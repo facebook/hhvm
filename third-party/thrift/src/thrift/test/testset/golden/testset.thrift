@@ -50,11 +50,98 @@ struct struct_list_binary {
 struct struct_list_string {
   1: list<string> field_1;
 }
-struct struct_set_string {
-  1: set<string> field_1;
+struct struct_list_struct_empty {
+  1: list<struct_empty> field_1;
+}
+struct struct_list_list_bool {
+  1: list<list<bool>> field_1;
+}
+struct struct_list_list_byte {
+  1: list<list<byte>> field_1;
+}
+struct struct_list_list_i16 {
+  1: list<list<i16>> field_1;
+}
+struct struct_list_list_i32 {
+  1: list<list<i32>> field_1;
+}
+struct struct_list_list_i64 {
+  1: list<list<i64>> field_1;
+}
+struct struct_list_list_float {
+  1: list<list<float>> field_1;
+}
+struct struct_list_list_double {
+  1: list<list<double>> field_1;
+}
+struct struct_list_list_binary {
+  1: list<list<binary>> field_1;
+}
+struct struct_list_list_string {
+  1: list<list<string>> field_1;
+}
+struct struct_list_list_struct_empty {
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_set_bool {
+  1: set<bool> field_1;
+}
+struct struct_set_byte {
+  1: set<byte> field_1;
+}
+struct struct_set_i16 {
+  1: set<i16> field_1;
+}
+struct struct_set_i32 {
+  1: set<i32> field_1;
 }
 struct struct_set_i64 {
   1: set<i64> field_1;
+}
+struct struct_set_float {
+  1: set<float> field_1;
+}
+struct struct_set_double {
+  1: set<double> field_1;
+}
+struct struct_set_binary {
+  1: set<binary> field_1;
+}
+struct struct_set_string {
+  1: set<string> field_1;
+}
+struct struct_set_struct_empty {
+  1: set<struct_empty> field_1;
+}
+struct struct_set_set_bool {
+  1: set<set<bool>> field_1;
+}
+struct struct_set_set_byte {
+  1: set<set<byte>> field_1;
+}
+struct struct_set_set_i16 {
+  1: set<set<i16>> field_1;
+}
+struct struct_set_set_i32 {
+  1: set<set<i32>> field_1;
+}
+struct struct_set_set_i64 {
+  1: set<set<i64>> field_1;
+}
+struct struct_set_set_float {
+  1: set<set<float>> field_1;
+}
+struct struct_set_set_double {
+  1: set<set<double>> field_1;
+}
+struct struct_set_set_binary {
+  1: set<set<binary>> field_1;
+}
+struct struct_set_set_string {
+  1: set<set<string>> field_1;
+}
+struct struct_set_set_struct_empty {
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool {
   1: map<string, bool> field_1;
@@ -83,6 +170,9 @@ struct struct_map_string_binary {
 struct struct_map_string_string {
   1: map<string, string> field_1;
 }
+struct struct_map_string_struct_empty {
+  1: map<string, struct_empty> field_1;
+}
 struct struct_map_i64_bool {
   1: map<i64, bool> field_1;
 }
@@ -110,17 +200,68 @@ struct struct_map_i64_binary {
 struct struct_map_i64_string {
   1: map<i64, string> field_1;
 }
-struct struct_map_string_set_string {
-  1: map<string, set<string>> field_1;
+struct struct_map_i64_struct_empty {
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_map_string_set_bool {
+  1: map<string, set<bool>> field_1;
+}
+struct struct_map_string_set_byte {
+  1: map<string, set<byte>> field_1;
+}
+struct struct_map_string_set_i16 {
+  1: map<string, set<i16>> field_1;
+}
+struct struct_map_string_set_i32 {
+  1: map<string, set<i32>> field_1;
 }
 struct struct_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
 }
-struct struct_map_i64_set_string {
-  1: map<i64, set<string>> field_1;
+struct struct_map_string_set_float {
+  1: map<string, set<float>> field_1;
+}
+struct struct_map_string_set_double {
+  1: map<string, set<double>> field_1;
+}
+struct struct_map_string_set_binary {
+  1: map<string, set<binary>> field_1;
+}
+struct struct_map_string_set_string {
+  1: map<string, set<string>> field_1;
+}
+struct struct_map_string_set_struct_empty {
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_map_i64_set_bool {
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_map_i64_set_byte {
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_map_i64_set_i16 {
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_map_i64_set_i32 {
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
+}
+struct struct_map_i64_set_float {
+  1: map<i64, set<float>> field_1;
+}
+struct struct_map_i64_set_double {
+  1: map<i64, set<double>> field_1;
+}
+struct struct_map_i64_set_binary {
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_map_i64_set_string {
+  1: map<i64, set<string>> field_1;
+}
+struct struct_map_i64_set_struct_empty {
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -167,15 +308,160 @@ struct struct_list_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
-struct struct_set_string_cpp_ref {
+struct struct_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+struct struct_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+struct struct_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+struct struct_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+struct struct_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+struct struct_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+struct struct_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+struct struct_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+struct struct_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+struct struct_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+struct struct_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+struct struct_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+struct struct_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+struct struct_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 struct struct_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+struct struct_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+struct struct_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+struct struct_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+struct struct_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+struct struct_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+struct struct_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+struct struct_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+struct struct_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+struct struct_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+struct struct_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+struct struct_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+struct struct_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+struct struct_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+struct struct_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+struct struct_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -222,6 +508,11 @@ struct struct_map_string_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
+struct struct_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
 struct struct_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -267,25 +558,110 @@ struct struct_map_i64_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
-struct struct_map_string_set_string_cpp_ref {
+struct struct_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+struct struct_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+struct struct_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+struct struct_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 struct struct_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
-struct struct_map_i64_set_string_cpp_ref {
+struct struct_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+struct struct_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+struct struct_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+struct struct_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+struct struct_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+struct struct_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+struct struct_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+struct struct_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+struct struct_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -332,15 +708,160 @@ struct struct_list_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
-struct struct_set_string_shared_cpp_ref {
+struct struct_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+struct struct_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+struct struct_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+struct struct_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+struct struct_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+struct struct_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+struct struct_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+struct struct_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+struct struct_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+struct struct_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+struct struct_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+struct struct_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+struct struct_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+struct struct_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 struct struct_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+struct struct_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+struct struct_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+struct struct_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+struct struct_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+struct struct_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+struct struct_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+struct struct_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+struct struct_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+struct struct_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+struct struct_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+struct struct_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+struct struct_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+struct struct_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+struct struct_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+struct struct_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -387,6 +908,11 @@ struct struct_map_string_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
+struct struct_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
 struct struct_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -432,25 +958,110 @@ struct struct_map_i64_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
-struct struct_map_string_set_string_shared_cpp_ref {
+struct struct_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+struct struct_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+struct struct_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+struct struct_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 struct struct_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
-struct struct_map_i64_set_string_shared_cpp_ref {
+struct struct_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+struct struct_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+struct struct_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+struct struct_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+struct struct_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+struct struct_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+struct struct_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+struct struct_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+struct struct_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_bool {
   1: bool field_1;
@@ -560,11 +1171,98 @@ struct struct_optional_list_binary {
 struct struct_optional_list_string {
   1: optional list<string> field_1;
 }
-struct struct_optional_set_string {
-  1: optional set<string> field_1;
+struct struct_optional_list_struct_empty {
+  1: optional list<struct_empty> field_1;
+}
+struct struct_optional_list_list_bool {
+  1: optional list<list<bool>> field_1;
+}
+struct struct_optional_list_list_byte {
+  1: optional list<list<byte>> field_1;
+}
+struct struct_optional_list_list_i16 {
+  1: optional list<list<i16>> field_1;
+}
+struct struct_optional_list_list_i32 {
+  1: optional list<list<i32>> field_1;
+}
+struct struct_optional_list_list_i64 {
+  1: optional list<list<i64>> field_1;
+}
+struct struct_optional_list_list_float {
+  1: optional list<list<float>> field_1;
+}
+struct struct_optional_list_list_double {
+  1: optional list<list<double>> field_1;
+}
+struct struct_optional_list_list_binary {
+  1: optional list<list<binary>> field_1;
+}
+struct struct_optional_list_list_string {
+  1: optional list<list<string>> field_1;
+}
+struct struct_optional_list_list_struct_empty {
+  1: optional list<list<struct_empty>> field_1;
+}
+struct struct_optional_set_bool {
+  1: optional set<bool> field_1;
+}
+struct struct_optional_set_byte {
+  1: optional set<byte> field_1;
+}
+struct struct_optional_set_i16 {
+  1: optional set<i16> field_1;
+}
+struct struct_optional_set_i32 {
+  1: optional set<i32> field_1;
 }
 struct struct_optional_set_i64 {
   1: optional set<i64> field_1;
+}
+struct struct_optional_set_float {
+  1: optional set<float> field_1;
+}
+struct struct_optional_set_double {
+  1: optional set<double> field_1;
+}
+struct struct_optional_set_binary {
+  1: optional set<binary> field_1;
+}
+struct struct_optional_set_string {
+  1: optional set<string> field_1;
+}
+struct struct_optional_set_struct_empty {
+  1: optional set<struct_empty> field_1;
+}
+struct struct_optional_set_set_bool {
+  1: optional set<set<bool>> field_1;
+}
+struct struct_optional_set_set_byte {
+  1: optional set<set<byte>> field_1;
+}
+struct struct_optional_set_set_i16 {
+  1: optional set<set<i16>> field_1;
+}
+struct struct_optional_set_set_i32 {
+  1: optional set<set<i32>> field_1;
+}
+struct struct_optional_set_set_i64 {
+  1: optional set<set<i64>> field_1;
+}
+struct struct_optional_set_set_float {
+  1: optional set<set<float>> field_1;
+}
+struct struct_optional_set_set_double {
+  1: optional set<set<double>> field_1;
+}
+struct struct_optional_set_set_binary {
+  1: optional set<set<binary>> field_1;
+}
+struct struct_optional_set_set_string {
+  1: optional set<set<string>> field_1;
+}
+struct struct_optional_set_set_struct_empty {
+  1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool {
   1: optional map<string, bool> field_1;
@@ -593,6 +1291,9 @@ struct struct_optional_map_string_binary {
 struct struct_optional_map_string_string {
   1: optional map<string, string> field_1;
 }
+struct struct_optional_map_string_struct_empty {
+  1: optional map<string, struct_empty> field_1;
+}
 struct struct_optional_map_i64_bool {
   1: optional map<i64, bool> field_1;
 }
@@ -620,17 +1321,68 @@ struct struct_optional_map_i64_binary {
 struct struct_optional_map_i64_string {
   1: optional map<i64, string> field_1;
 }
-struct struct_optional_map_string_set_string {
-  1: optional map<string, set<string>> field_1;
+struct struct_optional_map_i64_struct_empty {
+  1: optional map<i64, struct_empty> field_1;
+}
+struct struct_optional_map_string_set_bool {
+  1: optional map<string, set<bool>> field_1;
+}
+struct struct_optional_map_string_set_byte {
+  1: optional map<string, set<byte>> field_1;
+}
+struct struct_optional_map_string_set_i16 {
+  1: optional map<string, set<i16>> field_1;
+}
+struct struct_optional_map_string_set_i32 {
+  1: optional map<string, set<i32>> field_1;
 }
 struct struct_optional_map_string_set_i64 {
   1: optional map<string, set<i64>> field_1;
 }
-struct struct_optional_map_i64_set_string {
-  1: optional map<i64, set<string>> field_1;
+struct struct_optional_map_string_set_float {
+  1: optional map<string, set<float>> field_1;
+}
+struct struct_optional_map_string_set_double {
+  1: optional map<string, set<double>> field_1;
+}
+struct struct_optional_map_string_set_binary {
+  1: optional map<string, set<binary>> field_1;
+}
+struct struct_optional_map_string_set_string {
+  1: optional map<string, set<string>> field_1;
+}
+struct struct_optional_map_string_set_struct_empty {
+  1: optional map<string, set<struct_empty>> field_1;
+}
+struct struct_optional_map_i64_set_bool {
+  1: optional map<i64, set<bool>> field_1;
+}
+struct struct_optional_map_i64_set_byte {
+  1: optional map<i64, set<byte>> field_1;
+}
+struct struct_optional_map_i64_set_i16 {
+  1: optional map<i64, set<i16>> field_1;
+}
+struct struct_optional_map_i64_set_i32 {
+  1: optional map<i64, set<i32>> field_1;
 }
 struct struct_optional_map_i64_set_i64 {
   1: optional map<i64, set<i64>> field_1;
+}
+struct struct_optional_map_i64_set_float {
+  1: optional map<i64, set<float>> field_1;
+}
+struct struct_optional_map_i64_set_double {
+  1: optional map<i64, set<double>> field_1;
+}
+struct struct_optional_map_i64_set_binary {
+  1: optional map<i64, set<binary>> field_1;
+}
+struct struct_optional_map_i64_set_string {
+  1: optional map<i64, set<string>> field_1;
+}
+struct struct_optional_map_i64_set_struct_empty {
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_optional_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -677,15 +1429,160 @@ struct struct_optional_list_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
-struct struct_optional_set_string_cpp_ref {
+struct struct_optional_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+struct struct_optional_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+struct struct_optional_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+struct struct_optional_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+struct struct_optional_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+struct struct_optional_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+struct struct_optional_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+struct struct_optional_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+struct struct_optional_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+struct struct_optional_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+struct struct_optional_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+struct struct_optional_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+struct struct_optional_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+struct struct_optional_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+struct struct_optional_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 struct struct_optional_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+struct struct_optional_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+struct struct_optional_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+struct struct_optional_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+struct struct_optional_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+struct struct_optional_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+struct struct_optional_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+struct struct_optional_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+struct struct_optional_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+struct struct_optional_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+struct struct_optional_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+struct struct_optional_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+struct struct_optional_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+struct struct_optional_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+struct struct_optional_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+struct struct_optional_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -732,6 +1629,11 @@ struct struct_optional_map_string_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
+struct struct_optional_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
 struct struct_optional_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -777,25 +1679,110 @@ struct struct_optional_map_i64_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
-struct struct_optional_map_string_set_string_cpp_ref {
+struct struct_optional_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+struct struct_optional_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+struct struct_optional_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+struct struct_optional_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+struct struct_optional_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 struct struct_optional_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
-struct struct_optional_map_i64_set_string_cpp_ref {
+struct struct_optional_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+struct struct_optional_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+struct struct_optional_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+struct struct_optional_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+struct struct_optional_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+struct struct_optional_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+struct struct_optional_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+struct struct_optional_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+struct struct_optional_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 struct struct_optional_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+struct struct_optional_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+struct struct_optional_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+struct struct_optional_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+struct struct_optional_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+struct struct_optional_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_optional_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -842,15 +1829,160 @@ struct struct_optional_list_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
-struct struct_optional_set_string_shared_cpp_ref {
+struct struct_optional_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+struct struct_optional_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+struct struct_optional_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+struct struct_optional_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+struct struct_optional_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+struct struct_optional_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+struct struct_optional_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+struct struct_optional_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+struct struct_optional_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+struct struct_optional_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+struct struct_optional_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+struct struct_optional_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+struct struct_optional_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+struct struct_optional_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+struct struct_optional_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 struct struct_optional_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+struct struct_optional_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+struct struct_optional_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+struct struct_optional_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+struct struct_optional_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+struct struct_optional_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+struct struct_optional_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+struct struct_optional_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+struct struct_optional_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+struct struct_optional_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+struct struct_optional_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+struct struct_optional_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+struct struct_optional_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+struct struct_optional_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+struct struct_optional_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+struct struct_optional_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -897,6 +2029,11 @@ struct struct_optional_map_string_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
+struct struct_optional_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
 struct struct_optional_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -942,25 +2079,110 @@ struct struct_optional_map_i64_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
-struct struct_optional_map_string_set_string_shared_cpp_ref {
+struct struct_optional_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+struct struct_optional_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+struct struct_optional_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+struct struct_optional_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+struct struct_optional_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 struct struct_optional_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
-struct struct_optional_map_i64_set_string_shared_cpp_ref {
+struct struct_optional_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+struct struct_optional_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+struct struct_optional_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+struct struct_optional_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+struct struct_optional_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+struct struct_optional_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+struct struct_optional_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+struct struct_optional_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+struct struct_optional_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 struct struct_optional_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+struct struct_optional_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+struct struct_optional_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+struct struct_optional_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+struct struct_optional_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+struct struct_optional_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_optional_bool {
   1: optional bool field_1;
@@ -1070,11 +2292,98 @@ struct struct_required_list_binary {
 struct struct_required_list_string {
   1: required list<string> field_1;
 }
-struct struct_required_set_string {
-  1: required set<string> field_1;
+struct struct_required_list_struct_empty {
+  1: required list<struct_empty> field_1;
+}
+struct struct_required_list_list_bool {
+  1: required list<list<bool>> field_1;
+}
+struct struct_required_list_list_byte {
+  1: required list<list<byte>> field_1;
+}
+struct struct_required_list_list_i16 {
+  1: required list<list<i16>> field_1;
+}
+struct struct_required_list_list_i32 {
+  1: required list<list<i32>> field_1;
+}
+struct struct_required_list_list_i64 {
+  1: required list<list<i64>> field_1;
+}
+struct struct_required_list_list_float {
+  1: required list<list<float>> field_1;
+}
+struct struct_required_list_list_double {
+  1: required list<list<double>> field_1;
+}
+struct struct_required_list_list_binary {
+  1: required list<list<binary>> field_1;
+}
+struct struct_required_list_list_string {
+  1: required list<list<string>> field_1;
+}
+struct struct_required_list_list_struct_empty {
+  1: required list<list<struct_empty>> field_1;
+}
+struct struct_required_set_bool {
+  1: required set<bool> field_1;
+}
+struct struct_required_set_byte {
+  1: required set<byte> field_1;
+}
+struct struct_required_set_i16 {
+  1: required set<i16> field_1;
+}
+struct struct_required_set_i32 {
+  1: required set<i32> field_1;
 }
 struct struct_required_set_i64 {
   1: required set<i64> field_1;
+}
+struct struct_required_set_float {
+  1: required set<float> field_1;
+}
+struct struct_required_set_double {
+  1: required set<double> field_1;
+}
+struct struct_required_set_binary {
+  1: required set<binary> field_1;
+}
+struct struct_required_set_string {
+  1: required set<string> field_1;
+}
+struct struct_required_set_struct_empty {
+  1: required set<struct_empty> field_1;
+}
+struct struct_required_set_set_bool {
+  1: required set<set<bool>> field_1;
+}
+struct struct_required_set_set_byte {
+  1: required set<set<byte>> field_1;
+}
+struct struct_required_set_set_i16 {
+  1: required set<set<i16>> field_1;
+}
+struct struct_required_set_set_i32 {
+  1: required set<set<i32>> field_1;
+}
+struct struct_required_set_set_i64 {
+  1: required set<set<i64>> field_1;
+}
+struct struct_required_set_set_float {
+  1: required set<set<float>> field_1;
+}
+struct struct_required_set_set_double {
+  1: required set<set<double>> field_1;
+}
+struct struct_required_set_set_binary {
+  1: required set<set<binary>> field_1;
+}
+struct struct_required_set_set_string {
+  1: required set<set<string>> field_1;
+}
+struct struct_required_set_set_struct_empty {
+  1: required set<set<struct_empty>> field_1;
 }
 struct struct_required_map_string_bool {
   1: required map<string, bool> field_1;
@@ -1103,6 +2412,9 @@ struct struct_required_map_string_binary {
 struct struct_required_map_string_string {
   1: required map<string, string> field_1;
 }
+struct struct_required_map_string_struct_empty {
+  1: required map<string, struct_empty> field_1;
+}
 struct struct_required_map_i64_bool {
   1: required map<i64, bool> field_1;
 }
@@ -1130,17 +2442,68 @@ struct struct_required_map_i64_binary {
 struct struct_required_map_i64_string {
   1: required map<i64, string> field_1;
 }
-struct struct_required_map_string_set_string {
-  1: required map<string, set<string>> field_1;
+struct struct_required_map_i64_struct_empty {
+  1: required map<i64, struct_empty> field_1;
+}
+struct struct_required_map_string_set_bool {
+  1: required map<string, set<bool>> field_1;
+}
+struct struct_required_map_string_set_byte {
+  1: required map<string, set<byte>> field_1;
+}
+struct struct_required_map_string_set_i16 {
+  1: required map<string, set<i16>> field_1;
+}
+struct struct_required_map_string_set_i32 {
+  1: required map<string, set<i32>> field_1;
 }
 struct struct_required_map_string_set_i64 {
   1: required map<string, set<i64>> field_1;
 }
-struct struct_required_map_i64_set_string {
-  1: required map<i64, set<string>> field_1;
+struct struct_required_map_string_set_float {
+  1: required map<string, set<float>> field_1;
+}
+struct struct_required_map_string_set_double {
+  1: required map<string, set<double>> field_1;
+}
+struct struct_required_map_string_set_binary {
+  1: required map<string, set<binary>> field_1;
+}
+struct struct_required_map_string_set_string {
+  1: required map<string, set<string>> field_1;
+}
+struct struct_required_map_string_set_struct_empty {
+  1: required map<string, set<struct_empty>> field_1;
+}
+struct struct_required_map_i64_set_bool {
+  1: required map<i64, set<bool>> field_1;
+}
+struct struct_required_map_i64_set_byte {
+  1: required map<i64, set<byte>> field_1;
+}
+struct struct_required_map_i64_set_i16 {
+  1: required map<i64, set<i16>> field_1;
+}
+struct struct_required_map_i64_set_i32 {
+  1: required map<i64, set<i32>> field_1;
 }
 struct struct_required_map_i64_set_i64 {
   1: required map<i64, set<i64>> field_1;
+}
+struct struct_required_map_i64_set_float {
+  1: required map<i64, set<float>> field_1;
+}
+struct struct_required_map_i64_set_double {
+  1: required map<i64, set<double>> field_1;
+}
+struct struct_required_map_i64_set_binary {
+  1: required map<i64, set<binary>> field_1;
+}
+struct struct_required_map_i64_set_string {
+  1: required map<i64, set<string>> field_1;
+}
+struct struct_required_map_i64_set_struct_empty {
+  1: required map<i64, set<struct_empty>> field_1;
 }
 struct struct_required_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -1187,15 +2550,160 @@ struct struct_required_list_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
-struct struct_required_set_string_cpp_ref {
+struct struct_required_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+struct struct_required_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+struct struct_required_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+struct struct_required_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+struct struct_required_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+struct struct_required_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+struct struct_required_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+struct struct_required_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+struct struct_required_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+struct struct_required_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+struct struct_required_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+struct struct_required_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+struct struct_required_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+struct struct_required_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+struct struct_required_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 struct struct_required_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+struct struct_required_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+struct struct_required_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+struct struct_required_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+struct struct_required_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+struct struct_required_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+struct struct_required_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+struct struct_required_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+struct struct_required_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+struct struct_required_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+struct struct_required_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+struct struct_required_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+struct struct_required_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+struct struct_required_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+struct struct_required_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+struct struct_required_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 struct struct_required_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -1242,6 +2750,11 @@ struct struct_required_map_string_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
+struct struct_required_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
 struct struct_required_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -1287,25 +2800,110 @@ struct struct_required_map_i64_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
-struct struct_required_map_string_set_string_cpp_ref {
+struct struct_required_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+struct struct_required_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+struct struct_required_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+struct struct_required_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+struct struct_required_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 struct struct_required_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
-struct struct_required_map_i64_set_string_cpp_ref {
+struct struct_required_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+struct struct_required_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+struct struct_required_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+struct struct_required_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+struct struct_required_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+struct struct_required_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+struct struct_required_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+struct struct_required_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+struct struct_required_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 struct struct_required_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+struct struct_required_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+struct struct_required_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+struct struct_required_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+struct struct_required_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+struct struct_required_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 struct struct_required_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -1352,15 +2950,160 @@ struct struct_required_list_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
-struct struct_required_set_string_shared_cpp_ref {
+struct struct_required_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+struct struct_required_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+struct struct_required_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+struct struct_required_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+struct struct_required_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+struct struct_required_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+struct struct_required_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+struct struct_required_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+struct struct_required_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+struct struct_required_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+struct struct_required_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+struct struct_required_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+struct struct_required_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+struct struct_required_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+struct struct_required_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 struct struct_required_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+struct struct_required_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+struct struct_required_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+struct struct_required_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+struct struct_required_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+struct struct_required_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+struct struct_required_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+struct struct_required_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+struct struct_required_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+struct struct_required_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+struct struct_required_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+struct struct_required_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+struct struct_required_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+struct struct_required_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+struct struct_required_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+struct struct_required_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 struct struct_required_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -1407,6 +3150,11 @@ struct struct_required_map_string_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
+struct struct_required_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
 struct struct_required_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -1452,25 +3200,110 @@ struct struct_required_map_i64_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
-struct struct_required_map_string_set_string_shared_cpp_ref {
+struct struct_required_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+struct struct_required_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+struct struct_required_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+struct struct_required_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+struct struct_required_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 struct struct_required_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
-struct struct_required_map_i64_set_string_shared_cpp_ref {
+struct struct_required_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+struct struct_required_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+struct struct_required_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+struct struct_required_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+struct struct_required_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+struct struct_required_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+struct struct_required_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+struct struct_required_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+struct struct_required_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 struct struct_required_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+struct struct_required_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+struct struct_required_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+struct struct_required_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+struct struct_required_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+struct struct_required_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 struct struct_required_bool {
   1: required bool field_1;
@@ -1589,13 +3422,129 @@ struct struct_terse_list_string {
   @thrift.TerseWrite
   1: list<string> field_1;
 }
-struct struct_terse_set_string {
+struct struct_terse_list_struct_empty {
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+struct struct_terse_list_list_bool {
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+struct struct_terse_list_list_byte {
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+struct struct_terse_list_list_i16 {
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+struct struct_terse_list_list_i32 {
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+struct struct_terse_list_list_i64 {
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+struct struct_terse_list_list_float {
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+struct struct_terse_list_list_double {
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+struct struct_terse_list_list_binary {
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+struct struct_terse_list_list_string {
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+struct struct_terse_list_list_struct_empty {
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_terse_set_bool {
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+struct struct_terse_set_byte {
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+struct struct_terse_set_i16 {
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+struct struct_terse_set_i32 {
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 struct struct_terse_set_i64 {
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+struct struct_terse_set_float {
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+struct struct_terse_set_double {
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+struct struct_terse_set_binary {
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+struct struct_terse_set_string {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+struct struct_terse_set_struct_empty {
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+struct struct_terse_set_set_bool {
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+struct struct_terse_set_set_byte {
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+struct struct_terse_set_set_i16 {
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+struct struct_terse_set_set_i32 {
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+struct struct_terse_set_set_i64 {
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+struct struct_terse_set_set_float {
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+struct struct_terse_set_set_double {
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+struct struct_terse_set_set_binary {
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+struct struct_terse_set_set_string {
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+struct struct_terse_set_set_struct_empty {
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_terse_map_string_bool {
   @thrift.TerseWrite
@@ -1633,6 +3582,10 @@ struct struct_terse_map_string_string {
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+struct struct_terse_map_string_struct_empty {
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
 struct struct_terse_map_i64_bool {
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
@@ -1669,21 +3622,89 @@ struct struct_terse_map_i64_string {
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
-struct struct_terse_map_string_set_string {
+struct struct_terse_map_i64_struct_empty {
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_terse_map_string_set_bool {
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+struct struct_terse_map_string_set_byte {
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+struct struct_terse_map_string_set_i16 {
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+struct struct_terse_map_string_set_i32 {
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 struct struct_terse_map_string_set_i64 {
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
-struct struct_terse_map_i64_set_string {
+struct struct_terse_map_string_set_float {
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+struct struct_terse_map_string_set_double {
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+struct struct_terse_map_string_set_binary {
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+struct struct_terse_map_string_set_string {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+struct struct_terse_map_string_set_struct_empty {
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_terse_map_i64_set_bool {
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_terse_map_i64_set_byte {
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_terse_map_i64_set_i16 {
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_terse_map_i64_set_i32 {
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_terse_map_i64_set_i64 {
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+struct struct_terse_map_i64_set_float {
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+struct struct_terse_map_i64_set_double {
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+struct struct_terse_map_i64_set_binary {
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_terse_map_i64_set_string {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+struct struct_terse_map_i64_set_struct_empty {
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_terse_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -1739,17 +3760,191 @@ struct struct_terse_list_string_cpp_ref {
   @thrift.TerseWrite
   1: list<string> field_1;
 }
-struct struct_terse_set_string_cpp_ref {
+struct struct_terse_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+struct struct_terse_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+struct struct_terse_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+struct struct_terse_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+struct struct_terse_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+struct struct_terse_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+struct struct_terse_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+struct struct_terse_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+struct struct_terse_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+struct struct_terse_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+struct struct_terse_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_terse_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+struct struct_terse_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+struct struct_terse_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+struct struct_terse_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 struct struct_terse_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+struct struct_terse_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+struct struct_terse_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+struct struct_terse_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+struct struct_terse_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+struct struct_terse_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+struct struct_terse_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+struct struct_terse_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+struct struct_terse_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+struct struct_terse_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+struct struct_terse_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+struct struct_terse_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+struct struct_terse_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+struct struct_terse_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+struct struct_terse_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+struct struct_terse_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_terse_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -1805,6 +4000,12 @@ struct struct_terse_map_string_string_cpp_ref {
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+struct struct_terse_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
 struct struct_terse_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -1859,11 +4060,35 @@ struct struct_terse_map_i64_string_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
-struct struct_terse_map_string_set_string_cpp_ref {
+struct struct_terse_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_terse_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+struct struct_terse_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+struct struct_terse_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+struct struct_terse_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 struct struct_terse_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -1871,17 +4096,95 @@ struct struct_terse_map_string_set_i64_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
-struct struct_terse_map_i64_set_string_cpp_ref {
+struct struct_terse_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+struct struct_terse_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+struct struct_terse_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+struct struct_terse_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+struct struct_terse_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_terse_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_terse_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_terse_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_terse_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_terse_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+struct struct_terse_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+struct struct_terse_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+struct struct_terse_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_terse_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+struct struct_terse_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_terse_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -1937,17 +4240,191 @@ struct struct_terse_list_string_shared_cpp_ref {
   @thrift.TerseWrite
   1: list<string> field_1;
 }
-struct struct_terse_set_string_shared_cpp_ref {
+struct struct_terse_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+struct struct_terse_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+struct struct_terse_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+struct struct_terse_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+struct struct_terse_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+struct struct_terse_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+struct struct_terse_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+struct struct_terse_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+struct struct_terse_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+struct struct_terse_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+struct struct_terse_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_terse_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+struct struct_terse_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+struct struct_terse_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+struct struct_terse_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 struct struct_terse_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+struct struct_terse_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+struct struct_terse_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+struct struct_terse_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+struct struct_terse_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+struct struct_terse_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+struct struct_terse_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+struct struct_terse_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+struct struct_terse_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+struct struct_terse_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+struct struct_terse_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+struct struct_terse_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+struct struct_terse_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+struct struct_terse_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+struct struct_terse_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+struct struct_terse_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_terse_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -2003,6 +4480,12 @@ struct struct_terse_map_string_string_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+struct struct_terse_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
 struct struct_terse_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -2057,11 +4540,35 @@ struct struct_terse_map_i64_string_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
-struct struct_terse_map_string_set_string_shared_cpp_ref {
+struct struct_terse_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_terse_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+struct struct_terse_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+struct struct_terse_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+struct struct_terse_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 struct struct_terse_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -2069,17 +4576,95 @@ struct struct_terse_map_string_set_i64_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
-struct struct_terse_map_i64_set_string_shared_cpp_ref {
+struct struct_terse_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+struct struct_terse_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+struct struct_terse_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+struct struct_terse_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+struct struct_terse_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_terse_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_terse_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_terse_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_terse_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_terse_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+struct struct_terse_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+struct struct_terse_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+struct struct_terse_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_terse_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_terse_bool {
   @thrift.TerseWrite
@@ -2153,13 +4738,129 @@ struct struct_optional_list_string_box {
   @thrift.Box
   1: optional list<string> field_1;
 }
-struct struct_optional_set_string_box {
+struct struct_optional_list_struct_empty_box {
   @thrift.Box
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+struct struct_optional_list_list_bool_box {
+  @thrift.Box
+  1: optional list<list<bool>> field_1;
+}
+struct struct_optional_list_list_byte_box {
+  @thrift.Box
+  1: optional list<list<byte>> field_1;
+}
+struct struct_optional_list_list_i16_box {
+  @thrift.Box
+  1: optional list<list<i16>> field_1;
+}
+struct struct_optional_list_list_i32_box {
+  @thrift.Box
+  1: optional list<list<i32>> field_1;
+}
+struct struct_optional_list_list_i64_box {
+  @thrift.Box
+  1: optional list<list<i64>> field_1;
+}
+struct struct_optional_list_list_float_box {
+  @thrift.Box
+  1: optional list<list<float>> field_1;
+}
+struct struct_optional_list_list_double_box {
+  @thrift.Box
+  1: optional list<list<double>> field_1;
+}
+struct struct_optional_list_list_binary_box {
+  @thrift.Box
+  1: optional list<list<binary>> field_1;
+}
+struct struct_optional_list_list_string_box {
+  @thrift.Box
+  1: optional list<list<string>> field_1;
+}
+struct struct_optional_list_list_struct_empty_box {
+  @thrift.Box
+  1: optional list<list<struct_empty>> field_1;
+}
+struct struct_optional_set_bool_box {
+  @thrift.Box
+  1: optional set<bool> field_1;
+}
+struct struct_optional_set_byte_box {
+  @thrift.Box
+  1: optional set<byte> field_1;
+}
+struct struct_optional_set_i16_box {
+  @thrift.Box
+  1: optional set<i16> field_1;
+}
+struct struct_optional_set_i32_box {
+  @thrift.Box
+  1: optional set<i32> field_1;
 }
 struct struct_optional_set_i64_box {
   @thrift.Box
   1: optional set<i64> field_1;
+}
+struct struct_optional_set_float_box {
+  @thrift.Box
+  1: optional set<float> field_1;
+}
+struct struct_optional_set_double_box {
+  @thrift.Box
+  1: optional set<double> field_1;
+}
+struct struct_optional_set_binary_box {
+  @thrift.Box
+  1: optional set<binary> field_1;
+}
+struct struct_optional_set_string_box {
+  @thrift.Box
+  1: optional set<string> field_1;
+}
+struct struct_optional_set_struct_empty_box {
+  @thrift.Box
+  1: optional set<struct_empty> field_1;
+}
+struct struct_optional_set_set_bool_box {
+  @thrift.Box
+  1: optional set<set<bool>> field_1;
+}
+struct struct_optional_set_set_byte_box {
+  @thrift.Box
+  1: optional set<set<byte>> field_1;
+}
+struct struct_optional_set_set_i16_box {
+  @thrift.Box
+  1: optional set<set<i16>> field_1;
+}
+struct struct_optional_set_set_i32_box {
+  @thrift.Box
+  1: optional set<set<i32>> field_1;
+}
+struct struct_optional_set_set_i64_box {
+  @thrift.Box
+  1: optional set<set<i64>> field_1;
+}
+struct struct_optional_set_set_float_box {
+  @thrift.Box
+  1: optional set<set<float>> field_1;
+}
+struct struct_optional_set_set_double_box {
+  @thrift.Box
+  1: optional set<set<double>> field_1;
+}
+struct struct_optional_set_set_binary_box {
+  @thrift.Box
+  1: optional set<set<binary>> field_1;
+}
+struct struct_optional_set_set_string_box {
+  @thrift.Box
+  1: optional set<set<string>> field_1;
+}
+struct struct_optional_set_set_struct_empty_box {
+  @thrift.Box
+  1: optional set<set<struct_empty>> field_1;
 }
 struct struct_optional_map_string_bool_box {
   @thrift.Box
@@ -2197,6 +4898,10 @@ struct struct_optional_map_string_string_box {
   @thrift.Box
   1: optional map<string, string> field_1;
 }
+struct struct_optional_map_string_struct_empty_box {
+  @thrift.Box
+  1: optional map<string, struct_empty> field_1;
+}
 struct struct_optional_map_i64_bool_box {
   @thrift.Box
   1: optional map<i64, bool> field_1;
@@ -2233,21 +4938,89 @@ struct struct_optional_map_i64_string_box {
   @thrift.Box
   1: optional map<i64, string> field_1;
 }
-struct struct_optional_map_string_set_string_box {
+struct struct_optional_map_i64_struct_empty_box {
   @thrift.Box
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+struct struct_optional_map_string_set_bool_box {
+  @thrift.Box
+  1: optional map<string, set<bool>> field_1;
+}
+struct struct_optional_map_string_set_byte_box {
+  @thrift.Box
+  1: optional map<string, set<byte>> field_1;
+}
+struct struct_optional_map_string_set_i16_box {
+  @thrift.Box
+  1: optional map<string, set<i16>> field_1;
+}
+struct struct_optional_map_string_set_i32_box {
+  @thrift.Box
+  1: optional map<string, set<i32>> field_1;
 }
 struct struct_optional_map_string_set_i64_box {
   @thrift.Box
   1: optional map<string, set<i64>> field_1;
 }
-struct struct_optional_map_i64_set_string_box {
+struct struct_optional_map_string_set_float_box {
   @thrift.Box
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+struct struct_optional_map_string_set_double_box {
+  @thrift.Box
+  1: optional map<string, set<double>> field_1;
+}
+struct struct_optional_map_string_set_binary_box {
+  @thrift.Box
+  1: optional map<string, set<binary>> field_1;
+}
+struct struct_optional_map_string_set_string_box {
+  @thrift.Box
+  1: optional map<string, set<string>> field_1;
+}
+struct struct_optional_map_string_set_struct_empty_box {
+  @thrift.Box
+  1: optional map<string, set<struct_empty>> field_1;
+}
+struct struct_optional_map_i64_set_bool_box {
+  @thrift.Box
+  1: optional map<i64, set<bool>> field_1;
+}
+struct struct_optional_map_i64_set_byte_box {
+  @thrift.Box
+  1: optional map<i64, set<byte>> field_1;
+}
+struct struct_optional_map_i64_set_i16_box {
+  @thrift.Box
+  1: optional map<i64, set<i16>> field_1;
+}
+struct struct_optional_map_i64_set_i32_box {
+  @thrift.Box
+  1: optional map<i64, set<i32>> field_1;
 }
 struct struct_optional_map_i64_set_i64_box {
   @thrift.Box
   1: optional map<i64, set<i64>> field_1;
+}
+struct struct_optional_map_i64_set_float_box {
+  @thrift.Box
+  1: optional map<i64, set<float>> field_1;
+}
+struct struct_optional_map_i64_set_double_box {
+  @thrift.Box
+  1: optional map<i64, set<double>> field_1;
+}
+struct struct_optional_map_i64_set_binary_box {
+  @thrift.Box
+  1: optional map<i64, set<binary>> field_1;
+}
+struct struct_optional_map_i64_set_string_box {
+  @thrift.Box
+  1: optional map<i64, set<string>> field_1;
+}
+struct struct_optional_map_i64_set_struct_empty_box {
+  @thrift.Box
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 struct struct_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -2375,12 +5148,110 @@ struct struct_adapted_list_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_string'}
   1: list<string> field_1;
 }
-struct struct_adapted_set_string {
+struct struct_adapted_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
-  1: set<string> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_struct_empty'}
+  1: list<struct_empty> field_1;
+}
+struct struct_adapted_list_list_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_bool'}
+  1: list<list<bool>> field_1;
+}
+struct struct_adapted_list_list_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_byte'}
+  1: list<list<byte>> field_1;
+}
+struct struct_adapted_list_list_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i16'}
+  1: list<list<i16>> field_1;
+}
+struct struct_adapted_list_list_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i32'}
+  1: list<list<i32>> field_1;
+}
+struct struct_adapted_list_list_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i64'}
+  1: list<list<i64>> field_1;
+}
+struct struct_adapted_list_list_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_float'}
+  1: list<list<float>> field_1;
+}
+struct struct_adapted_list_list_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_double'}
+  1: list<list<double>> field_1;
+}
+struct struct_adapted_list_list_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_binary'}
+  1: list<list<binary>> field_1;
+}
+struct struct_adapted_list_list_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_string'}
+  1: list<list<string>> field_1;
+}
+struct struct_adapted_list_list_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_struct_empty'}
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_adapted_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  1: set<bool> field_1;
+}
+struct struct_adapted_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_byte'}
+  1: set<byte> field_1;
+}
+struct struct_adapted_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i16'}
+  1: set<i16> field_1;
+}
+struct struct_adapted_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i32'}
+  1: set<i32> field_1;
 }
 struct struct_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -2388,6 +5259,111 @@ struct struct_adapted_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
+}
+struct struct_adapted_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  1: set<float> field_1;
+}
+struct struct_adapted_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  1: set<double> field_1;
+}
+struct struct_adapted_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_binary'}
+  1: set<binary> field_1;
+}
+struct struct_adapted_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
+  1: set<string> field_1;
+}
+struct struct_adapted_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  1: set<struct_empty> field_1;
+}
+struct struct_adapted_set_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  1: set<set<bool>> field_1;
+}
+struct struct_adapted_set_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  1: set<set<byte>> field_1;
+}
+struct struct_adapted_set_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  1: set<set<i16>> field_1;
+}
+struct struct_adapted_set_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  1: set<set<i32>> field_1;
+}
+struct struct_adapted_set_set_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  1: set<set<i64>> field_1;
+}
+struct struct_adapted_set_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  1: set<set<float>> field_1;
+}
+struct struct_adapted_set_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  1: set<set<double>> field_1;
+}
+struct struct_adapted_set_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  1: set<set<binary>> field_1;
+}
+struct struct_adapted_set_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  1: set<set<string>> field_1;
+}
+struct struct_adapted_set_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -2452,6 +5428,13 @@ struct struct_adapted_map_string_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_string'}
   1: map<string, string> field_1;
 }
+struct struct_adapted_map_string_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_struct_empty'}
+  1: map<string, struct_empty> field_1;
+}
 struct struct_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -2515,12 +5498,40 @@ struct struct_adapted_map_i64_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_string'}
   1: map<i64, string> field_1;
 }
-struct struct_adapted_map_string_set_string {
+struct struct_adapted_map_i64_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
-  1: map<string, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_struct_empty'}
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_adapted_map_string_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  1: map<string, set<bool>> field_1;
+}
+struct struct_adapted_map_string_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_byte'}
+  1: map<string, set<byte>> field_1;
+}
+struct struct_adapted_map_string_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i16'}
+  1: map<string, set<i16>> field_1;
+}
+struct struct_adapted_map_string_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i32'}
+  1: map<string, set<i32>> field_1;
 }
 struct struct_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -2529,12 +5540,68 @@ struct struct_adapted_map_string_set_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i64'}
   1: map<string, set<i64>> field_1;
 }
-struct struct_adapted_map_i64_set_string {
+struct struct_adapted_map_string_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
-  1: map<i64, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  1: map<string, set<float>> field_1;
+}
+struct struct_adapted_map_string_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  1: map<string, set<double>> field_1;
+}
+struct struct_adapted_map_string_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_binary'}
+  1: map<string, set<binary>> field_1;
+}
+struct struct_adapted_map_string_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
+  1: map<string, set<string>> field_1;
+}
+struct struct_adapted_map_string_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_adapted_map_i64_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_adapted_map_i64_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_byte'}
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_adapted_map_i64_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i16'}
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_adapted_map_i64_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i32'}
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -2542,6 +5609,41 @@ struct struct_adapted_map_i64_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
+}
+struct struct_adapted_map_i64_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  1: map<i64, set<float>> field_1;
+}
+struct struct_adapted_map_i64_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  1: map<i64, set<double>> field_1;
+}
+struct struct_adapted_map_i64_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_binary'}
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_adapted_map_i64_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
+  1: map<i64, set<string>> field_1;
+}
+struct struct_adapted_map_i64_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_field_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -2669,12 +5771,110 @@ struct struct_field_adapted_list_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<string> field_1;
 }
-struct struct_field_adapted_set_string {
+struct struct_field_adapted_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+struct struct_field_adapted_list_list_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<bool>> field_1;
+}
+struct struct_field_adapted_list_list_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<byte>> field_1;
+}
+struct struct_field_adapted_list_list_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i16>> field_1;
+}
+struct struct_field_adapted_list_list_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i32>> field_1;
+}
+struct struct_field_adapted_list_list_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i64>> field_1;
+}
+struct struct_field_adapted_list_list_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<float>> field_1;
+}
+struct struct_field_adapted_list_list_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<double>> field_1;
+}
+struct struct_field_adapted_list_list_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<binary>> field_1;
+}
+struct struct_field_adapted_list_list_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<string>> field_1;
+}
+struct struct_field_adapted_list_list_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_field_adapted_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<bool> field_1;
+}
+struct struct_field_adapted_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<byte> field_1;
+}
+struct struct_field_adapted_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i16> field_1;
+}
+struct struct_field_adapted_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i32> field_1;
 }
 struct struct_field_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -2682,6 +5882,111 @@ struct struct_field_adapted_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<i64> field_1;
+}
+struct struct_field_adapted_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<float> field_1;
+}
+struct struct_field_adapted_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<double> field_1;
+}
+struct struct_field_adapted_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<binary> field_1;
+}
+struct struct_field_adapted_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<string> field_1;
+}
+struct struct_field_adapted_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<struct_empty> field_1;
+}
+struct struct_field_adapted_set_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<bool>> field_1;
+}
+struct struct_field_adapted_set_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<byte>> field_1;
+}
+struct struct_field_adapted_set_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i16>> field_1;
+}
+struct struct_field_adapted_set_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i32>> field_1;
+}
+struct struct_field_adapted_set_set_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i64>> field_1;
+}
+struct struct_field_adapted_set_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<float>> field_1;
+}
+struct struct_field_adapted_set_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<double>> field_1;
+}
+struct struct_field_adapted_set_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<binary>> field_1;
+}
+struct struct_field_adapted_set_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<string>> field_1;
+}
+struct struct_field_adapted_set_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_field_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -2746,6 +6051,13 @@ struct struct_field_adapted_map_string_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, string> field_1;
 }
+struct struct_field_adapted_map_string_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, struct_empty> field_1;
+}
 struct struct_field_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -2809,12 +6121,40 @@ struct struct_field_adapted_map_i64_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, string> field_1;
 }
-struct struct_field_adapted_map_string_set_string {
+struct struct_field_adapted_map_i64_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_field_adapted_map_string_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<bool>> field_1;
+}
+struct struct_field_adapted_map_string_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<byte>> field_1;
+}
+struct struct_field_adapted_map_string_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i16>> field_1;
+}
+struct struct_field_adapted_map_string_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i32>> field_1;
 }
 struct struct_field_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -2823,12 +6163,68 @@ struct struct_field_adapted_map_string_set_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<i64>> field_1;
 }
-struct struct_field_adapted_map_i64_set_string {
+struct struct_field_adapted_map_string_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+struct struct_field_adapted_map_string_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<double>> field_1;
+}
+struct struct_field_adapted_map_string_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<binary>> field_1;
+}
+struct struct_field_adapted_map_string_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<string>> field_1;
+}
+struct struct_field_adapted_map_string_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_field_adapted_map_i64_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_field_adapted_map_i64_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_field_adapted_map_i64_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_field_adapted_map_i64_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_field_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -2836,6 +6232,41 @@ struct struct_field_adapted_map_i64_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<i64>> field_1;
+}
+struct struct_field_adapted_map_i64_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<float>> field_1;
+}
+struct struct_field_adapted_map_i64_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<double>> field_1;
+}
+struct struct_field_adapted_map_i64_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_field_adapted_map_i64_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<string>> field_1;
+}
+struct struct_field_adapted_map_i64_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_list_bool_lazy {
   @cpp.Lazy
@@ -2873,13 +6304,129 @@ struct struct_list_string_lazy {
   @cpp.Lazy
   1: list<string> field_1;
 }
-struct struct_set_string_lazy {
+struct struct_list_struct_empty_lazy {
   @cpp.Lazy
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+struct struct_list_list_bool_lazy {
+  @cpp.Lazy
+  1: list<list<bool>> field_1;
+}
+struct struct_list_list_byte_lazy {
+  @cpp.Lazy
+  1: list<list<byte>> field_1;
+}
+struct struct_list_list_i16_lazy {
+  @cpp.Lazy
+  1: list<list<i16>> field_1;
+}
+struct struct_list_list_i32_lazy {
+  @cpp.Lazy
+  1: list<list<i32>> field_1;
+}
+struct struct_list_list_i64_lazy {
+  @cpp.Lazy
+  1: list<list<i64>> field_1;
+}
+struct struct_list_list_float_lazy {
+  @cpp.Lazy
+  1: list<list<float>> field_1;
+}
+struct struct_list_list_double_lazy {
+  @cpp.Lazy
+  1: list<list<double>> field_1;
+}
+struct struct_list_list_binary_lazy {
+  @cpp.Lazy
+  1: list<list<binary>> field_1;
+}
+struct struct_list_list_string_lazy {
+  @cpp.Lazy
+  1: list<list<string>> field_1;
+}
+struct struct_list_list_struct_empty_lazy {
+  @cpp.Lazy
+  1: list<list<struct_empty>> field_1;
+}
+struct struct_set_bool_lazy {
+  @cpp.Lazy
+  1: set<bool> field_1;
+}
+struct struct_set_byte_lazy {
+  @cpp.Lazy
+  1: set<byte> field_1;
+}
+struct struct_set_i16_lazy {
+  @cpp.Lazy
+  1: set<i16> field_1;
+}
+struct struct_set_i32_lazy {
+  @cpp.Lazy
+  1: set<i32> field_1;
 }
 struct struct_set_i64_lazy {
   @cpp.Lazy
   1: set<i64> field_1;
+}
+struct struct_set_float_lazy {
+  @cpp.Lazy
+  1: set<float> field_1;
+}
+struct struct_set_double_lazy {
+  @cpp.Lazy
+  1: set<double> field_1;
+}
+struct struct_set_binary_lazy {
+  @cpp.Lazy
+  1: set<binary> field_1;
+}
+struct struct_set_string_lazy {
+  @cpp.Lazy
+  1: set<string> field_1;
+}
+struct struct_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: set<struct_empty> field_1;
+}
+struct struct_set_set_bool_lazy {
+  @cpp.Lazy
+  1: set<set<bool>> field_1;
+}
+struct struct_set_set_byte_lazy {
+  @cpp.Lazy
+  1: set<set<byte>> field_1;
+}
+struct struct_set_set_i16_lazy {
+  @cpp.Lazy
+  1: set<set<i16>> field_1;
+}
+struct struct_set_set_i32_lazy {
+  @cpp.Lazy
+  1: set<set<i32>> field_1;
+}
+struct struct_set_set_i64_lazy {
+  @cpp.Lazy
+  1: set<set<i64>> field_1;
+}
+struct struct_set_set_float_lazy {
+  @cpp.Lazy
+  1: set<set<float>> field_1;
+}
+struct struct_set_set_double_lazy {
+  @cpp.Lazy
+  1: set<set<double>> field_1;
+}
+struct struct_set_set_binary_lazy {
+  @cpp.Lazy
+  1: set<set<binary>> field_1;
+}
+struct struct_set_set_string_lazy {
+  @cpp.Lazy
+  1: set<set<string>> field_1;
+}
+struct struct_set_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: set<set<struct_empty>> field_1;
 }
 struct struct_map_string_bool_lazy {
   @cpp.Lazy
@@ -2917,6 +6464,10 @@ struct struct_map_string_string_lazy {
   @cpp.Lazy
   1: map<string, string> field_1;
 }
+struct struct_map_string_struct_empty_lazy {
+  @cpp.Lazy
+  1: map<string, struct_empty> field_1;
+}
 struct struct_map_i64_bool_lazy {
   @cpp.Lazy
   1: map<i64, bool> field_1;
@@ -2953,21 +6504,89 @@ struct struct_map_i64_string_lazy {
   @cpp.Lazy
   1: map<i64, string> field_1;
 }
-struct struct_map_string_set_string_lazy {
+struct struct_map_i64_struct_empty_lazy {
   @cpp.Lazy
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+struct struct_map_string_set_bool_lazy {
+  @cpp.Lazy
+  1: map<string, set<bool>> field_1;
+}
+struct struct_map_string_set_byte_lazy {
+  @cpp.Lazy
+  1: map<string, set<byte>> field_1;
+}
+struct struct_map_string_set_i16_lazy {
+  @cpp.Lazy
+  1: map<string, set<i16>> field_1;
+}
+struct struct_map_string_set_i32_lazy {
+  @cpp.Lazy
+  1: map<string, set<i32>> field_1;
 }
 struct struct_map_string_set_i64_lazy {
   @cpp.Lazy
   1: map<string, set<i64>> field_1;
 }
-struct struct_map_i64_set_string_lazy {
+struct struct_map_string_set_float_lazy {
   @cpp.Lazy
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+struct struct_map_string_set_double_lazy {
+  @cpp.Lazy
+  1: map<string, set<double>> field_1;
+}
+struct struct_map_string_set_binary_lazy {
+  @cpp.Lazy
+  1: map<string, set<binary>> field_1;
+}
+struct struct_map_string_set_string_lazy {
+  @cpp.Lazy
+  1: map<string, set<string>> field_1;
+}
+struct struct_map_string_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: map<string, set<struct_empty>> field_1;
+}
+struct struct_map_i64_set_bool_lazy {
+  @cpp.Lazy
+  1: map<i64, set<bool>> field_1;
+}
+struct struct_map_i64_set_byte_lazy {
+  @cpp.Lazy
+  1: map<i64, set<byte>> field_1;
+}
+struct struct_map_i64_set_i16_lazy {
+  @cpp.Lazy
+  1: map<i64, set<i16>> field_1;
+}
+struct struct_map_i64_set_i32_lazy {
+  @cpp.Lazy
+  1: map<i64, set<i32>> field_1;
 }
 struct struct_map_i64_set_i64_lazy {
   @cpp.Lazy
   1: map<i64, set<i64>> field_1;
+}
+struct struct_map_i64_set_float_lazy {
+  @cpp.Lazy
+  1: map<i64, set<float>> field_1;
+}
+struct struct_map_i64_set_double_lazy {
+  @cpp.Lazy
+  1: map<i64, set<double>> field_1;
+}
+struct struct_map_i64_set_binary_lazy {
+  @cpp.Lazy
+  1: map<i64, set<binary>> field_1;
+}
+struct struct_map_i64_set_string_lazy {
+  @cpp.Lazy
+  1: map<i64, set<string>> field_1;
+}
+struct struct_map_i64_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: map<i64, set<struct_empty>> field_1;
 }
 struct struct_string_lazy {
   @cpp.Lazy
@@ -3013,12 +6632,128 @@ struct struct_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_set_string_op_encoded {
-  1: set<string> field_1;
+struct struct_list_struct_empty_op_encoded {
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_bool_op_encoded {
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_byte_op_encoded {
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i16_op_encoded {
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i32_op_encoded {
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i64_op_encoded {
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_float_op_encoded {
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_double_op_encoded {
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_binary_op_encoded {
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_string_op_encoded {
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_struct_empty_op_encoded {
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_bool_op_encoded {
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_byte_op_encoded {
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i16_op_encoded {
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i32_op_encoded {
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_i64_op_encoded {
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_float_op_encoded {
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_double_op_encoded {
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_binary_op_encoded {
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_string_op_encoded {
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_struct_empty_op_encoded {
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_bool_op_encoded {
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_byte_op_encoded {
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i16_op_encoded {
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i32_op_encoded {
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i64_op_encoded {
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_float_op_encoded {
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_double_op_encoded {
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_binary_op_encoded {
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_string_op_encoded {
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_struct_empty_op_encoded {
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_bool_op_encoded {
@@ -3057,6 +6792,10 @@ struct struct_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_map_string_struct_empty_op_encoded {
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_map_i64_bool_op_encoded {
   1: map<i64, bool> field_1;
 }
@@ -3093,20 +6832,88 @@ struct struct_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_string_set_string_op_encoded {
-  1: map<string, set<string>> field_1;
+struct struct_map_i64_struct_empty_op_encoded {
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_bool_op_encoded {
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_byte_op_encoded {
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i16_op_encoded {
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i32_op_encoded {
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_i64_set_string_op_encoded {
-  1: map<i64, set<string>> field_1;
+struct struct_map_string_set_float_op_encoded {
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_double_op_encoded {
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_binary_op_encoded {
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_string_op_encoded {
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_struct_empty_op_encoded {
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_bool_op_encoded {
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_byte_op_encoded {
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i16_op_encoded {
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i32_op_encoded {
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_i64_op_encoded {
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_float_op_encoded {
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_double_op_encoded {
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_binary_op_encoded {
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_op_encoded {
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_struct_empty_op_encoded {
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_bool_cpp_ref_op_encoded {
@@ -3163,16 +6970,190 @@ struct struct_list_string_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_set_string_cpp_ref_op_encoded {
+struct struct_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_bool_cpp_ref_op_encoded {
@@ -3229,6 +7210,12 @@ struct struct_map_string_string_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -3283,10 +7270,34 @@ struct struct_map_i64_string_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_string_set_string_cpp_ref_op_encoded {
+struct struct_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_i64_cpp_ref_op_encoded {
@@ -3295,16 +7306,94 @@ struct struct_map_string_set_i64_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_i64_set_string_cpp_ref_op_encoded {
+struct struct_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_bool_shared_cpp_ref_op_encoded {
@@ -3361,16 +7450,190 @@ struct struct_list_string_shared_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_set_string_shared_cpp_ref_op_encoded {
+struct struct_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_bool_shared_cpp_ref_op_encoded {
@@ -3427,6 +7690,12 @@ struct struct_map_string_string_shared_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -3481,10 +7750,34 @@ struct struct_map_i64_string_shared_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_string_set_string_shared_cpp_ref_op_encoded {
+struct struct_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -3493,16 +7786,94 @@ struct struct_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_i64_set_string_shared_cpp_ref_op_encoded {
+struct struct_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_bool_op_encoded {
@@ -3649,12 +8020,128 @@ struct struct_optional_list_string_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_set_string_op_encoded {
-  1: optional set<string> field_1;
+struct struct_optional_list_struct_empty_op_encoded {
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_bool_op_encoded {
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_byte_op_encoded {
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i16_op_encoded {
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i32_op_encoded {
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i64_op_encoded {
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_float_op_encoded {
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_double_op_encoded {
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_binary_op_encoded {
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_string_op_encoded {
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_struct_empty_op_encoded {
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_bool_op_encoded {
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_byte_op_encoded {
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i16_op_encoded {
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i32_op_encoded {
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_i64_op_encoded {
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_float_op_encoded {
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_double_op_encoded {
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_binary_op_encoded {
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_string_op_encoded {
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_struct_empty_op_encoded {
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_bool_op_encoded {
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_byte_op_encoded {
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i16_op_encoded {
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i32_op_encoded {
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i64_op_encoded {
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_float_op_encoded {
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_double_op_encoded {
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_binary_op_encoded {
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_string_op_encoded {
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_struct_empty_op_encoded {
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_bool_op_encoded {
@@ -3693,6 +8180,10 @@ struct struct_optional_map_string_string_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_optional_map_string_struct_empty_op_encoded {
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_optional_map_i64_bool_op_encoded {
   1: optional map<i64, bool> field_1;
 }
@@ -3729,20 +8220,88 @@ struct struct_optional_map_i64_string_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_string_set_string_op_encoded {
-  1: optional map<string, set<string>> field_1;
+struct struct_optional_map_i64_struct_empty_op_encoded {
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_bool_op_encoded {
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_byte_op_encoded {
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i16_op_encoded {
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i32_op_encoded {
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_i64_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_i64_set_string_op_encoded {
-  1: optional map<i64, set<string>> field_1;
+struct struct_optional_map_string_set_float_op_encoded {
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_double_op_encoded {
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_binary_op_encoded {
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_op_encoded {
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_struct_empty_op_encoded {
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_bool_op_encoded {
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_byte_op_encoded {
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i16_op_encoded {
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i32_op_encoded {
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_i64_op_encoded {
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_float_op_encoded {
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_double_op_encoded {
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_binary_op_encoded {
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_op_encoded {
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_struct_empty_op_encoded {
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_bool_cpp_ref_op_encoded {
@@ -3799,16 +8358,190 @@ struct struct_optional_list_string_cpp_ref_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_set_string_cpp_ref_op_encoded {
+struct struct_optional_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_bool_cpp_ref_op_encoded {
@@ -3865,6 +8598,12 @@ struct struct_optional_map_string_string_cpp_ref_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_optional_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_optional_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -3919,10 +8658,34 @@ struct struct_optional_map_i64_string_cpp_ref_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_string_set_string_cpp_ref_op_encoded {
+struct struct_optional_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_i64_cpp_ref_op_encoded {
@@ -3931,16 +8694,94 @@ struct struct_optional_map_string_set_i64_cpp_ref_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_i64_set_string_cpp_ref_op_encoded {
+struct struct_optional_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_bool_shared_cpp_ref_op_encoded {
@@ -3997,16 +8838,190 @@ struct struct_optional_list_string_shared_cpp_ref_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_set_string_shared_cpp_ref_op_encoded {
+struct struct_optional_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_bool_shared_cpp_ref_op_encoded {
@@ -4063,6 +9078,12 @@ struct struct_optional_map_string_string_shared_cpp_ref_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_optional_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_optional_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4117,10 +9138,34 @@ struct struct_optional_map_i64_string_shared_cpp_ref_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_string_set_string_shared_cpp_ref_op_encoded {
+struct struct_optional_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -4129,16 +9174,94 @@ struct struct_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
+struct struct_optional_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_bool_op_encoded {
@@ -4285,12 +9408,128 @@ struct struct_required_list_string_op_encoded {
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_set_string_op_encoded {
-  1: required set<string> field_1;
+struct struct_required_list_struct_empty_op_encoded {
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_bool_op_encoded {
+  1: required list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_byte_op_encoded {
+  1: required list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i16_op_encoded {
+  1: required list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i32_op_encoded {
+  1: required list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i64_op_encoded {
+  1: required list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_float_op_encoded {
+  1: required list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_double_op_encoded {
+  1: required list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_binary_op_encoded {
+  1: required list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_string_op_encoded {
+  1: required list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_struct_empty_op_encoded {
+  1: required list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_bool_op_encoded {
+  1: required set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_byte_op_encoded {
+  1: required set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_i16_op_encoded {
+  1: required set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_i32_op_encoded {
+  1: required set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_i64_op_encoded {
   1: required set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_float_op_encoded {
+  1: required set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_double_op_encoded {
+  1: required set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_binary_op_encoded {
+  1: required set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_string_op_encoded {
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_struct_empty_op_encoded {
+  1: required set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_bool_op_encoded {
+  1: required set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_byte_op_encoded {
+  1: required set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i16_op_encoded {
+  1: required set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i32_op_encoded {
+  1: required set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i64_op_encoded {
+  1: required set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_float_op_encoded {
+  1: required set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_double_op_encoded {
+  1: required set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_binary_op_encoded {
+  1: required set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_string_op_encoded {
+  1: required set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_struct_empty_op_encoded {
+  1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_bool_op_encoded {
@@ -4329,6 +9568,10 @@ struct struct_required_map_string_string_op_encoded {
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_required_map_string_struct_empty_op_encoded {
+  1: required map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_required_map_i64_bool_op_encoded {
   1: required map<i64, bool> field_1;
 }
@@ -4365,20 +9608,88 @@ struct struct_required_map_i64_string_op_encoded {
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_map_string_set_string_op_encoded {
-  1: required map<string, set<string>> field_1;
+struct struct_required_map_i64_struct_empty_op_encoded {
+  1: required map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_bool_op_encoded {
+  1: required map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_byte_op_encoded {
+  1: required map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i16_op_encoded {
+  1: required map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i32_op_encoded {
+  1: required map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_i64_op_encoded {
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_map_i64_set_string_op_encoded {
-  1: required map<i64, set<string>> field_1;
+struct struct_required_map_string_set_float_op_encoded {
+  1: required map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_double_op_encoded {
+  1: required map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_binary_op_encoded {
+  1: required map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_string_op_encoded {
+  1: required map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_struct_empty_op_encoded {
+  1: required map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_bool_op_encoded {
+  1: required map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_byte_op_encoded {
+  1: required map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i16_op_encoded {
+  1: required map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i32_op_encoded {
+  1: required map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_i64_op_encoded {
   1: required map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_float_op_encoded {
+  1: required map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_double_op_encoded {
+  1: required map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_binary_op_encoded {
+  1: required map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_string_op_encoded {
+  1: required map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_struct_empty_op_encoded {
+  1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_bool_cpp_ref_op_encoded {
@@ -4435,16 +9746,190 @@ struct struct_required_list_string_cpp_ref_op_encoded {
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_set_string_cpp_ref_op_encoded {
+struct struct_required_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_bool_cpp_ref_op_encoded {
@@ -4501,6 +9986,12 @@ struct struct_required_map_string_string_cpp_ref_op_encoded {
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_required_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_required_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4555,10 +10046,34 @@ struct struct_required_map_i64_string_cpp_ref_op_encoded {
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_map_string_set_string_cpp_ref_op_encoded {
+struct struct_required_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_i64_cpp_ref_op_encoded {
@@ -4567,16 +10082,94 @@ struct struct_required_map_string_set_i64_cpp_ref_op_encoded {
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_map_i64_set_string_cpp_ref_op_encoded {
+struct struct_required_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_bool_shared_cpp_ref_op_encoded {
@@ -4633,16 +10226,190 @@ struct struct_required_list_string_shared_cpp_ref_op_encoded {
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_set_string_shared_cpp_ref_op_encoded {
+struct struct_required_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_bool_shared_cpp_ref_op_encoded {
@@ -4699,6 +10466,12 @@ struct struct_required_map_string_string_shared_cpp_ref_op_encoded {
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_required_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_required_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4753,10 +10526,34 @@ struct struct_required_map_i64_string_shared_cpp_ref_op_encoded {
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_map_string_set_string_shared_cpp_ref_op_encoded {
+struct struct_required_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -4765,16 +10562,94 @@ struct struct_required_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_required_map_i64_set_string_shared_cpp_ref_op_encoded {
+struct struct_required_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_bool_op_encoded {
@@ -4930,14 +10805,159 @@ struct struct_terse_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_set_string_op_encoded {
+struct struct_terse_list_struct_empty_op_encoded {
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_bool_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_byte_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i16_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i32_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i64_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_float_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_double_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_binary_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_string_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_i64_op_encoded {
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_float_op_encoded {
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_float_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_bool_op_encoded {
@@ -4985,6 +11005,11 @@ struct struct_terse_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_terse_map_string_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_terse_map_i64_bool_op_encoded {
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
@@ -5030,9 +11055,29 @@ struct struct_terse_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_map_string_set_string_op_encoded {
+struct struct_terse_map_i64_struct_empty_op_encoded {
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_i64_op_encoded {
@@ -5040,14 +11085,79 @@ struct struct_terse_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_map_i64_set_string_op_encoded {
+struct struct_terse_map_string_set_float_op_encoded {
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_i64_op_encoded {
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_float_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_bool_cpp_ref_op_encoded {
@@ -5113,11 +11223,109 @@ struct struct_terse_list_string_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_set_string_cpp_ref_op_encoded {
+struct struct_terse_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_i64_cpp_ref_op_encoded {
@@ -5125,6 +11333,111 @@ struct struct_terse_set_i64_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_bool_cpp_ref_op_encoded {
@@ -5190,6 +11503,13 @@ struct struct_terse_map_string_string_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_terse_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_terse_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -5253,11 +11573,39 @@ struct struct_terse_map_i64_string_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_map_string_set_string_cpp_ref_op_encoded {
+struct struct_terse_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_i64_cpp_ref_op_encoded {
@@ -5267,11 +11615,67 @@ struct struct_terse_map_string_set_i64_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_map_i64_set_string_cpp_ref_op_encoded {
+struct struct_terse_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_i64_cpp_ref_op_encoded {
@@ -5279,6 +11683,41 @@ struct struct_terse_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_bool_shared_cpp_ref_op_encoded {
@@ -5344,11 +11783,109 @@ struct struct_terse_list_string_shared_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_set_string_shared_cpp_ref_op_encoded {
+struct struct_terse_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_i64_shared_cpp_ref_op_encoded {
@@ -5356,6 +11893,111 @@ struct struct_terse_set_i64_shared_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_bool_shared_cpp_ref_op_encoded {
@@ -5421,6 +12063,13 @@ struct struct_terse_map_string_string_shared_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_terse_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_terse_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -5484,11 +12133,39 @@ struct struct_terse_map_i64_string_shared_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_map_string_set_string_shared_cpp_ref_op_encoded {
+struct struct_terse_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -5498,11 +12175,67 @@ struct struct_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
+struct struct_terse_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
@@ -5510,6 +12243,41 @@ struct struct_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_bool_op_encoded {
@@ -5602,14 +12370,159 @@ struct struct_optional_list_string_box_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_set_string_box_op_encoded {
+struct struct_optional_list_struct_empty_box_op_encoded {
   @thrift.Box
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_bool_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_byte_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i16_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i32_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_i64_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_float_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_double_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_binary_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_string_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_list_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_i64_box_op_encoded {
   @thrift.Box
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_float_box_op_encoded {
+  @thrift.Box
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_float_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_bool_box_op_encoded {
@@ -5657,6 +12570,11 @@ struct struct_optional_map_string_string_box_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_optional_map_string_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_optional_map_i64_bool_box_op_encoded {
   @thrift.Box
   1: optional map<i64, bool> field_1;
@@ -5702,9 +12620,29 @@ struct struct_optional_map_i64_string_box_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_string_set_string_box_op_encoded {
+struct struct_optional_map_i64_struct_empty_box_op_encoded {
   @thrift.Box
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_i64_box_op_encoded {
@@ -5712,14 +12650,79 @@ struct struct_optional_map_string_set_i64_box_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_optional_map_i64_set_string_box_op_encoded {
+struct struct_optional_map_string_set_float_box_op_encoded {
   @thrift.Box
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_i64_box_op_encoded {
   @thrift.Box
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_float_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_adapted_bool_op_encoded {
@@ -5866,12 +12869,124 @@ struct struct_adapted_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_adapted_set_string_op_encoded {
+struct struct_adapted_list_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
-  1: set<string> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_struct_empty'}
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_bool'}
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_byte'}
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i16'}
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i32'}
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i64'}
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_float'}
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_double'}
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_binary'}
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_string'}
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_list_list_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_struct_empty'}
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_byte'}
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i16'}
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i32'}
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_adapted_set_i64_op_encoded {
@@ -5880,6 +12995,126 @@ struct struct_adapted_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_binary'}
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_set_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_adapted_map_string_bool_op_encoded {
@@ -5954,6 +13189,14 @@ struct struct_adapted_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_adapted_map_string_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_struct_empty'}
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_adapted_map_i64_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6026,12 +13269,44 @@ struct struct_adapted_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_adapted_map_string_set_string_op_encoded {
+struct struct_adapted_map_i64_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
-  1: map<string, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_struct_empty'}
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_byte'}
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i16'}
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i32'}
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_adapted_map_string_set_i64_op_encoded {
@@ -6042,12 +13317,76 @@ struct struct_adapted_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_adapted_map_i64_set_string_op_encoded {
+struct struct_adapted_map_string_set_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
-  1: map<i64, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_binary'}
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_byte'}
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i16'}
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i32'}
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_adapted_map_i64_set_i64_op_encoded {
@@ -6056,6 +13395,46 @@ struct struct_adapted_map_i64_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_binary'}
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_field_adapted_bool_op_encoded {
@@ -6202,12 +13581,124 @@ struct struct_field_adapted_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_field_adapted_set_string_op_encoded {
+struct struct_field_adapted_list_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_list_list_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_field_adapted_set_i64_op_encoded {
@@ -6216,6 +13707,126 @@ struct struct_field_adapted_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_set_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_field_adapted_map_string_bool_op_encoded {
@@ -6290,6 +13901,14 @@ struct struct_field_adapted_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_field_adapted_map_string_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_field_adapted_map_i64_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6362,12 +13981,44 @@ struct struct_field_adapted_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_field_adapted_map_string_set_string_op_encoded {
+struct struct_field_adapted_map_i64_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_field_adapted_map_string_set_i64_op_encoded {
@@ -6378,12 +14029,76 @@ struct struct_field_adapted_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_field_adapted_map_i64_set_string_op_encoded {
+struct struct_field_adapted_map_string_set_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_string_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_field_adapted_map_i64_set_i64_op_encoded {
@@ -6392,6 +14107,46 @@ struct struct_field_adapted_map_i64_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_field_adapted_map_i64_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_bool_lazy_op_encoded {
@@ -6439,14 +14194,159 @@ struct struct_list_string_lazy_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_set_string_lazy_op_encoded {
+struct struct_list_struct_empty_lazy_op_encoded {
   @cpp.Lazy
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_list_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_i64_lazy_op_encoded {
   @cpp.Lazy
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_bool_lazy_op_encoded {
@@ -6494,6 +14394,11 @@ struct struct_map_string_string_lazy_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+struct struct_map_string_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 struct struct_map_i64_bool_lazy_op_encoded {
   @cpp.Lazy
   1: map<i64, bool> field_1;
@@ -6539,9 +14444,29 @@ struct struct_map_i64_string_lazy_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_string_set_string_lazy_op_encoded {
+struct struct_map_i64_struct_empty_lazy_op_encoded {
   @cpp.Lazy
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_i64_lazy_op_encoded {
@@ -6549,14 +14474,79 @@ struct struct_map_string_set_i64_lazy_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-struct struct_map_i64_set_string_lazy_op_encoded {
+struct struct_map_string_set_float_lazy_op_encoded {
   @cpp.Lazy
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_string_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_i64_lazy_op_encoded {
   @cpp.Lazy
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_string_lazy_op_encoded {
@@ -6592,11 +14582,98 @@ exception exception_list_binary {
 exception exception_list_string {
   1: list<string> field_1;
 }
-exception exception_set_string {
-  1: set<string> field_1;
+exception exception_list_struct_empty {
+  1: list<struct_empty> field_1;
+}
+exception exception_list_list_bool {
+  1: list<list<bool>> field_1;
+}
+exception exception_list_list_byte {
+  1: list<list<byte>> field_1;
+}
+exception exception_list_list_i16 {
+  1: list<list<i16>> field_1;
+}
+exception exception_list_list_i32 {
+  1: list<list<i32>> field_1;
+}
+exception exception_list_list_i64 {
+  1: list<list<i64>> field_1;
+}
+exception exception_list_list_float {
+  1: list<list<float>> field_1;
+}
+exception exception_list_list_double {
+  1: list<list<double>> field_1;
+}
+exception exception_list_list_binary {
+  1: list<list<binary>> field_1;
+}
+exception exception_list_list_string {
+  1: list<list<string>> field_1;
+}
+exception exception_list_list_struct_empty {
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_set_bool {
+  1: set<bool> field_1;
+}
+exception exception_set_byte {
+  1: set<byte> field_1;
+}
+exception exception_set_i16 {
+  1: set<i16> field_1;
+}
+exception exception_set_i32 {
+  1: set<i32> field_1;
 }
 exception exception_set_i64 {
   1: set<i64> field_1;
+}
+exception exception_set_float {
+  1: set<float> field_1;
+}
+exception exception_set_double {
+  1: set<double> field_1;
+}
+exception exception_set_binary {
+  1: set<binary> field_1;
+}
+exception exception_set_string {
+  1: set<string> field_1;
+}
+exception exception_set_struct_empty {
+  1: set<struct_empty> field_1;
+}
+exception exception_set_set_bool {
+  1: set<set<bool>> field_1;
+}
+exception exception_set_set_byte {
+  1: set<set<byte>> field_1;
+}
+exception exception_set_set_i16 {
+  1: set<set<i16>> field_1;
+}
+exception exception_set_set_i32 {
+  1: set<set<i32>> field_1;
+}
+exception exception_set_set_i64 {
+  1: set<set<i64>> field_1;
+}
+exception exception_set_set_float {
+  1: set<set<float>> field_1;
+}
+exception exception_set_set_double {
+  1: set<set<double>> field_1;
+}
+exception exception_set_set_binary {
+  1: set<set<binary>> field_1;
+}
+exception exception_set_set_string {
+  1: set<set<string>> field_1;
+}
+exception exception_set_set_struct_empty {
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool {
   1: map<string, bool> field_1;
@@ -6625,6 +14702,9 @@ exception exception_map_string_binary {
 exception exception_map_string_string {
   1: map<string, string> field_1;
 }
+exception exception_map_string_struct_empty {
+  1: map<string, struct_empty> field_1;
+}
 exception exception_map_i64_bool {
   1: map<i64, bool> field_1;
 }
@@ -6652,17 +14732,68 @@ exception exception_map_i64_binary {
 exception exception_map_i64_string {
   1: map<i64, string> field_1;
 }
-exception exception_map_string_set_string {
-  1: map<string, set<string>> field_1;
+exception exception_map_i64_struct_empty {
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_map_string_set_bool {
+  1: map<string, set<bool>> field_1;
+}
+exception exception_map_string_set_byte {
+  1: map<string, set<byte>> field_1;
+}
+exception exception_map_string_set_i16 {
+  1: map<string, set<i16>> field_1;
+}
+exception exception_map_string_set_i32 {
+  1: map<string, set<i32>> field_1;
 }
 exception exception_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
 }
-exception exception_map_i64_set_string {
-  1: map<i64, set<string>> field_1;
+exception exception_map_string_set_float {
+  1: map<string, set<float>> field_1;
+}
+exception exception_map_string_set_double {
+  1: map<string, set<double>> field_1;
+}
+exception exception_map_string_set_binary {
+  1: map<string, set<binary>> field_1;
+}
+exception exception_map_string_set_string {
+  1: map<string, set<string>> field_1;
+}
+exception exception_map_string_set_struct_empty {
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_map_i64_set_bool {
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_map_i64_set_byte {
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_map_i64_set_i16 {
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_map_i64_set_i32 {
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
+}
+exception exception_map_i64_set_float {
+  1: map<i64, set<float>> field_1;
+}
+exception exception_map_i64_set_double {
+  1: map<i64, set<double>> field_1;
+}
+exception exception_map_i64_set_binary {
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_map_i64_set_string {
+  1: map<i64, set<string>> field_1;
+}
+exception exception_map_i64_set_struct_empty {
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -6709,15 +14840,160 @@ exception exception_list_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
-exception exception_set_string_cpp_ref {
+exception exception_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+exception exception_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+exception exception_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+exception exception_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+exception exception_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+exception exception_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+exception exception_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+exception exception_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+exception exception_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+exception exception_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+exception exception_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+exception exception_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+exception exception_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+exception exception_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 exception exception_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+exception exception_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+exception exception_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+exception exception_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+exception exception_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+exception exception_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+exception exception_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+exception exception_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+exception exception_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+exception exception_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+exception exception_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+exception exception_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+exception exception_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+exception exception_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+exception exception_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+exception exception_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -6764,6 +15040,11 @@ exception exception_map_string_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
+exception exception_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
 exception exception_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -6809,25 +15090,110 @@ exception exception_map_i64_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
-exception exception_map_string_set_string_cpp_ref {
+exception exception_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+exception exception_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+exception exception_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+exception exception_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 exception exception_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
-exception exception_map_i64_set_string_cpp_ref {
+exception exception_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+exception exception_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+exception exception_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+exception exception_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+exception exception_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+exception exception_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+exception exception_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+exception exception_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+exception exception_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -6874,15 +15240,160 @@ exception exception_list_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
-exception exception_set_string_shared_cpp_ref {
+exception exception_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+exception exception_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+exception exception_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+exception exception_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+exception exception_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+exception exception_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+exception exception_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+exception exception_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+exception exception_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+exception exception_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+exception exception_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+exception exception_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+exception exception_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+exception exception_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 exception exception_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+exception exception_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+exception exception_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+exception exception_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+exception exception_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+exception exception_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+exception exception_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+exception exception_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+exception exception_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+exception exception_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+exception exception_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+exception exception_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+exception exception_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+exception exception_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+exception exception_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+exception exception_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -6929,6 +15440,11 @@ exception exception_map_string_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
+exception exception_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
 exception exception_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -6974,25 +15490,110 @@ exception exception_map_i64_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
-exception exception_map_string_set_string_shared_cpp_ref {
+exception exception_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+exception exception_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+exception exception_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+exception exception_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 exception exception_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
-exception exception_map_i64_set_string_shared_cpp_ref {
+exception exception_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+exception exception_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+exception exception_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+exception exception_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+exception exception_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+exception exception_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+exception exception_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+exception exception_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+exception exception_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_bool {
   1: bool field_1;
@@ -7102,11 +15703,98 @@ exception exception_optional_list_binary {
 exception exception_optional_list_string {
   1: optional list<string> field_1;
 }
-exception exception_optional_set_string {
-  1: optional set<string> field_1;
+exception exception_optional_list_struct_empty {
+  1: optional list<struct_empty> field_1;
+}
+exception exception_optional_list_list_bool {
+  1: optional list<list<bool>> field_1;
+}
+exception exception_optional_list_list_byte {
+  1: optional list<list<byte>> field_1;
+}
+exception exception_optional_list_list_i16 {
+  1: optional list<list<i16>> field_1;
+}
+exception exception_optional_list_list_i32 {
+  1: optional list<list<i32>> field_1;
+}
+exception exception_optional_list_list_i64 {
+  1: optional list<list<i64>> field_1;
+}
+exception exception_optional_list_list_float {
+  1: optional list<list<float>> field_1;
+}
+exception exception_optional_list_list_double {
+  1: optional list<list<double>> field_1;
+}
+exception exception_optional_list_list_binary {
+  1: optional list<list<binary>> field_1;
+}
+exception exception_optional_list_list_string {
+  1: optional list<list<string>> field_1;
+}
+exception exception_optional_list_list_struct_empty {
+  1: optional list<list<struct_empty>> field_1;
+}
+exception exception_optional_set_bool {
+  1: optional set<bool> field_1;
+}
+exception exception_optional_set_byte {
+  1: optional set<byte> field_1;
+}
+exception exception_optional_set_i16 {
+  1: optional set<i16> field_1;
+}
+exception exception_optional_set_i32 {
+  1: optional set<i32> field_1;
 }
 exception exception_optional_set_i64 {
   1: optional set<i64> field_1;
+}
+exception exception_optional_set_float {
+  1: optional set<float> field_1;
+}
+exception exception_optional_set_double {
+  1: optional set<double> field_1;
+}
+exception exception_optional_set_binary {
+  1: optional set<binary> field_1;
+}
+exception exception_optional_set_string {
+  1: optional set<string> field_1;
+}
+exception exception_optional_set_struct_empty {
+  1: optional set<struct_empty> field_1;
+}
+exception exception_optional_set_set_bool {
+  1: optional set<set<bool>> field_1;
+}
+exception exception_optional_set_set_byte {
+  1: optional set<set<byte>> field_1;
+}
+exception exception_optional_set_set_i16 {
+  1: optional set<set<i16>> field_1;
+}
+exception exception_optional_set_set_i32 {
+  1: optional set<set<i32>> field_1;
+}
+exception exception_optional_set_set_i64 {
+  1: optional set<set<i64>> field_1;
+}
+exception exception_optional_set_set_float {
+  1: optional set<set<float>> field_1;
+}
+exception exception_optional_set_set_double {
+  1: optional set<set<double>> field_1;
+}
+exception exception_optional_set_set_binary {
+  1: optional set<set<binary>> field_1;
+}
+exception exception_optional_set_set_string {
+  1: optional set<set<string>> field_1;
+}
+exception exception_optional_set_set_struct_empty {
+  1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool {
   1: optional map<string, bool> field_1;
@@ -7135,6 +15823,9 @@ exception exception_optional_map_string_binary {
 exception exception_optional_map_string_string {
   1: optional map<string, string> field_1;
 }
+exception exception_optional_map_string_struct_empty {
+  1: optional map<string, struct_empty> field_1;
+}
 exception exception_optional_map_i64_bool {
   1: optional map<i64, bool> field_1;
 }
@@ -7162,17 +15853,68 @@ exception exception_optional_map_i64_binary {
 exception exception_optional_map_i64_string {
   1: optional map<i64, string> field_1;
 }
-exception exception_optional_map_string_set_string {
-  1: optional map<string, set<string>> field_1;
+exception exception_optional_map_i64_struct_empty {
+  1: optional map<i64, struct_empty> field_1;
+}
+exception exception_optional_map_string_set_bool {
+  1: optional map<string, set<bool>> field_1;
+}
+exception exception_optional_map_string_set_byte {
+  1: optional map<string, set<byte>> field_1;
+}
+exception exception_optional_map_string_set_i16 {
+  1: optional map<string, set<i16>> field_1;
+}
+exception exception_optional_map_string_set_i32 {
+  1: optional map<string, set<i32>> field_1;
 }
 exception exception_optional_map_string_set_i64 {
   1: optional map<string, set<i64>> field_1;
 }
-exception exception_optional_map_i64_set_string {
-  1: optional map<i64, set<string>> field_1;
+exception exception_optional_map_string_set_float {
+  1: optional map<string, set<float>> field_1;
+}
+exception exception_optional_map_string_set_double {
+  1: optional map<string, set<double>> field_1;
+}
+exception exception_optional_map_string_set_binary {
+  1: optional map<string, set<binary>> field_1;
+}
+exception exception_optional_map_string_set_string {
+  1: optional map<string, set<string>> field_1;
+}
+exception exception_optional_map_string_set_struct_empty {
+  1: optional map<string, set<struct_empty>> field_1;
+}
+exception exception_optional_map_i64_set_bool {
+  1: optional map<i64, set<bool>> field_1;
+}
+exception exception_optional_map_i64_set_byte {
+  1: optional map<i64, set<byte>> field_1;
+}
+exception exception_optional_map_i64_set_i16 {
+  1: optional map<i64, set<i16>> field_1;
+}
+exception exception_optional_map_i64_set_i32 {
+  1: optional map<i64, set<i32>> field_1;
 }
 exception exception_optional_map_i64_set_i64 {
   1: optional map<i64, set<i64>> field_1;
+}
+exception exception_optional_map_i64_set_float {
+  1: optional map<i64, set<float>> field_1;
+}
+exception exception_optional_map_i64_set_double {
+  1: optional map<i64, set<double>> field_1;
+}
+exception exception_optional_map_i64_set_binary {
+  1: optional map<i64, set<binary>> field_1;
+}
+exception exception_optional_map_i64_set_string {
+  1: optional map<i64, set<string>> field_1;
+}
+exception exception_optional_map_i64_set_struct_empty {
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_optional_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -7219,15 +15961,160 @@ exception exception_optional_list_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
-exception exception_optional_set_string_cpp_ref {
+exception exception_optional_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+exception exception_optional_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+exception exception_optional_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+exception exception_optional_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+exception exception_optional_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+exception exception_optional_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+exception exception_optional_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+exception exception_optional_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+exception exception_optional_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+exception exception_optional_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+exception exception_optional_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+exception exception_optional_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+exception exception_optional_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+exception exception_optional_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+exception exception_optional_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 exception exception_optional_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+exception exception_optional_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+exception exception_optional_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+exception exception_optional_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+exception exception_optional_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+exception exception_optional_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+exception exception_optional_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+exception exception_optional_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+exception exception_optional_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+exception exception_optional_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+exception exception_optional_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+exception exception_optional_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+exception exception_optional_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+exception exception_optional_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+exception exception_optional_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+exception exception_optional_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -7274,6 +16161,11 @@ exception exception_optional_map_string_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
+exception exception_optional_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
 exception exception_optional_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -7319,25 +16211,110 @@ exception exception_optional_map_i64_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
-exception exception_optional_map_string_set_string_cpp_ref {
+exception exception_optional_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+exception exception_optional_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+exception exception_optional_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+exception exception_optional_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+exception exception_optional_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 exception exception_optional_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
-exception exception_optional_map_i64_set_string_cpp_ref {
+exception exception_optional_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+exception exception_optional_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+exception exception_optional_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+exception exception_optional_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+exception exception_optional_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+exception exception_optional_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+exception exception_optional_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+exception exception_optional_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+exception exception_optional_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 exception exception_optional_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+exception exception_optional_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+exception exception_optional_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+exception exception_optional_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+exception exception_optional_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+exception exception_optional_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_optional_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -7384,15 +16361,160 @@ exception exception_optional_list_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
-exception exception_optional_set_string_shared_cpp_ref {
+exception exception_optional_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+exception exception_optional_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+exception exception_optional_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+exception exception_optional_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+exception exception_optional_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+exception exception_optional_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+exception exception_optional_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+exception exception_optional_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+exception exception_optional_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+exception exception_optional_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+exception exception_optional_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+exception exception_optional_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+exception exception_optional_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+exception exception_optional_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+exception exception_optional_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 exception exception_optional_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+exception exception_optional_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+exception exception_optional_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+exception exception_optional_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+exception exception_optional_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+exception exception_optional_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+exception exception_optional_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+exception exception_optional_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+exception exception_optional_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+exception exception_optional_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+exception exception_optional_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+exception exception_optional_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+exception exception_optional_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+exception exception_optional_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+exception exception_optional_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+exception exception_optional_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -7439,6 +16561,11 @@ exception exception_optional_map_string_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
+exception exception_optional_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
 exception exception_optional_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -7484,25 +16611,110 @@ exception exception_optional_map_i64_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
-exception exception_optional_map_string_set_string_shared_cpp_ref {
+exception exception_optional_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+exception exception_optional_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+exception exception_optional_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+exception exception_optional_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+exception exception_optional_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 exception exception_optional_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
-exception exception_optional_map_i64_set_string_shared_cpp_ref {
+exception exception_optional_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+exception exception_optional_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+exception exception_optional_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+exception exception_optional_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+exception exception_optional_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+exception exception_optional_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+exception exception_optional_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+exception exception_optional_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+exception exception_optional_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 exception exception_optional_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+exception exception_optional_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+exception exception_optional_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+exception exception_optional_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+exception exception_optional_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+exception exception_optional_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_optional_bool {
   1: optional bool field_1;
@@ -7612,11 +16824,98 @@ exception exception_required_list_binary {
 exception exception_required_list_string {
   1: required list<string> field_1;
 }
-exception exception_required_set_string {
-  1: required set<string> field_1;
+exception exception_required_list_struct_empty {
+  1: required list<struct_empty> field_1;
+}
+exception exception_required_list_list_bool {
+  1: required list<list<bool>> field_1;
+}
+exception exception_required_list_list_byte {
+  1: required list<list<byte>> field_1;
+}
+exception exception_required_list_list_i16 {
+  1: required list<list<i16>> field_1;
+}
+exception exception_required_list_list_i32 {
+  1: required list<list<i32>> field_1;
+}
+exception exception_required_list_list_i64 {
+  1: required list<list<i64>> field_1;
+}
+exception exception_required_list_list_float {
+  1: required list<list<float>> field_1;
+}
+exception exception_required_list_list_double {
+  1: required list<list<double>> field_1;
+}
+exception exception_required_list_list_binary {
+  1: required list<list<binary>> field_1;
+}
+exception exception_required_list_list_string {
+  1: required list<list<string>> field_1;
+}
+exception exception_required_list_list_struct_empty {
+  1: required list<list<struct_empty>> field_1;
+}
+exception exception_required_set_bool {
+  1: required set<bool> field_1;
+}
+exception exception_required_set_byte {
+  1: required set<byte> field_1;
+}
+exception exception_required_set_i16 {
+  1: required set<i16> field_1;
+}
+exception exception_required_set_i32 {
+  1: required set<i32> field_1;
 }
 exception exception_required_set_i64 {
   1: required set<i64> field_1;
+}
+exception exception_required_set_float {
+  1: required set<float> field_1;
+}
+exception exception_required_set_double {
+  1: required set<double> field_1;
+}
+exception exception_required_set_binary {
+  1: required set<binary> field_1;
+}
+exception exception_required_set_string {
+  1: required set<string> field_1;
+}
+exception exception_required_set_struct_empty {
+  1: required set<struct_empty> field_1;
+}
+exception exception_required_set_set_bool {
+  1: required set<set<bool>> field_1;
+}
+exception exception_required_set_set_byte {
+  1: required set<set<byte>> field_1;
+}
+exception exception_required_set_set_i16 {
+  1: required set<set<i16>> field_1;
+}
+exception exception_required_set_set_i32 {
+  1: required set<set<i32>> field_1;
+}
+exception exception_required_set_set_i64 {
+  1: required set<set<i64>> field_1;
+}
+exception exception_required_set_set_float {
+  1: required set<set<float>> field_1;
+}
+exception exception_required_set_set_double {
+  1: required set<set<double>> field_1;
+}
+exception exception_required_set_set_binary {
+  1: required set<set<binary>> field_1;
+}
+exception exception_required_set_set_string {
+  1: required set<set<string>> field_1;
+}
+exception exception_required_set_set_struct_empty {
+  1: required set<set<struct_empty>> field_1;
 }
 exception exception_required_map_string_bool {
   1: required map<string, bool> field_1;
@@ -7645,6 +16944,9 @@ exception exception_required_map_string_binary {
 exception exception_required_map_string_string {
   1: required map<string, string> field_1;
 }
+exception exception_required_map_string_struct_empty {
+  1: required map<string, struct_empty> field_1;
+}
 exception exception_required_map_i64_bool {
   1: required map<i64, bool> field_1;
 }
@@ -7672,17 +16974,68 @@ exception exception_required_map_i64_binary {
 exception exception_required_map_i64_string {
   1: required map<i64, string> field_1;
 }
-exception exception_required_map_string_set_string {
-  1: required map<string, set<string>> field_1;
+exception exception_required_map_i64_struct_empty {
+  1: required map<i64, struct_empty> field_1;
+}
+exception exception_required_map_string_set_bool {
+  1: required map<string, set<bool>> field_1;
+}
+exception exception_required_map_string_set_byte {
+  1: required map<string, set<byte>> field_1;
+}
+exception exception_required_map_string_set_i16 {
+  1: required map<string, set<i16>> field_1;
+}
+exception exception_required_map_string_set_i32 {
+  1: required map<string, set<i32>> field_1;
 }
 exception exception_required_map_string_set_i64 {
   1: required map<string, set<i64>> field_1;
 }
-exception exception_required_map_i64_set_string {
-  1: required map<i64, set<string>> field_1;
+exception exception_required_map_string_set_float {
+  1: required map<string, set<float>> field_1;
+}
+exception exception_required_map_string_set_double {
+  1: required map<string, set<double>> field_1;
+}
+exception exception_required_map_string_set_binary {
+  1: required map<string, set<binary>> field_1;
+}
+exception exception_required_map_string_set_string {
+  1: required map<string, set<string>> field_1;
+}
+exception exception_required_map_string_set_struct_empty {
+  1: required map<string, set<struct_empty>> field_1;
+}
+exception exception_required_map_i64_set_bool {
+  1: required map<i64, set<bool>> field_1;
+}
+exception exception_required_map_i64_set_byte {
+  1: required map<i64, set<byte>> field_1;
+}
+exception exception_required_map_i64_set_i16 {
+  1: required map<i64, set<i16>> field_1;
+}
+exception exception_required_map_i64_set_i32 {
+  1: required map<i64, set<i32>> field_1;
 }
 exception exception_required_map_i64_set_i64 {
   1: required map<i64, set<i64>> field_1;
+}
+exception exception_required_map_i64_set_float {
+  1: required map<i64, set<float>> field_1;
+}
+exception exception_required_map_i64_set_double {
+  1: required map<i64, set<double>> field_1;
+}
+exception exception_required_map_i64_set_binary {
+  1: required map<i64, set<binary>> field_1;
+}
+exception exception_required_map_i64_set_string {
+  1: required map<i64, set<string>> field_1;
+}
+exception exception_required_map_i64_set_struct_empty {
+  1: required map<i64, set<struct_empty>> field_1;
 }
 exception exception_required_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -7729,15 +17082,160 @@ exception exception_required_list_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
-exception exception_required_set_string_cpp_ref {
+exception exception_required_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+exception exception_required_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+exception exception_required_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+exception exception_required_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+exception exception_required_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+exception exception_required_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+exception exception_required_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+exception exception_required_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+exception exception_required_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+exception exception_required_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+exception exception_required_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+exception exception_required_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+exception exception_required_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+exception exception_required_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+exception exception_required_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 exception exception_required_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+exception exception_required_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+exception exception_required_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+exception exception_required_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+exception exception_required_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+exception exception_required_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+exception exception_required_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+exception exception_required_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+exception exception_required_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+exception exception_required_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+exception exception_required_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+exception exception_required_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+exception exception_required_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+exception exception_required_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+exception exception_required_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+exception exception_required_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 exception exception_required_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -7784,6 +17282,11 @@ exception exception_required_map_string_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
+exception exception_required_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
 exception exception_required_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -7829,25 +17332,110 @@ exception exception_required_map_i64_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
-exception exception_required_map_string_set_string_cpp_ref {
+exception exception_required_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+exception exception_required_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+exception exception_required_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+exception exception_required_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+exception exception_required_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 exception exception_required_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
-exception exception_required_map_i64_set_string_cpp_ref {
+exception exception_required_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+exception exception_required_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+exception exception_required_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+exception exception_required_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+exception exception_required_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+exception exception_required_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+exception exception_required_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+exception exception_required_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+exception exception_required_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 exception exception_required_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+exception exception_required_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+exception exception_required_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+exception exception_required_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+exception exception_required_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+exception exception_required_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 exception exception_required_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -7894,15 +17482,160 @@ exception exception_required_list_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
-exception exception_required_set_string_shared_cpp_ref {
+exception exception_required_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+exception exception_required_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+exception exception_required_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+exception exception_required_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+exception exception_required_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+exception exception_required_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+exception exception_required_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+exception exception_required_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+exception exception_required_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+exception exception_required_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+exception exception_required_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+exception exception_required_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+exception exception_required_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+exception exception_required_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+exception exception_required_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 exception exception_required_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+exception exception_required_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+exception exception_required_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+exception exception_required_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+exception exception_required_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+exception exception_required_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+exception exception_required_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+exception exception_required_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+exception exception_required_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+exception exception_required_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+exception exception_required_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+exception exception_required_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+exception exception_required_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+exception exception_required_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+exception exception_required_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+exception exception_required_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 exception exception_required_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -7949,6 +17682,11 @@ exception exception_required_map_string_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
+exception exception_required_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
 exception exception_required_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -7994,25 +17732,110 @@ exception exception_required_map_i64_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
-exception exception_required_map_string_set_string_shared_cpp_ref {
+exception exception_required_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+exception exception_required_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+exception exception_required_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+exception exception_required_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+exception exception_required_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 exception exception_required_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
-exception exception_required_map_i64_set_string_shared_cpp_ref {
+exception exception_required_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+exception exception_required_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+exception exception_required_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+exception exception_required_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+exception exception_required_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+exception exception_required_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+exception exception_required_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+exception exception_required_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+exception exception_required_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 exception exception_required_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+exception exception_required_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+exception exception_required_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+exception exception_required_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+exception exception_required_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+exception exception_required_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 exception exception_required_bool {
   1: required bool field_1;
@@ -8131,13 +17954,129 @@ exception exception_terse_list_string {
   @thrift.TerseWrite
   1: list<string> field_1;
 }
-exception exception_terse_set_string {
+exception exception_terse_list_struct_empty {
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+exception exception_terse_list_list_bool {
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+exception exception_terse_list_list_byte {
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+exception exception_terse_list_list_i16 {
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+exception exception_terse_list_list_i32 {
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+exception exception_terse_list_list_i64 {
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+exception exception_terse_list_list_float {
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+exception exception_terse_list_list_double {
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+exception exception_terse_list_list_binary {
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+exception exception_terse_list_list_string {
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+exception exception_terse_list_list_struct_empty {
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_terse_set_bool {
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+exception exception_terse_set_byte {
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+exception exception_terse_set_i16 {
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+exception exception_terse_set_i32 {
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 exception exception_terse_set_i64 {
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+exception exception_terse_set_float {
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+exception exception_terse_set_double {
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+exception exception_terse_set_binary {
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+exception exception_terse_set_string {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+exception exception_terse_set_struct_empty {
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+exception exception_terse_set_set_bool {
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+exception exception_terse_set_set_byte {
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+exception exception_terse_set_set_i16 {
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+exception exception_terse_set_set_i32 {
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+exception exception_terse_set_set_i64 {
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+exception exception_terse_set_set_float {
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+exception exception_terse_set_set_double {
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+exception exception_terse_set_set_binary {
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+exception exception_terse_set_set_string {
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+exception exception_terse_set_set_struct_empty {
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_terse_map_string_bool {
   @thrift.TerseWrite
@@ -8175,6 +18114,10 @@ exception exception_terse_map_string_string {
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+exception exception_terse_map_string_struct_empty {
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
 exception exception_terse_map_i64_bool {
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
@@ -8211,21 +18154,89 @@ exception exception_terse_map_i64_string {
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
-exception exception_terse_map_string_set_string {
+exception exception_terse_map_i64_struct_empty {
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_terse_map_string_set_bool {
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+exception exception_terse_map_string_set_byte {
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+exception exception_terse_map_string_set_i16 {
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+exception exception_terse_map_string_set_i32 {
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 exception exception_terse_map_string_set_i64 {
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
-exception exception_terse_map_i64_set_string {
+exception exception_terse_map_string_set_float {
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+exception exception_terse_map_string_set_double {
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+exception exception_terse_map_string_set_binary {
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+exception exception_terse_map_string_set_string {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+exception exception_terse_map_string_set_struct_empty {
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_terse_map_i64_set_bool {
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_terse_map_i64_set_byte {
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_terse_map_i64_set_i16 {
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_terse_map_i64_set_i32 {
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_terse_map_i64_set_i64 {
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+exception exception_terse_map_i64_set_float {
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+exception exception_terse_map_i64_set_double {
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+exception exception_terse_map_i64_set_binary {
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_terse_map_i64_set_string {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+exception exception_terse_map_i64_set_struct_empty {
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_terse_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -8281,17 +18292,191 @@ exception exception_terse_list_string_cpp_ref {
   @thrift.TerseWrite
   1: list<string> field_1;
 }
-exception exception_terse_set_string_cpp_ref {
+exception exception_terse_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+exception exception_terse_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+exception exception_terse_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+exception exception_terse_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+exception exception_terse_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+exception exception_terse_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+exception exception_terse_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+exception exception_terse_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+exception exception_terse_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+exception exception_terse_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+exception exception_terse_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_terse_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+exception exception_terse_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+exception exception_terse_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+exception exception_terse_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 exception exception_terse_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+exception exception_terse_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+exception exception_terse_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+exception exception_terse_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+exception exception_terse_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+exception exception_terse_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+exception exception_terse_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+exception exception_terse_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+exception exception_terse_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+exception exception_terse_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+exception exception_terse_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+exception exception_terse_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+exception exception_terse_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+exception exception_terse_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+exception exception_terse_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+exception exception_terse_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_terse_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -8347,6 +18532,12 @@ exception exception_terse_map_string_string_cpp_ref {
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+exception exception_terse_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
 exception exception_terse_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -8401,11 +18592,35 @@ exception exception_terse_map_i64_string_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
-exception exception_terse_map_string_set_string_cpp_ref {
+exception exception_terse_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_terse_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+exception exception_terse_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+exception exception_terse_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+exception exception_terse_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 exception exception_terse_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -8413,17 +18628,95 @@ exception exception_terse_map_string_set_i64_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
-exception exception_terse_map_i64_set_string_cpp_ref {
+exception exception_terse_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+exception exception_terse_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+exception exception_terse_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+exception exception_terse_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+exception exception_terse_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_terse_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_terse_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_terse_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_terse_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_terse_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+exception exception_terse_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+exception exception_terse_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+exception exception_terse_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_terse_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+exception exception_terse_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_terse_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -8479,17 +18772,191 @@ exception exception_terse_list_string_shared_cpp_ref {
   @thrift.TerseWrite
   1: list<string> field_1;
 }
-exception exception_terse_set_string_shared_cpp_ref {
+exception exception_terse_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+exception exception_terse_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+exception exception_terse_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+exception exception_terse_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+exception exception_terse_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+exception exception_terse_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+exception exception_terse_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+exception exception_terse_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+exception exception_terse_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+exception exception_terse_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+exception exception_terse_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_terse_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+exception exception_terse_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+exception exception_terse_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+exception exception_terse_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 exception exception_terse_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+exception exception_terse_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+exception exception_terse_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+exception exception_terse_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+exception exception_terse_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+exception exception_terse_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+exception exception_terse_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+exception exception_terse_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+exception exception_terse_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+exception exception_terse_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+exception exception_terse_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+exception exception_terse_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+exception exception_terse_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+exception exception_terse_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+exception exception_terse_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+exception exception_terse_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_terse_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -8545,6 +19012,12 @@ exception exception_terse_map_string_string_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+exception exception_terse_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
 exception exception_terse_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -8599,11 +19072,35 @@ exception exception_terse_map_i64_string_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
-exception exception_terse_map_string_set_string_shared_cpp_ref {
+exception exception_terse_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_terse_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+exception exception_terse_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+exception exception_terse_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+exception exception_terse_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 exception exception_terse_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -8611,17 +19108,95 @@ exception exception_terse_map_string_set_i64_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
-exception exception_terse_map_i64_set_string_shared_cpp_ref {
+exception exception_terse_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+exception exception_terse_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+exception exception_terse_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+exception exception_terse_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+exception exception_terse_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_terse_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_terse_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_terse_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_terse_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_terse_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+exception exception_terse_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+exception exception_terse_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+exception exception_terse_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_terse_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+exception exception_terse_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_terse_bool {
   @thrift.TerseWrite
@@ -8695,13 +19270,129 @@ exception exception_optional_list_string_box {
   @thrift.Box
   1: optional list<string> field_1;
 }
-exception exception_optional_set_string_box {
+exception exception_optional_list_struct_empty_box {
   @thrift.Box
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+exception exception_optional_list_list_bool_box {
+  @thrift.Box
+  1: optional list<list<bool>> field_1;
+}
+exception exception_optional_list_list_byte_box {
+  @thrift.Box
+  1: optional list<list<byte>> field_1;
+}
+exception exception_optional_list_list_i16_box {
+  @thrift.Box
+  1: optional list<list<i16>> field_1;
+}
+exception exception_optional_list_list_i32_box {
+  @thrift.Box
+  1: optional list<list<i32>> field_1;
+}
+exception exception_optional_list_list_i64_box {
+  @thrift.Box
+  1: optional list<list<i64>> field_1;
+}
+exception exception_optional_list_list_float_box {
+  @thrift.Box
+  1: optional list<list<float>> field_1;
+}
+exception exception_optional_list_list_double_box {
+  @thrift.Box
+  1: optional list<list<double>> field_1;
+}
+exception exception_optional_list_list_binary_box {
+  @thrift.Box
+  1: optional list<list<binary>> field_1;
+}
+exception exception_optional_list_list_string_box {
+  @thrift.Box
+  1: optional list<list<string>> field_1;
+}
+exception exception_optional_list_list_struct_empty_box {
+  @thrift.Box
+  1: optional list<list<struct_empty>> field_1;
+}
+exception exception_optional_set_bool_box {
+  @thrift.Box
+  1: optional set<bool> field_1;
+}
+exception exception_optional_set_byte_box {
+  @thrift.Box
+  1: optional set<byte> field_1;
+}
+exception exception_optional_set_i16_box {
+  @thrift.Box
+  1: optional set<i16> field_1;
+}
+exception exception_optional_set_i32_box {
+  @thrift.Box
+  1: optional set<i32> field_1;
 }
 exception exception_optional_set_i64_box {
   @thrift.Box
   1: optional set<i64> field_1;
+}
+exception exception_optional_set_float_box {
+  @thrift.Box
+  1: optional set<float> field_1;
+}
+exception exception_optional_set_double_box {
+  @thrift.Box
+  1: optional set<double> field_1;
+}
+exception exception_optional_set_binary_box {
+  @thrift.Box
+  1: optional set<binary> field_1;
+}
+exception exception_optional_set_string_box {
+  @thrift.Box
+  1: optional set<string> field_1;
+}
+exception exception_optional_set_struct_empty_box {
+  @thrift.Box
+  1: optional set<struct_empty> field_1;
+}
+exception exception_optional_set_set_bool_box {
+  @thrift.Box
+  1: optional set<set<bool>> field_1;
+}
+exception exception_optional_set_set_byte_box {
+  @thrift.Box
+  1: optional set<set<byte>> field_1;
+}
+exception exception_optional_set_set_i16_box {
+  @thrift.Box
+  1: optional set<set<i16>> field_1;
+}
+exception exception_optional_set_set_i32_box {
+  @thrift.Box
+  1: optional set<set<i32>> field_1;
+}
+exception exception_optional_set_set_i64_box {
+  @thrift.Box
+  1: optional set<set<i64>> field_1;
+}
+exception exception_optional_set_set_float_box {
+  @thrift.Box
+  1: optional set<set<float>> field_1;
+}
+exception exception_optional_set_set_double_box {
+  @thrift.Box
+  1: optional set<set<double>> field_1;
+}
+exception exception_optional_set_set_binary_box {
+  @thrift.Box
+  1: optional set<set<binary>> field_1;
+}
+exception exception_optional_set_set_string_box {
+  @thrift.Box
+  1: optional set<set<string>> field_1;
+}
+exception exception_optional_set_set_struct_empty_box {
+  @thrift.Box
+  1: optional set<set<struct_empty>> field_1;
 }
 exception exception_optional_map_string_bool_box {
   @thrift.Box
@@ -8739,6 +19430,10 @@ exception exception_optional_map_string_string_box {
   @thrift.Box
   1: optional map<string, string> field_1;
 }
+exception exception_optional_map_string_struct_empty_box {
+  @thrift.Box
+  1: optional map<string, struct_empty> field_1;
+}
 exception exception_optional_map_i64_bool_box {
   @thrift.Box
   1: optional map<i64, bool> field_1;
@@ -8775,21 +19470,89 @@ exception exception_optional_map_i64_string_box {
   @thrift.Box
   1: optional map<i64, string> field_1;
 }
-exception exception_optional_map_string_set_string_box {
+exception exception_optional_map_i64_struct_empty_box {
   @thrift.Box
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+exception exception_optional_map_string_set_bool_box {
+  @thrift.Box
+  1: optional map<string, set<bool>> field_1;
+}
+exception exception_optional_map_string_set_byte_box {
+  @thrift.Box
+  1: optional map<string, set<byte>> field_1;
+}
+exception exception_optional_map_string_set_i16_box {
+  @thrift.Box
+  1: optional map<string, set<i16>> field_1;
+}
+exception exception_optional_map_string_set_i32_box {
+  @thrift.Box
+  1: optional map<string, set<i32>> field_1;
 }
 exception exception_optional_map_string_set_i64_box {
   @thrift.Box
   1: optional map<string, set<i64>> field_1;
 }
-exception exception_optional_map_i64_set_string_box {
+exception exception_optional_map_string_set_float_box {
   @thrift.Box
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+exception exception_optional_map_string_set_double_box {
+  @thrift.Box
+  1: optional map<string, set<double>> field_1;
+}
+exception exception_optional_map_string_set_binary_box {
+  @thrift.Box
+  1: optional map<string, set<binary>> field_1;
+}
+exception exception_optional_map_string_set_string_box {
+  @thrift.Box
+  1: optional map<string, set<string>> field_1;
+}
+exception exception_optional_map_string_set_struct_empty_box {
+  @thrift.Box
+  1: optional map<string, set<struct_empty>> field_1;
+}
+exception exception_optional_map_i64_set_bool_box {
+  @thrift.Box
+  1: optional map<i64, set<bool>> field_1;
+}
+exception exception_optional_map_i64_set_byte_box {
+  @thrift.Box
+  1: optional map<i64, set<byte>> field_1;
+}
+exception exception_optional_map_i64_set_i16_box {
+  @thrift.Box
+  1: optional map<i64, set<i16>> field_1;
+}
+exception exception_optional_map_i64_set_i32_box {
+  @thrift.Box
+  1: optional map<i64, set<i32>> field_1;
 }
 exception exception_optional_map_i64_set_i64_box {
   @thrift.Box
   1: optional map<i64, set<i64>> field_1;
+}
+exception exception_optional_map_i64_set_float_box {
+  @thrift.Box
+  1: optional map<i64, set<float>> field_1;
+}
+exception exception_optional_map_i64_set_double_box {
+  @thrift.Box
+  1: optional map<i64, set<double>> field_1;
+}
+exception exception_optional_map_i64_set_binary_box {
+  @thrift.Box
+  1: optional map<i64, set<binary>> field_1;
+}
+exception exception_optional_map_i64_set_string_box {
+  @thrift.Box
+  1: optional map<i64, set<string>> field_1;
+}
+exception exception_optional_map_i64_set_struct_empty_box {
+  @thrift.Box
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 exception exception_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -8917,12 +19680,110 @@ exception exception_adapted_list_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_string'}
   1: list<string> field_1;
 }
-exception exception_adapted_set_string {
+exception exception_adapted_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
-  1: set<string> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_struct_empty'}
+  1: list<struct_empty> field_1;
+}
+exception exception_adapted_list_list_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_bool'}
+  1: list<list<bool>> field_1;
+}
+exception exception_adapted_list_list_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_byte'}
+  1: list<list<byte>> field_1;
+}
+exception exception_adapted_list_list_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i16'}
+  1: list<list<i16>> field_1;
+}
+exception exception_adapted_list_list_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i32'}
+  1: list<list<i32>> field_1;
+}
+exception exception_adapted_list_list_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i64'}
+  1: list<list<i64>> field_1;
+}
+exception exception_adapted_list_list_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_float'}
+  1: list<list<float>> field_1;
+}
+exception exception_adapted_list_list_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_double'}
+  1: list<list<double>> field_1;
+}
+exception exception_adapted_list_list_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_binary'}
+  1: list<list<binary>> field_1;
+}
+exception exception_adapted_list_list_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_string'}
+  1: list<list<string>> field_1;
+}
+exception exception_adapted_list_list_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_struct_empty'}
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_adapted_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  1: set<bool> field_1;
+}
+exception exception_adapted_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_byte'}
+  1: set<byte> field_1;
+}
+exception exception_adapted_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i16'}
+  1: set<i16> field_1;
+}
+exception exception_adapted_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i32'}
+  1: set<i32> field_1;
 }
 exception exception_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -8930,6 +19791,111 @@ exception exception_adapted_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
+}
+exception exception_adapted_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  1: set<float> field_1;
+}
+exception exception_adapted_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  1: set<double> field_1;
+}
+exception exception_adapted_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_binary'}
+  1: set<binary> field_1;
+}
+exception exception_adapted_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
+  1: set<string> field_1;
+}
+exception exception_adapted_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  1: set<struct_empty> field_1;
+}
+exception exception_adapted_set_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  1: set<set<bool>> field_1;
+}
+exception exception_adapted_set_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  1: set<set<byte>> field_1;
+}
+exception exception_adapted_set_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  1: set<set<i16>> field_1;
+}
+exception exception_adapted_set_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  1: set<set<i32>> field_1;
+}
+exception exception_adapted_set_set_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  1: set<set<i64>> field_1;
+}
+exception exception_adapted_set_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  1: set<set<float>> field_1;
+}
+exception exception_adapted_set_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  1: set<set<double>> field_1;
+}
+exception exception_adapted_set_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  1: set<set<binary>> field_1;
+}
+exception exception_adapted_set_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  1: set<set<string>> field_1;
+}
+exception exception_adapted_set_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -8994,6 +19960,13 @@ exception exception_adapted_map_string_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_string'}
   1: map<string, string> field_1;
 }
+exception exception_adapted_map_string_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_struct_empty'}
+  1: map<string, struct_empty> field_1;
+}
 exception exception_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -9057,12 +20030,40 @@ exception exception_adapted_map_i64_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_string'}
   1: map<i64, string> field_1;
 }
-exception exception_adapted_map_string_set_string {
+exception exception_adapted_map_i64_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
-  1: map<string, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_struct_empty'}
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_adapted_map_string_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  1: map<string, set<bool>> field_1;
+}
+exception exception_adapted_map_string_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_byte'}
+  1: map<string, set<byte>> field_1;
+}
+exception exception_adapted_map_string_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i16'}
+  1: map<string, set<i16>> field_1;
+}
+exception exception_adapted_map_string_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i32'}
+  1: map<string, set<i32>> field_1;
 }
 exception exception_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -9071,12 +20072,68 @@ exception exception_adapted_map_string_set_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i64'}
   1: map<string, set<i64>> field_1;
 }
-exception exception_adapted_map_i64_set_string {
+exception exception_adapted_map_string_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
-  1: map<i64, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  1: map<string, set<float>> field_1;
+}
+exception exception_adapted_map_string_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  1: map<string, set<double>> field_1;
+}
+exception exception_adapted_map_string_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_binary'}
+  1: map<string, set<binary>> field_1;
+}
+exception exception_adapted_map_string_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
+  1: map<string, set<string>> field_1;
+}
+exception exception_adapted_map_string_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_adapted_map_i64_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_adapted_map_i64_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_byte'}
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_adapted_map_i64_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i16'}
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_adapted_map_i64_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i32'}
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
@@ -9084,6 +20141,41 @@ exception exception_adapted_map_i64_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
+}
+exception exception_adapted_map_i64_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  1: map<i64, set<float>> field_1;
+}
+exception exception_adapted_map_i64_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  1: map<i64, set<double>> field_1;
+}
+exception exception_adapted_map_i64_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_binary'}
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_adapted_map_i64_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
+  1: map<i64, set<string>> field_1;
+}
+exception exception_adapted_map_i64_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_field_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -9211,12 +20303,110 @@ exception exception_field_adapted_list_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<string> field_1;
 }
-exception exception_field_adapted_set_string {
+exception exception_field_adapted_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+exception exception_field_adapted_list_list_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<bool>> field_1;
+}
+exception exception_field_adapted_list_list_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<byte>> field_1;
+}
+exception exception_field_adapted_list_list_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i16>> field_1;
+}
+exception exception_field_adapted_list_list_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i32>> field_1;
+}
+exception exception_field_adapted_list_list_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i64>> field_1;
+}
+exception exception_field_adapted_list_list_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<float>> field_1;
+}
+exception exception_field_adapted_list_list_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<double>> field_1;
+}
+exception exception_field_adapted_list_list_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<binary>> field_1;
+}
+exception exception_field_adapted_list_list_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<string>> field_1;
+}
+exception exception_field_adapted_list_list_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_field_adapted_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<bool> field_1;
+}
+exception exception_field_adapted_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<byte> field_1;
+}
+exception exception_field_adapted_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i16> field_1;
+}
+exception exception_field_adapted_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i32> field_1;
 }
 exception exception_field_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -9224,6 +20414,111 @@ exception exception_field_adapted_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<i64> field_1;
+}
+exception exception_field_adapted_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<float> field_1;
+}
+exception exception_field_adapted_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<double> field_1;
+}
+exception exception_field_adapted_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<binary> field_1;
+}
+exception exception_field_adapted_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<string> field_1;
+}
+exception exception_field_adapted_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<struct_empty> field_1;
+}
+exception exception_field_adapted_set_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<bool>> field_1;
+}
+exception exception_field_adapted_set_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<byte>> field_1;
+}
+exception exception_field_adapted_set_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i16>> field_1;
+}
+exception exception_field_adapted_set_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i32>> field_1;
+}
+exception exception_field_adapted_set_set_i64 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i64>> field_1;
+}
+exception exception_field_adapted_set_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<float>> field_1;
+}
+exception exception_field_adapted_set_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<double>> field_1;
+}
+exception exception_field_adapted_set_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<binary>> field_1;
+}
+exception exception_field_adapted_set_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<string>> field_1;
+}
+exception exception_field_adapted_set_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_field_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -9288,6 +20583,13 @@ exception exception_field_adapted_map_string_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, string> field_1;
 }
+exception exception_field_adapted_map_string_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, struct_empty> field_1;
+}
 exception exception_field_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -9351,12 +20653,40 @@ exception exception_field_adapted_map_i64_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, string> field_1;
 }
-exception exception_field_adapted_map_string_set_string {
+exception exception_field_adapted_map_i64_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_field_adapted_map_string_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<bool>> field_1;
+}
+exception exception_field_adapted_map_string_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<byte>> field_1;
+}
+exception exception_field_adapted_map_string_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i16>> field_1;
+}
+exception exception_field_adapted_map_string_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i32>> field_1;
 }
 exception exception_field_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -9365,12 +20695,68 @@ exception exception_field_adapted_map_string_set_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<i64>> field_1;
 }
-exception exception_field_adapted_map_i64_set_string {
+exception exception_field_adapted_map_string_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+exception exception_field_adapted_map_string_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<double>> field_1;
+}
+exception exception_field_adapted_map_string_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<binary>> field_1;
+}
+exception exception_field_adapted_map_string_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<string>> field_1;
+}
+exception exception_field_adapted_map_string_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_field_adapted_map_i64_set_bool {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_field_adapted_map_i64_set_byte {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_field_adapted_map_i64_set_i16 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_field_adapted_map_i64_set_i32 {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_field_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
@@ -9378,6 +20764,41 @@ exception exception_field_adapted_map_i64_set_i64 {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<i64>> field_1;
+}
+exception exception_field_adapted_map_i64_set_float {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<float>> field_1;
+}
+exception exception_field_adapted_map_i64_set_double {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<double>> field_1;
+}
+exception exception_field_adapted_map_i64_set_binary {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_field_adapted_map_i64_set_string {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<string>> field_1;
+}
+exception exception_field_adapted_map_i64_set_struct_empty {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_list_bool_lazy {
   @cpp.Lazy
@@ -9415,13 +20836,129 @@ exception exception_list_string_lazy {
   @cpp.Lazy
   1: list<string> field_1;
 }
-exception exception_set_string_lazy {
+exception exception_list_struct_empty_lazy {
   @cpp.Lazy
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+exception exception_list_list_bool_lazy {
+  @cpp.Lazy
+  1: list<list<bool>> field_1;
+}
+exception exception_list_list_byte_lazy {
+  @cpp.Lazy
+  1: list<list<byte>> field_1;
+}
+exception exception_list_list_i16_lazy {
+  @cpp.Lazy
+  1: list<list<i16>> field_1;
+}
+exception exception_list_list_i32_lazy {
+  @cpp.Lazy
+  1: list<list<i32>> field_1;
+}
+exception exception_list_list_i64_lazy {
+  @cpp.Lazy
+  1: list<list<i64>> field_1;
+}
+exception exception_list_list_float_lazy {
+  @cpp.Lazy
+  1: list<list<float>> field_1;
+}
+exception exception_list_list_double_lazy {
+  @cpp.Lazy
+  1: list<list<double>> field_1;
+}
+exception exception_list_list_binary_lazy {
+  @cpp.Lazy
+  1: list<list<binary>> field_1;
+}
+exception exception_list_list_string_lazy {
+  @cpp.Lazy
+  1: list<list<string>> field_1;
+}
+exception exception_list_list_struct_empty_lazy {
+  @cpp.Lazy
+  1: list<list<struct_empty>> field_1;
+}
+exception exception_set_bool_lazy {
+  @cpp.Lazy
+  1: set<bool> field_1;
+}
+exception exception_set_byte_lazy {
+  @cpp.Lazy
+  1: set<byte> field_1;
+}
+exception exception_set_i16_lazy {
+  @cpp.Lazy
+  1: set<i16> field_1;
+}
+exception exception_set_i32_lazy {
+  @cpp.Lazy
+  1: set<i32> field_1;
 }
 exception exception_set_i64_lazy {
   @cpp.Lazy
   1: set<i64> field_1;
+}
+exception exception_set_float_lazy {
+  @cpp.Lazy
+  1: set<float> field_1;
+}
+exception exception_set_double_lazy {
+  @cpp.Lazy
+  1: set<double> field_1;
+}
+exception exception_set_binary_lazy {
+  @cpp.Lazy
+  1: set<binary> field_1;
+}
+exception exception_set_string_lazy {
+  @cpp.Lazy
+  1: set<string> field_1;
+}
+exception exception_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: set<struct_empty> field_1;
+}
+exception exception_set_set_bool_lazy {
+  @cpp.Lazy
+  1: set<set<bool>> field_1;
+}
+exception exception_set_set_byte_lazy {
+  @cpp.Lazy
+  1: set<set<byte>> field_1;
+}
+exception exception_set_set_i16_lazy {
+  @cpp.Lazy
+  1: set<set<i16>> field_1;
+}
+exception exception_set_set_i32_lazy {
+  @cpp.Lazy
+  1: set<set<i32>> field_1;
+}
+exception exception_set_set_i64_lazy {
+  @cpp.Lazy
+  1: set<set<i64>> field_1;
+}
+exception exception_set_set_float_lazy {
+  @cpp.Lazy
+  1: set<set<float>> field_1;
+}
+exception exception_set_set_double_lazy {
+  @cpp.Lazy
+  1: set<set<double>> field_1;
+}
+exception exception_set_set_binary_lazy {
+  @cpp.Lazy
+  1: set<set<binary>> field_1;
+}
+exception exception_set_set_string_lazy {
+  @cpp.Lazy
+  1: set<set<string>> field_1;
+}
+exception exception_set_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: set<set<struct_empty>> field_1;
 }
 exception exception_map_string_bool_lazy {
   @cpp.Lazy
@@ -9459,6 +20996,10 @@ exception exception_map_string_string_lazy {
   @cpp.Lazy
   1: map<string, string> field_1;
 }
+exception exception_map_string_struct_empty_lazy {
+  @cpp.Lazy
+  1: map<string, struct_empty> field_1;
+}
 exception exception_map_i64_bool_lazy {
   @cpp.Lazy
   1: map<i64, bool> field_1;
@@ -9495,21 +21036,89 @@ exception exception_map_i64_string_lazy {
   @cpp.Lazy
   1: map<i64, string> field_1;
 }
-exception exception_map_string_set_string_lazy {
+exception exception_map_i64_struct_empty_lazy {
   @cpp.Lazy
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+exception exception_map_string_set_bool_lazy {
+  @cpp.Lazy
+  1: map<string, set<bool>> field_1;
+}
+exception exception_map_string_set_byte_lazy {
+  @cpp.Lazy
+  1: map<string, set<byte>> field_1;
+}
+exception exception_map_string_set_i16_lazy {
+  @cpp.Lazy
+  1: map<string, set<i16>> field_1;
+}
+exception exception_map_string_set_i32_lazy {
+  @cpp.Lazy
+  1: map<string, set<i32>> field_1;
 }
 exception exception_map_string_set_i64_lazy {
   @cpp.Lazy
   1: map<string, set<i64>> field_1;
 }
-exception exception_map_i64_set_string_lazy {
+exception exception_map_string_set_float_lazy {
   @cpp.Lazy
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+exception exception_map_string_set_double_lazy {
+  @cpp.Lazy
+  1: map<string, set<double>> field_1;
+}
+exception exception_map_string_set_binary_lazy {
+  @cpp.Lazy
+  1: map<string, set<binary>> field_1;
+}
+exception exception_map_string_set_string_lazy {
+  @cpp.Lazy
+  1: map<string, set<string>> field_1;
+}
+exception exception_map_string_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: map<string, set<struct_empty>> field_1;
+}
+exception exception_map_i64_set_bool_lazy {
+  @cpp.Lazy
+  1: map<i64, set<bool>> field_1;
+}
+exception exception_map_i64_set_byte_lazy {
+  @cpp.Lazy
+  1: map<i64, set<byte>> field_1;
+}
+exception exception_map_i64_set_i16_lazy {
+  @cpp.Lazy
+  1: map<i64, set<i16>> field_1;
+}
+exception exception_map_i64_set_i32_lazy {
+  @cpp.Lazy
+  1: map<i64, set<i32>> field_1;
 }
 exception exception_map_i64_set_i64_lazy {
   @cpp.Lazy
   1: map<i64, set<i64>> field_1;
+}
+exception exception_map_i64_set_float_lazy {
+  @cpp.Lazy
+  1: map<i64, set<float>> field_1;
+}
+exception exception_map_i64_set_double_lazy {
+  @cpp.Lazy
+  1: map<i64, set<double>> field_1;
+}
+exception exception_map_i64_set_binary_lazy {
+  @cpp.Lazy
+  1: map<i64, set<binary>> field_1;
+}
+exception exception_map_i64_set_string_lazy {
+  @cpp.Lazy
+  1: map<i64, set<string>> field_1;
+}
+exception exception_map_i64_set_struct_empty_lazy {
+  @cpp.Lazy
+  1: map<i64, set<struct_empty>> field_1;
 }
 exception exception_string_lazy {
   @cpp.Lazy
@@ -9555,12 +21164,128 @@ exception exception_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_set_string_op_encoded {
-  1: set<string> field_1;
+exception exception_list_struct_empty_op_encoded {
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_bool_op_encoded {
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_byte_op_encoded {
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i16_op_encoded {
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i32_op_encoded {
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i64_op_encoded {
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_float_op_encoded {
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_double_op_encoded {
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_binary_op_encoded {
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_string_op_encoded {
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_struct_empty_op_encoded {
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_bool_op_encoded {
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_byte_op_encoded {
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i16_op_encoded {
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i32_op_encoded {
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_i64_op_encoded {
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_float_op_encoded {
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_double_op_encoded {
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_binary_op_encoded {
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_string_op_encoded {
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_struct_empty_op_encoded {
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_bool_op_encoded {
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_byte_op_encoded {
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i16_op_encoded {
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i32_op_encoded {
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i64_op_encoded {
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_float_op_encoded {
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_double_op_encoded {
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_binary_op_encoded {
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_string_op_encoded {
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_struct_empty_op_encoded {
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_bool_op_encoded {
@@ -9599,6 +21324,10 @@ exception exception_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_map_string_struct_empty_op_encoded {
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_map_i64_bool_op_encoded {
   1: map<i64, bool> field_1;
 }
@@ -9635,20 +21364,88 @@ exception exception_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_string_set_string_op_encoded {
-  1: map<string, set<string>> field_1;
+exception exception_map_i64_struct_empty_op_encoded {
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_bool_op_encoded {
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_byte_op_encoded {
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i16_op_encoded {
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i32_op_encoded {
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_i64_set_string_op_encoded {
-  1: map<i64, set<string>> field_1;
+exception exception_map_string_set_float_op_encoded {
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_double_op_encoded {
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_binary_op_encoded {
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_string_op_encoded {
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_struct_empty_op_encoded {
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_bool_op_encoded {
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_byte_op_encoded {
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i16_op_encoded {
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i32_op_encoded {
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_i64_op_encoded {
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_float_op_encoded {
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_double_op_encoded {
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_binary_op_encoded {
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_op_encoded {
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_struct_empty_op_encoded {
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_bool_cpp_ref_op_encoded {
@@ -9705,16 +21502,190 @@ exception exception_list_string_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_set_string_cpp_ref_op_encoded {
+exception exception_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_bool_cpp_ref_op_encoded {
@@ -9771,6 +21742,12 @@ exception exception_map_string_string_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -9825,10 +21802,34 @@ exception exception_map_i64_string_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_string_set_string_cpp_ref_op_encoded {
+exception exception_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_i64_cpp_ref_op_encoded {
@@ -9837,16 +21838,94 @@ exception exception_map_string_set_i64_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_i64_set_string_cpp_ref_op_encoded {
+exception exception_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_bool_shared_cpp_ref_op_encoded {
@@ -9903,16 +21982,190 @@ exception exception_list_string_shared_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_set_string_shared_cpp_ref_op_encoded {
+exception exception_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_bool_shared_cpp_ref_op_encoded {
@@ -9969,6 +22222,12 @@ exception exception_map_string_string_shared_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -10023,10 +22282,34 @@ exception exception_map_i64_string_shared_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_string_set_string_shared_cpp_ref_op_encoded {
+exception exception_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -10035,16 +22318,94 @@ exception exception_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_i64_set_string_shared_cpp_ref_op_encoded {
+exception exception_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_bool_op_encoded {
@@ -10191,12 +22552,128 @@ exception exception_optional_list_string_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_set_string_op_encoded {
-  1: optional set<string> field_1;
+exception exception_optional_list_struct_empty_op_encoded {
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_bool_op_encoded {
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_byte_op_encoded {
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i16_op_encoded {
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i32_op_encoded {
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i64_op_encoded {
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_float_op_encoded {
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_double_op_encoded {
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_binary_op_encoded {
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_string_op_encoded {
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_struct_empty_op_encoded {
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_bool_op_encoded {
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_byte_op_encoded {
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i16_op_encoded {
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i32_op_encoded {
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_i64_op_encoded {
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_float_op_encoded {
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_double_op_encoded {
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_binary_op_encoded {
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_string_op_encoded {
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_struct_empty_op_encoded {
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_bool_op_encoded {
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_byte_op_encoded {
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i16_op_encoded {
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i32_op_encoded {
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i64_op_encoded {
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_float_op_encoded {
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_double_op_encoded {
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_binary_op_encoded {
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_string_op_encoded {
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_struct_empty_op_encoded {
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_bool_op_encoded {
@@ -10235,6 +22712,10 @@ exception exception_optional_map_string_string_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_optional_map_string_struct_empty_op_encoded {
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_optional_map_i64_bool_op_encoded {
   1: optional map<i64, bool> field_1;
 }
@@ -10271,20 +22752,88 @@ exception exception_optional_map_i64_string_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_string_set_string_op_encoded {
-  1: optional map<string, set<string>> field_1;
+exception exception_optional_map_i64_struct_empty_op_encoded {
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_bool_op_encoded {
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_byte_op_encoded {
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i16_op_encoded {
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i32_op_encoded {
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_i64_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_i64_set_string_op_encoded {
-  1: optional map<i64, set<string>> field_1;
+exception exception_optional_map_string_set_float_op_encoded {
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_double_op_encoded {
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_binary_op_encoded {
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_op_encoded {
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_struct_empty_op_encoded {
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_bool_op_encoded {
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_byte_op_encoded {
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i16_op_encoded {
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i32_op_encoded {
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_i64_op_encoded {
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_float_op_encoded {
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_double_op_encoded {
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_binary_op_encoded {
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_op_encoded {
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_struct_empty_op_encoded {
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_bool_cpp_ref_op_encoded {
@@ -10341,16 +22890,190 @@ exception exception_optional_list_string_cpp_ref_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_set_string_cpp_ref_op_encoded {
+exception exception_optional_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_bool_cpp_ref_op_encoded {
@@ -10407,6 +23130,12 @@ exception exception_optional_map_string_string_cpp_ref_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_optional_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_optional_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -10461,10 +23190,34 @@ exception exception_optional_map_i64_string_cpp_ref_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_string_set_string_cpp_ref_op_encoded {
+exception exception_optional_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_i64_cpp_ref_op_encoded {
@@ -10473,16 +23226,94 @@ exception exception_optional_map_string_set_i64_cpp_ref_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_i64_set_string_cpp_ref_op_encoded {
+exception exception_optional_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_bool_shared_cpp_ref_op_encoded {
@@ -10539,16 +23370,190 @@ exception exception_optional_list_string_shared_cpp_ref_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_set_string_shared_cpp_ref_op_encoded {
+exception exception_optional_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_bool_shared_cpp_ref_op_encoded {
@@ -10605,6 +23610,12 @@ exception exception_optional_map_string_string_shared_cpp_ref_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_optional_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_optional_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -10659,10 +23670,34 @@ exception exception_optional_map_i64_string_shared_cpp_ref_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_string_set_string_shared_cpp_ref_op_encoded {
+exception exception_optional_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -10671,16 +23706,94 @@ exception exception_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
+exception exception_optional_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_bool_op_encoded {
@@ -10827,12 +23940,128 @@ exception exception_required_list_string_op_encoded {
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_set_string_op_encoded {
-  1: required set<string> field_1;
+exception exception_required_list_struct_empty_op_encoded {
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_bool_op_encoded {
+  1: required list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_byte_op_encoded {
+  1: required list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i16_op_encoded {
+  1: required list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i32_op_encoded {
+  1: required list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i64_op_encoded {
+  1: required list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_float_op_encoded {
+  1: required list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_double_op_encoded {
+  1: required list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_binary_op_encoded {
+  1: required list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_string_op_encoded {
+  1: required list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_struct_empty_op_encoded {
+  1: required list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_bool_op_encoded {
+  1: required set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_byte_op_encoded {
+  1: required set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_i16_op_encoded {
+  1: required set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_i32_op_encoded {
+  1: required set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_i64_op_encoded {
   1: required set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_float_op_encoded {
+  1: required set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_double_op_encoded {
+  1: required set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_binary_op_encoded {
+  1: required set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_string_op_encoded {
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_struct_empty_op_encoded {
+  1: required set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_bool_op_encoded {
+  1: required set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_byte_op_encoded {
+  1: required set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i16_op_encoded {
+  1: required set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i32_op_encoded {
+  1: required set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i64_op_encoded {
+  1: required set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_float_op_encoded {
+  1: required set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_double_op_encoded {
+  1: required set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_binary_op_encoded {
+  1: required set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_string_op_encoded {
+  1: required set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_struct_empty_op_encoded {
+  1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_bool_op_encoded {
@@ -10871,6 +24100,10 @@ exception exception_required_map_string_string_op_encoded {
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_required_map_string_struct_empty_op_encoded {
+  1: required map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_required_map_i64_bool_op_encoded {
   1: required map<i64, bool> field_1;
 }
@@ -10907,20 +24140,88 @@ exception exception_required_map_i64_string_op_encoded {
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_map_string_set_string_op_encoded {
-  1: required map<string, set<string>> field_1;
+exception exception_required_map_i64_struct_empty_op_encoded {
+  1: required map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_bool_op_encoded {
+  1: required map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_byte_op_encoded {
+  1: required map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i16_op_encoded {
+  1: required map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i32_op_encoded {
+  1: required map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_i64_op_encoded {
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_map_i64_set_string_op_encoded {
-  1: required map<i64, set<string>> field_1;
+exception exception_required_map_string_set_float_op_encoded {
+  1: required map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_double_op_encoded {
+  1: required map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_binary_op_encoded {
+  1: required map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_string_op_encoded {
+  1: required map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_struct_empty_op_encoded {
+  1: required map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_bool_op_encoded {
+  1: required map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_byte_op_encoded {
+  1: required map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i16_op_encoded {
+  1: required map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i32_op_encoded {
+  1: required map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_i64_op_encoded {
   1: required map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_float_op_encoded {
+  1: required map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_double_op_encoded {
+  1: required map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_binary_op_encoded {
+  1: required map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_string_op_encoded {
+  1: required map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_struct_empty_op_encoded {
+  1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_bool_cpp_ref_op_encoded {
@@ -10977,16 +24278,190 @@ exception exception_required_list_string_cpp_ref_op_encoded {
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_set_string_cpp_ref_op_encoded {
+exception exception_required_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_bool_cpp_ref_op_encoded {
@@ -11043,6 +24518,12 @@ exception exception_required_map_string_string_cpp_ref_op_encoded {
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_required_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_required_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -11097,10 +24578,34 @@ exception exception_required_map_i64_string_cpp_ref_op_encoded {
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_map_string_set_string_cpp_ref_op_encoded {
+exception exception_required_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_i64_cpp_ref_op_encoded {
@@ -11109,16 +24614,94 @@ exception exception_required_map_string_set_i64_cpp_ref_op_encoded {
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_map_i64_set_string_cpp_ref_op_encoded {
+exception exception_required_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_bool_shared_cpp_ref_op_encoded {
@@ -11175,16 +24758,190 @@ exception exception_required_list_string_shared_cpp_ref_op_encoded {
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_set_string_shared_cpp_ref_op_encoded {
+exception exception_required_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required set<string> field_1;
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_bool_shared_cpp_ref_op_encoded {
@@ -11241,6 +24998,12 @@ exception exception_required_map_string_string_shared_cpp_ref_op_encoded {
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_required_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_required_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -11295,10 +25058,34 @@ exception exception_required_map_i64_string_shared_cpp_ref_op_encoded {
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_map_string_set_string_shared_cpp_ref_op_encoded {
+exception exception_required_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<string, set<string>> field_1;
+  1: required map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -11307,16 +25094,94 @@ exception exception_required_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_required_map_i64_set_string_shared_cpp_ref_op_encoded {
+exception exception_required_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: required map<i64, set<string>> field_1;
+  1: required map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_bool_op_encoded {
@@ -11472,14 +25337,159 @@ exception exception_terse_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_set_string_op_encoded {
+exception exception_terse_list_struct_empty_op_encoded {
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_bool_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_byte_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i16_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i32_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i64_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_float_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_double_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_binary_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_string_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_i64_op_encoded {
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_float_op_encoded {
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_float_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_bool_op_encoded {
@@ -11527,6 +25537,11 @@ exception exception_terse_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_terse_map_string_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_terse_map_i64_bool_op_encoded {
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
@@ -11572,9 +25587,29 @@ exception exception_terse_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_map_string_set_string_op_encoded {
+exception exception_terse_map_i64_struct_empty_op_encoded {
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_i64_op_encoded {
@@ -11582,14 +25617,79 @@ exception exception_terse_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_map_i64_set_string_op_encoded {
+exception exception_terse_map_string_set_float_op_encoded {
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_i64_op_encoded {
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_float_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_struct_empty_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_bool_cpp_ref_op_encoded {
@@ -11655,11 +25755,109 @@ exception exception_terse_list_string_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_set_string_cpp_ref_op_encoded {
+exception exception_terse_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_i64_cpp_ref_op_encoded {
@@ -11667,6 +25865,111 @@ exception exception_terse_set_i64_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_bool_cpp_ref_op_encoded {
@@ -11732,6 +26035,13 @@ exception exception_terse_map_string_string_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_terse_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_terse_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -11795,11 +26105,39 @@ exception exception_terse_map_i64_string_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_map_string_set_string_cpp_ref_op_encoded {
+exception exception_terse_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_i64_cpp_ref_op_encoded {
@@ -11809,11 +26147,67 @@ exception exception_terse_map_string_set_i64_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_map_i64_set_string_cpp_ref_op_encoded {
+exception exception_terse_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_i64_cpp_ref_op_encoded {
@@ -11821,6 +26215,41 @@ exception exception_terse_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_bool_shared_cpp_ref_op_encoded {
@@ -11886,11 +26315,109 @@ exception exception_terse_list_string_shared_cpp_ref_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_set_string_shared_cpp_ref_op_encoded {
+exception exception_terse_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_i64_shared_cpp_ref_op_encoded {
@@ -11898,6 +26425,111 @@ exception exception_terse_set_i64_shared_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_bool_shared_cpp_ref_op_encoded {
@@ -11963,6 +26595,13 @@ exception exception_terse_map_string_string_shared_cpp_ref_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_terse_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_terse_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -12026,11 +26665,39 @@ exception exception_terse_map_i64_string_shared_cpp_ref_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_map_string_set_string_shared_cpp_ref_op_encoded {
+exception exception_terse_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -12040,11 +26707,67 @@ exception exception_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
+exception exception_terse_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
@@ -12052,6 +26775,41 @@ exception exception_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_bool_op_encoded {
@@ -12144,14 +26902,159 @@ exception exception_optional_list_string_box_op_encoded {
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_set_string_box_op_encoded {
+exception exception_optional_list_struct_empty_box_op_encoded {
   @thrift.Box
-  1: optional set<string> field_1;
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_bool_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_byte_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i16_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i32_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_i64_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_float_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_double_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_binary_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_string_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_list_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_i64_box_op_encoded {
   @thrift.Box
   1: optional set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_float_box_op_encoded {
+  @thrift.Box
+  1: optional set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_float_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_bool_box_op_encoded {
@@ -12199,6 +27102,11 @@ exception exception_optional_map_string_string_box_op_encoded {
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_optional_map_string_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_optional_map_i64_bool_box_op_encoded {
   @thrift.Box
   1: optional map<i64, bool> field_1;
@@ -12244,9 +27152,29 @@ exception exception_optional_map_i64_string_box_op_encoded {
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_string_set_string_box_op_encoded {
+exception exception_optional_map_i64_struct_empty_box_op_encoded {
   @thrift.Box
-  1: optional map<string, set<string>> field_1;
+  1: optional map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_i64_box_op_encoded {
@@ -12254,14 +27182,79 @@ exception exception_optional_map_string_set_i64_box_op_encoded {
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_optional_map_i64_set_string_box_op_encoded {
+exception exception_optional_map_string_set_float_box_op_encoded {
   @thrift.Box
-  1: optional map<i64, set<string>> field_1;
+  1: optional map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_i64_box_op_encoded {
   @thrift.Box
   1: optional map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_float_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_struct_empty_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_adapted_bool_op_encoded {
@@ -12408,12 +27401,124 @@ exception exception_adapted_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_adapted_set_string_op_encoded {
+exception exception_adapted_list_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
-  1: set<string> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_struct_empty'}
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_bool'}
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_byte'}
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i16'}
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i32'}
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i64'}
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_float'}
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_double'}
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_binary'}
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_string'}
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_list_list_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_list_struct_empty'}
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_bool'}
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_byte'}
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i16'}
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i32'}
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_adapted_set_i64_op_encoded {
@@ -12422,6 +27527,126 @@ exception exception_adapted_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_float'}
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_double'}
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_binary'}
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_struct_empty'}
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_bool'}
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_byte'}
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i16'}
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i32'}
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_i64'}
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_float'}
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_double'}
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_binary'}
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_string'}
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_set_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_set_struct_empty'}
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_adapted_map_string_bool_op_encoded {
@@ -12496,6 +27721,14 @@ exception exception_adapted_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_adapted_map_string_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_struct_empty'}
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_adapted_map_i64_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -12568,12 +27801,44 @@ exception exception_adapted_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_adapted_map_string_set_string_op_encoded {
+exception exception_adapted_map_i64_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
-  1: map<string, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_struct_empty'}
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_bool'}
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_byte'}
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i16'}
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i32'}
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_adapted_map_string_set_i64_op_encoded {
@@ -12584,12 +27849,76 @@ exception exception_adapted_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_adapted_map_i64_set_string_op_encoded {
+exception exception_adapted_map_string_set_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
-  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
-  1: map<i64, set<string>> field_1;
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_float'}
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_double'}
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_binary'}
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_struct_empty'}
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_bool'}
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_byte'}
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i16'}
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i32'}
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_adapted_map_i64_set_i64_op_encoded {
@@ -12598,6 +27927,46 @@ exception exception_adapted_map_i64_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_float'}
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_double'}
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_binary'}
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_struct_empty'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_field_adapted_bool_op_encoded {
@@ -12744,12 +28113,124 @@ exception exception_field_adapted_list_string_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_field_adapted_set_string_op_encoded {
+exception exception_field_adapted_list_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_list_list_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_field_adapted_set_i64_op_encoded {
@@ -12758,6 +28239,126 @@ exception exception_field_adapted_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_set_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_field_adapted_map_string_bool_op_encoded {
@@ -12832,6 +28433,14 @@ exception exception_field_adapted_map_string_string_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_field_adapted_map_string_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_field_adapted_map_i64_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -12904,12 +28513,44 @@ exception exception_field_adapted_map_i64_string_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_field_adapted_map_string_set_string_op_encoded {
+exception exception_field_adapted_map_i64_struct_empty_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_field_adapted_map_string_set_i64_op_encoded {
@@ -12920,12 +28561,76 @@ exception exception_field_adapted_map_string_set_i64_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_field_adapted_map_i64_set_string_op_encoded {
+exception exception_field_adapted_map_string_set_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_string_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_field_adapted_map_i64_set_i64_op_encoded {
@@ -12934,6 +28639,46 @@ exception exception_field_adapted_map_i64_set_i64_op_encoded {
   @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_field_adapted_map_i64_set_struct_empty_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
+  @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
+  @python.Adapter{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_bool_lazy_op_encoded {
@@ -12981,14 +28726,159 @@ exception exception_list_string_lazy_op_encoded {
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_set_string_lazy_op_encoded {
+exception exception_list_struct_empty_lazy_op_encoded {
   @cpp.Lazy
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_list_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<list<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<byte> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<i16> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_i64_lazy_op_encoded {
   @cpp.Lazy
   1: set<i64> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<float> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<double> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<binary> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<i32>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_bool_lazy_op_encoded {
@@ -13036,6 +28926,11 @@ exception exception_map_string_string_lazy_op_encoded {
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
+exception exception_map_string_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, struct_empty> field_1;
+}
+@cpp.UseOpEncode
 exception exception_map_i64_bool_lazy_op_encoded {
   @cpp.Lazy
   1: map<i64, bool> field_1;
@@ -13081,9 +28976,29 @@ exception exception_map_i64_string_lazy_op_encoded {
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_string_set_string_lazy_op_encoded {
+exception exception_map_i64_struct_empty_lazy_op_encoded {
   @cpp.Lazy
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_i64_lazy_op_encoded {
@@ -13091,14 +29006,79 @@ exception exception_map_string_set_i64_lazy_op_encoded {
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
-exception exception_map_i64_set_string_lazy_op_encoded {
+exception exception_map_string_set_float_lazy_op_encoded {
   @cpp.Lazy
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_string_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<bool>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<byte>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<i16>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<i32>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_i64_lazy_op_encoded {
   @cpp.Lazy
   1: map<i64, set<i64>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<float>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<double>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<binary>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<string>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_set_struct_empty_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_string_lazy_op_encoded {
@@ -14042,13 +30022,129 @@ union union_list_string {
   1: list<string> field_1;
   2: list<string> field_2;
 }
-union union_set_string {
-  1: set<string> field_1;
-  2: set<string> field_2;
+union union_list_struct_empty {
+  1: list<struct_empty> field_1;
+  2: list<struct_empty> field_2;
+}
+union union_list_list_bool {
+  1: list<list<bool>> field_1;
+  2: list<list<bool>> field_2;
+}
+union union_list_list_byte {
+  1: list<list<byte>> field_1;
+  2: list<list<byte>> field_2;
+}
+union union_list_list_i16 {
+  1: list<list<i16>> field_1;
+  2: list<list<i16>> field_2;
+}
+union union_list_list_i32 {
+  1: list<list<i32>> field_1;
+  2: list<list<i32>> field_2;
+}
+union union_list_list_i64 {
+  1: list<list<i64>> field_1;
+  2: list<list<i64>> field_2;
+}
+union union_list_list_float {
+  1: list<list<float>> field_1;
+  2: list<list<float>> field_2;
+}
+union union_list_list_double {
+  1: list<list<double>> field_1;
+  2: list<list<double>> field_2;
+}
+union union_list_list_binary {
+  1: list<list<binary>> field_1;
+  2: list<list<binary>> field_2;
+}
+union union_list_list_string {
+  1: list<list<string>> field_1;
+  2: list<list<string>> field_2;
+}
+union union_list_list_struct_empty {
+  1: list<list<struct_empty>> field_1;
+  2: list<list<struct_empty>> field_2;
+}
+union union_set_bool {
+  1: set<bool> field_1;
+  2: set<bool> field_2;
+}
+union union_set_byte {
+  1: set<byte> field_1;
+  2: set<byte> field_2;
+}
+union union_set_i16 {
+  1: set<i16> field_1;
+  2: set<i16> field_2;
+}
+union union_set_i32 {
+  1: set<i32> field_1;
+  2: set<i32> field_2;
 }
 union union_set_i64 {
   1: set<i64> field_1;
   2: set<i64> field_2;
+}
+union union_set_float {
+  1: set<float> field_1;
+  2: set<float> field_2;
+}
+union union_set_double {
+  1: set<double> field_1;
+  2: set<double> field_2;
+}
+union union_set_binary {
+  1: set<binary> field_1;
+  2: set<binary> field_2;
+}
+union union_set_string {
+  1: set<string> field_1;
+  2: set<string> field_2;
+}
+union union_set_struct_empty {
+  1: set<struct_empty> field_1;
+  2: set<struct_empty> field_2;
+}
+union union_set_set_bool {
+  1: set<set<bool>> field_1;
+  2: set<set<bool>> field_2;
+}
+union union_set_set_byte {
+  1: set<set<byte>> field_1;
+  2: set<set<byte>> field_2;
+}
+union union_set_set_i16 {
+  1: set<set<i16>> field_1;
+  2: set<set<i16>> field_2;
+}
+union union_set_set_i32 {
+  1: set<set<i32>> field_1;
+  2: set<set<i32>> field_2;
+}
+union union_set_set_i64 {
+  1: set<set<i64>> field_1;
+  2: set<set<i64>> field_2;
+}
+union union_set_set_float {
+  1: set<set<float>> field_1;
+  2: set<set<float>> field_2;
+}
+union union_set_set_double {
+  1: set<set<double>> field_1;
+  2: set<set<double>> field_2;
+}
+union union_set_set_binary {
+  1: set<set<binary>> field_1;
+  2: set<set<binary>> field_2;
+}
+union union_set_set_string {
+  1: set<set<string>> field_1;
+  2: set<set<string>> field_2;
+}
+union union_set_set_struct_empty {
+  1: set<set<struct_empty>> field_1;
+  2: set<set<struct_empty>> field_2;
 }
 union union_map_string_bool {
   1: map<string, bool> field_1;
@@ -14086,6 +30182,10 @@ union union_map_string_string {
   1: map<string, string> field_1;
   2: map<string, string> field_2;
 }
+union union_map_string_struct_empty {
+  1: map<string, struct_empty> field_1;
+  2: map<string, struct_empty> field_2;
+}
 union union_map_i64_bool {
   1: map<i64, bool> field_1;
   2: map<i64, bool> field_2;
@@ -14122,21 +30222,89 @@ union union_map_i64_string {
   1: map<i64, string> field_1;
   2: map<i64, string> field_2;
 }
-union union_map_string_set_string {
-  1: map<string, set<string>> field_1;
-  2: map<string, set<string>> field_2;
+union union_map_i64_struct_empty {
+  1: map<i64, struct_empty> field_1;
+  2: map<i64, struct_empty> field_2;
+}
+union union_map_string_set_bool {
+  1: map<string, set<bool>> field_1;
+  2: map<string, set<bool>> field_2;
+}
+union union_map_string_set_byte {
+  1: map<string, set<byte>> field_1;
+  2: map<string, set<byte>> field_2;
+}
+union union_map_string_set_i16 {
+  1: map<string, set<i16>> field_1;
+  2: map<string, set<i16>> field_2;
+}
+union union_map_string_set_i32 {
+  1: map<string, set<i32>> field_1;
+  2: map<string, set<i32>> field_2;
 }
 union union_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
   2: map<string, set<i64>> field_2;
 }
-union union_map_i64_set_string {
-  1: map<i64, set<string>> field_1;
-  2: map<i64, set<string>> field_2;
+union union_map_string_set_float {
+  1: map<string, set<float>> field_1;
+  2: map<string, set<float>> field_2;
+}
+union union_map_string_set_double {
+  1: map<string, set<double>> field_1;
+  2: map<string, set<double>> field_2;
+}
+union union_map_string_set_binary {
+  1: map<string, set<binary>> field_1;
+  2: map<string, set<binary>> field_2;
+}
+union union_map_string_set_string {
+  1: map<string, set<string>> field_1;
+  2: map<string, set<string>> field_2;
+}
+union union_map_string_set_struct_empty {
+  1: map<string, set<struct_empty>> field_1;
+  2: map<string, set<struct_empty>> field_2;
+}
+union union_map_i64_set_bool {
+  1: map<i64, set<bool>> field_1;
+  2: map<i64, set<bool>> field_2;
+}
+union union_map_i64_set_byte {
+  1: map<i64, set<byte>> field_1;
+  2: map<i64, set<byte>> field_2;
+}
+union union_map_i64_set_i16 {
+  1: map<i64, set<i16>> field_1;
+  2: map<i64, set<i16>> field_2;
+}
+union union_map_i64_set_i32 {
+  1: map<i64, set<i32>> field_1;
+  2: map<i64, set<i32>> field_2;
 }
 union union_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
   2: map<i64, set<i64>> field_2;
+}
+union union_map_i64_set_float {
+  1: map<i64, set<float>> field_1;
+  2: map<i64, set<float>> field_2;
+}
+union union_map_i64_set_double {
+  1: map<i64, set<double>> field_1;
+  2: map<i64, set<double>> field_2;
+}
+union union_map_i64_set_binary {
+  1: map<i64, set<binary>> field_1;
+  2: map<i64, set<binary>> field_2;
+}
+union union_map_i64_set_string {
+  1: map<i64, set<string>> field_1;
+  2: map<i64, set<string>> field_2;
+}
+union union_map_i64_set_struct_empty {
+  1: map<i64, set<struct_empty>> field_1;
+  2: map<i64, set<struct_empty>> field_2;
 }
 union union_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -14210,13 +30378,125 @@ union union_list_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: list<string> field_2;
 }
-union union_set_string_cpp_ref {
+union union_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  2: set<string> field_2;
+  2: list<struct_empty> field_2;
+}
+union union_list_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<bool>> field_2;
+}
+union union_list_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<byte>> field_2;
+}
+union union_list_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i16>> field_2;
+}
+union union_list_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i32>> field_2;
+}
+union union_list_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i64>> field_2;
+}
+union union_list_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<float>> field_2;
+}
+union union_list_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<double>> field_2;
+}
+union union_list_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<binary>> field_2;
+}
+union union_list_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<string>> field_2;
+}
+union union_list_list_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<struct_empty>> field_2;
+}
+union union_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<bool> field_2;
+}
+union union_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<byte> field_2;
+}
+union union_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i16> field_2;
+}
+union union_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i32> field_2;
 }
 union union_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -14225,6 +30505,126 @@ union union_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
+}
+union union_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<float> field_2;
+}
+union union_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<double> field_2;
+}
+union union_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<binary> field_2;
+}
+union union_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<string> field_2;
+}
+union union_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<struct_empty> field_2;
+}
+union union_set_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<bool>> field_2;
+}
+union union_set_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<byte>> field_2;
+}
+union union_set_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i16>> field_2;
+}
+union union_set_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i32>> field_2;
+}
+union union_set_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i64>> field_2;
+}
+union union_set_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<float>> field_2;
+}
+union union_set_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<double>> field_2;
+}
+union union_set_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<binary>> field_2;
+}
+union union_set_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<string>> field_2;
+}
+union union_set_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<struct_empty>> field_2;
 }
 union union_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -14298,6 +30698,14 @@ union union_map_string_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: map<string, string> field_2;
 }
+union union_map_string_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, struct_empty> field_2;
+}
 union union_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -14370,13 +30778,45 @@ union union_map_i64_string_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: map<i64, string> field_2;
 }
-union union_map_string_set_string_cpp_ref {
+union union_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<string, set<string>> field_2;
+  2: map<i64, struct_empty> field_2;
+}
+union union_map_string_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<bool>> field_2;
+}
+union union_map_string_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<byte>> field_2;
+}
+union union_map_string_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i16>> field_2;
+}
+union union_map_string_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i32>> field_2;
 }
 union union_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -14386,13 +30826,77 @@ union union_map_string_set_i64_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<i64>> field_2;
 }
-union union_map_i64_set_string_cpp_ref {
+union union_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<i64, set<string>> field_2;
+  2: map<string, set<float>> field_2;
+}
+union union_map_string_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<double>> field_2;
+}
+union union_map_string_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<binary>> field_2;
+}
+union union_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<string>> field_2;
+}
+union union_map_string_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<struct_empty>> field_2;
+}
+union union_map_i64_set_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<bool>> field_2;
+}
+union union_map_i64_set_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<byte>> field_2;
+}
+union union_map_i64_set_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i16>> field_2;
+}
+union union_map_i64_set_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i32>> field_2;
 }
 union union_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -14401,6 +30905,46 @@ union union_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
+}
+union union_map_i64_set_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<float>> field_2;
+}
+union union_map_i64_set_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<double>> field_2;
+}
+union union_map_i64_set_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<binary>> field_2;
+}
+union union_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<string>> field_2;
+}
+union union_map_i64_set_struct_empty_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<struct_empty>> field_2;
 }
 union union_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -14474,13 +31018,125 @@ union union_list_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: list<string> field_2;
 }
-union union_set_string_shared_cpp_ref {
+union union_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  2: set<string> field_2;
+  2: list<struct_empty> field_2;
+}
+union union_list_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<bool>> field_2;
+}
+union union_list_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<byte>> field_2;
+}
+union union_list_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i16>> field_2;
+}
+union union_list_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i32>> field_2;
+}
+union union_list_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i64>> field_2;
+}
+union union_list_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<float>> field_2;
+}
+union union_list_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<double>> field_2;
+}
+union union_list_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<binary>> field_2;
+}
+union union_list_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<string>> field_2;
+}
+union union_list_list_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<struct_empty>> field_2;
+}
+union union_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<bool> field_2;
+}
+union union_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<byte> field_2;
+}
+union union_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i16> field_2;
+}
+union union_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i32> field_2;
 }
 union union_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -14489,6 +31145,126 @@ union union_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
+}
+union union_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<float> field_2;
+}
+union union_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<double> field_2;
+}
+union union_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<binary> field_2;
+}
+union union_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<string> field_2;
+}
+union union_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<struct_empty> field_2;
+}
+union union_set_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<bool>> field_2;
+}
+union union_set_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<byte>> field_2;
+}
+union union_set_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i16>> field_2;
+}
+union union_set_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i32>> field_2;
+}
+union union_set_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i64>> field_2;
+}
+union union_set_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<float>> field_2;
+}
+union union_set_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<double>> field_2;
+}
+union union_set_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<binary>> field_2;
+}
+union union_set_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<string>> field_2;
+}
+union union_set_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<struct_empty>> field_2;
 }
 union union_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -14562,6 +31338,14 @@ union union_map_string_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: map<string, string> field_2;
 }
+union union_map_string_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, struct_empty> field_2;
+}
 union union_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -14634,13 +31418,45 @@ union union_map_i64_string_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: map<i64, string> field_2;
 }
-union union_map_string_set_string_shared_cpp_ref {
+union union_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<string, set<string>> field_2;
+  2: map<i64, struct_empty> field_2;
+}
+union union_map_string_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<bool>> field_2;
+}
+union union_map_string_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<byte>> field_2;
+}
+union union_map_string_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i16>> field_2;
+}
+union union_map_string_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i32>> field_2;
 }
 union union_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -14650,13 +31466,77 @@ union union_map_string_set_i64_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<i64>> field_2;
 }
-union union_map_i64_set_string_shared_cpp_ref {
+union union_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<i64, set<string>> field_2;
+  2: map<string, set<float>> field_2;
+}
+union union_map_string_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<double>> field_2;
+}
+union union_map_string_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<binary>> field_2;
+}
+union union_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<string>> field_2;
+}
+union union_map_string_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<struct_empty>> field_2;
+}
+union union_map_i64_set_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<bool>> field_2;
+}
+union union_map_i64_set_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<byte>> field_2;
+}
+union union_map_i64_set_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i16>> field_2;
+}
+union union_map_i64_set_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i32>> field_2;
 }
 union union_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
@@ -14665,6 +31545,46 @@ union union_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
+}
+union union_map_i64_set_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<float>> field_2;
+}
+union union_map_i64_set_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<double>> field_2;
+}
+union union_map_i64_set_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<binary>> field_2;
+}
+union union_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<string>> field_2;
+}
+union union_map_i64_set_struct_empty_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<struct_empty>> field_2;
 }
 union union_bool {
   1: bool field_1;
@@ -14751,14 +31671,159 @@ union union_list_string_op_encoded {
   2: list<string> field_2;
 }
 @cpp.UseOpEncode
-union union_set_string_op_encoded {
-  1: set<string> field_1;
-  2: set<string> field_2;
+union union_list_struct_empty_op_encoded {
+  1: list<struct_empty> field_1;
+  2: list<struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_bool_op_encoded {
+  1: list<list<bool>> field_1;
+  2: list<list<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_byte_op_encoded {
+  1: list<list<byte>> field_1;
+  2: list<list<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i16_op_encoded {
+  1: list<list<i16>> field_1;
+  2: list<list<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i32_op_encoded {
+  1: list<list<i32>> field_1;
+  2: list<list<i32>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i64_op_encoded {
+  1: list<list<i64>> field_1;
+  2: list<list<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_float_op_encoded {
+  1: list<list<float>> field_1;
+  2: list<list<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_double_op_encoded {
+  1: list<list<double>> field_1;
+  2: list<list<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_binary_op_encoded {
+  1: list<list<binary>> field_1;
+  2: list<list<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_string_op_encoded {
+  1: list<list<string>> field_1;
+  2: list<list<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_struct_empty_op_encoded {
+  1: list<list<struct_empty>> field_1;
+  2: list<list<struct_empty>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_bool_op_encoded {
+  1: set<bool> field_1;
+  2: set<bool> field_2;
+}
+@cpp.UseOpEncode
+union union_set_byte_op_encoded {
+  1: set<byte> field_1;
+  2: set<byte> field_2;
+}
+@cpp.UseOpEncode
+union union_set_i16_op_encoded {
+  1: set<i16> field_1;
+  2: set<i16> field_2;
+}
+@cpp.UseOpEncode
+union union_set_i32_op_encoded {
+  1: set<i32> field_1;
+  2: set<i32> field_2;
 }
 @cpp.UseOpEncode
 union union_set_i64_op_encoded {
   1: set<i64> field_1;
   2: set<i64> field_2;
+}
+@cpp.UseOpEncode
+union union_set_float_op_encoded {
+  1: set<float> field_1;
+  2: set<float> field_2;
+}
+@cpp.UseOpEncode
+union union_set_double_op_encoded {
+  1: set<double> field_1;
+  2: set<double> field_2;
+}
+@cpp.UseOpEncode
+union union_set_binary_op_encoded {
+  1: set<binary> field_1;
+  2: set<binary> field_2;
+}
+@cpp.UseOpEncode
+union union_set_string_op_encoded {
+  1: set<string> field_1;
+  2: set<string> field_2;
+}
+@cpp.UseOpEncode
+union union_set_struct_empty_op_encoded {
+  1: set<struct_empty> field_1;
+  2: set<struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_bool_op_encoded {
+  1: set<set<bool>> field_1;
+  2: set<set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_byte_op_encoded {
+  1: set<set<byte>> field_1;
+  2: set<set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i16_op_encoded {
+  1: set<set<i16>> field_1;
+  2: set<set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i32_op_encoded {
+  1: set<set<i32>> field_1;
+  2: set<set<i32>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i64_op_encoded {
+  1: set<set<i64>> field_1;
+  2: set<set<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_float_op_encoded {
+  1: set<set<float>> field_1;
+  2: set<set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_double_op_encoded {
+  1: set<set<double>> field_1;
+  2: set<set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_binary_op_encoded {
+  1: set<set<binary>> field_1;
+  2: set<set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_string_op_encoded {
+  1: set<set<string>> field_1;
+  2: set<set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_struct_empty_op_encoded {
+  1: set<set<struct_empty>> field_1;
+  2: set<set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_bool_op_encoded {
@@ -14806,6 +31871,11 @@ union union_map_string_string_op_encoded {
   2: map<string, string> field_2;
 }
 @cpp.UseOpEncode
+union union_map_string_struct_empty_op_encoded {
+  1: map<string, struct_empty> field_1;
+  2: map<string, struct_empty> field_2;
+}
+@cpp.UseOpEncode
 union union_map_i64_bool_op_encoded {
   1: map<i64, bool> field_1;
   2: map<i64, bool> field_2;
@@ -14851,9 +31921,29 @@ union union_map_i64_string_op_encoded {
   2: map<i64, string> field_2;
 }
 @cpp.UseOpEncode
-union union_map_string_set_string_op_encoded {
-  1: map<string, set<string>> field_1;
-  2: map<string, set<string>> field_2;
+union union_map_i64_struct_empty_op_encoded {
+  1: map<i64, struct_empty> field_1;
+  2: map<i64, struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_bool_op_encoded {
+  1: map<string, set<bool>> field_1;
+  2: map<string, set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_byte_op_encoded {
+  1: map<string, set<byte>> field_1;
+  2: map<string, set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_i16_op_encoded {
+  1: map<string, set<i16>> field_1;
+  2: map<string, set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_i32_op_encoded {
+  1: map<string, set<i32>> field_1;
+  2: map<string, set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_i64_op_encoded {
@@ -14861,14 +31951,79 @@ union union_map_string_set_i64_op_encoded {
   2: map<string, set<i64>> field_2;
 }
 @cpp.UseOpEncode
-union union_map_i64_set_string_op_encoded {
-  1: map<i64, set<string>> field_1;
-  2: map<i64, set<string>> field_2;
+union union_map_string_set_float_op_encoded {
+  1: map<string, set<float>> field_1;
+  2: map<string, set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_double_op_encoded {
+  1: map<string, set<double>> field_1;
+  2: map<string, set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_binary_op_encoded {
+  1: map<string, set<binary>> field_1;
+  2: map<string, set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_string_op_encoded {
+  1: map<string, set<string>> field_1;
+  2: map<string, set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_struct_empty_op_encoded {
+  1: map<string, set<struct_empty>> field_1;
+  2: map<string, set<struct_empty>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_bool_op_encoded {
+  1: map<i64, set<bool>> field_1;
+  2: map<i64, set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_byte_op_encoded {
+  1: map<i64, set<byte>> field_1;
+  2: map<i64, set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_i16_op_encoded {
+  1: map<i64, set<i16>> field_1;
+  2: map<i64, set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_i32_op_encoded {
+  1: map<i64, set<i32>> field_1;
+  2: map<i64, set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_i64_op_encoded {
   1: map<i64, set<i64>> field_1;
   2: map<i64, set<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_float_op_encoded {
+  1: map<i64, set<float>> field_1;
+  2: map<i64, set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_double_op_encoded {
+  1: map<i64, set<double>> field_1;
+  2: map<i64, set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_binary_op_encoded {
+  1: map<i64, set<binary>> field_1;
+  2: map<i64, set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_string_op_encoded {
+  1: map<i64, set<string>> field_1;
+  2: map<i64, set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_struct_empty_op_encoded {
+  1: map<i64, set<struct_empty>> field_1;
+  2: map<i64, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_list_bool_cpp_ref_op_encoded {
@@ -14952,13 +32107,139 @@ union union_list_string_cpp_ref_op_encoded {
   2: list<string> field_2;
 }
 @cpp.UseOpEncode
-union union_set_string_cpp_ref_op_encoded {
+union union_list_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  2: set<string> field_2;
+  2: list<struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i32>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<struct_empty>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<bool> field_2;
+}
+@cpp.UseOpEncode
+union union_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<byte> field_2;
+}
+@cpp.UseOpEncode
+union union_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i16> field_2;
+}
+@cpp.UseOpEncode
+union union_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i32> field_2;
 }
 @cpp.UseOpEncode
 union union_set_i64_cpp_ref_op_encoded {
@@ -14968,6 +32249,141 @@ union union_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
+}
+@cpp.UseOpEncode
+union union_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<float> field_2;
+}
+@cpp.UseOpEncode
+union union_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<double> field_2;
+}
+@cpp.UseOpEncode
+union union_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<binary> field_2;
+}
+@cpp.UseOpEncode
+union union_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<string> field_2;
+}
+@cpp.UseOpEncode
+union union_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i32>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_bool_cpp_ref_op_encoded {
@@ -15051,6 +32467,15 @@ union union_map_string_string_cpp_ref_op_encoded {
   2: map<string, string> field_2;
 }
 @cpp.UseOpEncode
+union union_map_string_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, struct_empty> field_2;
+}
+@cpp.UseOpEncode
 union union_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -15132,13 +32557,49 @@ union union_map_i64_string_cpp_ref_op_encoded {
   2: map<i64, string> field_2;
 }
 @cpp.UseOpEncode
-union union_map_string_set_string_cpp_ref_op_encoded {
+union union_map_i64_struct_empty_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<string, set<string>> field_2;
+  2: map<i64, struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_i64_cpp_ref_op_encoded {
@@ -15150,13 +32611,85 @@ union union_map_string_set_i64_cpp_ref_op_encoded {
   2: map<string, set<i64>> field_2;
 }
 @cpp.UseOpEncode
-union union_map_i64_set_string_cpp_ref_op_encoded {
+union union_map_string_set_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<i64, set<string>> field_2;
+  2: map<string, set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<struct_empty>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_i64_cpp_ref_op_encoded {
@@ -15166,6 +32699,51 @@ union union_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_struct_empty_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_list_bool_shared_cpp_ref_op_encoded {
@@ -15249,13 +32827,139 @@ union union_list_string_shared_cpp_ref_op_encoded {
   2: list<string> field_2;
 }
 @cpp.UseOpEncode
-union union_set_string_shared_cpp_ref_op_encoded {
+union union_list_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: set<string> field_1;
+  1: list<struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  2: set<string> field_2;
+  2: list<struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i32>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_list_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<list<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<list<struct_empty>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<bool> field_2;
+}
+@cpp.UseOpEncode
+union union_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<byte> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<byte> field_2;
+}
+@cpp.UseOpEncode
+union union_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i16> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i16> field_2;
+}
+@cpp.UseOpEncode
+union union_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<i32> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<i32> field_2;
 }
 @cpp.UseOpEncode
 union union_set_i64_shared_cpp_ref_op_encoded {
@@ -15265,6 +32969,141 @@ union union_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
+}
+@cpp.UseOpEncode
+union union_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<float> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<float> field_2;
+}
+@cpp.UseOpEncode
+union union_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<double> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<double> field_2;
+}
+@cpp.UseOpEncode
+union union_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<binary> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<binary> field_2;
+}
+@cpp.UseOpEncode
+union union_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<string> field_2;
+}
+@cpp.UseOpEncode
+union union_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i32>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_set_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_bool_shared_cpp_ref_op_encoded {
@@ -15348,6 +33187,15 @@ union union_map_string_string_shared_cpp_ref_op_encoded {
   2: map<string, string> field_2;
 }
 @cpp.UseOpEncode
+union union_map_string_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, struct_empty> field_2;
+}
+@cpp.UseOpEncode
 union union_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -15429,13 +33277,49 @@ union union_map_i64_string_shared_cpp_ref_op_encoded {
   2: map<i64, string> field_2;
 }
 @cpp.UseOpEncode
-union union_map_string_set_string_shared_cpp_ref_op_encoded {
+union union_map_i64_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<string, set<string>> field_1;
+  1: map<i64, struct_empty> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<string, set<string>> field_2;
+  2: map<i64, struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_i64_shared_cpp_ref_op_encoded {
@@ -15447,13 +33331,85 @@ union union_map_string_set_i64_shared_cpp_ref_op_encoded {
   2: map<string, set<i64>> field_2;
 }
 @cpp.UseOpEncode
-union union_map_i64_set_string_shared_cpp_ref_op_encoded {
+union union_map_string_set_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  1: map<i64, set<string>> field_1;
+  1: map<string, set<float>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  2: map<i64, set<string>> field_2;
+  2: map<string, set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_string_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<string, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<string, set<struct_empty>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<bool>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<bool>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<byte>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<byte>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i16>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i16>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<i32>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<i32>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_i64_shared_cpp_ref_op_encoded {
@@ -15463,6 +33419,51 @@ union union_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<float>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<float>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<double>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<double>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<binary>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<binary>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<string>> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, set<struct_empty>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, set<struct_empty>> field_2;
 }
 @cpp.UseOpEncode
 union union_bool_op_encoded {

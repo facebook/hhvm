@@ -478,22 +478,26 @@ def gen_field_adapted(target: Target, values: Dict[str, str]) -> Dict[str, str]:
     return _gen_unary_tramsform(FIELD_ADAPTER_TRANSFORM, target, values)
 
 
-def gen_container_fields(target: Target) -> Dict[str, str]:
+def gen_container_fields(target: Target, include_empty: bool = True) -> Dict[str, str]:
     """Generates field name -> type that are appropriate for use in unions."""
     prims = gen_primatives(target, PRIMITIVE_TYPES)
     keys = gen_primatives(target, KEY_TYPES)
+    empty_struct = STRUCT_TRANSFORM[Target.NAME].format("empty")
+    struct_opt = {empty_struct: empty_struct} if include_empty else {}
 
-    lists = gen_lists(target, prims)
-    sets = gen_sets(target, keys)
-    maps = gen_maps(target, keys, prims)
+    lists = gen_lists(target, prims | struct_opt)
+    nested_lists = gen_lists(target, lists)
+    sets = gen_sets(target, prims | struct_opt)
+    nested_sets = gen_sets(target, sets)
+    maps = gen_maps(target, keys, prims | struct_opt)
 
     maps_to_sets = gen_maps(target, keys, sets)
 
-    return {**lists, **sets, **maps, **maps_to_sets}
+    return {**lists, **nested_lists, **sets, **nested_sets, **maps, **maps_to_sets}
 
 
-def gen_structured_fields(target: Target) -> Dict[str, str]:
-    ret = gen_container_fields(target)
+def gen_structured_fields(target: Target, include_empty: bool = True) -> Dict[str, str]:
+    ret = gen_container_fields(target, include_empty)
     ret.update(**gen_cpp_ref(target, ret), **gen_shared_cpp_ref(target, ret))
     ret.update(gen_primatives(target, PRIMITIVE_TYPES))
     return ret
@@ -513,9 +517,9 @@ def gen_optional_box_fields(target: Target) -> Dict[str, str]:
     return gen_optional(target, gen_box(target, gen_container_fields(target)))
 
 
-def gen_struct_fields(target: Target) -> Dict[str, str]:
+def gen_struct_fields(target: Target, include_empty: bool = True) -> Dict[str, str]:
     """Generates field name -> type that are appropriate for use in structs."""
-    ret = gen_structured_fields(target)
+    ret = gen_structured_fields(target, include_empty)
     ret.update(**gen_primatives_with_custom_default(target))
     ret.update(**gen_primatives_with_alternative_custom_default(target))
     ret.update(

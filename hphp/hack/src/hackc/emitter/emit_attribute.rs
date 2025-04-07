@@ -17,7 +17,13 @@ use oxidized::ast as a;
 use crate::emit_expression;
 
 pub fn from_asts(e: &mut Emitter<'_>, attrs: &[a::UserAttribute]) -> Result<Vec<Attribute>> {
-    attrs.iter().map(|attr| from_ast(e, attr)).collect()
+    attrs
+        .iter()
+        // Filter out __SimpliHack attributes as they may contain expressions not normally
+        // accepted in attributes. These are only needed for type checker and LSP, not runtime.
+        .filter(|attr| !ua::is_simplihack(&attr.name.1))
+        .map(|attr| from_ast(e, attr))
+        .collect()
 }
 
 pub fn from_ast(e: &mut Emitter<'_>, attr: &a::UserAttribute) -> Result<Attribute> {

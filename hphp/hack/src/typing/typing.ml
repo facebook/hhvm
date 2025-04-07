@@ -9946,7 +9946,29 @@ end = struct
           in
           (env, te))
     in
+
     (env, Aast.{ ua_name; ua_params = typed_ua_params })
+
+  let user_attribute env attr =
+    let (pos, name) = attr.Aast.ua_name in
+    (* For SimpliHack we allow arbitrary expressions including function calls.
+       In that case it is important to set the capabilities *)
+    if String.equal name SN.UserAttributes.uaSimpliHack then
+      (* For now use the default capability set, though ideally we would
+         introduce one that is specific to SimpliHack. *)
+      let defaults =
+        MakeType.default_capability @@ Pos_or_decl.of_raw_pos pos
+      in
+      Typing_lenv.stash_and_do
+        env
+        (Typing_env.all_continuations env)
+        (fun env ->
+          let env =
+            fst @@ Typing_coeffects.register_capabilities env defaults defaults
+          in
+          user_attribute env attr)
+    else
+      user_attribute env attr
 
   let attributes_check_def env kind attrs =
     let { emit_string_coercion_error; _ } = env in

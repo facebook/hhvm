@@ -4651,7 +4651,11 @@ fn process_attribute_constructor_call<'a>(
 ) -> Result<ast::UserAttribute> {
     let name = pos_name(constructor_call_type, env)?;
     let params = could_map(constructor_call_argument_list, env, |n, e| {
-        is_valid_attribute_arg(n, e, &name.1);
+        // Skip validation for __SimpliHack attributes as they may contain expressions not normally
+        // accepted in attributes.
+        if !sn::user_attributes::is_simplihack(&name.1) {
+            is_valid_attribute_arg(n, e, &name.1)
+        };
         p_expr(n, e)
     })?;
     if name.1.eq_ignore_ascii_case("__reified") || name.1.eq_ignore_ascii_case("__hasreifiedparent")
@@ -4786,7 +4790,16 @@ fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::UserAttri
 
 fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::UserAttributes {
     let attributes = could_map_emit_error(node, env, p_user_attribute);
-    attributes.into_iter().flatten().collect()
+    let attributes = attributes.into_iter().flatten();
+
+    // Drop SimpliHack attributes when generating code
+    if env.is_codegen() {
+        attributes
+            .filter(|attr| !sn::user_attributes::is_simplihack(&attr.name.1))
+            .collect()
+    } else {
+        attributes.collect()
+    }
 }
 
 /// Extract the URL in `<<__Docs("http://example.com")>>` if the __Docs attribute

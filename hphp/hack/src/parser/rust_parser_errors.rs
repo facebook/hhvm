@@ -2018,7 +2018,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         for node in attr_spec_to_node_list(attrs) {
             match self.attr_name(node) {
                 Some(n) => {
-                    if n == sn::user_attributes::SIMPLIHACK {
+                    if sn::user_attributes::is_simplihack(n) {
                         self.check_can_use_feature(node, &FeatureName::SimpliHack)
                     }
                     if (sn::user_attributes::ignore_readonly_local_errors(n)
@@ -2721,7 +2721,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     // it will be properly lifted in closure convert
                     if self
                         .first_parent_function_name()
-                        .map_or(true, |s| s == "include")
+                        .is_none_or(|s| s == "include")
                     {
                         return {};
                     }

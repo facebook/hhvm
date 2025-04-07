@@ -394,6 +394,10 @@ pub mod user_attributes {
     pub fn is_asio_low_pri(name: &str) -> bool {
         name == ASIO_LOW_PRI
     }
+
+    pub fn is_simplihack(name: &str) -> bool {
+        name == SIMPLIHACK
+    }
 }
 
 pub mod memoize_option {

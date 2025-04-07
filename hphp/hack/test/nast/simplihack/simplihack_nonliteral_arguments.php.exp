@@ -1,0 +1,78 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-46], (String "simpli_hack"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      fd_mode = Mstrict; fd_name = ([4:10-12], "\\id");
+      fd_fun =
+      { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([4:23-24], (Habstr ("T", [])))));
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([4:16-17], (Habstr ("T", []))))); 
+           param_pos = [4:18-20]; param_name = "$x"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-13], (Return (Some ((), [5:10-12], (Lvar ([5:10-12], $x))))))] }; 
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-12], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([4:13-14], "T"); tp_parameters = []; 
+         tp_constraints = [(Constraint_as, ([4:13-14], (Happly (([4:13-14], "\\HH\\supportdyn"), [([4:13-14], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
+      fd_where_constraints = []; fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-46], (String "simpli_hack"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([11:10-11], "\\f");
+       fd_fun =
+       { f_span = [8:1-11:28]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([11:21-26], (Happly (([11:21-26], "\\HH\\supportdyn"), [([11:21-26], Hmixed)])))));
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([11:12-15], (Hprim Tint)))); 
+            param_pos = [11:16-18]; param_name = "$i"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync;
+         f_user_attributes =
+         [{ ua_name = ([11:10-11], "__SupportDynamicType"); ua_params = [] };
+           { ua_name = ([8:3-15], "__SimpliHack");
+             ua_params =
+             [((), [8:16-22], (Call { func = ((), [8:16-18], (Id ([8:16-18], "\\id"))); targs = []; args = [(Anormal ((), [8:19-21], (Int "10")))]; unpacked_arg = None }));
+               ((), [8:24-10:2],
+                (Lfun (
+                   { f_span = [8:24-10:2]; f_readonly_this = None; f_annotation = (); 
+                     f_readonly_ret = None; f_ret = ((), None); f_params = []; 
+                     f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([9:3-16], (Return (Some ((), [9:10-15], (String "foo")))))] }; 
+                     f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+                     f_doc_comment = None },
+                   [])))
+               ]
+             }
+           ];
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })
+  ]

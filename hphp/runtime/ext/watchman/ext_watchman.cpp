@@ -772,7 +772,7 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
   auto socket_path = _socket_path.isNull() ?
     "" : _socket_path.toString().toCppString();
 
-  if (s_activeSubscriptions.count(name)) {
+  if (s_activeSubscriptions.contains(name)) {
     SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
       "Subscription with name '{}' already exists", name));
   }

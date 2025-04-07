@@ -267,7 +267,7 @@ static std::unordered_set<
 > s_ext_entity_whitelist;
 
 static bool allow_ext_entity_protocol(const String& protocol) {
-  return s_ext_entity_whitelist.count(protocol.get());
+  return s_ext_entity_whitelist.contains(protocol.get());
 }
 
 static xmlParserInputPtr libxml_ext_entity_loader(const char *url,

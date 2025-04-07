@@ -82,7 +82,7 @@ void IntervalTimer::RunCallbacks(
 
   auto const timers = s_timer_pool->timers(); // makes a copy!
   for (auto timer : timers) {
-    if (!s_timer_pool->timers().count(timer)) {
+    if (!s_timer_pool->timers().contains(timer)) {
       // This timer has been removed from the pool by one of the callbacks.
       continue;
     }

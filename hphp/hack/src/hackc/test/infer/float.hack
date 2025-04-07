@@ -5,19 +5,33 @@
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &gconst::INF
 // CHECK:   n1: *HackMixed = load &gconst::NAN
+// CHECK: // .column 3
 // CHECK:   n2 = $root.printf(null, $builtins.hack_string("%f\n"), n0)
+// CHECK: // .column 3
 // CHECK:   n3 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float($builtins.hack_const_neginf()))
+// CHECK: // .column 3
 // CHECK:   n4 = $root.printf(null, $builtins.hack_string("%f\n"), n1)
+// CHECK: // .column 3
 // CHECK:   n5 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(3.0))
+// CHECK: // .column 3
 // CHECK:   n6 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(-3.0))
+// CHECK: // .column 3
 // CHECK:   n7 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(3.14))
+// CHECK: // .column 3
 // CHECK:   n8 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(-3.14))
+// CHECK: // .column 3
 // CHECK:   n9 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(1.0000000000000002))
+// CHECK: // .column 3
 // CHECK:   n10 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(-1.0000000000000002))
+// CHECK: // .column 3
 // CHECK:   n11 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(1.7976931348623157e308))
+// CHECK: // .column 3
 // CHECK:   n12 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(-1.7976931348623157e308))
+// CHECK: // .column 3
 // CHECK:   n13 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(5e-324))
+// CHECK: // .column 3
 // CHECK:   n14 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(-5e-324))
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function basic(): void {

@@ -28,10 +28,13 @@ class D extends C { }
 // CHECK:   n2: *HackMixed = load &$this
 // CHECK:   n3 = null
 // CHECK:   store n2.?.prop <- n3: *HackMixed
+// CHECK: // .column 22
 // CHECK:   n4 = __sil_lazy_class_initialize(<C>)
 // CHECK:   n5 = $builtins.hack_field_get(n4, "A")
+// CHECK: // .column 1
 // CHECK:   n6: *HackMixed = load &$this
 // CHECK:   store n6.?.prop <- n5: *HackMixed
+// CHECK: // .column 1
 // CHECK:   ret null
 // CHECK: }
 

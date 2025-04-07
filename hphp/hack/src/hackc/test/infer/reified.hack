@@ -43,7 +43,9 @@ function rr_vv_nd<reify T>(int $a, int... $b): void {
 // CHECK: define .wrapper $root.nr_nv_dd($this: *void, $a: .notnull *HackInt) : *void {
 // CHECK: local $b: *void
 // CHECK: #b0:
+// CHECK: // .column 1
 // CHECK:   store &$b <- $builtins.hack_int(5): *HackMixed
+// CHECK: // .column 1
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK:   n0: *HackMixed = load &$a
@@ -63,7 +65,9 @@ function nr_nv_dd(int $a, int $b = 5): void {
 // CHECK: define .wrapper $root.rr_nv_dd($this: *void, $a: .notnull *HackInt, $0ReifiedGenerics: .notnull *HackVec) : *void {
 // CHECK: local $b: *void
 // CHECK: #b0:
+// CHECK: // .column 1
 // CHECK:   store &$b <- $builtins.hack_int(5): *HackMixed
+// CHECK: // .column 1
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK:   n0: *HackMixed = load &$a
@@ -86,7 +90,9 @@ function rr_nv_dd<reify T>(int $a, int $b = 5): void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec()
 // CHECK:   store &$c <- n0: *HackMixed
+// CHECK: // .column 1
 // CHECK:   store &$b <- $builtins.hack_int(5): *HackMixed
+// CHECK: // .column 1
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK:   n1: *HackMixed = load &$a
@@ -109,7 +115,9 @@ function nr_vv_dd(int $a, int $b = 5, int... $c): void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec()
 // CHECK:   store &$c <- n0: *HackMixed
+// CHECK: // .column 1
 // CHECK:   store &$b <- $builtins.hack_int(5): *HackMixed
+// CHECK: // .column 1
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK:   n1: *HackMixed = load &$a

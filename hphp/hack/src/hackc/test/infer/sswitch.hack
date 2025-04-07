@@ -3,19 +3,30 @@
 // TEST-CHECK-BAL: define C$static._86cinit
 // CHECK: define C$static._86cinit($this: .notnull *C$static, $constName: *HackMixed) : *HackMixed {
 // CHECK: #b0:
+// CHECK: // .column 1
 // CHECK:   n0: *HackMixed = load &$constName
+// CHECK: // .column 1
 // CHECK:   n1 = $builtins.hhbc_cmp_same($builtins.hack_string("CONST_REQUIRES_CINIT"), n0)
+// CHECK: // .column 1
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
+// CHECK: // .column 1
 // CHECK:   prune $builtins.hack_is_true(n1)
+// CHECK: // .column 17
 // CHECK:   n2 = __sil_lazy_class_initialize(<D>)
 // CHECK:   n3 = $builtins.hack_field_get(n2, "STRING")
+// CHECK: // .column 38
 // CHECK:   n4 = $builtins.hack_new_dict($builtins.hack_string("var"), $builtins.hack_string("id"), $builtins.hack_string("type"), n3)
+// CHECK: // .column 1
 // CHECK:   ret n4
 // CHECK: #b2:
+// CHECK: // .column 1
 // CHECK:   prune ! $builtins.hack_is_true(n1)
+// CHECK: // .column 1
 // CHECK:   n5: *HackMixed = load &$constName
+// CHECK: // .column 1
 // CHECK:   n6 = $builtins.hhbc_concat($builtins.hack_string("Could not find initializer for "), n5, $builtins.hack_string(" in 86cinit"))
+// CHECK: // .column 1
 // CHECK:   n7 = $builtins.hhbc_fatal(n6)
 // CHECK:   unreachable
 // CHECK: }

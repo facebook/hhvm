@@ -32,16 +32,25 @@ enum A: int {
 // TEST-CHECK-BAL: define $root.main
 // CHECK: define $root.main($this: *void) : *void {
 // CHECK: #b0:
+// CHECK: // .column 3
 // CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("A::V = "))
+// CHECK: // .column 19
 // CHECK:   n1 = __sil_lazy_class_initialize(<A>)
 // CHECK:   n2 = $builtins.hack_field_get(n1, "V")
+// CHECK: // .column 3
 // CHECK:   n3 = $builtins.hhbc_print(n2)
+// CHECK: // .column 3
 // CHECK:   n4 = $builtins.hhbc_print($builtins.hack_string("\n"))
+// CHECK: // .column 3
 // CHECK:   n5 = $builtins.hhbc_print($builtins.hack_string("B::V = "))
+// CHECK: // .column 19
 // CHECK:   n6 = __sil_lazy_class_initialize(<B>)
 // CHECK:   n7 = $builtins.hack_field_get(n6, "V")
+// CHECK: // .column 3
 // CHECK:   n8 = $builtins.hhbc_print(n7)
+// CHECK: // .column 3
 // CHECK:   n9 = $builtins.hhbc_print($builtins.hack_string("\n"))
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function main(): void {

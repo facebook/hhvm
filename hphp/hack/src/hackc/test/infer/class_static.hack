@@ -8,8 +8,11 @@
 // TEST-CHECK-BAL: define C$static.foo
 // CHECK: define C$static.foo($this: .notnull *C$static) : *void {
 // CHECK: #b0:
+// CHECK: // .column 8
 // CHECK:   n0 = __sil_lazy_class_initialize(<C>)
+// CHECK: // .column 5
 // CHECK:   store n0.?.a <- $builtins.hack_int(6): *HackMixed
+// CHECK: // .column 4
 // CHECK:   ret null
 // CHECK: }
 

@@ -4,11 +4,16 @@
 // CHECK: define $root.closure1($this: *void, $x: .notnull *HackString) : *HackMixed {
 // CHECK: local $y: *void
 // CHECK: #b0:
+// CHECK: // .column 8
 // CHECK:   n0: *HackMixed = load &$x
+// CHECK: // .column 8
 // CHECK:   n1 = __sil_allocate(<Closure$closure1>)
 // CHECK:   n2 = Closure$closure1.__construct(n1, null, n0)
+// CHECK: // .column 3
 // CHECK:   store &$y <- n1: *HackMixed
+// CHECK: // .column 10
 // CHECK:   n3: *HackMixed = load &$y
+// CHECK: // .column 3
 // CHECK:   ret n3
 // CHECK: }
 
@@ -34,8 +39,11 @@
 // CHECK:   n2: *HackMixed = load &$this
 // CHECK:   n3: *HackMixed = load n2.?.this
 // CHECK:   store &$this <- n3: *HackMixed
+// CHECK: // .column 21
 // CHECK:   n4: *HackMixed = load &$x
+// CHECK: // .column 15
 // CHECK:   n5 = $builtins.hhbc_print(n4)
+// CHECK: // .column 15
 // CHECK:   ret n5
 // CHECK: }
 
@@ -64,10 +72,14 @@ class C {
 // CHECK:   n2: *HackMixed = load &$this
 // CHECK:   n3: *HackMixed = load n2.?.this
 // CHECK:   store &$this <- n3: *HackMixed
+// CHECK: // .column 37
 // CHECK:   n4: *HackMixed = load &$x
+// CHECK: // .column 41
 // CHECK:   n5: *HackMixed = load &$y
+// CHECK: // .column 23
 // CHECK:   n6: *Closure$C::main = load &$this
 // CHECK:   n7 = Closure$C::main.closure(n6, n4, n5)
+// CHECK: // .column 23
 // CHECK:   ret n7
 // CHECK: }
 

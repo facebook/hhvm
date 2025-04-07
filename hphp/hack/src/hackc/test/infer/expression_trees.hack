@@ -6,19 +6,29 @@
 // CHECK: define $root.basic1($this: *void, $b: *A) : *HackMixed {
 // CHECK: local $0: *void
 // CHECK: #b0:
+// CHECK: // .column 12
 // CHECK:   n0: *HackMixed = load &$b
+// CHECK: // .column 12
 // CHECK:   n1 = __sil_allocate(<Closure$basic1232>)
 // CHECK:   n2 = Closure$basic1232.__construct(n1, null, n0)
+// CHECK: // .column 12
 // CHECK:   store &$0 <- n1: *HackMixed
+// CHECK: // .column 12
 // CHECK:   n3: *HackMixed = load &$0
+// CHECK: // .column 12
 // CHECK:   n4 = n3.?.__invoke()
+// CHECK: // .column 12
 // CHECK:   jmp b2
 // CHECK:   .handlers b1
 // CHECK: #b1(n5: *HackMixed):
+// CHECK: // .column 12
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 12
 // CHECK:   throw n5
 // CHECK: #b2:
+// CHECK: // .column 12
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 3
 // CHECK:   ret n4
 // CHECK: }
 

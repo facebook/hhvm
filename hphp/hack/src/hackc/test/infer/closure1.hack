@@ -7,12 +7,17 @@ abstract class Base {
 // TEST-CHECK-BAL: "define Base.checkInstance0("
 // CHECK: define Base.checkInstance0($this: .notnull *Base, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
+// CHECK: // .column 7
 // CHECK:   n0: *HackMixed = load &$zarg1
+// CHECK: // .column 7
 // CHECK:   n1: *HackMixed = load &$arg1
+// CHECK: // .column 7
 // CHECK:   n2 = __sil_allocate(<Closure$Base::checkInstance0>)
 // CHECK:   n3: *Base = load &$this
 // CHECK:   n4 = Closure$Base::checkInstance0.__construct(n2, n3, n0, n1)
+// CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
+// CHECK: // .column 4
 // CHECK:   ret null
 // CHECK: }
 
@@ -27,12 +32,17 @@ abstract class Base {
 // TEST-CHECK-BAL: "define Base.checkInstance1("
 // CHECK: define Base.checkInstance1($this: .notnull *Base, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
+// CHECK: // .column 7
 // CHECK:   n0: *HackMixed = load &$zarg1
+// CHECK: // .column 7
 // CHECK:   n1: *HackMixed = load &$arg1
+// CHECK: // .column 7
 // CHECK:   n2 = __sil_allocate(<Closure$Base::checkInstance1>)
 // CHECK:   n3: *Base = load &$this
 // CHECK:   n4 = Closure$Base::checkInstance1.__construct(n2, n3, n0, n1)
+// CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
+// CHECK: // .column 4
 // CHECK:   ret null
 // CHECK: }
 
@@ -47,12 +57,17 @@ abstract class Base {
 // TEST-CHECK-BAL: "define Base$static.checkStatic0("
 // CHECK: define Base$static.checkStatic0($this: .notnull *Base$static, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
+// CHECK: // .column 7
 // CHECK:   n0: *HackMixed = load &$zarg1
+// CHECK: // .column 7
 // CHECK:   n1: *HackMixed = load &$arg1
+// CHECK: // .column 7
 // CHECK:   n2 = __sil_allocate(<Closure$Base::checkStatic0>)
 // CHECK:   n3: *Base$static = load &$this
 // CHECK:   n4 = Closure$Base::checkStatic0.__construct(n2, n3, n0, n1)
+// CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
+// CHECK: // .column 4
 // CHECK:   ret null
 // CHECK: }
 
@@ -67,12 +82,17 @@ abstract class Base {
 // TEST-CHECK-BAL: "define Base$static.checkStatic1("
 // CHECK: define Base$static.checkStatic1($this: .notnull *Base$static, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
+// CHECK: // .column 7
 // CHECK:   n0: *HackMixed = load &$zarg1
+// CHECK: // .column 7
 // CHECK:   n1: *HackMixed = load &$arg1
+// CHECK: // .column 7
 // CHECK:   n2 = __sil_allocate(<Closure$Base::checkStatic1>)
 // CHECK:   n3: *Base$static = load &$this
 // CHECK:   n4 = Closure$Base::checkStatic1.__construct(n2, n3, n0, n1)
+// CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
+// CHECK: // .column 4
 // CHECK:   ret null
 // CHECK: }
 
@@ -87,12 +107,17 @@ abstract class Base {
 // TEST-CHECK-BAL: "define Base.checkNested("
 // CHECK: define Base.checkNested($this: .notnull *Base, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
+// CHECK: // .column 7
 // CHECK:   n0: *HackMixed = load &$zarg1
+// CHECK: // .column 7
 // CHECK:   n1: *HackMixed = load &$arg1
+// CHECK: // .column 7
 // CHECK:   n2 = __sil_allocate(<Closure$Base::checkNested232>)
 // CHECK:   n3: *Base = load &$this
 // CHECK:   n4 = Closure$Base::checkNested232.__construct(n2, n3, n0, n1)
+// CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
+// CHECK: // .column 4
 // CHECK:   ret null
 // CHECK: }
 
@@ -143,10 +168,15 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &$this
 // CHECK:   n5: *HackMixed = load n4.?.this
 // CHECK:   store &$this <- n5: *HackMixed
+// CHECK: // .column 23
 // CHECK:   n6: *HackMixed = load &$this
+// CHECK: // .column 30
 // CHECK:   n7: *HackMixed = load &$arg1
+// CHECK: // .column 37
 // CHECK:   n8: *HackMixed = load &$zarg1
+// CHECK: // .column 16
 // CHECK:   n9 = $root.helper(null, n6, n7, n8)
+// CHECK: // .column 9
 // CHECK:   ret n9
 // CHECK: }
 
@@ -185,9 +215,13 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &$this
 // CHECK:   n5: *HackMixed = load n4.?.this
 // CHECK:   store &$this <- n5: *HackMixed
+// CHECK: // .column 23
 // CHECK:   n6: *HackMixed = load &$arg1
+// CHECK: // .column 30
 // CHECK:   n7: *HackMixed = load &$zarg1
+// CHECK: // .column 16
 // CHECK:   n8 = $root.helper(null, n6, n7)
+// CHECK: // .column 9
 // CHECK:   ret n8
 // CHECK: }
 
@@ -226,10 +260,14 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &$this
 // CHECK:   n5: *HackMixed = load n4.?.this
 // CHECK:   store &$this <- n5: *HackMixed
+// CHECK: // .column 31
 // CHECK:   n6: *HackMixed = load &$arg1
+// CHECK: // .column 38
 // CHECK:   n7: *HackMixed = load &$zarg1
+// CHECK: // .column 16
 // CHECK:   n8: *Closure$Base::checkStatic0 = load &$this
 // CHECK:   n9 = n8.?.helper(n6, n7)
+// CHECK: // .column 9
 // CHECK:   ret n9
 // CHECK: }
 
@@ -268,9 +306,13 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &$this
 // CHECK:   n5: *HackMixed = load n4.?.this
 // CHECK:   store &$this <- n5: *HackMixed
+// CHECK: // .column 23
 // CHECK:   n6: *HackMixed = load &$arg1
+// CHECK: // .column 30
 // CHECK:   n7: *HackMixed = load &$zarg1
+// CHECK: // .column 16
 // CHECK:   n8 = $root.helper(null, n6, n7)
+// CHECK: // .column 9
 // CHECK:   ret n8
 // CHECK: }
 
@@ -309,12 +351,17 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &$this
 // CHECK:   n5: *HackMixed = load n4.?.this
 // CHECK:   store &$this <- n5: *HackMixed
+// CHECK: // .column 11
 // CHECK:   n6: *HackMixed = load &$zarg1
+// CHECK: // .column 11
 // CHECK:   n7: *HackMixed = load &$arg1
+// CHECK: // .column 11
 // CHECK:   n8 = __sil_allocate(<Closure$Base::checkNested>)
 // CHECK:   n9: *Closure$Base::checkNested232 = load &$this
 // CHECK:   n10 = Closure$Base::checkNested.__construct(n8, n9, n6, n7)
+// CHECK: // .column 16
 // CHECK:   n11 = $root.helper(null, n8)
+// CHECK: // .column 9
 // CHECK:   ret n11
 // CHECK: }
 
@@ -353,10 +400,15 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &$this
 // CHECK:   n5: *HackMixed = load n4.?.this
 // CHECK:   store &$this <- n5: *HackMixed
+// CHECK: // .column 27
 // CHECK:   n6: *HackMixed = load &$this
+// CHECK: // .column 34
 // CHECK:   n7: *HackMixed = load &$arg1
+// CHECK: // .column 41
 // CHECK:   n8: *HackMixed = load &$zarg1
+// CHECK: // .column 20
 // CHECK:   n9 = $root.helper(null, n6, n7, n8)
+// CHECK: // .column 13
 // CHECK:   ret n9
 // CHECK: }
 }
@@ -364,11 +416,16 @@ abstract class Base {
 // TEST-CHECK-BAL: "define $root.checkFunc("
 // CHECK: define $root.checkFunc($this: *void, $arg1: .notnull *HackInt, $zarg1: .notnull *HackInt) : *void {
 // CHECK: #b0:
+// CHECK: // .column 5
 // CHECK:   n0: *HackMixed = load &$zarg1
+// CHECK: // .column 5
 // CHECK:   n1: *HackMixed = load &$arg1
+// CHECK: // .column 5
 // CHECK:   n2 = __sil_allocate(<Closure$checkFunc>)
 // CHECK:   n3 = Closure$checkFunc.__construct(n2, null, n0, n1)
+// CHECK: // .column 3
 // CHECK:   n4 = $root.helper(null, n2)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 
@@ -407,9 +464,13 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &$this
 // CHECK:   n5: *HackMixed = load n4.?.this
 // CHECK:   store &$this <- n5: *HackMixed
+// CHECK: // .column 21
 // CHECK:   n6: *HackMixed = load &$arg1
+// CHECK: // .column 28
 // CHECK:   n7: *HackMixed = load &$zarg1
+// CHECK: // .column 14
 // CHECK:   n8 = $root.helper(null, n6, n7)
+// CHECK: // .column 7
 // CHECK:   ret n8
 // CHECK: }
 

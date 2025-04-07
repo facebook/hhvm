@@ -4,8 +4,10 @@ class D extends B {
   // TEST-CHECK-BAL: define D.inst_fcall_self
   // CHECK: define D.inst_fcall_self($this: .notnull *D) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = D.bar(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_self(): void {
@@ -15,8 +17,10 @@ class D extends B {
   // TEST-CHECK-BAL: define D$static.static_fcall_self
   // CHECK: define D$static.static_fcall_self($this: .notnull *D$static) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = D$static.bar(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_self(): void {
@@ -26,8 +30,10 @@ class D extends B {
   // TEST-CHECK-BAL: define D.inst_fcall_static
   // CHECK: define D.inst_fcall_static($this: .notnull *D) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = n0.?.bar()
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_static(): void {
@@ -37,8 +43,10 @@ class D extends B {
   // TEST-CHECK-BAL: define D$static.static_fcall_static
   // CHECK: define D$static.static_fcall_static($this: .notnull *D$static) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = n0.?.bar()
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_static(): void {
@@ -48,8 +56,10 @@ class D extends B {
   // TEST-CHECK-BAL: define D.inst_fcall_parent
   // CHECK: define D.inst_fcall_parent($this: .notnull *D) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = B.bar(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_parent(): void {
@@ -59,8 +69,10 @@ class D extends B {
   // TEST-CHECK-BAL: define D$static.static_fcall_parent
   // CHECK: define D$static.static_fcall_parent($this: .notnull *D$static) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = B$static.bar(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_parent(): void {
@@ -73,7 +85,9 @@ class D extends B {
 // TEST-CHECK-BAL: define $root.fcall_func
 // CHECK: define $root.fcall_func($this: *void) : *void {
 // CHECK: #b0:
+// CHECK: // .column 3
 // CHECK:   n0 = $root.f(null, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 
@@ -84,8 +98,10 @@ function fcall_func(): void {
 // TEST-CHECK-BAL: define $root.fcall_static
 // CHECK: define $root.fcall_static($this: *void) : *void {
 // CHECK: #b0:
+// CHECK: // .column 3
 // CHECK:   n0 = __sil_lazy_class_initialize(<C>)
 // CHECK:   n1 = C$static.f(n0, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_static(): void {
@@ -95,8 +111,11 @@ function fcall_static(): void {
 // TEST-CHECK-BAL: define $root.fcall_method
 // CHECK: define $root.fcall_method($this: *void, $a: *C) : *void {
 // CHECK: #b0:
+// CHECK: // .column 3
 // CHECK:   n0: *HackMixed = load &$a
+// CHECK: // .column 3
 // CHECK:   n1 = n0.?.b($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_method(C $a): void {
@@ -106,18 +125,28 @@ function fcall_method(C $a): void {
 // TEST-CHECK-BAL: define $root.fcall_nullsafe
 // CHECK: define $root.fcall_nullsafe($this: *void, $c: *C) : *void {
 // CHECK: #b0:
+// CHECK: // .column 5
 // CHECK:   n0: *HackMixed = load &$c
+// CHECK: // .column 5
 // CHECK:   n1 = $builtins.hhbc_is_type_null(n0)
+// CHECK: // .column 5
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
+// CHECK: // .column 5
 // CHECK:   prune $builtins.hack_is_true(n1)
+// CHECK: // .column 5
 // CHECK:   jmp b3(null)
 // CHECK: #b2:
+// CHECK: // .column 5
 // CHECK:   prune ! $builtins.hack_is_true(n1)
+// CHECK: // .column 5
 // CHECK:   n2 = n0.?.g()
+// CHECK: // .column 5
 // CHECK:   jmp b3(n2)
 // CHECK: #b3(n3: *HackMixed):
+// CHECK: // .column 3
 // CHECK:   n4 = $root.f(null, n3)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_nullsafe(?C $c): void {
@@ -128,23 +157,35 @@ function fcall_nullsafe(?C $c): void {
 // CHECK: define $root.fcall_class_meth($this: *void) : *void {
 // CHECK: local $x: *void, $0: *void
 // CHECK: #b0:
+// CHECK: // .column 8
 // CHECK:   n0 = __sil_lazy_class_initialize(<C>)
 // CHECK:   n1 = __sil_allocate(<C$static_sb$curry>)
 // CHECK:   store n1.C$static_sb$curry.this <- n0: *C$static
+// CHECK: // .column 3
 // CHECK:   store &$x <- n1: *HackMixed
+// CHECK: // .column 3
 // CHECK:   jmp b1
 // CHECK: #b1:
+// CHECK: // .column 3
 // CHECK:   n2: *HackMixed = load &$x
+// CHECK: // .column 3
 // CHECK:   store &$0 <- n2: *HackMixed
+// CHECK: // .column 3
 // CHECK:   n3: *HackMixed = load &$0
+// CHECK: // .column 3
 // CHECK:   n4 = n3.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK: // .column 3
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
 // CHECK: #b2(n5: *HackMixed):
+// CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 3
 // CHECK:   throw n5
 // CHECK: #b3:
+// CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_class_meth(): void {
@@ -156,21 +197,33 @@ function fcall_class_meth(): void {
 // CHECK: define $root.fcall_func_invoke($this: *void) : *void {
 // CHECK: local $x: *void, $0: *void
 // CHECK: #b0:
+// CHECK: // .column 8
 // CHECK:   n0 = __sil_allocate(<f$curry>)
+// CHECK: // .column 3
 // CHECK:   store &$x <- n0: *HackMixed
+// CHECK: // .column 3
 // CHECK:   jmp b1
 // CHECK: #b1:
+// CHECK: // .column 3
 // CHECK:   n1: *HackMixed = load &$x
+// CHECK: // .column 3
 // CHECK:   store &$0 <- n1: *HackMixed
+// CHECK: // .column 3
 // CHECK:   n2: *HackMixed = load &$0
+// CHECK: // .column 3
 // CHECK:   n3 = n2.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK: // .column 3
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
 // CHECK: #b2(n4: *HackMixed):
+// CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 3
 // CHECK:   throw n4
 // CHECK: #b3:
+// CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_func_invoke(): void {
@@ -183,10 +236,14 @@ function fcall_func_invoke(): void {
 // CHECK: local $x: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_int(2), $builtins.hack_int(3), $builtins.hack_int(4))
+// CHECK: // .column 3
 // CHECK:   store &$x <- n0: *HackMixed
+// CHECK: // .column 11
 // CHECK:   n1: *HackMixed = load &$x
+// CHECK: // .column 3
 // CHECK:   n2 = $builtins.__sil_splat(n1)
 // CHECK:   n3 = $root.f(null, $builtins.hack_int(1), n2)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_splat(): void {
@@ -198,22 +255,35 @@ function fcall_splat(): void {
 // CHECK: define $root.fcall_meth_caller($this: *void, $b: *C) : *void {
 // CHECK: local $x: *void, $0: *void
 // CHECK: #b0:
+// CHECK: // .column 8
 // CHECK:   n0 = $root.HH::meth_caller(null, __sil_get_lazy_class(<C>), $builtins.hack_string("b"))
+// CHECK: // .column 3
 // CHECK:   store &$x <- n0: *HackMixed
+// CHECK: // .column 3
 // CHECK:   jmp b1
 // CHECK: #b1:
+// CHECK: // .column 3
 // CHECK:   n1: *HackMixed = load &$x
+// CHECK: // .column 3
 // CHECK:   store &$0 <- n1: *HackMixed
+// CHECK: // .column 6
 // CHECK:   n2: *HackMixed = load &$b
+// CHECK: // .column 3
 // CHECK:   n3: *HackMixed = load &$0
+// CHECK: // .column 3
 // CHECK:   n4 = n3.?.__invoke(n2, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK: // .column 3
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
 // CHECK: #b2(n5: *HackMixed):
+// CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 3
 // CHECK:   throw n5
 // CHECK: #b3:
+// CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_meth_caller(C $b): void {
@@ -225,10 +295,15 @@ function fcall_meth_caller(C $b): void {
 // CHECK: define $root.fcall_cls_method($this: *void, $a: *HH::classname) : *void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("HH\\classname"))
+// CHECK: // .column 1
 // CHECK:   n1: *HackMixed = load &$a
+// CHECK: // .column 1
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK: // .column 3
 // CHECK:   n3: *HackMixed = load &$a
+// CHECK: // .column 3
 // CHECK:   n4 = n3.?.static_fcall_self()
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_cls_method(classname<D> $a): void {
@@ -238,8 +313,11 @@ function fcall_cls_method(classname<D> $a): void {
 // TEST-CHECK-BAL: define $root.fcall_readonly
 // CHECK: define $root.fcall_readonly($this: *void) : *void {
 // CHECK: #b0:
+// CHECK: // .column 18
 // CHECK:   n0 = $root.g(null)
+// CHECK: // .column 3
 // CHECK:   n1 = $root.readonly_param(null, $builtins.__sil_readonly(n0))
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function fcall_readonly(): void {

@@ -3,13 +3,30 @@
 // TEST-CHECK-BAL: define $root.check1
 // CHECK: define $root.check1($this: *void, $a: *HackMixed, $b: *HackMixed, $c: *HackMixed) : *void {
 // CHECK: #b0:
+// CHECK: // .column 8
 // CHECK:   n0: *HackMixed = load &$a
+// CHECK: // .column 11
 // CHECK:   n1: *HackMixed = load &$b
+// CHECK: // .column 14
 // CHECK:   n2: *HackMixed = load &$c
+// CHECK: // .column 3
 // CHECK:   n3 = $root.call(null, n0, n1, n2)
+// CHECK: // .column 8
+// CHECK: // .column 11
+// CHECK: // .column 14
+// CHECK: // .column 3
 // CHECK:   n4 = $root.call(null, n2, n1, n2)
+// CHECK: // .column 8
+// CHECK: // .column 11
+// CHECK: // .column 14
+// CHECK: // .column 3
 // CHECK:   n5 = $root.call(null, n1, n1, n2)
+// CHECK: // .column 8
+// CHECK: // .column 11
+// CHECK: // .column 14
+// CHECK: // .column 3
 // CHECK:   n6 = $root.call(null, n0, n1, n0)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function check1(mixed $a, mixed $b, mixed $c): void {
@@ -23,12 +40,19 @@ function check1(mixed $a, mixed $b, mixed $c): void {
 // CHECK: define $root.check2($this: *void, $c: .notnull *HackInt) : *void {
 // CHECK: local $a: *void
 // CHECK: #b0:
+// CHECK: // .column 3
 // CHECK:   store &$a <- $builtins.hack_int(2): *HackMixed
+// CHECK: // .column 8
 // CHECK:   n0: *HackMixed = load &$a
+// CHECK: // .column 3
 // CHECK:   n1 = $root.call(null, n0)
+// CHECK: // .column 3
 // CHECK:   store &$a <- $builtins.hack_int(7): *HackMixed
+// CHECK: // .column 8
 // CHECK:   n2: *HackMixed = load &$a
+// CHECK: // .column 3
 // CHECK:   n3 = $root.call(null, n2)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function check2(int $c): void  {
@@ -43,13 +67,20 @@ function check2(int $c): void  {
 // CHECK: local $a: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec()
+// CHECK: // .column 3
 // CHECK:   store &$a <- n0: *HackMixed
+// CHECK: // .column 8
+// CHECK: // .column 3
 // CHECK:   n1 = $root.call(null, n0)
+// CHECK: // .column 3
 // CHECK:   n2 = $builtins.hack_int(0)
 // CHECK:   n3 = $builtins.hack_int(7)
 // CHECK:   n4 = $builtins.hack_array_cow_set(n0, n2, n3)
 // CHECK:   store &$a <- n4: *HackMixed
+// CHECK: // .column 8
+// CHECK: // .column 3
 // CHECK:   n5 = $root.call(null, n4)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function check3(): void {

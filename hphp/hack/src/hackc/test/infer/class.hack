@@ -46,10 +46,13 @@
 // CHECK:   n6: *HackMixed = load &$this
 // CHECK:   n7 = $builtins.hack_int(2)
 // CHECK:   store n6.?.mangled:::type <- n7: *HackMixed
+// CHECK: // .column 23
 // CHECK:   n8 = __sil_lazy_class_initialize(<D>)
 // CHECK:   n9 = $builtins.hack_field_get(n8, "C")
+// CHECK: // .column 1
 // CHECK:   n10: *HackMixed = load &$this
 // CHECK:   store n10.?.prop5 <- n9: *HackMixed
+// CHECK: // .column 1
 // CHECK:   ret null
 // CHECK: }
 
@@ -81,6 +84,7 @@ class C {
   // TEST-CHECK-BAL: define C.__construct
   // CHECK: define C.__construct($this: .notnull *C, $a: .notnull *HackInt, $b: .notnull *HackString, $c: .notnull *HackInt) : *HackMixed {
   // CHECK: #b0:
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
 
@@ -92,32 +96,58 @@ class C {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hhbc_new_vec()
+  // CHECK: // .column 10
   // CHECK:   n1: *C = load &$this
+  // CHECK: // .column 10
   // CHECK:   n2 = $builtins.hack_get_static_class(n1)
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- n2: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n3: *C = load &$this
+  // CHECK: // .column 10
   // CHECK:   n4 = $builtins.hack_get_static_class(n3)
+  // CHECK: // .column 10
   // CHECK:   n5 = n4.?.__factory()
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- n5: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n6: *HackMixed = load &$0
+  // CHECK: // .column 10
   // CHECK:   store &$1 <- n0: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n7: *HackMixed = load &$2
+  // CHECK: // .column 10
   // CHECK:   n8: *HackMixed = load &$0
+  // CHECK: // .column 10
+  // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n9: *HackMixed = load &$2
+  // CHECK: // .column 10
   // CHECK:   jmp b2
   // CHECK:   .handlers b1
   // CHECK: #b1(n10: *HackMixed):
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   throw n10
   // CHECK: #b2:
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n11 = n9.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK: // .column 10
   // CHECK:   n12 = $builtins.hhbc_lock_obj(n9)
+  // CHECK: // .column 5
   // CHECK:   store &$a <- n9: *HackMixed
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {
@@ -129,28 +159,51 @@ class C {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hhbc_new_vec()
+  // CHECK: // .column 10
   // CHECK:   n1 = __sil_lazy_class_initialize(<C>)
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- n1: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- n2: *HackMixed
+  // CHECK: // .column 10
+  // CHECK:   store &$1 <- n0: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n4: *HackMixed = load &$2
+  // CHECK: // .column 10
   // CHECK:   n5: *HackMixed = load &$0
+  // CHECK: // .column 10
+  // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n6: *HackMixed = load &$2
+  // CHECK: // .column 10
   // CHECK:   jmp b2
   // CHECK:   .handlers b1
   // CHECK: #b1(n7: *HackMixed):
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   throw n7
   // CHECK: #b2:
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n8 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK: // .column 10
   // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
+  // CHECK: // .column 5
   // CHECK:   store &$a <- n6: *HackMixed
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function cons_self(): void {
@@ -162,28 +215,51 @@ class C {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hhbc_new_vec()
+  // CHECK: // .column 10
   // CHECK:   n1 = __sil_lazy_class_initialize(<C>)
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- n1: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- n2: *HackMixed
+  // CHECK: // .column 10
+  // CHECK:   store &$1 <- n0: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n4: *HackMixed = load &$2
+  // CHECK: // .column 10
   // CHECK:   n5: *HackMixed = load &$0
+  // CHECK: // .column 10
+  // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n6: *HackMixed = load &$2
+  // CHECK: // .column 10
   // CHECK:   jmp b2
   // CHECK:   .handlers b1
   // CHECK: #b1(n7: *HackMixed):
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   throw n7
   // CHECK: #b2:
+  // CHECK: // .column 10
   // CHECK:   store &$0 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$1 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   store &$2 <- null: *HackMixed
+  // CHECK: // .column 10
   // CHECK:   n8 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK: // .column 10
   // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
+  // CHECK: // .column 5
   // CHECK:   store &$a <- n6: *HackMixed
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function cons_inst(): void {
@@ -193,19 +269,30 @@ class C {
   // TEST-CHECK-BAL: define C$static.static_signature
   // CHECK: define C$static.static_signature($this: .notnull *C$static, $a: *HackMixed, $b: *HackMixed) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 15
   // CHECK:   n0: *HackMixed = load &$b
+  // CHECK: // .column 15
   // CHECK:   n1: *HackMixed = load &$a
+  // CHECK: // .column 15
   // CHECK:   n2 = $builtins.hhbc_cmp_eq(n1, n0)
+  // CHECK: // .column 15
   // CHECK:   jmp b1, b2
   // CHECK: #b1:
+  // CHECK: // .column 15
   // CHECK:   prune ! $builtins.hack_is_true(n2)
+  // CHECK: // .column 7
   // CHECK:   n3 = $builtins.hhbc_print($builtins.hack_string("unequal"))
+  // CHECK: // .column 7
   // CHECK:   jmp b3
   // CHECK: #b2:
+  // CHECK: // .column 15
   // CHECK:   prune $builtins.hack_is_true(n2)
+  // CHECK: // .column 7
   // CHECK:   n4 = $builtins.hhbc_print($builtins.hack_string("equal"))
+  // CHECK: // .column 5
   // CHECK:   jmp b3
   // CHECK: #b3:
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
 
@@ -232,9 +319,12 @@ class C {
   // CHECK: define .final C.test_const($this: .notnull *C) : *void {
   // CHECK: local $x: *void
   // CHECK: #b0:
+  // CHECK: // .column 10
   // CHECK:   n0 = __sil_lazy_class_initialize(<C>)
   // CHECK:   n1 = $builtins.hack_field_get(n0, "MY_CONSTANT")
+  // CHECK: // .column 5
   // CHECK:   store &$x <- n1: *HackMixed
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public final function test_const(): void {
@@ -262,8 +352,10 @@ trait T0 {
   // TEST-CHECK-BAL: define T0.trait_parent_caller
   // CHECK: define T0.trait_parent_caller($this: .notnull *T0, self: *HackMixed) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *T0 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
@@ -275,8 +367,11 @@ trait T0 {
   // CHECK: define .wrapper T0$static.with_optional_argument($this: .notnull *T0$static, self: *HackMixed) : *void {
   // CHECK: local $opt1: *void, $opt2: *void
   // CHECK: #b0:
+  // CHECK: // .column 17
   // CHECK:   store &$opt1 <- $builtins.hack_int(0): *HackMixed
+  // CHECK: // .column 17
   // CHECK:   store &$opt2 <- $builtins.hack_int(1): *HackMixed
+  // CHECK: // .column 17
   // CHECK:   jmp b1
   // CHECK: #b1:
   // CHECK:   n0: *HackMixed = load &$opt1
@@ -298,7 +393,9 @@ trait T0 {
   // CHECK: define .wrapper T0$static.with_optional_argument($this: .notnull *T0$static, $opt1: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: local $opt2: *void
   // CHECK: #b0:
+  // CHECK: // .column 17
   // CHECK:   store &$opt2 <- $builtins.hack_int(1): *HackMixed
+  // CHECK: // .column 17
   // CHECK:   jmp b1
   // CHECK: #b1:
   // CHECK:   n0: *HackMixed = load &$opt1
@@ -320,6 +417,7 @@ trait T0 {
   // TEST-CHECK-BAL: define T0$static.with_optional_argument
   // CHECK: define T0$static.with_optional_argument($this: .notnull *T0$static, $opt1: .notnull *HackInt, $opt2: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
@@ -343,8 +441,10 @@ trait T1 {
   // TEST-CHECK-BAL: define T1.trait_parent_caller
   // CHECK: define T1.trait_parent_caller($this: .notnull *T1, self: *HackMixed) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
@@ -354,8 +454,10 @@ trait T1 {
   // TEST-CHECK-BAL: define T1.trait_parent_static_caller
   // CHECK: define T1.trait_parent_static_caller($this: .notnull *T1, self: *HackMixed) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_static(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_static_caller(): void {
@@ -367,8 +469,10 @@ trait T2 {
   // TEST-CHECK-BAL: define T2$static.trait_self_caller
   // CHECK: define T2$static.trait_self_caller($this: .notnull *T2$static, self: *HackMixed) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *T2$static = load &$this
   // CHECK:   n1 = __self__$static.f(n0)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
 
@@ -392,10 +496,13 @@ trait T3 {
   // TEST-CHECK-BAL: define T3.trait_self_caller
   // CHECK: define T3.trait_self_caller($this: .notnull *T3, self: *HackMixed) : *void {
   // CHECK: #b0:
+  // CHECK: // .column 5
   // CHECK:   n0: *T3 = load &$this
   // CHECK:   n1 = __self__.f(n0)
+  // CHECK: // .column 5
   // CHECK:   n2: *T3 = load &$this
   // CHECK:   n3 = __self__.g(n2)
+  // CHECK: // .column 4
   // CHECK:   ret null
   // CHECK: }
   public function trait_self_caller(): void {
@@ -427,10 +534,15 @@ trait T4 {
 // TEST-CHECK-BAL: define $root.dynamic_const
 // CHECK: define $root.dynamic_const($this: *void, $c: *C) : *void {
 // CHECK: #b0:
+// CHECK: // .column 8
 // CHECK:   n0: *HackMixed = load &$c
+// CHECK: // .column 8
 // CHECK:   n1 = $builtins.hhbc_class_get_c(n0)
+// CHECK: // .column 8
 // CHECK:   n2 = $builtins.hhbc_cls_cns(n1, $builtins.hack_string("MY_CONSTANT"))
+// CHECK: // .column 3
 // CHECK:   n3 = $builtins.hhbc_print(n2)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function dynamic_const(C $c): void {
@@ -440,9 +552,13 @@ function dynamic_const(C $c): void {
 // TEST-CHECK-BAL: define $root.cgets
 // CHECK: define $root.cgets($this: *void) : *void {
 // CHECK: #b0:
+// CHECK: // .column 11
 // CHECK:   n0 = __sil_lazy_class_initialize(<C>)
+// CHECK: // .column 11
 // CHECK:   n1 = $builtins.hack_field_get(n0, "prop3")
+// CHECK: // .column 3
 // CHECK:   n2 = $root.sink(null, n1)
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: }
 function cgets(): void {
@@ -454,22 +570,37 @@ function cgets(): void {
 // CHECK: local $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(3))
+// CHECK: // .column 6
 // CHECK:   n1 = __sil_lazy_class_initialize(<C>)
+// CHECK: // .column 15
 // CHECK:   n2 = $root.source(null)
+// CHECK: // .column 15
 // CHECK:   store &$0 <- n2: *HackMixed
+// CHECK: // .column 15
 // CHECK:   store &$1 <- n0: *HackMixed
+// CHECK: // .column 15
 // CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n2, n0, $builtins.hack_int(1), $builtins.hack_int(0))
+// CHECK: // .column 15
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
+// CHECK: // .column 15
 // CHECK:   prune $builtins.hack_is_true(n3)
+// CHECK: // .column 15
 // CHECK:   n4: *HackMixed = load &$0
+// CHECK: // .column 15
 // CHECK:   store &$1 <- null: *HackMixed
+// CHECK: // .column 3
 // CHECK:   store n1.?.prop3 <- n4: *HackMixed
+// CHECK: // .column 2
 // CHECK:   ret null
 // CHECK: #b2:
+// CHECK: // .column 15
 // CHECK:   prune ! $builtins.hack_is_true(n3)
+// CHECK: // .column 15
 // CHECK:   n5: *HackMixed = load &$0
+// CHECK: // .column 15
 // CHECK:   n6: *HackMixed = load &$1
+// CHECK: // .column 15
 // CHECK:   n7 = $builtins.hhbc_throw_as_type_struct_exception(n5, n6)
 // CHECK:   unreachable
 // CHECK: }
@@ -510,16 +641,25 @@ class TestFieldNamesWithKeywordsAndConflicts {
 // TEST-CHECK-BAL: define TestClassWithGenerics.__construct
 // CHECK: define TestClassWithGenerics.__construct($this: .notnull *TestClassWithGenerics, $t: .typevar="T" *HackMixed, $b: *Box) : *HackMixed {
 // CHECK: #b0:
+// CHECK: // .column 58
 // CHECK:   n0: *HackMixed = load &$this
+// CHECK: // .column 58
 // CHECK:   n1 = $builtins.hhbc_check_this(n0)
+// CHECK: // .column 58
 // CHECK:   n2: *HackMixed = load &$b
+// CHECK: // .column 58
 // CHECK:   n3: *HackMixed = load &$this
 // CHECK:   store n3.?.b <- n2: *HackMixed
+// CHECK: // .column 40
 // CHECK:   n4: *HackMixed = load &$this
+// CHECK: // .column 40
 // CHECK:   n5 = $builtins.hhbc_check_this(n4)
+// CHECK: // .column 40
 // CHECK:   n6: *HackMixed = load &$t
+// CHECK: // .column 40
 // CHECK:   n7: *HackMixed = load &$this
 // CHECK:   store n7.?.t <- n6: *HackMixed
+// CHECK: // .column 4
 // CHECK:   ret null
 // CHECK: }
 class Box<T> {}

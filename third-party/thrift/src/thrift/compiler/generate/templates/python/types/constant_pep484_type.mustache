@@ -17,7 +17,7 @@
 }}{{!
 This is for constants PEP484 type
 }}{{#type:container?}}{{!
-    }}{{#type:list?}}_typing.List[{{!
+    }}{{#type:list?}}_typing.Sequence[{{!
         }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!
     }}]{{/type:list?}}{{!
     }}{{#type:set?}}_typing.Set[{{!

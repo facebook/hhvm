@@ -60,16 +60,14 @@ class ImmutableListTests(unittest.TestCase):
             TypeError,
             "'thrift.python.types.List' object does not support item assignment",
         ):
-            # TODO: This should trigger a Pyre error. The type of the list constant
-            # is currently specified as `List`, which needs to be corrected.
+            # pyre-ignore[16]: `typing.Sequence` has no attribute `__setitem__`
             int_list[0] = 0
 
         with self.assertRaisesRegex(
             AttributeError,
             "'thrift.python.types.List' object has no attribute 'append'",
         ):
-            # TODO: This should trigger a Pyre error. The type of the list constant
-            # is currently specified as `List`, which needs to be corrected.
+            # pyre-ignore[16]: `typing.Sequence` has no attribute `append`
             int_list.append(11)
 
 

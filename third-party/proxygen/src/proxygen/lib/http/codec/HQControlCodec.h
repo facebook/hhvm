@@ -134,12 +134,6 @@ class HQControlCodec
     folly::assume_unreachable();
   }
 
-  size_t addPriorityNodes(PriorityQueue& queue,
-                          folly::IOBufQueue& writeBuf,
-                          uint8_t maxLevel) override;
-
-  HTTPCodec::StreamID mapPriorityToDependency(uint8_t priority) const override;
-
   bool receivedSettings() const {
     return receivedSettings_;
   }

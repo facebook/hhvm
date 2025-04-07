@@ -298,18 +298,4 @@ size_t HQControlCodec::generatePushPriority(folly::IOBufQueue& writeBuf,
   return *writeRet;
 }
 
-size_t HQControlCodec::addPriorityNodes(PriorityQueue& /*queue*/,
-                                        folly::IOBufQueue& /*writeBuf*/,
-                                        uint8_t /*maxLevel*/) {
-
-  CHECK(false) << __func__ << " not implemented";
-  return 0;
-}
-
-HTTPCodec::StreamID HQControlCodec::mapPriorityToDependency(
-    uint8_t /*priority*/) const {
-  CHECK(false) << __func__ << " not implemented";
-  return 0;
-}
-
 }} // namespace proxygen::hq

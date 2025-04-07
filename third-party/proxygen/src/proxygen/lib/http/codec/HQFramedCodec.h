@@ -287,21 +287,6 @@ class HQFramedCodec : public HTTPCodec {
     folly::assume_unreachable();
   }
 
-  // only valid for the Control Codec
-  size_t addPriorityNodes(PriorityQueue& /*queue*/,
-                          folly::IOBufQueue& /*writeBuf*/,
-                          uint8_t /*maxLevel*/) override {
-    LOG(FATAL) << __func__ << " not supported on this codec";
-    folly::assume_unreachable();
-  }
-
-  // only valid for the Control Codec
-  HTTPCodec::StreamID mapPriorityToDependency(
-      uint8_t /*priority*/) const override {
-    LOG(FATAL) << __func__ << " not supported on this codec";
-    folly::assume_unreachable();
-  }
-
   // HTTPCodec has a default implementation, override that here to fail.
   // StreamCodec returns the QPACK table info
   CompressionInfo getCompressionInfo() const override {

@@ -779,21 +779,6 @@ ErrorCode HTTP2Codec::parsePriority(Cursor& cursor) {
   return ErrorCode::NO_ERROR;
 }
 
-size_t HTTP2Codec::addPriorityNodes(PriorityQueue& queue,
-                                    folly::IOBufQueue& writeBuf,
-                                    uint8_t maxLevel) {
-  HTTPCodec::StreamID parent = 0;
-  size_t bytes = 0;
-  while (maxLevel--) {
-    auto id = createStream();
-    virtualPriorityNodes_.push_back(id);
-    queue.addPriorityNode(id, parent);
-    bytes += generatePriority(writeBuf, id, std::make_tuple(parent, false, 0));
-    parent = id;
-  }
-  return bytes;
-}
-
 ErrorCode HTTP2Codec::parseRFC9218Priority(Cursor& cursor) {
   VLOG(4) << "parsing RFC 9218 PRIORITY_UPDATE frame for stream="
           << curHeader_.stream << " length=" << curHeader_.length;
@@ -1891,17 +1876,6 @@ void HTTP2Codec::streamError(const std::string& msg,
                            streamId ? *streamId : curHeader_.stream,
                            error,
                            newTxn);
-}
-
-HTTPCodec::StreamID HTTP2Codec::mapPriorityToDependency(
-    uint8_t priority) const {
-  // If the priority is out of the maximum index of virtual nodes array, we
-  // return the lowest level virtual node as a punishment of not setting
-  // priority correctly.
-  return virtualPriorityNodes_.empty()
-             ? 0
-             : virtualPriorityNodes_[std::min(
-                   priority, uint8_t(virtualPriorityNodes_.size() - 1))];
 }
 
 bool HTTP2Codec::parsingHeaders() const {

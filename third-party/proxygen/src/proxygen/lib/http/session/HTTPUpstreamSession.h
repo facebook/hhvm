@@ -28,8 +28,6 @@ class HTTPUpstreamSession : public HTTPSession {
    * @param peerAddr       Address and port of the remote end of the socket.
    * @param codec          A codec with which to parse/generate messages in
    *                         whatever HTTP-like wire format this session needs.
-   * @param maxVirtualPri  Number of virtual priority nodes to represent fixed
-   *                         priority levels.
    */
   HTTPUpstreamSession(
       const WheelTimerInstance& wheelTimer,
@@ -39,7 +37,6 @@ class HTTPUpstreamSession : public HTTPSession {
       std::unique_ptr<HTTPCodec> codec,
       const wangle::TransportInfo& tinfo,
       InfoCallback* infoCallback,
-      uint8_t maxVirtualPri = 0,
       std::shared_ptr<const PriorityMapFactory> priorityMapFactory =
           std::shared_ptr<const PriorityMapFactory>());
 
@@ -52,7 +49,6 @@ class HTTPUpstreamSession : public HTTPSession {
       std::unique_ptr<HTTPCodec> codec,
       const wangle::TransportInfo& tinfo,
       InfoCallback* infoCallback,
-      uint8_t maxVirtualPri = 0,
       std::shared_ptr<const PriorityMapFactory> priorityMapFactory =
           std::shared_ptr<const PriorityMapFactory>());
 
@@ -142,8 +138,6 @@ class HTTPUpstreamSession : public HTTPSession {
   void maybeAttachSSLContext(
       std::shared_ptr<const folly::SSLContext> sslContext) const;
   void maybeDetachSSLContext() const;
-
-  uint8_t maxVirtualPriorityLevel_{0};
 
   std::shared_ptr<const PriorityMapFactory> priorityMapFactory_;
   std::unique_ptr<PriorityAdapter> priorityAdapter_;

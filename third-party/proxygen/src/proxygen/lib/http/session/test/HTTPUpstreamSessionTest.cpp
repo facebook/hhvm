@@ -965,7 +965,6 @@ class HTTP2UpstreamSessionWithVirtualNodesTest
                                            std::move(codec),
                                            mockTransportInfo_,
                                            this,
-                                           level_,
                                            builder_);
     eventBase_.loop();
     ASSERT_EQ(this->sessionDestroyed_, false);

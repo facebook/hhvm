@@ -153,11 +153,6 @@ class HTTP2Codec
              (id & 0x1) == 0));
   }
 
-  size_t addPriorityNodes(PriorityQueue& queue,
-                          folly::IOBufQueue& writeBuf,
-                          uint8_t maxLevel) override;
-  HTTPCodec::StreamID mapPriorityToDependency(uint8_t priority) const override;
-
   CompressionInfo getCompressionInfo() const override {
     return headerCodec_.getCompressionInfo();
   }
@@ -357,7 +352,6 @@ class HTTP2Codec
   size_t pendingDataFramePaddingBytes_{0};
 
   HeaderDecodeInfo decodeInfo_;
-  std::vector<StreamID> virtualPriorityNodes_;
   folly::Optional<uint32_t> pendingTableMaxSize_;
   bool reuseIOBufHeadroomForData_{true};
 

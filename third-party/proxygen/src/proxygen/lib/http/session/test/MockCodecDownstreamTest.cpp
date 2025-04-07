@@ -120,7 +120,6 @@ class MockCodecDownstreamTest : public testing::Test {
           return 1;
         }));
     EXPECT_CALL(*codec_, generateRstStream(_, _, _)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*codec_, addPriorityNodes(_, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*codec_, mapPriorityToDependency(_)).WillRepeatedly(Return(0));
 
     HTTPSession::setDefaultReadBufferLimit(65536);

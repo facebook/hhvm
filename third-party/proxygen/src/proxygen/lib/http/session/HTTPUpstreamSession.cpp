@@ -25,7 +25,6 @@ HTTPUpstreamSession::HTTPUpstreamSession(
     std::unique_ptr<HTTPCodec> codec,
     const wangle::TransportInfo& tinfo,
     InfoCallback* infoCallback,
-    uint8_t maxVirtualPri,
     std::shared_ptr<const PriorityMapFactory> priorityMapFactory)
     : HTTPSession(wheelTimer,
                   std::move(sock),
@@ -35,7 +34,6 @@ HTTPUpstreamSession::HTTPUpstreamSession(
                   std::move(codec),
                   tinfo,
                   infoCallback),
-      maxVirtualPriorityLevel_(priorityMapFactory ? 0 : maxVirtualPri),
       priorityMapFactory_(priorityMapFactory) {
   if (sock_) {
     auto asyncSocket = sock_->getUnderlyingTransport<folly::AsyncSocket>();
@@ -55,7 +53,6 @@ HTTPUpstreamSession::HTTPUpstreamSession(
     std::unique_ptr<HTTPCodec> codec,
     const wangle::TransportInfo& tinfo,
     InfoCallback* infoCallback,
-    uint8_t maxVirtualPri,
     std::shared_ptr<const PriorityMapFactory> priorityMapFactory)
     : HTTPUpstreamSession(WheelTimerInstance(wheelTimer),
                           std::move(sock),
@@ -64,7 +61,6 @@ HTTPUpstreamSession::HTTPUpstreamSession(
                           std::move(codec),
                           tinfo,
                           infoCallback,
-                          maxVirtualPri,
                           priorityMapFactory) {
 }
 
@@ -116,14 +112,6 @@ void HTTPUpstreamSession::startNow() {
   if (priorityMapFactory_) {
     priorityAdapter_ = priorityMapFactory_->createVirtualStreams(this);
     scheduleWrite();
-  } else {
-    // TODO/T17420249 Move this to the PriorityAdapter and remove it from the
-    // codec.
-    auto bytes = codec_->addPriorityNodes(
-        txnEgressQueue_, writeBuf_, maxVirtualPriorityLevel_);
-    if (bytes) {
-      scheduleWrite();
-    }
   }
 }
 
@@ -211,13 +199,6 @@ bool HTTPUpstreamSession::onNativeProtocolUpgrade(
 
   bool ret =
       onNativeProtocolUpgradeImpl(streamID, std::move(codec), protocolString);
-  if (ret) {
-    auto bytes = codec_->addPriorityNodes(
-        txnEgressQueue_, writeBuf_, maxVirtualPriorityLevel_);
-    if (bytes) {
-      scheduleWrite();
-    }
-  }
   return ret;
 }
 

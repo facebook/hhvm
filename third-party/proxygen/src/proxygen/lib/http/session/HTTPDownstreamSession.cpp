@@ -18,10 +18,6 @@ HTTPDownstreamSession::~HTTPDownstreamSession() {
 }
 
 void HTTPDownstreamSession::startNow() {
-  // Create virtual nodes should happen before startNow since ingress may come
-  // before we can finish startNow. Since maxLevel = 0, this is a no-op unless
-  // SPDY is used. And no frame will be sent to peer, so ignore returned value.
-  codec_->addPriorityNodes(txnEgressQueue_, writeBuf_, 0);
   HTTPSession::startNow();
 }
 
@@ -128,9 +124,6 @@ bool HTTPDownstreamSession::onNativeProtocolUpgrade(
     // This will actually switch the protocol
     bool ret = HTTPSession::onNativeProtocolUpgradeImpl(
         streamID, std::move(codec), protocolString);
-    if (ret) {
-      codec_->addPriorityNodes(txnEgressQueue_, writeBuf_, 0);
-    }
     return ret;
   } else {
     VLOG(4) << *this << " plaintext upgrade failed due to early response";

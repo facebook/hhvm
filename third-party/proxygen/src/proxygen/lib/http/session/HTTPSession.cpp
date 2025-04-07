@@ -714,10 +714,6 @@ http2::PriorityUpdate HTTPSession::getMessagePriority(const HTTPMessage* msg) {
       h2Pri.streamDependency = std::get<0>(*res);
       h2Pri.exclusive = std::get<1>(*res);
       h2Pri.weight = std::get<2>(*res);
-    } else {
-      // HTTPMessage with setPriority called explicitly
-      h2Pri.streamDependency =
-          codec_->mapPriorityToDependency(msg->getPriority());
     }
   }
   return h2Pri;

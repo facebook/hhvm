@@ -943,7 +943,7 @@ void printTopFuncs() {
     auto tRec = TREC(t);
     if (!tRec->isValid()) continue;
     auto funcId = tRec->src.funcID();
-    if (funcStrs.count(funcId)) continue;
+    if (funcStrs.contains(funcId)) continue;
     auto funcName = tRec->funcName;
     funcStrs[funcId] = folly::sformat("{:<6}: {}", funcId, funcName);
   }

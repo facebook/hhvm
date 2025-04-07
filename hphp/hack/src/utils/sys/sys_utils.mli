@@ -155,8 +155,9 @@ val try_touch : touch_mode -> string -> unit
 
 val splitext : string -> string * string
 
-(** Do we want HackEventLogger to work? *)
-val enable_telemetry : unit -> bool
+(* HH_TEST_MODE env var redirects HackEventLogger to a different table and
+ * backs the [deterministic_behavior_for_tests] helper below *)
+val is_hh_test_mode : unit -> bool
 
 (** This flag controls whether at runtime we pick A/B experiments to test;
 if not, then the output behavior will be solely a function of the inputs

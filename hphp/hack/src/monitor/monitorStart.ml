@@ -71,20 +71,17 @@ let monitor_daemon_main
       ~cli_config_overrides:(ServerArgs.config options)
       ~ai_options:None
   in
-  if not (Sys_utils.enable_telemetry ()) then
-    EventLogger.init_fake ()
-  else
-    HackEventLogger.init_monitor
-      ~from:(ServerArgs.from options)
-      ~custom_columns:(ServerArgs.custom_telemetry_data options)
-      ~hhconfig_version:
-        (ServerConfig.version config |> Config_file.version_to_string_opt)
-      ~rollout_flags:(ServerLocalConfigLoad.to_rollout_flags local_config)
-      ~rollout_group:local_config.ServerLocalConfig.rollout_group
-      ~proc_stack
-      (ServerArgs.root options)
-      init_id
-      (Unix.gettimeofday ());
+  HackEventLogger.init_monitor
+    ~from:(ServerArgs.from options)
+    ~custom_columns:(ServerArgs.custom_telemetry_data options)
+    ~hhconfig_version:
+      (ServerConfig.version config |> Config_file.version_to_string_opt)
+    ~rollout_flags:(ServerLocalConfigLoad.to_rollout_flags local_config)
+    ~rollout_group:local_config.ServerLocalConfig.rollout_group
+    ~proc_stack
+    (ServerArgs.root options)
+    init_id
+    (Unix.gettimeofday ());
   Sys_utils.set_signal
     Sys.sigpipe
     (Sys.Signal_handle (fun i -> Hh_logger.log "SIGPIPE(%d)" i));

@@ -448,20 +448,14 @@ let splitext filename =
   let ext = String.sub filename ~pos:(root_length + 1) ~len:ext_length in
   (root, ext)
 
-let enable_telemetry () =
-  (* There are some cases where we want telemetry even from a non-production build,
-     so achieve that by setting HH_TEST_MODE=0.
-     There are other cases where we want to disable telemetry even in a production build,
-     so achieve that by setting HH_TEST_MODE=1 (or indeed anything other than 0). *)
+let is_hh_test_mode () =
   match Sys.getenv_opt "HH_TEST_MODE" with
   | Some "0" -> true
   | Some _ -> false
   | None -> not Build_id.is_dev_build
 
-let deterministic_behavior_for_tests () =
-  (* The only time we want A/B experiments is if we get telemetry on their outcomes!
-     That's why we use the same logic. *)
-  not (enable_telemetry ())
+(* TODO(vmladenov) Further audit the callers of this function *)
+let deterministic_behavior_for_tests () = not (is_hh_test_mode ())
 
 let sleep ~seconds = ignore @@ Unix.select [] [] [] seconds
 

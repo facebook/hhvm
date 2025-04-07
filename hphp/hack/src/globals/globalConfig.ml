@@ -20,8 +20,13 @@ let program_name = "hh_server"
 let gc_control = Gc.get ()
 
 let scuba_table_name =
-  try Sys.getenv "HH_SCUBA_TABLE" with
-  | _ -> "hh_server_events"
+  match Sys.getenv_opt "HH_SCUBA_TABLE" with
+  | Some table -> table
+  | None ->
+    if Sys_utils.is_hh_test_mode () then
+      "hh_test_mode_server_events"
+    else
+      "hh_server_events"
 
 (* Where to write temp files *)
 let tmp_dir = Tmp.hh_server_tmp_dir

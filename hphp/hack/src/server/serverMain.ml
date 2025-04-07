@@ -1129,9 +1129,7 @@ let initialize_logging
   let hhconfig_version =
     config |> ServerConfig.version |> Config_file.version_to_string_opt
   in
-  if not (Sys_utils.enable_telemetry ()) then
-    EventLogger.init_fake ()
-  else if is_worker then
+  if is_worker then
     HackEventLogger.init_worker
       ~root
       ~hhconfig_version

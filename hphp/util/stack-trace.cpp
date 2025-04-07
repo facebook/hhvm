@@ -179,7 +179,7 @@ void translateFromPerfMap(StackFrameExtra* frame) {
   std::lock_guard<std::mutex> lock(s_perfMapCacheMutex);
 
   if (s_perfMapCache.translate(frame)) {
-    if (s_perfMapNegCache.count(frame->addr)) {
+    if (s_perfMapNegCache.contains(frame->addr)) {
       // A prior failed lookup of frame already triggered a rebuild.
       return;
     }

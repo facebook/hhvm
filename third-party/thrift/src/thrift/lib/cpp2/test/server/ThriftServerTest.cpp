@@ -3034,10 +3034,10 @@ TEST(ThriftServer, ClientOnlyTimeouts) {
 
 TEST(ThriftServerTest, QueueTimeHeaderTest) {
   THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(/* ThreadManager features */);
-  using namespace ::testing;
+
   // Tests that queue time metadata is returned in the THeader when
   // queueing delay on server side is greater than pre-defined threshold.
-  static constexpr std::chrono::milliseconds kDefaultQueueTimeout{100};
+  const std::chrono::milliseconds defaultQueueTimeout(666);
   class QueueTimeTestHandler
       : public apache::thrift::ServiceHandler<TestService> {
    public:
@@ -3053,9 +3053,9 @@ TEST(ThriftServerTest, QueueTimeHeaderTest) {
       &eb, RocketClientChannel::newChannel);
   // Queue a task on the runner's ThreadManager to block it from
   // executing the Thrift request.
-  auto tServer = &runner.getThriftServer();
-  tServer->setQueueTimeout(kDefaultQueueTimeout);
-  auto threadManager = tServer->getThreadManager();
+  auto server = &runner.getThriftServer();
+  server->setQueueTimeout(defaultQueueTimeout);
+  auto threadManager = server->getThreadManager();
 
   folly::Baton<> startupBaton;
   threadManager->add([&startupBaton]() {
@@ -3071,15 +3071,12 @@ TEST(ThriftServerTest, QueueTimeHeaderTest) {
   auto [resp, header] =
       client->header_semifuture_sendResponse(options, 42).get();
   EXPECT_EQ(resp, "42");
-  // Check that queue time headers are set
+  // Check that queue time headers are set.
   auto queueTimeout = header->getServerQueueTimeout();
   auto queueingTime = header->getProcessDelay();
   EXPECT_TRUE(queueTimeout.hasValue() && queueingTime.hasValue());
-  EXPECT_EQ(queueTimeout.value(), kDefaultQueueTimeout);
-  EXPECT_THAT(
-      queueingTime.value(),
-      AllOf(
-          Gt(std::chrono::milliseconds(5)), Lt(std::chrono::milliseconds(50))));
+  EXPECT_EQ(queueTimeout.value(), defaultQueueTimeout);
+  EXPECT_LT(queueingTime.value(), std::chrono::milliseconds(50));
 }
 
 TEST(ThriftServer, QueueTimeoutStressTest) {

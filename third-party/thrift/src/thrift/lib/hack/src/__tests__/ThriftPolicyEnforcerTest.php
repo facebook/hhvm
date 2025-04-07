@@ -326,7 +326,8 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
 
   public async function testThriftClientMethodNameNotFiltered(
   ): Awaitable<void> {
-    $mock = self::mockFunction(ThriftServiceMethodNamePrivacyLib::get<>);
+    $mock = self::mockFunction(ThriftServiceMethodNamePrivacyLib::get<>)
+      ->assertCanPassthroughAndBlockMocks();
     self::mockClassStaticMethodUNSAFE(
       PolicyEnforcer::class,
       'shouldExecuteModule',
@@ -339,7 +340,6 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
       PrivacyLibEcho\PrivacyLibEchoServiceAsyncClient::factory(),
       "sr_config_1",
     )->gen();
-
     await (
       new TClientPoliciedAsyncHandler(
         'sr_config_1',
@@ -350,10 +350,16 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
     )->genBefore('PrivacyLibEchoService', 'echo');
 
     expect($mock)->toBeCalledWithInAnyOrder(
-      vec[vec[
-        ThriftServiceMethodNameAssetXID::get('PrivacyLibEchoService', 'echo'),
-        'sr_config_1',
-      ]],
+      vec[
+        vec[
+          ThriftServiceMethodNameAssetXID::get('PrivacyLibEchoService', 'echo'),
+          'sr_config_1',
+        ],
+        vec[
+          ThriftServiceMethodNameAssetXID::get('PrivacyLibEchoService', 'echo'),
+          'sr_config_1',
+        ],
+      ],
     );
   }
 

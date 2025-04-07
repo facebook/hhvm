@@ -111,6 +111,11 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
   MOCK_METHOD(bool, getUseClientTimeout, (), (const, override));
   MOCK_METHOD(
       std::chrono::milliseconds, getTaskExpireTime, (), (const, override));
+  MOCK_METHOD(
+      InterceptorMetricCallback&,
+      getInterceptorMetricCallback,
+      (),
+      (const, override));
 };
 
 } // namespace apache::thrift::server::test

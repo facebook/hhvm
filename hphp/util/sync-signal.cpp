@@ -95,7 +95,7 @@ SyncSignals g_state;
 //void block_and_raise(int signo) {
 void block_and_raise(int signo, siginfo_t* info, void* args) {
 #ifndef NDEBUG
-  if (!g_state.m_syncHandlers.count(signo)) {
+  if (!g_state.m_syncHandlers.contains(signo)) {
     abort();
   }
 #endif
@@ -241,7 +241,7 @@ bool sync_signal_info(int signo, sigaction_sync_t sync_action) {
 }
 
 bool is_sync_signal(int signo) {
-  return g_state.m_syncHandlers.count(signo);
+  return g_state.m_syncHandlers.contains(signo);
 }
 
 void reset_sync_signals() {

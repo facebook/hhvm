@@ -97,7 +97,7 @@ std::string FastCGITransport::getHeader(const char* name) {
     key += (*p == '-') ? '_' : toupper(*p);
   }
 
-  if (m_requestParams.count(key)) {
+  if (m_requestParams.contains(key)) {
     return m_requestParams[key];
   }
 

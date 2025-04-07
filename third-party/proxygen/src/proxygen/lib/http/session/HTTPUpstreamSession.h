@@ -29,28 +29,22 @@ class HTTPUpstreamSession : public HTTPSession {
    * @param codec          A codec with which to parse/generate messages in
    *                         whatever HTTP-like wire format this session needs.
    */
-  HTTPUpstreamSession(
-      const WheelTimerInstance& wheelTimer,
-      folly::AsyncTransport::UniquePtr&& sock,
-      const folly::SocketAddress& localAddr,
-      const folly::SocketAddress& peerAddr,
-      std::unique_ptr<HTTPCodec> codec,
-      const wangle::TransportInfo& tinfo,
-      InfoCallback* infoCallback,
-      std::shared_ptr<const PriorityMapFactory> priorityMapFactory =
-          std::shared_ptr<const PriorityMapFactory>());
+  HTTPUpstreamSession(const WheelTimerInstance& wheelTimer,
+                      folly::AsyncTransport::UniquePtr&& sock,
+                      const folly::SocketAddress& localAddr,
+                      const folly::SocketAddress& peerAddr,
+                      std::unique_ptr<HTTPCodec> codec,
+                      const wangle::TransportInfo& tinfo,
+                      InfoCallback* infoCallback);
 
   // uses folly::HHWheelTimer instance which is used on client side & thrift
-  HTTPUpstreamSession(
-      folly::HHWheelTimer* wheelTimer,
-      folly::AsyncTransport::UniquePtr&& sock,
-      const folly::SocketAddress& localAddr,
-      const folly::SocketAddress& peerAddr,
-      std::unique_ptr<HTTPCodec> codec,
-      const wangle::TransportInfo& tinfo,
-      InfoCallback* infoCallback,
-      std::shared_ptr<const PriorityMapFactory> priorityMapFactory =
-          std::shared_ptr<const PriorityMapFactory>());
+  HTTPUpstreamSession(folly::HHWheelTimer* wheelTimer,
+                      folly::AsyncTransport::UniquePtr&& sock,
+                      const folly::SocketAddress& localAddr,
+                      const folly::SocketAddress& peerAddr,
+                      std::unique_ptr<HTTPCodec> codec,
+                      const wangle::TransportInfo& tinfo,
+                      InfoCallback* infoCallback);
 
   using FilterIteratorFn = std::function<void(HTTPCodecFilter*)>;
 
@@ -139,7 +133,6 @@ class HTTPUpstreamSession : public HTTPSession {
       std::shared_ptr<const folly::SSLContext> sslContext) const;
   void maybeDetachSSLContext() const;
 
-  std::shared_ptr<const PriorityMapFactory> priorityMapFactory_;
   std::unique_ptr<PriorityAdapter> priorityAdapter_;
 };
 

@@ -48,7 +48,6 @@ class HTTPSession
     , public HTTPTransaction::Transport
     , public ByteEventTracker::Callback
     , protected folly::AsyncTransport::BufferCallback
-    , protected HTTPPriorityMapFactoryProvider
     , private FlowControlFilter::Callback
     , private HTTPCodec::Callback
     , private folly::EventBase::LoopCallback

@@ -24,8 +24,7 @@ HTTPUpstreamSession::HTTPUpstreamSession(
     const folly::SocketAddress& peerAddr,
     std::unique_ptr<HTTPCodec> codec,
     const wangle::TransportInfo& tinfo,
-    InfoCallback* infoCallback,
-    std::shared_ptr<const PriorityMapFactory> priorityMapFactory)
+    InfoCallback* infoCallback)
     : HTTPSession(wheelTimer,
                   std::move(sock),
                   localAddr,
@@ -33,8 +32,7 @@ HTTPUpstreamSession::HTTPUpstreamSession(
                   nullptr,
                   std::move(codec),
                   tinfo,
-                  infoCallback),
-      priorityMapFactory_(priorityMapFactory) {
+                  infoCallback) {
   if (sock_) {
     auto asyncSocket = sock_->getUnderlyingTransport<folly::AsyncSocket>();
     if (asyncSocket) {
@@ -52,16 +50,14 @@ HTTPUpstreamSession::HTTPUpstreamSession(
     const folly::SocketAddress& peerAddr,
     std::unique_ptr<HTTPCodec> codec,
     const wangle::TransportInfo& tinfo,
-    InfoCallback* infoCallback,
-    std::shared_ptr<const PriorityMapFactory> priorityMapFactory)
+    InfoCallback* infoCallback)
     : HTTPUpstreamSession(WheelTimerInstance(wheelTimer),
                           std::move(sock),
                           localAddr,
                           peerAddr,
                           std::move(codec),
                           tinfo,
-                          infoCallback,
-                          priorityMapFactory) {
+                          infoCallback) {
 }
 
 HTTPUpstreamSession::~HTTPUpstreamSession() {
@@ -107,12 +103,6 @@ bool HTTPUpstreamSession::isClosing() const {
 void HTTPUpstreamSession::startNow() {
   // startNow in base class CHECKs this session has not started.
   HTTPSession::startNow();
-  // Upstream specific:
-  // create virtual priority nodes and send Priority frames to peer if necessary
-  if (priorityMapFactory_) {
-    priorityAdapter_ = priorityMapFactory_->createVirtualStreams(this);
-    scheduleWrite();
-  }
 }
 
 HTTPTransaction* HTTPUpstreamSession::newTransaction(

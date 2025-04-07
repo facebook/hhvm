@@ -30,11 +30,6 @@ class ByteEventTracker;
 
 constexpr uint32_t kDefaultMaxConcurrentOutgoingStreams = 100;
 
-class HTTPPriorityMapFactoryProvider {
- public:
-  virtual ~HTTPPriorityMapFactoryProvider() = default;
-};
-
 class HTTPSessionBase : public wangle::ManagedConnection {
  public:
   /**
@@ -426,15 +421,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     virtual folly::Optional<const HTTPMessage::HTTP2Priority> getHTTPPriority(
         uint8_t level) = 0;
     virtual ~PriorityAdapter() = default;
-  };
-
-  class PriorityMapFactory {
-   public:
-    // Creates the map implemented by PriorityAdapter, sends the corresponding
-    // virtual stream on the given session, and retuns the map.
-    virtual std::unique_ptr<PriorityAdapter> createVirtualStreams(
-        HTTPPriorityMapFactoryProvider* session) const = 0;
-    virtual ~PriorityMapFactory() = default;
   };
 
   using FilterIteratorFn = std::function<void(HTTPCodecFilter*)>;

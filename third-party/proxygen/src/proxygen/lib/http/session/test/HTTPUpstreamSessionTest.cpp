@@ -34,18 +34,6 @@ using namespace testing;
 using std::string;
 using std::unique_ptr;
 
-class TestPriorityMapBuilder : public HTTPUpstreamSession::PriorityMapFactory {
- public:
-  std::unique_ptr<HTTPUpstreamSession::PriorityAdapter> createVirtualStreams(
-      HTTPPriorityMapFactoryProvider* session) const override;
-  ~TestPriorityMapBuilder() override = default;
-
-  uint8_t hiPriWeight_{18};
-  uint8_t hiPriLevel_{0};
-  uint8_t loPriWeight_{2};
-  uint8_t loPriLevel_{2};
-};
-
 class TestPriorityAdapter : public HTTPUpstreamSession::PriorityAdapter {
  public:
   folly::Optional<const HTTPMessage::HTTP2Priority> getHTTPPriority(
@@ -964,8 +952,7 @@ class HTTP2UpstreamSessionWithVirtualNodesTest
                                            peerAddr_,
                                            std::move(codec),
                                            mockTransportInfo_,
-                                           this,
-                                           builder_);
+                                           this);
     eventBase_.loop();
     ASSERT_EQ(this->sessionDestroyed_, false);
   }
@@ -980,15 +967,6 @@ class HTTP2UpstreamSessionWithVirtualNodesTest
   uint32_t nextOutgoingTxn_{1};
   std::vector<HTTPCodec::StreamID> dependencies;
   uint8_t level_{3};
-  std::shared_ptr<TestPriorityMapBuilder> builder_;
-};
-
-class HTTP2UpstreamSessionWithPriorityTree
-    : public HTTP2UpstreamSessionWithVirtualNodesTest {
- public:
-  HTTP2UpstreamSessionWithPriorityTree() {
-    builder_ = std::make_shared<TestPriorityMapBuilder>();
-  }
 };
 
 TYPED_TEST_P(HTTPUpstreamTest, ImmediateEof) {

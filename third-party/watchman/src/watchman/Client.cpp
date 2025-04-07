@@ -54,7 +54,7 @@ Client::Client(std::unique_ptr<watchman_stream> stm)
           w_event_make_sockets()
 #endif
               ),
-      peerPid_{this->stm->getPeerProcessID()},
+      peerPid_{this->stm ? this->stm->getPeerProcessID() : 0},
       peerInfo_{lookupProcessInfo(peerPid_)} {
   logf(DBG, "accepted client:stm={}\n", fmt::ptr(this->stm.get()));
 }

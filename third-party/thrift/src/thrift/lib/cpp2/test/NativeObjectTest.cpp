@@ -177,6 +177,45 @@ TEST(ValueHolderTest, Bytes) {
   test_value_holder_type<experimental::Bytes>();
 }
 
+TEST(ObjectIterator, object_with_primitive_fields) {
+  Object obj;
+  experimental::I32 int_val_1 = random_val<experimental::I32>();
+  obj.emplace(1, NativeValue{int_val_1});
+  experimental::I32 int_val_2 = random_val<experimental::I32>();
+  obj[2] = NativeValue{int_val_2};
+  {
+    ASSERT_EQ(obj.size(), 2);
+    for (const auto& [field_id, field_val] : obj) {
+      ASSERT_TRUE(field_val.is_type<experimental::I32>());
+      ASSERT_EQ(
+          field_val.as_type<experimental::I32>(),
+          field_id == 1 ? int_val_1 : int_val_2);
+    }
+  }
+
+  {
+    Object obj2{obj};
+    ASSERT_EQ(obj2.size(), 2);
+    for (const auto& [field_id, field_val] : obj2) {
+      ASSERT_TRUE(field_val.is_type<experimental::I32>());
+      ASSERT_EQ(
+          field_val.as_type<experimental::I32>(),
+          field_id == 1 ? int_val_1 : int_val_2);
+    }
+  }
+
+  {
+    Object obj3(std::move(obj));
+    ASSERT_EQ(obj3.size(), 2);
+    for (const auto& [field_id, field_val] : obj3) {
+      ASSERT_TRUE(field_val.is_type<experimental::I32>());
+      ASSERT_EQ(
+          field_val.as_type<experimental::I32>(),
+          field_id == 1 ? int_val_1 : int_val_2);
+    }
+  }
+}
+
 // ---- Object testcases ---- //
 
 template <StandardProtocol Protocol, typename T>
@@ -199,4 +238,43 @@ template <StandardProtocol Protocol, typename T>
 Object testSerDe(const T& t) {
   auto buf = serialize<Protocol>(t);
   return deserialize<Protocol>(*buf);
+}
+
+TEST(NativeObjectTest, empty) {
+  const auto empty =
+      testSerDe<StandardProtocol::Binary>(testset::struct_empty{});
+  ASSERT_TRUE(empty.empty());
+}
+
+template <typename T>
+void assertFieldType() {
+  T t;
+  using FieldTy =
+      std::remove_cvref_t<typename decltype(t.field_1())::value_type>;
+  const auto val = random_val<FieldTy>();
+  t.field_1().emplace(val);
+  const auto obj = testSerDe<StandardProtocol::Binary>(t);
+
+  ASSERT_EQ(obj.size(), 1);
+  const NativeValue& field_obj = obj.at(1);
+  ASSERT_TRUE(field_obj.is_type<FieldTy>());
+  ASSERT_EQ(field_obj.as_type<FieldTy>(), val);
+}
+
+template <typename... Ts>
+void assertFieldTypes() {
+  (assertFieldType<Ts>(), ...);
+}
+
+TEST(NativeObjectTest, struct_with_primitive_fields) {
+  assertFieldTypes<
+      testset::struct_bool,
+      testset::struct_byte,
+      testset::struct_i16,
+      testset::struct_i32,
+      testset::struct_i64,
+      testset::struct_float,
+      testset::struct_double,
+      testset::struct_binary,
+      testset::struct_string>();
 }

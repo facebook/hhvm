@@ -214,10 +214,91 @@ auto make_value(Args&&... args) {
   return ValueHolder{Value(std::forward<Args>(args)...)};
 }
 
+template <typename Protocol, bool StringToBinary>
+void read_struct_field(
+    Protocol& prot, TType field_type, Object& strct, Object::FieldId id) {
+  switch (field_type) {
+    case T_BOOL: {
+      strct.emplace(id, make_value(read_primitive_as<Protocol, Bool>(prot)));
+      return;
+    }
+    case T_BYTE: {
+      strct.emplace(id, make_value(read_primitive_as<Protocol, I8>(prot)));
+      return;
+    }
+    case T_I16: {
+      strct.emplace(id, make_value(read_primitive_as<Protocol, I16>(prot)));
+      return;
+    }
+    case T_I32: {
+      strct.emplace(id, make_value(read_primitive_as<Protocol, I32>(prot)));
+      return;
+    }
+    case T_I64: {
+      strct.emplace(id, make_value(read_primitive_as<Protocol, I64>(prot)));
+      return;
+    }
+    case T_FLOAT: {
+      strct.emplace(id, make_value(read_primitive_as<Protocol, Float>(prot)));
+      return;
+    }
+    case T_DOUBLE: {
+      strct.emplace(id, make_value(read_primitive_as<Protocol, Double>(prot)));
+      return;
+    }
+    case T_STRING: {
+      if constexpr (StringToBinary) {
+        strct.emplace(id, make_value(read_primitive_as<Protocol, Bytes>(prot)));
+      } else {
+        strct.emplace(
+            id, make_value(read_primitive_as<Protocol, String>(prot)));
+      }
+      return;
+    }
+    case protocol::T_STRUCT: {
+      strct.emplace(
+          id, make_value(read_struct<Protocol, StringToBinary>(prot)));
+      return;
+    }
+    case protocol::T_LIST: {
+      strct.emplace(id, make_value(read_list<Protocol, StringToBinary>(prot)));
+      return;
+    }
+    case protocol::T_SET: {
+      strct.emplace(id, make_value(read_set<Protocol, StringToBinary>(prot)));
+      return;
+    }
+    case protocol::T_MAP: {
+      strct.emplace(id, make_value(read_map<Protocol, StringToBinary>(prot)));
+      return;
+    }
+    case T_STOP:
+    case T_VOID:
+    case T_U64:
+    case T_UTF8:
+    case T_UTF16:
+    case T_STREAM:
+      TProtocolException::throwInvalidSkipType(field_type);
+      break;
+  }
+}
+
 template <class Protocol, bool StringToBinary>
 Object read_struct(Protocol& prot) {
+  std::string name;
+  int16_t fid{};
+  TType ftype{};
   Object strct{};
-  std::ignore = prot;
+  prot.readStructBegin(name);
+  while (true) {
+    prot.readFieldBegin(name, ftype, fid);
+    if (ftype == protocol::T_STOP) {
+      break;
+    }
+    read_struct_field<Protocol, StringToBinary>(prot, ftype, strct, fid);
+    prot.readFieldEnd();
+  }
+  prot.readStructEnd();
   return strct;
 }
 
@@ -293,8 +374,15 @@ std::uint32_t write(Protocol& prot, const String& val) {
 template <typename Protocol>
 std::uint32_t write(Protocol& prot, const Object& obj) {
   uint32_t serializedSize = 0;
-  std::ignore = prot;
-  std::ignore = obj;
+  serializedSize += prot.writeStructBegin("");
+  for (const auto& [field_id, field_val] : obj) {
+    auto fieldType = field_val.get_ttype();
+    serializedSize += prot.writeFieldBegin("", fieldType, field_id);
+    serializedSize += write(prot, field_val);
+    serializedSize += prot.writeFieldEnd();
+  }
+  serializedSize += prot.writeFieldStop();
+  serializedSize += prot.writeStructEnd();
   return serializedSize;
 }
 
@@ -352,6 +440,8 @@ std::uint32_t detail::serializeValueVia(
 
 // ---- Hashing utilities ---- //
 
+const std::size_t OBJECT_HASH_SEED = 0xFE << 24;
+
 struct ValueHasher {
   size_t operator()(const Value& v) const;
   size_t operator()(const ValueHolder& v) const;
@@ -369,6 +459,8 @@ struct ValueHasher {
   size_t operator()(const NativeSet& s) const;
   size_t operator()(const NativeMap& m) const;
   size_t operator()(const std::monostate&) const;
+  template <typename T, typename U>
+  size_t operator()(const std::pair<T, U>& p) const;
 };
 
 size_t ValueHasher::operator()(const Value& v) const {
@@ -406,7 +498,8 @@ size_t ValueHasher::operator()(const String& s) const {
 }
 
 size_t ValueHasher::operator()(const Object& o) const {
-  std::ignore = o;
+  return folly::hash::commutative_hash_combine_range_generic(
+      OBJECT_HASH_SEED, ValueHasher{}, o.begin(), o.end());
   return 0;
 }
 size_t ValueHasher::operator()(const NativeList& l) const {
@@ -420,6 +513,11 @@ size_t ValueHasher::operator()(const NativeSet& s) const {
 size_t ValueHasher::operator()(const NativeMap& m) const {
   std::ignore = m;
   return 0;
+}
+
+template <typename T, typename U>
+size_t ValueHasher::operator()(const std::pair<T, U>& p) const {
+  return folly::hash::hash_combine_generic(ValueHasher{}, p.first, p.second);
 }
 
 size_t ValueHasher::operator()(const std::monostate&) const {
@@ -445,6 +543,48 @@ size_t detail::hash_value(const Bytes& s) {
 
 size_t detail::hash_value(const ValueHolder& v) {
   return ValueHasher{}(v);
+}
+
+// ---- Object ---- //
+
+Object::Fields::iterator Object::begin() {
+  return fields.begin();
+}
+
+Object::Fields::iterator Object::end() {
+  return fields.end();
+}
+
+Object::Fields::const_iterator Object::begin() const {
+  return fields.begin();
+}
+
+Object::Fields::const_iterator Object::end() const {
+  return fields.end();
+}
+
+Value& Object::operator[](FieldId i) {
+  return fields[i];
+}
+Value& Object::at(FieldId i) {
+  return fields.at(i).as_value();
+}
+const Value& Object::at(FieldId i) const {
+  return fields.at(i).as_value();
+}
+bool Object::contains(FieldId i) const {
+  return fields.find(i) != fields.end();
+}
+std::size_t Object::erase(FieldId i) {
+  return fields.erase(i);
+}
+Value* Object::if_contains(FieldId i) {
+  auto* ptr = folly::get_ptr(fields, i);
+  return ptr ? &ptr->as_value() : nullptr;
+}
+const Value* Object::if_contains(FieldId i) const {
+  const auto* ptr = folly::get_ptr(fields, i);
+  return ptr ? &ptr->as_value() : nullptr;
 }
 
 } // namespace apache::thrift::protocol::experimental

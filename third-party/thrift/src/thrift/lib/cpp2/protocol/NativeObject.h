@@ -151,7 +151,10 @@ namespace detail {
 // NOTE: This contains the base case only
 
 template <typename T, bool StringToBinary>
-struct native_value_type;
+struct native_value_type {
+  using type = T;
+  using tag = ::apache::thrift::type::infer_tag<T>;
+};
 
 template <typename T, bool StringToBinary = true>
 using native_value_type_t =
@@ -258,11 +261,45 @@ class alignas(ALIGN_OF_VALUE) ValueHolder : public ValueAccess<ValueHolder> {
   alignas(ALIGN_OF_VALUE) std::array<std::uint8_t, SIZE_OF_VALUE> data_;
 };
 
-// ---- placeholders ---- //
+template <typename... Ts>
+using FieldMapOf = folly::F14FastMap<Ts...>;
+
 class Object {
  public:
-  bool operator==(const Object&) const = default;
+  using FieldId = std::int16_t;
+  using Fields = FieldMapOf<FieldId, ValueHolder>;
+
+  Object() noexcept = default;
+  Object(Object&&) noexcept = default;
+  ~Object() = default;
+  Object& operator=(const Object&) = default;
+  Object& operator=(Object&&) noexcept = default;
+  Object(const Object&) = default;
+
+  bool operator==(const Object& other) const = default;
+
+  Value& operator[](FieldId i);
+  Value& at(FieldId i);
+  const Value& at(FieldId i) const;
+  bool contains(FieldId i) const;
+  std::size_t erase(FieldId i);
+  Value* if_contains(FieldId i);
+  const Value* if_contains(FieldId i) const;
+  template <typename... Args>
+  Value& emplace(FieldId id, Args... args);
+
+  [[nodiscard]] Fields::iterator begin();
+  [[nodiscard]] Fields::const_iterator begin() const;
+  [[nodiscard]] Fields::iterator end();
+  [[nodiscard]] Fields::const_iterator end() const;
+  [[nodiscard]] size_t size() const { return fields.size(); }
+  [[nodiscard]] bool empty() const { return fields.empty(); }
+
+ private:
+  Fields fields;
 };
+
+// ---- placeholders ---- //
 class NativeList {
  public:
   bool operator==(const NativeList&) const = default;
@@ -343,8 +380,20 @@ struct native_value_type<String, StringToBinary> {
   using tag = ::apache::thrift::type::string_t;
 };
 
+template <bool StringToBinary>
+struct native_value_type<Object, StringToBinary> {
+  using type = Object;
+  using tag = ::apache::thrift::type::struct_t<Object>;
+};
+
 // TODO(sadroeck) - Implement this
 struct ValueLike {};
+
+template <bool StringToBinary>
+struct native_value_type<ValueHolder, StringToBinary> {
+  using type = ValueHolder;
+  using tag = ::apache::thrift::type::struct_t<ValueLike>;
+};
 
 template <bool StringToBinary>
 struct native_value_type<NativeList, StringToBinary> {

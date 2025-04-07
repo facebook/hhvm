@@ -18,6 +18,14 @@
 
 namespace apache::thrift::protocol::experimental {
 
+// ---- Object ---- //
+
+template <typename... Args>
+Value& Object::emplace(FieldId id, Args... args) {
+  auto it = fields.emplace(id, std::forward<Args...>(args)...).first;
+  return it->second;
+}
+
 // ---- ValueAPI ---- //
 
 template <typename T>

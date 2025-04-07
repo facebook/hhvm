@@ -18,6 +18,60 @@
 
 namespace apache::thrift::protocol::experimental {
 
+// ---- ValueHolder ---- //
+
+ValueHolder::ValueHolder(const Value& val) : data_{} {
+  static_cast<Value&>(*this) = val;
+}
+
+ValueHolder::ValueHolder(const ValueHolder& val) : data_{} {
+  static_cast<Value&>(*this) = static_cast<const Value&>(val);
+}
+
+ValueHolder::ValueHolder(Value&& val) noexcept : data_{} {
+  static_cast<Value&>(*this) = std::move(val);
+}
+
+ValueHolder::ValueHolder(ValueHolder&& val) noexcept
+    : data_{std::move(val.data_)} {
+  val.data_ = {};
+}
+
+Value& ValueHolder::as_value() noexcept {
+  return reinterpret_cast<Value&>(data_);
+}
+
+const Value& ValueHolder::as_value() const noexcept {
+  return reinterpret_cast<const Value&>(data_);
+}
+
+ValueHolder& ValueHolder::operator=(const ValueHolder& val) {
+  static_cast<Value&>(*this) = static_cast<const Value&>(val);
+  return *this;
+}
+
+ValueHolder& ValueHolder::operator=(ValueHolder&& val) noexcept {
+  data_ = std::move(val.data_);
+  val.data_ = {};
+  return *this;
+}
+
+ValueHolder::~ValueHolder() {
+  // TODO(sadroeck) - Invalidate data_ by putting sentinal value as last byte ?
+  // Note: this should always be the std::variant index
+  if (data_ != decltype(data_){}) {
+    static_cast<Value&>(*this).~Value();
+  }
+}
+
+bool ValueHolder::operator==(const ValueHolder& other) const {
+  return static_cast<const Value&>(*this) == static_cast<const Value&>(other);
+}
+
+bool ValueHolder::operator!=(const ValueHolder& other) const {
+  return !(*this == other);
+}
+
 // ---- Value ---- //
 
 Value::Value(const Value& other) : kind_(other.kind_) {}
@@ -154,6 +208,10 @@ template <typename Protocol, bool StringToBinary>
 NativeMap read_map(Protocol& prot) {
   std::ignore = prot;
   return NativeMap{};
+}
+template <typename... Args>
+auto make_value(Args&&... args) {
+  return ValueHolder{Value(std::forward<Args>(args)...)};
 }
 
 template <class Protocol, bool StringToBinary>
@@ -296,6 +354,7 @@ std::uint32_t detail::serializeValueVia(
 
 struct ValueHasher {
   size_t operator()(const Value& v) const;
+  size_t operator()(const ValueHolder& v) const;
   size_t operator()(const Bool& b) const;
   size_t operator()(const I8& i) const;
   size_t operator()(const I16& i) const;
@@ -314,6 +373,9 @@ struct ValueHasher {
 
 size_t ValueHasher::operator()(const Value& v) const {
   return v.inner().index() + folly::variant_match(v.inner(), ValueHasher{});
+}
+size_t ValueHasher::operator()(const ValueHolder& v) const {
+  return ValueHasher{}(v.as_value());
 }
 size_t ValueHasher::operator()(const Bool& b) const {
   return std::hash<bool>{}(b);
@@ -379,6 +441,10 @@ size_t detail::hash_value(const Object& o) {
 
 size_t detail::hash_value(const Bytes& s) {
   return ValueHasher{}(s);
+}
+
+size_t detail::hash_value(const ValueHolder& v) {
+  return ValueHasher{}(v);
 }
 
 } // namespace apache::thrift::protocol::experimental

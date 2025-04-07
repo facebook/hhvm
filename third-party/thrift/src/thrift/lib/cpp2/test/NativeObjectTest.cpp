@@ -30,6 +30,7 @@ using NativeValue = experimental::Value;
 using Object = experimental::Object;
 using Bytes = experimental::Bytes;
 using String = experimental::String;
+using ValueHolder = experimental::ValueHolder;
 
 // ---- Random utils ---- //
 template <typename T>
@@ -117,6 +118,63 @@ testset::struct_i32 random_val<testset::struct_i32>() {
   testset::struct_i32 val{};
   val.field_1().emplace(random_val<T>());
   return val;
+}
+
+// ---- ValueHolder testcases ---- //
+
+TEST(ValueHolderTest, empty) {
+  ValueHolder val{};
+  std::ignore = val;
+}
+
+template <typename T, typename Wrapper = T>
+void test_value_holder_type() {
+  Wrapper orig_val{random_val<T>()};
+  ValueHolder val{NativeValue{orig_val}};
+  const NativeValue& v = val;
+  ASSERT_TRUE(v.is_type<T>());
+  ASSERT_EQ(v.as_type<T>(), orig_val);
+  ValueHolder val2{std::move(val)};
+  const NativeValue& v2 = val2;
+  ASSERT_TRUE(v2.is_type<T>());
+  ASSERT_EQ(v2.as_type<T>(), orig_val);
+  ValueHolder val3{v2};
+  const NativeValue& v3 = val3;
+  ASSERT_TRUE(v3.is_type<T>());
+  ASSERT_EQ(v3.as_type<T>(), orig_val);
+  ASSERT_EQ(v3, v2);
+}
+
+TEST(ValueHolderTest, Bool) {
+  test_value_holder_type<experimental::Bool>();
+}
+
+TEST(ValueHolderTest, Byte) {
+  test_value_holder_type<experimental::I8>();
+}
+
+TEST(ValueHolderTest, I16) {
+  test_value_holder_type<experimental::I16>();
+}
+
+TEST(ValueHolderTest, I32) {
+  test_value_holder_type<experimental::I32>();
+}
+
+TEST(ValueHolderTest, I64) {
+  test_value_holder_type<experimental::I64>();
+}
+
+TEST(ValueHolderTest, Float) {
+  test_value_holder_type<experimental::Float>();
+}
+
+TEST(ValueHolderTest, Double) {
+  test_value_holder_type<experimental::Double>();
+}
+
+TEST(ValueHolderTest, Bytes) {
+  test_value_holder_type<experimental::Bytes>();
 }
 
 // ---- Object testcases ---- //

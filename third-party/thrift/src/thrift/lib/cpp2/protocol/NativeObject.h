@@ -32,6 +32,7 @@ namespace apache::thrift::protocol::experimental {
 class Object;
 class Value;
 struct Bytes;
+class ValueHolder;
 class NativeList;
 class NativeSet;
 class NativeMap;
@@ -40,6 +41,7 @@ namespace detail {
 size_t hash_value(const Value& v);
 size_t hash_value(const Object& o);
 size_t hash_value(const Bytes& s);
+size_t hash_value(const ValueHolder& v);
 } // namespace detail
 
 } // namespace apache::thrift::protocol::experimental
@@ -76,6 +78,15 @@ template <>
 struct std::hash<apache::thrift::protocol::experimental::Bytes> {
   std::size_t operator()(
       const apache::thrift::protocol::experimental::Bytes& s) const noexcept {
+    return apache::thrift::protocol::experimental::detail::hash_value(s);
+  }
+};
+
+template <>
+struct std::hash<apache::thrift::protocol::experimental::ValueHolder> {
+  std::size_t operator()(
+      const apache::thrift::protocol::experimental::ValueHolder& s)
+      const noexcept {
     return apache::thrift::protocol::experimental::detail::hash_value(s);
   }
 };
@@ -214,6 +225,37 @@ class ValueAccess {
   const Value& as_const_value() const noexcept {
     return static_cast<const T&>(*this).as_value();
   }
+};
+
+// ---- Structured types ---- //
+
+constexpr std::size_t SIZE_OF_VALUE = 56;
+constexpr std::size_t ALIGN_OF_VALUE = 8;
+
+// TODO(sadroeck) - Figure out a better name for this
+class alignas(ALIGN_OF_VALUE) ValueHolder : public ValueAccess<ValueHolder> {
+ public:
+  ValueHolder() noexcept = default;
+
+  /* implicit */ ValueHolder(const Value&);
+  ValueHolder(const ValueHolder&);
+
+  /* implicit */ ValueHolder(Value&&) noexcept;
+  ValueHolder(ValueHolder&&) noexcept;
+
+  ValueHolder& operator=(const ValueHolder&);
+  ValueHolder& operator=(ValueHolder&&) noexcept;
+
+  ~ValueHolder();
+
+  Value& as_value() noexcept;
+  const Value& as_value() const noexcept;
+
+  bool operator==(const ValueHolder& other) const;
+  bool operator!=(const ValueHolder& other) const;
+
+ private:
+  alignas(ALIGN_OF_VALUE) std::array<std::uint8_t, SIZE_OF_VALUE> data_;
 };
 
 // ---- placeholders ---- //

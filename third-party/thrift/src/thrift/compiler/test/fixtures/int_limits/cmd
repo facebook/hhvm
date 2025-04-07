@@ -1,6 +1,6 @@
 android: android src/module.thrift
 py: py src/module.thrift
-hack: hack:typedef,lazy_constants=1,hack_collections=1 src/module.thrift
+hack: hack:typedef,hack_collections=1 src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
 rust: mstch_rust src/module.thrift
 java: mstch_java src/module.thrift

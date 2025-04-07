@@ -1,5 +1,5 @@
 android: android src/terse_write.thrift
-hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1,shapes_use_pipe_structure=1,hack_collections=1 src/terse_write.thrift
+hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1,hack_collections=1 src/terse_write.thrift
 java_deprecated: java_deprecated src/terse_write.thrift
 json: json src/terse_write.thrift
 json_experimental: json_experimental src/terse_write.thrift

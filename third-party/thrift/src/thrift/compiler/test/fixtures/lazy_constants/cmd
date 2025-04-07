@@ -1,2 +1,2 @@
-hack: hack:lazy_constants=1 src/module.thrift
+hack: hack src/module.thrift
 java: mstch_java src/module.thrift

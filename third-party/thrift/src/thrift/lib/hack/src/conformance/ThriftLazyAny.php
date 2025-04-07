@@ -249,7 +249,7 @@ final class ThriftLazyAny implements JsonSerializable {
           Shapes::at($ts, 'classname'),
           IThriftStruct::class,
         );
-        return $thrift_cls::withDefaultValues();
+        return HH\classname_to_class($thrift_cls) |> $$::withDefaultValues();
       case TypeStructureKind::OF_ENUM:
         return 0;
       case TypeStructureKind::OF_DICT:

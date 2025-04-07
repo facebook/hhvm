@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     const auto parsed = po::command_line_parser(argc, argv).options(desc).run();
     po::store(parsed, vm);
 
-    if (vm.count("help")) {
+    if (vm.contains("help")) {
       std::cout << kProgramDescription << "\n\n"
                 << desc << std::endl;
       return 0;

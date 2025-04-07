@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/lang/Badge.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
@@ -40,6 +41,9 @@ class DynamicSetPatch;
 class DynamicMapPatch;
 class DynamicStructPatch;
 class DynamicUnionPatch;
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    bool, useAssignPatchInDiffVisitorForAnyLikeStruct);
 
 using ValueList = std::vector<Value>;
 using ValueSet = folly::F14VectorSet<Value>;

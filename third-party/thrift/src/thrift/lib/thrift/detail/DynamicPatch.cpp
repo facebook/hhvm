@@ -31,13 +31,13 @@
 
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 
-DEFINE_bool(
-    thrift_patch_use_assign_patch_in_diff_visitor_for_any_like_struct,
-    false,
-    "Whether to use assign patch in DiffVisitor if the struct looks like Any");
-
 namespace apache::thrift::protocol {
 using detail::badge;
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    bool, useAssignPatchInDiffVisitorForAnyLikeStruct) {
+  return false;
+}
 
 namespace {
 
@@ -1078,8 +1078,8 @@ DynamicPatch DiffVisitorBase::diffStructured(
 
   // If src and dst looks like a thrift.Any, only use assign operator since
   // we can't tell whether we should use AnyPatch or StructPatch.
-  if (FLAGS_thrift_patch_use_assign_patch_in_diff_visitor_for_any_like_struct &&
-      maybeAny(src) && maybeAny(dst)) {
+  if (useAssignPatchInDiffVisitorForAnyLikeStruct() && maybeAny(src) &&
+      maybeAny(dst)) {
     DynamicUnknownPatch patch;
     if (src != dst) {
       patch.doNotConvertStringToBinary(badge);

@@ -125,15 +125,15 @@ const Metadata* g_metadata_table = stub_metadata_table;
 std::size_t g_metadata_table_size = 2;
 
 bool isIgnoredType(const std::string& name) {
-  return ignored.count(stripTemplateArgs(name));
+  return ignored.contains(stripTemplateArgs(name));
 }
 
 bool isForbiddenTemplate(const std::string& name) {
-  return forbidden_template.count(stripTemplateArgs(name));
+  return forbidden_template.contains(stripTemplateArgs(name));
 }
 
 bool isForcedConservativeTemplate(const std::string& name) {
-  return forced_conservative.count(stripTemplateArgs(name));
+  return forced_conservative.contains(stripTemplateArgs(name));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

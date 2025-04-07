@@ -2203,18 +2203,24 @@ class SimpleStruct(thrift.py3.types.Struct):
 
     @_python__property
     def opt_default_int(self) -> int:
-        return self._fbthrift__inner.opt_default_int
+        __python_val = self._fbthrift__inner.opt_default_int
+        if __python_val is None:
+            return 2
+        return __python_val
 
     @_python__property
     def opt_default_str(self) -> str:
-        return self._fbthrift__inner.opt_default_str
+        __python_val = self._fbthrift__inner.opt_default_str
+        if __python_val is None:
+            return "2"
+        return __python_val
 
     @_python__property
     def opt_default_enum(self) -> AnEnum:
         if self._fbthrift_inner__opt_default_enum is None:
             __python_val = self._fbthrift__inner.opt_default_enum
             if __python_val is None:
-                return None
+                __python_val = AnEnum.THREE
             self._fbthrift_inner__opt_default_enum = AnEnum.from_python(__python_val)
 
         return self._fbthrift_inner__opt_default_enum

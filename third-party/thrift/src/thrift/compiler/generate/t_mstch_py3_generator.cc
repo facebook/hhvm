@@ -1045,6 +1045,9 @@ class py3_mstch_field : public mstch_field {
             {"field:iobuf_ref?", &py3_mstch_field::isIOBufRef},
             {"field:has_ref_accessor?", &py3_mstch_field::hasRefAccessor},
             {"field:hasDefaultValue?", &py3_mstch_field::hasDefaultValue},
+            {"field:optional_default?",
+             &py3_mstch_field::has_optional_default_value},
+            {"field:user_default_value", &py3_mstch_field::user_default_value},
             {"field:PEP484Optional?", &py3_mstch_field::isPEP484Optional},
             {"field:isset?", &py3_mstch_field::isSet},
             {"field:cppName", &py3_mstch_field::cppName},
@@ -1089,6 +1092,29 @@ class py3_mstch_field : public mstch_field {
 
   bool has_default_value() {
     return !is_ref() && (field_->get_value() != nullptr || !is_optional_());
+  }
+
+  bool has_optional_default_value() {
+    return is_optional_() && field_->get_value() != nullptr;
+  }
+
+  mstch::node user_default_value() {
+    const t_const_value* value = field_->get_value();
+    if (!value) {
+      return mstch::node();
+    }
+    if (value->is_empty()) {
+      auto true_type = field_->get_type()->get_true_type();
+      if ((true_type->is_list() || true_type->is_set()) &&
+          value->kind() != t_const_value::CV_LIST) {
+        const_cast<t_const_value*>(value)->convert_empty_map_to_list();
+      }
+      if (true_type->is_map() && value->kind() != t_const_value::CV_MAP) {
+        const_cast<t_const_value*>(value)->convert_empty_list_to_map();
+      }
+    }
+    return context_.const_value_factory->make_mstch_object(
+        value, context_, pos_, nullptr, nullptr);
   }
 
   mstch::node boxed_ref() {

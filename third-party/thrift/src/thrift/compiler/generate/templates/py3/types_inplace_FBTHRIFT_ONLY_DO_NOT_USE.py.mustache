@@ -201,7 +201,12 @@ class {{struct:name}}({{> types/python_struct_class }}):
             __python_val = self._fbthrift__inner.{{field:py_name}}
             {{#field:optional?}}
             if __python_val is None:
+            {{^field:optional_default?}}
                 return None
+            {{/field:optional_default?}}
+            {{#field:optional_default?}}
+                __python_val = {{#field:user_default_value}}{{#field:type}}{{> inplace/constant_value_py }}{{/field:type}}{{/field:user_default_value}}
+            {{/field:optional_default?}}
             {{/field:optional?}}{{^field:optional?}}{{#struct:union?}}
             if __python_val is None:
                 return None
@@ -209,9 +214,14 @@ class {{struct:name}}({{> types/python_struct_class }}):
             self._fbthrift_inner__{{field:py_name}} = {{> types/python_type}}.from_python(__python_val)
 
         return self._fbthrift_inner__{{field:py_name}}
-{{/type:needs_convert?}}{{^type:needs_convert?}}
+{{/type:needs_convert?}}{{^type:needs_convert?}}{{^field:optional_default?}}
         return self._fbthrift__inner.{{field:py_name}}
-{{/type:needs_convert?}}{{/field:type}}
+{{/field:optional_default?}}{{#field:optional_default?}}
+        __python_val = self._fbthrift__inner.{{field:py_name}}
+        if __python_val is None:
+            return {{#field:user_default_value}}{{#field:type}}{{> inplace/constant_value_py }}{{/field:type}}{{/field:user_default_value}}
+        return __python_val
+{{/field:optional_default?}}{{/type:needs_convert?}}{{/field:type}}
 
     {{/struct:fields_and_mixin_fields}}
     {{#struct:union?}}

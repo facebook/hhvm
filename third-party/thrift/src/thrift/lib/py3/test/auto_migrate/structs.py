@@ -592,6 +592,21 @@ class NumericalConversionsTests(unittest.TestCase):
         assert_mixed(m)
         assert_isset(m)
 
+        # basic sanity check for normal set behavior
+        non_opt = mixed(opt_field="foo", opt_float=2.0, opt_int=3, opt_enum=Color.blue)
+        self.assertEqual(non_opt.opt_field, "foo")
+        self.assertEqual(non_opt.opt_float, 2.0)
+        self.assertEqual(non_opt.opt_int, 3)
+        self.assertEqual(non_opt.opt_enum, Color.blue)
+        # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
+        non_opt_isset = Struct.isset(non_opt)
+        for field, field_value in non_opt:
+            if not field.startswith("opt_"):
+                continue
+            self.assertEqual(
+                getattr(non_opt_isset, field, False), field_value is not None, field
+            )
+
 
 class TestSubclass(OptionalFile):
     pass

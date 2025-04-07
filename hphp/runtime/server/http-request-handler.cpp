@@ -96,7 +96,7 @@ static bool shouldProxyPath(const std::string& path) {
   }
 
   if (Cfg::Proxy::UseProxyURLs) {
-    if (Cfg::Proxy::ProxyURLs.count(path)) return true;
+    if (Cfg::Proxy::ProxyURLs.contains(path)) return true;
     if (matchAnyPattern(path, Cfg::Proxy::ProxyPatterns)) return true;
   }
 

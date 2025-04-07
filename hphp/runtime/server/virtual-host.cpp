@@ -114,7 +114,7 @@ void VirtualHost::UpdateSerializationSizeLimit() {
 bool VirtualHost::alwaysDecodePostData(const String& origPath) const {
   if (!m_alwaysDecodePostData) return false;
   if (m_decodePostDataBlackList.empty()) return true;
-  return !m_decodePostDataBlackList.count(origPath.toCppString());
+  return !m_decodePostDataBlackList.contains(origPath.toCppString());
 }
 
 const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {

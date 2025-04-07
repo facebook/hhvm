@@ -38,6 +38,7 @@ from python_test.lists.thrift_types import (
     easy,
     EasyList,
     I32List,
+    int_list,
     StringList,
     StrList2D,
 )
@@ -51,6 +52,25 @@ class ImmutableListTests(unittest.TestCase):
     def test_hashability(self) -> None:
         hash(easy().val_list)
         hash(I32List(range(10)))
+
+    def test_constant_list(self) -> None:
+        self.assertEqual(int_list, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "'thrift.python.types.List' object does not support item assignment",
+        ):
+            # TODO: This should trigger a Pyre error. The type of the list constant
+            # is currently specified as `List`, which needs to be corrected.
+            int_list[0] = 0
+
+        with self.assertRaisesRegex(
+            AttributeError,
+            "'thrift.python.types.List' object has no attribute 'append'",
+        ):
+            # TODO: This should trigger a Pyre error. The type of the list constant
+            # is currently specified as `List`, which needs to be corrected.
+            int_list.append(11)
 
 
 # ct = containers type, lt = lists type

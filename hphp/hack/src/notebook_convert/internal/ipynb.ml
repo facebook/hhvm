@@ -223,6 +223,15 @@ let ipynb_of_chunks
           (* reduce_exn is safe because groups created by sort_and_group are non-empty *)
           |> List.reduce_exn ~f:combine_cells_exn)
     in
+    let cells =
+      (* Our Jupyter notebooks implementation cannot handle an empty cell list,
+       * so we add an empty cell if the user's notebook has no cells.
+       *)
+      if List.is_empty cells then
+        [Hack { contents = ""; cell_bento_metadata = None }]
+      else
+        cells
+    in
     Ok { cells; kernelspec }
   with
   | e ->

@@ -1,4 +1,4 @@
 ERROR: File "awaitable_enum_switch_exhaustiveness.php", line 15, characters 5-71:
 This `switch` statement is nonexhaustive. At least the following cases are missing: `SwitchDemoEnum::B` (Typing[4019])
   File "awaitable_enum_switch_exhaustiveness.php", line 15, characters 13-17:
-  The scrutinee has type `SwitchDemoEnum`.
+  The scrutinee has type `(~SwitchDemoEnum & arraykey)`.

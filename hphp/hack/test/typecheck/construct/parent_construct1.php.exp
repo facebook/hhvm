@@ -1,3 +1,7 @@
+ERROR: File "parent_construct1.php", line 27, characters 5-255:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "parent_construct1.php", line 27, characters 13-25:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
 ERROR: File "parent_construct1.php", line 36, characters 32-36:
 Invalid argument (Typing[4359])
   File "parent_construct1.php", line 36, characters 32-36:

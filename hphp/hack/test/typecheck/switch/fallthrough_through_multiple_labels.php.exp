@@ -1,3 +1,7 @@
+ERROR: File "fallthrough_through_multiple_labels.php", line 5, characters 3-166:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "fallthrough_through_multiple_labels.php", line 5, characters 11-12:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
 ERROR: File "fallthrough_through_multiple_labels.php", line 12, characters 14-20:
 Invalid return type (Typing[4110])
   File "fallthrough_through_multiple_labels.php", line 3, characters 23-25:

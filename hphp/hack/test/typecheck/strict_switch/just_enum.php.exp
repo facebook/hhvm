@@ -1,16 +1,6 @@
-ERROR: File "just_enum.php", line 22, characters 11-12:
-All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
-  File "just_enum.php", line 27, characters 5-12:
-  default declared here
-ERROR: File "just_enum.php", line 37, characters 10-21:
-Redundant `case` statement (Typing[4021])
+WARN: File "just_enum.php", line 27, characters 5-12:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+WARN: File "just_enum.php", line 37, characters 10-21:
+This switch case, `IntEnumAB::A`, occurred before. It will never be matched. (Warn[12019])
   File "just_enum.php", line 35, characters 10-21:
-  `A` already handled here
-ERROR: File "just_enum.php", line 47, characters 10-21:
-Switching on `int` but using constant from `IntEnumAB` (Typing[4023])
-  File "just_enum.php", line 45, characters 17-19:
-  expecting `int` based on this
-ERROR: File "just_enum.php", line 49, characters 10-21:
-Switching on `int` but using constant from `IntEnumAB` (Typing[4023])
-  File "just_enum.php", line 45, characters 17-19:
-  expecting `int` based on this
+  This is the original occurrence of the case.

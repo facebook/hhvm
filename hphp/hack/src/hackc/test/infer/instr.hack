@@ -186,9 +186,7 @@ function col_from_array(string $s1, string $s2) : void {
 // CHECK: #b2:
 // CHECK: // .column 10
 // CHECK:   prune ! $builtins.hack_is_true(n1)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_throw_non_exhaustive_switch()
-// CHECK: // .column 3
+// CHECK: // .column 10
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK: // .column 2
@@ -197,6 +195,8 @@ function col_from_array(string $s1, string $s2) : void {
 function check_switch(int $x): void {
   switch ($x) {
     case 5: echo "5"; break;
+    default:
+      break;
   }
 }
 

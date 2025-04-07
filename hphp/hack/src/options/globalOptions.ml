@@ -306,7 +306,7 @@ let default =
     safe_abstract = false;
     needs_concrete = false;
     allow_class_string_cast = true;
-    tco_new_exhaustivity_check = false;
+    tco_new_exhaustivity_check = true;
   }
 
 let set

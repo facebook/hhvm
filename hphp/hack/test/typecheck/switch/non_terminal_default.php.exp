@@ -1,2 +1,6 @@
 ERROR: File "non_terminal_default.php", line 6, characters 5-12:
 Default case in `switch` must be terminal (Parsing[1002])
+ERROR: File "non_terminal_default.php", line 5, characters 3-121:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "non_terminal_default.php", line 5, characters 11-12:
+  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

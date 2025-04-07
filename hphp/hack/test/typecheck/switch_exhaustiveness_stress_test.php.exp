@@ -1,4 +1,4 @@
-ERROR: File "switch_exhaustiveness_stress_test.php", line 18439, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `WYXGFEBA1`, `WYXGFEBA10`, `WYXGFEBA100`, `WYXGFEBA101`, `WYXGFEBA102`, `WYXGFEBA103`, `WYXGFEBA104`, `WYXGFEBA105`, `WYXGFEBA106`, `WYXGFEBA107` (Typing[4019])
-  File "switch_exhaustiveness_stress_test.php", line 3, characters 6-6:
-  Enum declared here
+ERROR: File "switch_exhaustiveness_stress_test.php", line 18439, characters 3-76:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::WYXGFEBA1`, `E::WYXGFEBA10`, `E::WYXGFEBA100`, `E::WYXGFEBA101`, `E::WYXGFEBA102`, `E::WYXGFEBA103`, `E::WYXGFEBA104`, `E::WYXGFEBA105`, `E::WYXGFEBA106`, `E::WYXGFEBA107` (Typing[4019])
+  File "switch_exhaustiveness_stress_test.php", line 18439, characters 11-12:
+  The scrutinee has type `E`.

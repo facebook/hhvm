@@ -1,12 +1,8 @@
-ERROR: File "string_class_const.php", line 36, characters 10-13:
-Redundant `case` statement (Typing[4021])
+WARN: File "string_class_const.php", line 36, characters 10-13:
+This switch case, `E::B`, occurred before. It will never be matched. (Warn[12019])
   File "string_class_const.php", line 34, characters 10-13:
-  `B` already handled here
-ERROR: File "string_class_const.php", line 50, characters 10-13:
-Redundant `case` statement (Typing[4021])
+  This is the original occurrence of the case.
+WARN: File "string_class_const.php", line 50, characters 10-13:
+This switch case, `E::A`, occurred before. It will never be matched. (Warn[12019])
   File "string_class_const.php", line 48, characters 10-13:
-  `A` already handled here
-ERROR: File "string_class_const.php", line 71, characters 10-13:
-Switching on `string` but using constant from `G` (Typing[4023])
-  File "string_class_const.php", line 69, characters 38-43:
-  expecting `string` based on this
+  This is the original occurrence of the case.

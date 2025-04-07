@@ -16,4 +16,11 @@ File "switch_fallthrough12.php", line 33, characters 7-17:
   float
 File "switch_fallthrough12.php", line 37, characters 3-13:
   (bool | num)
-No errors
+WARN: File "switch_fallthrough12.php", line 28, characters 10-10:
+This switch case, `4`, occurred before. It will never be matched. (Warn[12019])
+  File "switch_fallthrough12.php", line 24, characters 10-10:
+  This is the original occurrence of the case.
+ERROR: File "switch_fallthrough12.php", line 7, characters 3-646:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_fallthrough12.php", line 7, characters 11-12:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

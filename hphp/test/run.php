@@ -1922,6 +1922,7 @@ final class Status {
         return false;
 
       case Status::MSG_SERVER_RESTARTED:
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1947,6 +1948,7 @@ final class Status {
       case Status::MSG_TEST_PASS:
         self::$passed++;
         invariant($message is nonnull, "%s", __METHOD__);
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1985,6 +1987,7 @@ final class Status {
         self::$skip_reasons[$reason] ??= 0;
         self::$skip_reasons[$reason]++;
 
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -2019,6 +2022,7 @@ final class Status {
       case Status::MSG_TEST_FAIL:
         self::$failed++;
         invariant($message is nonnull, "%s", __METHOD__);
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (Status::hasCursorControl()) {
@@ -3669,6 +3673,7 @@ function run_repo_test(
 }
 
 function num_cpus(): int {
+  /* HH_FIXME[4489]: Revealed through strict switches */
   switch (PHP_OS) {
     case 'Linux':
       $data = file('/proc/stat');

@@ -16,6 +16,9 @@ function h(): void {
       // FALLTHROUGH
     case 1:
       ($x upcast dynamic)();
+      break;
+    default:
+      break;
   }
 }
 
@@ -28,5 +31,8 @@ function e(): void {
       break;
     case 1:
       ($x upcast dynamic)();
+      break;
+    default:
+      break;
   }
 }

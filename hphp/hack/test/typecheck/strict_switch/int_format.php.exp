@@ -1,32 +1,4 @@
-ERROR: File "int_format.php", line 8, characters 10-12:
-This int literal is in `binary`, but was expecting it to be in `decimal` (Typing[4023])
-  File "int_format.php", line 6, characters 10-10:
-  All int literals in this switch must be written in the same base as the first one
-ERROR: File "int_format.php", line 20, characters 10-12:
-This int literal is in `hexadecimal`, but was expecting it to be in `decimal` (Typing[4023])
-  File "int_format.php", line 18, characters 10-10:
-  All int literals in this switch must be written in the same base as the first one
-ERROR: File "int_format.php", line 32, characters 10-12:
-This int literal is in `octal`, but was expecting it to be in `decimal` (Typing[4023])
+WARN: File "int_format.php", line 34, characters 10-20:
+This switch case, `709138457`, occurred before. It will never be matched. (Warn[12019])
   File "int_format.php", line 30, characters 10-20:
-  All int literals in this switch must be written in the same base as the first one
-ERROR: File "int_format.php", line 34, characters 10-20:
-Redundant `case` statement (Typing[4021])
-  File "int_format.php", line 30, characters 10-20:
-  `709138457` already handled here
-ERROR: File "int_format.php", line 46, characters 10-10:
-This int literal is in `decimal`, but was expecting it to be in `binary` (Typing[4023])
-  File "int_format.php", line 44, characters 10-12:
-  All int literals in this switch must be written in the same base as the first one
-ERROR: File "int_format.php", line 58, characters 10-13:
-This int literal is in `binary`, but was expecting it to be in `octal` (Typing[4023])
-  File "int_format.php", line 56, characters 10-11:
-  All int literals in this switch must be written in the same base as the first one
-ERROR: File "int_format.php", line 70, characters 10-13:
-This int literal is in `hexadecimal`, but was expecting it to be in `octal` (Typing[4023])
-  File "int_format.php", line 68, characters 10-18:
-  All int literals in this switch must be written in the same base as the first one
-ERROR: File "int_format.php", line 82, characters 10-14:
-This int literal is in `binary`, but was expecting it to be in `hexadecimal` (Typing[4023])
-  File "int_format.php", line 80, characters 10-13:
-  All int literals in this switch must be written in the same base as the first one
+  This is the original occurrence of the case.

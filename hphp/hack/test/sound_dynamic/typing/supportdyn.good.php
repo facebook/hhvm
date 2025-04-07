@@ -28,6 +28,8 @@ function stmt(\HH\supportdyn<mixed> $sd): void {
   switch ($sd) {
     case 42:
       break;
+    default:
+      break;
   }
 }
 

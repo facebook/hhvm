@@ -1,6 +1,4 @@
-ERROR: File "mixed_no_default.php", line 6, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `default`, `false`, `int`, `true`, `null`, `enum`, `string` (Typing[4019])
+ERROR: File "mixed_no_default.php", line 6, characters 3-49:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
   File "mixed_no_default.php", line 6, characters 11-12:
-  only unions and intersections of bool, null and enums can be switched on without a default
-ERROR: File "mixed_no_default.php", line 7, characters 10-14:
-Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
+  The scrutinee has type `mixed` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

@@ -1,4 +1,8 @@
-ERROR: File "double_null.php", line 9, characters 10-13:
-Redundant `case` statement (Typing[4021])
+WARN: File "double_null.php", line 6, characters 3-77:
+This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
+  File "double_null.php", line 9, characters 10-13:
+  The case is redundant.
+WARN: File "double_null.php", line 9, characters 10-13:
+This switch case, `null`, occurred before. It will never be matched. (Warn[12019])
   File "double_null.php", line 7, characters 10-13:
-  `null` already handled here
+  This is the original occurrence of the case.

@@ -1,14 +1,12 @@
-ERROR: File "just_int.php", line 19, characters 10-11:
-Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
-ERROR: File "just_int.php", line 28, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
-  File "just_int.php", line 28, characters 11-12:
-  only unions and intersections of bool, null and enums can be switched on without a default
-ERROR: File "just_int.php", line 41, characters 10-10:
-Redundant `case` statement (Typing[4021])
+WARN: File "just_int.php", line 41, characters 10-10:
+This switch case, `0`, occurred before. It will never be matched. (Warn[12019])
   File "just_int.php", line 37, characters 10-10:
-  `0` already handled here
-ERROR: File "just_int.php", line 43, characters 10-10:
-Redundant `case` statement (Typing[4021])
+  This is the original occurrence of the case.
+WARN: File "just_int.php", line 43, characters 10-10:
+This switch case, `1`, occurred before. It will never be matched. (Warn[12019])
   File "just_int.php", line 39, characters 10-10:
-  `1` already handled here
+  This is the original occurrence of the case.
+ERROR: File "just_int.php", line 28, characters 3-45:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "just_int.php", line 28, characters 11-12:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

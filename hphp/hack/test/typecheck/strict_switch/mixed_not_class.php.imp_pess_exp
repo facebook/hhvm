@@ -1,4 +1,4 @@
-ERROR: File "mixed_not_class.php", line 12, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+ERROR: File "mixed_not_class.php", line 12, characters 3-48:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
   File "mixed_not_class.php", line 12, characters 11-12:
-  only unions and intersections of bool, null and enums can be switched on without a default
+  The scrutinee has type `?(nonnull & not C)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

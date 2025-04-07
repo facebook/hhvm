@@ -1,2 +1,4 @@
-ERROR: File "nullable_bool_not_bool.php", line 27, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `true`, `false` (Typing[4019])
+ERROR: File "nullable_bool_not_bool.php", line 27, characters 3-188:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `true`, `false` (Typing[4019])
+  File "nullable_bool_not_bool.php", line 27, characters 11-12:
+  The scrutinee has type `?bool`.

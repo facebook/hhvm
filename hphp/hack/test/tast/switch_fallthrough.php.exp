@@ -16,6 +16,11 @@ File "switch_fallthrough.php", line 33, characters 7-17:
   float
 File "switch_fallthrough.php", line 37, characters 3-13:
   (bool | num)
+Errors:
+  [28:10-11] This switch case, `4`, occurred before. It will never be matched.
+  [24:10-11] This is the original occurrence of the case.
+  [7:3-35:4] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown.
+  [7:11-13] The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

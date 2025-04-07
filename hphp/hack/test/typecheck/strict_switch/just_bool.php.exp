@@ -1,14 +1,18 @@
-ERROR: File "just_bool.php", line 18, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `true` (Typing[4019])
-ERROR: File "just_bool.php", line 19, characters 10-11:
-Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
-ERROR: File "just_bool.php", line 28, characters 11-12:
-All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
-  File "just_bool.php", line 33, characters 5-12:
-  default declared here
-ERROR: File "just_bool.php", line 45, characters 10-14:
-Redundant `case` statement (Typing[4021])
+WARN: File "just_bool.php", line 33, characters 5-12:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+WARN: File "just_bool.php", line 40, characters 3-110:
+This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
+  File "just_bool.php", line 45, characters 10-14:
+  The case is redundant.
+WARN: File "just_bool.php", line 45, characters 10-14:
+This switch case, `false`, occurred before. It will never be matched. (Warn[12019])
   File "just_bool.php", line 41, characters 10-14:
-  `false` already handled here
-ERROR: File "just_bool.php", line 52, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `true` (Typing[4019])
+  This is the original occurrence of the case.
+ERROR: File "just_bool.php", line 18, characters 3-76:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `true` (Typing[4019])
+  File "just_bool.php", line 18, characters 11-12:
+  The scrutinee has type `bool`.
+ERROR: File "just_bool.php", line 52, characters 3-49:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `true` (Typing[4019])
+  File "just_bool.php", line 52, characters 11-12:
+  The scrutinee has type `bool`.

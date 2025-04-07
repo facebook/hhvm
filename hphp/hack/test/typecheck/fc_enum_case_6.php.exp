@@ -1,6 +1,4 @@
-ERROR: File "fc_enum_case_6.php", line 11, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `FOO` (Typing[4019])
-  File "fc_enum_case_6.php", line 3, characters 6-8:
-  Enum declared here
-ERROR: File "fc_enum_case_6.php", line 12, characters 10-11:
-Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
+ERROR: File "fc_enum_case_6.php", line 11, characters 3-118:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `Bar::FOO` (Typing[4019])
+  File "fc_enum_case_6.php", line 11, characters 11-12:
+  The scrutinee has type `Bar`.

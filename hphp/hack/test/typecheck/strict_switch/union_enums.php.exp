@@ -1,12 +1,8 @@
-ERROR: File "union_enums.php", line 30, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `B` (Typing[4019])
-  File "union_enums.php", line 5, characters 6-14:
-  enum declared here
-ERROR: File "union_enums.php", line 30, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `C` (Typing[4019])
-  File "union_enums.php", line 10, characters 6-14:
-  enum declared here
-ERROR: File "union_enums.php", line 47, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `C`, `D` (Typing[4019])
-  File "union_enums.php", line 10, characters 6-14:
-  enum declared here
+ERROR: File "union_enums.php", line 30, characters 3-93:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `IntEnumAB::B`, `IntEnumCD::C` (Typing[4019])
+  File "union_enums.php", line 30, characters 11-12:
+  The scrutinee has type `(IntEnumAB | IntEnumCD)`.
+ERROR: File "union_enums.php", line 47, characters 3-93:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `IntEnumCD::C`, `IntEnumCD::D` (Typing[4019])
+  File "union_enums.php", line 47, characters 11-12:
+  The scrutinee has type `(IntEnumAB | IntEnumCD)`.

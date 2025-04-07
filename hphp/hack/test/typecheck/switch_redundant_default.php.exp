@@ -1,4 +1,2 @@
-ERROR: File "switch_redundant_default.php", line 9, characters 11-12:
-All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
-  File "switch_redundant_default.php", line 3, characters 6-6:
-  Enum declared here
+WARN: File "switch_redundant_default.php", line 16, characters 5-12:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])

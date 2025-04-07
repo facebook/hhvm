@@ -1,1 +1,4 @@
-No errors
+ERROR: File "switch.php", line 27, characters 3-66:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `false` (Typing[4019])
+  File "switch.php", line 27, characters 11-12:
+  The scrutinee has type `bool`.

@@ -1,3 +1,7 @@
+ERROR: File "switch_local_type_change_after_break2.php", line 14, characters 3-107:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_local_type_change_after_break2.php", line 14, characters 11-11:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
 ERROR: File "switch_local_type_change_after_break2.php", line 23, characters 10-11:
 Invalid return type (Typing[4110])
   File "switch_local_type_change_after_break2.php", line 12, characters 15-17:

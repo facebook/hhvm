@@ -1728,6 +1728,18 @@ TEST(ObjectTest, MaybeAny) {
     EXPECT_FALSE(maybeAny(obj2));
   }
 
+  // Test if Field{1} does not look like a TypeStruct
+  {
+    auto obj2 = obj;
+    obj2[FieldId{1}].as_object()[FieldId{1}].emplace_binary();
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2[FieldId{1}].as_object()[FieldId{1}].emplace_binary();
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+
   obj = asValueStruct<type::struct_t<Bar>>(Bar{}).as_object();
   EXPECT_FALSE(maybeAny(obj));
 }

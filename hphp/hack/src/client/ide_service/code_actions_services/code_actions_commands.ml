@@ -136,6 +136,8 @@ let create_legacy_user_prompt selection user_error =
   user_prompt_suffix buf;
   Buffer.contents buf
 
+let is_parser_error code = code >= 1000 && code < 2000
+
 let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let claim = User_error.claim_message user_error in
   let override_selection =
@@ -155,9 +157,14 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   (* LSP uses 0-based line numbers *)
   let webview_start_line = Pos.line override_selection - 1 in
   let display_prompt = Format.sprintf {|Fix inline - %s|} (snd claim) in
-  let user_prompt = create_user_prompt override_selection user_error in
-  let legacy_user_prompt =
-    create_legacy_user_prompt override_selection user_error
+  let (user_prompt, legacy_user_prompt) =
+    let legacy_user_prompt =
+      create_legacy_user_prompt override_selection user_error
+    in
+    if is_parser_error (User_error.get_code user_error) then
+      (legacy_user_prompt, legacy_user_prompt)
+    else
+      (create_user_prompt override_selection user_error, legacy_user_prompt)
   in
   let predefined_prompt =
     Code_action_types.(

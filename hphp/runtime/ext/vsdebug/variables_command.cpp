@@ -544,7 +544,7 @@ bool VariablesCommand::isSuperGlobal(const std::string& name) {
     }
     return superGlobals;
   }();
-  return superGlobals.count(name);
+  return superGlobals.contains(name);
 }
 
 int VariablesCommand::addSuperglobalVariables(

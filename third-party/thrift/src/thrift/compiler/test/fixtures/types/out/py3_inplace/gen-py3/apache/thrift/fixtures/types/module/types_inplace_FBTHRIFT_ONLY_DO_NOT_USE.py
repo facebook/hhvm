@@ -15,6 +15,7 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -1378,7 +1379,14 @@ class empty_struct(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, empty_struct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, empty_struct):
@@ -1467,7 +1475,14 @@ class decorated_struct(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, decorated_struct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, decorated_struct):
@@ -1647,7 +1662,14 @@ class ContainerStruct(thrift.py3.types.Struct):
         return 8
 
     def __eq__(self, other):
-        return isinstance(other, ContainerStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ContainerStruct):
@@ -1743,7 +1765,14 @@ class CppTypeStruct(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, CppTypeStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, CppTypeStruct):
@@ -1832,7 +1861,14 @@ class VirtualStruct(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, VirtualStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, VirtualStruct):
@@ -1940,7 +1976,14 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, MyStructWithForwardRefEnum) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MyStructWithForwardRefEnum):
@@ -2034,7 +2077,14 @@ class TrivialNumeric(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, TrivialNumeric) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, TrivialNumeric):
@@ -2135,7 +2185,14 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, TrivialNestedWithDefault) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, TrivialNestedWithDefault):
@@ -2236,7 +2293,14 @@ class ComplexString(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, ComplexString) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ComplexString):
@@ -2337,7 +2401,14 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, ComplexNestedWithDefault) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ComplexNestedWithDefault):
@@ -2446,7 +2517,14 @@ class MinPadding(thrift.py3.types.Struct):
         return 5
 
     def __eq__(self, other):
-        return isinstance(other, MinPadding) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MinPadding):
@@ -2555,7 +2633,14 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
         return 5
 
     def __eq__(self, other):
-        return isinstance(other, MinPaddingWithCustomType) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MinPaddingWithCustomType):
@@ -2666,7 +2751,14 @@ class MyStruct(thrift.py3.types.Struct):
         return 4
 
     def __eq__(self, other):
-        return isinstance(other, MyStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MyStruct):
@@ -2750,7 +2842,14 @@ class MyDataItem(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, MyDataItem) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MyDataItem):
@@ -2839,7 +2938,14 @@ class Renaming(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, Renaming) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, Renaming):
@@ -2940,7 +3046,14 @@ class AnnotatedTypes(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, AnnotatedTypes) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, AnnotatedTypes):
@@ -3052,7 +3165,14 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, ForwardUsageRoot) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ForwardUsageRoot):
@@ -3150,7 +3270,14 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, ForwardUsageStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ForwardUsageStruct):
@@ -3248,7 +3375,14 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, ForwardUsageByRef) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ForwardUsageByRef):
@@ -3346,7 +3480,14 @@ class IncompleteMap(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, IncompleteMap) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, IncompleteMap):
@@ -3430,7 +3571,14 @@ class IncompleteMapDep(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, IncompleteMapDep) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, IncompleteMapDep):
@@ -3528,7 +3676,14 @@ class CompleteMap(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, CompleteMap) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, CompleteMap):
@@ -3612,7 +3767,14 @@ class CompleteMapDep(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, CompleteMapDep) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, CompleteMapDep):
@@ -3710,7 +3872,14 @@ class IncompleteList(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, IncompleteList) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, IncompleteList):
@@ -3794,7 +3963,14 @@ class IncompleteListDep(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, IncompleteListDep) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, IncompleteListDep):
@@ -3892,7 +4068,14 @@ class CompleteList(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, CompleteList) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, CompleteList):
@@ -3976,7 +4159,14 @@ class CompleteListDep(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, CompleteListDep) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, CompleteListDep):
@@ -4074,7 +4264,14 @@ class AdaptedList(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, AdaptedList) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, AdaptedList):
@@ -4172,7 +4369,14 @@ class DependentAdaptedList(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, DependentAdaptedList) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, DependentAdaptedList):
@@ -4312,7 +4516,14 @@ class AllocatorAware(thrift.py3.types.Struct):
         return 7
 
     def __eq__(self, other):
-        return isinstance(other, AllocatorAware) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, AllocatorAware):
@@ -4406,7 +4617,14 @@ class AllocatorAware2(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, AllocatorAware2) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, AllocatorAware2):
@@ -4505,7 +4723,14 @@ class TypedefStruct(thrift.py3.types.Struct):
         return 3
 
     def __eq__(self, other):
-        return isinstance(other, TypedefStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, TypedefStruct):
@@ -4594,7 +4819,14 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, StructWithDoubleUnderscores) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, StructWithDoubleUnderscores):

@@ -255,6 +255,11 @@ union ComplexUnion {
   9: string text;
   10: binary raw;
   11: bool truthy;
+  12: list<float> float_list;
+  // @lint-ignore THRIFTCHECKS
+  13: set<float> float_set;
+  // @lint-ignore THRIFTCHECKS
+  14: map<float, float> float_map;
 }
 
 union IOBufUnion {

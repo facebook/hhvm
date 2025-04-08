@@ -93,8 +93,9 @@ const t_type* get_map_val_type(const t_type& type) {
 }
 
 bool type_needs_convert(const t_type* type) {
-  return type->is_enum() || type->is_struct_or_union() || type->is_union() ||
-      type->is_exception() || type->is_container();
+  // NB: float32 has to be rounded by cython to maintain old py3 behavior
+  return type->is_enum() || type->is_struct_or_union() ||
+      type->is_exception() || type->is_container() || type->is_float();
 }
 
 std::string get_cpp_template(const t_type& type) {

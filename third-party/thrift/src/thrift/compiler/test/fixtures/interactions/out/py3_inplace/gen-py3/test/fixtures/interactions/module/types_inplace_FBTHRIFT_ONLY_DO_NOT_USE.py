@@ -15,6 +15,7 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -110,7 +111,14 @@ class CustomException(thrift.py3.exceptions.GeneratedError):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, CustomException) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, CustomException):
@@ -202,7 +210,14 @@ class ShouldBeBoxed(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, ShouldBeBoxed) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ShouldBeBoxed):

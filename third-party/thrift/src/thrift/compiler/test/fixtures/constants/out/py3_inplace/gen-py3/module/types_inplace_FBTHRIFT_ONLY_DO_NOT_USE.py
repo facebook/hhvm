@@ -15,6 +15,7 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -1007,7 +1008,14 @@ class Internship(thrift.py3.types.Struct):
         return 5
 
     def __eq__(self, other):
-        return isinstance(other, Internship) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, Internship):
@@ -1101,7 +1109,14 @@ class Range(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, Range) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, Range):
@@ -1195,7 +1210,14 @@ class struct1(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, struct1) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, struct1):
@@ -1313,7 +1335,14 @@ class struct2(thrift.py3.types.Struct):
         return 4
 
     def __eq__(self, other):
-        return isinstance(other, struct2) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, struct2):
@@ -1419,7 +1448,14 @@ class struct3(thrift.py3.types.Struct):
         return 3
 
     def __eq__(self, other):
-        return isinstance(other, struct3) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, struct3):
@@ -1518,7 +1554,14 @@ class struct4(thrift.py3.types.Struct):
         return 3
 
     def __eq__(self, other):
-        return isinstance(other, struct4) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, struct4):
@@ -1649,7 +1692,11 @@ class union1(thrift.py3.types.Union):
         return 2
 
     def __eq__(self, other):
-        return isinstance(other, union1) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        return self.type == other.type and self.value == other.value
+
 
     def __lt__(self, other):
         if not isinstance(other, union1):
@@ -1816,7 +1863,11 @@ class union2(thrift.py3.types.Union):
         return 4
 
     def __eq__(self, other):
-        return isinstance(other, union2) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        return self.type == other.type and self.value == other.value
+
 
     def __lt__(self, other):
         if not isinstance(other, union2):

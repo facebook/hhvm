@@ -30,7 +30,10 @@ from testing.types import (
     ReservedUnion,
     ValueOrError,
 )
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Struct, Union
@@ -193,6 +196,30 @@ class UnionTests(unittest.TestCase):
         else:
             self.assertEqual(u.type, Misordered.Type.s1)
             self.assertEqual(u.s1, "31")
+
+    @brokenInAutoMigrate()
+    def test_float32_field(self) -> None:
+        # thrift-py3 rounds to float32 via cython. We want to eventually
+        # remove this behavior and update tests that expect float32 rounding.
+        self.assertNotEqual(ComplexUnion(float_val=1.1).float_val, 1.1)
+        self.assertEqual(ComplexUnion(float_val=1.1).float_val, 1.100000023841858)
+
+        doubles = [1.1, 2.2, 3.3]
+        floats = [1.100000023841858, 2.200000047683716, 3.299999952316284]
+        u = ComplexUnion(float_list=doubles)
+        self.assertNotEqual(u.float_list, doubles)
+        self.assertEqual(u.float_list, floats)
+
+        double_set = set(doubles)
+        u = ComplexUnion(float_set=double_set)
+        self.assertNotEqual(u.float_set, double_set)
+        self.assertEqual(u.float_set, set(floats))
+
+        double_map = {x: x for x in doubles}
+        u = ComplexUnion(float_map=double_map)
+        float_map = {x: x for x in floats}
+        self.assertNotEqual(u.float_map, double_map)
+        self.assertEqual(u.float_map, float_map)
 
     def test_iobuf_union(self) -> None:
         abuf = IOBuf(b"3.141592025756836")

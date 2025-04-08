@@ -15,6 +15,7 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -178,7 +179,10 @@ class Set__float(thrift.py3.types.Set):
 
     @staticmethod
     def from_python(python_set: thrift.python.types.Set) -> Set__float:
-        _items = frozenset(python_set)
+        _items = frozenset(
+            _fbthrift__round_float32(item)
+            for item in python_set
+        )
         return Set__float(
             items=_items,
             private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
@@ -547,7 +551,14 @@ class MyStruct(thrift.py3.types.Struct):
         return 9
 
     def __eq__(self, other):
-        return isinstance(other, MyStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MyStruct):
@@ -667,7 +678,14 @@ class Containers(thrift.py3.types.Struct):
         return 3
 
     def __eq__(self, other):
-        return isinstance(other, Containers) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, Containers):
@@ -751,7 +769,14 @@ class MyDataItem(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, MyDataItem) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MyDataItem):
@@ -927,7 +952,11 @@ class MyUnion(thrift.py3.types.Union):
         return 4
 
     def __eq__(self, other):
-        return isinstance(other, MyUnion) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        return self.type == other.type and self.value == other.value
+
 
     def __lt__(self, other):
         if not isinstance(other, MyUnion):
@@ -1044,7 +1073,14 @@ class MyException(thrift.py3.exceptions.GeneratedError):
         return 4
 
     def __eq__(self, other):
-        return isinstance(other, MyException) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MyException):
@@ -1164,7 +1200,14 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
         return 4
 
     def __eq__(self, other):
-        return isinstance(other, MyExceptionWithMessage) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, MyExceptionWithMessage):
@@ -1259,7 +1302,14 @@ class ReservedKeyword(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, ReservedKeyword) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, ReservedKeyword):
@@ -1374,7 +1424,11 @@ class UnionToBeRenamed(thrift.py3.types.Union):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, UnionToBeRenamed) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        return self.type == other.type and self.value == other.value
+
 
     def __lt__(self, other):
         if not isinstance(other, UnionToBeRenamed):

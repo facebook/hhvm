@@ -15,6 +15,7 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -1900,8 +1901,8 @@ class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
     @staticmethod
     def from_python(python_map: thrift.python.types.Map) -> Map__AnEnumRenamed_i32:
         _keys = (
-            AnEnumRenamed.from_python(item)
-            for item in python_map.keys()
+            AnEnumRenamed.from_python(key)
+            for key in python_map.keys()
         )
         _values = python_map.values()
         return Map__AnEnumRenamed_i32(
@@ -1982,7 +1983,14 @@ class SimpleException(thrift.py3.exceptions.GeneratedError):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, SimpleException) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, SimpleException):
@@ -2074,7 +2082,14 @@ class OptionalRefStruct(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, OptionalRefStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, OptionalRefStruct):
@@ -2100,6 +2115,7 @@ class SimpleStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+        "_fbthrift_inner__smaller_real",
         "_fbthrift_inner__something",
         "_fbthrift_inner__opt_default_enum",
     )
@@ -2118,6 +2134,7 @@ class SimpleStruct(thrift.py3.types.Struct):
         "opt_default_enum",
     )
     _fbthrift__inner : _fbthrift_python_types.SimpleStruct
+    _fbthrift_inner__smaller_real : float | None
     _fbthrift_inner__something : _typing.Mapping[int, int] | None
     _fbthrift_inner__opt_default_enum : AnEnum | None
 
@@ -2127,6 +2144,7 @@ class SimpleStruct(thrift.py3.types.Struct):
 
     def __new__(cls, *args, **kwargs) -> SimpleStruct:
         instance = super().__new__(cls)
+        instance._fbthrift_inner__smaller_real = None
         instance._fbthrift_inner__something = None
         instance._fbthrift_inner__opt_default_enum = None
         return instance
@@ -2191,7 +2209,11 @@ class SimpleStruct(thrift.py3.types.Struct):
 
     @_python__property
     def smaller_real(self) -> float:
-        return self._fbthrift__inner.smaller_real
+        if self._fbthrift_inner__smaller_real is None:
+            __python_val = self._fbthrift__inner.smaller_real
+            self._fbthrift_inner__smaller_real = _fbthrift__round_float32(__python_val)
+
+        return self._fbthrift_inner__smaller_real
 
     @_python__property
     def something(self) -> _typing.Mapping[int, int]:
@@ -2235,7 +2257,14 @@ class SimpleStruct(thrift.py3.types.Struct):
         return 11
 
     def __eq__(self, other):
-        return isinstance(other, SimpleStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
 
     def __hash__(self):
@@ -2309,7 +2338,14 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, HiddenTypeFieldsStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
 
     def __hash__(self):
@@ -2449,7 +2485,14 @@ class ComplexStruct(thrift.py3.types.Struct):
         return 9
 
     def __eq__(self, other):
-        return isinstance(other, ComplexStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
 
     def __hash__(self):
@@ -2550,7 +2593,11 @@ class BinaryUnion(thrift.py3.types.Union):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, BinaryUnion) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        return self.type == other.type and self.value == other.value
+
 
     def __lt__(self, other):
         if not isinstance(other, BinaryUnion):
@@ -2646,7 +2693,14 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
         return 1
 
     def __eq__(self, other):
-        return isinstance(other, BinaryUnionStruct) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
     def __lt__(self, other):
         if not isinstance(other, BinaryUnionStruct):
@@ -2803,7 +2857,14 @@ class CustomFields(thrift.py3.types.Struct):
         return 9
 
     def __eq__(self, other):
-        return isinstance(other, CustomFields) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
 
     def __hash__(self):
@@ -2950,7 +3011,14 @@ class CustomTypedefFields(thrift.py3.types.Struct):
         return 9
 
     def __eq__(self, other):
-        return isinstance(other, CustomTypedefFields) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
 
     def __hash__(self):
@@ -3097,7 +3165,14 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
         return 9
 
     def __eq__(self, other):
-        return isinstance(other, AdaptedTypedefFields) and self._fbthrift__inner == other._fbthrift__inner
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
 
 
     def __hash__(self):

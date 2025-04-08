@@ -297,6 +297,10 @@ def _fbthrift__is_float32(double f64):
     cdef float f32 = f64
     return f32 == f64
 
+# use to replicate thrift-py3 rounding of `float` (32-bit) fields
+def _fbthrift__round_float32(double f64):
+    return <float> f64
+
 
 cdef class Union(Struct):
     """

@@ -32,7 +32,7 @@ def fromValue(value) -> {{struct:name}}:
                 {{#type:float?}}
                 {{! only allow f64 to match to f32 if no loss of precision}}
                 # pyre-ignore[21]: types does not define type stub for this internal helper method
-                if thrift.py3.types._fbthrift__is_float32(value):
+                if _fbthrift__is_float32(value):
                     return {{struct:name}}({{field:py_name}}=value)
                 {{/type:float?}}{{^type:float?}}
                 return {{struct:name}}({{field:py_name}}=value)

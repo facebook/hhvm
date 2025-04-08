@@ -152,8 +152,7 @@ c_AsyncFunctionWaitHandle* AsioContext::maybePopFast() {
       return wh;
     } else {
       // `wh' is blocked or finished in some other context.
-      m_fastRunnableQueue.push_back(wh);
-      return nullptr;
+      decRefObj(wh);
     }
   }
   return nullptr;

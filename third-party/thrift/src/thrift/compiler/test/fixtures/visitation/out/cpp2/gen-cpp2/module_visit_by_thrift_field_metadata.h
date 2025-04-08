@@ -520,27 +520,6 @@ struct VisitByFieldId<::test_cpp2::cpp_reflection::struct_with_special_names> {
     }
   }
 };
-
-template <>
-struct VisitByFieldId<::test_cpp2::cpp_reflection::struct_with_indirections> {
-  template <typename F, typename T>
-  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).real_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).fake_ref());
-    case 3:
-      return f(2, static_cast<T&&>(t).number_ref());
-    case 4:
-      return f(3, static_cast<T&&>(t).result_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).phrase_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::test_cpp2::cpp_reflection::struct_with_indirections");
-    }
-  }
-};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

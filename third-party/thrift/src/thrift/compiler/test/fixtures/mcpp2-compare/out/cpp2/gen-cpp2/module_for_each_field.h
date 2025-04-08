@@ -177,11 +177,9 @@ struct ForEachField<::some::valid::ns::containerStruct> {
     f(38, static_cast<T&&>(t).fieldY_ref()...);
     f(39, static_cast<T&&>(t).fieldZ_ref()...);
     f(40, static_cast<T&&>(t).fieldAA_ref()...);
-    f(41, static_cast<T&&>(t).fieldAB_ref()...);
-    f(42, static_cast<T&&>(t).fieldAC_ref()...);
-    f(43, static_cast<T&&>(t).fieldAD_ref()...);
-    f(44, static_cast<T&&>(t).fieldAE_ref()...);
-    f(45, static_cast<T&&>(t).fieldSD_ref()...);
+    f(41, static_cast<T&&>(t).fieldAC_ref()...);
+    f(42, static_cast<T&&>(t).fieldAD_ref()...);
+    f(43, static_cast<T&&>(t).fieldAE_ref()...);
   }
 };
 
@@ -234,12 +232,9 @@ struct ForEachField<::some::valid::ns::AnnotatedStruct> {
     f(31, static_cast<T&&>(t).typedef_deque_template_ref()...);
     f(32, static_cast<T&&>(t).typedef_set_template_ref()...);
     f(33, static_cast<T&&>(t).typedef_map_template_ref()...);
-    f(34, static_cast<T&&>(t).indirection_a_ref()...);
-    f(35, static_cast<T&&>(t).indirection_b_ref()...);
-    f(36, static_cast<T&&>(t).indirection_c_ref()...);
-    f(37, static_cast<T&&>(t).iobuf_type_val_ref()...);
-    f(38, static_cast<T&&>(t).iobuf_ptr_val_ref()...);
-    f(39, static_cast<T&&>(t).struct_struct_ref()...);
+    f(34, static_cast<T&&>(t).iobuf_type_val_ref()...);
+    f(35, static_cast<T&&>(t).iobuf_ptr_val_ref()...);
+    f(36, static_cast<T&&>(t).struct_struct_ref()...);
   }
 };
 

@@ -75,30 +75,21 @@ inline void reset_field<::cpp2::containerStruct>(
       obj.fieldM_ref().copy_from(default_inst<::cpp2::containerStruct>().fieldM_ref());
       return;
     case 13:
-      obj.fieldN_ref().copy_from(default_inst<::cpp2::containerStruct>().fieldN_ref());
-      return;
-    case 14:
-      obj.fieldO_ref().copy_from(default_inst<::cpp2::containerStruct>().fieldO_ref());
-      return;
-    case 15:
-      obj.fieldP_ref().copy_from(default_inst<::cpp2::containerStruct>().fieldP_ref());
-      return;
-    case 16:
       obj.fieldQ_ref().copy_from(default_inst<::cpp2::containerStruct>().fieldQ_ref());
       return;
-    case 17:
+    case 14:
       obj.fieldR_ref().reset();
       return;
-    case 18:
+    case 15:
       obj.fieldS_ref().reset();
       return;
-    case 19:
+    case 16:
       obj.fieldT_ref().reset();
       return;
-    case 20:
+    case 17:
       obj.fieldU_ref().reset();
       return;
-    case 21:
+    case 18:
       obj.fieldX_ref().reset();
       return;
   }

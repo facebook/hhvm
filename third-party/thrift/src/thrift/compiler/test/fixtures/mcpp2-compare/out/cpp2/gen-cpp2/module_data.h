@@ -288,7 +288,7 @@ template <> struct TStructDataStorage<::some::valid::ns::AnotherException> {
 };
 
 template <> struct TStructDataStorage<::some::valid::ns::containerStruct> {
-  static constexpr const std::size_t fields_size = 46;
+  static constexpr const std::size_t fields_size = 44;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -320,7 +320,7 @@ template <> struct TStructDataStorage<::some::valid::ns::MyIncludedStruct> {
 };
 
 template <> struct TStructDataStorage<::some::valid::ns::AnnotatedStruct> {
-  static constexpr const std::size_t fields_size = 40;
+  static constexpr const std::size_t fields_size = 37;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

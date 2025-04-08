@@ -14,10 +14,10 @@ namespace test::fixtures::python_capi {
 namespace containers_constants {
 
 
-::std::string_view _fbthrift_schema_566ea659689f9ba8() {
+::std::string_view _fbthrift_schema_474acde4c63234cd() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_566ea659689f9ba8_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_474acde4c63234cd_includes() {
   return {};
 }
 

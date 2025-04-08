@@ -34,12 +34,6 @@ from thrift.py3.types cimport (
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 
 
-cdef extern from *:
-    ctypedef cint64_t Foo "Foo"
-cdef extern from *:
-    ctypedef double Bar "Bar"
-cdef extern from *:
-    ctypedef cint32_t Baz "Baz"
 
 cdef extern from "thrift/compiler/test/fixtures/templated-deserialize/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -94,9 +88,6 @@ cdef extern from "thrift/compiler/test/fixtures/templated-deserialize/gen-cpp2/m
         __field_ref[vector[vector[vector[vector[cint32_t]]]]] fieldK_ref "fieldK_ref" ()
         __field_ref[cset[cset[cset[cbool]]]] fieldL_ref "fieldL_ref" ()
         __field_ref[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]] fieldM_ref "fieldM_ref" ()
-        __field_ref[vector[Foo]] fieldN_ref "fieldN_ref" ()
-        __field_ref[vector[Bar]] fieldO_ref "fieldO_ref" ()
-        __field_ref[vector[Baz]] fieldP_ref "fieldP_ref" ()
         __field_ref[cMyEnumA] fieldQ_ref "fieldQ_ref" ()
         unique_ptr[cmap[string,cbool]] fieldR_ref "fieldR_ref" ()
         unique_ptr[cSmallStruct] fieldS_ref "fieldS_ref" ()

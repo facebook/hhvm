@@ -1024,42 +1024,5 @@ THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp
   27,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::name = "struct_with_indirections";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_names = { {
-  "real"sv,
-  "fake"sv,
-  "number"sv,
-  "result"sv,
-  "phrase"sv,
-}};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_ids = { {
-  1,
-  2,
-  3,
-  4,
-  5,
-}};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_types = { {
-  TType::T_I32,
-  TType::T_I32,
-  TType::T_I32,
-  TType::T_I32,
-  TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::storage_names = { {
-  "__fbthrift_field_real"sv,
-  "__fbthrift_field_fake"sv,
-  "__fbthrift_field_number"sv,
-  "__fbthrift_field_result"sv,
-  "__fbthrift_field_phrase"sv,
-}};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::isset_indexes = { {
-  0,
-  1,
-  2,
-  3,
-  4,
-}};
-
 } // namespace thrift
 } // namespace apache

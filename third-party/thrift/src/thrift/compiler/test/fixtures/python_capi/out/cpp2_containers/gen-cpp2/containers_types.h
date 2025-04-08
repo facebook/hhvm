@@ -183,8 +183,6 @@ typedef folly::small_vector<::test::fixtures::python_capi::IOBuf> small_vector_i
 typedef folly::fbvector<::std::string> fbvector_string;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "fbvector_fbvector_string", "kind": "typedef" } */
 typedef folly::fbvector<::test::fixtures::python_capi::fbvector_string> fbvector_fbvector_string;
-/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "CppWrapper", "kind": "typedef" } */
-typedef ::thrift::test::python_capi::CppWrapperT CppWrapper;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "ListOfWrapped", "kind": "typedef" } */
 typedef ::std::vector<::test::fixtures::python_capi::TWrapped> ListOfWrapped;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "VecOfWrapped", "kind": "typedef" } */

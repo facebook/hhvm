@@ -102,7 +102,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__bool,
     Set__Set__bool,
     Set__Set__Set__bool,
-    Map__Bar__double_Baz__i32,
     folly_small_vector_int64_t_8__List__i64,
     folly_sorted_vector_set_std_string__Set__string,
     FakeMap__Map__i64_double,
@@ -111,8 +110,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     std_deque__List__string,
     folly_sorted_vector_set__Set__string,
     folly_sorted_vector_map__Map__i64_string,
-    List__Bar__double,
-    Set__Baz__i32,
     Map__string_folly_IOBuf__binary,
     Map__string_std_unique_ptr_folly_IOBuf__binary,
     Map__i32_string,
@@ -1957,11 +1954,9 @@ cdef class containerStruct(thrift.py3.types.Struct):
           "fieldY": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldY_ref().has_value(),
           "fieldZ": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldZ_ref().has_value(),
           "fieldAA": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldAA_ref().has_value(),
-          "fieldAB": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldAB_ref().has_value(),
           "fieldAC": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldAC_ref().has_value(),
           "fieldAD": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldAD_ref().has_value(),
           "fieldAE": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldAE_ref().has_value(),
-          "fieldSD": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldSD_ref().has_value(),
         })
 
     @staticmethod
@@ -2329,15 +2324,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
     def fieldAA(self):
         return self.fieldAA_impl()
 
-    cdef inline fieldAB_impl(self):
-        if self.__fbthrift_cached_fieldAB is None:
-            self.__fbthrift_cached_fieldAB = Map__Bar__double_Baz__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldAB_ref().ref())
-        return self.__fbthrift_cached_fieldAB
-
-    @property
-    def fieldAB(self):
-        return self.fieldAB_impl()
-
     cdef inline fieldAC_impl(self):
         if self.__fbthrift_cached_fieldAC is None:
             self.__fbthrift_cached_fieldAC = translate_cpp_enum_to_python(MyEnumB, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldAC_ref().value()))
@@ -2364,13 +2350,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
     @property
     def fieldAE(self):
         return self.fieldAE_impl()
-
-    cdef inline fieldSD_impl(self):
-        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldSD_ref().value()).decode('UTF-8')
-
-    @property
-    def fieldSD(self):
-        return self.fieldSD_impl()
 
 
     def __hash__(containerStruct self):
@@ -2414,7 +2393,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 46
+        return 44
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(containerStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -2619,9 +2598,6 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
           "typedef_deque_template": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).typedef_deque_template_ref().has_value(),
           "typedef_set_template": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).typedef_set_template_ref().has_value(),
           "typedef_map_template": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).typedef_map_template_ref().has_value(),
-          "indirection_a": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).indirection_a_ref().has_value(),
-          "indirection_b": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).indirection_b_ref().has_value(),
-          "indirection_c": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).indirection_c_ref().has_value(),
           "iobuf_type_val": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).iobuf_type_val_ref().has_value(),
           "iobuf_ptr_val": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).iobuf_ptr_val_ref().has_value(),
           "struct_struct": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_struct_ref().has_value(),
@@ -2975,31 +2951,6 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
     def typedef_map_template(self):
         return self.typedef_map_template_impl()
 
-    cdef inline indirection_a_impl(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).indirection_a_ref().value()
-
-    @property
-    def indirection_a(self):
-        return self.indirection_a_impl()
-
-    cdef inline indirection_b_impl(self):
-        if self.__fbthrift_cached_indirection_b is None:
-            self.__fbthrift_cached_indirection_b = List__Bar__double__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).indirection_b_ref().ref())
-        return self.__fbthrift_cached_indirection_b
-
-    @property
-    def indirection_b(self):
-        return self.indirection_b_impl()
-
-    cdef inline indirection_c_impl(self):
-        if self.__fbthrift_cached_indirection_c is None:
-            self.__fbthrift_cached_indirection_c = Set__Baz__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).indirection_c_ref().ref())
-        return self.__fbthrift_cached_indirection_c
-
-    @property
-    def indirection_c(self):
-        return self.indirection_c_impl()
-
     cdef inline iobuf_type_val_impl(self):
         if self.__fbthrift_cached_iobuf_type_val is None:
             self.__fbthrift_cached_iobuf_type_val = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).iobuf_type_val_ref().ref()), self)
@@ -3073,7 +3024,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 40
+        return 37
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AnnotatedStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -4480,32 +4431,6 @@ cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]& c_set) 
         py_items.append(Set__Set__bool__from_cpp(citem))
     return Set__Set__Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
-cdef cmap[_module_cbindings.Bar,_module_cbindings.Baz] Map__Bar__double_Baz__i32__make_instance(object items) except *:
-    cdef cmap[_module_cbindings.Bar,_module_cbindings.Baz] c_inst
-    cdef _module_cbindings.Bar c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, (float, int)):
-            raise TypeError(f"{key!r} is not of type float")
-        c_key = key
-        if not isinstance(item, int):
-            raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-
-        c_inst[c_key] = item
-    return cmove(c_inst)
-
-cdef object Map__Bar__double_Baz__i32__from_cpp(const cmap[_module_cbindings.Bar,_module_cbindings.Baz]& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[cmap[_module_cbindings.Bar,_module_cbindings.Baz]] iter = __map_iter[cmap[_module_cbindings.Bar,_module_cbindings.Baz]](c_map)
-    cdef _module_cbindings.Bar ckey = 0
-    cdef _module_cbindings.Baz cval = 0
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[ckey] = cval
-    return Map__Bar__double_Baz__i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
 cdef _module_cbindings.folly_small_vector_int64_t_8 folly_small_vector_int64_t_8__List__i64__make_instance(object items) except *:
     cdef _module_cbindings.folly_small_vector_int64_t_8 c_inst
     if items is None:
@@ -4681,44 +4606,6 @@ cdef object folly_sorted_vector_map__Map__i64_string__from_cpp(const _module_cbi
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = __init_unicode_from_cpp(cval)
     return folly_sorted_vector_map__Map__i64_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
-cdef vector[_module_cbindings.Bar] List__Bar__double__make_instance(object items) except *:
-    cdef vector[_module_cbindings.Bar] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, (float, int)):
-            raise TypeError(f"{item!r} is not of type float")
-        c_inst.push_back(item)
-    return cmove(c_inst)
-
-cdef object List__Bar__double__from_cpp(const vector[_module_cbindings.Bar]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(c_vec[idx])
-    return List__Bar__double(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef cset[_module_cbindings.Baz] Set__Baz__i32__make_instance(object items) except *:
-    cdef cset[_module_cbindings.Baz] c_inst
-    cdef _module_cbindings.Baz c_item
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, int):
-            raise TypeError(f"{item!r} is not of type int")
-        c_item = <cint32_t> item
-        c_inst.insert(c_item)
-    return cmove(c_inst)
-
-cdef object Set__Baz__i32__from_cpp(const cset[_module_cbindings.Baz]& c_set) except *:
-    cdef list py_items = []
-    cdef __set_iter[cset[_module_cbindings.Baz]] iter = __set_iter[cset[_module_cbindings.Baz]](c_set)
-    cdef _module_cbindings.Baz citem = 0
-    for i in range(c_set.size()):
-        iter.genNextItem(citem)
-        py_items.append(citem)
-    return Set__Baz__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 cdef cmap[string,_fbthrift_iobuf.cIOBuf] Map__string_folly_IOBuf__binary__make_instance(object items) except *:
     cdef cmap[string,_fbthrift_iobuf.cIOBuf] c_inst
@@ -4904,11 +4791,6 @@ unionTypeDef = Set__SimpleUnion
 structTypeDef = List__MyStruct
 complexStructTypeDef = List__Map__Empty_MyStruct
 mostComplexTypeDef = List__List__Map__Empty_MyStruct
-IndirectionA = int
-IndirectionC = int
-IndirectionB = float
-IndirectionD = str
-HashedTypedef = Map__MyEnumA_string
 CppFakeI32 = int
 FollySmallVectorI64 = folly_small_vector_int64_t_8__List__i64
 SortedVectorSetString = folly_sorted_vector_set_std_string__Set__string

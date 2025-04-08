@@ -59,24 +59,18 @@ struct VisitByFieldId<::cpp2::containerStruct> {
       return f(11, static_cast<T&&>(t).fieldL_ref());
     case 13:
       return f(12, static_cast<T&&>(t).fieldM_ref());
-    case 14:
-      return f(13, static_cast<T&&>(t).fieldN_ref());
-    case 15:
-      return f(14, static_cast<T&&>(t).fieldO_ref());
-    case 16:
-      return f(15, static_cast<T&&>(t).fieldP_ref());
     case 17:
-      return f(16, static_cast<T&&>(t).fieldQ_ref());
+      return f(13, static_cast<T&&>(t).fieldQ_ref());
     case 18:
-      return f(17, static_cast<T&&>(t).fieldR_ref());
+      return f(14, static_cast<T&&>(t).fieldR_ref());
     case 19:
-      return f(18, static_cast<T&&>(t).fieldS_ref());
+      return f(15, static_cast<T&&>(t).fieldS_ref());
     case 20:
-      return f(19, static_cast<T&&>(t).fieldT_ref());
+      return f(16, static_cast<T&&>(t).fieldT_ref());
     case 21:
-      return f(20, static_cast<T&&>(t).fieldU_ref());
+      return f(17, static_cast<T&&>(t).fieldU_ref());
     case 23:
-      return f(21, static_cast<T&&>(t).fieldX_ref());
+      return f(18, static_cast<T&&>(t).fieldX_ref());
     default:
       throwInvalidThriftId(fieldId, "::cpp2::containerStruct");
     }

@@ -79,9 +79,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
     cdef inline object fieldK_impl(self)
     cdef inline object fieldL_impl(self)
     cdef inline object fieldM_impl(self)
-    cdef inline object fieldN_impl(self)
-    cdef inline object fieldO_impl(self)
-    cdef inline object fieldP_impl(self)
     cdef inline object fieldQ_impl(self)
     cdef inline object fieldR_impl(self)
     cdef inline object fieldS_impl(self)
@@ -97,9 +94,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_fieldK
     cdef object __fbthrift_cached_fieldL
     cdef object __fbthrift_cached_fieldM
-    cdef object __fbthrift_cached_fieldN
-    cdef object __fbthrift_cached_fieldO
-    cdef object __fbthrift_cached_fieldP
     cdef object __fbthrift_cached_fieldQ
     cdef object __fbthrift_cached_fieldR
     cdef SmallStruct __fbthrift_cached_fieldS
@@ -167,14 +161,5 @@ cdef object Map__List__Set__string_string__from_cpp(const cmap[vector[cset[strin
 
 cdef cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]] Map__Set__List__i32_Map__List__Set__string_string__make_instance(object items) except *
 cdef object Map__Set__List__i32_Map__List__Set__string_string__from_cpp(const cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]&) except *
-
-cdef vector[_module_cbindings.Foo] List__Foo__i64__make_instance(object items) except *
-cdef object List__Foo__i64__from_cpp(const vector[_module_cbindings.Foo]&) except *
-
-cdef vector[_module_cbindings.Bar] List__Bar__double__make_instance(object items) except *
-cdef object List__Bar__double__from_cpp(const vector[_module_cbindings.Bar]&) except *
-
-cdef vector[_module_cbindings.Baz] List__Baz__i32__make_instance(object items) except *
-cdef object List__Baz__i32__from_cpp(const vector[_module_cbindings.Baz]&) except *
 
 

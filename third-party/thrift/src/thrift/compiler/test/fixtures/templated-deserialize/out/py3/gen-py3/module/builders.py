@@ -43,9 +43,6 @@ class containerStruct_Builder(thrift.py3.builder.StructBuilder):
         self.fieldK: _typing.Optional[list] = None
         self.fieldL: _typing.Optional[set] = None
         self.fieldM: _typing.Optional[dict] = None
-        self.fieldN: _typing.Optional[list] = None
-        self.fieldO: _typing.Optional[list] = None
-        self.fieldP: _typing.Optional[list] = None
         self.fieldQ: _typing.Optional[_module_types.MyEnumA] = None
         self.fieldR: _typing.Optional[dict] = None
         self.fieldS: _typing.Any = None
@@ -67,9 +64,6 @@ class containerStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "fieldK", self.fieldK
         yield "fieldL", self.fieldL
         yield "fieldM", self.fieldM
-        yield "fieldN", self.fieldN
-        yield "fieldO", self.fieldO
-        yield "fieldP", self.fieldP
         yield "fieldQ", self.fieldQ
         yield "fieldR", self.fieldR
         yield "fieldS", self.fieldS

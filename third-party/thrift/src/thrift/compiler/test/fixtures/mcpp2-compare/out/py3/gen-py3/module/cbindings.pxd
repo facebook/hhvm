@@ -189,12 +189,6 @@ cdef extern from * nogil:
         bint empty()
 
 cdef extern from *:
-    ctypedef double Bar "Bar"
-cdef extern from *:
-    ctypedef cint32_t Baz "Baz"
-cdef extern from *:
-    ctypedef string FooBar "FooBar"
-cdef extern from *:
     ctypedef cint32_t CppFakeI32 "CppFakeI32"
 cdef extern from * nogil:
     cdef cppclass folly_small_vector_int64_t_8 "folly::small_vector<int64_t, 8 >":
@@ -350,8 +344,6 @@ cdef extern from * nogil:
         void clear()
         bint empty()
 
-cdef extern from *:
-    ctypedef cint64_t Foo "Foo"
 
 cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -651,11 +643,9 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_ty
         __field_ref[vector[cComplexUnion]] fieldY_ref "fieldY_ref" ()
         __field_ref[cset[cSimpleUnion]] fieldZ_ref "fieldZ_ref" ()
         __field_ref[vector[cset[cSimpleUnion]]] fieldAA_ref "fieldAA_ref" ()
-        __field_ref[cmap[Bar,Baz]] fieldAB_ref "fieldAB_ref" ()
         __field_ref[cMyEnumB] fieldAC_ref "fieldAC_ref" ()
         __field_ref[_includes_cbindings.cAnEnum] fieldAD_ref "fieldAD_ref" ()
         __field_ref[cmap[string,cint32_t]] fieldAE_ref "fieldAE_ref" ()
-        __field_ref[FooBar] fieldSD_ref "fieldSD_ref" ()
 
 
     cdef cppclass cMyIncludedStruct "::some::valid::ns::MyIncludedStruct":
@@ -711,9 +701,6 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_ty
         __field_ref[std_deque[string]] typedef_deque_template_ref "typedef_deque_template_ref" ()
         __field_ref[folly_sorted_vector_set[string]] typedef_set_template_ref "typedef_set_template_ref" ()
         __field_ref[folly_sorted_vector_map[cint64_t,string]] typedef_map_template_ref "typedef_map_template_ref" ()
-        __field_ref[Foo] indirection_a_ref "indirection_a_ref" ()
-        __field_ref[vector[Bar]] indirection_b_ref "indirection_b_ref" ()
-        __field_ref[cset[Baz]] indirection_c_ref "indirection_c_ref" ()
         __field_ref[_fbthrift_iobuf.cIOBuf] iobuf_type_val_ref "iobuf_type_val_ref" ()
         __field_ref[unique_ptr[_fbthrift_iobuf.cIOBuf]] iobuf_ptr_val_ref "iobuf_ptr_val_ref" ()
         __field_ref[ccontainerStruct] struct_struct_ref "struct_struct_ref" ()

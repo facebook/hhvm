@@ -30,7 +30,6 @@ struct __fbthrift_strings_module {
   using __fbthrift_hash_0a93067560e454e387c1e19b575eb2786edd2457adcecc15d06593fb509a44fe = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '2'>;
   using __fbthrift_hash_0c7d02e77b69e64478888bde6c36431c34c69317e783b302b7b09b6c32e55f6f = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'I'>;
   using __fbthrift_hash_10dacdccfe877dc064d57442e6fa7a4e3085dc94e11a29819c2290fc3d788724 = ::fatal::sequence<char, 'l', '3'>;
-  using __fbthrift_hash_12886f9d00055adf24c40579e22d31b2b45f2023f892954ffd5567beb60825f8 = ::fatal::sequence<char, 'n', 'u', 'm', 'b', 'e', 'r'>;
   using __fbthrift_hash_12b2fdc0a0ffd6ce4b7d74d080cd8dcb1c60b6e8f365fb46ac511c46cc31f1c1 = ::fatal::sequence<char, 'd', 'e', 's', 'c', 'r', 'i', 'p', 't', 'o', 'r', 's'>;
   using __fbthrift_hash_13009491225878db05f406520b14390fe348bed9c4c2f8de4ef0a6f2932b6b74 = ::fatal::sequence<char, 'u', 'e', '_', '2'>;
   using __fbthrift_hash_1303c06b0b014d0ce7b988ab173a13f31227d417058ff4bbe6f8c222b4ad913c = ::fatal::sequence<char, 't', 'y', 'p', 'e'>;
@@ -68,7 +67,6 @@ struct __fbthrift_strings_module {
   using __fbthrift_hash_4c14c4a453f98de4bd1c972fea7850adb52822c5823e5da287085165afcf2020 = ::fatal::sequence<char, 'l', 'i', 's', 't', 's'>;
   using __fbthrift_hash_4c4f1be7384da0ab8e9483a59b7018f4671e228da38fa30ee8eabe777bc24cda = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'G'>;
   using __fbthrift_hash_4cb122443fdcc93ce02d0854f1bcf045042abde666a2a2cb80ca70374f4a0930 = ::fatal::sequence<char, 'u', 'd', '_', '2'>;
-  using __fbthrift_hash_55e6591542e7a11d1d233d42fe6e5109de1934b51437189b76f440f9667b2d6c = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '_', 'w', 'i', 't', 'h', '_', 'i', 'n', 'd', 'i', 'r', 'e', 'c', 't', 'i', 'o', 'n', 's'>;
   using __fbthrift_hash_5a2908eb2945bee309afb7d78397a237ba234d4799ea8ab6d82676de3a36c405 = ::fatal::sequence<char, 'd', 'e', 'p', '_', 'A', '_', 's', 't', 'r', 'u', 'c', 't'>;
   using __fbthrift_hash_63d2f586a734f5278e0744cfc648e9f7c35e3d26b0d5b6489478844d5eedffdd = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'K'>;
   using __fbthrift_hash_676b8bb84ce7267dd520deca4811c8f10a53e636352f06987f42fe425acedd80 = ::fatal::sequence<char, 'n', '1'>;
@@ -107,20 +105,17 @@ struct __fbthrift_strings_module {
   using __fbthrift_hash_a499068b8f456a03adaf1064efe8fb54c8f0fd204468f27e168642eab19d883b = ::fatal::sequence<char, 'j', '2'>;
   using __fbthrift_hash_a56145270ce6b3bebd1dd012b73948677dd618d496488bc608a3cb43ce3547dd = ::fatal::sequence<char, 'i', 'd'>;
   using __fbthrift_hash_a73c4974ccb5981437f75c22da908dd553c1389729210c7d554a65e1b0f4045a = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'D'>;
-  using __fbthrift_hash_aa33996d60e89311b4d1a920dae03c6d7fa3ae1956c52662e273aad4683e577f = ::fatal::sequence<char, 'r', 'e', 'a', 'l'>;
   using __fbthrift_hash_aaa9402664f1a41f40ebbc52c9993eb66aeb366602958fdfaa283b71e64db123 = ::fatal::sequence<char, 'h'>;
   using __fbthrift_hash_ac72b2f5d1e514309dfd006f7c838e821485cd0c32d23dd24078a969d72dfb01 = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', 'C'>;
   using __fbthrift_hash_acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0 = ::fatal::sequence<char, 'l'>;
   using __fbthrift_hash_aeb24056810d3d1f1e8afee61a0bc0028556eb0fb49a215ae5eb1b970cad0315 = ::fatal::sequence<char, 'n', 'a', 'm', 'e', 's'>;
   using __fbthrift_hash_aee2ad14bcf09f5bd7bc15e9c3e69ed37514d588a766b457545dca7382ace91e = ::fatal::sequence<char, 'e', 'n', 'u', 'm', '_', 'w', 'i', 't', 'h', '_', 's', 'p', 'e', 'c', 'i', 'a', 'l', '_', 'n', 'a', 'm', 'e', 's'>;
-  using __fbthrift_hash_b5d54c39e66671c9731b9f471e585d8262cd4f54963f0c93082d8dcf334d4c78 = ::fatal::sequence<char, 'f', 'a', 'k', 'e'>;
   using __fbthrift_hash_ba17c9f00788cd9472d21de4fa490d6c91123ad11eb2afbf159648a6843947d5 = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'M'>;
   using __fbthrift_hash_ba2a88de7258832d40bb04e70c8d37d66141754f3561ecfa366dc9496c9a7704 = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'E'>;
   using __fbthrift_hash_bab6f4cdfe399488eecf37176422c2f336b814c3b5f3d174987098ebb289f1fc = ::fatal::sequence<char, 's', 'e', 't', 't', 'e', 'r'>;
   using __fbthrift_hash_bbef32808794fbb533b862e9a380aab6cf6d813201c2c0d0ee2447e172d50bb7 = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', 'B'>;
   using __fbthrift_hash_bc85f9ac8aa1b4db9610ee0f87ee0427abda47659de9f369b220e96bb7fdbfa6 = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '1'>;
   using __fbthrift_hash_bfe5d697162d90298c67c1933908741be8395838aa230408e04710909c576806 = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 's'>;
-  using __fbthrift_hash_c00062f7ec9c80e2e77abc65b046049364054299a26cba17c81067b4d37552a2 = ::fatal::sequence<char, 'p', 'h', 'r', 'a', 's', 'e'>;
   using __fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0 = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd'>;
   using __fbthrift_hash_c0d4170793132df761051fd1289ecc194f697747aeb47dde230d60e619fb3570 = ::fatal::sequence<char, 'e', 'n', 'u', 'm', '2'>;
   using __fbthrift_hash_c33849b4e01fee9484569654c522b031dd13986d15225cd70e29ec883629fc30 = ::fatal::sequence<char, 'u', 's', '_', '3'>;
@@ -150,7 +145,6 @@ struct __fbthrift_strings_module {
   using __fbthrift_hash_ebae87887fcdb8e762ca95a71b09e6c46e67a1d9d5c9cc9cd7f1e8e5d061245a = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '3'>;
   using __fbthrift_hash_f0a85e81a4cdc5b0ffa6b6bae7015c00d3cc730d040c955859d3b797aaba3ce9 = ::fatal::sequence<char, 'u', 'd'>;
   using __fbthrift_hash_f1fe8005943a7730e9a95f7262952d9717a6f43a21d1b55daeb44de82fe4aac6 = ::fatal::sequence<char, 'n', 'a', 'm', 'e', '_', 't', 'o', '_', 'v', 'a', 'l', 'u', 'e'>;
-  using __fbthrift_hash_f6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68 = ::fatal::sequence<char, 'r', 'e', 's', 'u', 'l', 't'>;
   using __fbthrift_hash_f80a57fdbe26b4535c30a520859c2fbc28d29944e1afa486a8c2c9e5d76aaecc = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '_', 'b', 'i', 'n', 'a', 'r', 'y'>;
   using __fbthrift_hash_f98ad21069f8dc0dcbaedd5a3ae3b3691de33b5e37d1a4c945707c8bd9a491bb = ::fatal::sequence<char, 'a', 'n', 'n', 'o', 't', 'a', 't', 'e', 'd'>;
   using _now_with_an_underscore = ::fatal::sequence<char, '_', 'n', 'o', 'w', '.', 'w', 'i', 't', 'h', '.', 'a', 'n', '.', 'u', 'n', 'd', 'e', 'r', 's', 'c', 'o', 'r', 'e'>;
@@ -183,7 +177,6 @@ struct __fbthrift_strings_module {
   using enum3 = ::fatal::sequence<char, 'e', 'n', 'u', 'm', '3'>;
   using enum_with_special_names = ::fatal::sequence<char, 'e', 'n', 'u', 'm', '_', 'w', 'i', 't', 'h', '_', 's', 'p', 'e', 'c', 'i', 'a', 'l', '_', 'n', 'a', 'm', 'e', 's'>;
   using f = ::fatal::sequence<char, 'f'>;
-  using fake = ::fatal::sequence<char, 'f', 'a', 'k', 'e'>;
   using field = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd'>;
   using field0 = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', '0'>;
   using field0_2 = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', '0', '_', '2'>;
@@ -280,17 +273,13 @@ struct __fbthrift_strings_module {
   using name = ::fatal::sequence<char, 'n', 'a', 'm', 'e'>;
   using name_to_value = ::fatal::sequence<char, 'n', 'a', 'm', 'e', '_', 't', 'o', '_', 'v', 'a', 'l', 'u', 'e'>;
   using names = ::fatal::sequence<char, 'n', 'a', 'm', 'e', 's'>;
-  using number = ::fatal::sequence<char, 'n', 'u', 'm', 'b', 'e', 'r'>;
   using o1 = ::fatal::sequence<char, 'o', '1'>;
   using o2 = ::fatal::sequence<char, 'o', '2'>;
   using o3 = ::fatal::sequence<char, 'o', '3'>;
   using one_here = ::fatal::sequence<char, 'o', 'n', 'e', '.', 'h', 'e', 'r', 'e'>;
   using php = ::fatal::sequence<char, 'p', 'h', 'p'>;
-  using phrase = ::fatal::sequence<char, 'p', 'h', 'r', 'a', 's', 'e'>;
   using prefix_tree = ::fatal::sequence<char, 'p', 'r', 'e', 'f', 'i', 'x', '_', 't', 'r', 'e', 'e'>;
   using py3 = ::fatal::sequence<char, 'p', 'y', '3'>;
-  using real = ::fatal::sequence<char, 'r', 'e', 'a', 'l'>;
-  using result = ::fatal::sequence<char, 'r', 'e', 's', 'u', 'l', 't'>;
   using s = ::fatal::sequence<char, 's'>;
   using s_b_false = ::fatal::sequence<char, 's', '_', 'b', '_', 'f', 'a', 'l', 's', 'e'>;
   using s_b_true = ::fatal::sequence<char, 's', '_', 'b', '_', 't', 'r', 'u', 'e'>;
@@ -322,7 +311,6 @@ struct __fbthrift_strings_module {
   using structB = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', 'B'>;
   using structC = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', 'C'>;
   using struct_binary = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '_', 'b', 'i', 'n', 'a', 'r', 'y'>;
-  using struct_with_indirections = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '_', 'w', 'i', 't', 'h', '_', 'i', 'n', 'd', 'i', 'r', 'e', 'c', 't', 'i', 'o', 'n', 's'>;
   using struct_with_special_names = ::fatal::sequence<char, 's', 't', 'r', 'u', 'c', 't', '_', 'w', 'i', 't', 'h', '_', 's', 'p', 'e', 'c', 'i', 'a', 'l', '_', 'n', 'a', 'm', 'e', 's'>;
   using test_cpp1__cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 'c', 'p', 'p', '1', ':', ':', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
   using test_cpp2__cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 'c', 'p', 'p', '2', ':', ':', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
@@ -331,7 +319,6 @@ struct __fbthrift_strings_module {
   using test_php_cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 'p', 'h', 'p', '_', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
   using test_py_cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 'p', 'y', '.', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
   using test_swift_cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 's', 'w', 'i', 'f', 't', '.', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
-  using thrift_uri = ::fatal::sequence<char, 't', 'h', 'r', 'i', 'f', 't', '.', 'u', 'r', 'i'>;
   using type = ::fatal::sequence<char, 't', 'y', 'p', 'e'>;
   using ud = ::fatal::sequence<char, 'u', 'd'>;
   using ud_2 = ::fatal::sequence<char, 'u', 'd', '_', '2'>;
@@ -399,7 +386,6 @@ struct module_module_traits {
       ::fatal::pair<::test_cpp2::cpp_reflection::dep_B_struct, strings::dep_B_struct>,
       ::fatal::pair<::test_cpp2::cpp_reflection::annotated, strings::annotated>,
       ::fatal::pair<::test_cpp2::cpp_reflection::struct_with_special_names, strings::struct_with_special_names>,
-      ::fatal::pair<::test_cpp2::cpp_reflection::struct_with_indirections, strings::struct_with_indirections>,
       ::fatal::pair<::test_cpp2::cpp_reflection::StructWithFieldAdapter, strings::StructWithFieldAdapter>,
       ::fatal::pair<::test_cpp2::cpp_reflection::my_structA, strings::my_structA>
   >;
@@ -458,7 +444,6 @@ class module_tags {
     using dep_B_struct = __fbthrift_strings::dep_B_struct;
     using annotated = __fbthrift_strings::annotated;
     using struct_with_special_names = __fbthrift_strings::struct_with_special_names;
-    using struct_with_indirections = __fbthrift_strings::struct_with_indirections;
     using StructWithFieldAdapter = __fbthrift_strings::StructWithFieldAdapter;
     using my_structA = __fbthrift_strings::my_structA;
   };

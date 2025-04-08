@@ -39,15 +39,12 @@ struct ForEachField<::cpp2::containerStruct> {
     f(10, static_cast<T&&>(t).fieldK_ref()...);
     f(11, static_cast<T&&>(t).fieldL_ref()...);
     f(12, static_cast<T&&>(t).fieldM_ref()...);
-    f(13, static_cast<T&&>(t).fieldN_ref()...);
-    f(14, static_cast<T&&>(t).fieldO_ref()...);
-    f(15, static_cast<T&&>(t).fieldP_ref()...);
-    f(16, static_cast<T&&>(t).fieldQ_ref()...);
-    f(17, static_cast<T&&>(t).fieldR_ref()...);
-    f(18, static_cast<T&&>(t).fieldS_ref()...);
-    f(19, static_cast<T&&>(t).fieldT_ref()...);
-    f(20, static_cast<T&&>(t).fieldU_ref()...);
-    f(21, static_cast<T&&>(t).fieldX_ref()...);
+    f(13, static_cast<T&&>(t).fieldQ_ref()...);
+    f(14, static_cast<T&&>(t).fieldR_ref()...);
+    f(15, static_cast<T&&>(t).fieldS_ref()...);
+    f(16, static_cast<T&&>(t).fieldT_ref()...);
+    f(17, static_cast<T&&>(t).fieldU_ref()...);
+    f(18, static_cast<T&&>(t).fieldX_ref()...);
   }
 };
 } // namespace detail

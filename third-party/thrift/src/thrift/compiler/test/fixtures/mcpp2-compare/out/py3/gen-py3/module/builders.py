@@ -252,11 +252,9 @@ class containerStruct_Builder(thrift.py3.builder.StructBuilder):
         self.fieldY: _typing.Optional[list] = None
         self.fieldZ: _typing.Optional[set] = None
         self.fieldAA: _typing.Optional[list] = None
-        self.fieldAB: _typing.Optional[dict] = None
         self.fieldAC: _typing.Optional[_module_types.MyEnumB] = None
         self.fieldAD: _typing.Optional[_includes_types.AnEnum] = None
         self.fieldAE: _typing.Optional[dict] = None
-        self.fieldSD: _typing.Optional[str] = None
 
     def __iter__(self):
         yield "fieldA", self.fieldA
@@ -300,11 +298,9 @@ class containerStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "fieldY", self.fieldY
         yield "fieldZ", self.fieldZ
         yield "fieldAA", self.fieldAA
-        yield "fieldAB", self.fieldAB
         yield "fieldAC", self.fieldAC
         yield "fieldAD", self.fieldAD
         yield "fieldAE", self.fieldAE
-        yield "fieldSD", self.fieldSD
 
 _fbthrift_struct_type__MyIncludedStruct = _module_types.MyIncludedStruct
 class MyIncludedStruct_Builder(thrift.py3.builder.StructBuilder):
@@ -361,9 +357,6 @@ class AnnotatedStruct_Builder(thrift.py3.builder.StructBuilder):
         self.typedef_deque_template: _typing.Optional[list] = None
         self.typedef_set_template: _typing.Optional[set] = None
         self.typedef_map_template: _typing.Optional[dict] = None
-        self.indirection_a: _typing.Optional[int] = None
-        self.indirection_b: _typing.Optional[list] = None
-        self.indirection_c: _typing.Optional[set] = None
         self.iobuf_type_val: _typing.Optional[_fbthrift_iobuf.IOBuf] = None
         self.iobuf_ptr_val: _typing.Optional[_fbthrift_iobuf.IOBuf] = None
         self.struct_struct: _typing.Any = None
@@ -403,9 +396,6 @@ class AnnotatedStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "typedef_deque_template", self.typedef_deque_template
         yield "typedef_set_template", self.typedef_set_template
         yield "typedef_map_template", self.typedef_map_template
-        yield "indirection_a", self.indirection_a
-        yield "indirection_b", self.indirection_b
-        yield "indirection_c", self.indirection_c
         yield "iobuf_type_val", self.iobuf_type_val
         yield "iobuf_ptr_val", self.iobuf_ptr_val
         yield "struct_struct", self.struct_struct

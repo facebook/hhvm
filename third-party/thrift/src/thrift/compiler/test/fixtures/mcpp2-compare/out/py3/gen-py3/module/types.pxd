@@ -266,11 +266,9 @@ cdef class containerStruct(thrift.py3.types.Struct):
     cdef inline object fieldY_impl(self)
     cdef inline object fieldZ_impl(self)
     cdef inline object fieldAA_impl(self)
-    cdef inline object fieldAB_impl(self)
     cdef inline object fieldAC_impl(self)
     cdef inline object fieldAD_impl(self)
     cdef inline object fieldAE_impl(self)
-    cdef inline object fieldSD_impl(self)
     cdef object __fbthrift_cached_fieldB
     cdef object __fbthrift_cached_req_fieldB
     cdef object __fbthrift_cached_opt_fieldB
@@ -303,7 +301,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_fieldY
     cdef object __fbthrift_cached_fieldZ
     cdef object __fbthrift_cached_fieldAA
-    cdef object __fbthrift_cached_fieldAB
     cdef object __fbthrift_cached_fieldAC
     cdef object __fbthrift_cached_fieldAD
     cdef object __fbthrift_cached_fieldAE
@@ -366,9 +363,6 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
     cdef inline object typedef_deque_template_impl(self)
     cdef inline object typedef_set_template_impl(self)
     cdef inline object typedef_map_template_impl(self)
-    cdef inline object indirection_a_impl(self)
-    cdef inline object indirection_b_impl(self)
-    cdef inline object indirection_c_impl(self)
     cdef inline object iobuf_type_val_impl(self)
     cdef inline object iobuf_ptr_val_impl(self)
     cdef inline object struct_struct_impl(self)
@@ -405,8 +399,6 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_typedef_deque_template
     cdef object __fbthrift_cached_typedef_set_template
     cdef object __fbthrift_cached_typedef_map_template
-    cdef object __fbthrift_cached_indirection_b
-    cdef object __fbthrift_cached_indirection_c
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_type_val
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_ptr_val
     cdef containerStruct __fbthrift_cached_struct_struct
@@ -582,9 +574,6 @@ cdef object Set__Set__bool__from_cpp(const cset[cset[cbool]]&) except *
 cdef cset[cset[cset[cbool]]] Set__Set__Set__bool__make_instance(object items) except *
 cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]&) except *
 
-cdef cmap[_module_cbindings.Bar,_module_cbindings.Baz] Map__Bar__double_Baz__i32__make_instance(object items) except *
-cdef object Map__Bar__double_Baz__i32__from_cpp(const cmap[_module_cbindings.Bar,_module_cbindings.Baz]&) except *
-
 cdef _module_cbindings.folly_small_vector_int64_t_8 folly_small_vector_int64_t_8__List__i64__make_instance(object items) except *
 cdef object folly_small_vector_int64_t_8__List__i64__from_cpp(const _module_cbindings.folly_small_vector_int64_t_8&) except *
 
@@ -608,12 +597,6 @@ cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindin
 
 cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] folly_sorted_vector_map__Map__i64_string__make_instance(object items) except *
 cdef object folly_sorted_vector_map__Map__i64_string__from_cpp(const _module_cbindings.folly_sorted_vector_map[cint64_t,string]&) except *
-
-cdef vector[_module_cbindings.Bar] List__Bar__double__make_instance(object items) except *
-cdef object List__Bar__double__from_cpp(const vector[_module_cbindings.Bar]&) except *
-
-cdef cset[_module_cbindings.Baz] Set__Baz__i32__make_instance(object items) except *
-cdef object Set__Baz__i32__from_cpp(const cset[_module_cbindings.Baz]&) except *
 
 cdef cmap[string,_fbthrift_iobuf.cIOBuf] Map__string_folly_IOBuf__binary__make_instance(object items) except *
 cdef object Map__string_folly_IOBuf__binary__from_cpp(const cmap[string,_fbthrift_iobuf.cIOBuf]&) except *

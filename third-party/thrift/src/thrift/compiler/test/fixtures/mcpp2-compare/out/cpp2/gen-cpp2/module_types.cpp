@@ -1747,7 +1747,7 @@ containerStruct::containerStruct() :
 containerStruct::~containerStruct() {}
 
 
-containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, bool req_fieldA__arg, bool opt_fieldA__arg, ::std::map<::std::string, bool> fieldB__arg, ::std::map<::std::string, bool> req_fieldB__arg, ::std::map<::std::string, bool> opt_fieldB__arg, ::std::set<::std::int32_t> fieldC__arg, ::std::set<::std::int32_t> req_fieldC__arg, ::std::set<::std::int32_t> opt_fieldC__arg, ::std::string fieldD__arg, ::std::string fieldE__arg, ::std::string req_fieldE__arg, ::std::string opt_fieldE__arg, ::std::vector<::std::vector<::std::int32_t>> fieldF__arg, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> fieldG__arg, ::std::vector<::std::set<::std::int32_t>> fieldH__arg, bool fieldI__arg, ::std::map<::std::string, ::std::vector<::std::int32_t>> fieldJ__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> fieldK__arg, ::std::set<::std::set<::std::set<bool>>> fieldL__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> fieldM__arg, ::some::valid::ns::simpleTypeDef fieldN__arg, ::some::valid::ns::complexStructTypeDef fieldO__arg, ::std::vector<::some::valid::ns::mostComplexTypeDef> fieldP__arg, ::some::valid::ns::MyEnumA fieldQ__arg, ::some::valid::ns::MyEnumA fieldR__arg, ::some::valid::ns::MyEnumA req_fieldR__arg, ::some::valid::ns::MyEnumA opt_fieldR__arg, ::some::valid::ns::MyEnumA fieldS__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldT__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldU__arg, ::some::valid::ns::MyStruct fieldV__arg, ::some::valid::ns::MyStruct req_fieldV__arg, ::some::valid::ns::MyStruct opt_fieldV__arg, ::std::set<::some::valid::ns::MyStruct> fieldW__arg, ::some::valid::ns::ComplexUnion fieldX__arg, ::some::valid::ns::ComplexUnion req_fieldX__arg, ::some::valid::ns::ComplexUnion opt_fieldX__arg, ::std::vector<::some::valid::ns::ComplexUnion> fieldY__arg, ::some::valid::ns::unionTypeDef fieldZ__arg, ::std::vector<::some::valid::ns::unionTypeDef> fieldAA__arg, ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> fieldAB__arg, ::some::valid::ns::MyEnumB fieldAC__arg, ::a::different::ns::AnEnum fieldAD__arg, ::std::map<::std::string, ::std::int32_t> fieldAE__arg, ::some::valid::ns::IndirectionD fieldSD__arg) :
+containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, bool req_fieldA__arg, bool opt_fieldA__arg, ::std::map<::std::string, bool> fieldB__arg, ::std::map<::std::string, bool> req_fieldB__arg, ::std::map<::std::string, bool> opt_fieldB__arg, ::std::set<::std::int32_t> fieldC__arg, ::std::set<::std::int32_t> req_fieldC__arg, ::std::set<::std::int32_t> opt_fieldC__arg, ::std::string fieldD__arg, ::std::string fieldE__arg, ::std::string req_fieldE__arg, ::std::string opt_fieldE__arg, ::std::vector<::std::vector<::std::int32_t>> fieldF__arg, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> fieldG__arg, ::std::vector<::std::set<::std::int32_t>> fieldH__arg, bool fieldI__arg, ::std::map<::std::string, ::std::vector<::std::int32_t>> fieldJ__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> fieldK__arg, ::std::set<::std::set<::std::set<bool>>> fieldL__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> fieldM__arg, ::some::valid::ns::simpleTypeDef fieldN__arg, ::some::valid::ns::complexStructTypeDef fieldO__arg, ::std::vector<::some::valid::ns::mostComplexTypeDef> fieldP__arg, ::some::valid::ns::MyEnumA fieldQ__arg, ::some::valid::ns::MyEnumA fieldR__arg, ::some::valid::ns::MyEnumA req_fieldR__arg, ::some::valid::ns::MyEnumA opt_fieldR__arg, ::some::valid::ns::MyEnumA fieldS__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldT__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldU__arg, ::some::valid::ns::MyStruct fieldV__arg, ::some::valid::ns::MyStruct req_fieldV__arg, ::some::valid::ns::MyStruct opt_fieldV__arg, ::std::set<::some::valid::ns::MyStruct> fieldW__arg, ::some::valid::ns::ComplexUnion fieldX__arg, ::some::valid::ns::ComplexUnion req_fieldX__arg, ::some::valid::ns::ComplexUnion opt_fieldX__arg, ::std::vector<::some::valid::ns::ComplexUnion> fieldY__arg, ::some::valid::ns::unionTypeDef fieldZ__arg, ::std::vector<::some::valid::ns::unionTypeDef> fieldAA__arg, ::some::valid::ns::MyEnumB fieldAC__arg, ::a::different::ns::AnEnum fieldAD__arg, ::std::map<::std::string, ::std::int32_t> fieldAE__arg) :
     fieldA(std::move(fieldA__arg)),
     req_fieldA(std::move(req_fieldA__arg)),
     opt_fieldA(std::move(opt_fieldA__arg)),
@@ -1789,11 +1789,9 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
     fieldY(std::move(fieldY__arg)),
     fieldZ(std::move(fieldZ__arg)),
     fieldAA(std::move(fieldAA__arg)),
-    fieldAB(std::move(fieldAB__arg)),
     fieldAC(std::move(fieldAC__arg)),
     fieldAD(std::move(fieldAD__arg)),
-    fieldAE(std::move(fieldAE__arg)),
-    fieldSD(std::move(fieldSD__arg)) { 
+    fieldAE(std::move(fieldAE__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1831,8 +1829,6 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
   __isset.set(folly::index_constant<34>(), true);
   __isset.set(folly::index_constant<35>(), true);
   __isset.set(folly::index_constant<36>(), true);
-  __isset.set(folly::index_constant<37>(), true);
-  __isset.set(folly::index_constant<38>(), true);
 }
 
 
@@ -1879,11 +1875,9 @@ void containerStruct::__fbthrift_clear() {
   this->fieldY.clear();
   this->fieldZ.clear();
   this->fieldAA.clear();
-  this->fieldAB.clear();
   this->fieldAC = ::some::valid::ns::MyEnumB();
   this->fieldAD = ::a::different::ns::AnEnum();
   this->fieldAE.clear();
-  ::apache::thrift::apply_indirection(this->fieldSD) = apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, FooBar const&>>>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -2225,14 +2219,6 @@ const ::std::vector<::some::valid::ns::unionTypeDef>& containerStruct::get_field
   return static_cast<::std::vector<::some::valid::ns::unionTypeDef>&&>(fieldAA);
 }
 
-const ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>& containerStruct::get_fieldAB() const& {
-  return fieldAB;
-}
-
-::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> containerStruct::get_fieldAB() && {
-  return static_cast<::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>&&>(fieldAB);
-}
-
 ::some::valid::ns::MyEnumB containerStruct::get_fieldAC() const {
   return fieldAC;
 }
@@ -2302,11 +2288,9 @@ void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct&
   swap(a.fieldY, b.fieldY);
   swap(a.fieldZ, b.fieldZ);
   swap(a.fieldAA, b.fieldAA);
-  swap(a.fieldAB, b.fieldAB);
   swap(a.fieldAC, b.fieldAC);
   swap(a.fieldAD, b.fieldAD);
   swap(a.fieldAE, b.fieldAE);
-  swap(a.fieldSD, b.fieldSD);
   swap(a.__isset, b.__isset);
 }
 
@@ -2607,7 +2591,6 @@ AnnotatedStruct::AnnotatedStruct() :
     req_ref_type_const(std::make_shared<::some::valid::ns::containerStruct>()),
     req_ref_type_unique(std::make_unique<::std::vector<::std::string>>()),
     base_type(),
-    indirection_a(),
     iobuf_type_val(apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("value")),
     iobuf_ptr_val(apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("value2")),
     struct_struct(::apache::thrift::detail::make_structured_constant<::some::valid::ns::containerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(false))) {
@@ -2617,7 +2600,7 @@ AnnotatedStruct::AnnotatedStruct() :
 AnnotatedStruct::~AnnotatedStruct() {}
 
 
-AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::valid::ns::containerStruct no_annotation__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp2_unique_ref__arg, ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp2_unique_ref__arg, ::std::unique_ptr<::std::vector<::std::string>> req_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp2_unique_ref__arg, ::std::unique_ptr<::std::set<::std::int32_t>> opt_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> ref_type_unique__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> ref_type_shared__arg, ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>> ref_type_const__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> req_ref_type_shared__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> req_ref_type_const__arg, ::std::unique_ptr<::std::vector<::std::string>> req_ref_type_unique__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> opt_ref_type_const__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_ref_type_unique__arg, ::std::shared_ptr<::std::set<::std::int32_t>> opt_ref_type_shared__arg, ::some::valid::ns::CppFakeI32 base_type__arg, ::some::valid::ns::FollySmallVectorI64 list_type__arg, ::some::valid::ns::SortedVectorSetString set_type__arg, ::some::valid::ns::FakeMap map_type__arg, ::some::valid::ns::UnorderedMapStruct map_struct_type__arg, ::some::valid::ns::IOBuf iobuf_type__arg, ::some::valid::ns::IOBufPtr iobuf_ptr__arg, std::list<::std::int32_t> list_i32_template__arg, std::deque<::std::string> list_string_template__arg, folly::sorted_vector_set<::std::string> set_template__arg, folly::sorted_vector_map<::std::int64_t, ::std::string> map_template__arg, ::some::valid::ns::std_list typedef_list_template__arg, ::some::valid::ns::std_deque typedef_deque_template__arg, ::some::valid::ns::folly_set typedef_set_template__arg, ::some::valid::ns::folly_map typedef_map_template__arg, ::some::valid::ns::IndirectionA indirection_a__arg, ::std::vector<::some::valid::ns::IndirectionB> indirection_b__arg, ::std::set<::some::valid::ns::IndirectionC> indirection_c__arg, ::some::valid::ns::IOBuf iobuf_type_val__arg, ::some::valid::ns::IOBufPtr iobuf_ptr_val__arg, ::some::valid::ns::containerStruct struct_struct__arg) :
+AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::valid::ns::containerStruct no_annotation__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp2_unique_ref__arg, ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp2_unique_ref__arg, ::std::unique_ptr<::std::vector<::std::string>> req_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp2_unique_ref__arg, ::std::unique_ptr<::std::set<::std::int32_t>> opt_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> ref_type_unique__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> ref_type_shared__arg, ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>> ref_type_const__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> req_ref_type_shared__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> req_ref_type_const__arg, ::std::unique_ptr<::std::vector<::std::string>> req_ref_type_unique__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> opt_ref_type_const__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_ref_type_unique__arg, ::std::shared_ptr<::std::set<::std::int32_t>> opt_ref_type_shared__arg, ::some::valid::ns::CppFakeI32 base_type__arg, ::some::valid::ns::FollySmallVectorI64 list_type__arg, ::some::valid::ns::SortedVectorSetString set_type__arg, ::some::valid::ns::FakeMap map_type__arg, ::some::valid::ns::UnorderedMapStruct map_struct_type__arg, ::some::valid::ns::IOBuf iobuf_type__arg, ::some::valid::ns::IOBufPtr iobuf_ptr__arg, std::list<::std::int32_t> list_i32_template__arg, std::deque<::std::string> list_string_template__arg, folly::sorted_vector_set<::std::string> set_template__arg, folly::sorted_vector_map<::std::int64_t, ::std::string> map_template__arg, ::some::valid::ns::std_list typedef_list_template__arg, ::some::valid::ns::std_deque typedef_deque_template__arg, ::some::valid::ns::folly_set typedef_set_template__arg, ::some::valid::ns::folly_map typedef_map_template__arg, ::some::valid::ns::IOBuf iobuf_type_val__arg, ::some::valid::ns::IOBufPtr iobuf_ptr_val__arg, ::some::valid::ns::containerStruct struct_struct__arg) :
     no_annotation(std::move(no_annotation__arg)),
     cpp_unique_ref(std::move(cpp_unique_ref__arg)),
     cpp2_unique_ref(std::move(cpp2_unique_ref__arg)),
@@ -2652,9 +2635,6 @@ AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::val
     typedef_deque_template(std::move(typedef_deque_template__arg)),
     typedef_set_template(std::move(typedef_set_template__arg)),
     typedef_map_template(std::move(typedef_map_template__arg)),
-    indirection_a(std::move(indirection_a__arg)),
-    indirection_b(std::move(indirection_b__arg)),
-    indirection_c(std::move(indirection_c__arg)),
     iobuf_type_val(std::move(iobuf_type_val__arg)),
     iobuf_ptr_val(std::move(iobuf_ptr_val__arg)),
     struct_struct(std::move(struct_struct__arg)) { 
@@ -2677,9 +2657,6 @@ AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::val
   __isset.set(folly::index_constant<16>(), true);
   __isset.set(folly::index_constant<17>(), true);
   __isset.set(folly::index_constant<18>(), true);
-  __isset.set(folly::index_constant<19>(), true);
-  __isset.set(folly::index_constant<20>(), true);
-  __isset.set(folly::index_constant<21>(), true);
 }
 
 
@@ -2719,9 +2696,6 @@ void AnnotatedStruct::__fbthrift_clear() {
   this->typedef_deque_template.clear();
   this->typedef_set_template.clear();
   this->typedef_map_template.clear();
-  ::apache::thrift::apply_indirection(this->indirection_a) = 0;
-  this->indirection_b.clear();
-  this->indirection_c.clear();
   this->iobuf_type_val = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
   this->iobuf_ptr_val = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
   ::apache::thrift::clear(this->struct_struct);
@@ -2853,31 +2827,6 @@ const ::some::valid::ns::folly_map& AnnotatedStruct::get_typedef_map_template() 
   return static_cast<::some::valid::ns::folly_map&&>(typedef_map_template);
 }
 
-::some::valid::ns::IndirectionA AnnotatedStruct::get_indirection_a() const {
-  return indirection_a;
-}
-
-::some::valid::ns::IndirectionA& AnnotatedStruct::set_indirection_a(::some::valid::ns::IndirectionA indirection_a_) {
-  indirection_a_ref() = indirection_a_;
-  return indirection_a;
-}
-
-const ::std::vector<::some::valid::ns::IndirectionB>& AnnotatedStruct::get_indirection_b() const& {
-  return indirection_b;
-}
-
-::std::vector<::some::valid::ns::IndirectionB> AnnotatedStruct::get_indirection_b() && {
-  return static_cast<::std::vector<::some::valid::ns::IndirectionB>&&>(indirection_b);
-}
-
-const ::std::set<::some::valid::ns::IndirectionC>& AnnotatedStruct::get_indirection_c() const& {
-  return indirection_c;
-}
-
-::std::set<::some::valid::ns::IndirectionC> AnnotatedStruct::get_indirection_c() && {
-  return static_cast<::std::set<::some::valid::ns::IndirectionC>&&>(indirection_c);
-}
-
 const ::some::valid::ns::containerStruct& AnnotatedStruct::get_struct_struct() const& {
   return struct_struct;
 }
@@ -2922,9 +2871,6 @@ void swap([[maybe_unused]] AnnotatedStruct& a, [[maybe_unused]] AnnotatedStruct&
   swap(a.typedef_deque_template, b.typedef_deque_template);
   swap(a.typedef_set_template, b.typedef_set_template);
   swap(a.typedef_map_template, b.typedef_map_template);
-  swap(a.indirection_a, b.indirection_a);
-  swap(a.indirection_b, b.indirection_b);
-  swap(a.indirection_c, b.indirection_c);
   swap(a.iobuf_type_val, b.iobuf_type_val);
   swap(a.iobuf_ptr_val, b.iobuf_ptr_val);
   swap(a.struct_struct, b.struct_struct);

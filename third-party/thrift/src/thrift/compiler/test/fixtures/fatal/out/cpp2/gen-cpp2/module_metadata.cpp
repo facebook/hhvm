@@ -490,29 +490,6 @@ StructMetadata<::test_cpp2::cpp_reflection::struct_with_special_names>::gen(Thri
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test_cpp2::cpp_reflection::struct_with_indirections>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.struct_with_indirections", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_struct_with_indirections = res.first->second;
-  module_struct_with_indirections.name() = "module.struct_with_indirections";
-  module_struct_with_indirections.is_union() = false;
-  static const auto* const
-  module_struct_with_indirections_fields = new std::array<EncodedThriftField, 5>{ {
-    { 1, "real", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "fake", false, std::make_unique<Typedef>("module.FakeI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("CppFakeI32") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "number", false, std::make_unique<Typedef>("module.HasANumber", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("CppHasANumber") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "result", false, std::make_unique<Typedef>("module.HasAResult", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("CppHasAResult") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "phrase", false, std::make_unique<Typedef>("module.HasAPhrase", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("CppHasAPhrase") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},  }};
-  for (const auto& f : *module_struct_with_indirections_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_struct_with_indirections.fields()->push_back(std::move(field));
-  }
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::StructWithFieldAdapter>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.StructWithFieldAdapter", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

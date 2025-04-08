@@ -390,20 +390,3 @@ service service_with_special_names {
 }
 
 const i32 constant_with_special_name = 42;
-
-@cpp.Type{name = "CppFakeI32"}
-typedef i32 FakeI32
-@cpp.Type{name = "CppHasANumber"}
-typedef i32 (cpp.indirection) HasANumber
-@cpp.Type{name = "CppHasAResult"}
-typedef i32 (cpp.indirection) HasAResult
-@cpp.Type{name = "CppHasAPhrase"}
-typedef string (cpp.indirection) HasAPhrase
-
-struct struct_with_indirections {
-  1: i32 real;
-  2: FakeI32 fake;
-  3: HasANumber number;
-  4: HasAResult result;
-  5: HasAPhrase phrase;
-}

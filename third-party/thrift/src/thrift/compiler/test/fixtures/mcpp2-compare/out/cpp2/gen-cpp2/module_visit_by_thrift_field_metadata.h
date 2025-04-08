@@ -314,16 +314,12 @@ struct VisitByFieldId<::some::valid::ns::containerStruct> {
       return f(39, static_cast<T&&>(t).fieldZ_ref());
     case 28:
       return f(40, static_cast<T&&>(t).fieldAA_ref());
-    case 29:
-      return f(41, static_cast<T&&>(t).fieldAB_ref());
     case 30:
-      return f(42, static_cast<T&&>(t).fieldAC_ref());
+      return f(41, static_cast<T&&>(t).fieldAC_ref());
     case 31:
-      return f(43, static_cast<T&&>(t).fieldAD_ref());
+      return f(42, static_cast<T&&>(t).fieldAD_ref());
     case 32:
-      return f(44, static_cast<T&&>(t).fieldAE_ref());
-    case 33:
-      return f(45, static_cast<T&&>(t).fieldSD_ref());
+      return f(43, static_cast<T&&>(t).fieldAE_ref());
     default:
       throwInvalidThriftId(fieldId, "::some::valid::ns::containerStruct");
     }
@@ -422,18 +418,12 @@ struct VisitByFieldId<::some::valid::ns::AnnotatedStruct> {
       return f(32, static_cast<T&&>(t).typedef_set_template_ref());
     case 34:
       return f(33, static_cast<T&&>(t).typedef_map_template_ref());
-    case 35:
-      return f(34, static_cast<T&&>(t).indirection_a_ref());
-    case 36:
-      return f(35, static_cast<T&&>(t).indirection_b_ref());
-    case 37:
-      return f(36, static_cast<T&&>(t).indirection_c_ref());
     case 38:
-      return f(37, static_cast<T&&>(t).iobuf_type_val_ref());
+      return f(34, static_cast<T&&>(t).iobuf_type_val_ref());
     case 39:
-      return f(38, static_cast<T&&>(t).iobuf_ptr_val_ref());
+      return f(35, static_cast<T&&>(t).iobuf_ptr_val_ref());
     case 40:
-      return f(39, static_cast<T&&>(t).struct_struct_ref());
+      return f(36, static_cast<T&&>(t).struct_struct_ref());
     default:
       throwInvalidThriftId(fieldId, "::some::valid::ns::AnnotatedStruct");
     }

@@ -87,15 +87,12 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldK")] = __containerStruct_FieldsSetter._set_field_10
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldL")] = __containerStruct_FieldsSetter._set_field_11
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldM")] = __containerStruct_FieldsSetter._set_field_12
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldN")] = __containerStruct_FieldsSetter._set_field_13
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldO")] = __containerStruct_FieldsSetter._set_field_14
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldP")] = __containerStruct_FieldsSetter._set_field_15
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldQ")] = __containerStruct_FieldsSetter._set_field_16
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldR")] = __containerStruct_FieldsSetter._set_field_17
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldS")] = __containerStruct_FieldsSetter._set_field_18
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldT")] = __containerStruct_FieldsSetter._set_field_19
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldU")] = __containerStruct_FieldsSetter._set_field_20
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldX")] = __containerStruct_FieldsSetter._set_field_21
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldQ")] = __containerStruct_FieldsSetter._set_field_13
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldR")] = __containerStruct_FieldsSetter._set_field_14
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldS")] = __containerStruct_FieldsSetter._set_field_15
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldT")] = __containerStruct_FieldsSetter._set_field_16
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldU")] = __containerStruct_FieldsSetter._set_field_17
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldX")] = __containerStruct_FieldsSetter._set_field_18
         return __fbthrift_inst
 
     cdef void set_field(__containerStruct_FieldsSetter self, const char* name, object value) except *:
@@ -205,73 +202,52 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         deref(self._struct_cpp_obj).fieldM_ref().assign(_module_types.Map__Set__List__i32_Map__List__Set__string_string__make_instance(_fbthrift_value))
 
     cdef void _set_field_13(self, _fbthrift_value) except *:
-        # for field fieldN
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 13)
-            return
-        deref(self._struct_cpp_obj).fieldN_ref().assign(_module_types.List__Foo__i64__make_instance(_fbthrift_value))
-
-    cdef void _set_field_14(self, _fbthrift_value) except *:
-        # for field fieldO
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 14)
-            return
-        deref(self._struct_cpp_obj).fieldO_ref().assign(_module_types.List__Bar__double__make_instance(_fbthrift_value))
-
-    cdef void _set_field_15(self, _fbthrift_value) except *:
-        # for field fieldP
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 15)
-            return
-        deref(self._struct_cpp_obj).fieldP_ref().assign(_module_types.List__Baz__i32__make_instance(_fbthrift_value))
-
-    cdef void _set_field_16(self, _fbthrift_value) except *:
         # for field fieldQ
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 16)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 13)
             return
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumA):
             raise TypeError(f'field fieldQ value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumA }.')
         deref(self._struct_cpp_obj).fieldQ_ref().assign(<_module_cbindings.cMyEnumA><int>_fbthrift_value)
 
-    cdef void _set_field_17(self, _fbthrift_value) except *:
+    cdef void _set_field_14(self, _fbthrift_value) except *:
         # for field fieldR
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 17)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 14)
             return
         assign_unique_ptr[cmap[string,cbool]](deref(self._struct_cpp_obj).fieldR_ref(), make_unique[cmap[string,cbool]](_module_types.Map__string_bool__make_instance(_fbthrift_value)))
 
-    cdef void _set_field_18(self, _fbthrift_value) except *:
+    cdef void _set_field_15(self, _fbthrift_value) except *:
         # for field fieldS
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 18)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 15)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldS is not a { _module_types.SmallStruct !r}.')
         assign_unique_ptr[_module_cbindings.cSmallStruct](deref(self._struct_cpp_obj).fieldS_ref(), make_unique[_module_cbindings.cSmallStruct](deref((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
-    cdef void _set_field_19(self, _fbthrift_value) except *:
+    cdef void _set_field_16(self, _fbthrift_value) except *:
         # for field fieldT
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 19)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 16)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldT is not a { _module_types.SmallStruct !r}.')
         assign_shared_ptr[_module_cbindings.cSmallStruct](deref(self._struct_cpp_obj).fieldT_ref(), (<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
-    cdef void _set_field_20(self, _fbthrift_value) except *:
+    cdef void _set_field_17(self, _fbthrift_value) except *:
         # for field fieldU
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 20)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 17)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldU is not a { _module_types.SmallStruct !r}.')
         assign_shared_const_ptr[_module_cbindings.cSmallStruct](deref(self._struct_cpp_obj).fieldU_ref(), const_pointer_cast((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
-    cdef void _set_field_21(self, _fbthrift_value) except *:
+    cdef void _set_field_18(self, _fbthrift_value) except *:
         # for field fieldX
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 21)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 18)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
             raise TypeError(f'fieldX is not a { _module_types.SmallStruct !r}.')

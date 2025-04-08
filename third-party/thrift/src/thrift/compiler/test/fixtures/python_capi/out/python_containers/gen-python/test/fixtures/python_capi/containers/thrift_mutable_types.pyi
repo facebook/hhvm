@@ -322,7 +322,6 @@ IOBuf = _fbthrift_iobuf.IOBuf
 small_vector_iobuf = _typing.List[_fbthrift_iobuf.IOBuf]
 fbvector_string = _typing.List[str]
 fbvector_fbvector_string = _typing.List[_fbthrift_python_mutable_containers.MutableList[str]]
-CppWrapper = _fbthrift_TWrapped
 ListOfWrapped = _typing.List[_fbthrift_TWrapped]
 VecOfWrapped = _typing.List[_fbthrift_TWrapped]
 ListOfWrappedAlias = _typing.List[_fbthrift_TWrapped]

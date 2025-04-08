@@ -666,7 +666,6 @@ IOBuf = _fbthrift_iobuf.IOBuf
 small_vector_iobuf = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_iobuf)
 fbvector_string = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_string)
 fbvector_fbvector_string = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string))
-CppWrapper = _fbthrift_TWrapped
 ListOfWrapped = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(TWrapped))
 VecOfWrapped = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(TWrapped))
 ListOfWrappedAlias = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(TWrapped))

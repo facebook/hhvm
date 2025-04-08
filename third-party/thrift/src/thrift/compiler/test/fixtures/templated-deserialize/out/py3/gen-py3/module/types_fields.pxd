@@ -84,7 +84,4 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_16(self, _fbthrift_value) except *
     cdef void _set_field_17(self, _fbthrift_value) except *
     cdef void _set_field_18(self, _fbthrift_value) except *
-    cdef void _set_field_19(self, _fbthrift_value) except *
-    cdef void _set_field_20(self, _fbthrift_value) except *
-    cdef void _set_field_21(self, _fbthrift_value) except *
 

@@ -237,45 +237,6 @@ def get_reflection__containerStruct() -> __StructSpec:
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=14,
-            name="fieldN",
-            py_name="fieldN",
-            type=_module_types.List__Foo__i64,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=15,
-            name="fieldO",
-            py_name="fieldO",
-            type=_module_types.List__Bar__double,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=16,
-            name="fieldP",
-            py_name="fieldP",
-            type=_module_types.List__Baz__i32,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
             id=17,
             name="fieldQ",
             py_name="fieldQ",
@@ -479,23 +440,5 @@ def get_reflection__Map__Set__List__i32_Map__List__Set__string_string() -> __Map
         key_kind=__NumberType.NOT_A_NUMBER,
         value=_module_types.Map__List__Set__string_string,
         value_kind=__NumberType.NOT_A_NUMBER,
-    )
-
-def get_reflection__List__Foo__i64() -> __ListSpec :
-    return __ListSpec._fbthrift_create(
-        value=int,
-        kind=__NumberType.I64,
-    )
-
-def get_reflection__List__Bar__double() -> __ListSpec :
-    return __ListSpec._fbthrift_create(
-        value=float,
-        kind=__NumberType.DOUBLE,
-    )
-
-def get_reflection__List__Baz__i32() -> __ListSpec :
-    return __ListSpec._fbthrift_create(
-        value=int,
-        kind=__NumberType.I32,
     )
 

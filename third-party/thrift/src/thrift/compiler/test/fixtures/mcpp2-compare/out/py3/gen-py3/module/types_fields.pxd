@@ -192,8 +192,6 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_41(self, _fbthrift_value) except *
     cdef void _set_field_42(self, _fbthrift_value) except *
     cdef void _set_field_43(self, _fbthrift_value) except *
-    cdef void _set_field_44(self, _fbthrift_value) except *
-    cdef void _set_field_45(self, _fbthrift_value) except *
 
 
 ctypedef void (*__MyIncludedStruct_FieldsSetterFunc)(__MyIncludedStruct_FieldsSetter, object) except *
@@ -255,9 +253,6 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_34(self, _fbthrift_value) except *
     cdef void _set_field_35(self, _fbthrift_value) except *
     cdef void _set_field_36(self, _fbthrift_value) except *
-    cdef void _set_field_37(self, _fbthrift_value) except *
-    cdef void _set_field_38(self, _fbthrift_value) except *
-    cdef void _set_field_39(self, _fbthrift_value) except *
 
 
 ctypedef void (*__ComplexContainerStruct_FieldsSetterFunc)(__ComplexContainerStruct_FieldsSetter, object) except *

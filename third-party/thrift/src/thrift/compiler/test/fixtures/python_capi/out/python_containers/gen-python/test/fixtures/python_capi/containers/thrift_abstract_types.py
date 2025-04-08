@@ -203,7 +203,6 @@ IOBuf = _fbthrift_iobuf.IOBuf
 small_vector_iobuf = _typing.Sequence[_fbthrift_iobuf.IOBuf]
 fbvector_string = _typing.Sequence[str]
 fbvector_fbvector_string = _typing.Sequence[_typing.Sequence[str]]
-CppWrapper = _fbthrift_TWrapped
 ListOfWrapped = _typing.Sequence[_fbthrift_TWrapped]
 VecOfWrapped = _typing.Sequence[_fbthrift_TWrapped]
 ListOfWrappedAlias = _typing.Sequence[_fbthrift_TWrapped]

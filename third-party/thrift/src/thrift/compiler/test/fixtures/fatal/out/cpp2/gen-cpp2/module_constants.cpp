@@ -20,10 +20,10 @@ namespace module_constants {
 
 
 
-::std::string_view _fbthrift_schema_357a35fb91e6eaf0() {
+::std::string_view _fbthrift_schema_7a4a502fee7f90ef() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_357a35fb91e6eaf0_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_7a4a502fee7f90ef_includes() {
   return {};
 }
 

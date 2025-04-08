@@ -142,11 +142,6 @@ class StructMetadata<::test_cpp2::cpp_reflection::struct_with_special_names> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test_cpp2::cpp_reflection::struct_with_indirections> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service1>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);

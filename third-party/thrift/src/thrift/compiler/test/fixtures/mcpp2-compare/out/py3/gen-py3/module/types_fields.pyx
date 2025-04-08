@@ -495,11 +495,9 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldY")] = __containerStruct_FieldsSetter._set_field_38
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldZ")] = __containerStruct_FieldsSetter._set_field_39
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAA")] = __containerStruct_FieldsSetter._set_field_40
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAB")] = __containerStruct_FieldsSetter._set_field_41
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAC")] = __containerStruct_FieldsSetter._set_field_42
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAD")] = __containerStruct_FieldsSetter._set_field_43
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAE")] = __containerStruct_FieldsSetter._set_field_44
-        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldSD")] = __containerStruct_FieldsSetter._set_field_45
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAC")] = __containerStruct_FieldsSetter._set_field_41
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAD")] = __containerStruct_FieldsSetter._set_field_42
+        __fbthrift_inst._setters[__cstring_view(<const char*>"fieldAE")] = __containerStruct_FieldsSetter._set_field_43
         return __fbthrift_inst
 
     cdef void set_field(__containerStruct_FieldsSetter self, const char* name, object value) except *:
@@ -838,45 +836,29 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         deref(self._struct_cpp_obj).fieldAA_ref().assign(_module_types.List__Set__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_41(self, _fbthrift_value) except *:
-        # for field fieldAB
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 41)
-            return
-        deref(self._struct_cpp_obj).fieldAB_ref().assign(_module_types.Map__Bar__double_Baz__i32__make_instance(_fbthrift_value))
-
-    cdef void _set_field_42(self, _fbthrift_value) except *:
         # for field fieldAC
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 42)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 41)
             return
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumB):
             raise TypeError(f'field fieldAC value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumB }.')
         deref(self._struct_cpp_obj).fieldAC_ref().assign(<_module_cbindings.cMyEnumB><int>_fbthrift_value)
 
-    cdef void _set_field_43(self, _fbthrift_value) except *:
+    cdef void _set_field_42(self, _fbthrift_value) except *:
         # for field fieldAD
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 43)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 42)
             return
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _includes_types.AnEnum):
             raise TypeError(f'field fieldAD value: {repr(_fbthrift_value)} is not of the enum type { _includes_types.AnEnum }.')
         deref(self._struct_cpp_obj).fieldAD_ref().assign(<_includes_cbindings.cAnEnum><int>_fbthrift_value)
 
-    cdef void _set_field_44(self, _fbthrift_value) except *:
+    cdef void _set_field_43(self, _fbthrift_value) except *:
         # for field fieldAE
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 44)
+            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 43)
             return
         deref(self._struct_cpp_obj).fieldAE_ref().assign(_module_types.Map__string_i32__make_instance(_fbthrift_value))
-
-    cdef void _set_field_45(self, _fbthrift_value) except *:
-        # for field fieldSD
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 45)
-            return
-        if not isinstance(_fbthrift_value, str):
-            raise TypeError(f'fieldSD is not a { str !r}.')
-        deref(self._struct_cpp_obj).fieldSD_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
 
 
 @__cython.auto_pickle(False)
@@ -978,12 +960,9 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"typedef_deque_template")] = __AnnotatedStruct_FieldsSetter._set_field_31
         __fbthrift_inst._setters[__cstring_view(<const char*>"typedef_set_template")] = __AnnotatedStruct_FieldsSetter._set_field_32
         __fbthrift_inst._setters[__cstring_view(<const char*>"typedef_map_template")] = __AnnotatedStruct_FieldsSetter._set_field_33
-        __fbthrift_inst._setters[__cstring_view(<const char*>"indirection_a")] = __AnnotatedStruct_FieldsSetter._set_field_34
-        __fbthrift_inst._setters[__cstring_view(<const char*>"indirection_b")] = __AnnotatedStruct_FieldsSetter._set_field_35
-        __fbthrift_inst._setters[__cstring_view(<const char*>"indirection_c")] = __AnnotatedStruct_FieldsSetter._set_field_36
-        __fbthrift_inst._setters[__cstring_view(<const char*>"iobuf_type_val")] = __AnnotatedStruct_FieldsSetter._set_field_37
-        __fbthrift_inst._setters[__cstring_view(<const char*>"iobuf_ptr_val")] = __AnnotatedStruct_FieldsSetter._set_field_38
-        __fbthrift_inst._setters[__cstring_view(<const char*>"struct_struct")] = __AnnotatedStruct_FieldsSetter._set_field_39
+        __fbthrift_inst._setters[__cstring_view(<const char*>"iobuf_type_val")] = __AnnotatedStruct_FieldsSetter._set_field_34
+        __fbthrift_inst._setters[__cstring_view(<const char*>"iobuf_ptr_val")] = __AnnotatedStruct_FieldsSetter._set_field_35
+        __fbthrift_inst._setters[__cstring_view(<const char*>"struct_struct")] = __AnnotatedStruct_FieldsSetter._set_field_36
         return __fbthrift_inst
 
     cdef void set_field(__AnnotatedStruct_FieldsSetter self, const char* name, object value) except *:
@@ -1265,51 +1244,27 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         deref(self._struct_cpp_obj).typedef_map_template_ref().assign(_module_types.folly_sorted_vector_map__Map__i64_string__make_instance(_fbthrift_value))
 
     cdef void _set_field_34(self, _fbthrift_value) except *:
-        # for field indirection_a
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 34)
-            return
-        if not isinstance(_fbthrift_value, int):
-            raise TypeError(f'indirection_a is not a { int !r}.')
-        _fbthrift_value = <cint64_t> _fbthrift_value
-        deref(self._struct_cpp_obj).indirection_a_ref().assign(_fbthrift_value)
-
-    cdef void _set_field_35(self, _fbthrift_value) except *:
-        # for field indirection_b
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 35)
-            return
-        deref(self._struct_cpp_obj).indirection_b_ref().assign(_module_types.List__Bar__double__make_instance(_fbthrift_value))
-
-    cdef void _set_field_36(self, _fbthrift_value) except *:
-        # for field indirection_c
-        if _fbthrift_value is None:
-            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 36)
-            return
-        deref(self._struct_cpp_obj).indirection_c_ref().assign(_module_types.Set__Baz__i32__make_instance(_fbthrift_value))
-
-    cdef void _set_field_37(self, _fbthrift_value) except *:
         # for field iobuf_type_val
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 37)
+            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 34)
             return
         if not isinstance(_fbthrift_value, _fbthrift_iobuf.IOBuf):
             raise TypeError(f'iobuf_type_val is not a { _fbthrift_iobuf.IOBuf !r}.')
         deref(self._struct_cpp_obj).iobuf_type_val_ref().assign(deref((<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone()))
 
-    cdef void _set_field_38(self, _fbthrift_value) except *:
+    cdef void _set_field_35(self, _fbthrift_value) except *:
         # for field iobuf_ptr_val
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 38)
+            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 35)
             return
         if not isinstance(_fbthrift_value, _fbthrift_iobuf.IOBuf):
             raise TypeError(f'iobuf_ptr_val is not a { _fbthrift_iobuf.IOBuf !r}.')
         deref(self._struct_cpp_obj).iobuf_ptr_val_ref().assign((<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone())
 
-    cdef void _set_field_39(self, _fbthrift_value) except *:
+    cdef void _set_field_36(self, _fbthrift_value) except *:
         # for field struct_struct
         if _fbthrift_value is None:
-            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 39)
+            __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 36)
             return
         if not isinstance(_fbthrift_value, _module_types.containerStruct):
             raise TypeError(f'struct_struct is not a { _module_types.containerStruct !r}.')

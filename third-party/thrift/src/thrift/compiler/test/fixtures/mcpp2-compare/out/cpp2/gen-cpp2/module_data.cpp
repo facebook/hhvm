@@ -445,7 +445,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::some::valid::ns
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::valid::ns::containerStruct>::name = "containerStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 46> TStructDataStorage<::some::valid::ns::containerStruct>::fields_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, 44> TStructDataStorage<::some::valid::ns::containerStruct>::fields_names = { {
   "fieldA"sv,
   "req_fieldA"sv,
   "opt_fieldA"sv,
@@ -487,13 +487,11 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 46> TStructDataStorage<::s
   "fieldY"sv,
   "fieldZ"sv,
   "fieldAA"sv,
-  "fieldAB"sv,
   "fieldAC"sv,
   "fieldAD"sv,
   "fieldAE"sv,
-  "fieldSD"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 46> TStructDataStorage<::some::valid::ns::containerStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER const std::array<int16_t, 44> TStructDataStorage<::some::valid::ns::containerStruct>::fields_ids = { {
   1,
   101,
   201,
@@ -535,13 +533,11 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 46> TStructDataStorage<::some::vali
   26,
   27,
   28,
-  29,
   30,
   31,
   32,
-  33,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 46> TStructDataStorage<::some::valid::ns::containerStruct>::fields_types = { {
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 44> TStructDataStorage<::some::valid::ns::containerStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BOOL,
   TType::T_BOOL,
@@ -583,13 +579,11 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 46> TStructDataStorage<::so
   TType::T_LIST,
   TType::T_SET,
   TType::T_LIST,
-  TType::T_MAP,
   TType::T_I32,
   TType::T_I32,
   TType::T_MAP,
-  TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 46> TStructDataStorage<::some::valid::ns::containerStruct>::storage_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, 44> TStructDataStorage<::some::valid::ns::containerStruct>::storage_names = { {
   "fieldA"sv,
   "req_fieldA"sv,
   "opt_fieldA"sv,
@@ -631,13 +625,11 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 46> TStructDataStorage<::s
   "fieldY"sv,
   "fieldZ"sv,
   "fieldAA"sv,
-  "fieldAB"sv,
   "fieldAC"sv,
   "fieldAD"sv,
   "fieldAE"sv,
-  "fieldSD"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 46> TStructDataStorage<::some::valid::ns::containerStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER const std::array<int, 44> TStructDataStorage<::some::valid::ns::containerStruct>::isset_indexes = { {
   0,
   -1,
   1,
@@ -682,8 +674,6 @@ THRIFT_DATA_MEMBER const std::array<int, 46> TStructDataStorage<::some::valid::n
   34,
   35,
   36,
-  37,
-  38,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::valid::ns::MyIncludedStruct>::name = "MyIncludedStruct";
@@ -719,7 +709,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::some::valid::ns
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::valid::ns::AnnotatedStruct>::name = "AnnotatedStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, 37> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_names = { {
   "no_annotation"sv,
   "cpp_unique_ref"sv,
   "cpp2_unique_ref"sv,
@@ -754,14 +744,11 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 40> TStructDataStorage<::s
   "typedef_deque_template"sv,
   "typedef_set_template"sv,
   "typedef_map_template"sv,
-  "indirection_a"sv,
-  "indirection_b"sv,
-  "indirection_c"sv,
   "iobuf_type_val"sv,
   "iobuf_ptr_val"sv,
   "struct_struct"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER const std::array<int16_t, 37> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -796,14 +783,11 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 40> TStructDataStorage<::some::vali
   32,
   33,
   34,
-  35,
-  36,
-  37,
   38,
   39,
   40,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_types = { {
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 37> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
@@ -838,14 +822,11 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 40> TStructDataStorage<::so
   TType::T_LIST,
   TType::T_SET,
   TType::T_MAP,
-  TType::T_I64,
-  TType::T_LIST,
-  TType::T_SET,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::storage_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, 37> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::storage_names = { {
   "no_annotation"sv,
   "cpp_unique_ref"sv,
   "cpp2_unique_ref"sv,
@@ -880,14 +861,11 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 40> TStructDataStorage<::s
   "typedef_deque_template"sv,
   "typedef_set_template"sv,
   "typedef_map_template"sv,
-  "indirection_a"sv,
-  "indirection_b"sv,
-  "indirection_c"sv,
   "iobuf_type_val"sv,
   "iobuf_ptr_val"sv,
   "struct_struct"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER const std::array<int, 37> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::isset_indexes = { {
   0,
   -1,
   -1,
@@ -925,9 +903,6 @@ THRIFT_DATA_MEMBER const std::array<int, 40> TStructDataStorage<::some::valid::n
   16,
   17,
   18,
-  19,
-  20,
-  21,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::valid::ns::ComplexContainerStruct>::name = "ComplexContainerStruct";

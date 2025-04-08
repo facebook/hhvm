@@ -119,11 +119,9 @@ struct opt_fieldX;
 struct fieldY;
 struct fieldZ;
 struct fieldAA;
-struct fieldAB;
 struct fieldAC;
 struct fieldAD;
 struct fieldAE;
-struct fieldSD;
 struct MyIncludedInt;
 struct MyIncludedStruct;
 struct ARefField;
@@ -162,9 +160,6 @@ struct typedef_list_template;
 struct typedef_deque_template;
 struct typedef_set_template;
 struct typedef_map_template;
-struct indirection_a;
-struct indirection_b;
-struct indirection_c;
 struct iobuf_type_val;
 struct iobuf_ptr_val;
 struct struct_struct;
@@ -593,10 +588,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldZ);
 #define APACHE_THRIFT_ACCESSOR_fieldAA
 APACHE_THRIFT_DEFINE_ACCESSOR(fieldAA);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_fieldAB
-#define APACHE_THRIFT_ACCESSOR_fieldAB
-APACHE_THRIFT_DEFINE_ACCESSOR(fieldAB);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_fieldAC
 #define APACHE_THRIFT_ACCESSOR_fieldAC
 APACHE_THRIFT_DEFINE_ACCESSOR(fieldAC);
@@ -608,10 +599,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldAD);
 #ifndef APACHE_THRIFT_ACCESSOR_fieldAE
 #define APACHE_THRIFT_ACCESSOR_fieldAE
 APACHE_THRIFT_DEFINE_ACCESSOR(fieldAE);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_fieldSD
-#define APACHE_THRIFT_ACCESSOR_fieldSD
-APACHE_THRIFT_DEFINE_ACCESSOR(fieldSD);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_MyIncludedInt
 #define APACHE_THRIFT_ACCESSOR_MyIncludedInt
@@ -764,18 +751,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(typedef_set_template);
 #ifndef APACHE_THRIFT_ACCESSOR_typedef_map_template
 #define APACHE_THRIFT_ACCESSOR_typedef_map_template
 APACHE_THRIFT_DEFINE_ACCESSOR(typedef_map_template);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_indirection_a
-#define APACHE_THRIFT_ACCESSOR_indirection_a
-APACHE_THRIFT_DEFINE_ACCESSOR(indirection_a);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_indirection_b
-#define APACHE_THRIFT_ACCESSOR_indirection_b
-APACHE_THRIFT_DEFINE_ACCESSOR(indirection_b);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_indirection_c
-#define APACHE_THRIFT_ACCESSOR_indirection_c
-APACHE_THRIFT_DEFINE_ACCESSOR(indirection_c);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_iobuf_type_val
 #define APACHE_THRIFT_ACCESSOR_iobuf_type_val
@@ -1175,16 +1150,6 @@ typedef ::std::vector<::some::valid::ns::MyStruct> structTypeDef;
 typedef ::std::vector<::std::map<::some::valid::ns::Empty, ::some::valid::ns::MyStruct>> complexStructTypeDef;
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "mostComplexTypeDef", "kind": "typedef" } */
 typedef ::std::vector<::some::valid::ns::complexStructTypeDef> mostComplexTypeDef;
-/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionA", "kind": "typedef" } */
-typedef Foo IndirectionA;
-/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionC", "kind": "typedef" } */
-typedef Baz IndirectionC;
-/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionB", "kind": "typedef" } */
-typedef Bar IndirectionB;
-/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IndirectionD", "kind": "typedef" } */
-typedef FooBar IndirectionD;
-/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "HashedTypedef", "kind": "typedef" } */
-typedef ::std::map<::some::valid::ns::MyEnumA, ::std::string> HashedTypedef;
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "CppFakeI32", "kind": "typedef" } */
 typedef CppFakeI32 CppFakeI32;
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "FollySmallVectorI64", "kind": "typedef" } */
@@ -6720,14 +6685,12 @@ class containerStruct final  {
     ::apache::thrift::ident::fieldY,
     ::apache::thrift::ident::fieldZ,
     ::apache::thrift::ident::fieldAA,
-    ::apache::thrift::ident::fieldAB,
     ::apache::thrift::ident::fieldAC,
     ::apache::thrift::ident::fieldAD,
-    ::apache::thrift::ident::fieldAE,
-    ::apache::thrift::ident::fieldSD
+    ::apache::thrift::ident::fieldAE
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,101,201,2,102,202,3,103,203,4,5,105,205,6,7,8,9,10,11,12,13,14,15,16,17,18,118,218,19,21,22,23,123,223,24,25,125,225,26,27,28,29,30,31,32,33};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,101,201,2,102,202,3,103,203,4,5,105,205,6,7,8,9,10,11,12,13,14,15,16,17,18,118,218,19,21,22,23,123,223,24,25,125,225,26,27,28,30,31,32};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::bool_t,
@@ -6770,14 +6733,12 @@ class containerStruct final  {
     ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>,
     ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>,
     ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>,
-    ::apache::thrift::type::map<::apache::thrift::type::indirected<Bar, ::apache::thrift::type::double_t>, ::apache::thrift::type::indirected<Baz, ::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::enum_t<::some::valid::ns::MyEnumB>,
     ::apache::thrift::type::enum_t<::a::different::ns::AnEnum>,
-    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::indirected<FooBar, ::apache::thrift::type::string_t>
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 46;
+  static constexpr std::size_t __fbthrift_field_size_v = 44;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -6813,7 +6774,7 @@ class containerStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, bool req_fieldA__arg, bool opt_fieldA__arg, ::std::map<::std::string, bool> fieldB__arg, ::std::map<::std::string, bool> req_fieldB__arg, ::std::map<::std::string, bool> opt_fieldB__arg, ::std::set<::std::int32_t> fieldC__arg, ::std::set<::std::int32_t> req_fieldC__arg, ::std::set<::std::int32_t> opt_fieldC__arg, ::std::string fieldD__arg, ::std::string fieldE__arg, ::std::string req_fieldE__arg, ::std::string opt_fieldE__arg, ::std::vector<::std::vector<::std::int32_t>> fieldF__arg, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> fieldG__arg, ::std::vector<::std::set<::std::int32_t>> fieldH__arg, bool fieldI__arg, ::std::map<::std::string, ::std::vector<::std::int32_t>> fieldJ__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> fieldK__arg, ::std::set<::std::set<::std::set<bool>>> fieldL__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> fieldM__arg, ::some::valid::ns::simpleTypeDef fieldN__arg, ::some::valid::ns::complexStructTypeDef fieldO__arg, ::std::vector<::some::valid::ns::mostComplexTypeDef> fieldP__arg, ::some::valid::ns::MyEnumA fieldQ__arg, ::some::valid::ns::MyEnumA fieldR__arg, ::some::valid::ns::MyEnumA req_fieldR__arg, ::some::valid::ns::MyEnumA opt_fieldR__arg, ::some::valid::ns::MyEnumA fieldS__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldT__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldU__arg, ::some::valid::ns::MyStruct fieldV__arg, ::some::valid::ns::MyStruct req_fieldV__arg, ::some::valid::ns::MyStruct opt_fieldV__arg, ::std::set<::some::valid::ns::MyStruct> fieldW__arg, ::some::valid::ns::ComplexUnion fieldX__arg, ::some::valid::ns::ComplexUnion req_fieldX__arg, ::some::valid::ns::ComplexUnion opt_fieldX__arg, ::std::vector<::some::valid::ns::ComplexUnion> fieldY__arg, ::some::valid::ns::unionTypeDef fieldZ__arg, ::std::vector<::some::valid::ns::unionTypeDef> fieldAA__arg, ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> fieldAB__arg, ::some::valid::ns::MyEnumB fieldAC__arg, ::a::different::ns::AnEnum fieldAD__arg, ::std::map<::std::string, ::std::int32_t> fieldAE__arg, ::some::valid::ns::IndirectionD fieldSD__arg);
+  containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, bool req_fieldA__arg, bool opt_fieldA__arg, ::std::map<::std::string, bool> fieldB__arg, ::std::map<::std::string, bool> req_fieldB__arg, ::std::map<::std::string, bool> opt_fieldB__arg, ::std::set<::std::int32_t> fieldC__arg, ::std::set<::std::int32_t> req_fieldC__arg, ::std::set<::std::int32_t> opt_fieldC__arg, ::std::string fieldD__arg, ::std::string fieldE__arg, ::std::string req_fieldE__arg, ::std::string opt_fieldE__arg, ::std::vector<::std::vector<::std::int32_t>> fieldF__arg, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> fieldG__arg, ::std::vector<::std::set<::std::int32_t>> fieldH__arg, bool fieldI__arg, ::std::map<::std::string, ::std::vector<::std::int32_t>> fieldJ__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> fieldK__arg, ::std::set<::std::set<::std::set<bool>>> fieldL__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> fieldM__arg, ::some::valid::ns::simpleTypeDef fieldN__arg, ::some::valid::ns::complexStructTypeDef fieldO__arg, ::std::vector<::some::valid::ns::mostComplexTypeDef> fieldP__arg, ::some::valid::ns::MyEnumA fieldQ__arg, ::some::valid::ns::MyEnumA fieldR__arg, ::some::valid::ns::MyEnumA req_fieldR__arg, ::some::valid::ns::MyEnumA opt_fieldR__arg, ::some::valid::ns::MyEnumA fieldS__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldT__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldU__arg, ::some::valid::ns::MyStruct fieldV__arg, ::some::valid::ns::MyStruct req_fieldV__arg, ::some::valid::ns::MyStruct opt_fieldV__arg, ::std::set<::some::valid::ns::MyStruct> fieldW__arg, ::some::valid::ns::ComplexUnion fieldX__arg, ::some::valid::ns::ComplexUnion req_fieldX__arg, ::some::valid::ns::ComplexUnion opt_fieldX__arg, ::std::vector<::some::valid::ns::ComplexUnion> fieldY__arg, ::some::valid::ns::unionTypeDef fieldZ__arg, ::std::vector<::some::valid::ns::unionTypeDef> fieldAA__arg, ::some::valid::ns::MyEnumB fieldAC__arg, ::a::different::ns::AnEnum fieldAD__arg, ::std::map<::std::string, ::std::int32_t> fieldAE__arg);
 
   containerStruct(containerStruct&&) = default;
 
@@ -6905,17 +6866,13 @@ class containerStruct final  {
  private:
   ::std::vector<::some::valid::ns::unionTypeDef> fieldAA;
  private:
-  ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> fieldAB;
- private:
   ::some::valid::ns::MyEnumB fieldAC;
  private:
   ::a::different::ns::AnEnum fieldAD;
  private:
   ::std::map<::std::string, ::std::int32_t> fieldAE;
  private:
-  ::some::valid::ns::IndirectionD fieldSD;
- private:
-  apache::thrift::detail::isset_bitset<39, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  apache::thrift::detail::isset_bitset<37, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -7906,124 +7863,76 @@ class containerStruct final  {
     return {static_cast<fbthrift_T&&>(this->fieldAA), __isset.at(33), __isset.bit(33)};
   }
 
-  /** Glean { "field": "fieldAB" } */
-  template <typename..., typename fbthrift_T = ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldAB_ref() const& {
-    return {this->fieldAB, __isset.at(34), __isset.bit(34)};
-  }
-
-  /** Glean { "field": "fieldAB" } */
-  template <typename..., typename fbthrift_T = ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldAB_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->fieldAB), __isset.at(34), __isset.bit(34)};
-  }
-
-  /** Glean { "field": "fieldAB" } */
-  template <typename..., typename fbthrift_T = ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldAB_ref() & {
-    return {this->fieldAB, __isset.at(34), __isset.bit(34)};
-  }
-
-  /** Glean { "field": "fieldAB" } */
-  template <typename..., typename fbthrift_T = ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldAB_ref() && {
-    return {static_cast<fbthrift_T&&>(this->fieldAB), __isset.at(34), __isset.bit(34)};
-  }
-
   /** Glean { "field": "fieldAC" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::MyEnumB>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldAC_ref() const& {
-    return {this->fieldAC, __isset.at(35), __isset.bit(35)};
+    return {this->fieldAC, __isset.at(34), __isset.bit(34)};
   }
 
   /** Glean { "field": "fieldAC" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::MyEnumB>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldAC_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->fieldAC), __isset.at(35), __isset.bit(35)};
+    return {static_cast<const fbthrift_T&&>(this->fieldAC), __isset.at(34), __isset.bit(34)};
   }
 
   /** Glean { "field": "fieldAC" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::MyEnumB>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldAC_ref() & {
-    return {this->fieldAC, __isset.at(35), __isset.bit(35)};
+    return {this->fieldAC, __isset.at(34), __isset.bit(34)};
   }
 
   /** Glean { "field": "fieldAC" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::MyEnumB>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldAC_ref() && {
-    return {static_cast<fbthrift_T&&>(this->fieldAC), __isset.at(35), __isset.bit(35)};
+    return {static_cast<fbthrift_T&&>(this->fieldAC), __isset.at(34), __isset.bit(34)};
   }
 
   /** Glean { "field": "fieldAD" } */
   template <typename..., typename fbthrift_T = ::a::different::ns::AnEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldAD_ref() const& {
-    return {this->fieldAD, __isset.at(36), __isset.bit(36)};
+    return {this->fieldAD, __isset.at(35), __isset.bit(35)};
   }
 
   /** Glean { "field": "fieldAD" } */
   template <typename..., typename fbthrift_T = ::a::different::ns::AnEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldAD_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->fieldAD), __isset.at(36), __isset.bit(36)};
+    return {static_cast<const fbthrift_T&&>(this->fieldAD), __isset.at(35), __isset.bit(35)};
   }
 
   /** Glean { "field": "fieldAD" } */
   template <typename..., typename fbthrift_T = ::a::different::ns::AnEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldAD_ref() & {
-    return {this->fieldAD, __isset.at(36), __isset.bit(36)};
+    return {this->fieldAD, __isset.at(35), __isset.bit(35)};
   }
 
   /** Glean { "field": "fieldAD" } */
   template <typename..., typename fbthrift_T = ::a::different::ns::AnEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldAD_ref() && {
-    return {static_cast<fbthrift_T&&>(this->fieldAD), __isset.at(36), __isset.bit(36)};
+    return {static_cast<fbthrift_T&&>(this->fieldAD), __isset.at(35), __isset.bit(35)};
   }
 
   /** Glean { "field": "fieldAE" } */
   template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::int32_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldAE_ref() const& {
-    return {this->fieldAE, __isset.at(37), __isset.bit(37)};
+    return {this->fieldAE, __isset.at(36), __isset.bit(36)};
   }
 
   /** Glean { "field": "fieldAE" } */
   template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::int32_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldAE_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->fieldAE), __isset.at(37), __isset.bit(37)};
+    return {static_cast<const fbthrift_T&&>(this->fieldAE), __isset.at(36), __isset.bit(36)};
   }
 
   /** Glean { "field": "fieldAE" } */
   template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::int32_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldAE_ref() & {
-    return {this->fieldAE, __isset.at(37), __isset.bit(37)};
+    return {this->fieldAE, __isset.at(36), __isset.bit(36)};
   }
 
   /** Glean { "field": "fieldAE" } */
   template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::int32_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldAE_ref() && {
-    return {static_cast<fbthrift_T&&>(this->fieldAE), __isset.at(37), __isset.bit(37)};
-  }
-
-  /** Glean { "field": "fieldSD" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionD>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldSD_ref() const& {
-    return {this->fieldSD, __isset.at(38), __isset.bit(38)};
-  }
-
-  /** Glean { "field": "fieldSD" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionD>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldSD_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->fieldSD), __isset.at(38), __isset.bit(38)};
-  }
-
-  /** Glean { "field": "fieldSD" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionD>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldSD_ref() & {
-    return {this->fieldSD, __isset.at(38), __isset.bit(38)};
-  }
-
-  /** Glean { "field": "fieldSD" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionD>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldSD_ref() && {
-    return {static_cast<fbthrift_T&&>(this->fieldSD), __isset.at(38), __isset.bit(38)};
+    return {static_cast<fbthrift_T&&>(this->fieldAE), __isset.at(36), __isset.bit(36)};
   }
 
   /** Glean { "field": "fieldA" } */
@@ -8636,22 +8545,6 @@ class containerStruct final  {
     return fieldAA;
   }
 
-  /** Glean { "field": "fieldAB" } */
-  [[deprecated("Use `FOO.fieldAB().value()` instead of `FOO.get_fieldAB()`")]]
-  const ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>& get_fieldAB() const&;
-
-  /** Glean { "field": "fieldAB" } */
-  [[deprecated("Use `FOO.fieldAB().value()` instead of `FOO.get_fieldAB()`")]]
-  ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> get_fieldAB() &&;
-
-  /** Glean { "field": "fieldAB" } */
-  template <typename T_containerStruct_fieldAB_struct_setter = ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>>
-  [[deprecated("Use `FOO.fieldAB() = BAR` instead of `FOO.set_fieldAB(BAR)`")]]
-  ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>& set_fieldAB(T_containerStruct_fieldAB_struct_setter&& fieldAB_) {
-    fieldAB_ref() = std::forward<T_containerStruct_fieldAB_struct_setter>(fieldAB_);
-    return fieldAB;
-  }
-
   /** Glean { "field": "fieldAC" } */
   [[deprecated("Use `FOO.fieldAC().value()` instead of `FOO.get_fieldAC()`")]]
   ::some::valid::ns::MyEnumB get_fieldAC() const;
@@ -8682,26 +8575,6 @@ class containerStruct final  {
   ::std::map<::std::string, ::std::int32_t>& set_fieldAE(T_containerStruct_fieldAE_struct_setter&& fieldAE_) {
     fieldAE_ref() = std::forward<T_containerStruct_fieldAE_struct_setter>(fieldAE_);
     return fieldAE;
-  }
-
-  /** Glean { "field": "fieldSD" } */
-  [[deprecated("Use `FOO.fieldSD().value()` instead of `FOO.get_fieldSD()`")]]
-  const ::some::valid::ns::IndirectionD& get_fieldSD() const& {
-    return fieldSD;
-  }
-
-  /** Glean { "field": "fieldSD" } */
-  [[deprecated("Use `FOO.fieldSD().value()` instead of `FOO.get_fieldSD()`")]]
-  ::some::valid::ns::IndirectionD get_fieldSD() && {
-    return static_cast<::some::valid::ns::IndirectionD&&>(fieldSD);
-  }
-
-  /** Glean { "field": "fieldSD" } */
-  template <typename T_containerStruct_fieldSD_struct_setter = ::some::valid::ns::IndirectionD>
-  [[deprecated("Use `FOO.fieldSD() = BAR` instead of `FOO.set_fieldSD(BAR)`")]]
-  ::some::valid::ns::IndirectionD& set_fieldSD(T_containerStruct_fieldSD_struct_setter&& fieldSD_) {
-    fieldSD_ref() = std::forward<T_containerStruct_fieldSD_struct_setter>(fieldSD_);
-    return fieldSD;
   }
 
   template <class Protocol_>
@@ -9130,15 +9003,12 @@ class AnnotatedStruct  {
     ::apache::thrift::ident::typedef_deque_template,
     ::apache::thrift::ident::typedef_set_template,
     ::apache::thrift::ident::typedef_map_template,
-    ::apache::thrift::ident::indirection_a,
-    ::apache::thrift::ident::indirection_b,
-    ::apache::thrift::ident::indirection_c,
     ::apache::thrift::ident::iobuf_type_val,
     ::apache::thrift::ident::iobuf_ptr_val,
     ::apache::thrift::ident::struct_struct
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,38,39,40};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::struct_t<::some::valid::ns::containerStruct>,
     ::apache::thrift::type::struct_t<::some::valid::ns::containerStruct>,
@@ -9174,15 +9044,12 @@ class AnnotatedStruct  {
     ::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>,
     ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
     ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>,
-    ::apache::thrift::type::indirected<Foo, ::apache::thrift::type::i64_t>,
-    ::apache::thrift::type::list<::apache::thrift::type::indirected<Bar, ::apache::thrift::type::double_t>>,
-    ::apache::thrift::type::set<::apache::thrift::type::indirected<Baz, ::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>,
     ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>,
     ::apache::thrift::type::struct_t<::some::valid::ns::containerStruct>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 40;
+  static constexpr std::size_t __fbthrift_field_size_v = 37;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -9218,7 +9085,7 @@ class AnnotatedStruct  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  AnnotatedStruct(apache::thrift::FragileConstructor, ::some::valid::ns::containerStruct no_annotation__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp2_unique_ref__arg, ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp2_unique_ref__arg, ::std::unique_ptr<::std::vector<::std::string>> req_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp2_unique_ref__arg, ::std::unique_ptr<::std::set<::std::int32_t>> opt_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> ref_type_unique__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> ref_type_shared__arg, ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>> ref_type_const__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> req_ref_type_shared__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> req_ref_type_const__arg, ::std::unique_ptr<::std::vector<::std::string>> req_ref_type_unique__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> opt_ref_type_const__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_ref_type_unique__arg, ::std::shared_ptr<::std::set<::std::int32_t>> opt_ref_type_shared__arg, ::some::valid::ns::CppFakeI32 base_type__arg, ::some::valid::ns::FollySmallVectorI64 list_type__arg, ::some::valid::ns::SortedVectorSetString set_type__arg, ::some::valid::ns::FakeMap map_type__arg, ::some::valid::ns::UnorderedMapStruct map_struct_type__arg, ::some::valid::ns::IOBuf iobuf_type__arg, ::some::valid::ns::IOBufPtr iobuf_ptr__arg, std::list<::std::int32_t> list_i32_template__arg, std::deque<::std::string> list_string_template__arg, folly::sorted_vector_set<::std::string> set_template__arg, folly::sorted_vector_map<::std::int64_t, ::std::string> map_template__arg, ::some::valid::ns::std_list typedef_list_template__arg, ::some::valid::ns::std_deque typedef_deque_template__arg, ::some::valid::ns::folly_set typedef_set_template__arg, ::some::valid::ns::folly_map typedef_map_template__arg, ::some::valid::ns::IndirectionA indirection_a__arg, ::std::vector<::some::valid::ns::IndirectionB> indirection_b__arg, ::std::set<::some::valid::ns::IndirectionC> indirection_c__arg, ::some::valid::ns::IOBuf iobuf_type_val__arg, ::some::valid::ns::IOBufPtr iobuf_ptr_val__arg, ::some::valid::ns::containerStruct struct_struct__arg);
+  AnnotatedStruct(apache::thrift::FragileConstructor, ::some::valid::ns::containerStruct no_annotation__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp2_unique_ref__arg, ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp2_unique_ref__arg, ::std::unique_ptr<::std::vector<::std::string>> req_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp2_unique_ref__arg, ::std::unique_ptr<::std::set<::std::int32_t>> opt_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> ref_type_unique__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> ref_type_shared__arg, ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>> ref_type_const__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> req_ref_type_shared__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> req_ref_type_const__arg, ::std::unique_ptr<::std::vector<::std::string>> req_ref_type_unique__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> opt_ref_type_const__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_ref_type_unique__arg, ::std::shared_ptr<::std::set<::std::int32_t>> opt_ref_type_shared__arg, ::some::valid::ns::CppFakeI32 base_type__arg, ::some::valid::ns::FollySmallVectorI64 list_type__arg, ::some::valid::ns::SortedVectorSetString set_type__arg, ::some::valid::ns::FakeMap map_type__arg, ::some::valid::ns::UnorderedMapStruct map_struct_type__arg, ::some::valid::ns::IOBuf iobuf_type__arg, ::some::valid::ns::IOBufPtr iobuf_ptr__arg, std::list<::std::int32_t> list_i32_template__arg, std::deque<::std::string> list_string_template__arg, folly::sorted_vector_set<::std::string> set_template__arg, folly::sorted_vector_map<::std::int64_t, ::std::string> map_template__arg, ::some::valid::ns::std_list typedef_list_template__arg, ::some::valid::ns::std_deque typedef_deque_template__arg, ::some::valid::ns::folly_set typedef_set_template__arg, ::some::valid::ns::folly_map typedef_map_template__arg, ::some::valid::ns::IOBuf iobuf_type_val__arg, ::some::valid::ns::IOBufPtr iobuf_ptr_val__arg, ::some::valid::ns::containerStruct struct_struct__arg);
 
   AnnotatedStruct(AnnotatedStruct&&) = default;
 
@@ -9296,19 +9163,13 @@ class AnnotatedStruct  {
  private:
   ::some::valid::ns::folly_map typedef_map_template;
  private:
-  ::some::valid::ns::IndirectionA indirection_a;
- private:
-  ::std::vector<::some::valid::ns::IndirectionB> indirection_b;
- private:
-  ::std::set<::some::valid::ns::IndirectionC> indirection_c;
- private:
   ::some::valid::ns::IOBuf iobuf_type_val;
  private:
   ::some::valid::ns::IOBufPtr iobuf_ptr_val;
  private:
   ::some::valid::ns::containerStruct struct_struct;
  private:
-  apache::thrift::detail::isset_bitset<22, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  apache::thrift::detail::isset_bitset<19, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -10113,148 +9974,76 @@ class AnnotatedStruct  {
     return {static_cast<fbthrift_T&&>(this->typedef_map_template), __isset.at(15), __isset.bit(15)};
   }
 
-  /** Glean { "field": "indirection_a" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionA>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> indirection_a_ref() const& {
-    return {this->indirection_a, __isset.at(16), __isset.bit(16)};
-  }
-
-  /** Glean { "field": "indirection_a" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionA>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> indirection_a_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->indirection_a), __isset.at(16), __isset.bit(16)};
-  }
-
-  /** Glean { "field": "indirection_a" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionA>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> indirection_a_ref() & {
-    return {this->indirection_a, __isset.at(16), __isset.bit(16)};
-  }
-
-  /** Glean { "field": "indirection_a" } */
-  template <typename..., typename fbthrift_T = ::some::valid::ns::IndirectionA>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> indirection_a_ref() && {
-    return {static_cast<fbthrift_T&&>(this->indirection_a), __isset.at(16), __isset.bit(16)};
-  }
-
-  /** Glean { "field": "indirection_b" } */
-  template <typename..., typename fbthrift_T = ::std::vector<::some::valid::ns::IndirectionB>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> indirection_b_ref() const& {
-    return {this->indirection_b, __isset.at(17), __isset.bit(17)};
-  }
-
-  /** Glean { "field": "indirection_b" } */
-  template <typename..., typename fbthrift_T = ::std::vector<::some::valid::ns::IndirectionB>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> indirection_b_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->indirection_b), __isset.at(17), __isset.bit(17)};
-  }
-
-  /** Glean { "field": "indirection_b" } */
-  template <typename..., typename fbthrift_T = ::std::vector<::some::valid::ns::IndirectionB>>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> indirection_b_ref() & {
-    return {this->indirection_b, __isset.at(17), __isset.bit(17)};
-  }
-
-  /** Glean { "field": "indirection_b" } */
-  template <typename..., typename fbthrift_T = ::std::vector<::some::valid::ns::IndirectionB>>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> indirection_b_ref() && {
-    return {static_cast<fbthrift_T&&>(this->indirection_b), __isset.at(17), __isset.bit(17)};
-  }
-
-  /** Glean { "field": "indirection_c" } */
-  template <typename..., typename fbthrift_T = ::std::set<::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> indirection_c_ref() const& {
-    return {this->indirection_c, __isset.at(18), __isset.bit(18)};
-  }
-
-  /** Glean { "field": "indirection_c" } */
-  template <typename..., typename fbthrift_T = ::std::set<::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> indirection_c_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->indirection_c), __isset.at(18), __isset.bit(18)};
-  }
-
-  /** Glean { "field": "indirection_c" } */
-  template <typename..., typename fbthrift_T = ::std::set<::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> indirection_c_ref() & {
-    return {this->indirection_c, __isset.at(18), __isset.bit(18)};
-  }
-
-  /** Glean { "field": "indirection_c" } */
-  template <typename..., typename fbthrift_T = ::std::set<::some::valid::ns::IndirectionC>>
-  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> indirection_c_ref() && {
-    return {static_cast<fbthrift_T&&>(this->indirection_c), __isset.at(18), __isset.bit(18)};
-  }
-
   /** Glean { "field": "iobuf_type_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> iobuf_type_val_ref() const& {
-    return {this->iobuf_type_val, __isset.at(19), __isset.bit(19)};
+    return {this->iobuf_type_val, __isset.at(16), __isset.bit(16)};
   }
 
   /** Glean { "field": "iobuf_type_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> iobuf_type_val_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->iobuf_type_val), __isset.at(19), __isset.bit(19)};
+    return {static_cast<const fbthrift_T&&>(this->iobuf_type_val), __isset.at(16), __isset.bit(16)};
   }
 
   /** Glean { "field": "iobuf_type_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> iobuf_type_val_ref() & {
-    return {this->iobuf_type_val, __isset.at(19), __isset.bit(19)};
+    return {this->iobuf_type_val, __isset.at(16), __isset.bit(16)};
   }
 
   /** Glean { "field": "iobuf_type_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> iobuf_type_val_ref() && {
-    return {static_cast<fbthrift_T&&>(this->iobuf_type_val), __isset.at(19), __isset.bit(19)};
+    return {static_cast<fbthrift_T&&>(this->iobuf_type_val), __isset.at(16), __isset.bit(16)};
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> iobuf_ptr_val_ref() const& {
-    return {this->iobuf_ptr_val, __isset.at(20), __isset.bit(20)};
+    return {this->iobuf_ptr_val, __isset.at(17), __isset.bit(17)};
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> iobuf_ptr_val_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->iobuf_ptr_val), __isset.at(20), __isset.bit(20)};
+    return {static_cast<const fbthrift_T&&>(this->iobuf_ptr_val), __isset.at(17), __isset.bit(17)};
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> iobuf_ptr_val_ref() & {
-    return {this->iobuf_ptr_val, __isset.at(20), __isset.bit(20)};
+    return {this->iobuf_ptr_val, __isset.at(17), __isset.bit(17)};
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> iobuf_ptr_val_ref() && {
-    return {static_cast<fbthrift_T&&>(this->iobuf_ptr_val), __isset.at(20), __isset.bit(20)};
+    return {static_cast<fbthrift_T&&>(this->iobuf_ptr_val), __isset.at(17), __isset.bit(17)};
   }
 
   /** Glean { "field": "struct_struct" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::containerStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> struct_struct_ref() const& {
-    return {this->struct_struct, __isset.at(21), __isset.bit(21)};
+    return {this->struct_struct, __isset.at(18), __isset.bit(18)};
   }
 
   /** Glean { "field": "struct_struct" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::containerStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> struct_struct_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->struct_struct), __isset.at(21), __isset.bit(21)};
+    return {static_cast<const fbthrift_T&&>(this->struct_struct), __isset.at(18), __isset.bit(18)};
   }
 
   /** Glean { "field": "struct_struct" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::containerStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> struct_struct_ref() & {
-    return {this->struct_struct, __isset.at(21), __isset.bit(21)};
+    return {this->struct_struct, __isset.at(18), __isset.bit(18)};
   }
 
   /** Glean { "field": "struct_struct" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::containerStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> struct_struct_ref() && {
-    return {static_cast<fbthrift_T&&>(this->struct_struct), __isset.at(21), __isset.bit(21)};
+    return {static_cast<fbthrift_T&&>(this->struct_struct), __isset.at(18), __isset.bit(18)};
   }
 
   /** Glean { "field": "no_annotation" } */
@@ -10511,46 +10300,6 @@ class AnnotatedStruct  {
   ::some::valid::ns::folly_map& set_typedef_map_template(T_AnnotatedStruct_typedef_map_template_struct_setter&& typedef_map_template_) {
     typedef_map_template_ref() = std::forward<T_AnnotatedStruct_typedef_map_template_struct_setter>(typedef_map_template_);
     return typedef_map_template;
-  }
-
-  /** Glean { "field": "indirection_a" } */
-  [[deprecated("Use `FOO.indirection_a().value()` instead of `FOO.get_indirection_a()`")]]
-  ::some::valid::ns::IndirectionA get_indirection_a() const;
-
-  /** Glean { "field": "indirection_a" } */
-  [[deprecated("Use `FOO.indirection_a() = BAR` instead of `FOO.set_indirection_a(BAR)`")]]
-  ::some::valid::ns::IndirectionA& set_indirection_a(::some::valid::ns::IndirectionA indirection_a_);
-
-  /** Glean { "field": "indirection_b" } */
-  [[deprecated("Use `FOO.indirection_b().value()` instead of `FOO.get_indirection_b()`")]]
-  const ::std::vector<::some::valid::ns::IndirectionB>& get_indirection_b() const&;
-
-  /** Glean { "field": "indirection_b" } */
-  [[deprecated("Use `FOO.indirection_b().value()` instead of `FOO.get_indirection_b()`")]]
-  ::std::vector<::some::valid::ns::IndirectionB> get_indirection_b() &&;
-
-  /** Glean { "field": "indirection_b" } */
-  template <typename T_AnnotatedStruct_indirection_b_struct_setter = ::std::vector<::some::valid::ns::IndirectionB>>
-  [[deprecated("Use `FOO.indirection_b() = BAR` instead of `FOO.set_indirection_b(BAR)`")]]
-  ::std::vector<::some::valid::ns::IndirectionB>& set_indirection_b(T_AnnotatedStruct_indirection_b_struct_setter&& indirection_b_) {
-    indirection_b_ref() = std::forward<T_AnnotatedStruct_indirection_b_struct_setter>(indirection_b_);
-    return indirection_b;
-  }
-
-  /** Glean { "field": "indirection_c" } */
-  [[deprecated("Use `FOO.indirection_c().value()` instead of `FOO.get_indirection_c()`")]]
-  const ::std::set<::some::valid::ns::IndirectionC>& get_indirection_c() const&;
-
-  /** Glean { "field": "indirection_c" } */
-  [[deprecated("Use `FOO.indirection_c().value()` instead of `FOO.get_indirection_c()`")]]
-  ::std::set<::some::valid::ns::IndirectionC> get_indirection_c() &&;
-
-  /** Glean { "field": "indirection_c" } */
-  template <typename T_AnnotatedStruct_indirection_c_struct_setter = ::std::set<::some::valid::ns::IndirectionC>>
-  [[deprecated("Use `FOO.indirection_c() = BAR` instead of `FOO.set_indirection_c(BAR)`")]]
-  ::std::set<::some::valid::ns::IndirectionC>& set_indirection_c(T_AnnotatedStruct_indirection_c_struct_setter&& indirection_c_) {
-    indirection_c_ref() = std::forward<T_AnnotatedStruct_indirection_c_struct_setter>(indirection_c_);
-    return indirection_c;
   }
 
   /** Glean { "field": "iobuf_type_val" } */

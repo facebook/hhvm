@@ -16,13 +16,6 @@
 
 include "thrift/annotation/cpp.thrift"
 
-@cpp.Type{name = "Foo"}
-typedef i64 (cpp.indirection) IndirectionA
-@cpp.Type{name = "Baz"}
-typedef i32 (cpp.indirection) IndirectionC
-@cpp.Type{name = "Bar"}
-typedef double (cpp.indirection) IndirectionB
-
 enum MyEnumA {
   fieldA = 1,
   fieldB = 2,
@@ -51,9 +44,6 @@ struct containerStruct {
   11: list<list<list<list<i32>>>> fieldK;
   12: set<set<set<bool>>> fieldL;
   13: map<set<list<i32>>, map<list<set<string>>, string>> fieldM;
-  14: list<IndirectionA> fieldN;
-  15: list<IndirectionB> fieldO;
-  16: list<IndirectionC> fieldP;
   17: MyEnumA fieldQ;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef

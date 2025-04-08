@@ -1453,19 +1453,6 @@ def get_reflection__containerStruct() -> __StructSpec:
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=29,
-            name="fieldAB",
-            py_name="fieldAB",
-            type=_module_types.Map__Bar__double_Baz__i32,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
             id=30,
             name="fieldAC",
             py_name="fieldAC",
@@ -1499,19 +1486,6 @@ def get_reflection__containerStruct() -> __StructSpec:
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=defaults.fieldAE,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=33,
-            name="fieldSD",
-            py_name="fieldSD",
-            type=str,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
             annotations={
             },
         ),
@@ -2030,45 +2004,6 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=35,
-            name="indirection_a",
-            py_name="indirection_a",
-            type=int,
-            kind=__NumberType.I64,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=36,
-            name="indirection_b",
-            py_name="indirection_b",
-            type=_module_types.List__Bar__double,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=37,
-            name="indirection_c",
-            py_name="indirection_c",
-            type=_module_types.Set__Baz__i32,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
             id=38,
             name="iobuf_type_val",
             py_name="iobuf_type_val",
@@ -2480,14 +2415,6 @@ def get_reflection__Set__Set__Set__bool() -> __SetSpec:
         kind=__NumberType.NOT_A_NUMBER,
      )
 
-def get_reflection__Map__Bar__double_Baz__i32() -> __MapSpec:
-    return __MapSpec._fbthrift_create(
-        key=float,
-        key_kind=__NumberType.DOUBLE,
-        value=int,
-        value_kind=__NumberType.I32,
-    )
-
 def get_reflection__folly_small_vector_int64_t_8__List__i64() -> __ListSpec :
     return __ListSpec._fbthrift_create(
         value=int,
@@ -2541,18 +2468,6 @@ def get_reflection__folly_sorted_vector_map__Map__i64_string() -> __MapSpec:
         value=str,
         value_kind=__NumberType.NOT_A_NUMBER,
     )
-
-def get_reflection__List__Bar__double() -> __ListSpec :
-    return __ListSpec._fbthrift_create(
-        value=float,
-        kind=__NumberType.DOUBLE,
-    )
-
-def get_reflection__Set__Baz__i32() -> __SetSpec:
-    return __SetSpec._fbthrift_create(
-        value=int,
-        kind=__NumberType.I32,
-     )
 
 def get_reflection__Map__string_folly_IOBuf__binary() -> __MapSpec:
     return __MapSpec._fbthrift_create(

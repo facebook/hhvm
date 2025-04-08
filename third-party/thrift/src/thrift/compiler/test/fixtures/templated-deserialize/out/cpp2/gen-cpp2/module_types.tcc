@@ -401,54 +401,6 @@ _readField_fieldM:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           13,
-          14,
-          apache::thrift::protocol::T_LIST))) {
-    goto _advance_failure;
-  }
-_readField_fieldN:
-  {
-    _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_fieldN = ::std::vector<::cpp2::IndirectionA>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionA>>::readWithContext(*iprot, this->__fbthrift_field_fieldN, _readState);
-    _readState.afterSubobject(iprot);
-  }
- this->__isset.set(13, true);
-
-  if (UNLIKELY(!_readState.advanceToNextField(
-          iprot,
-          14,
-          15,
-          apache::thrift::protocol::T_LIST))) {
-    goto _advance_failure;
-  }
-_readField_fieldO:
-  {
-    _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_fieldO = ::std::vector<::cpp2::IndirectionB>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::floating_point, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionB>>::readWithContext(*iprot, this->__fbthrift_field_fieldO, _readState);
-    _readState.afterSubobject(iprot);
-  }
- this->__isset.set(14, true);
-
-  if (UNLIKELY(!_readState.advanceToNextField(
-          iprot,
-          15,
-          16,
-          apache::thrift::protocol::T_LIST))) {
-    goto _advance_failure;
-  }
-_readField_fieldP:
-  {
-    _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_fieldP = ::std::vector<::cpp2::IndirectionC>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionC>>::readWithContext(*iprot, this->__fbthrift_field_fieldP, _readState);
-    _readState.afterSubobject(iprot);
-  }
- this->__isset.set(15, true);
-
-  if (UNLIKELY(!_readState.advanceToNextField(
-          iprot,
-          16,
           17,
           apache::thrift::protocol::T_I32))) {
     goto _advance_failure;
@@ -457,7 +409,7 @@ _readField_fieldQ:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::MyEnumA>::readWithContext(*iprot, this->__fbthrift_field_fieldQ, _readState);
   }
- this->__isset.set(16, true);
+ this->__isset.set(13, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -668,30 +620,6 @@ _loop:
         goto _skip;
       }
     }
-    case 14:
-    {
-      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
-        goto _readField_fieldN;
-      } else {
-        goto _skip;
-      }
-    }
-    case 15:
-    {
-      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
-        goto _readField_fieldO;
-      } else {
-        goto _skip;
-      }
-    }
-    case 16:
-    {
-      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
-        goto _readField_fieldP;
-      } else {
-        goto _skip;
-      }
-    }
     case 17:
     {
       if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
@@ -808,18 +736,6 @@ uint32_t containerStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::apache::thrift::type_class::map<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::string>>, ::apache::thrift::type_class::string>>, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldM);
   }
   {
-    xfer += prot_->serializedFieldSize("fieldN", apache::thrift::protocol::T_LIST, 14);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionA>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldN);
-  }
-  {
-    xfer += prot_->serializedFieldSize("fieldO", apache::thrift::protocol::T_LIST, 15);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::floating_point, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionB>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldO);
-  }
-  {
-    xfer += prot_->serializedFieldSize("fieldP", apache::thrift::protocol::T_LIST, 16);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionC>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldP);
-  }
-  {
     xfer += prot_->serializedFieldSize("fieldQ", apache::thrift::protocol::T_I32, 17);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::MyEnumA>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldQ);
   }
@@ -927,18 +843,6 @@ uint32_t containerStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("fieldM", apache::thrift::protocol::T_MAP, 13);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::apache::thrift::type_class::map<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::string>>, ::apache::thrift::type_class::string>>, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldM);
-  }
-  {
-    xfer += prot_->serializedFieldSize("fieldN", apache::thrift::protocol::T_LIST, 14);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionA>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldN);
-  }
-  {
-    xfer += prot_->serializedFieldSize("fieldO", apache::thrift::protocol::T_LIST, 15);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::floating_point, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionB>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldO);
-  }
-  {
-    xfer += prot_->serializedFieldSize("fieldP", apache::thrift::protocol::T_LIST, 16);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionC>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldP);
   }
   {
     xfer += prot_->serializedFieldSize("fieldQ", apache::thrift::protocol::T_I32, 17);
@@ -1091,27 +995,6 @@ uint32_t containerStruct::write(Protocol_* prot_) const {
   }
   {
     constexpr int16_t kPrevFieldId = 13;
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 14, kPrevFieldId>(*prot_, "fieldN", previousFieldHasValue);
-    previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionA>>::write(*prot_, this->__fbthrift_field_fieldN);
-    xfer += prot_->writeFieldEnd();
-  }
-  {
-    constexpr int16_t kPrevFieldId = 14;
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 15, kPrevFieldId>(*prot_, "fieldO", previousFieldHasValue);
-    previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::floating_point, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionB>>::write(*prot_, this->__fbthrift_field_fieldO);
-    xfer += prot_->writeFieldEnd();
-  }
-  {
-    constexpr int16_t kPrevFieldId = 15;
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 16, kPrevFieldId>(*prot_, "fieldP", previousFieldHasValue);
-    previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::integral, ::apache::thrift::detail::apply_indirection_fn>>, ::std::vector<::cpp2::IndirectionC>>::write(*prot_, this->__fbthrift_field_fieldP);
-    xfer += prot_->writeFieldEnd();
-  }
-  {
-    constexpr int16_t kPrevFieldId = 16;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 17, kPrevFieldId>(*prot_, "fieldQ", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::MyEnumA>::write(*prot_, this->__fbthrift_field_fieldQ);

@@ -178,19 +178,6 @@ exception AnotherException {
   2: string message;
 } (cpp.virtual)
 
-@cpp.Type{name = "Foo"}
-typedef i64 (cpp.indirection) IndirectionA
-@cpp.Type{name = "Baz"}
-typedef i32 (cpp.indirection) IndirectionC
-@cpp.Type{name = "Bar"}
-typedef double (cpp.indirection) IndirectionB
-@cpp.Type{name = "FooBar"}
-typedef string (cpp.indirection) IndirectionD
-typedef map<MyEnumA, string> (
-  cpp.declare_hash,
-  cpp.declare_equal_to,
-) HashedTypedef
-
 struct containerStruct {
   1: bool fieldA;
   101: required bool req_fieldA;
@@ -236,11 +223,9 @@ struct containerStruct {
   26: list<ComplexUnion> fieldY;
   27: unionTypeDef fieldZ;
   28: list<unionTypeDef> fieldAA;
-  29: map<IndirectionB, IndirectionC> fieldAB;
   30: MyEnumB fieldAC;
   31: includes.AnEnum fieldAD;
   32: map<string, i32> fieldAE = {};
-  33: IndirectionD fieldSD;
 } (cpp.noncopyable, cpp.methods = "void foo(const std::string& bar) {}")
 
 enum MyEnumB {
@@ -349,9 +334,6 @@ struct AnnotatedStruct {
   32: std_deque typedef_deque_template;
   33: folly_set typedef_set_template;
   34: folly_map typedef_map_template;
-  35: IndirectionA indirection_a;
-  36: list<IndirectionB> indirection_b;
-  37: set<IndirectionC> indirection_c;
   38: IOBuf iobuf_type_val = "value";
   39: IOBufPtr iobuf_ptr_val = "value2";
   40: containerStruct struct_struct = {

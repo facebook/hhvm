@@ -75,9 +75,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Set__string,
     Map__List__Set__string_string,
     Map__Set__List__i32_Map__List__Set__string_string,
-    List__Foo__i64,
-    List__Bar__double,
-    List__Baz__i32,
 )
 
 _fbthrift__module_name__ = "module.types"
@@ -246,9 +243,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
           "fieldK": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldK_ref().has_value(),
           "fieldL": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldL_ref().has_value(),
           "fieldM": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldM_ref().has_value(),
-          "fieldN": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldN_ref().has_value(),
-          "fieldO": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldO_ref().has_value(),
-          "fieldP": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldP_ref().has_value(),
           "fieldQ": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldQ_ref().has_value(),
         })
 
@@ -367,33 +361,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
     def fieldM(self):
         return self.fieldM_impl()
 
-    cdef inline fieldN_impl(self):
-        if self.__fbthrift_cached_fieldN is None:
-            self.__fbthrift_cached_fieldN = List__Foo__i64__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldN_ref().ref())
-        return self.__fbthrift_cached_fieldN
-
-    @property
-    def fieldN(self):
-        return self.fieldN_impl()
-
-    cdef inline fieldO_impl(self):
-        if self.__fbthrift_cached_fieldO is None:
-            self.__fbthrift_cached_fieldO = List__Bar__double__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldO_ref().ref())
-        return self.__fbthrift_cached_fieldO
-
-    @property
-    def fieldO(self):
-        return self.fieldO_impl()
-
-    cdef inline fieldP_impl(self):
-        if self.__fbthrift_cached_fieldP is None:
-            self.__fbthrift_cached_fieldP = List__Baz__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldP_ref().ref())
-        return self.__fbthrift_cached_fieldP
-
-    @property
-    def fieldP(self):
-        return self.fieldP_impl()
-
     cdef inline fieldQ_impl(self):
         if self.__fbthrift_cached_fieldQ is None:
             self.__fbthrift_cached_fieldQ = translate_cpp_enum_to_python(MyEnumA, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldQ_ref().value()))
@@ -500,7 +467,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 22
+        return 19
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(containerStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -965,60 +932,4 @@ cdef object Map__Set__List__i32_Map__List__Set__string_string__from_cpp(const cm
         py_items[Set__List__i32__from_cpp(ckey)] = Map__List__Set__string_string__from_cpp(cval)
     return Map__Set__List__i32_Map__List__Set__string_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
-cdef vector[_module_cbindings.Foo] List__Foo__i64__make_instance(object items) except *:
-    cdef vector[_module_cbindings.Foo] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, int):
-            raise TypeError(f"{item!r} is not of type int")
-        item = <cint64_t> item
-        c_inst.push_back(item)
-    return cmove(c_inst)
 
-cdef object List__Foo__i64__from_cpp(const vector[_module_cbindings.Foo]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(c_vec[idx])
-    return List__Foo__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef vector[_module_cbindings.Bar] List__Bar__double__make_instance(object items) except *:
-    cdef vector[_module_cbindings.Bar] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, (float, int)):
-            raise TypeError(f"{item!r} is not of type float")
-        c_inst.push_back(item)
-    return cmove(c_inst)
-
-cdef object List__Bar__double__from_cpp(const vector[_module_cbindings.Bar]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(c_vec[idx])
-    return List__Bar__double(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef vector[_module_cbindings.Baz] List__Baz__i32__make_instance(object items) except *:
-    cdef vector[_module_cbindings.Baz] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, int):
-            raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-        c_inst.push_back(item)
-    return cmove(c_inst)
-
-cdef object List__Baz__i32__from_cpp(const vector[_module_cbindings.Baz]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(c_vec[idx])
-    return List__Baz__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-
-IndirectionA = int
-IndirectionC = int
-IndirectionB = float

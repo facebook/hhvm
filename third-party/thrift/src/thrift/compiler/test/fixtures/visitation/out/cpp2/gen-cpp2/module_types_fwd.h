@@ -28,7 +28,6 @@ class dep_B_struct;
 class annotated;
 class union_with_special_names;
 class struct_with_special_names;
-class struct_with_indirections;
 } // namespace test_cpp2::cpp_reflection
 // END forward_declare
 

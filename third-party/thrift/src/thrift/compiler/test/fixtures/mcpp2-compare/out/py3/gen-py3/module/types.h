@@ -287,19 +287,13 @@ inline void reset_field<::some::valid::ns::containerStruct>(
       obj.fieldAA_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAA_ref());
       return;
     case 41:
-      obj.fieldAB_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAB_ref());
-      return;
-    case 42:
       obj.fieldAC_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAC_ref());
       return;
-    case 43:
+    case 42:
       obj.fieldAD_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAD_ref());
       return;
-    case 44:
+    case 43:
       obj.fieldAE_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAE_ref());
-      return;
-    case 45:
-      obj.fieldSD_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldSD_ref());
       return;
   }
 }
@@ -430,21 +424,12 @@ inline void reset_field<::some::valid::ns::AnnotatedStruct>(
       obj.typedef_map_template_ref().copy_from(default_inst<::some::valid::ns::AnnotatedStruct>().typedef_map_template_ref());
       return;
     case 34:
-      obj.indirection_a_ref().copy_from(default_inst<::some::valid::ns::AnnotatedStruct>().indirection_a_ref());
-      return;
-    case 35:
-      obj.indirection_b_ref().copy_from(default_inst<::some::valid::ns::AnnotatedStruct>().indirection_b_ref());
-      return;
-    case 36:
-      obj.indirection_c_ref().copy_from(default_inst<::some::valid::ns::AnnotatedStruct>().indirection_c_ref());
-      return;
-    case 37:
       obj.iobuf_type_val_ref().copy_from(default_inst<::some::valid::ns::AnnotatedStruct>().iobuf_type_val_ref());
       return;
-    case 38:
+    case 35:
       obj.iobuf_ptr_val_ref()->reset();
       return;
-    case 39:
+    case 36:
       obj.struct_struct_ref().copy_from(default_inst<::some::valid::ns::AnnotatedStruct>().struct_struct_ref());
       return;
   }

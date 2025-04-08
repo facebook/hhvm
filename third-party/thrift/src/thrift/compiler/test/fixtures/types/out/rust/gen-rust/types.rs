@@ -1002,7 +1002,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of decorated_struct"))?),
+                (::fbthrift::TType::String, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of decorated_struct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1162,14 +1162,14 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 12) => field_fieldA = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldA field of ContainerStruct"))?),
-                (::fbthrift::TType::List, 2) => field_fieldB = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldB field of ContainerStruct"))?),
-                (::fbthrift::TType::List, 3) => field_fieldC = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldC field of ContainerStruct"))?),
-                (::fbthrift::TType::List, 4) => field_fieldD = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldD field of ContainerStruct"))?),
-                (::fbthrift::TType::List, 5) => field_fieldE = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldE field of ContainerStruct"))?),
-                (::fbthrift::TType::Set, 6) => field_fieldF = ::std::option::Option::Some(crate::r#impl::read(p).with_context(||format!("Error while deserialising fieldF field of ContainerStruct"))?),
-                (::fbthrift::TType::Map, 7) => field_fieldG = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldG field of ContainerStruct"))?),
-                (::fbthrift::TType::Map, 8) => field_fieldH = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldH field of ContainerStruct"))?),
+                (::fbthrift::TType::List, 12) => field_fieldA = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldA field of ContainerStruct")?),
+                (::fbthrift::TType::List, 2) => field_fieldB = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldB field of ContainerStruct")?),
+                (::fbthrift::TType::List, 3) => field_fieldC = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldC field of ContainerStruct")?),
+                (::fbthrift::TType::List, 4) => field_fieldD = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldD field of ContainerStruct")?),
+                (::fbthrift::TType::List, 5) => field_fieldE = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldE field of ContainerStruct")?),
+                (::fbthrift::TType::Set, 6) => field_fieldF = ::std::option::Option::Some(crate::r#impl::read(p).context("Error while deserialising fieldF field of ContainerStruct")?),
+                (::fbthrift::TType::Map, 7) => field_fieldG = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldG field of ContainerStruct")?),
+                (::fbthrift::TType::Map, 8) => field_fieldH = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldH field of ContainerStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1356,7 +1356,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_fieldA = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising fieldA field of CppTypeStruct"))?),
+                (::fbthrift::TType::List, 1) => field_fieldA = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising fieldA field of CppTypeStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1478,7 +1478,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyIntField field of VirtualStruct"))?),
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyIntField field of VirtualStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1596,8 +1596,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising a field of MyStructWithForwardRefEnum"))?),
-                (::fbthrift::TType::I32, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising b field of MyStructWithForwardRefEnum"))?),
+                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising a field of MyStructWithForwardRefEnum")?),
+                (::fbthrift::TType::I32, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising b field of MyStructWithForwardRefEnum")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1718,8 +1718,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising a field of TrivialNumeric"))?),
-                (::fbthrift::TType::Bool, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising b field of TrivialNumeric"))?),
+                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising a field of TrivialNumeric")?),
+                (::fbthrift::TType::Bool, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising b field of TrivialNumeric")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1844,8 +1844,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_z = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising z field of TrivialNestedWithDefault"))?),
-                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising n field of TrivialNestedWithDefault"))?),
+                (::fbthrift::TType::I32, 1) => field_z = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising z field of TrivialNestedWithDefault")?),
+                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising n field of TrivialNestedWithDefault")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1970,8 +1970,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising a field of ComplexString"))?),
-                (::fbthrift::TType::Map, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising b field of ComplexString"))?),
+                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising a field of ComplexString")?),
+                (::fbthrift::TType::Map, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising b field of ComplexString")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2106,8 +2106,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_z = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising z field of ComplexNestedWithDefault"))?),
-                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising n field of ComplexNestedWithDefault"))?),
+                (::fbthrift::TType::String, 1) => field_z = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising z field of ComplexNestedWithDefault")?),
+                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising n field of ComplexNestedWithDefault")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2263,11 +2263,11 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising small field of MinPadding"))?),
-                (::fbthrift::TType::I64, 2) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising big field of MinPadding"))?),
-                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising medium field of MinPadding"))?),
-                (::fbthrift::TType::I32, 4) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising biggish field of MinPadding"))?),
-                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising tiny field of MinPadding"))?),
+                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising small field of MinPadding")?),
+                (::fbthrift::TType::I64, 2) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising big field of MinPadding")?),
+                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising medium field of MinPadding")?),
+                (::fbthrift::TType::I32, 4) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising biggish field of MinPadding")?),
+                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising tiny field of MinPadding")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2427,11 +2427,11 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising small field of MinPaddingWithCustomType"))?),
-                (::fbthrift::TType::I32, 2) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising biggish field of MinPaddingWithCustomType"))?),
-                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising medium field of MinPaddingWithCustomType"))?),
-                (::fbthrift::TType::I64, 4) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising big field of MinPaddingWithCustomType"))?),
-                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising tiny field of MinPaddingWithCustomType"))?),
+                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising small field of MinPaddingWithCustomType")?),
+                (::fbthrift::TType::I32, 2) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising biggish field of MinPaddingWithCustomType")?),
+                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising medium field of MinPaddingWithCustomType")?),
+                (::fbthrift::TType::I64, 4) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising big field of MinPaddingWithCustomType")?),
+                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising tiny field of MinPaddingWithCustomType")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2624,10 +2624,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyIntField field of MyStruct"))?),
-                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyStringField field of MyStruct"))?),
-                (::fbthrift::TType::I64, 3) => field_majorVer = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising majorVer field of MyStruct"))?),
-                (::fbthrift::TType::Struct, 4) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising data field of MyStruct"))?),
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyIntField field of MyStruct")?),
+                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyStringField field of MyStruct")?),
+                (::fbthrift::TType::I64, 3) => field_majorVer = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising majorVer field of MyStruct")?),
+                (::fbthrift::TType::Struct, 4) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising data field of MyStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2849,7 +2849,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo field of Renaming"))?),
+                (::fbthrift::TType::I64, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo field of Renaming")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2995,8 +2995,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_binary_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising binary_field field of AnnotatedTypes"))?),
-                (::fbthrift::TType::List, 2) => field_list_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising list_field field of AnnotatedTypes"))?),
+                (::fbthrift::TType::String, 1) => field_binary_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising binary_field field of AnnotatedTypes")?),
+                (::fbthrift::TType::List, 2) => field_list_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising list_field field of AnnotatedTypes")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3125,8 +3125,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.ForwardUsageStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising ForwardUsageStruct field of ForwardUsageRoot"))?),
-                (::fbthrift::TType::Struct, 2) => fields.ForwardUsageByRef = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising ForwardUsageByRef field of ForwardUsageRoot"))?),
+                (::fbthrift::TType::Struct, 1) => fields.ForwardUsageStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising ForwardUsageStruct field of ForwardUsageRoot")?),
+                (::fbthrift::TType::Struct, 2) => fields.ForwardUsageByRef = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising ForwardUsageByRef field of ForwardUsageRoot")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3252,7 +3252,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo field of ForwardUsageStruct"))?),
+                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo field of ForwardUsageStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3376,7 +3376,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo field of ForwardUsageByRef"))?),
+                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo field of ForwardUsageByRef")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3500,7 +3500,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of IncompleteMap"))?),
+                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of IncompleteMap")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3716,7 +3716,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of CompleteMap"))?),
+                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of CompleteMap")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3943,7 +3943,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of IncompleteList"))?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of IncompleteList")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4170,7 +4170,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of CompleteList"))?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of CompleteList")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4397,7 +4397,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of AdaptedList"))?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of AdaptedList")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4505,7 +4505,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of AdaptedListDep"))?),
+                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of AdaptedListDep")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4640,7 +4640,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of DependentAdaptedList"))?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of DependentAdaptedList")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4754,7 +4754,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I16, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field field of DependentAdaptedListDep"))?),
+                (::fbthrift::TType::I16, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field field of DependentAdaptedListDep")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4931,13 +4931,13 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_aa_list = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising aa_list field of AllocatorAware"))?),
-                (::fbthrift::TType::Set, 2) => field_aa_set = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising aa_set field of AllocatorAware"))?),
-                (::fbthrift::TType::Map, 3) => field_aa_map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising aa_map field of AllocatorAware"))?),
-                (::fbthrift::TType::String, 4) => field_aa_string = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising aa_string field of AllocatorAware"))?),
-                (::fbthrift::TType::I32, 5) => field_not_a_container = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising not_a_container field of AllocatorAware"))?),
-                (::fbthrift::TType::I32, 6) => field_aa_unique = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising aa_unique field of AllocatorAware"))?),
-                (::fbthrift::TType::I32, 7) => field_aa_shared = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising aa_shared field of AllocatorAware"))?),
+                (::fbthrift::TType::List, 1) => field_aa_list = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising aa_list field of AllocatorAware")?),
+                (::fbthrift::TType::Set, 2) => field_aa_set = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising aa_set field of AllocatorAware")?),
+                (::fbthrift::TType::Map, 3) => field_aa_map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising aa_map field of AllocatorAware")?),
+                (::fbthrift::TType::String, 4) => field_aa_string = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising aa_string field of AllocatorAware")?),
+                (::fbthrift::TType::I32, 5) => field_not_a_container = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising not_a_container field of AllocatorAware")?),
+                (::fbthrift::TType::I32, 6) => field_aa_unique = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising aa_unique field of AllocatorAware")?),
+                (::fbthrift::TType::I32, 7) => field_aa_shared = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising aa_shared field of AllocatorAware")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5113,8 +5113,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_not_a_container = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising not_a_container field of AllocatorAware2"))?),
-                (::fbthrift::TType::I32, 2) => field_box_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising box_field field of AllocatorAware2"))?),
+                (::fbthrift::TType::I32, 1) => field_not_a_container = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising not_a_container field of AllocatorAware2")?),
+                (::fbthrift::TType::I32, 2) => field_box_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising box_field field of AllocatorAware2")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5251,9 +5251,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_i32_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising i32_field field of TypedefStruct"))?),
-                (::fbthrift::TType::I32, 2) => field_IntTypedef_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising IntTypedef_field field of TypedefStruct"))?),
-                (::fbthrift::TType::I32, 3) => field_UintTypedef_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising UintTypedef_field field of TypedefStruct"))?),
+                (::fbthrift::TType::I32, 1) => field_i32_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising i32_field field of TypedefStruct")?),
+                (::fbthrift::TType::I32, 2) => field_IntTypedef_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising IntTypedef_field field of TypedefStruct")?),
+                (::fbthrift::TType::I32, 3) => field_UintTypedef_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising UintTypedef_field field of TypedefStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5370,7 +5370,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field___field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising __field field of StructWithDoubleUnderscores"))?),
+                (::fbthrift::TType::I32, 1) => field___field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising __field field of StructWithDoubleUnderscores")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

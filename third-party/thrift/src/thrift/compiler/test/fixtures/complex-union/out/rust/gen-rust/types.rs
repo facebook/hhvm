@@ -168,27 +168,27 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I64, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::intValue(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising intValue field of ComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::intValue(::fbthrift::Deserialize::read(p).context("Error while deserialising intValue field of ComplexUnion")?));
                 }
                 (::fbthrift::TType::String, 5, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringValue(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising stringValue field of ComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::stringValue(::fbthrift::Deserialize::read(p).context("Error while deserialising stringValue field of ComplexUnion")?));
                 }
                 (::fbthrift::TType::List, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::intListValue(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising intListValue field of ComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::intListValue(::fbthrift::Deserialize::read(p).context("Error while deserialising intListValue field of ComplexUnion")?));
                 }
                 (::fbthrift::TType::List, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringListValue(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising stringListValue field of ComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::stringListValue(::fbthrift::Deserialize::read(p).context("Error while deserialising stringListValue field of ComplexUnion")?));
                 }
                 (::fbthrift::TType::Map, 9, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::typedefValue(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising typedefValue field of ComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::typedefValue(::fbthrift::Deserialize::read(p).context("Error while deserialising typedefValue field of ComplexUnion")?));
                 }
                 (::fbthrift::TType::String, 14, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringRef(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising stringRef field of ComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::stringRef(::fbthrift::Deserialize::read(p).context("Error while deserialising stringRef field of ComplexUnion")?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -325,11 +325,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::List, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::intListValue(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising intListValue field of ListUnion"))?));
+                    alt = ::std::option::Option::Some(Self::intListValue(::fbthrift::Deserialize::read(p).context("Error while deserialising intListValue field of ListUnion")?));
                 }
                 (::fbthrift::TType::List, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringListValue(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising stringListValue field of ListUnion"))?));
+                    alt = ::std::option::Option::Some(Self::stringListValue(::fbthrift::Deserialize::read(p).context("Error while deserialising stringListValue field of ListUnion")?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -444,11 +444,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::String, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::binaryData(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising binaryData field of DataUnion"))?));
+                    alt = ::std::option::Option::Some(Self::binaryData(::fbthrift::Deserialize::read(p).context("Error while deserialising binaryData field of DataUnion")?));
                 }
                 (::fbthrift::TType::String, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringData(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising stringData field of DataUnion"))?));
+                    alt = ::std::option::Option::Some(Self::stringData(::fbthrift::Deserialize::read(p).context("Error while deserialising stringData field of DataUnion")?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -581,9 +581,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_strVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising strVal field of Val"))?),
-                (::fbthrift::TType::I32, 2) => field_intVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising intVal field of Val"))?),
-                (::fbthrift::TType::Map, 9) => field_typedefValue = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising typedefValue field of Val"))?),
+                (::fbthrift::TType::String, 1) => field_strVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising strVal field of Val")?),
+                (::fbthrift::TType::I32, 2) => field_intVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising intVal field of Val")?),
+                (::fbthrift::TType::Map, 9) => field_typedefValue = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising typedefValue field of Val")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -690,11 +690,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::Struct, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::v1(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising v1 field of ValUnion"))?));
+                    alt = ::std::option::Option::Some(Self::v1(::fbthrift::Deserialize::read(p).context("Error while deserialising v1 field of ValUnion")?));
                 }
                 (::fbthrift::TType::Struct, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::v2(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising v2 field of ValUnion"))?));
+                    alt = ::std::option::Option::Some(Self::v2(::fbthrift::Deserialize::read(p).context("Error while deserialising v2 field of ValUnion")?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -809,11 +809,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::String, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::thingOne(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising thingOne field of VirtualComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::thingOne(::fbthrift::Deserialize::read(p).context("Error while deserialising thingOne field of VirtualComplexUnion")?));
                 }
                 (::fbthrift::TType::String, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::thingTwo(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising thingTwo field of VirtualComplexUnion"))?));
+                    alt = ::std::option::Option::Some(Self::thingTwo(::fbthrift::Deserialize::read(p).context("Error while deserialising thingTwo field of VirtualComplexUnion")?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -932,7 +932,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_num = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising num field of NonCopyableStruct"))?),
+                (::fbthrift::TType::I64, 1) => field_num = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising num field of NonCopyableStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1027,7 +1027,7 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::Struct, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising s field of NonCopyableUnion"))?));
+                    alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p).context("Error while deserialising s field of NonCopyableUnion")?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(

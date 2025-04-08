@@ -272,14 +272,14 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_unqualified_int_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising unqualified_int_field field of TestStruct"))?),
-                (::fbthrift::TType::Bool, 2) => field_unqualified_bool_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising unqualified_bool_field field of TestStruct"))?),
-                (::fbthrift::TType::List, 3) => field_unqualified_list_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising unqualified_list_field field of TestStruct"))?),
-                (::fbthrift::TType::Struct, 4) => field_unqualified_struct_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising unqualified_struct_field field of TestStruct"))?),
-                (::fbthrift::TType::I32, 5) => field_optional_int_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising optional_int_field field of TestStruct"))?),
-                (::fbthrift::TType::Bool, 6) => field_optional_bool_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising optional_bool_field field of TestStruct"))?),
-                (::fbthrift::TType::List, 7) => field_optional_list_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising optional_list_field field of TestStruct"))?),
-                (::fbthrift::TType::Struct, 8) => field_optional_struct_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising optional_struct_field field of TestStruct"))?),
+                (::fbthrift::TType::I32, 1) => field_unqualified_int_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising unqualified_int_field field of TestStruct")?),
+                (::fbthrift::TType::Bool, 2) => field_unqualified_bool_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising unqualified_bool_field field of TestStruct")?),
+                (::fbthrift::TType::List, 3) => field_unqualified_list_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising unqualified_list_field field of TestStruct")?),
+                (::fbthrift::TType::Struct, 4) => field_unqualified_struct_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising unqualified_struct_field field of TestStruct")?),
+                (::fbthrift::TType::I32, 5) => field_optional_int_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising optional_int_field field of TestStruct")?),
+                (::fbthrift::TType::Bool, 6) => field_optional_bool_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising optional_bool_field field of TestStruct")?),
+                (::fbthrift::TType::List, 7) => field_optional_list_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising optional_list_field field of TestStruct")?),
+                (::fbthrift::TType::Struct, 8) => field_optional_struct_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising optional_struct_field field of TestStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

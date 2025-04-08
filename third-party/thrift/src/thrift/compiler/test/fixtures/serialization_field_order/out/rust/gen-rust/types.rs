@@ -117,9 +117,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 3) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field1 field of Foo"))?),
-                (::fbthrift::TType::I32, 1) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field2 field of Foo"))?),
-                (::fbthrift::TType::I32, 2) => field_field3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field3 field of Foo"))?),
+                (::fbthrift::TType::I32, 3) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field1 field of Foo")?),
+                (::fbthrift::TType::I32, 1) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field2 field of Foo")?),
+                (::fbthrift::TType::I32, 2) => field_field3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field3 field of Foo")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -253,9 +253,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 3) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field1 field of Foo2"))?),
-                (::fbthrift::TType::I32, 1) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field2 field of Foo2"))?),
-                (::fbthrift::TType::I32, 2) => field_field3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising field3 field of Foo2"))?),
+                (::fbthrift::TType::I32, 3) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field1 field of Foo2")?),
+                (::fbthrift::TType::I32, 1) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field2 field of Foo2")?),
+                (::fbthrift::TType::I32, 2) => field_field3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising field3 field of Foo2")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

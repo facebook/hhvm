@@ -96,7 +96,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyInt field of Foo"))?),
+                (::fbthrift::TType::I64, 1) => field_MyInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyInt field of Foo")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

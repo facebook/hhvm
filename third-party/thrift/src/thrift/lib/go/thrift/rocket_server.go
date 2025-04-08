@@ -35,7 +35,7 @@ type rocketServer struct {
 	listener      net.Listener
 	transportID   TransportID
 	zstdSupported bool
-	log           func(format string, args ...interface{})
+	log           func(format string, args ...any)
 	connContext   ConnContextFunc
 
 	pipeliningEnabled bool
@@ -124,11 +124,11 @@ type rocketServerSocket struct {
 	ctx               context.Context
 	proc              Processor
 	pipeliningEnabled bool
-	log               func(format string, args ...interface{})
+	log               func(format string, args ...any)
 	stats             *stats.ServerStats
 }
 
-func newRocketServerSocket(ctx context.Context, proc Processor, pipeliningEnabled bool, log func(format string, args ...interface{}), stats *stats.ServerStats) *rocketServerSocket {
+func newRocketServerSocket(ctx context.Context, proc Processor, pipeliningEnabled bool, log func(format string, args ...any), stats *stats.ServerStats) *rocketServerSocket {
 	return &rocketServerSocket{
 		ctx:               ctx,
 		proc:              proc,

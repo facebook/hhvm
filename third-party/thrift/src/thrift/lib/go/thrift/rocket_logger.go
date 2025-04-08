@@ -20,29 +20,29 @@ import (
 	"github.com/rsocket/rsocket-go/logger"
 )
 
-type rsocketLogger func(format string, args ...interface{})
+type rsocketLogger func(format string, args ...any)
 
 // Debugf print to the debug level logs.
-func (log rsocketLogger) Debugf(format string, args ...interface{}) {
+func (log rsocketLogger) Debugf(format string, args ...any) {
 	log(format, args...)
 }
 
 // Infof print to the info level logs.
-func (log rsocketLogger) Infof(format string, args ...interface{}) {
+func (log rsocketLogger) Infof(format string, args ...any) {
 	log(format, args...)
 }
 
 // Warnf print to the info level logs.
-func (log rsocketLogger) Warnf(format string, args ...interface{}) {
+func (log rsocketLogger) Warnf(format string, args ...any) {
 	log(format, args...)
 }
 
 // Errorf print to the info level logs.
-func (log rsocketLogger) Errorf(format string, args ...interface{}) {
+func (log rsocketLogger) Errorf(format string, args ...any) {
 	log(format, args...)
 }
 
-func setRsocketLogger(log func(format string, args ...interface{})) {
+func setRsocketLogger(log func(format string, args ...any)) {
 	logger.SetLevel(logger.LevelError)
 	logger.SetLogger(rsocketLogger(log))
 }

@@ -25,7 +25,7 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-func assertEq(t *testing.T, expected interface{}, actual interface{}) {
+func assertEq(t *testing.T, expected any, actual any) {
 	t.Helper()
 	if expected != actual {
 		t.Errorf("assertEq failed: actual=%+v expected=%+v", actual, expected)

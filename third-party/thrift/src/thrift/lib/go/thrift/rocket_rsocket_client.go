@@ -58,7 +58,7 @@ func (r *rsocketClient) SendSetup(_ context.Context) error {
 	// If "setup" has already run (client != nil) - we return immediately.
 	// If "setup" has already run but failed with an error (client == nil),
 	// the code below will be retried by the next goroutine that arrives here.
-	_, setupErr, _ := r.initGroup.Do("setup", func() (interface{}, error) {
+	_, setupErr, _ := r.initGroup.Do("setup", func() (any, error) {
 		if r.client != nil {
 			return nil, nil
 		}

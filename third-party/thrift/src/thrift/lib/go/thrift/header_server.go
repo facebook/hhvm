@@ -47,7 +47,7 @@ var taskExpiredException = NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION
 type server struct {
 	processor   Processor
 	listener    net.Listener
-	log         func(format string, args ...interface{})
+	log         func(format string, args ...any)
 	connContext ConnContextFunc
 
 	wg sync.WaitGroup

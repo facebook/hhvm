@@ -45,7 +45,7 @@ type ConnContextFunc func(context.Context, net.Conn) context.Context
 type serverOptions struct {
 	pipeliningEnabled bool
 	numWorkers        int
-	log               func(format string, args ...interface{})
+	log               func(format string, args ...any)
 	connContext       ConnContextFunc
 	serverStats       *stats.ServerStats
 	processorStats    map[string]*stats.TimingSeries
@@ -102,7 +102,7 @@ func WithConnContext(connContext ConnContextFunc) ServerOption {
 
 // WithLog allows you to over-ride the location that exceptional server events are logged.
 // The default is stderr.
-func WithLog(log func(format string, args ...interface{})) ServerOption {
+func WithLog(log func(format string, args ...any)) ServerOption {
 	return func(server *serverOptions) {
 		server.log = log
 	}

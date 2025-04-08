@@ -36,11 +36,11 @@ type rocketServerTransport struct {
 	acceptor    transport.ServerTransportAcceptor
 	transportID TransportID
 	connContext ConnContextFunc
-	log         func(format string, args ...interface{})
+	log         func(format string, args ...any)
 	stats       *stats.ServerStats
 }
 
-func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...interface{}), stats *stats.ServerStats) transport.ServerTransport {
+func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...any), stats *stats.ServerStats) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
 		processor:   processor,

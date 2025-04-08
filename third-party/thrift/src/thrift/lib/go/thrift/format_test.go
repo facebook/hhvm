@@ -32,7 +32,7 @@ type fieldData struct {
 	name  string
 	typ   types.Type
 	id    int16
-	value interface{}
+	value any
 }
 
 type structData struct {

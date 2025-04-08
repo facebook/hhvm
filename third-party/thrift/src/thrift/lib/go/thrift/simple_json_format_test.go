@@ -595,7 +595,7 @@ func TestWriteSimpleJSONProtocolList(t *testing.T) {
 		t.Fatalf("Unable to write %s due to error flushing: %s", thetype, e.Error())
 	}
 	str := trans.String()
-	str1 := new([]interface{})
+	str1 := new([]any)
 	err := json.Unmarshal([]byte(str), str1)
 	if err != nil {
 		t.Fatalf("Unable to decode %s, wrote: %s", thetype, str)
@@ -648,7 +648,7 @@ func TestWriteSimpleJSONProtocolSet(t *testing.T) {
 		t.Fatalf("Unable to write %s due to error flushing: %s", thetype, e.Error())
 	}
 	str := trans.String()
-	str1 := new([]interface{})
+	str1 := new([]any)
 	err := json.Unmarshal([]byte(str), str1)
 	if err != nil {
 		t.Fatalf("Unable to decode %s, wrote: %s", thetype, str)

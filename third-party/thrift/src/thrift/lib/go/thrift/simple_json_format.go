@@ -1133,7 +1133,7 @@ func (p *simpleJSONFormat) ParseListEnd() error {
 	return p.ParsePostValue()
 }
 
-func (p *simpleJSONFormat) readSingleValue() (interface{}, types.Type, error) {
+func (p *simpleJSONFormat) readSingleValue() (any, types.Type, error) {
 	e := p.readNonSignificantWhitespace()
 	if e != nil {
 		return nil, types.VOID, types.NewProtocolException(e)
@@ -1191,10 +1191,10 @@ func (p *simpleJSONFormat) readSingleValue() (interface{}, types.Type, error) {
 			return false, types.BOOL, nil
 		case JSON_LBRACKET[0]:
 			_, e := p.reader.ReadByte()
-			return make([]interface{}, 0), types.LIST, types.NewProtocolException(e)
+			return make([]any, 0), types.LIST, types.NewProtocolException(e)
 		case JSON_LBRACE[0]:
 			_, e := p.reader.ReadByte()
-			return make(map[string]interface{}), types.STRUCT, types.NewProtocolException(e)
+			return make(map[string]any), types.STRUCT, types.NewProtocolException(e)
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'e', 'E', '.', '+', '-', JSON_INFINITY[0], JSON_NAN[0]:
 			// assume numeric
 			v, e := p.readNumeric()

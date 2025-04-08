@@ -6,6 +6,2595 @@
 /// Error definitions for `SinkService`.
 pub mod sink_service {
 
+    pub type MethodError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum MethodReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodReader {
+        type Success = ();
+        type Error = MethodError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodSinkError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodSinkError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::method failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::method failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodSinkError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodSinkError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodSinkError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_err) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodSinkError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodSinkError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for MethodSinkError {
+        type Success = crate::types::SinkPayload;
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
+                let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
+                ::fbthrift::Serialize::write(&aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(success) => {
+                    p.write_field_begin(
+                        "Success",
+                        ::fbthrift::TType::Struct,
+                        0i16,
+                    );
+                    ::fbthrift::Serialize::write(success, p);
+                    p.write_field_end();
+                }
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
+                ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodSinkFinalError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodSinkFinalError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::method failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::method failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodSinkFinalError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodSinkFinalError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodSinkFinalError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodSinkFinalError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodSinkFinalError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodSinkFinalError {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ThriftError(exn)
+        }
+    }
+
+    pub(crate) enum MethodSinkFinalReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodSinkFinalReader {
+        type Success = crate::types::FinalResponse;
+        type Error = MethodSinkFinalError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodError"),
+                )
+                .into(),
+            )
+        }
+    }
+    pub type MethodAndReponseError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum MethodAndReponseReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodAndReponseReader {
+        type Success = crate::types::InitialResponse;
+        type Error = MethodAndReponseError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodAndReponseError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodAndReponseError"),
+                )
+                .into(),
+            )
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodAndReponseSinkError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodAndReponseSinkError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodAndReponse failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodAndReponse failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodAndReponseSinkError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodAndReponseSinkError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodAndReponseSinkError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_err) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodAndReponseSinkError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodAndReponseSinkError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for MethodAndReponseSinkError {
+        type Success = crate::types::SinkPayload;
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
+                let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
+                ::fbthrift::Serialize::write(&aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(success) => {
+                    p.write_field_begin(
+                        "Success",
+                        ::fbthrift::TType::Struct,
+                        0i16,
+                    );
+                    ::fbthrift::Serialize::write(success, p);
+                    p.write_field_end();
+                }
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
+                ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodAndReponseSinkFinalError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodAndReponseSinkFinalError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodAndReponse failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodAndReponse failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodAndReponseSinkFinalError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodAndReponseSinkFinalError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodAndReponseSinkFinalError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodAndReponseSinkFinalError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodAndReponseSinkFinalError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodAndReponseSinkFinalError {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ThriftError(exn)
+        }
+    }
+
+    pub(crate) enum MethodAndReponseSinkFinalReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodAndReponseSinkFinalReader {
+        type Success = crate::types::FinalResponse;
+        type Error = MethodAndReponseSinkFinalError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodAndReponseError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodAndReponseError"),
+                )
+                .into(),
+            )
+        }
+    }
+    /// Errors for methodThrow (client side).
+    #[derive(Debug)]
+    pub enum MethodThrowError {
+        ex(crate::types::InitialException),
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodThrowError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ex(inner) => {
+                    if f.alternate() {
+                        write!(f, "SinkService::methodThrow failed with variant `ex`: {:#}", inner)?;
+                    } else {
+                        write!(f, "SinkService::methodThrow failed with ex(InitialException)")?;
+                    }
+                }
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodThrowError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ex(inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ApplicationException(inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::types::InitialException> for MethodThrowError {
+        fn from(e: crate::types::InitialException) -> Self {
+            Self::ex(e)
+        }
+    }
+
+    impl AsInitialException for MethodThrowError {
+        fn as_initial_exception(&self) -> ::std::option::Option<&crate::types::InitialException> {
+            match self {
+                Self::ex(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodThrowError {
+        fn from(err: ::anyhow::Error) -> Self {
+            Self::ThriftError(err)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodThrowError {
+        fn from(ae: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(ae)
+        }
+    }
+
+    impl ::std::convert::From<crate::services::sink_service::MethodThrowExn> for MethodThrowError {
+        fn from(e: crate::services::sink_service::MethodThrowExn) -> Self {
+            match e {
+                crate::services::sink_service::MethodThrowExn::ApplicationException(aexn) =>
+                    MethodThrowError::ApplicationException(aexn),
+                crate::services::sink_service::MethodThrowExn::ex(exn) =>
+                    MethodThrowError::ex(exn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<MethodThrowError> for crate::services::sink_service::MethodThrowExn {
+        fn from(err: MethodThrowError) -> Self {
+            match err {
+                MethodThrowError::ex(err) => crate::services::sink_service::MethodThrowExn::ex(err),
+                MethodThrowError::ApplicationException(aexn) => crate::services::sink_service::MethodThrowExn::ApplicationException(aexn),
+                MethodThrowError::ThriftError(err) => crate::services::sink_service::MethodThrowExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    pub(crate) enum MethodThrowReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodThrowReader {
+        type Success = ();
+        type Error = MethodThrowError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+                ::fbthrift::Field::new("ex", ::fbthrift::TType::Struct, 1),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((::fbthrift::TType::Struct, 1), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodThrowSinkError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodThrowSinkError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodThrowSinkError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodThrowSinkError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodThrowSinkError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_err) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodThrowSinkError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodThrowSinkError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for MethodThrowSinkError {
+        type Success = crate::types::SinkPayload;
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
+                let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
+                ::fbthrift::Serialize::write(&aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(success) => {
+                    p.write_field_begin(
+                        "Success",
+                        ::fbthrift::TType::Struct,
+                        0i16,
+                    );
+                    ::fbthrift::Serialize::write(success, p);
+                    p.write_field_end();
+                }
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
+                ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodThrowSinkFinalError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodThrowSinkFinalError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodThrowSinkFinalError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodThrowSinkFinalError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodThrowSinkFinalError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodThrowSinkFinalError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodThrowSinkFinalError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodThrowSinkFinalError {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ThriftError(exn)
+        }
+    }
+
+    pub(crate) enum MethodThrowSinkFinalReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodThrowSinkFinalReader {
+        type Success = crate::types::FinalResponse;
+        type Error = MethodThrowSinkFinalError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+                ::fbthrift::Field::new("ex", ::fbthrift::TType::Struct, 1),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodThrowError"),
+                )
+                .into(),
+            )
+        }
+    }
+    pub type MethodSinkThrowError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum MethodSinkThrowReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodSinkThrowReader {
+        type Success = ();
+        type Error = MethodSinkThrowError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodSinkThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodSinkThrowSinkError {
+        ex(crate::types::SinkException1),
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodSinkThrowSinkError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ex(inner) => {
+                    if f.alternate() {
+                        write!(f, "SinkService::methodSinkThrow failed with variant `ex`: {:#}", inner)?;
+                    } else {
+                        write!(f, "SinkService::methodSinkThrow failed with ex(SinkException1)")?;
+                    }
+                }
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodSinkThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodSinkThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodSinkThrowSinkError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ex(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodSinkThrowSinkError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+                Self::ex(exn) => exn.exn_name(),
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+                Self::ex(exn) => exn.exn_value(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+                Self::ex(exn) => exn.exn_is_declared(),
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodSinkThrowSinkError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_err) => ::fbthrift::ResultType::Exception,
+                Self::ex(_exn) => fbthrift::ResultType::Error,
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::types::SinkException1> for MethodSinkThrowSinkError {
+        fn from(exn: crate::types::SinkException1) -> Self {
+            Self::ex(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodSinkThrowSinkError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodSinkThrowSinkError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for MethodSinkThrowSinkError {
+        type Success = crate::types::SinkPayload;
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
+                let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
+                ::fbthrift::Serialize::write(&aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(success) => {
+                    p.write_field_begin(
+                        "Success",
+                        ::fbthrift::TType::Struct,
+                        0i16,
+                    );
+                    ::fbthrift::Serialize::write(success, p);
+                    p.write_field_end();
+                }
+                ::std::result::Result::Err(Self::ex(inner)) => {
+                    p.write_field_begin(
+                        "ex",
+                        ::fbthrift::TType::Struct,
+                        1,
+                    );
+                    ::fbthrift::Serialize::write(inner, p);
+                    p.write_field_end();
+                }
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
+                ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodSinkThrowSinkFinalError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodSinkThrowSinkFinalError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodSinkThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodSinkThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodSinkThrowSinkFinalError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodSinkThrowSinkFinalError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodSinkThrowSinkFinalError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodSinkThrowSinkFinalError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodSinkThrowSinkFinalError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodSinkThrowSinkFinalError {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ThriftError(exn)
+        }
+    }
+
+    pub(crate) enum MethodSinkThrowSinkFinalReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodSinkThrowSinkFinalReader {
+        type Success = crate::types::FinalResponse;
+        type Error = MethodSinkThrowSinkFinalError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodSinkThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodSinkThrowError"),
+                )
+                .into(),
+            )
+        }
+    }
+    pub type MethodFinalThrowError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum MethodFinalThrowReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodFinalThrowReader {
+        type Success = ();
+        type Error = MethodFinalThrowError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodFinalThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodFinalThrowSinkError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodFinalThrowSinkError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodFinalThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodFinalThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodFinalThrowSinkError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodFinalThrowSinkError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodFinalThrowSinkError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_err) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodFinalThrowSinkError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodFinalThrowSinkError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for MethodFinalThrowSinkError {
+        type Success = crate::types::SinkPayload;
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
+                let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
+                ::fbthrift::Serialize::write(&aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(success) => {
+                    p.write_field_begin(
+                        "Success",
+                        ::fbthrift::TType::Struct,
+                        0i16,
+                    );
+                    ::fbthrift::Serialize::write(success, p);
+                    p.write_field_end();
+                }
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
+                ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodFinalThrowSinkFinalError {
+        ex(crate::types::SinkException2),
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodFinalThrowSinkFinalError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ex(inner) => {
+                    if f.alternate() {
+                        write!(f, "SinkService::methodFinalThrow failed with variant `ex`: {:#}", inner)?;
+                    } else {
+                        write!(f, "SinkService::methodFinalThrow failed with ex(SinkException2)")?;
+                    }
+                }
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodFinalThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodFinalThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodFinalThrowSinkFinalError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ex(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodFinalThrowSinkFinalError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+                Self::ex(exn) => exn.exn_name(),
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+                Self::ex(exn) => exn.exn_value(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+                Self::ex(exn) => exn.exn_is_declared(),
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodFinalThrowSinkFinalError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_) => ::fbthrift::ResultType::Exception,
+                Self::ex(_exn) => fbthrift::ResultType::Error,
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::types::SinkException2> for MethodFinalThrowSinkFinalError {
+        fn from(exn: crate::types::SinkException2) -> Self {
+            Self::ex(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodFinalThrowSinkFinalError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodFinalThrowSinkFinalError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodFinalThrowSinkFinalError {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ThriftError(exn)
+        }
+    }
+
+    pub(crate) enum MethodFinalThrowSinkFinalReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodFinalThrowSinkFinalReader {
+        type Success = crate::types::FinalResponse;
+        type Error = MethodFinalThrowSinkFinalError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((::fbthrift::TType::Struct, 1), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::read(p)?)));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodFinalThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodFinalThrowError"),
+                )
+                .into(),
+            )
+        }
+    }
+    pub type MethodBothThrowError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum MethodBothThrowReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodBothThrowReader {
+        type Success = ();
+        type Error = MethodBothThrowError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodBothThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodBothThrowSinkError {
+        ex(crate::types::SinkException1),
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodBothThrowSinkError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ex(inner) => {
+                    if f.alternate() {
+                        write!(f, "SinkService::methodBothThrow failed with variant `ex`: {:#}", inner)?;
+                    } else {
+                        write!(f, "SinkService::methodBothThrow failed with ex(SinkException1)")?;
+                    }
+                }
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodBothThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodBothThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodBothThrowSinkError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ex(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodBothThrowSinkError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+                Self::ex(exn) => exn.exn_name(),
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+                Self::ex(exn) => exn.exn_value(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+                Self::ex(exn) => exn.exn_is_declared(),
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodBothThrowSinkError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_err) => ::fbthrift::ResultType::Exception,
+                Self::ex(_exn) => fbthrift::ResultType::Error,
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::types::SinkException1> for MethodBothThrowSinkError {
+        fn from(exn: crate::types::SinkException1) -> Self {
+            Self::ex(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodBothThrowSinkError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodBothThrowSinkError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for MethodBothThrowSinkError {
+        type Success = crate::types::SinkPayload;
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
+                let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
+                ::fbthrift::Serialize::write(&aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(success) => {
+                    p.write_field_begin(
+                        "Success",
+                        ::fbthrift::TType::Struct,
+                        0i16,
+                    );
+                    ::fbthrift::Serialize::write(success, p);
+                    p.write_field_end();
+                }
+                ::std::result::Result::Err(Self::ex(inner)) => {
+                    p.write_field_begin(
+                        "ex",
+                        ::fbthrift::TType::Struct,
+                        1,
+                    );
+                    ::fbthrift::Serialize::write(inner, p);
+                    p.write_field_end();
+                }
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
+                ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodBothThrowSinkFinalError {
+        ex(crate::types::SinkException2),
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodBothThrowSinkFinalError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ex(inner) => {
+                    if f.alternate() {
+                        write!(f, "SinkService::methodBothThrow failed with variant `ex`: {:#}", inner)?;
+                    } else {
+                        write!(f, "SinkService::methodBothThrow failed with ex(SinkException2)")?;
+                    }
+                }
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodBothThrow failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodBothThrow failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodBothThrowSinkFinalError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ex(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodBothThrowSinkFinalError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+                Self::ex(exn) => exn.exn_name(),
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+                Self::ex(exn) => exn.exn_value(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+                Self::ex(exn) => exn.exn_is_declared(),
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodBothThrowSinkFinalError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_) => ::fbthrift::ResultType::Exception,
+                Self::ex(_exn) => fbthrift::ResultType::Error,
+            }
+        }
+    }
+
+    impl ::std::convert::From<crate::types::SinkException2> for MethodBothThrowSinkFinalError {
+        fn from(exn: crate::types::SinkException2) -> Self {
+            Self::ex(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodBothThrowSinkFinalError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodBothThrowSinkFinalError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodBothThrowSinkFinalError {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ThriftError(exn)
+        }
+    }
+
+    pub(crate) enum MethodBothThrowSinkFinalReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodBothThrowSinkFinalReader {
+        type Success = crate::types::FinalResponse;
+        type Error = MethodBothThrowSinkFinalError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((::fbthrift::TType::Struct, 1), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::read(p)?)));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodBothThrowError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodBothThrowError"),
+                )
+                .into(),
+            )
+        }
+    }
+    pub type MethodFastError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum MethodFastReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodFastReader {
+        type Success = ();
+        type Error = MethodFastError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodFastError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodFastSinkError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodFastSinkError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodFast failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodFast failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodFastSinkError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodFastSinkError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodFastSinkError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_err) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodFastSinkError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodFastSinkError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for MethodFastSinkError {
+        type Success = crate::types::SinkPayload;
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
+                let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
+                ::fbthrift::Serialize::write(&aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(success) => {
+                    p.write_field_begin(
+                        "Success",
+                        ::fbthrift::TType::Struct,
+                        0i16,
+                    );
+                    ::fbthrift::Serialize::write(success, p);
+                    p.write_field_end();
+                }
+
+                ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
+                ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    #[derive(Debug)]
+    pub enum MethodFastSinkFinalError {
+
+        ApplicationException(::fbthrift::ApplicationException),
+        ThriftError(::anyhow::Error),
+    }
+
+    /// Human-readable string representation of the Thrift client error.
+    ///
+    /// By default, this will not print the full cause chain. If you would like to print the underlying error
+    /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+    /// alternate formatter `{:#}` instead of just `{}`.
+    impl ::std::fmt::Display for MethodFastSinkFinalError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+            match self {
+                Self::ApplicationException(inner) => {
+                    write!(f, "SinkService::methodFast failed with ApplicationException")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+                Self::ThriftError(inner) => {
+                    write!(f, "SinkService::methodFast failed with ThriftError")?;
+
+                    if f.alternate() {
+                      write!(f, ": {:#}", inner)?;
+                    }
+                }
+            }
+
+            ::std::result::Result::Ok(())
+        }
+    }
+
+    impl ::std::error::Error for MethodFastSinkFinalError {
+        fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            match self {
+                Self::ApplicationException(ref inner) => {
+                    ::std::option::Option::Some(inner)
+                }
+                Self::ThriftError(ref inner) => {
+                    ::std::option::Option::Some(inner.as_ref())
+                }
+            }
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for MethodFastSinkFinalError {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                Self::ThriftError(_) => "ThriftError",
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                Self::ThriftError(err) => err.to_string(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                Self::ThriftError(_) => false,
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for MethodFastSinkFinalError {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                Self::ThriftError(_) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for MethodFastSinkFinalError {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for MethodFastSinkFinalError {
+        fn from(exn: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match exn {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => Self::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => Self::ThriftError(err),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::anyhow::Error> for MethodFastSinkFinalError {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ThriftError(exn)
+        }
+    }
+
+    pub(crate) enum MethodFastSinkFinalReader {}
+
+    impl ::fbthrift::help::DeserializeExn for MethodFastSinkFinalReader {
+        type Success = crate::types::FinalResponse;
+        type Error = MethodFastSinkFinalError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "MethodFastError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "MethodFastError"),
+                )
+                .into(),
+            )
+        }
+    }
 }
 
 #[doc(inline)]

@@ -35,9 +35,9 @@ pub struct {{service:rust_name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
 {{#service:interaction?}}
 pub struct {{service:rust_name}}Names {
     pub service: &'static ::std::ffi::CStr,
-    {{#service:rustFunctions}}{{^function:sink?}}
+    {{#service:rustFunctions}}
     pub method_{{function:name}}: &'static ::std::ffi::CStr,
-    {{/function:sink?}}{{/service:rustFunctions}}
+    {{/service:rustFunctions}}
 }
 {{/service:interaction?}}
 
@@ -78,14 +78,14 @@ where
     {{#service:interactions}}
     const NAMES_{{service:rust_name}}: {{service:client_package}}::{{service:rust_name}}Names = {{service:client_package}}::{{service:rust_name}}Names {
         service: c"{{service:parent_service_name}}",
-        {{#service:rustFunctions}}{{^function:sink?}}
+        {{#service:rustFunctions}}
         method_{{function:name}}: c"{{service:parent_service_name}}.{{service:name}}.{{function:name}}",
-        {{/function:sink?}}{{/service:rustFunctions}}
+        {{/service:rustFunctions}}
     };
     {{/service:interactions}}
 
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}{{^function:sink?}}
+    {{^function:starts_interaction?}}
 
     fn _{{function:name}}_impl(
         &self,{{!
@@ -100,6 +100,11 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
         {{/function:stream?}}
+        {{#function:sink?}}
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+        {{/function:sink?}}
 
         let service_name = {{!
             }}{{^service:interaction?}}c"{{service:name}}"{{/service:interaction?}}{{!
@@ -141,11 +146,15 @@ where
         let call_stream = transport
             .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
-        {{/function:stream?}}{{^function:stream?}}
+        {{/function:stream?}}{{#function:sink?}}
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "{{service:name}}.{{function:name}}"));
+        {{/function:sink?}}{{^function:sink?}}{{^function:stream?}}
         let call = transport
             .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "{{service:name}}.{{function:name}}"));
-        {{/function:stream?}}
+        {{/function:stream?}}{{/function:sink?}}
 
         async move {
             {{#function:stream?}}{{!
@@ -193,7 +202,80 @@ where
                     }}{{#function:stream_has_first_response?}}move |initial| (initial, new_stream){{/function:stream_has_first_response?}}{{!
                     }}{{^function:stream_has_first_response?}}move |_| new_stream{{/function:stream_has_first_response?}}{{!
                 }});
-            {{/function:stream?}}{{^function:stream?}}{{!
+            {{/function:stream?}}{{#function:sink?}}{{!
+
+            ******************************
+            **** SINK BODY ****
+            ******************************
+
+            }}
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            {{#function:sink_has_first_response?}}
+            let de = P::deserializer(_initial_response);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Reader, S>(de).await?;
+
+            let initial_response = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn))
+                }
+            }?;
+            {{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}
+            let initial_response = ();
+            {{/function:sink_has_first_response?}}
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                {{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}},
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError
+            >>| {
+                {{!TODO (seanlawlor): This decoding should be done on the blocking thread, not the IO thread. }}
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Ok(res), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        {{#function:sink_exceptions?}}
+                        ::std::result::Result::Err(other_err) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err(other_err), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::DeclaredEx(enc)
+                        }
+                        {{/function:sink_exceptions?}}
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                {{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}},
+                {{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}},
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError,
+                {{#function:sink_final_response_type}}{{> lib/type}}{{/function:sink_final_response_type}},
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            {{/function:sink?}}{{^function:sink?}}{{^function:stream?}}{{!
 
             ******************************
             **** SINGLE RESPONSE BODY ****
@@ -211,7 +293,7 @@ where
                     ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn))
                 }
             };
-            {{/function:stream?}}
+            {{/function:stream?}}{{/function:sink?}}
             {{#function:return_type}}{{#function:creates_interaction?}}{{!
 
             ***********************************
@@ -236,7 +318,7 @@ where
         .instrument(::tracing::info_span!("stream", method = "{{service:name}}.{{function:name}}"))
         .boxed()
     }
-    {{/function:sink?}}{{/function:starts_interaction?}}
+    {{/function:starts_interaction?}}
     {{/service:rustFunctions}}
 }
 
@@ -305,7 +387,7 @@ where
 
 {{/service:extendedClients}}
 
-{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}
 
 struct Args_{{service:rust_name}}_{{function:name}}<'a> {
     {{#function:args}}
@@ -339,7 +421,7 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
         p.write_struct_end();
     }
 }
-{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+{{/function:starts_interaction?}}{{/service:rustFunctions}}
 
 impl<P, T, S> {{service:rust_name}} for {{service:rust_name}}Impl<P, T, S>
 where
@@ -353,7 +435,7 @@ where
 {{> lib/block}}
 
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}{{^function:sink?}}
+    {{^function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,{{!
         }}{{#function:args}}
@@ -368,7 +450,7 @@ where
             rpc_options,
         )
     }
-    {{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    {{/function:starts_interaction?}}{{#function:starts_interaction?}}
 
     fn {{function:name}}(
         &self,
@@ -399,7 +481,7 @@ where
 {{> lib/block}}
 
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}{{^function:sink?}}
+    {{^function:starts_interaction?}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,{{!
         }}{{#function:args}}
@@ -414,7 +496,7 @@ where
             rpc_options,
         )
     }
-    {{/function:sink?}}{{/function:starts_interaction?}}
+    {{/function:starts_interaction?}}
     {{/service:rustFunctions}}
     {{^service:extendedClients}}
 

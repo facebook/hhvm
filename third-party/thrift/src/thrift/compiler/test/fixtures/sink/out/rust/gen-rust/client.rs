@@ -17,18 +17,151 @@ pub(crate) use ::::services;
 
 
 pub trait SinkService: ::std::marker::Send {
+    fn method(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>>;
 
+    fn methodAndReponse(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>>;
 
+    fn methodThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>>;
 
+    fn methodSinkThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>>;
 
+    fn methodFinalThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>>;
 
+    fn methodBothThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>>;
 
+    fn methodFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>>;
 }
 
 pub trait SinkServiceExt<T>: SinkService
 where
     T: ::fbthrift::Transport,
 {
+    fn method_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>>;
+    fn methodAndReponse_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>>;
+    fn methodThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>>;
+    fn methodSinkThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>>;
+    fn methodFinalThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>>;
+    fn methodBothThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>>;
+    fn methodFast_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>>;
 
     fn transport(&self) -> &T;
 }
@@ -39,6 +172,90 @@ where
     S: ::std::convert::AsRef<dyn SinkService + 'a>,
     S: ::std::marker::Send,
 {
+    fn method(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>> {
+        self.as_ref().method(
+        )
+    }
+    fn methodAndReponse(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>> {
+        self.as_ref().methodAndReponse(
+        )
+    }
+    fn methodThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>> {
+        self.as_ref().methodThrow(
+        )
+    }
+    fn methodSinkThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>> {
+        self.as_ref().methodSinkThrow(
+        )
+    }
+    fn methodFinalThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>> {
+        self.as_ref().methodFinalThrow(
+        )
+    }
+    fn methodBothThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>> {
+        self.as_ref().methodBothThrow(
+        )
+    }
+    fn methodFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>> {
+        self.as_ref().methodFast(
+        )
+    }
 }
 
 #[allow(deprecated)]
@@ -48,6 +265,104 @@ where
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
+    fn method_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>> {
+        <Self as ::std::convert::AsRef<dyn SinkServiceExt<T>>>::as_ref(self).method_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn methodAndReponse_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>> {
+        <Self as ::std::convert::AsRef<dyn SinkServiceExt<T>>>::as_ref(self).methodAndReponse_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn methodThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>> {
+        <Self as ::std::convert::AsRef<dyn SinkServiceExt<T>>>::as_ref(self).methodThrow_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn methodSinkThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>> {
+        <Self as ::std::convert::AsRef<dyn SinkServiceExt<T>>>::as_ref(self).methodSinkThrow_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn methodFinalThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>> {
+        <Self as ::std::convert::AsRef<dyn SinkServiceExt<T>>>::as_ref(self).methodFinalThrow_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn methodBothThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>> {
+        <Self as ::std::convert::AsRef<dyn SinkServiceExt<T>>>::as_ref(self).methodBothThrow_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn methodFast_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>> {
+        <Self as ::std::convert::AsRef<dyn SinkServiceExt<T>>>::as_ref(self).methodFast_with_rpc_opts(
+            rpc_options,
+        )
+    }
 
     fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
@@ -83,6 +398,645 @@ where
     }
 
 
+
+    fn _method_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = c"SinkService";
+        let service_method_name = c"SinkService.method";
+
+        let args = self::Args_SinkService_method {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("method", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "SinkService.method"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let initial_response = ();
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodSinkError>(::std::result::Result::Ok(res), "method");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodSinkError::ApplicationException(aexn)), "method");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodSinkError::ThriftError(err)), "method");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::sink_service::MethodSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                (),
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodSinkError,
+                crate::types::FinalResponse,
+                crate::errors::sink_service::MethodSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SinkService.method"))
+        .boxed()
+    }
+
+    fn _methodAndReponse_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = c"SinkService";
+        let service_method_name = c"SinkService.methodAndReponse";
+
+        let args = self::Args_SinkService_methodAndReponse {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("methodAndReponse", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "SinkService.methodAndReponse"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let de = P::deserializer(_initial_response);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::sink_service::MethodAndReponseReader, S>(de).await?;
+
+            let initial_response = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseError::ApplicationException(aexn))
+                }
+            }?;
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodAndReponseSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodAndReponseSinkError>(::std::result::Result::Ok(res), "methodAndReponse");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodAndReponseSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseSinkError::ApplicationException(aexn)), "methodAndReponse");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodAndReponseSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseSinkError::ThriftError(err)), "methodAndReponse");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::sink_service::MethodAndReponseSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                crate::types::InitialResponse,
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodAndReponseSinkError,
+                crate::types::FinalResponse,
+                crate::errors::sink_service::MethodAndReponseSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SinkService.methodAndReponse"))
+        .boxed()
+    }
+
+    fn _methodThrow_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = c"SinkService";
+        let service_method_name = c"SinkService.methodThrow";
+
+        let args = self::Args_SinkService_methodThrow {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("methodThrow", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "SinkService.methodThrow"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let initial_response = ();
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodThrowSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodThrowSinkError>(::std::result::Result::Ok(res), "methodThrow");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodThrowSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodThrowSinkError::ApplicationException(aexn)), "methodThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodThrowSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodThrowSinkError::ThriftError(err)), "methodThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::sink_service::MethodThrowSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                (),
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodThrowSinkError,
+                crate::types::FinalResponse,
+                crate::errors::sink_service::MethodThrowSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SinkService.methodThrow"))
+        .boxed()
+    }
+
+    fn _methodSinkThrow_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = c"SinkService";
+        let service_method_name = c"SinkService.methodSinkThrow";
+
+        let args = self::Args_SinkService_methodSinkThrow {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("methodSinkThrow", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "SinkService.methodSinkThrow"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let initial_response = ();
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodSinkThrowSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodSinkThrowSinkError>(::std::result::Result::Ok(res), "methodSinkThrow");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodSinkThrowSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodSinkThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodSinkThrowSinkError::ApplicationException(aexn)), "methodSinkThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodSinkThrowSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodSinkThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodSinkThrowSinkError::ThriftError(err)), "methodSinkThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(other_err) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodSinkThrowSinkError>(::std::result::Result::Err(other_err), "methodSinkThrow");
+                            ::fbthrift::ClientStreamElement::DeclaredEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::sink_service::MethodSinkThrowSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                (),
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodSinkThrowSinkError,
+                crate::types::FinalResponse,
+                crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SinkService.methodSinkThrow"))
+        .boxed()
+    }
+
+    fn _methodFinalThrow_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = c"SinkService";
+        let service_method_name = c"SinkService.methodFinalThrow";
+
+        let args = self::Args_SinkService_methodFinalThrow {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("methodFinalThrow", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "SinkService.methodFinalThrow"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let initial_response = ();
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodFinalThrowSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodFinalThrowSinkError>(::std::result::Result::Ok(res), "methodFinalThrow");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodFinalThrowSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodFinalThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodFinalThrowSinkError::ApplicationException(aexn)), "methodFinalThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodFinalThrowSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodFinalThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodFinalThrowSinkError::ThriftError(err)), "methodFinalThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::sink_service::MethodFinalThrowSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                (),
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodFinalThrowSinkError,
+                crate::types::FinalResponse,
+                crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SinkService.methodFinalThrow"))
+        .boxed()
+    }
+
+    fn _methodBothThrow_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = c"SinkService";
+        let service_method_name = c"SinkService.methodBothThrow";
+
+        let args = self::Args_SinkService_methodBothThrow {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("methodBothThrow", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "SinkService.methodBothThrow"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let initial_response = ();
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodBothThrowSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodBothThrowSinkError>(::std::result::Result::Ok(res), "methodBothThrow");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodBothThrowSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodBothThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodBothThrowSinkError::ApplicationException(aexn)), "methodBothThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodBothThrowSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodBothThrowSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodBothThrowSinkError::ThriftError(err)), "methodBothThrow");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(other_err) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodBothThrowSinkError>(::std::result::Result::Err(other_err), "methodBothThrow");
+                            ::fbthrift::ClientStreamElement::DeclaredEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::sink_service::MethodBothThrowSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                (),
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodBothThrowSinkError,
+                crate::types::FinalResponse,
+                crate::errors::sink_service::MethodBothThrowSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SinkService.methodBothThrow"))
+        .boxed()
+    }
+
+    fn _methodFast_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = c"SinkService";
+        let service_method_name = c"SinkService.methodFast";
+
+        let args = self::Args_SinkService_methodFast {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("methodFast", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "SinkService.methodFast"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let initial_response = ();
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodFastSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodFastSinkError>(::std::result::Result::Ok(res), "methodFast");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodFastSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodFastSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodFastSinkError::ApplicationException(aexn)), "methodFast");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::sink_service::MethodFastSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::sink_service::MethodFastSinkError>(::std::result::Result::Err(crate::errors::sink_service::MethodFastSinkError::ThriftError(err)), "methodFast");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::sink_service::MethodFastSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                (),
+                crate::types::SinkPayload,
+                crate::errors::sink_service::MethodFastSinkError,
+                crate::types::FinalResponse,
+                crate::errors::sink_service::MethodFastSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SinkService.methodFast"))
+        .boxed()
+    }
 }
 
 impl<P, T, S> ::fbthrift::help::GetTransport<T> for SinkServiceImpl<P, T, S>
@@ -96,6 +1050,104 @@ where
 
 
 
+struct Args_SinkService_method<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SinkService_method<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SinkService.method"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SinkService_methodAndReponse<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SinkService_methodAndReponse<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SinkService.methodAndReponse"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SinkService_methodThrow<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SinkService_methodThrow<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SinkService.methodThrow"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SinkService_methodSinkThrow<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SinkService_methodSinkThrow<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SinkService.methodSinkThrow"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SinkService_methodFinalThrow<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SinkService_methodFinalThrow<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SinkService.methodFinalThrow"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SinkService_methodBothThrow<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SinkService_methodBothThrow<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SinkService.methodBothThrow"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SinkService_methodFast<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SinkService_methodFast<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SinkService.methodFast"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
 impl<P, T, S> SinkService for SinkServiceImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -105,6 +1157,104 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
+    fn method(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._method_impl(
+            rpc_options,
+        )
+    }
+    fn methodAndReponse(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._methodAndReponse_impl(
+            rpc_options,
+        )
+    }
+    fn methodThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._methodThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodSinkThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._methodSinkThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodFinalThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._methodFinalThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodBothThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._methodBothThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._methodFast_impl(
+            rpc_options,
+        )
+    }
 }
 
 impl<P, T, S> SinkServiceExt<T> for SinkServiceImpl<P, T, S>
@@ -116,6 +1266,104 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
+    fn method_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>> {
+        self._method_impl(
+            rpc_options,
+        )
+    }
+    fn methodAndReponse_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>> {
+        self._methodAndReponse_impl(
+            rpc_options,
+        )
+    }
+    fn methodThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>> {
+        self._methodThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodSinkThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>> {
+        self._methodSinkThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodFinalThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>> {
+        self._methodFinalThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodBothThrow_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>> {
+        self._methodBothThrow_impl(
+            rpc_options,
+        )
+    }
+    fn methodFast_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>> {
+        self._methodFast_impl(
+            rpc_options,
+        )
+    }
 
     fn transport(&self) -> &T {
         self.transport()

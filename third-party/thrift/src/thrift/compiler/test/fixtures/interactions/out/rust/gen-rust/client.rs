@@ -28,6 +28,15 @@ pub trait MyInteraction: ::std::marker::Send {
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
 
+    fn encode(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction::EncodeSinkFinalError,
+>, crate::errors::my_interaction::EncodeError>>;
 }
 
 pub trait MyInteractionExt<T>: MyInteraction
@@ -46,6 +55,16 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
+    fn encode_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction::EncodeSinkFinalError,
+>, crate::errors::my_interaction::EncodeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -72,6 +91,18 @@ where
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
         self.as_ref().truthify(
+        )
+    }
+    fn encode(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction::EncodeSinkFinalError,
+>, crate::errors::my_interaction::EncodeError>> {
+        self.as_ref().encode(
         )
     }
 }
@@ -107,6 +138,20 @@ where
             rpc_options,
         )
     }
+    fn encode_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction::EncodeSinkFinalError,
+>, crate::errors::my_interaction::EncodeError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).encode_with_rpc_opts(
+            rpc_options,
+        )
+    }
 
     fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
@@ -125,6 +170,7 @@ pub struct MyInteractionNames {
     pub method_frobnicate: &'static ::std::ffi::CStr,
     pub method_ping: &'static ::std::ffi::CStr,
     pub method_truthify: &'static ::std::ffi::CStr,
+    pub method_encode: &'static ::std::ffi::CStr,
 }
 
 impl<P, T, S> MyInteractionImpl<P, T, S>
@@ -310,6 +356,103 @@ where
         .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
         .boxed()
     }
+
+    fn _encode_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction::EncodeSinkFinalError,
+>, crate::errors::my_interaction::EncodeError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_encode;
+
+        let args = self::Args_MyInteraction_encode {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.encode", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "MyInteraction.encode"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let de = P::deserializer(_initial_response);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::EncodeReader, S>(de).await?;
+
+            let initial_response = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction::EncodeError::ApplicationException(aexn))
+                }
+            }?;
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                ::std::string::String,
+                crate::errors::my_interaction::EncodeSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::my_interaction::EncodeSinkError>(::std::result::Result::Ok(res), "MyInteraction.encode");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::my_interaction::EncodeSinkError>(::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkError::ApplicationException(aexn)), "MyInteraction.encode");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::my_interaction::EncodeSinkError>(::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkError::ThriftError(err)), "MyInteraction.encode");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::my_interaction::EncodeSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                ::std::collections::BTreeSet<::std::primitive::i32>,
+                ::std::string::String,
+                crate::errors::my_interaction::EncodeSinkError,
+                ::std::vec::Vec<::std::primitive::u8>,
+                crate::errors::my_interaction::EncodeSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteraction.encode"))
+        .boxed()
+    }
 }
 
 impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
@@ -365,6 +508,20 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
     }
 }
 
+struct Args_MyInteraction_encode<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_encode<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.encode"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
 impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -395,6 +552,20 @@ where
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
         let rpc_options = T::RpcOptions::default();
         self._truthify_impl(
+            rpc_options,
+        )
+    }
+    fn encode(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction::EncodeSinkFinalError,
+>, crate::errors::my_interaction::EncodeError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._encode_impl(
             rpc_options,
         )
     }
@@ -433,6 +604,20 @@ where
             rpc_options,
         )
     }
+    fn encode_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction::EncodeSinkFinalError,
+>, crate::errors::my_interaction::EncodeError>> {
+        self._encode_impl(
+            rpc_options,
+        )
+    }
 
     fn transport(&self) -> &T {
         self.transport()
@@ -457,6 +642,15 @@ pub trait MyInteractionFast: ::std::marker::Send {
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
 
+    fn encode(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction_fast::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction_fast::EncodeSinkFinalError,
+>, crate::errors::my_interaction_fast::EncodeError>>;
 }
 
 pub trait MyInteractionFastExt<T>: MyInteractionFast
@@ -475,6 +669,16 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
+    fn encode_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction_fast::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction_fast::EncodeSinkFinalError,
+>, crate::errors::my_interaction_fast::EncodeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -501,6 +705,18 @@ where
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
         self.as_ref().truthify(
+        )
+    }
+    fn encode(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction_fast::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction_fast::EncodeSinkFinalError,
+>, crate::errors::my_interaction_fast::EncodeError>> {
+        self.as_ref().encode(
         )
     }
 }
@@ -536,6 +752,20 @@ where
             rpc_options,
         )
     }
+    fn encode_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction_fast::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction_fast::EncodeSinkFinalError,
+>, crate::errors::my_interaction_fast::EncodeError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).encode_with_rpc_opts(
+            rpc_options,
+        )
+    }
 
     fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
@@ -554,6 +784,7 @@ pub struct MyInteractionFastNames {
     pub method_frobnicate: &'static ::std::ffi::CStr,
     pub method_ping: &'static ::std::ffi::CStr,
     pub method_truthify: &'static ::std::ffi::CStr,
+    pub method_encode: &'static ::std::ffi::CStr,
 }
 
 impl<P, T, S> MyInteractionFastImpl<P, T, S>
@@ -739,6 +970,103 @@ where
         .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
         .boxed()
     }
+
+    fn _encode_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction_fast::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction_fast::EncodeSinkFinalError,
+>, crate::errors::my_interaction_fast::EncodeError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_encode;
+
+        let args = self::Args_MyInteractionFast_encode {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.encode", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "MyInteractionFast.encode"));
+
+        async move {
+            let ::fbthrift::SinkReply {
+                initial_response: _initial_response,
+                sink_processor,
+            } = call_sink.await?;
+
+            let de = P::deserializer(_initial_response);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::EncodeReader, S>(de).await?;
+
+            let initial_response = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeError::ApplicationException(aexn))
+                }
+            }?;
+
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                ::std::string::String,
+                crate::errors::my_interaction_fast::EncodeSinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::my_interaction_fast::EncodeSinkError>(::std::result::Result::Ok(res), "MyInteractionFast.encode");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::my_interaction_fast::EncodeSinkError>(::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkError::ApplicationException(aexn)), "MyInteractionFast.encode");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, crate::errors::my_interaction_fast::EncodeSinkError>(::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkError::ThriftError(err)), "MyInteractionFast.encode");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let payload = (sinker)(new_stream).await?;
+                    S::spawn(move || {
+                        let mut de = P::deserializer(payload);
+                        <crate::errors::my_interaction_fast::EncodeSinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                    }).await.map_err(::anyhow::Error::from)??
+                }.boxed()
+            };
+
+            let res = Ok(::fbthrift::SinkResult::<
+                ::std::collections::BTreeSet<::std::primitive::i32>,
+                ::std::string::String,
+                crate::errors::my_interaction_fast::EncodeSinkError,
+                ::std::vec::Vec<::std::primitive::u8>,
+                crate::errors::my_interaction_fast::EncodeSinkFinalError,
+            > {
+                initial_response,
+                sink: Box::new(sink_helper_fn),
+            });
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.encode"))
+        .boxed()
+    }
 }
 
 impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
@@ -794,6 +1122,20 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
     }
 }
 
+struct Args_MyInteractionFast_encode<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_encode<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.encode"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
 impl<P, T, S> MyInteractionFast for MyInteractionFastImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -824,6 +1166,20 @@ where
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
         let rpc_options = T::RpcOptions::default();
         self._truthify_impl(
+            rpc_options,
+        )
+    }
+    fn encode(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction_fast::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction_fast::EncodeSinkFinalError,
+>, crate::errors::my_interaction_fast::EncodeError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._encode_impl(
             rpc_options,
         )
     }
@@ -859,6 +1215,20 @@ where
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
         self._truthify_impl(
+            rpc_options,
+        )
+    }
+    fn encode_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    ::std::collections::BTreeSet<::std::primitive::i32>,
+    ::std::string::String,
+    crate::errors::my_interaction_fast::EncodeSinkError,
+    ::std::vec::Vec<::std::primitive::u8>,
+    crate::errors::my_interaction_fast::EncodeSinkFinalError,
+>, crate::errors::my_interaction_fast::EncodeError>> {
+        self._encode_impl(
             rpc_options,
         )
     }
@@ -1475,12 +1845,14 @@ where
         method_frobnicate: c"MyService.MyInteraction.frobnicate",
         method_ping: c"MyService.MyInteraction.ping",
         method_truthify: c"MyService.MyInteraction.truthify",
+        method_encode: c"MyService.MyInteraction.encode",
     };
     const NAMES_MyInteractionFast: crate::client::MyInteractionFastNames = crate::client::MyInteractionFastNames {
         service: c"MyService",
         method_frobnicate: c"MyService.MyInteractionFast.frobnicate",
         method_ping: c"MyService.MyInteractionFast.ping",
         method_truthify: c"MyService.MyInteractionFast.truthify",
+        method_encode: c"MyService.MyInteractionFast.encode",
     };
     const NAMES_SerialInteraction: crate::client::SerialInteractionNames = crate::client::SerialInteractionNames {
         service: c"MyService",
@@ -2175,12 +2547,14 @@ where
         method_frobnicate: c"Factories.MyInteraction.frobnicate",
         method_ping: c"Factories.MyInteraction.ping",
         method_truthify: c"Factories.MyInteraction.truthify",
+        method_encode: c"Factories.MyInteraction.encode",
     };
     const NAMES_MyInteractionFast: crate::client::MyInteractionFastNames = crate::client::MyInteractionFastNames {
         service: c"Factories",
         method_frobnicate: c"Factories.MyInteractionFast.frobnicate",
         method_ping: c"Factories.MyInteractionFast.ping",
         method_truthify: c"Factories.MyInteractionFast.truthify",
+        method_encode: c"Factories.MyInteractionFast.encode",
     };
     const NAMES_SerialInteraction: crate::client::SerialInteractionNames = crate::client::SerialInteractionNames {
         service: c"Factories",
@@ -2791,12 +3165,14 @@ where
         method_frobnicate: c"Perform.MyInteraction.frobnicate",
         method_ping: c"Perform.MyInteraction.ping",
         method_truthify: c"Perform.MyInteraction.truthify",
+        method_encode: c"Perform.MyInteraction.encode",
     };
     const NAMES_MyInteractionFast: crate::client::MyInteractionFastNames = crate::client::MyInteractionFastNames {
         service: c"Perform",
         method_frobnicate: c"Perform.MyInteractionFast.frobnicate",
         method_ping: c"Perform.MyInteractionFast.ping",
         method_truthify: c"Perform.MyInteractionFast.truthify",
+        method_encode: c"Perform.MyInteractionFast.encode",
     };
     const NAMES_SerialInteraction: crate::client::SerialInteractionNames = crate::client::SerialInteractionNames {
         service: c"Perform",
@@ -3157,6 +3533,7 @@ where
         method_frobnicate: c"InteractWithShared.MyInteraction.frobnicate",
         method_ping: c"InteractWithShared.MyInteraction.ping",
         method_truthify: c"InteractWithShared.MyInteraction.truthify",
+        method_encode: c"InteractWithShared.MyInteraction.encode",
     };
     const NAMES_SharedInteraction: shared__clients::SharedInteractionNames = shared__clients::SharedInteractionNames {
         service: c"InteractWithShared",

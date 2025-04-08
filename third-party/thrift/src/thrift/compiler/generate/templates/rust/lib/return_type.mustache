@@ -18,7 +18,7 @@
   If we ever add a type here which may not have a Send or Sync impl, the
   unsafe impls in structimpl.mustache need to be revisited.
   ====
-}}{{^function:stream?}}{{> lib/type}}{{/function:stream?}}{{!
+}}{{^function:sink?}}{{^function:stream?}}{{> lib/type}}{{/function:stream?}}{{/function:sink?}}{{!
 }}{{#function:stream?}}{{!
     }}{{#function:stream_has_first_response?}}{{!
         }}({{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}, {{!
@@ -30,4 +30,13 @@
     }}{{#function:stream_has_first_response?}}{{!
         }}){{!
     }}{{/function:stream_has_first_response?}}{{!
-}}{{/function:stream?}}
+}}{{/function:stream?}}{{!
+}}{{#function:sink?}}{{!
+}}::fbthrift::SinkResult<
+    {{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}},
+    {{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}},
+    {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError,
+    {{#function:sink_final_response_type}}{{> lib/type}}{{/function:sink_final_response_type}},
+    {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkFinalError,
+>{{!
+}}{{/function:sink?}}

@@ -111,6 +111,13 @@ pub trait DynClient {
 }
 
 pub struct SinkService<'mock> {
+    pub method: r#impl::sink_service::method<'mock>,
+    pub methodAndReponse: r#impl::sink_service::methodAndReponse<'mock>,
+    pub methodThrow: r#impl::sink_service::methodThrow<'mock>,
+    pub methodSinkThrow: r#impl::sink_service::methodSinkThrow<'mock>,
+    pub methodFinalThrow: r#impl::sink_service::methodFinalThrow<'mock>,
+    pub methodBothThrow: r#impl::sink_service::methodBothThrow<'mock>,
+    pub methodFast: r#impl::sink_service::methodFast<'mock>,
     _marker: ::std::marker::PhantomData<&'mock ()>,
 }
 
@@ -118,25 +125,214 @@ impl crate::DynClient for dyn ::::SinkService {
     type Mock<'mock> = SinkService<'mock>;
     fn mock<'mock>() -> Self::Mock<'mock> {
         SinkService {
+            method: r#impl::sink_service::method::unimplemented(),
+            methodAndReponse: r#impl::sink_service::methodAndReponse::unimplemented(),
+            methodThrow: r#impl::sink_service::methodThrow::unimplemented(),
+            methodSinkThrow: r#impl::sink_service::methodSinkThrow::unimplemented(),
+            methodFinalThrow: r#impl::sink_service::methodFinalThrow::unimplemented(),
+            methodBothThrow: r#impl::sink_service::methodBothThrow::unimplemented(),
+            methodFast: r#impl::sink_service::methodFast::unimplemented(),
             _marker: ::std::marker::PhantomData,
         }
     }
 }
 
 impl<'mock> ::::SinkService for SinkService<'mock> {
-
-
-
-
-
-
-
+    fn method(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>> {
+        let mut closure = self.method.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+    fn methodAndReponse(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>> {
+        let mut closure = self.methodAndReponse.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+    fn methodThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>> {
+        let mut closure = self.methodThrow.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+    fn methodSinkThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>> {
+        let mut closure = self.methodSinkThrow.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+    fn methodFinalThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>> {
+        let mut closure = self.methodFinalThrow.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+    fn methodBothThrow(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>> {
+        let mut closure = self.methodBothThrow.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+    fn methodFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>> {
+        let mut closure = self.methodFast.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
 }
 
 impl<'mock, T> ::::SinkServiceExt<T> for SinkService<'mock>
 where
     T: ::fbthrift::Transport,
-{
+{    fn method_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, crate::errors::sink_service::MethodError>> {
+        <Self as ::::SinkService>::method(
+            self,
+        )
+    }
+    fn methodAndReponse_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, crate::errors::sink_service::MethodAndReponseError>> {
+        <Self as ::::SinkService>::methodAndReponse(
+            self,
+        )
+    }
+    fn methodThrow_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, crate::errors::sink_service::MethodThrowError>> {
+        <Self as ::::SinkService>::methodThrow(
+            self,
+        )
+    }
+    fn methodSinkThrow_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, crate::errors::sink_service::MethodSinkThrowError>> {
+        <Self as ::::SinkService>::methodSinkThrow(
+            self,
+        )
+    }
+    fn methodFinalThrow_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, crate::errors::sink_service::MethodFinalThrowError>> {
+        <Self as ::::SinkService>::methodFinalThrow(
+            self,
+        )
+    }
+    fn methodBothThrow_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, crate::errors::sink_service::MethodBothThrowError>> {
+        <Self as ::::SinkService>::methodBothThrow(
+            self,
+        )
+    }
+    fn methodFast_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, crate::errors::sink_service::MethodFastError>> {
+        <Self as ::::SinkService>::methodFast(
+            self,
+        )
+    }
+
     fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
     }
@@ -154,11 +350,487 @@ where
 pub mod r#impl {
     pub mod sink_service {
 
+        pub struct method<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>,
+                    ::::errors::sink_service::MethodError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
 
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> method<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "SinkService",
+                        "method",
+                    ))),
+                }
+            }
 
+            pub fn ret(&self, _value: ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>) {
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+            }
 
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
 
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkFinalError,
+>, ::::errors::sink_service::MethodError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
 
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::sink_service::MethodError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
 
+        pub struct methodAndReponse<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    ::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>,
+                    ::::errors::sink_service::MethodAndReponseError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> methodAndReponse<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "SinkService",
+                        "methodAndReponse",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, _value: ::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>) {
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::fbthrift::SinkResult<
+    crate::types::InitialResponse,
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodAndReponseSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodAndReponseSinkFinalError,
+>, ::::errors::sink_service::MethodAndReponseError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::sink_service::MethodAndReponseError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
+
+        pub struct methodThrow<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>,
+                    ::::errors::sink_service::MethodThrowError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> methodThrow<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "SinkService",
+                        "methodThrow",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, _value: ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>) {
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodThrowSinkFinalError,
+>, ::::errors::sink_service::MethodThrowError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::sink_service::MethodThrowError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
+
+        pub struct methodSinkThrow<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>,
+                    ::::errors::sink_service::MethodSinkThrowError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> methodSinkThrow<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "SinkService",
+                        "methodSinkThrow",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, _value: ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>) {
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodSinkThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodSinkThrowSinkFinalError,
+>, ::::errors::sink_service::MethodSinkThrowError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::sink_service::MethodSinkThrowError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
+
+        pub struct methodFinalThrow<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>,
+                    ::::errors::sink_service::MethodFinalThrowError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> methodFinalThrow<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "SinkService",
+                        "methodFinalThrow",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, _value: ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>) {
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFinalThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFinalThrowSinkFinalError,
+>, ::::errors::sink_service::MethodFinalThrowError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::sink_service::MethodFinalThrowError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
+
+        pub struct methodBothThrow<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>,
+                    ::::errors::sink_service::MethodBothThrowError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> methodBothThrow<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "SinkService",
+                        "methodBothThrow",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, _value: ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>) {
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodBothThrowSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodBothThrowSinkFinalError,
+>, ::::errors::sink_service::MethodBothThrowError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::sink_service::MethodBothThrowError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
+
+        pub struct methodFast<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>,
+                    ::::errors::sink_service::MethodFastError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> methodFast<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "SinkService",
+                        "methodFast",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, _value: ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>) {
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<::fbthrift::SinkResult<
+    (),
+    crate::types::SinkPayload,
+    crate::errors::sink_service::MethodFastSinkError,
+    crate::types::FinalResponse,
+    crate::errors::sink_service::MethodFastSinkFinalError,
+>, ::::errors::sink_service::MethodFastError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::sink_service::MethodFastError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
     }
 }

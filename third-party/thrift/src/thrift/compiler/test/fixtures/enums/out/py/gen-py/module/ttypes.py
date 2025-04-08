@@ -55,6 +55,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Metasyntactic', 'MyEnum1', 'MyEnum2', 'MyEnum3', 'MyEnum4', 'MyBitmaskEnum1', 'MyBitmaskEnum2', 'SomeStruct', 'MyStruct']
 
 class Metasyntactic:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "FOO",
@@ -75,6 +76,7 @@ for k, v in Metasyntactic._NAMES_TO_VALUES.items():
     Metasyntactic._VALUES_TO_NAMES[v] = k
 
 class MyEnum1:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ME1_0",
@@ -99,6 +101,7 @@ for k, v in MyEnum1._NAMES_TO_VALUES.items():
     MyEnum1._VALUES_TO_NAMES[v] = k
 
 class MyEnum2:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ME2_0",
@@ -117,6 +120,7 @@ for k, v in MyEnum2._NAMES_TO_VALUES.items():
     MyEnum2._VALUES_TO_NAMES[v] = k
 
 class MyEnum3:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ME3_0",
@@ -141,6 +145,7 @@ for k, v in MyEnum3._NAMES_TO_VALUES.items():
     MyEnum3._VALUES_TO_NAMES[v] = k
 
 class MyEnum4:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ME4_A",
@@ -161,6 +166,7 @@ for k, v in MyEnum4._NAMES_TO_VALUES.items():
     MyEnum4._VALUES_TO_NAMES[v] = k
 
 class MyBitmaskEnum1:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ONE",
@@ -179,6 +185,7 @@ for k, v in MyBitmaskEnum1._NAMES_TO_VALUES.items():
     MyBitmaskEnum1._VALUES_TO_NAMES[v] = k
 
 class MyBitmaskEnum2:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ONE",

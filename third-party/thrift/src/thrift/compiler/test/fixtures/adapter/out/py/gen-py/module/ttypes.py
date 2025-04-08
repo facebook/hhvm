@@ -58,6 +58,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Color', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'IndependentDirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'ReorderedStruct', 'DeclaredAfterStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'RenamedStructWithStructAdapterAndFieldAdapter', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'IOBuf', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt', 'FooWithAdapter_9317', 'ListWithElemAdapter_withAdapter_2312', 'MyI32_4873', 'StringWithAdapter_7208', 'Baz_7352', 'Foo_3943', 'Foo_6868', 'binary_5673', 'i32_5137', 'map_string_ListWithElemAdapter_withAdapter_8454']
 
 class Color:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "UNKNOWN",
@@ -78,6 +79,7 @@ for k, v in Color._NAMES_TO_VALUES.items():
     Color._VALUES_TO_NAMES[v] = k
 
 class ThriftAdaptedEnum:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "Zero",

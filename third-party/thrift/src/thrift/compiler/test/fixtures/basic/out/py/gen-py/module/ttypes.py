@@ -55,6 +55,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'Containers', 'MyDataItem', 'MyUnion', 'MyException', 'MyExceptionWithMessage', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
 
 class MyEnum:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "MyValue1",
@@ -71,6 +72,7 @@ for k, v in MyEnum._NAMES_TO_VALUES.items():
     MyEnum._VALUES_TO_NAMES[v] = k
 
 class HackEnum:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "Value1",

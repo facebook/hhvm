@@ -53,6 +53,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'empty_struct', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'IncompleteMap', 'IncompleteMapDep', 'CompleteMap', 'CompleteMapDep', 'IncompleteList', 'IncompleteListDep', 'CompleteList', 'CompleteListDep', 'AdaptedList', 'AdaptedListDep', 'DependentAdaptedList', 'DependentAdaptedListDep', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef', 'SomeListOfTypeMap_2468', 'TBinary_8623', 'i32_9314', 'list_i32_9187', 'map_i32_i32_9565', 'map_i32_string_1261', 'set_i32_7070', 'set_i32_7194', 'string_5252']
 
 class has_bitwise_ops:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "none",
@@ -75,6 +76,7 @@ for k, v in has_bitwise_ops._NAMES_TO_VALUES.items():
     has_bitwise_ops._VALUES_TO_NAMES[v] = k
 
 class is_unscoped:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "hello",
@@ -91,6 +93,7 @@ for k, v in is_unscoped._NAMES_TO_VALUES.items():
     is_unscoped._VALUES_TO_NAMES[v] = k
 
 class MyForwardRefEnum:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ZERO",

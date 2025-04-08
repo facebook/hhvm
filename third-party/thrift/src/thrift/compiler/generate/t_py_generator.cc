@@ -1082,6 +1082,10 @@ void t_py_generator::generate_enum(const t_enum* tenum) {
   indent_up();
   generate_python_docstring(f_types_, tenum);
 
+  // Make Pylint not blow up on access of enum members
+  f_types_ << indent()
+           << "def __getattr__(self, name): raise AttributeError(name)" << endl;
+
   names_list << "(" << endl;
   values_list << "(" << endl;
 

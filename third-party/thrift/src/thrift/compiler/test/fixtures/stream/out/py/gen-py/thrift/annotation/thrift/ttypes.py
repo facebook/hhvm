@@ -55,6 +55,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'RpcPriority', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'InternBox', 'Serial', 'Uri', 'Priority', 'DeprecatedUnvalidatedAnnotations', 'AllowReservedIdentifier', 'AllowReservedFilename']
 
 class RpcPriority:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "HIGH_IMPORTANT",

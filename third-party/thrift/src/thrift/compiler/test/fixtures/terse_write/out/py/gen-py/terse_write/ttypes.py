@@ -55,6 +55,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'MyEnum', 'MyStruct', 'MyUnion', 'MyStructWithCustomDefault', 'StructLevelTerseStruct', 'FieldLevelTerseStruct', 'AdaptedFields', 'TerseException', 'MyInteger']
 
 class MyEnum:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "ME0",

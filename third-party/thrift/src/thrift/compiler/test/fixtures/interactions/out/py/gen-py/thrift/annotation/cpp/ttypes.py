@@ -58,6 +58,7 @@ class RefType:
   r"""
   Optional, defaults to Unique
   """
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "Unique",
@@ -81,6 +82,7 @@ class EnumUnderlyingType:
   underlying type for signed 32 bit integer.
   64-bit is not supported to avoid truncation since enums are sent as 32-bit integers over the wire.
   """
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "I8",

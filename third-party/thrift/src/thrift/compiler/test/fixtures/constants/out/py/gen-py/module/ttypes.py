@@ -51,6 +51,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'EmptyEnum', 'City', 'Company', 'Internship', 'Range', 'struct1', 'struct2', 'struct3', 'struct4', 'union1', 'union2', 'MyCompany', 'MyStringIdentifier', 'MyIntIdentifier', 'MyMapIdentifier']
 
 class EmptyEnum:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
 ),
@@ -63,6 +64,7 @@ for k, v in EmptyEnum._NAMES_TO_VALUES.items():
     EmptyEnum._VALUES_TO_NAMES[v] = k
 
 class City:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "NYC",
@@ -83,6 +85,7 @@ for k, v in City._NAMES_TO_VALUES.items():
     City._VALUES_TO_NAMES[v] = k
 
 class Company:
+  def __getattr__(self, name): raise AttributeError(name)
 
   _NAMES_TO_VALUES = dict(zip((
     "FACEBOOK",

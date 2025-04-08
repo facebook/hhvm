@@ -500,8 +500,7 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
 #if FOLLY_HAS_MEMORY_RESOURCE
 TEST(AllocatingParserStrategyTest, testWithAllocatorFromSharedPtr) {
   char poolBuf[10'000];
-  folly::detail::std_pmr::monotonic_buffer_resource pool(
-      poolBuf, sizeof(poolBuf));
+  std::pmr::monotonic_buffer_resource pool(poolBuf, sizeof(poolBuf));
   ParserAllocatorType alloc(&pool);
   FakeOwner owner;
   AllocatingParserStrategy<FakeOwner> parser(owner, alloc);

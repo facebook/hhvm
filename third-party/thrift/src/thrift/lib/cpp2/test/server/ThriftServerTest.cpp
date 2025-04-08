@@ -3500,7 +3500,7 @@ TEST(ThriftServer, RocketOverQuic) {
 }
 
 #if FOLLY_HAS_MEMORY_RESOURCE
-class AccountingMemoryPool : public folly::detail::std_pmr::memory_resource {
+class AccountingMemoryPool : public std::pmr::memory_resource {
  public:
   size_t allocated = 0;
   size_t deallocated = 0;
@@ -3508,20 +3508,18 @@ class AccountingMemoryPool : public folly::detail::std_pmr::memory_resource {
  protected:
   void* do_allocate(std::size_t bytes, std::size_t alignment) override {
     allocated += bytes;
-    return folly::detail::std_pmr::new_delete_resource()->allocate(
-        bytes, alignment);
+    return std::pmr::new_delete_resource()->allocate(bytes, alignment);
   }
 
-  [[nodiscard]] bool do_is_equal(const folly::detail::std_pmr::memory_resource&
-                                     other) const noexcept override {
+  [[nodiscard]] bool do_is_equal(
+      const std::pmr::memory_resource& other) const noexcept override {
     return this == &other;
   }
 
   void do_deallocate(
       void* p, std::size_t bytes, std::size_t alignment) override {
     deallocated += bytes;
-    return folly::detail::std_pmr::new_delete_resource()->deallocate(
-        p, bytes, alignment);
+    return std::pmr::new_delete_resource()->deallocate(p, bytes, alignment);
   }
 };
 

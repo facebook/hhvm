@@ -28,8 +28,7 @@ THRIFT_FLAG_DECLARE_int64(rocket_allocating_parser_min_buffer_size);
 namespace apache::thrift::rocket {
 
 #if FOLLY_HAS_MEMORY_RESOURCE
-using ParserAllocatorType =
-    folly::detail::std_pmr::polymorphic_allocator<std::uint8_t>;
+using ParserAllocatorType = std::pmr::polymorphic_allocator<std::uint8_t>;
 #else
 using ParserAllocatorType = std::allocator<std::uint8_t>;
 #endif

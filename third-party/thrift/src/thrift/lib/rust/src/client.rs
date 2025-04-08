@@ -53,6 +53,17 @@ impl<Payload> ClientStreamElement<Payload> {
     }
 }
 
+pub struct SinkResult<TInitialReply, TSinkItem, TSinkExn, TFinalReply, TFinalExn> {
+    pub initial_response: TInitialReply,
+    pub sink: Box<
+        dyn FnOnce(
+                BoxStream<'static, Result<TSinkItem, TSinkExn>>,
+            ) -> BoxFuture<'static, Result<TFinalReply, TFinalExn>>
+            + Send
+            + 'static,
+    >,
+}
+
 pub struct SinkReply<P>
 where
     P: Framing,
@@ -61,10 +72,10 @@ where
     pub sink_processor: Box<
         dyn FnOnce(
                 BoxStream<'static, ClientStreamElement<FramingEncodedFinal<P>>>,
-            ) -> BoxFuture<
-                'static,
-                Result<ClientStreamElement<FramingDecoded<P>>, anyhow::Error>,
-            > + Send,
+            )
+                -> BoxFuture<'static, Result<FramingDecoded<P>, crate::NonthrowingFunctionError>>
+            + Send
+            + 'static,
     >,
 }
 
@@ -125,7 +136,7 @@ pub trait Transport: Framing + Send + Sync + Sized + 'static {
         _fn_name: &'static CStr,
         _req: FramingEncodedFinal<Self>,
         _rpc_options: Self::RpcOptions,
-    ) -> BoxFuture<anyhow::Result<SinkReply<Self>>> {
+    ) -> BoxFuture<'static, anyhow::Result<SinkReply<Self>>> {
         future::err(anyhow::Error::msg(
             "Sink is not supported by this transport",
         ))

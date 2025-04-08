@@ -52,6 +52,30 @@ pub enum ApplicationExceptionErrorCode {
     TenantQuotaExceeded = 16,
 }
 
+impl ApplicationExceptionErrorCode {
+    pub fn from_i32(value: i32) -> Self {
+        match value {
+            1 => ApplicationExceptionErrorCode::UnknownMethod,
+            2 => ApplicationExceptionErrorCode::InvalidMessageType,
+            3 => ApplicationExceptionErrorCode::WrongMethodName,
+            4 => ApplicationExceptionErrorCode::BadSequenceID,
+            5 => ApplicationExceptionErrorCode::MissingResult,
+            6 => ApplicationExceptionErrorCode::InternalError,
+            7 => ApplicationExceptionErrorCode::ProtocolError,
+            8 => ApplicationExceptionErrorCode::InvalidTransform,
+            9 => ApplicationExceptionErrorCode::InvalidProtocol,
+            10 => ApplicationExceptionErrorCode::UnsupportedClientType,
+            11 => ApplicationExceptionErrorCode::Loadshedding,
+            12 => ApplicationExceptionErrorCode::Timeout,
+            13 => ApplicationExceptionErrorCode::InjectedFailure,
+            14 => ApplicationExceptionErrorCode::ChecksumMismatch,
+            15 => ApplicationExceptionErrorCode::Interruption,
+            16 => ApplicationExceptionErrorCode::TenantQuotaExceeded,
+            _ => ApplicationExceptionErrorCode::Unknown,
+        }
+    }
+}
+
 const TAPPLICATION_EXCEPTION_ERROR_CODE: &str = "ApplicationExceptionErrorCode";
 
 #[derive(
@@ -196,26 +220,7 @@ where
                 (TType::Stop, _) => break,
                 (TType::String, 1) => message = iprot.read_string()?,
                 (TType::I32, 2) => {
-                    type_ = match iprot.read_i32()? {
-                        1 => ApplicationExceptionErrorCode::UnknownMethod,
-                        2 => ApplicationExceptionErrorCode::InvalidMessageType,
-                        3 => ApplicationExceptionErrorCode::WrongMethodName,
-                        4 => ApplicationExceptionErrorCode::BadSequenceID,
-                        5 => ApplicationExceptionErrorCode::MissingResult,
-                        6 => ApplicationExceptionErrorCode::InternalError,
-                        7 => ApplicationExceptionErrorCode::ProtocolError,
-                        8 => ApplicationExceptionErrorCode::InvalidTransform,
-                        9 => ApplicationExceptionErrorCode::InvalidProtocol,
-                        10 => ApplicationExceptionErrorCode::UnsupportedClientType,
-                        11 => ApplicationExceptionErrorCode::Loadshedding,
-                        12 => ApplicationExceptionErrorCode::Timeout,
-                        13 => ApplicationExceptionErrorCode::InjectedFailure,
-                        14 => ApplicationExceptionErrorCode::ChecksumMismatch,
-                        15 => ApplicationExceptionErrorCode::Interruption,
-                        16 => ApplicationExceptionErrorCode::TenantQuotaExceeded,
-
-                        _ => ApplicationExceptionErrorCode::Unknown,
-                    }
+                    type_ = ApplicationExceptionErrorCode::from_i32(iprot.read_i32()?)
                 }
                 (ttype, _) => iprot.skip(ttype)?,
             };

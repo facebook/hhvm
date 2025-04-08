@@ -327,7 +327,7 @@ Object ObjectData::iterableObject(bool& isIterable,
 
 Array& ObjectData::dynPropArray() const {
   assertx(getAttribute(HasDynPropArr));
-  assertx(g_context->dynPropTable.count(this));
+  assertx(g_context->dynPropTable.contains(this));
   assertx(g_context->dynPropTable[this].arr().isDict());
   return g_context->dynPropTable[this].arr();
 }
@@ -357,7 +357,7 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 }
 
 Array& ObjectData::setDynPropArray(const Array& newArr) {
-  assertx(!g_context->dynPropTable.count(this));
+  assertx(!g_context->dynPropTable.contains(this));
   assertx(!getAttribute(HasDynPropArr));
   assertx(newArr.isDict());
 

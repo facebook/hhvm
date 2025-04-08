@@ -1675,7 +1675,7 @@ static int execute_program_impl(int argc, char** argv) {
       // Process the options
       store(opts, vm);
       notify(vm);
-      if (vm.count("interactive") /* or -a */) {
+      if (vm.contains("interactive") /* or -a */) {
         po.mode = ExecutionMode::DEBUG;
       }
 
@@ -1733,7 +1733,7 @@ static int execute_program_impl(int argc, char** argv) {
     cout << desc << "\n";
     return 0;
   }
-  if (vm.count("version")) {
+  if (vm.contains("version")) {
     cout << "HipHop VM";
     cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")";
@@ -1742,7 +1742,7 @@ static int execute_program_impl(int argc, char** argv) {
     cout << "Repo schema: " << repoSchemaId() << "\n";
     return 0;
   }
-  if (vm.count("modules")) {
+  if (vm.contains("modules")) {
     rds::local::init();
     SCOPE_EXIT { rds::local::fini(); };
     tl_heap.getCheck();
@@ -1753,12 +1753,12 @@ static int execute_program_impl(int argc, char** argv) {
     }
     return 0;
   }
-  if (vm.count("compiler-id")) {
+  if (vm.contains("compiler-id")) {
     cout << compilerId() << "\n";
     return 0;
   }
 
-  if (vm.count("repo-schema")) {
+  if (vm.contains("repo-schema")) {
     cout << repoSchemaId() << "\n";
     return 0;
   }
@@ -1869,7 +1869,7 @@ static int execute_program_impl(int argc, char** argv) {
       printf("%s\n", value.toString().data());
       return 0;
     }
-    if (vm.count("repo-option-hash")) {
+    if (vm.contains("repo-option-hash")) {
       rds::local::init();
       SCOPE_EXIT { rds::local::fini(); };
 
@@ -2092,7 +2092,7 @@ static int execute_program_impl(int argc, char** argv) {
     exit(HPHP_EXIT_FAILURE);
   }
 
-  if (vm.count("check-repo")) {
+  if (vm.contains("check-repo")) {
     hphp_thread_init();
     always_assert(Cfg::Repo::Authoritative);
     init_repo_file();
@@ -2101,7 +2101,7 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
 
-  if (vm.count("verify-resolutions")) {
+  if (vm.contains("verify-resolutions")) {
     if (po.args.size() < 2) {
       fprintf(stderr,
               "Usage: %s --verify-resolutions [hhbc-repo] [src-root]\n",

@@ -37,7 +37,7 @@ static hphp_string_map<Wrapper*> s_wrappers;
 static RDS_LOCAL(Wrapper*, rl_fileHandler);
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
-  assertx(!s_wrappers.count(scheme));
+  assertx(!s_wrappers.contains(scheme));
   s_wrappers[scheme] = wrapper;
   return true;
 }

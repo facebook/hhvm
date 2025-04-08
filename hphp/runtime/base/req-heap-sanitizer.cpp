@@ -242,7 +242,7 @@ HeapObjectSanitizer::access_handler(int signo, siginfo_t* info, void* extra) {
     char buf[4096];
     char* curr = buf;
     int remaining = sizeof(buf);
-    if (tl_heap_sanitizer->addresses.count(dataAddr)) {
+    if (tl_heap_sanitizer->addresses.contains(dataAddr)) {
       auto n = snprintf(curr, remaining,
                         "[%p] changing value at %p: curr value = %x, ip =",
                         threadid, dataAddr, *(int*)(dataAddr));

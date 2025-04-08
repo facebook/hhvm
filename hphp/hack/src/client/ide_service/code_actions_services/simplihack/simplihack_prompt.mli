@@ -7,7 +7,7 @@
  *)
 
 type t = {
-  attribute_pos: Pos.t;
+  param_pos: Pos.t;
   derive_prompt: unit -> string option;
   edit_span: Pos.t;
 }

@@ -293,26 +293,6 @@ end = struct
 end
 
 (* Top-level evaluation function for user attributes *)
-let eval provider (ua : Tast.user_attribute) method_name =
-  let open Option.Let_syntax in
+let eval provider (e : Tast.expr) =
   let ctx = Context.init provider in
-  (* Extract promptlet and arguments *)
-  let* (promptlet, args) =
-    match ua.Aast.ua_params with
-    | promptlet :: args -> Some (promptlet, args)
-    | [] -> None
-  in
-  (* Evaluate the first argument *)
-  let promptlet_value = Expr.eval ctx promptlet in
-  (* If it's a string, return it directly *)
-  match Value.str promptlet_value with
-  | Some str -> Some str
-  | None ->
-    (* Otherwise, proceed with the original class pointer logic *)
-    let* promptlet_class = Value.class_ptr promptlet_value in
-    let* method_ = Context.find_method ~ctx promptlet_class method_name in
-    (* Evaluate method call *)
-    let* value =
-      Call.eval ctx method_ @@ List.map ~f:(fun a -> Aast.Anormal a) args
-    in
-    Value.str value
+  Value.str @@ Expr.eval ctx e

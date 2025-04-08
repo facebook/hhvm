@@ -1,6 +1,6 @@
 <?hh
-<<__SimpliHack(DeriveGetters::class, "and setters")>>
- //   ^ at-caret
+<<__SimpliHack(DeriveGetters::onClass("and setters"))>>
+ //                 ^ at-caret
 class SomeClass {
   public int $one;
   public string $word;

@@ -57,5 +57,15 @@ folly::StringPiece parseString(
 std::chrono::milliseconds parseTimeout(
     const folly::dynamic& json,
     folly::StringPiece name);
+
+/**
+ * Parses `json` to an integer representing timeout.
+ * @return value stored in `json`
+ *
+ * @throws std::logic_error if `json` is not an integer or out of range.
+ */
+std::chrono::milliseconds parseNullableTimeout(
+    const folly::dynamic& json,
+    folly::StringPiece name);
 } // namespace memcache
 } // namespace facebook

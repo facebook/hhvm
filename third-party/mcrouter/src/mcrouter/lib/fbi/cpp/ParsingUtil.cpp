@@ -45,6 +45,12 @@ std::chrono::milliseconds parseTimeout(
   return std::chrono::milliseconds{parseInt(json, name, 1, kMaxTimeout)};
 }
 
+std::chrono::milliseconds parseNullableTimeout(
+    const folly::dynamic& json,
+    folly::StringPiece name) {
+  return std::chrono::milliseconds{parseInt(json, name, 0, kMaxTimeout)};
+}
+
 folly::StringPiece parseString(
     const folly::dynamic& json,
     folly::StringPiece name) {

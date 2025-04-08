@@ -57,15 +57,30 @@ var _ Protocol = (*rocketClient)(nil)
 var _ RequestChannel = (*rocketClient)(nil)
 
 // NewRocketClient creates a new Rocket client given an RSocketClient.
-func NewRocketClient(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func NewRocketClient(
+	client RSocketClient,
+	protoID types.ProtocolID,
+	ioTimeout time.Duration,
+	persistentHeaders map[string]string,
+) (Protocol, error) {
 	return newRocketClientFromRsocket(client, protoID, ioTimeout, persistentHeaders)
 }
 
-func newRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func newRocketClient(
+	conn net.Conn,
+	protoID types.ProtocolID,
+	ioTimeout time.Duration,
+	persistentHeaders map[string]string,
+) (Protocol, error) {
 	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, ioTimeout, persistentHeaders)
 }
 
-func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func newRocketClientFromRsocket(
+	client RSocketClient,
+	protoID types.ProtocolID,
+	ioTimeout time.Duration,
+	persistentHeaders map[string]string,
+) (Protocol, error) {
 	p := &rocketClient{
 		client:            client,
 		protoID:           protoID,

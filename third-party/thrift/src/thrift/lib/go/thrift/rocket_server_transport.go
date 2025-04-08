@@ -40,7 +40,14 @@ type rocketServerTransport struct {
 	stats       *stats.ServerStats
 }
 
-func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...any), stats *stats.ServerStats) transport.ServerTransport {
+func newRocketServerTransport(
+	listener net.Listener,
+	connContext ConnContextFunc,
+	processor Processor,
+	transportID TransportID,
+	log func(format string, args ...any),
+	stats *stats.ServerStats,
+) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
 		processor:   processor,

@@ -129,7 +129,13 @@ func (r *rsocketClient) resetDeadline() {
 	r.conn.SetDeadline(time.Time{})
 }
 
-func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error) {
+func (r *rsocketClient) RequestResponse(
+	ctx context.Context,
+	messageName string,
+	protoID types.ProtocolID,
+	headers map[string]string,
+	dataBytes []byte,
+) (map[string]string, []byte, error) {
 	r.resetDeadline()
 	request, err := encodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, headers, r.useZstd, dataBytes)
 	if err != nil {

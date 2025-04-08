@@ -128,7 +128,13 @@ type rocketServerSocket struct {
 	stats             *stats.ServerStats
 }
 
-func newRocketServerSocket(ctx context.Context, proc Processor, pipeliningEnabled bool, log func(format string, args ...any), stats *stats.ServerStats) *rocketServerSocket {
+func newRocketServerSocket(
+	ctx context.Context,
+	proc Processor,
+	pipeliningEnabled bool,
+	log func(format string, args ...any),
+	stats *stats.ServerStats,
+) *rocketServerSocket {
 	return &rocketServerSocket{
 		ctx:               ctx,
 		proc:              proc,

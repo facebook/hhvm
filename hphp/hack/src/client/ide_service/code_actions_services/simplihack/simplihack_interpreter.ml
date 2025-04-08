@@ -12,8 +12,6 @@ open Hh_prelude
 module Value = struct
   type t =
     | Str of string  (** String values *)
-    | ClassPtr of Nast.class_  (** References to class definitions *)
-    | MethodPtr of Nast.method_  (** References to method definitions *)
     | Error  (** Represents evaluation errors *)
 
   (* Helper functions to safely extract values from the Value.t type.
@@ -24,19 +22,6 @@ module Value = struct
 
   let str = function
     | Str s -> Some s
-    | _ -> None
-
-  let str_ish = function
-    | Str s -> Some s
-    | ClassPtr c -> Some (Utils.strip_ns @@ snd c.Aast.c_name)
-    | _ -> None
-
-  let class_ptr = function
-    | ClassPtr c -> Some c
-    | _ -> None
-
-  let method_ptr = function
-    | MethodPtr m -> Some m
     | _ -> None
 end
 
@@ -123,6 +108,24 @@ module Context = struct
   let find_method ~ctx:_ class_ name =
     List.find class_.Aast.c_methods ~f:(fun meth ->
         String.equal (snd meth.Aast.m_name) name)
+
+  (** [find_function ~ctx name] looks up a function definition by name using the context's provider
+      Returns [None] if the function is not found
+
+      Example:
+      {[
+        match Context.find_function ~ctx "myFunction" with
+        | Some func_def -> (* Use function definition *)
+        | None -> (* Handle missing function *)
+      ]}
+  *)
+  let find_function ~ctx name =
+    let open Option.Let_syntax in
+    let* path = Naming_provider.get_fun_path ctx.provider name in
+    let* fun_def =
+      Ast_provider.find_fun_in_file ~full:true ctx.provider path name
+    in
+    return @@ Naming.fun_def ctx.provider fun_def
 end
 
 (* ControlFlow module represents the possible outcomes of statement evaluation *)
@@ -157,28 +160,18 @@ end = struct
           ~init:(Some "")
           ~f:(fun acc e ->
             let* lhs = acc in
-            let* rhs = Value.str_ish @@ expr ctx e in
+            let* rhs = Value.str @@ expr ctx e in
             return @@ lhs ^ rhs)
           exprs
       in
       return @@ Value.Str value
+    | Aast.Nameof (_, _, Aast.CI (_, name)) -> return @@ Value.Str name
     | Aast.Lvar (_, name) ->
       (* Looks up value of a local variable *)
       Context.load ~ctx name
-    | Aast.Class_const (cid, (_, id))
-      when String.equal id Naming_special_names.Members.mClass ->
-      (* Handles class constant access for getting class pointer *)
-      let* class_ = ClassId.eval ctx cid in
-      return @@ Value.ClassPtr class_
-    | Aast.Class_const (cid, (_, id)) ->
-      (* Handles method reference through class constant access *)
-      let* class_ = ClassId.eval ctx cid in
-      let* meth = Context.find_method ~ctx class_ id in
-      return @@ Value.MethodPtr meth
     | Aast.(Call { func; targs = _; args; unpacked_arg = None }) ->
       (* Evaluates a function/method call *)
-      let* meth = Value.method_ptr @@ expr ctx func in
-      Call.eval ctx meth args
+      Call.eval ctx func args
     | Aast.(Binop { bop; lhs; rhs }) ->
       (* Handles binary operations *)
       Binop.eval ctx bop lhs rhs
@@ -239,10 +232,9 @@ end = struct
 
   let class_id (ctx : Context.t) (ClassId cid) =
     match cid with
-    | Aast.(CIparent | CIself | CIstatic) ->
+    | Aast.(CIparent | CIself | CIstatic | CIexpr _) ->
       None (* Special class refs not supported *)
     | Aast.CI (_, name) -> Context.find_class ~ctx name (* Named class *)
-    | Aast.CIexpr e -> Value.class_ptr @@ Expr.eval ctx e (* Class expression *)
 
   let eval (ctx : Context.t) (_, _, cid) = class_id ctx (ClassId cid)
 end
@@ -250,10 +242,10 @@ end
 (* Call module handles function/method calls *)
 and Call : sig
   val eval :
-    Context.t -> Nast.method_ -> (_, _) Aast.argument list -> Value.t option
+    Context.t -> (_, _) Aast.expr -> (_, _) Aast.argument list -> Value.t option
 end = struct
   (* Build new context for function call with arguments *)
-  let build_ctx ~ctx func args =
+  let build_ctx ~ctx params args =
     let eval = Expr.eval ctx in
     let rec go args params ctx =
       match (args, params) with
@@ -262,15 +254,33 @@ end = struct
         @@ Context.store ~ctx (Local_id.make_unscoped param_name) (eval arg)
       | _ -> ctx
     in
-    go args func.Aast.m_params @@ Context.fresh ctx
+    go args params @@ Context.fresh ctx
+
+  let invoke ctx (params, body) args =
+    let ctx = build_ctx ~ctx params args in
+    let { Aast.fb_ast } = body in
+    Block.eval ctx fb_ast
 
   (* Evaluate function call *)
   let eval
-      (ctx : Context.t) (func : Nast.method_) (args : (_, _) Aast.argument list)
-      =
-    let ctx = build_ctx ~ctx func args in
-    let { Aast.fb_ast } = func.Aast.m_body in
-    Block.eval ctx fb_ast
+      (ctx : Context.t)
+      (func : (_, _) Aast.expr)
+      (args : (_, _) Aast.argument list) =
+    let open Option.Let_syntax in
+    let (_, _, func) = func in
+    match func with
+    | Aast.Id (_, name) ->
+      let* Aast.{ fd_fun = { f_params = params; f_body = body; _ }; _ } =
+        Context.find_function ~ctx name
+      in
+      invoke ctx (params, body) args
+    | Aast.Class_const (cid, (_, name)) ->
+      let* class_ = ClassId.eval ctx cid in
+      let* Aast.{ m_params = params; m_body = body; _ } =
+        Context.find_method ~ctx class_ name
+      in
+      invoke ctx (params, body) args
+    | _ -> None
 end
 
 (* Binop module handles binary operations *)
@@ -286,8 +296,8 @@ end = struct
     match bop with
     | Ast_defs.Dot ->
       let open Option.Let_syntax in
-      let* lhs_str = Value.str_ish @@ Expr.eval ctx lhs_expr in
-      let* rhs_str = Value.str_ish @@ Expr.eval ctx rhs_expr in
+      let* lhs_str = Value.str @@ Expr.eval ctx lhs_expr in
+      let* rhs_str = Value.str @@ Expr.eval ctx rhs_expr in
       Some (Value.Str (lhs_str ^ rhs_str))
     | _ -> None
 end

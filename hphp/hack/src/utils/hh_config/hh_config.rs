@@ -14,7 +14,6 @@ use anyhow::Context;
 use anyhow::Result;
 use config_file::ConfigFile;
 use oxidized::custom_error_config::CustomErrorConfig;
-use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::experimental_features;
 use oxidized::global_options::ExtendedReasonsConfig;
 use oxidized::global_options::GlobalOptions;
@@ -199,19 +198,6 @@ impl HhConfig {
         hasher.update(package_config.as_bytes());
         hasher.update(custom_error_config.as_bytes());
         format!("{:x}", hasher.finalize())
-    }
-
-    pub fn from_slice(bytes: &[u8]) -> Result<Self> {
-        let (hash, config) = ConfigFile::from_slice_with_sha1(bytes);
-        Ok(Self {
-            hash,
-            ..Self::from_configs(
-                PathBuf::new(),
-                config,
-                Default::default(),
-                Default::default(),
-            )?
-        })
     }
 
     /// Construct from .hhconfig and hh.conf files with CLI overrides already applied.
@@ -644,10 +630,6 @@ impl HhConfig {
         Ok(c)
     }
 
-    pub fn get_decl_parser_options(&self) -> DeclParserOptions {
-        DeclParserOptions::from_parser_options(&self.opts.po)
-    }
-
     pub fn to_selected_experiments_json(&self) -> String {
         let experiments = json!({
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
@@ -679,7 +661,7 @@ fn parse_svec(value: &str) -> Vec<String> {
 }
 
 /// Return the local config file path, allowing HH_LOCALCONF_PATH to override it.
-pub fn system_config_path() -> PathBuf {
+fn system_config_path() -> PathBuf {
     const HH_CONF: &str = "hh.conf";
     match std::env::var_os("HH_LOCALCONF_PATH") {
         Some(path) => Path::new(&path).join(HH_CONF),
@@ -690,10 +672,22 @@ pub fn system_config_path() -> PathBuf {
 #[cfg(test)]
 mod test {
     use super::*;
+    fn from_slice(bytes: &[u8]) -> Result<HhConfig> {
+        let (hash, config) = ConfigFile::from_slice_with_sha1(bytes);
+        Ok(HhConfig {
+            hash,
+            ..HhConfig::from_configs(
+                PathBuf::new(),
+                config,
+                Default::default(),
+                Default::default(),
+            )?
+        })
+    }
 
     #[test]
     fn test_log_levels() {
-        let hhconf = HhConfig::from_slice(br#"log_levels={ "pessimise": 1 }"#).unwrap();
+        let hhconf = from_slice(br#"log_levels={ "pessimise": 1 }"#).unwrap();
         assert_eq!(
             hhconf.opts.log_levels.get("pessimise").copied(),
             Some(1isize)

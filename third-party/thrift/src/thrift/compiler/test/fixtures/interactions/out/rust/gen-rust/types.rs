@@ -113,12 +113,10 @@ where
         let mut field_message = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CustomException")?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising message field of CustomException")?),
+                (::fbthrift::TType::String, 1) => field_message = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising message field of CustomException")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -218,12 +216,10 @@ where
         let mut field_sessionId = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ShouldBeBoxed")?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_sessionId = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising sessionId field of ShouldBeBoxed")?),
+                (::fbthrift::TType::String, 1) => field_sessionId = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising sessionId field of ShouldBeBoxed")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

@@ -652,13 +652,11 @@ where
         let mut field_myBigEnum = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_myEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myEnum field of MyStruct")?),
-                (::fbthrift::TType::I32, 2) => field_myBigEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myBigEnum field of MyStruct")?),
+                (::fbthrift::TType::I32, 1) => field_myEnum = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising myEnum field of MyStruct")?),
+                (::fbthrift::TType::I32, 2) => field_myBigEnum = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising myBigEnum field of MyStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

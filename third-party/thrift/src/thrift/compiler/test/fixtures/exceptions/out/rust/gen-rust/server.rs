@@ -148,8 +148,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
         ];
         let _ = p.read_struct_begin(|_| ())?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
@@ -175,8 +173,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
         ];
         let _ = p.read_struct_begin(|_| ())?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
@@ -202,8 +198,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
         ];
         let _ = p.read_struct_begin(|_| ())?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
@@ -229,8 +223,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
         ];
         let _ = p.read_struct_begin(|_| ())?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,

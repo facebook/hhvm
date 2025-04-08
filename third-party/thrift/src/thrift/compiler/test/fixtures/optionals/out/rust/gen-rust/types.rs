@@ -264,15 +264,13 @@ where
         let mut field_alpha = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Color")?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Double, 1) => field_red = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising red field of Color")?),
-                (::fbthrift::TType::Double, 2) => field_green = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising green field of Color")?),
-                (::fbthrift::TType::Double, 3) => field_blue = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising blue field of Color")?),
-                (::fbthrift::TType::Double, 4) => field_alpha = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising alpha field of Color")?),
+                (::fbthrift::TType::Double, 1) => field_red = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising red field of Color")?),
+                (::fbthrift::TType::Double, 2) => field_green = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising green field of Color")?),
+                (::fbthrift::TType::Double, 3) => field_blue = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising blue field of Color")?),
+                (::fbthrift::TType::Double, 4) => field_alpha = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising alpha field of Color")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -417,16 +415,14 @@ where
         let mut field_hasAC = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Vehicle")?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_color = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising color field of Vehicle")?),
-                (::fbthrift::TType::String, 2) => field_licensePlate = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising licensePlate field of Vehicle")?),
-                (::fbthrift::TType::String, 3) => field_description = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising description field of Vehicle")?),
-                (::fbthrift::TType::String, 4) => field_name = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising name field of Vehicle")?),
-                (::fbthrift::TType::Bool, 5) => field_hasAC = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising hasAC field of Vehicle")?),
+                (::fbthrift::TType::Struct, 1) => field_color = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising color field of Vehicle")?),
+                (::fbthrift::TType::String, 2) => field_licensePlate = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising licensePlate field of Vehicle")?),
+                (::fbthrift::TType::String, 3) => field_description = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising description field of Vehicle")?),
+                (::fbthrift::TType::String, 4) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising name field of Vehicle")?),
+                (::fbthrift::TType::Bool, 5) => field_hasAC = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising hasAC field of Vehicle")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -617,21 +613,19 @@ where
         let mut field_vehicles = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Person")?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising id field of Person")?),
-                (::fbthrift::TType::String, 2) => field_name = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising name field of Person")?),
-                (::fbthrift::TType::I16, 3) => field_age = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising age field of Person")?),
-                (::fbthrift::TType::String, 4) => field_address = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising address field of Person")?),
-                (::fbthrift::TType::Struct, 5) => field_favoriteColor = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising favoriteColor field of Person")?),
-                (::fbthrift::TType::Set, 6) => field_friends = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising friends field of Person")?),
-                (::fbthrift::TType::I64, 7) => field_bestFriend = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising bestFriend field of Person")?),
-                (::fbthrift::TType::Map, 8) => field_petNames = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising petNames field of Person")?),
-                (::fbthrift::TType::I32, 9) => field_afraidOfAnimal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising afraidOfAnimal field of Person")?),
-                (::fbthrift::TType::List, 10) => field_vehicles = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising vehicles field of Person")?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising id field of Person")?),
+                (::fbthrift::TType::String, 2) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising name field of Person")?),
+                (::fbthrift::TType::I16, 3) => field_age = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising age field of Person")?),
+                (::fbthrift::TType::String, 4) => field_address = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising address field of Person")?),
+                (::fbthrift::TType::Struct, 5) => field_favoriteColor = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising favoriteColor field of Person")?),
+                (::fbthrift::TType::Set, 6) => field_friends = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising friends field of Person")?),
+                (::fbthrift::TType::I64, 7) => field_bestFriend = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising bestFriend field of Person")?),
+                (::fbthrift::TType::Map, 8) => field_petNames = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising petNames field of Person")?),
+                (::fbthrift::TType::I32, 9) => field_afraidOfAnimal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising afraidOfAnimal field of Person")?),
+                (::fbthrift::TType::List, 10) => field_vehicles = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising vehicles field of Person")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

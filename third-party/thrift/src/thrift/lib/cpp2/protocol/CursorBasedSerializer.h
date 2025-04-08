@@ -553,7 +553,7 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
   // Last field id the caller tried to read.
   FieldId fieldId_{0};
   // Contains last field id read from the buffer.
-  typename ProtocolReader::StructReadState readState_;
+  typename ProtocolReader::StructReadState readState_{};
 
   template <typename T>
   T copy(const T& in) {

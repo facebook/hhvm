@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-mod local_config;
 
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -14,14 +13,16 @@ use std::path::PathBuf;
 use anyhow::Context;
 use anyhow::Result;
 use config_file::ConfigFile;
-pub use local_config::LocalConfig;
 use oxidized::custom_error_config::CustomErrorConfig;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::experimental_features;
 use oxidized::global_options::ExtendedReasonsConfig;
 use oxidized::global_options::GlobalOptions;
 use oxidized::global_options::NoneOrAllExcept;
+use oxidized::global_options::SavedState;
+use oxidized::global_options::SavedStateLoading;
 use oxidized::parser_options::ParserOptions;
+use oxidized::saved_state_rollouts::SavedStateRollouts;
 use package::PackageInfo;
 use serde_json::json;
 use sha1::Digest;
@@ -45,7 +46,6 @@ pub struct HhConfig {
     pub hash: String,
 
     pub opts: GlobalOptions,
-    pub local_config: LocalConfig,
 
     pub gc_minor_heap_size: usize,
     pub gc_space_overhead: usize,
@@ -229,15 +229,7 @@ impl HhConfig {
             .unwrap_or(Ok(false))?;
 
         let version = hhconfig.get_str("version");
-
-        let local_config = LocalConfig::from_config(
-            version,
-            current_rolled_out_flag_idx,
-            deactivate_saved_state_rollout,
-            &hh_conf,
-        )?;
         let package_info: PackageInfo = Self::get_package_info(root, &hhconfig);
-
         let default = ParserOptions::default();
         let experimental_features = hhconfig.get_str("enable_experimental_stx_features");
         let po = ParserOptions {
@@ -252,7 +244,9 @@ impl HhConfig {
             codegen: hhconfig.get_bool_or("codegen", default.codegen)?,
             deregister_php_stdlib: hhconfig
                 .get_bool_or("deregister_php_stdlib", default.deregister_php_stdlib)?,
-            allow_unstable_features: local_config.allow_unstable_features,
+            allow_unstable_features: hh_conf
+                .bool_if_min_version("allow_unstable_features", version)
+                .unwrap_or(Ok(default.allow_unstable_features))?,
             disable_lval_as_an_expression: default.disable_lval_as_an_expression,
             union_intersection_type_hints: hhconfig.get_bool_or(
                 "union_intersection_type_hints",
@@ -334,10 +328,22 @@ impl HhConfig {
                 default.use_oxidized_by_ref_decls,
             )?,
         };
+        let rollouts = SavedStateRollouts::make(
+            current_rolled_out_flag_idx,
+            deactivate_saved_state_rollout,
+            hh_conf.get_str("ss_force"),
+            |flag_name| hh_conf.get_bool(flag_name).unwrap_or(Ok(false)),
+        )?;
         let default = GlobalOptions::default();
         let opts = GlobalOptions {
             po,
-            tco_saved_state: local_config.saved_state.clone(),
+            tco_saved_state: SavedState {
+                loading: SavedStateLoading::default(),
+                rollouts,
+                project_metadata_w_flags: hh_conf
+                    .get_bool("project_metadata_w_flags")
+                    .unwrap_or(Ok(default.tco_saved_state.project_metadata_w_flags))?,
+            },
             tco_experimental_features: hhconfig.get_string_set_or(
                 "enable_experimental_tc_features",
                 default.tco_experimental_features,
@@ -575,7 +581,6 @@ impl HhConfig {
                 .get_bool_or("new_exhaustivity_check", default.tco_new_exhaustivity_check)?,
         };
         let mut c = Self {
-            local_config,
             opts,
             ..Self::default()
         };

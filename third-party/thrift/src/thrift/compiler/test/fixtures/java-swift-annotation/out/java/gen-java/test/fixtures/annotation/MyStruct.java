@@ -150,7 +150,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private static final TField DETAIL_MAP_FIELD_DESC = new TField("detailMap", TType.MAP, (short)4);
         private final String toto;
     public static final int _TITI = 5;
-    private static final TField TITI_FIELD_DESC = new TField("titi", TType.STRING, (short)5);
+    private static final TField TOTO_FIELD_DESC = new TField("titi", TType.STRING, (short)5);
         @org.apache.thrift.annotations.Sensitive
     private final String password;
     public static final int _PASSWORD = 6;
@@ -170,7 +170,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       FIELD_METADATA.put(4, DETAIL_MAP_FIELD_DESC);
       NAMES_TO_IDS.put("toto", 5);
       THRIFT_NAMES_TO_IDS.put("titi", 5);
-      FIELD_METADATA.put(5, TITI_FIELD_DESC);
+      FIELD_METADATA.put(5, TOTO_FIELD_DESC);
       NAMES_TO_IDS.put("password", 6);
       THRIFT_NAMES_TO_IDS.put("password", 6);
       FIELD_METADATA.put(6, PASSWORD_FIELD_DESC);
@@ -359,7 +359,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldEnd();
       }
       if (toto != null) {
-        oprot.writeFieldBegin(TITI_FIELD_DESC);
+        oprot.writeFieldBegin(TOTO_FIELD_DESC);
         oprot.writeString(this.toto);
         oprot.writeFieldEnd();
       }

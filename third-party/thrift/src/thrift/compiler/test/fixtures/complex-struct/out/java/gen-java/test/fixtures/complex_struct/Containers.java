@@ -567,31 +567,31 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
     private static final TField ENUM_MAP_FIELD_DESC = new TField("enum_map", TType.MAP, (short)9);
         private final Map<Integer, test.fixtures.complex_struct.MyStruct> structMap2;
     public static final int _STRUCT_MAP_2 = 10;
-    private static final TField STRUCT_MAP_2_FIELD_DESC = new TField("struct_map_2", TType.MAP, (short)10);
+    private static final TField STRUCT_MAP2_FIELD_DESC = new TField("struct_map_2", TType.MAP, (short)10);
         private final Map<Integer, test.fixtures.complex_struct.MyUnion> unionMap2;
     public static final int _UNION_MAP_2 = 11;
-    private static final TField UNION_MAP_2_FIELD_DESC = new TField("union_map_2", TType.MAP, (short)11);
+    private static final TField UNION_MAP2_FIELD_DESC = new TField("union_map_2", TType.MAP, (short)11);
         private final Map<Integer, test.fixtures.complex_struct.MyEnum> enumMap2;
     public static final int _ENUM_MAP_2 = 12;
-    private static final TField ENUM_MAP_2_FIELD_DESC = new TField("enum_map_2", TType.MAP, (short)12);
+    private static final TField ENUM_MAP2_FIELD_DESC = new TField("enum_map_2", TType.MAP, (short)12);
         private final Map<List<Integer>, Integer> listMap;
     public static final int _LIST_MAP = 13;
     private static final TField LIST_MAP_FIELD_DESC = new TField("list_map", TType.MAP, (short)13);
         private final Map<Integer, List<Integer>> listMap2;
     public static final int _LIST_MAP_2 = 14;
-    private static final TField LIST_MAP_2_FIELD_DESC = new TField("list_map_2", TType.MAP, (short)14);
+    private static final TField LIST_MAP2_FIELD_DESC = new TField("list_map_2", TType.MAP, (short)14);
         private final Map<Set<Integer>, Integer> setMap;
     public static final int _SET_MAP = 15;
     private static final TField SET_MAP_FIELD_DESC = new TField("set_map", TType.MAP, (short)15);
         private final Map<Integer, Set<Integer>> setMap2;
     public static final int _SET_MAP_2 = 16;
-    private static final TField SET_MAP_2_FIELD_DESC = new TField("set_map_2", TType.MAP, (short)16);
+    private static final TField SET_MAP2_FIELD_DESC = new TField("set_map_2", TType.MAP, (short)16);
         private final Map<Map<Integer, Integer>, Integer> mapMap;
     public static final int _MAP_MAP = 17;
     private static final TField MAP_MAP_FIELD_DESC = new TField("map_map", TType.MAP, (short)17);
         private final Map<Integer, Map<Integer, Integer>> mapMap2;
     public static final int _MAP_MAP_2 = 18;
-    private static final TField MAP_MAP_2_FIELD_DESC = new TField("map_map_2", TType.MAP, (short)18);
+    private static final TField MAP_MAP2_FIELD_DESC = new TField("map_map_2", TType.MAP, (short)18);
         private final List<List<Integer>> listListI32;
     public static final int _LIST_LIST_I32 = 19;
     private static final TField LIST_LIST_I32_FIELD_DESC = new TField("list_list_i32", TType.LIST, (short)19);
@@ -679,31 +679,31 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
       FIELD_METADATA.put(9, ENUM_MAP_FIELD_DESC);
       NAMES_TO_IDS.put("structMap2", 10);
       THRIFT_NAMES_TO_IDS.put("struct_map_2", 10);
-      FIELD_METADATA.put(10, STRUCT_MAP_2_FIELD_DESC);
+      FIELD_METADATA.put(10, STRUCT_MAP2_FIELD_DESC);
       NAMES_TO_IDS.put("unionMap2", 11);
       THRIFT_NAMES_TO_IDS.put("union_map_2", 11);
-      FIELD_METADATA.put(11, UNION_MAP_2_FIELD_DESC);
+      FIELD_METADATA.put(11, UNION_MAP2_FIELD_DESC);
       NAMES_TO_IDS.put("enumMap2", 12);
       THRIFT_NAMES_TO_IDS.put("enum_map_2", 12);
-      FIELD_METADATA.put(12, ENUM_MAP_2_FIELD_DESC);
+      FIELD_METADATA.put(12, ENUM_MAP2_FIELD_DESC);
       NAMES_TO_IDS.put("listMap", 13);
       THRIFT_NAMES_TO_IDS.put("list_map", 13);
       FIELD_METADATA.put(13, LIST_MAP_FIELD_DESC);
       NAMES_TO_IDS.put("listMap2", 14);
       THRIFT_NAMES_TO_IDS.put("list_map_2", 14);
-      FIELD_METADATA.put(14, LIST_MAP_2_FIELD_DESC);
+      FIELD_METADATA.put(14, LIST_MAP2_FIELD_DESC);
       NAMES_TO_IDS.put("setMap", 15);
       THRIFT_NAMES_TO_IDS.put("set_map", 15);
       FIELD_METADATA.put(15, SET_MAP_FIELD_DESC);
       NAMES_TO_IDS.put("setMap2", 16);
       THRIFT_NAMES_TO_IDS.put("set_map_2", 16);
-      FIELD_METADATA.put(16, SET_MAP_2_FIELD_DESC);
+      FIELD_METADATA.put(16, SET_MAP2_FIELD_DESC);
       NAMES_TO_IDS.put("mapMap", 17);
       THRIFT_NAMES_TO_IDS.put("map_map", 17);
       FIELD_METADATA.put(17, MAP_MAP_FIELD_DESC);
       NAMES_TO_IDS.put("mapMap2", 18);
       THRIFT_NAMES_TO_IDS.put("map_map_2", 18);
-      FIELD_METADATA.put(18, MAP_MAP_2_FIELD_DESC);
+      FIELD_METADATA.put(18, MAP_MAP2_FIELD_DESC);
       NAMES_TO_IDS.put("listListI32", 19);
       THRIFT_NAMES_TO_IDS.put("list_list_i32", 19);
       FIELD_METADATA.put(19, LIST_LIST_I32_FIELD_DESC);
@@ -2301,7 +2301,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         oprot.writeFieldEnd();
       }
       if (structMap2 != null) {
-        oprot.writeFieldBegin(STRUCT_MAP_2_FIELD_DESC);
+        oprot.writeFieldBegin(STRUCT_MAP2_FIELD_DESC);
         Map<Integer, test.fixtures.complex_struct.MyStruct> _iter0 = structMap2;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter0.size()));
             for (Map.Entry<Integer, test.fixtures.complex_struct.MyStruct> _iter1 : _iter0.entrySet()) {
@@ -2312,7 +2312,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         oprot.writeFieldEnd();
       }
       if (unionMap2 != null) {
-        oprot.writeFieldBegin(UNION_MAP_2_FIELD_DESC);
+        oprot.writeFieldBegin(UNION_MAP2_FIELD_DESC);
         Map<Integer, test.fixtures.complex_struct.MyUnion> _iter0 = unionMap2;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter0.size()));
             for (Map.Entry<Integer, test.fixtures.complex_struct.MyUnion> _iter1 : _iter0.entrySet()) {
@@ -2323,7 +2323,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         oprot.writeFieldEnd();
       }
       if (enumMap2 != null) {
-        oprot.writeFieldBegin(ENUM_MAP_2_FIELD_DESC);
+        oprot.writeFieldBegin(ENUM_MAP2_FIELD_DESC);
         Map<Integer, test.fixtures.complex_struct.MyEnum> _iter0 = enumMap2;
         oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter0.size()));
             for (Map.Entry<Integer, test.fixtures.complex_struct.MyEnum> _iter1 : _iter0.entrySet()) {
@@ -2349,7 +2349,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         oprot.writeFieldEnd();
       }
       if (listMap2 != null) {
-        oprot.writeFieldBegin(LIST_MAP_2_FIELD_DESC);
+        oprot.writeFieldBegin(LIST_MAP2_FIELD_DESC);
         Map<Integer, List<Integer>> _iter0 = listMap2;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
             for (Map.Entry<Integer, List<Integer>> _iter1 : _iter0.entrySet()) {
@@ -2379,7 +2379,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         oprot.writeFieldEnd();
       }
       if (setMap2 != null) {
-        oprot.writeFieldBegin(SET_MAP_2_FIELD_DESC);
+        oprot.writeFieldBegin(SET_MAP2_FIELD_DESC);
         Map<Integer, Set<Integer>> _iter0 = setMap2;
         oprot.writeMapBegin(new TMap(TType.I32, TType.SET, _iter0.size()));
             for (Map.Entry<Integer, Set<Integer>> _iter1 : _iter0.entrySet()) {
@@ -2410,7 +2410,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         oprot.writeFieldEnd();
       }
       if (mapMap2 != null) {
-        oprot.writeFieldBegin(MAP_MAP_2_FIELD_DESC);
+        oprot.writeFieldBegin(MAP_MAP2_FIELD_DESC);
         Map<Integer, Map<Integer, Integer>> _iter0 = mapMap2;
         oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
             for (Map.Entry<Integer, Map<Integer, Integer>> _iter1 : _iter0.entrySet()) {

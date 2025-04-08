@@ -33,7 +33,7 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
     private static final TField ERROR_MESSAGE_FIELD_DESC = new TField("errorMessage", TType.STRING, (short)1);
     private final String internalGreatMessage;
     public static final int _INTERNAL_ERROR_MESSAGE = 2;
-    private static final TField INTERNAL_ERROR_MESSAGE_FIELD_DESC = new TField("internalGreatMessage", TType.STRING, (short)2);
+    private static final TField INTERNAL_GREAT_MESSAGE_FIELD_DESC = new TField("internalGreatMessage", TType.STRING, (short)2);
 
     static {
       NAMES_TO_IDS.put("errorMessage", 1);
@@ -41,7 +41,7 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
       FIELD_METADATA.put(1, ERROR_MESSAGE_FIELD_DESC);
       NAMES_TO_IDS.put("internalGreatMessage", 2);
       THRIFT_NAMES_TO_IDS.put("internal_error_message", 2);
-      FIELD_METADATA.put(2, INTERNAL_ERROR_MESSAGE_FIELD_DESC);
+      FIELD_METADATA.put(2, INTERNAL_GREAT_MESSAGE_FIELD_DESC);
     }
 
     @ThriftConstructor
@@ -153,7 +153,7 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
         oprot.writeFieldEnd();
       }
       if (internalGreatMessage != null) {
-        oprot.writeFieldBegin(INTERNAL_ERROR_MESSAGE_FIELD_DESC);
+        oprot.writeFieldBegin(INTERNAL_GREAT_MESSAGE_FIELD_DESC);
         oprot.writeString(this.internalGreatMessage);
         oprot.writeFieldEnd();
       }

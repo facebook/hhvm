@@ -999,17 +999,13 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node java_tfield_name() {
-    return constant_name(field_->get_name()) + "_FIELD_DESC";
+    return constant_name(get_java_swift_name(field_)) + "_FIELD_DESC";
   }
   mstch::node java_capital_name() {
-    return java::mangle_java_name(
-        field_->get_unstructured_annotation(
-            "java.swift.name", &field_->get_name()),
-        true);
+    return java::mangle_java_name(get_java_swift_name(field_), true);
   }
   mstch::node java_constant_name() {
-    return constant_name(field_->get_unstructured_annotation(
-        "java.swift.name", &field_->get_name()));
+    return constant_name(get_java_swift_name(field_));
   }
   mstch::node java_all_caps_name() {
     auto field_name = field_->get_name();

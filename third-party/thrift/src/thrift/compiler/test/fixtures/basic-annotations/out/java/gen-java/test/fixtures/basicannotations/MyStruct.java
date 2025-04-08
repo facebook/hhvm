@@ -179,7 +179,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private static final TField MAJOR_FIELD_DESC = new TField("major", TType.I64, (short)2);
         private final String _abstract;
     public static final int _ABSTRACT = 1;
-    private static final TField ABSTRACT_FIELD_DESC = new TField("abstract", TType.STRING, (short)1);
+    private static final TField _ABSTRACT_FIELD_DESC = new TField("abstract", TType.STRING, (short)1);
         private final String annotationWithQuote;
     public static final int _ANNOTATION_WITH_QUOTE = 3;
     private static final TField ANNOTATION_WITH_QUOTE_FIELD_DESC = new TField("annotation_with_quote", TType.STRING, (short)3);
@@ -207,7 +207,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       FIELD_METADATA.put(2, MAJOR_FIELD_DESC);
       NAMES_TO_IDS.put("_abstract", 1);
       THRIFT_NAMES_TO_IDS.put("abstract", 1);
-      FIELD_METADATA.put(1, ABSTRACT_FIELD_DESC);
+      FIELD_METADATA.put(1, _ABSTRACT_FIELD_DESC);
       NAMES_TO_IDS.put("annotationWithQuote", 3);
       THRIFT_NAMES_TO_IDS.put("annotation_with_quote", 3);
       FIELD_METADATA.put(3, ANNOTATION_WITH_QUOTE_FIELD_DESC);
@@ -443,7 +443,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeI64(this.major);
       oprot.writeFieldEnd();
       if (_abstract != null) {
-        oprot.writeFieldBegin(ABSTRACT_FIELD_DESC);
+        oprot.writeFieldBegin(_ABSTRACT_FIELD_DESC);
         oprot.writeString(this._abstract);
         oprot.writeFieldEnd();
       }

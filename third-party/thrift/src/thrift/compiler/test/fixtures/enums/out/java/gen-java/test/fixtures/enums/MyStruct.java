@@ -111,7 +111,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct");
     private final test.fixtures.enums.MyEnum2 me23;
     public static final int _ME2_3 = 1;
-    private static final TField ME2_3_FIELD_DESC = new TField("me2_3", TType.I32, (short)1);
+    private static final TField ME23_FIELD_DESC = new TField("me2_3", TType.I32, (short)1);
         private final test.fixtures.enums.MyEnum3 me3N3;
     public static final int _ME3_N3 = 2;
     private static final TField ME3_N3_FIELD_DESC = new TField("me3_n3", TType.I32, (short)2);
@@ -124,7 +124,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     static {
       NAMES_TO_IDS.put("me23", 1);
       THRIFT_NAMES_TO_IDS.put("me2_3", 1);
-      FIELD_METADATA.put(1, ME2_3_FIELD_DESC);
+      FIELD_METADATA.put(1, ME23_FIELD_DESC);
       NAMES_TO_IDS.put("me3N3", 2);
       THRIFT_NAMES_TO_IDS.put("me3_n3", 2);
       FIELD_METADATA.put(2, ME3_N3_FIELD_DESC);
@@ -254,7 +254,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      oprot.writeFieldBegin(ME2_3_FIELD_DESC);
+      oprot.writeFieldBegin(ME23_FIELD_DESC);
       oprot.writeI32(this.me23 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.me23));
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(ME3_N3_FIELD_DESC);

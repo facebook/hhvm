@@ -569,7 +569,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     private static final TStruct STRUCT_DESC = new TStruct("B");
     private final test.fixtures.shapes.A justAnA;
     public static final int _JUST_AN_A = 1;
-    private static final TField JUST_AN__A_FIELD_DESC = new TField("just_an_A", TType.STRUCT, (short)1);
+    private static final TField JUST_AN_A_FIELD_DESC = new TField("just_an_A", TType.STRUCT, (short)1);
         private final Set<Integer> setOfI32;
     public static final int _SET_OF_I32 = 2;
     private static final TField SET_OF_I32_FIELD_DESC = new TField("set_of_i32", TType.SET, (short)2);
@@ -584,13 +584,13 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     private static final TField MAP_OF_STRING_TO_I32_FIELD_DESC = new TField("map_of_string_to_i32", TType.MAP, (short)5);
         private final Map<String, test.fixtures.shapes.A> mapOfStringToA;
     public static final int _MAP_OF_STRING_TO_A = 6;
-    private static final TField MAP_OF_STRING_TO__A_FIELD_DESC = new TField("map_of_string_to_A", TType.MAP, (short)6);
+    private static final TField MAP_OF_STRING_TO_A_FIELD_DESC = new TField("map_of_string_to_A", TType.MAP, (short)6);
         private final Map<String, List<Integer>> mapOfStringToListOfI32;
     public static final int _MAP_OF_STRING_TO_LIST_OF_I32 = 7;
     private static final TField MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC = new TField("map_of_string_to_list_of_i32", TType.MAP, (short)7);
         private final Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA;
     public static final int _MAP_OF_STRING_TO_LIST_OF_A = 8;
-    private static final TField MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC = new TField("map_of_string_to_list_of_A", TType.MAP, (short)8);
+    private static final TField MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC = new TField("map_of_string_to_list_of_A", TType.MAP, (short)8);
         private final Map<String, Set<Integer>> mapOfStringToSetOfI32;
     public static final int _MAP_OF_STRING_TO_SET_OF_I32 = 9;
     private static final TField MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC = new TField("map_of_string_to_set_of_i32", TType.MAP, (short)9);
@@ -599,25 +599,25 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     private static final TField MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC = new TField("map_of_string_to_map_of_string_to_i32", TType.MAP, (short)10);
         private final Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA;
     public static final int _MAP_OF_STRING_TO_MAP_OF_STRING_TO_A = 11;
-    private static final TField MAP_OF_STRING_TO_MAP_OF_STRING_TO__A_FIELD_DESC = new TField("map_of_string_to_map_of_string_to_A", TType.MAP, (short)11);
+    private static final TField MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC = new TField("map_of_string_to_map_of_string_to_A", TType.MAP, (short)11);
         private final List<Set<Integer>> listOfSetOfI32;
     public static final int _LIST_OF_SET_OF_I32 = 12;
     private static final TField LIST_OF_SET_OF_I32_FIELD_DESC = new TField("list_of_set_of_i32", TType.LIST, (short)12);
         private final List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA;
     public static final int _LIST_OF_MAP_OF_STRING_TO_LIST_OF_A = 13;
-    private static final TField LIST_OF_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC = new TField("list_of_map_of_string_to_list_of_A", TType.LIST, (short)13);
+    private static final TField LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC = new TField("list_of_map_of_string_to_list_of_A", TType.LIST, (short)13);
         private final List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA;
     public static final int _LIST_OF_MAP_OF_STRING_TO_A = 14;
-    private static final TField LIST_OF_MAP_OF_STRING_TO__A_FIELD_DESC = new TField("list_of_map_of_string_to_A", TType.LIST, (short)14);
+    private static final TField LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC = new TField("list_of_map_of_string_to_A", TType.LIST, (short)14);
         private final test.fixtures.shapes.Enum justAnEnum;
     public static final int _JUST_AN_ENUM = 17;
     private static final TField JUST_AN_ENUM_FIELD_DESC = new TField("just_an_enum", TType.I32, (short)17);
         private final test.fixtures.shapes.Union justAUnion;
     public static final int _JUST_A_UNION = 18;
-    private static final TField JUST_A_UNION_FIELD_DESC = new TField("just_a_union", TType.STRUCT, (short)18);
+    private static final TField JUST_AUNION_FIELD_DESC = new TField("just_a_union", TType.STRUCT, (short)18);
         private final test.fixtures.shapes.A optionalJustAnA;
     public static final int _OPTIONAL_JUST_AN_A = 51;
-    private static final TField OPTIONAL_JUST_AN__A_FIELD_DESC = new TField("optional_just_an_A", TType.STRUCT, (short)51);
+    private static final TField OPTIONAL_JUST_AN_A_FIELD_DESC = new TField("optional_just_an_A", TType.STRUCT, (short)51);
         private final Set<Integer> optionalSetOfI32;
     public static final int _OPTIONAL_SET_OF_I32 = 52;
     private static final TField OPTIONAL_SET_OF_I32_FIELD_DESC = new TField("optional_set_of_i32", TType.SET, (short)52);
@@ -632,13 +632,13 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     private static final TField OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC = new TField("optional_map_of_string_to_i32", TType.MAP, (short)55);
         private final Map<String, test.fixtures.shapes.A> optionalMapOfStringToA;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_A = 56;
-    private static final TField OPTIONAL_MAP_OF_STRING_TO__A_FIELD_DESC = new TField("optional_map_of_string_to_A", TType.MAP, (short)56);
+    private static final TField OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC = new TField("optional_map_of_string_to_A", TType.MAP, (short)56);
         private final Map<String, List<Integer>> optionalMapOfStringToListOfI32;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32 = 57;
     private static final TField OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC = new TField("optional_map_of_string_to_list_of_i32", TType.MAP, (short)57);
         private final Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A = 58;
-    private static final TField OPTIONAL_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC = new TField("optional_map_of_string_to_list_of_A", TType.MAP, (short)58);
+    private static final TField OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC = new TField("optional_map_of_string_to_list_of_A", TType.MAP, (short)58);
         private final Map<String, Set<Integer>> optionalMapOfStringToSetOfI32;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32 = 59;
     private static final TField OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC = new TField("optional_map_of_string_to_set_of_i32", TType.MAP, (short)59);
@@ -678,7 +678,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     static {
       NAMES_TO_IDS.put("justAnA", 1);
       THRIFT_NAMES_TO_IDS.put("just_an_A", 1);
-      FIELD_METADATA.put(1, JUST_AN__A_FIELD_DESC);
+      FIELD_METADATA.put(1, JUST_AN_A_FIELD_DESC);
       NAMES_TO_IDS.put("setOfI32", 2);
       THRIFT_NAMES_TO_IDS.put("set_of_i32", 2);
       FIELD_METADATA.put(2, SET_OF_I32_FIELD_DESC);
@@ -693,13 +693,13 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       FIELD_METADATA.put(5, MAP_OF_STRING_TO_I32_FIELD_DESC);
       NAMES_TO_IDS.put("mapOfStringToA", 6);
       THRIFT_NAMES_TO_IDS.put("map_of_string_to_A", 6);
-      FIELD_METADATA.put(6, MAP_OF_STRING_TO__A_FIELD_DESC);
+      FIELD_METADATA.put(6, MAP_OF_STRING_TO_A_FIELD_DESC);
       NAMES_TO_IDS.put("mapOfStringToListOfI32", 7);
       THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_i32", 7);
       FIELD_METADATA.put(7, MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
       NAMES_TO_IDS.put("mapOfStringToListOfA", 8);
       THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_A", 8);
-      FIELD_METADATA.put(8, MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
+      FIELD_METADATA.put(8, MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
       NAMES_TO_IDS.put("mapOfStringToSetOfI32", 9);
       THRIFT_NAMES_TO_IDS.put("map_of_string_to_set_of_i32", 9);
       FIELD_METADATA.put(9, MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
@@ -708,25 +708,25 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       FIELD_METADATA.put(10, MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC);
       NAMES_TO_IDS.put("mapOfStringToMapOfStringToA", 11);
       THRIFT_NAMES_TO_IDS.put("map_of_string_to_map_of_string_to_A", 11);
-      FIELD_METADATA.put(11, MAP_OF_STRING_TO_MAP_OF_STRING_TO__A_FIELD_DESC);
+      FIELD_METADATA.put(11, MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC);
       NAMES_TO_IDS.put("listOfSetOfI32", 12);
       THRIFT_NAMES_TO_IDS.put("list_of_set_of_i32", 12);
       FIELD_METADATA.put(12, LIST_OF_SET_OF_I32_FIELD_DESC);
       NAMES_TO_IDS.put("listOfMapOfStringToListOfA", 13);
       THRIFT_NAMES_TO_IDS.put("list_of_map_of_string_to_list_of_A", 13);
-      FIELD_METADATA.put(13, LIST_OF_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
+      FIELD_METADATA.put(13, LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
       NAMES_TO_IDS.put("listOfMapOfStringToA", 14);
       THRIFT_NAMES_TO_IDS.put("list_of_map_of_string_to_A", 14);
-      FIELD_METADATA.put(14, LIST_OF_MAP_OF_STRING_TO__A_FIELD_DESC);
+      FIELD_METADATA.put(14, LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC);
       NAMES_TO_IDS.put("justAnEnum", 17);
       THRIFT_NAMES_TO_IDS.put("just_an_enum", 17);
       FIELD_METADATA.put(17, JUST_AN_ENUM_FIELD_DESC);
       NAMES_TO_IDS.put("justAUnion", 18);
       THRIFT_NAMES_TO_IDS.put("just_a_union", 18);
-      FIELD_METADATA.put(18, JUST_A_UNION_FIELD_DESC);
+      FIELD_METADATA.put(18, JUST_AUNION_FIELD_DESC);
       NAMES_TO_IDS.put("optionalJustAnA", 51);
       THRIFT_NAMES_TO_IDS.put("optional_just_an_A", 51);
-      FIELD_METADATA.put(51, OPTIONAL_JUST_AN__A_FIELD_DESC);
+      FIELD_METADATA.put(51, OPTIONAL_JUST_AN_A_FIELD_DESC);
       NAMES_TO_IDS.put("optionalSetOfI32", 52);
       THRIFT_NAMES_TO_IDS.put("optional_set_of_i32", 52);
       FIELD_METADATA.put(52, OPTIONAL_SET_OF_I32_FIELD_DESC);
@@ -741,13 +741,13 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       FIELD_METADATA.put(55, OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC);
       NAMES_TO_IDS.put("optionalMapOfStringToA", 56);
       THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_A", 56);
-      FIELD_METADATA.put(56, OPTIONAL_MAP_OF_STRING_TO__A_FIELD_DESC);
+      FIELD_METADATA.put(56, OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC);
       NAMES_TO_IDS.put("optionalMapOfStringToListOfI32", 57);
       THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_list_of_i32", 57);
       FIELD_METADATA.put(57, OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
       NAMES_TO_IDS.put("optionalMapOfStringToListOfA", 58);
       THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_list_of_A", 58);
-      FIELD_METADATA.put(58, OPTIONAL_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
+      FIELD_METADATA.put(58, OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
       NAMES_TO_IDS.put("optionalMapOfStringToSetOfI32", 59);
       THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_set_of_i32", 59);
       FIELD_METADATA.put(59, OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
@@ -1875,7 +1875,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (justAnA != null) {
-        oprot.writeFieldBegin(JUST_AN__A_FIELD_DESC);
+        oprot.writeFieldBegin(JUST_AN_A_FIELD_DESC);
         this.justAnA.write0(oprot);
         oprot.writeFieldEnd();
       }
@@ -1921,7 +1921,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       if (mapOfStringToA != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO__A_FIELD_DESC);
+        oprot.writeFieldBegin(MAP_OF_STRING_TO_A_FIELD_DESC);
         Map<String, test.fixtures.shapes.A> _iter0 = mapOfStringToA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
             for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
@@ -1947,7 +1947,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       if (mapOfStringToListOfA != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
+        oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
         Map<String, List<test.fixtures.shapes.A>> _iter0 = mapOfStringToListOfA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
             for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
@@ -1993,7 +1993,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       if (mapOfStringToMapOfStringToA != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO__A_FIELD_DESC);
+        oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC);
         Map<String, Map<String, test.fixtures.shapes.A>> _iter0 = mapOfStringToMapOfStringToA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
             for (Map.Entry<String, Map<String, test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
@@ -2023,7 +2023,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       if (listOfMapOfStringToListOfA != null) {
-        oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
+        oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
         List<Map<String, List<test.fixtures.shapes.A>>> _iter0 = listOfMapOfStringToListOfA;
         oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
             for (Map<String, List<test.fixtures.shapes.A>> _iter1 : _iter0) {
@@ -2042,7 +2042,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       if (listOfMapOfStringToA != null) {
-        oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO__A_FIELD_DESC);
+        oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC);
         List<Map<String, test.fixtures.shapes.A>> _iter0 = listOfMapOfStringToA;
         oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
             for (Map<String, test.fixtures.shapes.A> _iter1 : _iter0) {
@@ -2060,12 +2060,12 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       oprot.writeI32(this.justAnEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.justAnEnum));
       oprot.writeFieldEnd();
       if (justAUnion != null) {
-        oprot.writeFieldBegin(JUST_A_UNION_FIELD_DESC);
+        oprot.writeFieldBegin(JUST_AUNION_FIELD_DESC);
         this.justAUnion.write0(oprot);
         oprot.writeFieldEnd();
       }
       if (optionalJustAnA != null) {
-        oprot.writeFieldBegin(OPTIONAL_JUST_AN__A_FIELD_DESC);
+        oprot.writeFieldBegin(OPTIONAL_JUST_AN_A_FIELD_DESC);
         this.optionalJustAnA.write0(oprot);
         oprot.writeFieldEnd();
       }
@@ -2111,7 +2111,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       if (optionalMapOfStringToA != null) {
-        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO__A_FIELD_DESC);
+        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC);
         Map<String, test.fixtures.shapes.A>  _iter0 = optionalMapOfStringToA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
             for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
@@ -2137,7 +2137,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       if (optionalMapOfStringToListOfA != null) {
-        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
+        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
         Map<String, List<test.fixtures.shapes.A>>  _iter0 = optionalMapOfStringToListOfA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
             for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {

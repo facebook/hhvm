@@ -123,6 +123,11 @@ TEST(PayloadSerializerTest, TestMakeCustomCompression) {
 }
 
 TEST(PayloadSerializerTest, TestCompressionAndUncompression) {
+  if (!folly::kIsLinux) {
+    // on non-linux platforms
+    return;
+  }
+
   std::vector<std::pair<
       std::unique_ptr<PayloadSerializer>,
       bool /*supports custom compression*/>>

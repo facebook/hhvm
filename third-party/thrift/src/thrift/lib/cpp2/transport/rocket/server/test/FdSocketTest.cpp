@@ -159,7 +159,7 @@ class FdWriteBatchingTest : public testing::TestWithParam<bool> {
     }
 
     folly::SocketAddress sockAddr;
-    sockAddr.setFromPath((tempDir_.path() / "fd-test-socket").string());
+    sockAddr.setFromPath((tempDir_.path() / "sock").string());
 
     runner_ = std::make_unique<ScopedServerInterfaceThread>(
         std::make_shared<ServerResponseEnqueuedInterface>(&sendQueue_, baton_),

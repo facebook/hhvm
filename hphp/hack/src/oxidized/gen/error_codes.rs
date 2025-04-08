@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e9b293d71c0fc00123fd18ca8be3f88d>>
+// @generated SignedSource<<58c83eb0c31caa419247bf9722d9e3fd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -505,7 +505,6 @@ pub enum Typing {
     IllegalInformationFlow = 4379,
     ContextImplicitPolicyLeakage = 4380,
     ReifiedFunctionReference = 4381,
-    ClassMethAbstractCall = 4382,
     KindMismatch = 4383,
     UnboundNameTypeConstantAccess = 4384,
     UnknownInformationFlow = 4385,

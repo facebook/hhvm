@@ -671,7 +671,7 @@ module Typing = struct
     | IllegalInformationFlow [@value 4379]
     | ContextImplicitPolicyLeakage [@value 4380]
     | ReifiedFunctionReference [@value 4381]
-    | ClassMethAbstractCall [@value 4382]
+    (* | ClassMethAbstractCall [@value 4382] *)
     | KindMismatch [@value 4383]
     | UnboundNameTypeConstantAccess [@value 4384]
     | UnknownInformationFlow [@value 4385]

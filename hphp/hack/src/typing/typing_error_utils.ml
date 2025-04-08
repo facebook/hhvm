@@ -3005,19 +3005,6 @@ end = struct
     in
     create ~code:Error_code.ReifiedFunctionReference ~claim ()
 
-  let class_meth_abstract_call cname meth_name call_pos decl_pos =
-    let cname = Render.strip_ns cname in
-    let claim =
-      lazy
-        ( call_pos,
-          "Cannot create a class_meth of "
-          ^ cname
-          ^ "::"
-          ^ meth_name
-          ^ "; it is abstract." )
-    and reasons = lazy [(decl_pos, "Declaration is here")] in
-    create ~code:Error_code.ClassMethAbstractCall ~claim ~reasons ()
-
   let reinheriting_classish_const
       dest_classish_pos
       dest_classish_name
@@ -5010,8 +4997,6 @@ end = struct
     | Duplicate_interface { pos; name; others } ->
       duplicate_interface pos name others
     | Reified_function_reference pos -> reified_function_reference pos
-    | Class_meth_abstract_call { pos; class_name; meth_name; decl_pos } ->
-      class_meth_abstract_call class_name meth_name pos decl_pos
     | Reinheriting_classish_const
         {
           pos;

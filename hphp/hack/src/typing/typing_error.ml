@@ -858,12 +858,6 @@ module Primary = struct
         others: Pos_or_decl.t list;
       }
     | Reified_function_reference of Pos.t
-    | Class_meth_abstract_call of {
-        pos: Pos.t;
-        class_name: string;
-        meth_name: string;
-        decl_pos: Pos_or_decl.t;
-      }
     | Reinheriting_classish_const of {
         pos: Pos.t;
         classish_name: string;

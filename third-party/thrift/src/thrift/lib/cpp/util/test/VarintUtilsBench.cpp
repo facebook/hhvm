@@ -194,6 +194,10 @@ BENCHMARK_NAMED_PARAM(bench_read, u64_8b, u64_8b())
 BENCHMARK_NAMED_PARAM(bench_read, u64_9b, u64_9b())
 BENCHMARK_NAMED_PARAM(bench_read, u64_10b, u64_10b())
 
+BENCHMARK_NAMED_PARAM(bench_read, exponential_1b, exponential_1b())
+BENCHMARK_NAMED_PARAM(bench_read, exponential_2b, exponential_1b())
+BENCHMARK_NAMED_PARAM(bench_read, exponential_3b, exponential_1b())
+
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv, true);
   folly::runBenchmarks();

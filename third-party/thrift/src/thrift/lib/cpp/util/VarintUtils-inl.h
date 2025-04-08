@@ -110,7 +110,7 @@ void readVarintSlow(CursorT& c, T& value) {
 [[noreturn]] void throwInvalidVarint();
 
 template <class T>
-size_t readVarintMediumSlowUnrolled(T& value, const uint8_t* p) {
+size_t readVarintMediumSlowUnrolledX86(T& value, const uint8_t* p) {
   uint64_t result;
   const uint8_t* start = p;
   do {
@@ -134,6 +134,39 @@ size_t readVarintMediumSlowUnrolled(T& value, const uint8_t* p) {
   } while (false);
   value = static_cast<T>(result);
   return p - start;
+}
+
+// This way of structuring code branching guarantees that only one conditional
+// jump will be taken. It provides a straight-line execution path, while
+// breaking from it when no more bytes need to be read.
+template <class T>
+size_t readVarintMediumSlowUnrolledAarch64(T& result, const uint8_t* p) {
+  T byte;
+  // clang-format off
+  byte = *p++; result  = (byte & 0x7f);       if (UNLIKELY(!(byte & 0x80))) return 1;
+  byte = *p++; result |= (byte & 0x7f) <<  7; if (UNLIKELY(!(byte & 0x80))) return 2;
+  if constexpr (sizeof(T) <= 1) throwInvalidVarint();
+  byte = *p++; result |= (byte & 0x7f) << 14; if (UNLIKELY(!(byte & 0x80))) return 3;
+  if constexpr (sizeof(T) <= 2) throwInvalidVarint();
+  byte = *p++; result |= (byte & 0x7f) << 21; if (UNLIKELY(!(byte & 0x80))) return 4;
+  byte = *p++; result |= (byte & 0x7f) << 28; if (UNLIKELY(!(byte & 0x80))) return 5;
+  if constexpr (sizeof(T) <= 4) throwInvalidVarint();
+  byte = *p++; result |= (byte & 0x7f) << 35; if (UNLIKELY(!(byte & 0x80))) return 6;
+  byte = *p++; result |= (byte & 0x7f) << 42; if (UNLIKELY(!(byte & 0x80))) return 7;
+  byte = *p++; result |= (byte & 0x7f) << 49; if (UNLIKELY(!(byte & 0x80))) return 8;
+  byte = *p++; result |= (byte & 0x7f) << 56; if (UNLIKELY(!(byte & 0x80))) return 9;
+  byte = *p++; result |= (byte & 0x7f) << 63; if (UNLIKELY(!(byte & 0x80))) return 10;
+  // clang-format on
+  throwInvalidVarint();
+}
+
+template <class T>
+size_t readVarintMediumSlowUnrolled(T& result, const uint8_t* p) {
+  if constexpr (folly::kIsArchAArch64) {
+    return readVarintMediumSlowUnrolledAarch64(result, p);
+  } else {
+    return readVarintMediumSlowUnrolledX86(result, p);
+  }
 }
 
 // The fast-path of the optimized medium-slow paths. Decodes the first two bytes

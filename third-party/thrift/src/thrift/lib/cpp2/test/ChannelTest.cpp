@@ -1069,7 +1069,15 @@ class ClientCloseOnErrorTest
     if (forcePendingSend_) {
       // make request size big enough to not fit into kernel buffer
       getsockopt(getFd1(), SOL_SOCKET, SO_RCVBUF, &reqSize_, &ss);
-      reqSize_++;
+
+      if (folly::kIsApple) {
+        // On macOS, the kernel does not fail the request if the size slightly
+        // exceeds the kernel buffer. Significantly increase the
+        // size to ensure the intended behavior is triggered.
+        reqSize_ *= 2;
+      } else {
+        reqSize_++;
+      }
     }
 
     channel1_->setCallback(this);

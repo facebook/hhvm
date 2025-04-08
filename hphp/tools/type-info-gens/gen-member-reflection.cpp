@@ -162,7 +162,7 @@ void generate(const std::string& source_executable, std::ostream& o) {
         if (type.name.linkage != ObjectTypeName::Linkage::external) return;
 
         // Assume the first, complete, external definition is the canonical one.
-        if (!reflectables.count(type.name.name)) return;
+        if (!reflectables.contains(type.name.name)) return;
         reflectables.erase(type.name.name);
 
         if (first) {
@@ -206,13 +206,13 @@ int main(int argc, char** argv) {
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
-    if (vm.count("help")) {
+    if (vm.contains("help")) {
       std::cout << kProgramDescription << "\n\n"
                 << desc << std::endl;
       return 1;
     }
 
-    if (vm.count("num_threads")) {
+    if (vm.contains("num_threads")) {
       auto n = vm["num_threads"].as<int>();
       if (n > 0) {
         NumThreads = n;
@@ -225,7 +225,7 @@ int main(int argc, char** argv) {
     po::notify(vm);
 
     auto const source_executable = vm["source_file"].as<std::string>();
-    auto const output_filename = vm.count("install_dir")
+    auto const output_filename = vm.contains("install_dir")
       ? folly::sformat(
           "{}{}{}",
           vm["install_dir"].as<std::string>(),

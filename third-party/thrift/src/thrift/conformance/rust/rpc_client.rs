@@ -22,6 +22,16 @@ use anyhow::anyhow;
 use anyhow::Result;
 use clap::Parser;
 use futures::stream::StreamExt;
+use rpc::rpc::SinkBasicClientInstruction;
+use rpc::rpc::SinkBasicClientTestResult;
+use rpc::rpc::SinkChunkTimeoutClientInstruction;
+use rpc::rpc::SinkChunkTimeoutClientTestResult;
+use rpc::rpc::SinkDeclaredExceptionClientInstruction;
+use rpc::rpc::SinkDeclaredExceptionClientTestResult;
+use rpc::rpc::SinkInitialResponseClientInstruction;
+use rpc::rpc::SinkInitialResponseClientTestResult;
+use rpc::rpc::SinkUndeclaredExceptionClientInstruction;
+use rpc::rpc::SinkUndeclaredExceptionClientTestResult;
 use rpc::rpc::StreamBasicClientInstruction;
 use rpc::rpc::StreamBasicClientTestResult;
 use rpc::rpc::StreamChunkTimeoutClientInstruction;
@@ -40,6 +50,9 @@ use rpc::rpc::StreamInitialUndeclaredExceptionClientInstruction;
 use rpc::rpc::StreamInitialUndeclaredExceptionClientTestResult;
 use rpc::rpc::StreamUndeclaredExceptionClientInstruction;
 use rpc::rpc::StreamUndeclaredExceptionClientTestResult;
+use rpc_clients::rpc::errors::r_p_c_conformance_service::SinkChunkTimeoutSinkFinalError;
+use rpc_clients::rpc::errors::r_p_c_conformance_service::SinkDeclaredExceptionSinkError;
+use rpc_clients::rpc::errors::r_p_c_conformance_service::SinkUndeclaredExceptionSinkError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::StreamDeclaredExceptionStreamError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::StreamInitialDeclaredExceptionError;
 use rpc_clients::rpc::make_RPCConformanceService;
@@ -148,20 +161,16 @@ async fn test(client: &dyn RPCConformanceService) -> Result<()> {
         streamInitialDeclaredException(i) => stream_initial_declared_exception(client, i).await,
         streamInitialUndeclaredException(i) => stream_initial_undeclared_exception(client, i).await,
         streamInitialTimeout(i) => stream_initial_timeout(client, i).await,
-        sinkBasic(i) => not_implemented(),
-        sinkChunkTimeout(i) => not_implemented(),
-        sinkInitialResponse(i) => not_implemented(),
-        sinkDeclaredException(i) => not_implemented(),
-        sinkUndeclaredException(i) => not_implemented(),
+        sinkBasic(i) => sink_basic(client, i).await,
+        sinkChunkTimeout(i) => sink_chunk_timeout(client, i).await,
+        sinkInitialResponse(i) => sink_initial_response(client, i).await,
+        sinkDeclaredException(i) => sink_declared_exception(client, i).await,
+        sinkUndeclaredException(i) => sink_undeclared_exception(client, i).await,
         UnknownField(i) => Err(anyhow!(format!("not supported: {:?}", i))),
     }
 }
 
 // ---
-
-fn not_implemented() -> Result<()> {
-    Err(anyhow!("not implemented"))
-}
 
 async fn create_interaction(
     client: &dyn RPCConformanceService,
@@ -539,5 +548,159 @@ async fn stream_initial_timeout(
     client
         .sendTestResult(&ClientTestResult::streamInitialTimeout(test_result))
         .await?;
+    Ok(())
+}
+
+async fn sink_basic(
+    client: &dyn RPCConformanceService,
+    instr: &SinkBasicClientInstruction,
+) -> Result<()> {
+    let sink_result = client.sinkBasic(&instr.request).await?;
+    let final_response = (sink_result.sink)(
+        futures::stream::iter(instr.sinkPayloads.clone())
+            .map(Ok)
+            .boxed(),
+    )
+    .await
+    .map_err(|err| anyhow!("sink_basic: sink failed: {:?}", err))?;
+
+    let test_result = SinkBasicClientTestResult {
+        finalResponse: final_response,
+        ..Default::default()
+    };
+    client
+        .sendTestResult(&ClientTestResult::sinkBasic(test_result))
+        .await?;
+
+    Ok(())
+}
+
+async fn sink_chunk_timeout(
+    client: &dyn RPCConformanceService,
+    instr: &SinkChunkTimeoutClientInstruction,
+) -> Result<()> {
+    let sink_result = client.sinkChunkTimeout(&instr.request).await?;
+    let final_response = (sink_result.sink)(
+        futures::stream::iter(instr.sinkPayloads.clone())
+            .map(Ok)
+            .boxed(),
+    )
+    .await;
+
+    let chunk_timeout = match final_response {
+        Ok(_) => false,
+        Err(SinkChunkTimeoutSinkFinalError::ApplicationException(aexn))
+            if aexn.type_ == fbthrift::ApplicationExceptionErrorCode::Timeout =>
+        {
+            true
+        }
+        _ => false,
+    };
+
+    let test_result = SinkChunkTimeoutClientTestResult {
+        chunkTimeoutException: chunk_timeout,
+        ..Default::default()
+    };
+    client
+        .sendTestResult(&ClientTestResult::sinkChunkTimeout(test_result))
+        .await?;
+
+    Ok(())
+}
+
+async fn sink_initial_response(
+    client: &dyn RPCConformanceService,
+    instr: &SinkInitialResponseClientInstruction,
+) -> Result<()> {
+    let sink_result = client.sinkInitialResponse(&instr.request).await?;
+    let final_response = (sink_result.sink)(
+        futures::stream::iter(instr.sinkPayloads.clone())
+            .map(Ok)
+            .boxed(),
+    )
+    .await?;
+
+    let test_result = SinkInitialResponseClientTestResult {
+        finalResponse: final_response,
+        initialResponse: sink_result.initial_response,
+        ..Default::default()
+    };
+    client
+        .sendTestResult(&ClientTestResult::sinkInitialResponse(test_result))
+        .await?;
+
+    Ok(())
+}
+
+async fn sink_declared_exception(
+    client: &dyn RPCConformanceService,
+    instr: &SinkDeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let sink_result = client.sinkDeclaredException(&instr.request).await?;
+    let final_response = if let Some(ue) = &instr.userException {
+        (sink_result.sink)(
+            futures::stream::iter([ue.clone()])
+                .map(|ex| Err(SinkDeclaredExceptionSinkError::e(ex)))
+                .boxed(),
+        )
+        .await
+    } else {
+        (sink_result.sink)(futures::stream::empty().boxed()).await
+    };
+
+    if instr.userException.is_some() {
+        assert!(final_response.is_err());
+    } else {
+        assert!(final_response.is_ok());
+    }
+
+    let test_result = SinkDeclaredExceptionClientTestResult {
+        sinkThrew: instr.userException.is_some(),
+        ..Default::default()
+    };
+    client
+        .sendTestResult(&ClientTestResult::sinkDeclaredException(test_result))
+        .await?;
+
+    Ok(())
+}
+
+async fn sink_undeclared_exception(
+    client: &dyn RPCConformanceService,
+    instr: &SinkUndeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let sink_result = client.sinkUndeclaredException(&instr.request).await?;
+    let final_response = if let Some(ue) = &instr.exceptionMessage {
+        (sink_result.sink)(
+            futures::stream::iter([ue.clone()])
+                .map(|ex| {
+                    Err(SinkUndeclaredExceptionSinkError::ApplicationException(
+                        fbthrift::ApplicationException::new(
+                            fbthrift::ApplicationExceptionErrorCode::Unknown,
+                            ex,
+                        ),
+                    ))
+                })
+                .boxed(),
+        )
+        .await
+    } else {
+        (sink_result.sink)(futures::stream::empty().boxed()).await
+    };
+
+    if instr.exceptionMessage.is_some() {
+        assert!(final_response.is_err());
+    } else {
+        assert!(final_response.is_ok());
+    }
+
+    let test_result = SinkUndeclaredExceptionClientTestResult {
+        sinkThrew: instr.exceptionMessage.is_some(),
+        ..Default::default()
+    };
+    client
+        .sendTestResult(&ClientTestResult::sinkUndeclaredException(test_result))
+        .await?;
+
     Ok(())
 }

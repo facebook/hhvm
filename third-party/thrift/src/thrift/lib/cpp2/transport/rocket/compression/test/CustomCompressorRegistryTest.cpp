@@ -64,7 +64,7 @@ class MockCompressorFactory : public CustomCompressorFactory {
   }
 
   std::shared_ptr<CustomCompressor> make(
-      CustomCompressionSetupResponse /*response*/,
+      CustomCompressionSetupResponse const& /*response*/,
       CompressorLocation /*location*/) const override {
     return nullptr;
   }

@@ -196,7 +196,7 @@ class TestCustomThriftCompressorFactory
   }
 
   std::shared_ptr<apache::thrift::rocket::CustomCompressor> make(
-      apache::thrift::CustomCompressionSetupResponse response,
+      apache::thrift::CustomCompressionSetupResponse const& response,
       CustomCompressorFactory::CompressorLocation location) const override {
     switch (location) {
       case CustomCompressorFactory::CompressorLocation::CLIENT: {

@@ -69,8 +69,7 @@ func (p *compositeProcessor) Include(processor Processor) {
 
 // GetProcessorFunction multiplexes redirects to the appropriate Processor
 func (p *compositeProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
-	tfunc, _ := p.processorFunctionMap[name]
-	return tfunc
+	return p.processorFunctionMap[name]
 }
 
 // ProcessorMap returns the map that maps method names to Processors

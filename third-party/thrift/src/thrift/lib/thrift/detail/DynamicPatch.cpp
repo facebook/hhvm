@@ -600,7 +600,7 @@ void DynamicStructurePatch<IsUnion>::ensurePatchable() {
     ensure_[fieldId] = emptyValue(field.getType());
     Object patch;
     patch[static_cast<FieldId>(op::PatchOp::Assign)] = std::move(field);
-    patchAfter_[fieldId].fromObject(patch);
+    patchAfter_[fieldId].fromObject(std::move(patch));
   }
   assign_.reset();
 }

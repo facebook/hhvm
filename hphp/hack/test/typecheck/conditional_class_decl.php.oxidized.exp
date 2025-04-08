@@ -1,41 +1,15 @@
 oxidized direct decl parser does not match oxidized_by_ref DDP:
-oxidized:
-[("\\C",
-  (Shallow_decl_defs.Class
-     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
-       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-       sc_module = None; sc_name = ([18:7-8], "\\C"); sc_tparams = [];
-       sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
-       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
-       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package = None }))
-  ]
-oxidized_by_ref:
-[("\\A",
-  (Shallow_decl_defs.Class
-     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
-       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-       sc_module = None; sc_name = ([13:9-10], "\\A"); sc_tparams = [];
-       sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
-       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
-       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package = None }));
-  ("\\B",
+--- oxidized
++++ oxidized_by_ref
+@@ -1,15 +1,43 @@
+-[("\\C",
++[("\\A",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-        sc_module = None; sc_name = ([15:9-10], "\\B"); sc_tparams = [];
+-       sc_module = None; sc_name = ([18:7-8], "\\C"); sc_tparams = [];
++       sc_module = None; sc_name = ([13:9-10], "\\A"); sc_tparams = [];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
@@ -43,19 +17,34 @@ oxidized_by_ref:
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package = None }));
-  ("\\C",
-   (Shallow_decl_defs.Class
-      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
-        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-        sc_module = None; sc_name = ([18:7-8], "\\C"); sc_tparams = [];
-        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
-        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
-        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package = None }))
-  ]
+-       sc_package = None }))
++       sc_package = None }));
++  ("\\B",
++   (Shallow_decl_defs.Class
++      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
++        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
++        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
++        sc_module = None; sc_name = ([15:9-10], "\\B"); sc_tparams = [];
++        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
++        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
++        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
++        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
++        sc_typeconsts = []; sc_props = []; sc_sprops = [];
++        sc_constructor = None; sc_static_methods = []; sc_methods = [];
++        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
++        sc_package = None }));
++  ("\\C",
++   (Shallow_decl_defs.Class
++      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
++        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
++        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
++        sc_module = None; sc_name = ([18:7-8], "\\C"); sc_tparams = [];
++        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
++        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
++        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
++        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
++        sc_typeconsts = []; sc_props = []; sc_sprops = [];
++        sc_constructor = None; sc_static_methods = []; sc_methods = [];
++        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
++        sc_package = None }))
+   ]

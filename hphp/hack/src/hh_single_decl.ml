@@ -111,8 +111,29 @@ let compare_oxidized ctx fn text =
     if not decls_matched then begin
       Printf.printf
         "oxidized direct decl parser does not match oxidized_by_ref DDP:\n%!";
-      Printf.printf "oxidized:\n%s\n%!" oxidized;
-      Printf.printf "oxidized_by_ref:\n%s\n%!" oxidized_by_ref
+      Tempfile.with_real_tempdir @@ fun dir ->
+      let temp_dir = Path.to_string dir in
+      let oxidized_name = "oxidized" in
+      let oxidized_by_ref_name = "oxidized_by_ref" in
+      let oxidized_file =
+        Stdlib.Filename.temp_file ~temp_dir oxidized_name ".txt"
+      in
+      let oxidized_by_ref_file =
+        Stdlib.Filename.temp_file ~temp_dir oxidized_by_ref_name ".txt"
+      in
+      Disk.write_file ~file:oxidized_file ~contents:(oxidized ^ "\n");
+      Disk.write_file
+        ~file:oxidized_by_ref_file
+        ~contents:(oxidized_by_ref ^ "\n");
+      Ppxlib_print_diff.print
+        ~diff_command:
+          (Printf.sprintf
+             "diff -U9999 --label '%s' --label '%s'"
+             oxidized_name
+             oxidized_by_ref_name)
+        ~file1:oxidized_file
+        ~file2:oxidized_by_ref_file
+        ()
     end
   in
   decls_matched

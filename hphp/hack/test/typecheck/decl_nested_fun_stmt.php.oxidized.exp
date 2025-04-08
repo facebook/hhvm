@@ -1,66 +1,31 @@
 oxidized direct decl parser does not match oxidized_by_ref DDP:
-oxidized:
-[("\\f",
-  (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
-       fe_internal = false;
-       fe_type =
-       (Rwitness_from_decl ([12:10-11]),
-        (Tfun
-           { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-             ft_implicit_params = { capability = (CapDefaults [12:10-11]) };
-             ft_ret = (Rhint ([12:15-19]), (Tprim Tvoid));
-             ft_flags =
-             { Typing_defs_flags.Fun.return_disposable = false;
-               async = false; generator = false; fun_kind = FSync;
-               is_function_pointer = false; returns_readonly = false;
-               readonly_this = false; support_dynamic_type = false;
-               is_memoized = false; variadic = false };
-             ft_cross_package = None; ft_instantiated = true }));
-       fe_pos = [12:10-11]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false }))
-  ]
-oxidized_by_ref:
-[("\\g",
-  (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
-       fe_internal = false;
-       fe_type =
-       (Rwitness_from_decl ([13:12-13]),
-        (Tfun
-           { ft_tparams = []; ft_where_constraints = [];
-             ft_params =
-             [{ fp_pos = [13:14-16]; fp_name = (Some "$a");
-                fp_type = (Rwitness_from_decl ([13:14-16]), Tany);
-                fp_flags =
-                { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; is_optional = false; readonly = false;
-                  ignore_readonly_error = false; splat = false };
-                fp_def_value = None }
-               ];
-             ft_implicit_params = { capability = (CapDefaults [13:12-13]) };
-             ft_ret = (Rwitness_from_decl ([13:12-13]), Tany);
-             ft_flags =
-             { Typing_defs_flags.Fun.return_disposable = false;
-               async = false; generator = false; fun_kind = FSync;
-               is_function_pointer = false; returns_readonly = false;
-               readonly_this = false; support_dynamic_type = false;
-               is_memoized = false; variadic = false };
-             ft_cross_package = None; ft_instantiated = true }));
-       fe_pos = [13:12-13]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false }));
-  ("\\f",
+--- oxidized
++++ oxidized_by_ref
+@@ -1,21 +1,50 @@
+-[("\\f",
++[("\\g",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package = None; fe_internal = false;
+      { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
+        fe_internal = false;
         fe_type =
-        (Rwitness_from_decl ([12:10-11]),
+-       (Rwitness_from_decl ([12:10-11]),
++       (Rwitness_from_decl ([13:12-13]),
          (Tfun
-            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [12:10-11]) };
-              ft_ret = (Rhint ([12:15-19]), (Tprim Tvoid));
+-           { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+-             ft_implicit_params = { capability = (CapDefaults [12:10-11]) };
+-             ft_ret = (Rhint ([12:15-19]), (Tprim Tvoid));
++           { ft_tparams = []; ft_where_constraints = [];
++             ft_params =
++             [{ fp_pos = [13:14-16]; fp_name = (Some "$a");
++                fp_type = (Rwitness_from_decl ([13:14-16]), Tany);
++                fp_flags =
++                { Typing_defs_flags.FunParam.accept_disposable = false;
++                  inout = false; is_optional = false; readonly = false;
++                  ignore_readonly_error = false; splat = false };
++                fp_def_value = None }
++               ];
++             ft_implicit_params = { capability = (CapDefaults [13:12-13]) };
++             ft_ret = (Rwitness_from_decl ([13:12-13]), Tany);
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -68,7 +33,29 @@ oxidized_by_ref:
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
               ft_cross_package = None; ft_instantiated = true }));
-        fe_pos = [12:10-11]; fe_php_std_lib = false;
+-       fe_pos = [12:10-11]; fe_php_std_lib = false;
++       fe_pos = [13:12-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false }))
-  ]
+-       fe_no_auto_likes = false }))
++       fe_no_auto_likes = false }));
++  ("\\f",
++   (Shallow_decl_defs.Fun
++      { Typing_defs.fe_deprecated = None; fe_module = None;
++        fe_package = None; fe_internal = false;
++        fe_type =
++        (Rwitness_from_decl ([12:10-11]),
++         (Tfun
++            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
++              ft_implicit_params = { capability = (CapDefaults [12:10-11]) };
++              ft_ret = (Rhint ([12:15-19]), (Tprim Tvoid));
++              ft_flags =
++              { Typing_defs_flags.Fun.return_disposable = false;
++                async = false; generator = false; fun_kind = FSync;
++                is_function_pointer = false; returns_readonly = false;
++                readonly_this = false; support_dynamic_type = false;
++                is_memoized = false; variadic = false };
++              ft_cross_package = None; ft_instantiated = true }));
++        fe_pos = [12:10-11]; fe_php_std_lib = false;
++        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
++        fe_no_auto_likes = false }))
+   ]

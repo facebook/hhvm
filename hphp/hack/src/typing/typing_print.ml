@@ -1679,13 +1679,15 @@ module ErrorString = struct
     | Tnewtype (n, _, ty)
       when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env) ->
       type_ ~fuel env ty
-    | Tnewtype (x, _, _) when String.equal x SN.Classes.cClassname ->
-      (fuel, "a classname string")
-    | Tclass_ptr x ->
-      let (fuel, ty_str) = ety_to_string x in
+    | Tnewtype (x, [ty], _) when String.equal x SN.Classes.cClassname ->
+      let (fuel, ty_str) = ety_to_string ty in
+      (fuel, "a classname string for " ^ ty_str)
+    | Tclass_ptr ty ->
+      let (fuel, ty_str) = ety_to_string ty in
       (fuel, "a class pointer for " ^ ty_str)
-    | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->
-      (fuel, "a typename string")
+    | Tnewtype (x, [ty], _) when String.equal x SN.Classes.cTypename ->
+      let (fuel, ty_str) = ety_to_string ty in
+      (fuel, "a typename string for " ^ ty_str)
     | Tnewtype _ ->
       let (fuel, ty_str) = ety_to_string ety in
       (fuel, "a value of type " ^ ty_str)

@@ -20,7 +20,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
@@ -103,7 +105,7 @@ func sendException(prot types.Encoder, name string, seqID int32, err types.Appli
 // 1. Read the message from the protocol.
 // 2. Process the message.
 // 3. Write the message to the protocol.
-func process(ctx context.Context, processor Processor, prot Protocol) error {
+func process(ctx context.Context, processor Processor, prot Protocol, processorStats map[string]*stats.TimingSeries) error {
 	// Step 1: Decode message only using Decoder interface and GetResponseHeaders method on the protocol.
 
 	// Step 1a: find the processor function for the message.
@@ -137,7 +139,12 @@ func process(ctx context.Context, processor Processor, prot Protocol) error {
 	// Step 2: Processing the message without using the Protocol.
 	var result types.WritableStruct
 	if pfunc != nil {
+		pfuncStartTime := time.Now()
 		result, appException = pfunc.RunContext(ctx, argStruct)
+		pfuncDuration := time.Since(pfuncStartTime)
+		if timingSeries := processorStats[name]; timingSeries != nil {
+			timingSeries.RecordWithStatus(pfuncDuration, appException == nil)
+		}
 	}
 
 	// Often times oneway calls do not even have msgType ONEWAY.

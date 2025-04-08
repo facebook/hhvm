@@ -38,6 +38,7 @@ type rocketServerTransport struct {
 	connContext ConnContextFunc
 	log         func(format string, args ...any)
 	stats       *stats.ServerStats
+	pstats      map[string]*stats.TimingSeries
 }
 
 func newRocketServerTransport(
@@ -47,6 +48,7 @@ func newRocketServerTransport(
 	transportID TransportID,
 	log func(format string, args ...any),
 	stats *stats.ServerStats,
+	pstats map[string]*stats.TimingSeries,
 ) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
@@ -55,6 +57,7 @@ func newRocketServerTransport(
 		connContext: connContext,
 		log:         log,
 		stats:       stats,
+		pstats:      pstats,
 	}
 }
 
@@ -191,7 +194,7 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 }
 
 func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor Processor) error {
-	exc := process(ctx, processor, protocol)
+	exc := process(ctx, processor, protocol, r.pstats)
 	if isEOF(exc) {
 		return exc
 	}

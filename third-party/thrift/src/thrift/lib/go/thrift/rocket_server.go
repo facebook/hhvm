@@ -83,7 +83,7 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
-		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log, s.stats), nil
+		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log, s.stats, s.pstats), nil
 	}
 	r := rsocket.Receive().
 		Scheduler(s.requestScheduler(), s.responeScheduler()).
@@ -112,7 +112,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats)
+	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats, s.pstats)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResonse),
@@ -126,6 +126,7 @@ type rocketServerSocket struct {
 	pipeliningEnabled bool
 	log               func(format string, args ...any)
 	stats             *stats.ServerStats
+	pstats            map[string]*stats.TimingSeries
 }
 
 func newRocketServerSocket(
@@ -134,6 +135,7 @@ func newRocketServerSocket(
 	pipeliningEnabled bool,
 	log func(format string, args ...any),
 	stats *stats.ServerStats,
+	pstats map[string]*stats.TimingSeries,
 ) *rocketServerSocket {
 	return &rocketServerSocket{
 		ctx:               ctx,
@@ -141,6 +143,7 @@ func newRocketServerSocket(
 		pipeliningEnabled: pipeliningEnabled,
 		log:               log,
 		stats:             stats,
+		pstats:            pstats,
 	}
 }
 
@@ -166,7 +169,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		s.stats.SchedulingWorkCount.Decr()
 		s.stats.WorkingCount.Incr()
 		defer s.stats.WorkingCount.Decr()
-		if err := process(ctx, s.proc, protocol); err != nil {
+		if err := process(ctx, s.proc, protocol, s.pstats); err != nil {
 			return nil, err
 		}
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
@@ -194,7 +197,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		return
 	}
 	// TODO: support pipelining
-	if err := process(s.ctx, s.proc, protocol); err != nil {
+	if err := process(s.ctx, s.proc, protocol, s.pstats); err != nil {
 		s.log("rocketServer fireAndForget process error: %v", err)
 		return
 	}

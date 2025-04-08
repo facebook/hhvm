@@ -25,18 +25,19 @@ import (
 // The headersKeyType type is unexported to prevent collisions with context keys.
 type headersKeyType int
 
-// RequestHeadersKey is a context key.
-const RequestHeadersKey headersKeyType = 0
-
-// ResponseHeadersKey is a context key.
-const ResponseHeadersKey headersKeyType = 1
+const (
+	// requestHeadersKey is a context key.
+	requestHeadersKey headersKeyType = 0
+	// responseHeadersKey is a context key.
+	responseHeadersKey headersKeyType = 1
+)
 
 // AddHeader adds a header to the context, which will be sent as part of the request.
 // AddHeader can be called multiple times to add multiple headers.
 // These headers are not persistent and will only be sent with the current request.
 func AddHeader(ctx context.Context, key string, value string) (context.Context, error) {
 	headersMap := make(map[string]string)
-	if headers := ctx.Value(RequestHeadersKey); headers != nil {
+	if headers := ctx.Value(requestHeadersKey); headers != nil {
 		var ok bool
 		headersMap, ok = headers.(map[string]string)
 		if !ok {
@@ -44,35 +45,35 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 		}
 	}
 	headersMap[key] = value
-	ctx = context.WithValue(ctx, RequestHeadersKey, headersMap)
+	ctx = context.WithValue(ctx, requestHeadersKey, headersMap)
 	return ctx, nil
 }
 
 // WithHeaders attaches thrift headers to a ctx.
 func WithHeaders(ctx context.Context, headers map[string]string) context.Context {
-	storedHeaders := ctx.Value(RequestHeadersKey)
+	storedHeaders := ctx.Value(requestHeadersKey)
 	if storedHeaders == nil {
-		return context.WithValue(ctx, RequestHeadersKey, headers)
+		return context.WithValue(ctx, requestHeadersKey, headers)
 	}
 	headersMap, ok := storedHeaders.(map[string]string)
 	if !ok {
-		return context.WithValue(ctx, RequestHeadersKey, headers)
+		return context.WithValue(ctx, requestHeadersKey, headers)
 	}
 	for k, v := range headers {
 		headersMap[k] = v
 	}
-	return context.WithValue(ctx, RequestHeadersKey, headersMap)
+	return context.WithValue(ctx, requestHeadersKey, headersMap)
 }
 
 // SetHeaders replaces all the current headers.
 func SetHeaders(ctx context.Context, headers map[string]string) context.Context {
-	return context.WithValue(ctx, RequestHeadersKey, headers)
+	return context.WithValue(ctx, requestHeadersKey, headers)
 }
 
 // GetHeaders gets thrift headers from ctx.
 func GetHeaders(ctx context.Context) map[string]string {
 	// check for headersKey
-	v, ok := ctx.Value(RequestHeadersKey).(map[string]string)
+	v, ok := ctx.Value(requestHeadersKey).(map[string]string)
 	if ok {
 		return v
 	}
@@ -81,7 +82,7 @@ func GetHeaders(ctx context.Context) map[string]string {
 
 // NewResponseHeadersContext returns a new context with the response headers value.
 func NewResponseHeadersContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, ResponseHeadersKey, make(map[string]string))
+	return context.WithValue(ctx, responseHeadersKey, make(map[string]string))
 }
 
 // ResponseHeadersFromContext returns the response headers from the context.
@@ -89,7 +90,7 @@ func ResponseHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}
-	responseHeaders := ctx.Value(ResponseHeadersKey)
+	responseHeaders := ctx.Value(responseHeadersKey)
 	if responseHeaders == nil {
 		return nil
 	}
@@ -105,7 +106,7 @@ func RequestHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}
-	requestHeaders := ctx.Value(RequestHeadersKey)
+	requestHeaders := ctx.Value(requestHeadersKey)
 	if requestHeaders == nil {
 		return nil
 	}
@@ -123,7 +124,7 @@ func SetRequestHeaders(ctx context.Context, protocol Protocol) error {
 	if ctx == nil {
 		return nil
 	}
-	headers := ctx.Value(RequestHeadersKey)
+	headers := ctx.Value(requestHeadersKey)
 	if headers == nil {
 		return nil
 	}
@@ -141,7 +142,7 @@ func setResponseHeaders(ctx context.Context, responseHeaders map[string]string) 
 	if ctx == nil {
 		return
 	}
-	responseHeadersMapIf := ctx.Value(ResponseHeadersKey)
+	responseHeadersMapIf := ctx.Value(responseHeadersKey)
 	if responseHeadersMapIf == nil {
 		return
 	}

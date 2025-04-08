@@ -634,6 +634,7 @@ watchman/fs/UnixDirHandle.cpp
 watchman/fs/WindowsTime.cpp
 watchman/UserDir.cpp
 watchman/WatchmanConfig.cpp
+watchman/XattrUtils.cpp
 watchman/fs/WinDirHandle.cpp
 watchman/bser.cpp
 watchman/listener-user.cpp

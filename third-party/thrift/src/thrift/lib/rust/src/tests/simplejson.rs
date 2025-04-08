@@ -132,7 +132,25 @@ fn write_f64_list() {
 
     // json can't handle infinity or nan
     let v: serde_json::Result<serde_json::Value> = serde_json::from_slice(&buf);
-    assert!(v.is_err());
+    assert_eq!(
+        v.unwrap(),
+        serde_json::Value::Array(vec![
+            serde_json::Value::Number(serde_json::Number::from_f64(459.3).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(0.0).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(-1.0).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(1.0).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(0.5).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(0.3333).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(3.14159).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(1.537e-38).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(1.673e25).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(6.02214179e23).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(-6.02214179e23).unwrap()),
+            serde_json::Value::String("Infinity".to_string()),
+            serde_json::Value::String("-Infinity".to_string()),
+            serde_json::Value::String("NaN".to_string())
+        ])
+    );
 
     let buf2 = serialize!(SimpleJsonProtocol, |p| {
         p.write_list_begin(thetype, thelen - 2);
@@ -148,7 +166,22 @@ fn write_f64_list() {
     });
 
     let v: serde_json::Result<serde_json::Value> = serde_json::from_slice(&buf2);
-    assert!(v.is_ok());
+    assert_eq!(
+        v.unwrap(),
+        serde_json::Value::Array(vec![
+            serde_json::Value::Number(serde_json::Number::from_f64(459.3).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(0.0).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(-1.0).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(1.0).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(0.5).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(0.3333).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(3.14159).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(1.537e-38).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(1.673e25).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(6.02214179e23).unwrap()),
+            serde_json::Value::Number(serde_json::Number::from_f64(-6.02214179e23).unwrap()),
+        ])
+    );
     assert_eq!(
         buf2,
         "[459.3,0.0,-1.0,1.0,0.5,0.3333,3.14159,\

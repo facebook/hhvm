@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::io;
 use std::io::Cursor;
 use std::num::ParseFloatError;
 use std::str::FromStr;
@@ -153,6 +154,25 @@ impl<B: BufMutExt> SimpleJsonProtocolSerializer<B> {
         {
             SerializationState::InContainerKey => true,
             _ => false,
+        }
+    }
+    #[inline]
+    fn write_floating_point_number<F, W>(&mut self, value: F, finite_writer: W)
+    where
+        F: num_traits::Float,
+        W: FnOnce(&mut CompactFormatter, &mut Writer<B>, F) -> io::Result<()>,
+    {
+        if value.is_infinite() {
+            if value.is_sign_positive() {
+                self.write_string("Infinity");
+            } else {
+                self.write_string("-Infinity");
+            }
+        } else if value.is_nan() {
+            self.write_string("NaN");
+        } else {
+            finite_writer(&mut CompactFormatter, &mut self.buffer, value)
+                .expect("Somehow failed to do \"io\" on a buffer");
         }
     }
 }
@@ -337,9 +357,7 @@ impl<B: BufMutExt> ProtocolWriter for SimpleJsonProtocolSerializer<B> {
             self.write_string(&value.to_string());
             return;
         }
-        CompactFormatter
-            .write_f64(&mut self.buffer, value)
-            .expect("Somehow failed to do \"io\" on a buffer");
+        self.write_floating_point_number(value, CompactFormatter::write_f64::<Writer<B>>);
     }
     #[inline]
     fn write_float(&mut self, value: f32) {
@@ -347,9 +365,7 @@ impl<B: BufMutExt> ProtocolWriter for SimpleJsonProtocolSerializer<B> {
             self.write_string(&value.to_string());
             return;
         }
-        CompactFormatter
-            .write_f32(&mut self.buffer, value)
-            .expect("Somehow failed to do \"io\" on a buffer");
+        self.write_floating_point_number(value, CompactFormatter::write_f32::<Writer<B>>);
     }
     #[inline]
     fn write_string(&mut self, value: &str) {

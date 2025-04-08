@@ -16,7 +16,6 @@
 
 use std::collections::BTreeMap;
 use std::io::Cursor;
-use std::sync::LazyLock;
 
 use anyhow::Result;
 use approx::assert_relative_eq;
@@ -35,7 +34,6 @@ use fbthrift_test_if::SubStruct;
 use fbthrift_test_if::Un;
 use fbthrift_test_if::UnOne;
 use proptest::prelude::*;
-use regex::Regex;
 use rstest::*;
 
 use crate::proptest::gen_main_struct;
@@ -541,7 +539,7 @@ fn test_not_enough() -> Result<()> {
 
     let mut deserializer = SimpleJsonProtocolDeserializer::new(Cursor::new(
         // 6 should cover the } and a `true` value
-        &to_check.as_bytes()[..to_check.as_bytes().len() - 6],
+        &to_check[..to_check.len() - 6],
     ));
     // Assert that deserialize builts the exact same struct
     assert_eq!(b1, Basic::read(&mut deserializer)?);
@@ -603,6 +601,10 @@ fn test_invalid_json(#[case] json: &str) {
 #[case::negative_one(-1.0, r#"{"f32":-1.0,"f64":0.0}"#)]
 #[case::min(f32::MIN, r#"{"f32":-3.4028235e38,"f64":0.0}"#)]
 #[case::max(f32::MAX, r#"{"f32":3.4028235e38,"f64":0.0}"#)]
+#[case::infinity(f32::INFINITY, r#"{"f32":"Infinity","f64":0.0}"#)]
+#[case::negative_infinity(f32::NEG_INFINITY, r#"{"f32":"-Infinity","f64":0.0}"#)]
+#[case::nan(f32::NAN, r#"{"f32":"NaN","f64":0.0}"#)]
+#[case::negative_nan(-f32::NAN, r#"{"f32":"NaN","f64":0.0}"#)]
 fn test_f32_round_trip(#[case] value: f32, #[case] expected_json: &str) -> Result<()> {
     let fp = FloatingPoint {
         f32: value,
@@ -613,48 +615,11 @@ fn test_f32_round_trip(#[case] value: f32, #[case] expected_json: &str) -> Resul
     assert_eq!(s, expected_json);
     let d: FloatingPoint = deserialize(s).unwrap();
 
-    assert_relative_eq!(d.f32, fp.f32);
-
-    Ok(())
-}
-
-static EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F32_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"\{"f32":([+-]?[0-9]*[.]?[0-9]+([eE][0-9]+)?),"f64":0\.0\}"#).unwrap()
-});
-
-#[rstest]
-#[case::infinity(f32::INFINITY)]
-#[case::negative_infinity(f32::NEG_INFINITY)]
-fn test_f32_round_trip_ignore_intermediate_representation_temporarily(
-    #[case] value: f32,
-) -> Result<()> {
-    let fp = FloatingPoint {
-        f32: value,
-        ..Default::default()
-    };
-
-    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
-    assert!(EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F32_REGEX.is_match(s.as_str()));
-    let d: FloatingPoint = deserialize(s).unwrap();
-
-    assert_relative_eq!(d.f32, fp.f32);
-
-    Ok(())
-}
-
-#[rstest]
-#[case::nan(f32::NAN)]
-#[case::negative_nan(-f32::NAN)]
-fn test_f32_round_trip_nan(#[case] value: f32) -> Result<()> {
-    let fp = FloatingPoint {
-        f32: value,
-        ..Default::default()
-    };
-
-    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
-    let d: FloatingPoint = deserialize(s).unwrap();
-
-    assert!(d.f32.is_nan(), "value: {}", d.f32);
+    if value.is_nan() {
+        assert!(d.f32.is_nan(), "value: {}", d.f32);
+    } else {
+        assert_relative_eq!(d.f32, fp.f32);
+    }
 
     Ok(())
 }
@@ -693,6 +658,10 @@ fn test_f32_deserialize(#[case] json: &str, #[case] expected_value: f32) -> Resu
 #[case::f32_negative_infinity(-3.4028237e38, r#"{"f32":0.0,"f64":-3.4028237e38}"#)]
 #[case::min(f64::MIN, r#"{"f32":0.0,"f64":-1.7976931348623157e308}"#)]
 #[case::max(f64::MAX, r#"{"f32":0.0,"f64":1.7976931348623157e308}"#)]
+#[case::infinity(f64::INFINITY, r#"{"f32":0.0,"f64":"Infinity"}"#)]
+#[case::negative_infinity(f64::NEG_INFINITY, r#"{"f32":0.0,"f64":"-Infinity"}"#)]
+#[case::nan(f64::NAN, r#"{"f32":0.0,"f64":"NaN"}"#)]
+#[case::negative_nan(-f64::NAN, r#"{"f32":0.0,"f64":"NaN"}"#)]
 fn test_f64_round_trip(#[case] value: f64, #[case] expected_json: &str) -> Result<()> {
     let fp = FloatingPoint {
         f64: value,
@@ -703,52 +672,11 @@ fn test_f64_round_trip(#[case] value: f64, #[case] expected_json: &str) -> Resul
     assert_eq!(s, expected_json);
     let d: FloatingPoint = deserialize(s).unwrap();
 
-    assert_relative_eq!(d.f64, fp.f64);
-
-    Ok(())
-}
-
-static EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F64_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"\{"f32":0\.0,"f64":([+-]?[0-9]*[.]?[0-9]+([eE][0-9]+)?)}"#).unwrap()
-});
-
-#[rstest]
-#[case::infinity(f64::INFINITY)]
-#[case::negative_infinity(f64::NEG_INFINITY)]
-fn test_f64_round_trip_ignore_intermediate_representation_temporarily(
-    #[case] value: f64,
-) -> Result<()> {
-    let fp = FloatingPoint {
-        f64: value,
-        ..Default::default()
-    };
-
-    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
-    assert!(
-        EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F64_REGEX.is_match(s.as_str()),
-        "serialized: {}",
-        s
-    );
-    let d: FloatingPoint = deserialize(s).unwrap();
-
-    assert_relative_eq!(d.f64, fp.f64);
-
-    Ok(())
-}
-
-#[rstest]
-#[case::nan(f64::NAN)]
-#[case::negative_nan(-f64::NAN)]
-fn test_f64_round_trip_nan(#[case] value: f64) -> Result<()> {
-    let fp = FloatingPoint {
-        f64: value,
-        ..Default::default()
-    };
-
-    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
-    let d: FloatingPoint = deserialize(s).unwrap();
-
-    assert!(d.f64.is_nan(), "value: {}", d.f64);
+    if value.is_nan() {
+        assert!(d.f64.is_nan(), "value: {}", d.f64);
+    } else {
+        assert_relative_eq!(d.f64, fp.f64);
+    }
 
     Ok(())
 }

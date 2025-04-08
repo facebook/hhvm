@@ -31,15 +31,15 @@ type CompositeProcessor interface {
 // compositeProcessor allows different ComposableProcessor to sit under one
 // server as long as their functions carry distinct names
 type compositeProcessor struct {
-	serviceProcessorMap map[string]types.ProcessorFunction
-	metadata            *metadata.ThriftMetadata
+	processorFunctionMap map[string]types.ProcessorFunction
+	metadata             *metadata.ThriftMetadata
 }
 
 // NewCompositeProcessor creates a new CompositeProcessor
 func NewCompositeProcessor() CompositeProcessor {
 	return &compositeProcessor{
-		serviceProcessorMap: make(map[string]types.ProcessorFunction),
-		metadata:            metadata.NewThriftMetadata(),
+		processorFunctionMap: make(map[string]types.ProcessorFunction),
+		metadata:             metadata.NewThriftMetadata(),
 	}
 }
 
@@ -50,7 +50,7 @@ func NewCompositeProcessor() CompositeProcessor {
 // to the thrift compiler
 func (p *compositeProcessor) Include(processor Processor) {
 	for name, tfunc := range processor.ProcessorFunctionMap() {
-		p.serviceProcessorMap[name] = tfunc
+		p.processorFunctionMap[name] = tfunc
 	}
 	metadata := processor.GetThriftMetadata()
 	for name, v := range metadata.GetEnums() {
@@ -69,13 +69,13 @@ func (p *compositeProcessor) Include(processor Processor) {
 
 // GetProcessorFunction multiplexes redirects to the appropriate Processor
 func (p *compositeProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
-	tfunc, _ := p.serviceProcessorMap[name]
+	tfunc, _ := p.processorFunctionMap[name]
 	return tfunc
 }
 
 // ProcessorMap returns the map that maps method names to Processors
 func (p *compositeProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
-	return p.serviceProcessorMap
+	return p.processorFunctionMap
 }
 
 func (p *compositeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {

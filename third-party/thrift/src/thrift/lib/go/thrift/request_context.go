@@ -64,6 +64,13 @@ type RequestContext struct {
 	contextHeaders
 }
 
+type requestContextKey int
+
+const (
+	rpcOptionsKey requestContextKey = 1
+	reqContextKey requestContextKey = 2
+)
+
 // WithRPCOptions sets the RPCOptions in a client request go context
 func WithRPCOptions(ctx context.Context, opts *RPCOptions) context.Context {
 	return context.WithValue(ctx, rpcOptionsKey, opts)
@@ -91,13 +98,6 @@ func GetRequestContext(ctx context.Context) *RequestContext {
 func WithRequestContext(ctx context.Context, reqCtx *RequestContext) context.Context {
 	return context.WithValue(ctx, reqContextKey, reqCtx)
 }
-
-type requestContextKey int
-
-const (
-	rpcOptionsKey requestContextKey = 1
-	reqContextKey requestContextKey = 2
-)
 
 // Priority maps to C++ apache::thrift::concurrency::PRIORITY
 type Priority uint8

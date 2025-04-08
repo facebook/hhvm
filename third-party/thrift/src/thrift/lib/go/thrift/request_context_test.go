@@ -159,3 +159,23 @@ func TestParallelWriteHeader(t *testing.T) {
 	assert.False(t, ok)
 	assert.Empty(t, value)
 }
+
+func TestRequestContext(t *testing.T) {
+	reqCtx := &RequestContext{}
+	ctx := WithRequestContext(context.TODO(), reqCtx)
+	reqCtxPrime := GetRequestContext(ctx)
+	require.Equal(t, reqCtx, reqCtxPrime)
+
+	reqCtxPrime = GetRequestContext(context.TODO())
+	require.Nil(t, reqCtxPrime)
+}
+
+func TestRPCOptions(t *testing.T) {
+	rpcOpts := &RPCOptions{}
+	ctx := WithRPCOptions(context.TODO(), rpcOpts)
+	rpcOptsPrime := GetRPCOptions(ctx)
+	require.Equal(t, rpcOpts, rpcOptsPrime)
+
+	rpcOptsPrime = GetRPCOptions(context.TODO())
+	require.Nil(t, rpcOptsPrime)
+}

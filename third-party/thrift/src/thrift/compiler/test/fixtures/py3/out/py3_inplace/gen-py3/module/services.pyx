@@ -1981,7 +1981,7 @@ async def SimpleService_expected_exception_coro(
 ):
     try:
         result = await self.expected_exception()
-    except object as ex:
+    except _module_types.SimpleException as ex:
         promise.cPromise.setException(_module_thrift_converter.SimpleException_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one

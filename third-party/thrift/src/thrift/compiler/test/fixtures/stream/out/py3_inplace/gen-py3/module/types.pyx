@@ -79,7 +79,7 @@ cdef class ClientBufferedStream__i32(ClientBufferedStream):
         cdef cint32_t _value
         stream, pyfuture, rpc_options = <object> userdata
         if result.hasException[_module_cbindings.cFooStreamEx]():
-            pyfuture.set_exception(_module_thrift_converter.FooStreamEx_from_cpp(thrift.py3.exceptions.unwrap_exception[_module_cbindings.cFooStreamEx](result.exception())))
+            pyfuture.set_exception(FooStreamEx.from_python(_module_thrift_converter.FooStreamEx_from_cpp(thrift.py3.exceptions.unwrap_exception[_module_cbindings.cFooStreamEx](result.exception()))))
         elif result.hasException():
             pyfuture.set_exception(
                 thrift.python.exceptions.create_py_exception(result.exception(), <__RpcOptions>rpc_options)

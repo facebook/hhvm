@@ -139,8 +139,8 @@ async def runGenerator_PubSubStreamingService_streamthrows(object generator, Pro
         item = await generator.asend(None)
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
-    except object as ex:
-        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex))
+    except _module_types.FooStreamEx as ex:
+        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -246,8 +246,8 @@ async def runGenerator_PubSubStreamingService_boththrows(object generator, Promi
         item = await generator.asend(None)
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
-    except object as ex:
-        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex))
+    except _module_types.FooStreamEx as ex:
+        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -283,8 +283,8 @@ async def runGenerator_PubSubStreamingService_responseandstreamstreamthrows(obje
         item = await generator.asend(None)
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
-    except object as ex:
-        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex))
+    except _module_types.FooStreamEx as ex:
+        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -355,8 +355,8 @@ async def runGenerator_PubSubStreamingService_responseandstreamboththrows(object
         item = await generator.asend(None)
     except StopAsyncIteration:
         promise.cPromise.setValue(optional[cint32_t]())
-    except object as ex:
-        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex))
+    except _module_types.FooStreamEx as ex:
+        promise.cPromise.setException(_module_thrift_converter.FooStreamEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -928,7 +928,7 @@ async def PubSubStreamingService_servicethrows_coro(
             result = await result
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_servicethrows)))
-    except object as ex:
+    except _module_types.FooEx as ex:
         promise.cPromise.setException(_module_thrift_converter.FooEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
@@ -964,9 +964,9 @@ async def PubSubStreamingService_servicethrows2_coro(
             result = await result
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_servicethrows2)))
-    except object as ex:
+    except _module_types.FooEx as ex:
         promise.cPromise.setException(_module_thrift_converter.FooEx_convert_to_cpp(ex._to_python()))
-    except object as ex:
+    except _module_types.FooEx2 as ex:
         promise.cPromise.setException(_module_thrift_converter.FooEx2_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
@@ -1002,7 +1002,7 @@ async def PubSubStreamingService_boththrows_coro(
             result = await result
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_boththrows)))
-    except object as ex:
+    except _module_types.FooEx as ex:
         promise.cPromise.setException(_module_thrift_converter.FooEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
@@ -1076,7 +1076,7 @@ async def PubSubStreamingService_responseandstreamservicethrows_coro(
             result = await result
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_responseandstreamservicethrows)))
-    except object as ex:
+    except _module_types.FooEx as ex:
         promise.cPromise.setException(_module_thrift_converter.FooEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
@@ -1114,7 +1114,7 @@ async def PubSubStreamingService_responseandstreamboththrows_coro(
             result = await result
         if isinstance(result, AsyncIterator):
             result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_responseandstreamboththrows)))
-    except object as ex:
+    except _module_types.FooEx as ex:
         promise.cPromise.setException(_module_thrift_converter.FooEx_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one

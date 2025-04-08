@@ -111,7 +111,7 @@ async def {{service:name}}_{{function:name}}_coro(
         {{/function:return_type}}
     {{#function:exceptions}}
     {{#field:type}}
-    except {{> types/cython_python_type}} as ex:
+    except {{> types/python_type}} as ex:
         promise.cPromise.setException{{!
 }}{{^program:inplace_migrate?}}{{!
           }}(deref((<{{> types/cython_python_type}}> ex).{{> types/cpp_obj}})){{!

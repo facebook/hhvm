@@ -536,7 +536,7 @@ std::string opt_type_constraint(const TypeConstraint& tc) {
 std::string type_info(const StringData* userType,
                       const TypeIntersectionConstraint& tcs) {
   std::string utype = userType ? escaped(userType) : "N";
-  std::string constraints = "";
+  std::string constraints;
   for (auto const& tc : tcs.range()) {
     if (constraints != "") constraints += ", ";
     constraints += opt_type_constraint(tc);

@@ -62,7 +62,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
       return propName;
     }
     case AttrProtected: {
-      std::string mangledName = "";
+      std::string mangledName;
       mangledName.push_back('\0');
       mangledName.push_back('*');
       mangledName.push_back('\0');
@@ -70,7 +70,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
       return makeStaticString(mangledName);
     }
     case AttrPrivate: {
-      std::string mangledName = "";
+      std::string mangledName;
       mangledName.push_back('\0');
       mangledName += className->data();
       mangledName.push_back('\0');

@@ -1185,7 +1185,7 @@ std::string show(const LocalRange& range) {
 
 std::string show(uint32_t numArgs, const uint8_t* boolVecArgs) {
   if (!boolVecArgs) return "";
-  std::string out = "";
+  std::string out;
   uint8_t tmp = 0;
   for (auto i = 0; i < numArgs; ++i) {
     if (i % 8 == 0) tmp = *(boolVecArgs++);

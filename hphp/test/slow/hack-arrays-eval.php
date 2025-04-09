@@ -41,9 +41,9 @@ function test_func($v = wrap(vec[], vec[1, 2]),
 function test_default_value() :mixed{
   echo "============ test_default_value ==============================\n";
   $r = new ReflectionFunction('test_func');
-  var_dump($r->getParameters()[0]->info['default']);
-  var_dump($r->getParameters()[1]->info['default']);
-  var_dump($r->getParameters()[2]->info['default']);
+  var_dump($r->getParameters()[0]->getDefaultValue());
+  var_dump($r->getParameters()[1]->getDefaultValue());
+  var_dump($r->getParameters()[2]->getDefaultValue());
 }
 
 

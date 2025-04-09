@@ -1,7 +1,7 @@
 Warning: Failed to eval default value of func1()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
 vec(1) {
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(0)
@@ -31,22 +31,13 @@ vec(1) {
     }
     ["name"]=>
     string(2) "p0"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
 }
 
 Warning: Failed to eval default value of func2()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
 vec(1) {
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(0)
@@ -76,22 +67,13 @@ vec(1) {
     }
     ["name"]=>
     string(2) "p0"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
 }
 
 Warning: Failed to eval default value of func3()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
 vec(1) {
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(0)
@@ -121,22 +103,13 @@ vec(1) {
     }
     ["name"]=>
     string(2) "p0"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
 }
 
 Warning: Failed to eval default value of func4()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
 vec(1) {
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(0)
@@ -166,14 +139,5 @@ vec(1) {
     }
     ["name"]=>
     string(2) "p0"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
 }

@@ -24,8 +24,8 @@ int(2)
 
 --- getParameters("f") ---
 vec(4) {
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(10) {
       ["index"]=>
       int(0)
@@ -51,18 +51,9 @@ vec(4) {
     }
     ["name"]=>
     string(1) "a"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(11) {
       ["index"]=>
       int(1)
@@ -90,18 +81,9 @@ vec(4) {
     }
     ["name"]=>
     string(1) "b"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(2)
@@ -131,18 +113,9 @@ vec(4) {
     }
     ["name"]=>
     string(1) "c"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(3)
@@ -176,15 +149,6 @@ vec(4) {
     }
     ["name"]=>
     string(1) "d"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
 }
 

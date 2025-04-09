@@ -2,8 +2,8 @@ hello
 
 Warning: Failed to eval default value of JJTest::test()'s $answer argument for reflection, assigning NULL instead in %s/test/slow/reflection_classes/default_value_with_lsb.php on line 11
 vec(1) {
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(0)
@@ -33,14 +33,5 @@ vec(1) {
     }
     ["name"]=>
     string(6) "answer"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(6) "HH\int"
-      ["nullable"]=>
-      bool(false)
-      ["builtin"]=>
-      bool(true)
-    }
   }
 }

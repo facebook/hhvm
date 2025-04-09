@@ -64,8 +64,8 @@ isStatic: bool(false)
 vec(0) {
 }
 ReflectionException: Method my_child::my_trait_method does not have a prototype
-object(ReflectionParameter) (3) {
-  ["info"]=>
+object(ReflectionParameter) (2) {
+  ["info":"ReflectionParameter":private]=>
   dict(10) {
     ["index"]=>
     int(0)
@@ -91,13 +91,4 @@ object(ReflectionParameter) (3) {
   }
   ["name"]=>
   string(1) "c"
-  ["paramTypeInfo"]=>
-  dict(3) {
-    ["name"]=>
-    string(7) "MyClass"
-    ["nullable"]=>
-    bool(false)
-    ["builtin"]=>
-    bool(false)
-  }
 }

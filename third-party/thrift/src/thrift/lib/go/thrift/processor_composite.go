@@ -34,6 +34,7 @@ type CompositeProcessor interface {
 // server as long as their functions carry distinct names
 type compositeProcessor struct {
 	processorFunctionMap map[string]types.ProcessorFunction
+	functionServiceMap   map[string]string
 	metadata             *metadata.ThriftMetadata
 }
 
@@ -41,6 +42,7 @@ type compositeProcessor struct {
 func NewCompositeProcessor() CompositeProcessor {
 	return &compositeProcessor{
 		processorFunctionMap: make(map[string]types.ProcessorFunction),
+		functionServiceMap:   make(map[string]string),
 		metadata:             metadata.NewThriftMetadata(),
 	}
 }
@@ -52,6 +54,7 @@ func NewCompositeProcessor() CompositeProcessor {
 // to the thrift compiler
 func (p *compositeProcessor) Include(processor Processor) {
 	maps.Copy(p.processorFunctionMap, processor.ProcessorFunctionMap())
+	maps.Copy(p.functionServiceMap, processor.FunctionServiceMap())
 
 	metadata := processor.GetThriftMetadata()
 	maps.Copy(p.metadata.Enums, metadata.GetEnums())
@@ -68,6 +71,11 @@ func (p *compositeProcessor) GetProcessorFunction(name string) types.ProcessorFu
 // ProcessorMap returns the map that maps method names to Processors
 func (p *compositeProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	return p.processorFunctionMap
+}
+
+// FunctionServiceMap returns the map that maps method names to service names
+func (p *compositeProcessor) FunctionServiceMap() map[string]string {
+	return p.functionServiceMap
 }
 
 func (p *compositeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {

@@ -11,6 +11,7 @@
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
 #include <proxygen/lib/http/webtransport/QuicWebTransport.h>
 #include <proxygen/lib/http/webtransport/test/Mocks.h>
+#include <quic/priority/HTTPPriorityQueue.h>
 
 using namespace proxygen;
 using namespace proxygen::test;
@@ -151,9 +152,8 @@ TEST_F(QuicWebTransportTest, ConnectionError) {
 TEST_F(QuicWebTransportTest, SetPriority) {
   auto handle = webTransport()->createUniStream();
   EXPECT_TRUE(handle.hasValue());
-  EXPECT_CALL(
-      *socketDriver_.getSocket(),
-      setStreamPriority(handle.value()->getID(), quic::Priority(1, false, 1)));
+  socketDriver_.expectSetPriority(
+      handle.value()->getID(), quic::HTTPPriorityQueue::Priority(1, false, 1));
   handle.value()->setPriority(1, 1, false);
   handle.value()->writeStreamData(nullptr, true, nullptr);
   eventBase_.loop();

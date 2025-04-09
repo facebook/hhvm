@@ -284,11 +284,12 @@ folly::Optional<HTTPHeaders> HQDownstreamSession::getExtraHeaders(
     return folly::none;
   }
   HTTPHeaders extraHeaders;
+  quic::HTTPPriorityQueue::Priority httpPri(*priority);
   extraHeaders.add(HTTP_HEADER_PRIORITY,
-                   httpPriorityToString(HTTPPriority(priority->level,
-                                                     priority->incremental,
-                                                     priority->orderId,
-                                                     priority->paused)));
+                   httpPriorityToString(HTTPPriority(httpPri->urgency,
+                                                     httpPri->incremental,
+                                                     httpPri->order,
+                                                     httpPri->paused)));
   return extraHeaders;
 }
 

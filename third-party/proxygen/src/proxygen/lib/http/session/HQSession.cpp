@@ -87,8 +87,12 @@ quic::QuicErrorCode quicControlStreamError(quic::QuicErrorCode error) {
   folly::assume_unreachable();
 }
 
-quic::Priority toQuicPriority(const proxygen::HTTPPriority& pri) {
-  return {pri.urgency, pri.incremental, pri.orderId, pri.paused};
+quic::PriorityQueue::Priority toQuicPriority(
+    const proxygen::HTTPPriority& pri) {
+  return pri.paused ? quic::HTTPPriorityQueue::Priority(
+                          quic::HTTPPriorityQueue::Priority::PAUSED)
+                    : quic::HTTPPriorityQueue::Priority(
+                          pri.urgency, pri.incremental, pri.orderId);
 }
 
 // Get the size of the WebTransport stream preface without actually encoding it

@@ -35,6 +35,7 @@
 #include <quic/api/QuicSocket.h>
 #include <quic/common/BufUtil.h>
 #include <quic/common/events/FollyQuicEventBase.h>
+#include <quic/priority/HTTPPriorityQueue.h>
 
 namespace proxygen {
 
@@ -1488,7 +1489,9 @@ class HQSession
       if (session_.sock_ && hasStreamId()) {
         auto sp = session_.sock_->getStreamPriority(getStreamId());
         if (sp) {
-          return HTTPPriority(sp.value().level, sp.value().incremental);
+          quic::HTTPPriorityQueue::Priority priority(sp.value());
+          return HTTPPriority(
+              priority->urgency, priority->incremental, priority->order);
         }
       }
       return folly::none;

@@ -7,6 +7,7 @@
  */
 
 #include <proxygen/lib/http/webtransport/QuicWebTransport.h>
+#include <quic/priority/HTTPPriorityQueue.h>
 
 using FCState = proxygen::WebTransport::FCState;
 
@@ -142,7 +143,9 @@ QuicWebTransport::setWebTransportStreamPriority(HTTPCodec::StreamID id,
 
   XCHECK(quicSocket_);
   auto res = quicSocket_->setStreamPriority(
-      id, quic::Priority(pri.urgency, pri.incremental, pri.orderId));
+      id,
+      quic::HTTPPriorityQueue::Priority(
+          pri.urgency, pri.incremental, pri.orderId));
   if (res.hasError()) {
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }

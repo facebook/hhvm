@@ -14,6 +14,7 @@
 #include <proxygen/lib/transport/test/MockAsyncTransportCertificate.h>
 #include <quic/api/test/MockQuicSocket.h>
 #include <quic/common/events/FollyQuicEventBase.h>
+#include <quic/priority/HTTPPriorityQueue.h>
 #include <unordered_map>
 
 namespace quic {
@@ -872,6 +873,16 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
         .WillRepeatedly(testing::ReturnRef(peerAddress_));
     EXPECT_CALL(*sock_, getPeerCertificate())
         .WillRepeatedly(testing::Return(mockCertificate));
+  }
+
+  void expectSetPriority(StreamId id,
+                         const HTTPPriorityQueue::Priority& expectedPri) {
+    EXPECT_CALL(*sock_, setStreamPriority(id, testing::_))
+        .WillOnce(testing::Invoke(
+            [expectedPri](StreamId, const PriorityQueue::Priority& pri) {
+              EXPECT_EQ(HTTPPriorityQueue::Priority(pri), expectedPri);
+              return folly::unit;
+            }));
   }
 
   uint16_t getDatagramSizeLimitImpl() {

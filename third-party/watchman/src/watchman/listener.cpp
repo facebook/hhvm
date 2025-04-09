@@ -105,7 +105,9 @@ static FileDescriptor get_listener_unix_domain_socket(const char* path) {
       cfg_get_string("secondary_sock_group", nullptr);
 
   if (secondary_sock_group) {
-    if (!watchman::setFileSecondaryGroupACL(
+    // TODO: pass mode_t perms (from earlier in this function) to
+    // setSecondaryGroupACL instead of using three booleans
+    if (!watchman::setSecondaryGroupACL(
             path,
             secondary_sock_group,
             true /* read bits */,

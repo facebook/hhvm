@@ -10,22 +10,19 @@
 namespace watchman {
 
 /**
- * Sets extended attributes on a file to allow secondary group access. This
- * function avoids needing to use chmod which wont work if the user is not a
- * member of the secondary group.
+ * Sets extended attributes for the given path to allow secondary group access.
+ * This function avoids needing to use chmod which wont work if the user is not
+ * a member of the secondary group.
  *
- * @param path The path to the file to set attributes on
+ * @param path The path to to set attributes on
  * @param secondary_group_name The name of the secondary group
- * @param read If the secondary group should be given read permissions on the
- * file
- * @param write If the secondary group should be given write permissions on the
- * file
- * @param execute If the secondary group should be given execute permissions on
- * the file
+ * @param read If the secondary group should be given read permissions
+ * @param write If the secondary group should be given write permissions
+ * @param execute If the secondary group should be given execute permissions
  * @return On Linux, true if the attributes were set successfully, false on
  * error. Always returns false on non-Linux
  */
-bool setFileSecondaryGroupACL(
+bool setSecondaryGroupACL(
     const char* path,
     const char* secondary_group_name,
     bool read,

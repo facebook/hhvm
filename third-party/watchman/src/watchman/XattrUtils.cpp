@@ -75,7 +75,8 @@ struct acl_ea_header {
 };
 } // namespace
 #endif
-bool setFileSecondaryGroupACL(
+
+bool setSecondaryGroupACL(
     const char* path,
     const char* secondary_group_name,
     bool read,
@@ -89,7 +90,7 @@ bool setFileSecondaryGroupACL(
     return false;
   }
 
-  // Get the file's current permissions
+  // Get the path's current permissions
   struct stat st {};
   if (lstat(path, &st) != 0) {
     logf(ERR, "Failed to lstat {}: {}\n", path, folly::errnoStr(errno));
@@ -97,7 +98,7 @@ bool setFileSecondaryGroupACL(
   }
 
   // setxattr doesn't like when just GROUP is supplied, so we will provide
-  // USER_OBJ, GROUP_OBJ, GROUP, MASK, and OTHER (based off of the file's
+  // USER_OBJ, GROUP_OBJ, GROUP, MASK, and OTHER (based off of the path's
   // current permissions)
   const size_t acl_entry_count = 5;
 
@@ -163,7 +164,7 @@ bool setFileSecondaryGroupACL(
   ext_entry->e_perm = cpu_to_le16(other_perm);
   ext_entry->e_id = ACL_UNDEFINED_ID;
 
-  // Finally, set the ACL xattr on the file and free the allocated memory
+  // Finally, set the ACL xattr on the path and free the allocated memory
   int ret = setxattr(path, ACL_EA_ACCESS, ext_acl_p, acl_size, 0);
   free(ext_acl_p);
 
@@ -179,7 +180,7 @@ bool setFileSecondaryGroupACL(
   (void)read;
   (void)write;
   (void)execute;
-  log(ERR, "setFileSecondaryGroup() is only implemented on Linux\n");
+  log(ERR, "setSecondaryGroupACL() is only implemented on Linux\n");
   return false;
 #endif
 }

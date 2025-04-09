@@ -275,7 +275,8 @@ class TestSockPerms(unittest.TestCase):
         instance.start()
         instance.stop()
 
-        self.assertFileACL(instance.sock_file, group)
+        self.assertACL(instance.user_dir, group, f"group:{group.gr_name}:r-x")
+        self.assertACL(instance.sock_file, group, f"group:{group.gr_name}:rw-")
 
     def test_sock_access_via_acl_user_not_in_sock_group(self) -> None:
         group = self._get_non_member_group()
@@ -283,7 +284,8 @@ class TestSockPerms(unittest.TestCase):
         instance.start()
         instance.stop()
 
-        self.assertFileACL(instance.sock_file, group)
+        self.assertACL(instance.user_dir, group, f"group:{group.gr_name}:r-x")
+        self.assertACL(instance.sock_file, group, f"group:{group.gr_name}:rw-")
 
     def assertFileMode(self, f, mode) -> None:
         st = os.lstat(f)
@@ -293,13 +295,13 @@ class TestSockPerms(unittest.TestCase):
         st = os.lstat(f)
         self.assertEqual(st.st_gid, gid)
 
-    def assertFileACL(self, f, group) -> None:
+    def assertACL(self, f, group, expected_regex) -> None:
         getfacl_result = subprocess.run(
             ["/usr/bin/getfacl", f], capture_output=True, text=True, check=True
         ).stdout
 
-        group_pattern = re.compile(f"group:{group.gr_name}:rw-")
+        group_pattern = re.compile(expected_regex)
         self.assertIsNotNone(
             group_pattern.search(getfacl_result),
-            f"Group '{group.gr_name}' does not have expected 'rw-' permissions, acl result:\n {getfacl_result}",
+            f"Group '{group.gr_name}' does not have expected permissions {expected_regex}, acl result:\n {getfacl_result}",
         )

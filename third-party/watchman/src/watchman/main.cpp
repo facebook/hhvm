@@ -34,6 +34,7 @@
 #include "watchman/ThreadPool.h"
 #include "watchman/UserDir.h"
 #include "watchman/WatchmanConfig.h"
+#include "watchman/XattrUtils.h"
 #include "watchman/fs/DirHandle.h"
 #include "watchman/fs/FileSystem.h"
 #include "watchman/listener.h"
@@ -645,6 +646,8 @@ static void verify_dir_ownership(const std::string& state_dir) {
   uid_t euid = geteuid();
   // TODO: also allow a gid to be specified here
   const char* sock_group_name = cfg_get_string("sock_group", nullptr);
+  const char* secondary_sock_group =
+      cfg_get_string("secondary_sock_group", nullptr);
   // S_ISGID is set so that files inside this directory inherit the group
   // name
   mode_t dir_perms =
@@ -709,6 +712,26 @@ static void verify_dir_ownership(const std::string& state_dir) {
       goto bail;
     }
   }
+
+#ifdef __linux__
+  // Allow setting an ACL on the state_dir, this method does not require the
+  // owner to be a member of the target group.
+  if (secondary_sock_group) {
+    // TODO: pass mode_t dir_perms (from earlier in this function) to
+    // setSecondaryGroupACL instead of using three booleans
+    if (!watchman::setSecondaryGroupACL(
+            state_dir.c_str(),
+            secondary_sock_group,
+            true /* read bits */,
+            false /* write bits */,
+            true /* execute bits */)) {
+      ret = 1;
+      goto bail;
+    }
+  }
+#else
+  (void)secondary_sock_group;
+#endif
 
   // Depending on group and world accessibility, change permissions on the
   // directory. We can't leave the directory open and set permissions on the

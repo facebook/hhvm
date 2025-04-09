@@ -547,21 +547,21 @@ Flags handle_general_effects(Local& env,
 
       case InitSProps: {
         auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
-        if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+        if (env.state.initRDS.contains(handle)) return FJmpNext{};
         env.state.initRDS.insert(handle);
         return std::nullopt;
       }
 
       case InitProps: {
         auto const handle = inst.extra<ClassData>()->cls->propHandle();
-        if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+        if (env.state.initRDS.contains(handle)) return FJmpNext{};
         env.state.initRDS.insert(handle);
         return std::nullopt;
       }
 
       case CheckRDSInitialized: {
         auto const handle = inst.extra<CheckRDSInitialized>()->handle;
-        if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+        if (env.state.initRDS.contains(handle)) return FJmpNext{};
         // set this unconditionally; we record taken state before every
         // instruction, and next state after each instruction
         env.state.initRDS.insert(handle);
@@ -570,7 +570,7 @@ Flags handle_general_effects(Local& env,
 
       case MarkRDSInitialized: {
         auto const handle = inst.extra<MarkRDSInitialized>()->handle;
-        if (env.state.initRDS.count(handle) > 0) return FRemovable{};
+        if (env.state.initRDS.contains(handle)) return FRemovable{};
         env.state.initRDS.insert(handle);
         return std::nullopt;
       }
@@ -627,7 +627,7 @@ Flags handle_irrelevant_effects(Local& env, const IRInstruction& inst) {
   switch (inst.op()) {
     case JmpZero: {
       auto const src = inst.src(0);
-      if (env.state.jmpz.count(src) > 0) return FJmpNext{};
+      if (env.state.jmpz.contains(src)) return FJmpNext{};
       // set this unconditionally; we record taken state before every
       // instruction, and next state after each instruction
       env.state.jmpz.insert(src);
@@ -1519,8 +1519,8 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
     }
   );
 
-  folly::erase_if(dst.initRDS, [&](rds::Handle x) {return !src.initRDS.count(x);});
-  folly::erase_if(dst.jmpz, [&](SSATmp* x) {return !src.jmpz.count(x);});
+  folly::erase_if(dst.initRDS, [&](rds::Handle x) {return !src.initRDS.contains(x);});
+  folly::erase_if(dst.jmpz, [&](SSATmp* x) {return !src.jmpz.contains(x);});
 }
 
 //////////////////////////////////////////////////////////////////////

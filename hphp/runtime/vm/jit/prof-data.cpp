@@ -205,7 +205,7 @@ bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
                                    std::move(offsets)).first;
   }
 
-  return it->second.count(offset);
+  return it->second.contains(offset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

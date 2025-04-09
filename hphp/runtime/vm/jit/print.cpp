@@ -1020,7 +1020,7 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
       return
         target->isCatch() ? " [color=gray]" :
         target->hint() == Block::Hint::Unlikely ? " [color=blue]" :
-        retreating_edges.count(edge) ? " [color=red]" : "";
+        retreating_edges.contains(edge) ? " [color=red]" : "";
     };
     auto show_edge = [&] (Edge* edge) {
       os << folly::format(

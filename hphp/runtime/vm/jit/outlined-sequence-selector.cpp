@@ -321,7 +321,7 @@ void buildOptimizedHashes() {
                            uint32_t prefixesRemoved,
                            auto const& impl_ref) {
       std::pair<uint32_t, uint32_t> key(suffixesRemoved, prefixesRemoved);
-      if (visited.count(key)) return;
+      if (visited.contains(key)) return;
       visited.insert(key);
       order.erase(h);
       auto& r = data[h];

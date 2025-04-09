@@ -6,53 +6,78 @@
 #  @generated
 #
 
+from libcpp.memory cimport make_shared, unique_ptr
+from cython.operator cimport dereference as deref, address
+from libcpp.utility cimport move as cmove
 cimport module.types as _fbthrift_ctypes
+from thrift.py3.serializer cimport (
+    cserialize as __cserialize,
+    cdeserialize as __cdeserialize,
+)
+from thrift.python.protocol cimport Protocol
+cimport folly.iobuf as _folly__iobuf
 
 
 cdef shared_ptr[_fbthrift_cbindings.cInternship] Internship_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Internship?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cInternship](deref(
+        (<_fbthrift_ctypes.Internship?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object Internship_from_cpp(const shared_ptr[_fbthrift_cbindings.cInternship]& c_struct):
     return _fbthrift_ctypes.Internship._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cRange] Range_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Range?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cRange](deref(
+        (<_fbthrift_ctypes.Range?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object Range_from_cpp(const shared_ptr[_fbthrift_cbindings.cRange]& c_struct):
     return _fbthrift_ctypes.Range._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cstruct1] struct1_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.struct1?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cstruct1](deref(
+        (<_fbthrift_ctypes.struct1?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object struct1_from_cpp(const shared_ptr[_fbthrift_cbindings.cstruct1]& c_struct):
     return _fbthrift_ctypes.struct1._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cstruct2] struct2_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.struct2?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cstruct2](deref(
+        (<_fbthrift_ctypes.struct2?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object struct2_from_cpp(const shared_ptr[_fbthrift_cbindings.cstruct2]& c_struct):
     return _fbthrift_ctypes.struct2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cstruct3] struct3_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.struct3?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cstruct3](deref(
+        (<_fbthrift_ctypes.struct3?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object struct3_from_cpp(const shared_ptr[_fbthrift_cbindings.cstruct3]& c_struct):
     return _fbthrift_ctypes.struct3._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cstruct4] struct4_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.struct4?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cstruct4](deref(
+        (<_fbthrift_ctypes.struct4?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object struct4_from_cpp(const shared_ptr[_fbthrift_cbindings.cstruct4]& c_struct):
     return _fbthrift_ctypes.struct4._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cunion1] union1_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.union1?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cunion1](deref(
+        (<_fbthrift_ctypes.union1?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object union1_from_cpp(const shared_ptr[_fbthrift_cbindings.cunion1]& c_struct):
     return _fbthrift_ctypes.union1._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cunion2] union2_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.union2?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cunion2](deref(
+        (<_fbthrift_ctypes.union2?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object union2_from_cpp(const shared_ptr[_fbthrift_cbindings.cunion2]& c_struct):
     return _fbthrift_ctypes.union2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

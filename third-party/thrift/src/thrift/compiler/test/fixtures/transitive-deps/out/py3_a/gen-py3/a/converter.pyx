@@ -6,11 +6,22 @@
 #  @generated
 #
 
+from libcpp.memory cimport make_shared, unique_ptr
+from cython.operator cimport dereference as deref, address
+from libcpp.utility cimport move as cmove
 cimport a.types as _fbthrift_ctypes
+from thrift.py3.serializer cimport (
+    cserialize as __cserialize,
+    cdeserialize as __cdeserialize,
+)
+from thrift.python.protocol cimport Protocol
+cimport folly.iobuf as _folly__iobuf
 
 
 cdef shared_ptr[_fbthrift_cbindings.cA] A_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.A?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cA](deref(
+        (<_fbthrift_ctypes.A?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object A_from_cpp(const shared_ptr[_fbthrift_cbindings.cA]& c_struct):
     return _fbthrift_ctypes.A._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

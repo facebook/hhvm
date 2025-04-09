@@ -16,6 +16,8 @@
 
 include "thrift/annotation/python.thrift"
 
+namespace cpp2 convertible
+
 enum Empty {
 }
 

@@ -169,7 +169,7 @@ class SetTests(unittest.TestCase):
 
     def test_no_dict(self) -> None:
         with self.assertRaises(AttributeError):
-            SetI32().__dict__
+            Set__i32().__dict__
 
     def test_empty(self) -> None:
         SetI32Lists(set())

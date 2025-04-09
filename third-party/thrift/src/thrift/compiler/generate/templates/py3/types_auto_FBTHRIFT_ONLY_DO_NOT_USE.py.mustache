@@ -94,6 +94,7 @@ class {{type:flat_name}}__Meta(type):
 
 class {{type:flat_name}}(_fbthrift_python_types.{{> types/container_base}}, metaclass={{type:flat_name}}__Meta):
     __module__ = _fbthrift__py3_module_name
+    __slots__ = ()
 
     def __init__(self, *args, **kwargs):
         if not args and not kwargs:

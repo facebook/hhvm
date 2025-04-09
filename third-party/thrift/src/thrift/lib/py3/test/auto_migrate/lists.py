@@ -95,7 +95,7 @@ class ListTests(unittest.TestCase):
 
     def test_no_dict(self) -> None:
         with self.assertRaises(AttributeError):
-            I32List().__dict__
+            List__i32().__dict__
 
     def test_default_ctor(self) -> None:
         self.assertEqual(I32List(), [])

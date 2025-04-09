@@ -123,7 +123,7 @@ class MapTests(unittest.TestCase):
 
     def test_no_dict(self) -> None:
         with self.assertRaises(AttributeError):
-            StrIntMap().__dict__
+            Map__Color_Color().__dict__
 
     def test_empty(self) -> None:
         StrIntMap()

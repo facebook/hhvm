@@ -76,8 +76,7 @@ struct APCDetailedStats {
   void collectStats(std::map<const StringData*, int64_t>& stats) const;
 
   // A new value was added to APC. This is a fresh value not replacing
-  // an existing value. However the key may exists already a be a primed
-  // mapped to file entry
+  // an existing value. 
   void addAPCValue(APCHandle* handle);
   // A new value replaces an existing one
   void updateAPCValue(APCHandle* handle, APCHandle* oldHandle, bool expired);
@@ -198,15 +197,11 @@ struct APCStats {
   // A new value was added to APC. This is a fresh value not replacing
   // an existing value. However the key may exists already a be a primed
   // mapped to file entry
-  void addAPCValue(APCHandle* handle, size_t size, bool livePrimed) {
+  void addAPCValue(APCHandle* handle, size_t size) {
     assertx(handle && size > 0);
     m_valueSize->addValue(size);
     if (handle->isUncounted()) {
       m_uncountedEntries->increment();
-    }
-    if (livePrimed) {
-      m_livePrimedSize->addValue(size);
-      m_livePrimedEntries->increment();
     }
     if (m_detailedStats) {
       m_detailedStats->addAPCValue(handle);
@@ -218,15 +213,11 @@ struct APCStats {
                       size_t size,
                       APCHandle* oldHandle,
                       size_t oldSize,
-                      bool livePrimed,
                       bool expired) {
     assertx(handle && size > 0 && oldHandle && oldSize > 0);
     auto diff = size - oldSize;
     if (diff != 0) {
       m_valueSize->addValue(diff);
-      if (livePrimed) {
-        m_livePrimedSize->addValue(diff);
-      }
     }
     if (m_detailedStats) {
       m_detailedStats->updateAPCValue(handle, oldHandle, expired);
@@ -236,16 +227,11 @@ struct APCStats {
   // A value is removed. The entry may still exists if it is a primed entry
   void removeAPCValue(size_t size,
                       APCHandle* handle,
-                      bool livePrimed,
                       bool expired) {
     assertx(size > 0);
     m_valueSize->addValue(-size);
     if (handle->isUncounted()) {
       m_uncountedEntries->decrement();
-    }
-    if (livePrimed) {
-      m_livePrimedSize->addValue(-size);
-      m_livePrimedEntries->decrement();
     }
     if (m_detailedStats) {
       m_detailedStats->removeAPCValue(handle, expired);
@@ -285,9 +271,6 @@ private:
   ServiceData::ExportedCounter* m_valueSize;
   // Keep track of the overall memory usage of all keys
   ServiceData::ExportedCounter* m_keySize;
-  // Size of primed data that is brought to life, that is, that goes
-  // into memory
-  ServiceData::ExportedCounter* m_livePrimedSize;
   // Size of the APC data pending deletes in the treadmill
   ServiceData::ExportedCounter* m_pendingDeleteSize;
 
@@ -297,8 +280,6 @@ private:
 
   // Number of entries (keys)
   ServiceData::ExportedCounter* m_entries;
-  // Number of live primed entries
-  ServiceData::ExportedCounter* m_livePrimedEntries;
   // Number of uncounted entries
   ServiceData::ExportedCounter* m_uncountedEntries;
   // Number of uncounted blocks

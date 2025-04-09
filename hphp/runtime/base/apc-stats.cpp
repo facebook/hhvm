@@ -238,21 +238,16 @@ void APCStats::Create() {
 
 APCStats::APCStats() : m_valueSize(nullptr)
                      , m_keySize(nullptr)
-                     , m_livePrimedSize(nullptr)
                      , m_pendingDeleteSize(nullptr)
                      , m_entries(nullptr)
-                     , m_livePrimedEntries(nullptr)
                      , m_uncountedEntries(nullptr)
                      , m_uncountedBlocks(nullptr)
                      , m_detailedStats(nullptr) {
   m_valueSize = ServiceData::createCounter("apc.value_size.sum");
   m_keySize = ServiceData::createCounter("apc.key_size.sum");
-  m_livePrimedSize = ServiceData::createCounter("apc.primed_live_size.sum");
   m_pendingDeleteSize =
     ServiceData::createCounter("apc.pending_delete_size.sum");
   m_entries = ServiceData::createCounter("apc.entries");
-  m_livePrimedEntries =
-      ServiceData::createCounter("apc.primed_live_entries");
   m_uncountedEntries = ServiceData::createCounter("apc.uncounted_entries");
   m_uncountedBlocks =
     ServiceData::createCounter("apc.uncounted_blocks.mayNotBeAPCValues");
@@ -270,12 +265,8 @@ std::string APCStats::getStatsInfo() const {
   info += std::to_string(m_valueSize->getValue()) +
           "\nKey size: " +
           std::to_string(m_keySize->getValue()) +
-          "\nIn memory primed data size: " +
-          std::to_string(m_livePrimedSize->getValue()) +
           "\nEntries count: " +
           std::to_string(m_entries->getValue()) +
-          "\nIn memory primed entries count: " +
-          std::to_string(m_livePrimedEntries->getValue()) +
           "\nIn total uncounted entries count: " +
           std::to_string(m_uncountedEntries->getValue()) +
           "\nIn memory uncounted blocks: " +
@@ -291,10 +282,8 @@ std::string APCStats::getStatsInfo() const {
 }
 
 const StaticString s_num_entries("num_entries");
-const StaticString s_primedLiveEntries("primed_live_entries");
 const StaticString s_valuesSize("values_size");
 const StaticString s_keysSize("keys_size");
-const StaticString s_primeLiveSize("primed_live_size");
 const StaticString s_pendingDeleteSize("pending_delete_size");
 const StaticString s_uncountedEntries("uncounted_entries");
 const StaticString s_uncountedBlocks("uncounted_blocks");
@@ -303,9 +292,6 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
       std::pair<const StringData*, int64_t>(s_num_entries.get(),
                                             m_entries->getValue()));
-  stats.insert(
-      std::pair<const StringData*, int64_t>(s_primedLiveEntries.get(),
-                                            m_livePrimedEntries->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>( s_uncountedEntries.get(),
                                             m_uncountedEntries->getValue()));
@@ -318,9 +304,6 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
       std::pair<const StringData*, int64_t>(s_keysSize.get(),
                                             m_keySize->getValue()));
-  stats.insert(
-      std::pair<const StringData*, int64_t>(s_primeLiveSize.get(),
-                                            m_livePrimedSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_pendingDeleteSize.get(),
                                             m_pendingDeleteSize->getValue()));

@@ -298,7 +298,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
       Logger::Info("retranslateAll: %lu functions had no samples!", extra);
     }
     for (int i = 0; i < cg.targets.size(); ++i) {
-      if (!seen.count(i)) {
+      if (!seen.contains(i)) {
         addFuncId(i);
       }
     }
@@ -324,7 +324,7 @@ uint64_t compute() {
   hphp_hash_set<FuncId> optSet;
   optSet.insert(ret.first.begin(), ret.first.end());
   for (auto fid : s_funcOrder) {
-    if (optSet.count(fid) == 0) ret.first.push_back(fid);
+    if (!optSet.contains(fid)) ret.first.push_back(fid);
   }
   s_funcOrder = std::move(ret.first);
   return ret.second;

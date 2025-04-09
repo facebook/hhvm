@@ -122,7 +122,7 @@ bool merge_memory_stack_into(StackStateMap& dst, const StackStateMap& src) {
   auto changed = false;
   // Throw away any information only known in dst.
   for (auto& [dIdx, dState] : dst) {
-    if (src.count(dIdx) == 0) {
+    if (!src.contains(dIdx)) {
       dState = StackState{};
       changed = true;
     }
@@ -206,7 +206,7 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   for (auto& it : dst.locals) {
     auto const id = it.first;
     auto& dState = it.second;
-    if (src.locals.count(id) == 0) {
+    if (!src.locals.contains(id)) {
       dState = LocalState{};
       changed = true;
     }
@@ -835,7 +835,7 @@ PostConditions FrameStateMgr::collectPostConds() {
 // Per-block state.
 
 bool FrameStateMgr::hasStateFor(Block* block) const {
-  return m_states.count(block);
+  return m_states.contains(block);
 }
 
 void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
@@ -1367,10 +1367,10 @@ LocalState FrameStateMgr::local(uint32_t id) const {
 bool FrameStateMgr::tracked(Location l) const {
   switch (l.tag()) {
     case LTag::Local:
-      return cur().locals.count(l.localId()) > 0;
+      return cur().locals.contains(l.localId());
     case LTag::Stack: {
       auto const sbRel = l.stackIdx();
-      return cur().stack.count(sbRel) > 0;
+      return cur().stack.contains(sbRel);
     }
     case LTag::MBase:
       return true;

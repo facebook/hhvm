@@ -299,7 +299,7 @@ void rewriteUses(IRUnit& unit,
       // perform the rewrites here because the targets are not
       // available. We need to create a DefLabel. If we already have,
       // stop (nothing more to do).
-      if (phis.count(block)) continue;
+      if (phis.contains(block)) continue;
 
       // All of SSATmps in the rewrite map will be inputs to the
       // DefLabel. We want these to be in consistent order, so sort
@@ -363,7 +363,7 @@ void rewriteUses(IRUnit& unit,
     // visited.
     block->forEachSucc(
       [&] (Block* succ) {
-        if (visited.count(succ)) return;
+        if (visited.contains(succ)) return;
         visited.emplace(succ);
         worklist.push(succ);
       }

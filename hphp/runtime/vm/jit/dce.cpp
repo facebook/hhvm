@@ -859,7 +859,7 @@ void removeDeadInstructions(IRUnit& unit,
           auto dstIdx = 0;
           auto const numDsts = front.numDsts();
           for (auto i = 0; i < numDsts; ++i) {
-            if (!defLabelLive.count(std::make_pair(&front, i))) {
+            if (!defLabelLive.contains(std::make_pair(&front, i))) {
               FTRACE(1, "Removing dead DefLabel dst {}: {}\n",
                      i, front.toString());
               front.deleteDst(dstIdx);
@@ -886,7 +886,7 @@ void removeDeadInstructions(IRUnit& unit,
             for (auto i = 0; i < numSrcs; ++i) {
               auto& defLabel = block->taken()->front();
               assertx(defLabel.is(DefLabel));
-              if (!defLabelLive.count(std::make_pair(&defLabel, i))) {
+              if (!defLabelLive.contains(std::make_pair(&defLabel, i))) {
                 FTRACE(1, "Removing dead Jmp src {}: {}\n",
                        i, back.toString());
                 back.deleteSrc(srcIdx);
@@ -1443,7 +1443,7 @@ void fullDCE(IRUnit& unit) {
       // For a DefLabel operand, look "through" each corresponding Jmp
       // and process the source as if we were processing that Jmp.
       assertx(defLabelIdx < inst->numDsts());
-      assertx(defLabelLive.count(std::make_pair(inst, defLabelIdx)));
+      assertx(defLabelLive.contains(std::make_pair(inst, defLabelIdx)));
       inst->block()->forEachPred(
         [&, inst = inst, defLabelIdx = defLabelIdx] (Block* pred) {
           auto& jmp = pred->back();

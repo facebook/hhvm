@@ -89,7 +89,7 @@ HTTPHeaders CurlClient::parseHeaders(const std::string& headersString) {
       if (nv[0].empty()) {
         continue;
       }
-      std::string value("");
+      std::string value;
       for (size_t i = 1; i < nv.size(); i++) {
         value += folly::to<std::string>(nv[i], '=');
       }

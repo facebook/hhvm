@@ -93,6 +93,7 @@ module Concurrent (Metadata : Metadata) : sig
   it will be returned (either on this call or a subsequent call) with the exact
   same [(path, metadata)]. *)
   val enqueue_next_and_get_earlier_results :
+    use_obr:bool ->
     handle ->
     (Relative_path.t * Metadata.t * content) list ->
     (Relative_path.t * Metadata.t * parsed_file) option

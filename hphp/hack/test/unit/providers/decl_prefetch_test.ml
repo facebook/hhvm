@@ -35,8 +35,8 @@ let repo =
     (c_path, "<?hh\n class C implements A,B {}\n");
   ]
 
-let test_decl_provider () =
-  run_test repo ~f:(fun env ->
+let test_decl_provider ~use_obr () =
+  run_test ~use_obr repo ~f:(fun env ->
       let ctx = make_empty_ctx env in
 
       (* Can we fold the decl correctly? *)
@@ -85,7 +85,10 @@ let concurrent_get_pfs ~ctx (paths : Relative_path.t list) :
     | None -> acc
     | Some earlier ->
       let next_earlier =
-        Concurrent.enqueue_next_and_get_earlier_results handle []
+        Concurrent.enqueue_next_and_get_earlier_results
+          ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls2
+          handle
+          []
       in
       loop (earlier :: acc) next_earlier
   in
@@ -93,7 +96,10 @@ let concurrent_get_pfs ~ctx (paths : Relative_path.t list) :
     List.mapi paths ~f:(fun i path -> (path, Printf.sprintf "%02d" i, None))
   in
   let earlier_opt =
-    Concurrent.enqueue_next_and_get_earlier_results handle paths
+    Concurrent.enqueue_next_and_get_earlier_results
+      ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls2
+      handle
+      paths
   in
   let acc = loop [] earlier_opt in
   acc
@@ -109,8 +115,8 @@ let pfs_to_decls (pfs : Direct_decl_parser.parsed_file list) : string list =
   |> List.map ~f:(fun (name, _decl) -> name)
   |> List.sort ~compare:String.compare
 
-let test_concurrent_parser () =
-  run_test repo ~f:(fun env ->
+let test_concurrent_parser ~use_obr () =
+  run_test ~use_obr repo ~f:(fun env ->
       let ctx = Common_provider.make_empty_ctx env in
 
       (* single file that exists *)
@@ -162,6 +168,8 @@ let test_concurrent_parser () =
 
 let () =
   EventLogger.init_fake ();
-  test_decl_provider ();
-  test_concurrent_parser ();
+  test_decl_provider ~use_obr:true ();
+  test_decl_provider ~use_obr:false ();
+  test_concurrent_parser ~use_obr:true ();
+  test_concurrent_parser ~use_obr:false ();
   ()

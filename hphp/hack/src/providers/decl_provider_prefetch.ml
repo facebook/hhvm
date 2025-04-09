@@ -414,7 +414,10 @@ let rec prefetch_loop
      but we'll get back answers from either the [to_decl] in this iteration,
      or from any earlier [to_decl] from an earlier iteration. *)
   match
-    Concurrent.enqueue_next_and_get_earlier_results handle to_decl_by_path
+    Concurrent.enqueue_next_and_get_earlier_results
+      ~use_obr:(Provider_context.get_popt ctx).use_oxidized_by_ref_decls2
+      handle
+      to_decl_by_path
   with
   | None -> telemetry
   | Some

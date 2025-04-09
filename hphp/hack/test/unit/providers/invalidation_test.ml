@@ -50,7 +50,7 @@ let change_class path name =
       new_pfh_hash = None;
     }
 
-let () =
+let f ~use_obr =
   EventLogger.init_fake ();
   let repo =
     [
@@ -66,7 +66,7 @@ let () =
            (Relative_path.from_root ~suffix, contents))
   in
   let open Common_provider in
-  run_test repo ~f:(fun env ->
+  run_test ~use_obr repo ~f:(fun env ->
       (* Typecheck a.php. This will bring in lots of decls. *)
       let (path, contents) = List.hd_exn repo in
       let (ctx, entry) = make_entry_ctx env path contents in
@@ -219,3 +219,7 @@ let () =
 
       ());
   ()
+
+let _ = f ~use_obr:true
+
+let _ = f ~use_obr:false

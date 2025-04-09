@@ -146,4 +146,30 @@ module Concurrent (Metadata : Metadata) = struct
     (Relative_path.t * Metadata.t * content) list ->
     (Relative_path.t * Metadata.t * parsed_file) option
     = "hh_concurrent_parse_step_ffi"
+
+  external start_obr :
+    opts:DeclParserOptions.t ->
+    root:Path.t ->
+    hhi:Path.t ->
+    tmp:Path.t ->
+    dummy:Path.t ->
+    handle = "hh_concurrent_parse_start_obr_ffi"
+
+  external enqueue_next_and_get_earlier_results_obr :
+    handle ->
+    (Relative_path.t * Metadata.t * content) list ->
+    (Relative_path.t * Metadata.t * parsed_file) option
+    = "hh_concurrent_parse_step_obr_ffi"
+
+  let start ~opts =
+    if opts.DeclParserOptions.use_oxidized_by_ref_decls2 then
+      start_obr ~opts
+    else
+      start ~opts
+
+  let enqueue_next_and_get_earlier_results ~use_obr =
+    if use_obr then
+      enqueue_next_and_get_earlier_results_obr
+    else
+      enqueue_next_and_get_earlier_results
 end

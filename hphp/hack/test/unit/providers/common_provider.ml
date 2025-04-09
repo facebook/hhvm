@@ -75,7 +75,8 @@ let make_entry_ctx env path contents =
 (** Note: this function does NOT set up Hhi/Tmp properly. It'd make the test
 irritatingly slow to have to write hhi to disk. Instead it just sets up Hhi
 to point to the same place as root, and none of the hhi are present. *)
-let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
+let run_test
+    ~use_obr (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
     =
   let tcopt =
     GlobalOptions.set
@@ -89,7 +90,18 @@ let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
     | Provider_backend.Local_memory local_memory -> local_memory
     | _ -> failwith "expected local_memory"
   in
-  let env = { popt = tcopt.GlobalOptions.po; tcopt; local_memory } in
+  let env =
+    {
+      popt =
+        {
+          tcopt.GlobalOptions.po with
+          ParserOptions.use_oxidized_by_ref_decls = use_obr;
+          ParserOptions.use_oxidized_by_ref_decls2 = use_obr;
+        };
+      tcopt;
+      local_memory;
+    }
+  in
   let ctx = make_empty_ctx env in
   Tempfile.with_real_tempdir (fun path ->
       Relative_path.set_path_prefix Relative_path.Root path;

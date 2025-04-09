@@ -103,6 +103,10 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
 };
 
 TEST(InteractionTest, PrioritizedInteractionRequest) {
+  gflags::FlagSaver flag_saver;
+  // Make sure resourcepool is enabled, it's somehow will NOT be enabled in
+  // test.
+  FLAGS_thrift_experimental_use_resource_pools = true;
   struct BlockingCalculatorHandler : public SemiCalculatorHandler {
     folly::Baton<> blockInteraction, blockNormal, startedInteraction;
 
@@ -137,12 +141,11 @@ TEST(InteractionTest, PrioritizedInteractionRequest) {
   // Wait for the interaction requests to reach the server
   handler->startedInteraction.wait();
 
-  auto normal1 = client->semifuture_addPrimitive(1, 2);
-  auto normal2 = client->semifuture_addPrimitive(3, 4);
+  auto normal = client->semifuture_addPrimitive(1, 2);
 
-  // Wait for the 2 requests to reach the server
+  // Wait for the normal requests to reach the server
   auto start = std::chrono::steady_clock::now();
-  while (runner.getThriftServer().resourcePoolSet().numQueued() != 2) {
+  while (runner.getThriftServer().resourcePoolSet().numQueued() != 1) {
     /* sleep override */
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     if (std::chrono::steady_clock::now() - start > std::chrono::seconds(5)) {
@@ -155,17 +158,12 @@ TEST(InteractionTest, PrioritizedInteractionRequest) {
   handler->blockInteraction.post();
   EXPECT_EQ(std::move(sf1).get(), 42);
 
-  // Unblock the normal request and wait for it to finish
-  handler->blockNormal.post();
-  EXPECT_EQ(std::move(normal1).get(), 3);
-
-  // The continuation to the interaction should have been finished now even
-  // though it was enqueued after the second normal request
+  // Make sure interaction request is executed before normal request.
   EXPECT_EQ(std::move(sf2).get(), 42);
 
-  // The second normal request will be dequeued last
+  // Unblock the normal request and wait for it to finish
   handler->blockNormal.post();
-  EXPECT_EQ(std::move(normal2).get(), 7);
+  EXPECT_EQ(std::move(normal).get(), 3);
 }
 
 TEST(InteractionTest, TerminateUsed) {

@@ -19,8 +19,6 @@
 
 namespace apache::thrift::detail {
 
-struct bundled_annotations {
-  static const std::map<std::string, std::string>& files();
-};
+const std::map<std::string, std::string>& bundled_annotation_files();
 
 } // namespace apache::thrift::detail

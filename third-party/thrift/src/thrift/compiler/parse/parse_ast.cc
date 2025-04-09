@@ -987,7 +987,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
     t_program_bundle* already_parsed) {
   if constexpr (bundle_annotations()) {
     const auto& annotation_files =
-        apache::thrift::detail::bundled_annotations::files();
+        apache::thrift::detail::bundled_annotation_files();
     for (const auto& [annot_path, content] : annotation_files) {
       auto found_or_error =
           sm.find_include_file(annot_path, path, params.incl_searchpath);

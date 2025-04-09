@@ -51,7 +51,7 @@ import builtins as _builtins
 import importlib
 
 import test.fixtures.enumstrict.module.thrift_types as _fbthrift_python_types
-from test.fixtures.enumstrict.module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from test.fixtures.enumstrict.module.thrift_enums import (
     EmptyEnum,
     MyEnum,
     MyUseIntrinsicDefaultEnum,

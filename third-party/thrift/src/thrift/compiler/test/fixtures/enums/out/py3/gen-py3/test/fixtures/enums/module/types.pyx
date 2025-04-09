@@ -51,7 +51,7 @@ import builtins as _builtins
 import importlib
 
 import test.fixtures.enums.module.thrift_types as _fbthrift_python_types
-from test.fixtures.enums.module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from test.fixtures.enums.module.thrift_enums import (
     Metasyntactic,
     MyEnum1,
     MyEnum2,

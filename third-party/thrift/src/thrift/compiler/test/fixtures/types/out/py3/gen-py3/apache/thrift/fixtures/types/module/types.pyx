@@ -53,7 +53,7 @@ cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_t
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 import apache.thrift.fixtures.types.module.thrift_types as _fbthrift_python_types
-from apache.thrift.fixtures.types.module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from apache.thrift.fixtures.types.module.thrift_enums import (
     has_bitwise_ops,
     is_unscoped,
     MyForwardRefEnum,

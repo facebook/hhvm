@@ -236,8 +236,8 @@ class EnumTests(unittest.TestCase):
             self.assertEqual(repr(e), f"<Color.{color}: {i}>")
 
     def test_enum_module(self) -> None:
-        module = "thrift_enums" if is_auto_migrated() else "types"
-        self.assertEqual(Color.__module__, f"testing.{module}")
+        # py3 enums are now the same as thrift-python enums
+        self.assertEqual(Color.__module__, f"testing.thrift_enums")
 
     def test_enum_print(self) -> None:
         for i, color in enumerate("red blue green".split(), 0):

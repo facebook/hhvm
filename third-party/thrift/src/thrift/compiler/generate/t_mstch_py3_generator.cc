@@ -166,6 +166,7 @@ class py3_mstch_program : public mstch_program {
             {"program:hasContainerTypes",
              &py3_mstch_program::hasContainerTypes},
             {"program:hasEnumTypes", &py3_mstch_program::hasEnumTypes},
+            {"program:hasUnionTypes", &py3_mstch_program::hasUnionTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
             {"program:has_stream?", &py3_mstch_program::hasStream},
@@ -227,10 +228,9 @@ class py3_mstch_program : public mstch_program {
     return false;
   }
 
-  mstch::node hasEnumTypes() {
-    if (!program_->enums().empty()) {
-      return true;
-    }
+  mstch::node hasEnumTypes() { return !program_->enums().empty(); }
+
+  mstch::node hasUnionTypes() {
     for (const auto* ttype : objects_) {
       if (ttype->is_union()) {
         return true;

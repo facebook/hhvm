@@ -87,7 +87,11 @@ class ThriftPython_Enum(unittest.TestCase):
             s.number_list,
         )
 
-        with self.assertRaisesRegex(TypeError, "Color.green is not '.*PositiveNumber'"):
+        error_regex = (
+            r"value Color.green is a py3 enum of type <class '.*thrift_enums\.Color'>, "
+            r"cannot be converted to <class '.*thrift_enums\.PositiveNumber'>"
+        )
+        with self.assertRaisesRegex(TypeError, error_regex):
             s.number_list.append(test_types.Color.green)
         self.assertEqual([2, 5], s.number_list)
 

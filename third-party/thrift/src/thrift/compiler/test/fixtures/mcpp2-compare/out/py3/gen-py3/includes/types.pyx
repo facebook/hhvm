@@ -51,7 +51,7 @@ import builtins as _builtins
 import importlib
 
 import includes.thrift_types as _fbthrift_python_types
-from includes.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from includes.thrift_enums import (
     AnEnum,
 )
 

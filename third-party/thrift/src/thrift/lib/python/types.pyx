@@ -53,8 +53,8 @@ def _is_py3_struct(obj):
         return False
 
 def _is_py3_enum(obj):
-    # py3 enums now use thrift-python Enum base class
-    return isinstance(obj, Enum) and obj.__class__.__module__.endswith(".types")
+    # py3 enums now use is same as thrift python Enum.
+    return isinstance(obj, Enum)
 
 def _make_noncached_property(getter_function, struct_class, field_name):
     prop = property(getter_function)

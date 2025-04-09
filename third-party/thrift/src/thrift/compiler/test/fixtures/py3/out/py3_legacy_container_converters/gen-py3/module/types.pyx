@@ -51,10 +51,12 @@ import builtins as _builtins
 import importlib
 
 import module.thrift_types as _fbthrift_python_types
-from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from module.thrift_enums import (
     AnEnum,
     AnEnumRenamed,
     Flags,
+)
+from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
     __BinaryUnionType,
 )
 

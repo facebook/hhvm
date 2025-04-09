@@ -53,11 +53,13 @@ cimport includes.types as _includes_types
 import includes.types as _includes_types
 
 import module.thrift_types as _fbthrift_python_types
-from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from module.thrift_enums import (
     MyEnumA,
     AnnotatedEnum,
     AnnotatedEnum2,
     MyEnumB,
+)
+from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
     __SimpleUnionType,
     __ComplexUnionType,
     __FloatUnionType,

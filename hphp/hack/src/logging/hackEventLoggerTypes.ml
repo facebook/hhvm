@@ -125,4 +125,6 @@ type rollout_flags = {
       (** POC: @catg - whether the client shows warnings by default. *)
   use_oxidized_by_ref_decls: bool;
       (** POC sowens - whether to decl with oxidized or oxidized-by-ref *)
+  use_oxidized_by_ref_decls2: bool;
+      (** POC sowens - whether to decl with oxidized or oxidized-by-ref *)
 }

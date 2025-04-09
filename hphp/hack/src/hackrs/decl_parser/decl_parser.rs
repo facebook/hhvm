@@ -101,7 +101,7 @@ impl<R: Reason> DeclParser<R> {
         ParsedFileWithHashesObr::new(parsed_file, deregister_php_stdlib_if_hhi, prefix, arena)
     }
     /// Parse and hash decls, removing stdlib decls if that's what parser-options say.
-    fn parse_impl(&self, path: RelativePath, text: &[u8]) -> ParsedFileWithHashes {
+    pub fn parse_impl(&self, path: RelativePath, text: &[u8]) -> ParsedFileWithHashes {
         let prefix = path.prefix();
         let opts = &self.decl_parser_opts;
         let deregister_php_stdlib_if_hhi = opts.deregister_php_stdlib;

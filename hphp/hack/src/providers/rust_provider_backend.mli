@@ -30,6 +30,9 @@ type ctx_proxy = {
 }
 
 module Decl : sig
+  val direct_decl_parse_and_cache_obr :
+    t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
+
   val direct_decl_parse_and_cache :
     t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
 

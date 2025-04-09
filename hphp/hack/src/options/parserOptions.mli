@@ -85,6 +85,9 @@ type t = {
       (** When true, plain <<__Memoize>> will be treated as <<__Memoize(#KeyedByIC)>>. **)
   use_oxidized_by_ref_decls: bool;
       (** Controls whether the direct decl parser uses oxidized-by-ref or just plain oxidized *)
+  use_oxidized_by_ref_decls2: bool;
+      (** Controls whether the direct decl parser uses oxidized-by-ref or just plain oxidized, for
+           the cached direct decl parsing *)
 }
 [@@deriving show, eq]
 
@@ -112,6 +115,7 @@ type ffi_t =
   * bool
   * bool
   * Experimental_features.feature_status SMap.t
+  * bool
   * bool
   * bool
   * bool

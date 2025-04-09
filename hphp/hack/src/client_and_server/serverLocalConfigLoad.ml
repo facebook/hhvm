@@ -107,6 +107,7 @@ let default =
     warnings_default_all = false;
     warnings_in_sandcastle = true;
     use_oxidized_by_ref_decls = true;
+    use_oxidized_by_ref_decls2 = true;
   }
 
 let system_config_path =
@@ -829,6 +830,12 @@ let load_
       ~default:default.use_oxidized_by_ref_decls
       config
   in
+  let use_oxidized_by_ref_decls2 =
+    bool_
+      "use_oxidized_by_ref_decls2"
+      ~default:default.use_oxidized_by_ref_decls2
+      config
+  in
   {
     saved_state =
       {
@@ -939,6 +946,7 @@ let load_
     warnings_default_all;
     warnings_in_sandcastle;
     use_oxidized_by_ref_decls;
+    use_oxidized_by_ref_decls2;
   }
 
 let load :
@@ -985,4 +993,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       autocomplete_sort_text = options.autocomplete_sort_text;
       warnings_default_all = options.warnings_default_all;
       use_oxidized_by_ref_decls = options.use_oxidized_by_ref_decls;
+      use_oxidized_by_ref_decls2 = options.use_oxidized_by_ref_decls2;
     }

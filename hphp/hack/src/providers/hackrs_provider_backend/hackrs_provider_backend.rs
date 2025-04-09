@@ -165,7 +165,7 @@ impl HhServerProviderBackend {
     /// Decl-parse the given file, dedup duplicate definitions of the same
     /// symbol (within the file, as well as removing losers of naming conflicts
     /// with other files), and add the parsed decls to the shallow decl store.
-    fn parse_and_cache_decls<'a>(
+    fn parse_and_cache_decls_obr<'a>(
         &self,
         path: RelativePath,
         text: &'a [u8],
@@ -179,6 +179,22 @@ impl HhServerProviderBackend {
         Ok(hashed_file)
     }
 
+    /// Decl-parse the given file, dedup duplicate definitions of the same
+    /// symbol (within the file, as well as removing losers of naming conflicts
+    /// with other files), and add the parsed decls to the shallow decl store.
+    fn parse_and_cache_decls(
+        &self,
+        path: RelativePath,
+        text: &[u8],
+    ) -> Result<oxidized::direct_decl_parser::ParsedFileWithHashes> {
+        let hashed_file = self.decl_parser.parse_impl(path, text);
+        self.lazy_shallow_decl_provider.dedup_and_add_decls(
+            path,
+            (hashed_file.iter())
+                .map(|(name, decl, _, _)| NamedDecl::from((name.clone(), decl.clone()))),
+        )?;
+        Ok(hashed_file)
+    }
     /// Directly add the given decls to the shallow decl store (without removing
     /// php_stdlib decls, deduping, or removing naming conflict losers).
     fn add_decls(
@@ -252,7 +268,7 @@ impl rust_provider_backend_ffi::ProviderBackendFfi for HhServerProviderBackend {
         self.ctx_is_empty.store(is_empty, Ordering::SeqCst);
     }
 
-    fn direct_decl_parse_and_cache<'a>(
+    fn direct_decl_parse_and_cache_obr<'a>(
         &self,
         path: RelativePath,
         text: UnsafeOcamlPtr,
@@ -263,7 +279,20 @@ impl rust_provider_backend_ffi::ProviderBackendFfi for HhServerProviderBackend {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = ocamlrep::bytes_from_ocamlrep(text_value).expect("expected string");
-        self.parse_and_cache_decls(path, text, arena).unwrap()
+        self.parse_and_cache_decls_obr(path, text, arena).unwrap()
+    }
+
+    fn direct_decl_parse_and_cache(
+        &self,
+        path: RelativePath,
+        text: UnsafeOcamlPtr,
+    ) -> oxidized::direct_decl_parser::ParsedFileWithHashes {
+        // SAFETY: Borrow the contents of the source file from the value on the
+        // OCaml heap rather than copying it over. This is safe as long as we
+        // don't call into OCaml within this function scope.
+        let text_value: ocamlrep::Value<'_> = unsafe { text.as_value() };
+        let text = ocamlrep::bytes_from_ocamlrep(text_value).expect("expected string");
+        self.parse_and_cache_decls(path, text).unwrap()
     }
 
     fn add_shallow_decls(&self, decls: &[&(&str, oxidized_by_ref::shallow_decl_defs::Decl<'_>)]) {

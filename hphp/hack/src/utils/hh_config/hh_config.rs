@@ -313,6 +313,10 @@ impl HhConfig {
                 "use_oxidized_by_ref_decls",
                 default.use_oxidized_by_ref_decls,
             )?,
+            use_oxidized_by_ref_decls2: hhconfig.get_bool_or(
+                "use_oxidized_by_ref_decls2",
+                default.use_oxidized_by_ref_decls2,
+            )?,
         };
         let rollouts = SavedStateRollouts::make(
             current_rolled_out_flag_idx,

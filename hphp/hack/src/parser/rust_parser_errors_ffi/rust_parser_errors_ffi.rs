@@ -61,6 +61,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
     let enable_class_pointer_hint = bool::from_ocaml(*ocaml_opts.add(21)).unwrap();
     let use_oxidized_by_ref_decls = bool::from_ocaml(*ocaml_opts.add(22)).unwrap();
+    let use_oxidized_by_ref_decls2 = bool::from_ocaml(*ocaml_opts.add(23)).unwrap();
 
     parser_options.disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -84,6 +85,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         consider_unspecified_experimental_features_released;
     parser_options.enable_class_pointer_hint = enable_class_pointer_hint;
     parser_options.use_oxidized_by_ref_decls = use_oxidized_by_ref_decls;
+    parser_options.use_oxidized_by_ref_decls2 = use_oxidized_by_ref_decls2;
     (
         parser_options,
         (hhvm_compat_mode, hhi_mode, codegen, tco_is_systemlib),

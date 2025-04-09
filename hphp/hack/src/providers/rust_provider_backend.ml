@@ -291,6 +291,14 @@ module Decl = struct
       Decl_store.set (decl_store t)
     )
 
+  external direct_decl_parse_and_cache_obr :
+    t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
+    = "hh_rust_provider_backend_direct_decl_parse_and_cache_obr"
+
+  let direct_decl_parse_and_cache_obr t =
+    set_decl_store t;
+    direct_decl_parse_and_cache_obr t
+
   external direct_decl_parse_and_cache :
     t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
     = "hh_rust_provider_backend_direct_decl_parse_and_cache"

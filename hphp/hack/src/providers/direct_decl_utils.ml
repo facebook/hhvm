@@ -227,10 +227,16 @@ let direct_decl_parse_and_cache ctx file =
     Counters.count Counters.Category.Direct_decl_parse @@ fun () ->
     get_file_contents ~ignore_file_content_caches:false ctx file
     |> Option.map ~f:(fun contents ->
-           Rust_provider_backend.Decl.direct_decl_parse_and_cache
-             backend
-             file
-             contents)
+           if (Provider_context.get_popt ctx).use_oxidized_by_ref_decls2 then
+             Rust_provider_backend.Decl.direct_decl_parse_and_cache_obr
+               backend
+               file
+               contents
+           else
+             Rust_provider_backend.Decl.direct_decl_parse_and_cache
+               backend
+               file
+               contents)
   | _ ->
     let result = direct_decl_parse ctx file in
     (match result with

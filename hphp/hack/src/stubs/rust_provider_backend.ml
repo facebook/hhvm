@@ -28,6 +28,8 @@ type ctx_proxy = {
 }
 
 module Decl = struct
+  let direct_decl_parse_and_cache_obr _ _ _ = failwith "unimplemented"
+
   let direct_decl_parse_and_cache _ _ _ = failwith "unimplemented"
 
   let add_shallow_decls _ _ = failwith "unimplemented"

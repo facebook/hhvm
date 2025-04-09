@@ -386,6 +386,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         use_oxidized_by_ref_decls =
           bool_opt "use_oxidized_by_ref_decls" config
           >?? po_opt.use_oxidized_by_ref_decls;
+        use_oxidized_by_ref_decls2 =
+          bool_opt "use_oxidized_by_ref_decls2" config
+          >?? po_opt.use_oxidized_by_ref_decls2;
       }
   in
   GlobalOptions.set

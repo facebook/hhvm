@@ -17827,20 +17827,15 @@ rust/CompatibilityTest/testset.double/ExceptionToStruct/NaN.Compact
 rust/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Binary
 rust/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Compact
 
-# Rust RPC server tests (all comformant)
+# Rust RPC server tests
 
-# rpc-server-test
-
-## This is an actual non-conformance failure, because we are trying to send encoded
-## data to a server about a runtime exn T218969298
+# This is an actual non-conformance failure, because we are trying to send
+# encoded data to a server about a runtime exn T218969298
 rust/ThriftRPCServerTest/SinkUndeclaredException/Success.SinkUndeclaredExceptionTest
 
 # Rust RPC client tests
 
-# rpc-client-test
-
-# These tests are implemented, but are genuine nonconformance failures.
-rust/ThriftRPCClientTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
-rust/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
+# This one is a pain to setup, while we support the flows, it requires
+# configuring the server in a client-test specific way. It should be
+# supported, but it's not today
 rust/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
-rust/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest

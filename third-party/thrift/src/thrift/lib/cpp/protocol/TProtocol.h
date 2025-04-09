@@ -168,10 +168,10 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
     case T_VOID:
     case T_STREAM:
       // Unimplemented, fallback to default
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcovered-switch-default"
+      FOLLY_PUSH_WARNING
+      FOLLY_CLANG_DISABLE_WARNING("-Wcovered-switch-default")
     default: {
-#pragma GCC diagnostic pop
+      FOLLY_POP_WARNING
       TProtocolException::throwInvalidSkipType(arg_type);
     }
   }

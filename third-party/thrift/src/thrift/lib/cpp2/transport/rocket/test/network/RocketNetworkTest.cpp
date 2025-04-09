@@ -38,6 +38,7 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 
+#include <folly/stop_watch.h>
 #include <thrift/lib/cpp/transport/TTransport.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
@@ -1430,19 +1431,23 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
         std::make_unique<NiceMock<MockRocketServerConnectionObserver>>(
             eventSet);
 
-    this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
-      auto connCount = 0;
-      server_->getConnectionManager()->forEachConnection(
-          [&](wangle::ManagedConnection* connection) {
-            if (auto conn = dynamic_cast<RocketServerConnection*>(connection)) {
-              EXPECT_EQ(conn->numObservers(), 0);
-              conn->addObserver(observer.get());
-              EXPECT_EQ(conn->numObservers(), 1);
-              connCount += 1;
-            }
-          });
-      EXPECT_EQ(connCount, 1);
-    });
+    auto connCount = 0;
+    folly::stop_watch<std::chrono::minutes> timer;
+    while (connCount == 0 && timer.elapsed() < std::chrono::minutes(1)) {
+      this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
+        server_->getConnectionManager()->forEachConnection(
+            [&](wangle::ManagedConnection* connection) {
+              if (auto conn =
+                      dynamic_cast<RocketServerConnection*>(connection)) {
+                EXPECT_EQ(conn->numObservers(), 0);
+                conn->addObserver(observer.get());
+                EXPECT_EQ(conn->numObservers(), 1);
+                connCount += 1;
+              }
+            });
+      });
+    }
+    EXPECT_EQ(connCount, 1);
 
     constexpr size_t kSetupFrameSize(14);
     constexpr size_t kSetupFrameStreamId(0);

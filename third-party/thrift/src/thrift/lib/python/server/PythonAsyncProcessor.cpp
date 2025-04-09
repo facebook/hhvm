@@ -248,14 +248,10 @@ void PythonAsyncProcessor::processSerializedCompressedRequestWithMetadata(
     return;
   }
 
-  // While this folly::makeSemiFuture().deferValue() may seem
-  // unnecessary, without this deferValue, the call to
-  // do_import(), defined at the top of this file,
-  // which happens via the call to dispatchRequest() below
-  // will crash with a null pointer derefence.
-  // The hypothesis is that python is not yet initialized
-  // and we chose not to go down that rabbit hole because
-  // the current implementation matches what was already present.
+  // This folly::makeSemiFuture().deferValue()
+  // ensures that the dispatchRequest(),
+  // which imports the cython module that must happen
+  // on the python thread, runs in the python thread.
   folly::makeSemiFuture()
       .deferValue([this,
                    protocol,
@@ -353,17 +349,35 @@ void PythonAsyncProcessor::executeRequest(
     return;
   }
 
-  dispatchRequest(
-      protocol,
-      ctx,
-      eb,
-      executor,
-      std::move(requestData),
-      std::move(req),
-      std::move(ctxStack),
-      serviceName,
-      std::move(serializedRequest),
-      kind.value())
+  // This folly::makeSemiFuture().deferValue()
+  // ensures that the dispatchRequest(),
+  // which imports the cython module that must happen
+  // on the python thread, runs in the python thread.
+  folly::makeSemiFuture()
+      .deferValue([this,
+                   protocol,
+                   ctx,
+                   eb,
+                   executor,
+                   serviceName,
+                   kind,
+                   requestData = std::move(requestData),
+                   req = std::move(req),
+                   ctxStack = std::move(ctxStack),
+                   serializedRequest = std::move(serializedRequest)](
+                      auto&& /* unused */) mutable {
+        return dispatchRequest(
+            protocol,
+            ctx,
+            eb,
+            executor,
+            std::move(requestData),
+            std::move(req),
+            std::move(ctxStack),
+            serviceName,
+            std::move(serializedRequest),
+            kind.value());
+      })
       .via(executor_);
 }
 

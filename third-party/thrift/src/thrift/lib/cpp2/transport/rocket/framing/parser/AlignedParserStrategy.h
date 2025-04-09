@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <folly/String.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
@@ -46,11 +47,11 @@ enum class State : uint8_t {
  * 1. The frame type is one of the following:
  *    - REQUEST_RESPONSE
  *    - PAYLOAD
- * 2. When the frame type is REQUEST_RESPONSE, the aligned field must be a the
- * first parameter of a Thrift Request, and binary.
+ * 2. When the frame type is REQUEST_RESPONSE, the aligned field must the first
+ * entry of the of the first parameter of the Thrift RPC call.
  * 3. When the frame type is PAYLOAD, the aligned field must be a binary field
  * that is the first field of a Thrift Response Struct.
- * 4. The must not be fragmented.
+ * 4. Must not be fragmented.
  *
  */
 template <typename T>
@@ -72,6 +73,10 @@ class AlignedParserStrategy {
       // Metadata Length
       Serializer::kBytesForFrameOrMetadataLength;
 
+  // In order to align the first IOBuf field of a Thrift Response Struct, we
+  // need to pad the RSocket data field by 6 bytes.
+  constexpr static auto kResponseFieldPadding = 6;
+
  public:
   explicit AlignedParserStrategy(T& owner)
       : state_(State::AwaitingHeader),
@@ -92,6 +97,9 @@ class AlignedParserStrategy {
   size_t remainingData() const { return remainingData_; }
   size_t remainingUnaligned() const { return remainingUnaligned_; }
 
+  // Visible for testing
+  std::unique_ptr<folly::IOBuf> createAlignedBuffer(size_t size);
+
  private:
   State state_;
   T& owner_;
@@ -111,8 +119,6 @@ class AlignedParserStrategy {
   std::unique_ptr<folly::IOBuf> createDataBuffer();
   std::unique_ptr<folly::IOBuf> createRequestResponseDataBuffer();
   std::unique_ptr<folly::IOBuf> createPayloadDataBuffer();
-  std::unique_ptr<folly::IOBuf> createAlignedBuffer(
-      size_t size, size_t padding);
 
   void handleAwaitingHeader(size_t len);
 
@@ -138,26 +144,23 @@ std::unique_ptr<folly::IOBuf> AlignedParserStrategy<T>::createHeaderBuffer() {
 
 template <typename T>
 std::unique_ptr<folly::IOBuf> AlignedParserStrategy<T>::createAlignedBuffer(
-    const size_t size, const size_t padding) {
-  // We need to allocate an extra byte for the IOBuf to be able to
-  // make sure the first field in a binary encoded thrift struct is
-  // aligned. There are 7 bytes between the start of the first field and
-  // the start of the struct.
-  auto buffer = folly::IOBuf::createSeparate(size + padding);
-  buffer->advance(padding);
-  return buffer;
+    const size_t size) {
+  return folly::IOBuf::create(size);
 }
 
 template <typename T>
 std::unique_ptr<folly::IOBuf>
 AlignedParserStrategy<T>::createRequestResponseDataBuffer() {
-  return createAlignedBuffer(remainingData_, 4);
+  auto requiredSize = remainingData_ + kResponseFieldPadding;
+  auto buf = folly::IOBuf::createSeparate(requiredSize);
+  buf->advance(kResponseFieldPadding);
+  return buf;
 }
 
 template <typename T>
 std::unique_ptr<folly::IOBuf>
 AlignedParserStrategy<T>::createPayloadDataBuffer() {
-  return createAlignedBuffer(remainingData_, 1);
+  return createAlignedBuffer(remainingData_);
 }
 
 template <typename T>

@@ -116,7 +116,7 @@ class ScopedServerInterfaceThread {
       folly::Executor* callbackExecutor = nullptr,
       MakeChannelFunc channelFunc = RocketClientChannel::newChannel,
       protocol::PROTOCOL_TYPES prot =
-          protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL,
+          protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL,
       InterceptorList interceptors = nullptr) const;
 
   static std::shared_ptr<RequestChannel> makeTestClientChannel(
@@ -124,7 +124,7 @@ class ScopedServerInterfaceThread {
       ScopedServerInterfaceThread::FaultInjectionFunc injectFault,
       ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault =
           nullptr,
-      protocol::PROTOCOL_TYPES prot = protocol::T_COMPACT_PROTOCOL);
+      protocol::PROTOCOL_TYPES prot = protocol::T_BINARY_PROTOCOL);
 
  private:
   std::shared_ptr<ThriftServer> ts_;
@@ -134,7 +134,7 @@ class ScopedServerInterfaceThread {
       folly::Executor* callbackExecutor,
       MakeChannelFunc channelFunc,
       size_t numThreads = folly::hardware_concurrency(),
-      protocol::PROTOCOL_TYPES prot = protocol::T_COMPACT_PROTOCOL) const;
+      protocol::PROTOCOL_TYPES prot = protocol::T_BINARY_PROTOCOL) const;
 };
 
 namespace detail {

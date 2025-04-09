@@ -21,6 +21,11 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AlignedParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/test/TestUtil.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/test/gen-cpp2/AlignedParser_types.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/test/gen-cpp2/TestService.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/test/gen-cpp2/TestServiceAsyncClient.h>
+
+#include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 namespace apache::thrift::rocket {
 
@@ -418,6 +423,100 @@ TEST(AlignedParserStrategyTest, AppendRequestNFrame) {
   RequestNFrame frame(std::move(ownerBuf));
   EXPECT_EQ(requestNFrame.frameType(), frame.frameType());
   EXPECT_EQ(requestNFrame.requestN(), frame.requestN());
+}
+
+TEST(AlignedParserStrategyTest, CreateAlignedBuffer) {
+  auto check = [&](folly::IOBuf* iobuf) {
+    uintptr_t address = reinterpret_cast<uintptr_t>(iobuf->data());
+    EXPECT_EQ((address) % 8, 0);
+    EXPECT_EQ((address) % 4, 0);
+  };
+
+  FakeOwner owner;
+  AlignedParserStrategy<FakeOwner> parser(owner);
+
+  auto createAndCheck = [&](size_t size) {
+    auto iobuf = parser.createAlignedBuffer(size);
+    return iobuf;
+  };
+
+  auto testSerializationRoundtrip = [&](size_t size) {
+    TestStruct testStruct;
+    testStruct.buf() = folly::IOBuf::copyBuffer(std::string(size, 'a'));
+
+    OuterStruct outerStruct;
+    outerStruct.test() = std::move(testStruct);
+
+    BinaryProtocolWriter writer;
+    folly::IOBufQueue queue;
+    queue.append(createAndCheck(size));
+    writer.setOutput(&queue);
+    outerStruct.write(&writer);
+
+    OuterStruct outerStruct2;
+    BinaryProtocolReader reader;
+    reader.setInput(queue.front());
+
+    outerStruct2.read(&reader);
+
+    TestStruct& testStruct2 = *outerStruct2.test();
+    check(testStruct2.buf().value().get());
+  };
+
+  testSerializationRoundtrip(4096);
+  testSerializationRoundtrip(12356);
+  testSerializationRoundtrip(12357);
+}
+
+TEST(AlignedParserStrategyTest, TestAlignmentWithRPC) {
+  THRIFT_FLAG_SET_MOCK(rocket_frame_parser, "aligned");
+
+  class TestServiceHandler
+      : public apache::thrift::ServiceHandler<TestService> {
+   public:
+    folly::coro::Task<std::unique_ptr<TestStruct>> co_test(
+        std::unique_ptr<TestStruct> response) override {
+      auto& buf = response->buf().value();
+      EXPECT_FALSE(buf->isChained());
+
+      uintptr_t address = reinterpret_cast<uintptr_t>(buf->data());
+      uintptr_t bufferStartAddress = reinterpret_cast<uintptr_t>(buf->buffer());
+
+      std::cout << "buffer start address: " << bufferStartAddress << std::endl;
+      std::cout << "from struct data address: " << address << std::endl;
+      std::cout << "offset: " << buf->data() - buf->buffer() << std::endl;
+
+      EXPECT_EQ((address) % 4, 0);
+      EXPECT_EQ((address) % 8, 0);
+
+      co_return std::move(response);
+    }
+  };
+
+  auto handler = std::make_shared<TestServiceHandler>();
+  auto server =
+      std::make_shared<ScopedServerInterfaceThread>(handler, [](auto&) {});
+  auto client = server->newClient<apache::thrift::Client<TestService>>();
+
+  for (int i = 0; i < 20; ++i) {
+    {
+      TestStruct testStruct;
+      testStruct.buf() = folly::IOBuf::copyBuffer(std::string(1 << i, 'a'));
+      client->semifuture_test(testStruct).get();
+    }
+    {
+      auto size = (1 << i) + 1;
+      TestStruct testStruct;
+      testStruct.buf() = folly::IOBuf::copyBuffer(std::string(size, 'a'));
+      client->semifuture_test(testStruct).get();
+    }
+    {
+      auto size = (1 << i) + folly::Random::rand32(1, 100);
+      TestStruct testStruct;
+      testStruct.buf() = folly::IOBuf::copyBuffer(std::string(size, 'a'));
+      client->semifuture_test(testStruct).get();
+    }
+  }
 }
 
 } // namespace apache::thrift::rocket

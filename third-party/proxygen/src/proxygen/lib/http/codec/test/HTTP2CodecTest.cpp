@@ -1638,8 +1638,6 @@ TEST_F(HTTP2CodecTest, GoawayHandling) {
   upstreamCodec_.generateWindowUpdate(output_, 3, 100);
   upstreamCodec_.generateBody(
       output_, 3, makeBuf(10), HTTPCodec::NoPadding, false);
-  upstreamCodec_.generatePriority(
-      output_, 3, HTTPMessage::HTTP2Priority(0, true, 1));
   upstreamCodec_.generateEOM(output_, 3);
   upstreamCodec_.generateRstStream(output_, 3, ErrorCode::CANCEL);
   EXPECT_EQ(output_.chainLength(), 0);
@@ -1665,8 +1663,6 @@ TEST_F(HTTP2CodecTest, GoawayHandling) {
   parseUpstream();
 
   output_.append(makeBuf(10));
-  downstreamCodec_.generatePriority(
-      output_, 2, HTTPMessage::HTTP2Priority(0, true, 1));
   downstreamCodec_.generateEOM(output_, 2);
   downstreamCodec_.generateRstStream(output_, 2, ErrorCode::CANCEL);
 
@@ -1971,21 +1967,6 @@ TEST_F(HTTP2CodecTest, DuplicateBadHeaderPriority) {
   parse();
   callbacks_.expectMessage(true, 1, "/");
   EXPECT_EQ(callbacks_.streamErrors, 0);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-}
-
-TEST_F(HTTP2CodecTest, BadPriority) {
-  auto pri = HTTPMessage::HTTP2Priority(0, true, 1);
-  upstreamCodec_.generatePriority(output_, 1, pri);
-
-  // hack ingress with cirular dep
-  EXPECT_TRUE(parse([&](IOBuf* ingress) {
-    folly::io::RWPrivateCursor c(ingress);
-    c.skip(http2::kFrameHeaderSize);
-    c.writeBE<uint32_t>(1);
-  }));
-
-  EXPECT_EQ(callbacks_.streamErrors, 1);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
@@ -2433,7 +2414,7 @@ TEST_F(HTTP2CodecTest, TestAllEgressFrameTypeCallbacks) {
       http2::FrameType expectedTypes[] = {
           http2::FrameType::DATA,
           http2::FrameType::HEADERS,
-          http2::FrameType::PRIORITY,
+          http2::FrameType::RFC9218_PRIORITY,
           http2::FrameType::RST_STREAM,
           http2::FrameType::SETTINGS,
           http2::FrameType::PUSH_PROMISE,
@@ -2472,8 +2453,7 @@ TEST_F(HTTP2CodecTest, TestAllEgressFrameTypeCallbacks) {
   auto id = upstreamCodec_.createStream();
   upstreamCodec_.generateHeader(output_, id, req, true, &size);
 
-  upstreamCodec_.generatePriority(
-      output_, 3, HTTPMessage::HTTP2Priority(0, true, 1));
+  upstreamCodec_.generatePriority(output_, 3, HTTPPriority{1, true});
   upstreamCodec_.generateRstStream(output_, 2, ErrorCode::ENHANCE_YOUR_CALM);
   upstreamCodec_.generateSettings(output_);
   downstreamCodec_.generatePushPromise(output_, 2, req, 1);

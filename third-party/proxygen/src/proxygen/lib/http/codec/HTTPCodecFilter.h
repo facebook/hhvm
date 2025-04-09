@@ -227,10 +227,6 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
                               uint32_t delta) override;
 
   size_t generatePriority(folly::IOBufQueue& writeBuf,
-                          StreamID stream,
-                          const HTTPMessage::HTTP2Priority& pri) override;
-
-  size_t generatePriority(folly::IOBufQueue& writeBuf,
                           StreamID streamId,
                           HTTPPriority priority) override;
 

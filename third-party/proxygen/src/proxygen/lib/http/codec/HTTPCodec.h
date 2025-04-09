@@ -723,15 +723,6 @@ class HTTPCodec {
     return 0;
   }
 
-  /*
-   * Generate a PRIORITY message, if supported
-   */
-  virtual size_t generatePriority(folly::IOBufQueue& /* writeBuf */,
-                                  StreamID /* stream */,
-                                  const HTTPMessage::HTTP2Priority& /* pri */) {
-    return 0;
-  }
-
   /**
    * Generate a PRIORITY_UPDATE frame, according to the new HTTP priority
    * draft, if supported.

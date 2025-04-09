@@ -91,10 +91,6 @@ class HQControlCodec
 
   size_t generatePriority(folly::IOBufQueue& writeBuf,
                           StreamID stream,
-                          const HTTPMessage::HTTP2Priority& pri) override;
-
-  size_t generatePriority(folly::IOBufQueue& writeBuf,
-                          StreamID stream,
                           HTTPPriority priority) override;
 
   size_t generatePushPriority(folly::IOBufQueue& writeBuf,

@@ -250,15 +250,6 @@ size_t HQControlCodec::generateSettings(folly::IOBufQueue& writeBuf) {
   return *writeRes;
 }
 
-size_t HQControlCodec::generatePriority(
-    folly::IOBufQueue& /*writeBuf*/,
-    StreamID /*stream*/,
-    const HTTPMessage::HTTP2Priority& /*pri*/) {
-  CHECK(false) << __func__
-               << " deprecated draft. Use the other generatePriority API";
-  return 0;
-}
-
 size_t HQControlCodec::generatePriority(folly::IOBufQueue& writeBuf,
                                         StreamID stream,
                                         HTTPPriority priority) {

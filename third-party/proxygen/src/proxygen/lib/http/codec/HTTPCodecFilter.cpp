@@ -342,13 +342,6 @@ size_t PassThroughHTTPCodecFilter::generateWindowUpdate(folly::IOBufQueue& buf,
   return call_->generateWindowUpdate(buf, stream, delta);
 }
 
-size_t PassThroughHTTPCodecFilter::generatePriority(
-    folly::IOBufQueue& writeBuf,
-    StreamID stream,
-    const HTTPMessage::HTTP2Priority& pri) {
-  return call_->generatePriority(writeBuf, stream, pri);
-}
-
 size_t PassThroughHTTPCodecFilter::generatePriority(folly::IOBufQueue& writeBuf,
                                                     StreamID streamId,
                                                     HTTPPriority priority) {

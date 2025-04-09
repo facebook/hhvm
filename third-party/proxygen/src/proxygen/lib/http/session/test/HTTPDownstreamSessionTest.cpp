@@ -3886,8 +3886,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
 
   // virtual priority node
   auto priGroupID = clientCodec_->createStream();
-  clientCodec_->generatePriority(
-      requests_, priGroupID, HTTPMessage::HTTP2Priority(0, false, 3));
   auto req = getGetRequest();
   req.setHTTP2Priority(HTTPMessage::HTTP2Priority{priGroupID, false, 255});
   auto id1 = sendRequest(req);
@@ -4011,8 +4009,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
   for (uint32_t i = 0;
        i < ControlMessageRateLimiter::kMaxEventsPerIntervalLowerBound - 3;
        i++) {
-    clientCodec_->generatePriority(
-        requests_, streamid, HTTPMessage::HTTP2Priority(0, false, 3));
+    clientCodec_->generatePriority(requests_, streamid, HTTPPriority{3, false});
   }
 
   clientCodec_->generateSettings(requests_);
@@ -4029,8 +4026,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
   // Send 10 control frames. This is just within the rate limits that we have
   // set.
   for (int i = 0; i < 5; i++) {
-    clientCodec_->generatePriority(
-        requests_, streamid, HTTPMessage::HTTP2Priority(0, false, 3));
+    clientCodec_->generatePriority(requests_, streamid, HTTPPriority{3, false});
   }
 
   clientCodec_->generateSettings(requests_);

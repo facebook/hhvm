@@ -106,9 +106,6 @@ class HTTP2Codec
   size_t generateWindowUpdate(folly::IOBufQueue& writeBuf,
                               StreamID stream,
                               uint32_t delta) override;
-  size_t generatePriority(folly::IOBufQueue& writeBuf,
-                          StreamID stream,
-                          const HTTPMessage::HTTP2Priority& pri) override;
   size_t generatePriority(folly::IOBufQueue& /* writeBuf */,
                           StreamID /* stream */,
                           HTTPPriority /* priority */) override;

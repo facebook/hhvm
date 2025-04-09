@@ -589,19 +589,25 @@ void DynamicMapPatch::setOrCheckMapType(
 }
 
 template <bool IsUnion>
-void DynamicStructurePatch<IsUnion>::ensurePatchable() {
-  if (!assign_) {
-    return;
-  }
-
-  clear_ = true;
-  for (auto&& [id, field] : *assign_) {
+void DynamicStructurePatch<IsUnion>::ensureAndAssignFieldsFromObject(
+    Object obj) {
+  for (auto&& [id, field] : obj) {
     auto fieldId = static_cast<FieldId>(id);
     ensure_[fieldId] = emptyValue(field.getType());
     Object patch;
     patch[static_cast<FieldId>(op::PatchOp::Assign)] = std::move(field);
     patchAfter_[fieldId].fromObject(std::move(patch));
   }
+}
+
+template <bool IsUnion>
+void DynamicStructurePatch<IsUnion>::ensurePatchable() {
+  if (!assign_) {
+    return;
+  }
+
+  clear_ = true;
+  ensureAndAssignFieldsFromObject(std::move(*assign_));
   assign_.reset();
 }
 template <bool IsUnion>

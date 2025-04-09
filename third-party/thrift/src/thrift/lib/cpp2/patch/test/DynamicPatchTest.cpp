@@ -1613,4 +1613,35 @@ TEST(DynamicPatchTest, Any) {
   }
 }
 
+struct EnsureAndPatchVisitor {
+  void assign(const auto&) { EXPECT_FALSE(true); }
+  void clear() { EXPECT_FALSE(true); }
+  void patchIfSet(FieldId id, const auto&) { patchIds.insert(id); }
+  void ensure(FieldId id, const Value&) { ensureIds.insert(id); }
+  void remove(FieldId) { EXPECT_FALSE(true); }
+
+  std::set<FieldId> ensureIds;
+  std::set<FieldId> patchIds;
+};
+
+TEST(DynamicPatchTest, convertAssignPatchToFieldPatch) {
+  protocol::Object obj;
+  obj[FieldId{1}].emplace_i32(1);
+  obj[FieldId{2}].emplace_i32(2);
+  DynamicStructPatch patch;
+  patch.ensureAndAssignFieldsFromObject(obj);
+
+  EnsureAndPatchVisitor visitor;
+  patch.customVisit(visitor);
+
+  auto check = [](const auto& ids) {
+    EXPECT_EQ(ids.size(), 2);
+    EXPECT_TRUE(ids.contains(FieldId{1}));
+    EXPECT_TRUE(ids.contains(FieldId{2}));
+  };
+
+  check(visitor.ensureIds);
+  check(visitor.patchIds);
+}
+
 } // namespace apache::thrift::protocol

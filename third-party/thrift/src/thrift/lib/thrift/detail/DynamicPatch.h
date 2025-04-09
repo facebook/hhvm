@@ -634,6 +634,9 @@ class DynamicStructurePatch {
         remove_.contains(id);
   }
 
+  // Ensures and patches fields with assign operation from the given object.
+  void ensureAndAssignFieldsFromObject(Object obj);
+
  private:
   template <class Self, class Visitor>
   static void customVisitImpl(Self&& self, Visitor&& v);

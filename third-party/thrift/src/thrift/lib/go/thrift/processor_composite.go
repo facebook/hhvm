@@ -17,6 +17,8 @@
 package thrift
 
 import (
+	"maps"
+
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
@@ -49,22 +51,13 @@ func NewCompositeProcessor() CompositeProcessor {
 // A full solution (inclusion respecting namespaces) will require changes
 // to the thrift compiler
 func (p *compositeProcessor) Include(processor Processor) {
-	for name, tfunc := range processor.ProcessorFunctionMap() {
-		p.processorFunctionMap[name] = tfunc
-	}
+	maps.Copy(p.processorFunctionMap, processor.ProcessorFunctionMap())
+
 	metadata := processor.GetThriftMetadata()
-	for name, v := range metadata.GetEnums() {
-		p.metadata.Enums[name] = v
-	}
-	for name, v := range metadata.GetStructs() {
-		p.metadata.Structs[name] = v
-	}
-	for name, v := range metadata.GetExceptions() {
-		p.metadata.Exceptions[name] = v
-	}
-	for name, v := range metadata.GetServices() {
-		p.metadata.Services[name] = v
-	}
+	maps.Copy(p.metadata.Enums, metadata.GetEnums())
+	maps.Copy(p.metadata.Structs, metadata.GetStructs())
+	maps.Copy(p.metadata.Exceptions, metadata.GetExceptions())
+	maps.Copy(p.metadata.Services, metadata.GetServices())
 }
 
 // GetProcessorFunction multiplexes redirects to the appropriate Processor

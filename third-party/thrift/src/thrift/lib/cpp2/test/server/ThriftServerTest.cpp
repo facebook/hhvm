@@ -2311,20 +2311,17 @@ TEST(ThriftServer, BadSendTest) {
 TEST(ThriftServer, ResetStateTest) {
   folly::EventBase base;
 
-  // Create a server socket and bind, don't listen.  This gets us a
-  // port to test with which is guaranteed to fail.
-  auto ssock = std::unique_ptr<
-      folly::AsyncServerSocket,
-      folly::DelayedDestruction::Destructor>(new folly::AsyncServerSocket);
-  ssock->bind(0);
-  EXPECT_FALSE(ssock->getAddresses().empty());
+  // Create an invalid address connecting to which will fail. Note that
+  // creating a server socket that binds to an address but doesn't listen
+  // won't work portably because on Linux it will cause connect to fail
+  // quickly while on macOS it will fail after a long(ish) timeout.
+  folly::SocketAddress addr("::", 0);
 
   // We do this loop a bunch of times, because the bug which caused
   // the assertion failure was a lost race, which doesn't happen
   // reliably.
   for (int i = 0; i < 1000; ++i) {
-    auto socket =
-        folly::AsyncSocket::newSocket(&base, ssock->getAddresses()[0]);
+    auto socket = folly::AsyncSocket::newSocket(&base, addr);
 
     // Create a client.
     TestServiceAsyncClient client(

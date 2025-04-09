@@ -76,7 +76,7 @@ void markCoveredArc(TransID src,
                     TransCFG::ArcPtrSet& coveredArcs) {
   auto dstRetransSet = findRetransSet(dstRegion, dst);
   for (auto outArc : cfg.outArcs(src)) {
-    if (dstRetransSet.count(outArc->dst())) {
+    if (dstRetransSet.contains(outArc->dst())) {
       coveredArcs.insert(outArc);
     }
   }
@@ -108,7 +108,7 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
     headToRegion[newHead] = region;
     for (auto arc : cfg.inArcs(newHead)) {
       const auto src = arc->src();
-      if (coveredNodes.count(src)) {
+      if (coveredNodes.contains(src)) {
         markCoveredArc(src, entryId, cfg, *region, coveredArcs);
       }
     }
@@ -121,7 +121,7 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
 
     for (auto srcId : srcIds) {
       for (auto arc : cfg.outArcs(srcId)) {
-        if (dstIds.count(arc->dst())) {
+        if (dstIds.contains(arc->dst())) {
           coveredArcs.insert(arc);
         }
       }
@@ -132,7 +132,7 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
   for (auto& b : region->blocks()) {
     for (auto srcId : findRetransSet(*region, b->id())) {
       for (auto arc : cfg.outArcs(srcId)) {
-        if (heads.count(arc->dst())) {
+        if (heads.contains(arc->dst())) {
           auto dstRegionEntryId = headToRegion[arc->dst()]->entry()->id();
           markCoveredArc(arc->src(), dstRegionEntryId, cfg,
                          *headToRegion[arc->dst()], coveredArcs);
@@ -206,7 +206,7 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
   auto lowestSk = SrcKey {};
   for (const auto& pair : regionToTransIds) {
     auto r = pair.first;
-    if (selected.count(r)) continue;
+    if (selected.contains(r)) continue;
     auto& tids = pair.second;
     auto const firstTid = tids[0];
     auto const firstSk = profData->transRec(firstTid)->srcKey();
@@ -240,7 +240,7 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
     RegionDescPtr bestNext = nullptr;
     auto    regionTransIds = getRegionTransIDVec(regionToTransIds, region);
     for (auto next : regions) {
-      if (selected.count(next)) continue;
+      if (selected.contains(next)) continue;
       auto nextTransIds = getRegionTransIDVec(regionToTransIds, next);
       int64_t weight = interRegionWeight(regionTransIds, nextTransIds[0], cfg);
       int64_t headWeight = cfg.weight(nextTransIds[0]);
@@ -273,7 +273,7 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
 bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
                     const TransCFG::ArcPtrSet& coveredArcs) {
   for (auto arc : arcs) {
-    if (!coveredArcs.count(arc)) {
+    if (!coveredArcs.contains(arc)) {
       return false;
     }
   }

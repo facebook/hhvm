@@ -252,7 +252,7 @@ private:
     auto firstDead = std::remove_if(
       begin(arcs), end(arcs), [&](const TransCFG::Arc* arc) {
         auto const rec = m_profData->transRec(arc->dst());
-        const bool ok = allowedSks.count(rec->srcKey());
+        const bool ok = allowedSks.contains(rec->srcKey());
         ITRACE(5, "Arc {} -> {} {}included\n",
                arc->src(), arc->dst(), ok ? "" : "not ");
         return !ok;
@@ -404,10 +404,10 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
   }
 
   auto const setScale = [&] (TransID tid, double scale) {
-    assertx(!scales.count(tid));
+    assertx(!scales.contains(tid));
     scales.emplace(tid, scale);
     for (auto const b : merged[tid]) {
-      assertx(!scales.count(b));
+      assertx(!scales.contains(b));
       scales.emplace(b, scale);
     }
   };
@@ -418,7 +418,7 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
 
     assertx(region->blockProfCountScale(bid) == 1.0);
 
-    if (inEntryChain.count(bid)) {
+    if (inEntryChain.contains(bid)) {
       ITRACE(5, "    entry block. No scaling\n");
       setScale(bid, 1.0);
       continue;
@@ -432,7 +432,7 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
       auto const predWeight = ctx.cfg->weight(pred);
       ITRACE(5, "    pred {} (weight {})\n", pred, predWeight);
 
-      if (!inRegion.count(pred)) {
+      if (!inRegion.contains(pred)) {
         ITRACE(5, "      not in region\n");
         totalPredWeight += predWeight;
         continue;

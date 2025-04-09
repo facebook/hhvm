@@ -156,7 +156,7 @@ size_t relocateImpl(RelocationInfo& rel,
           assertx(success);
         } else {
           if (!preserveAlignment && d2.isBranch()) {
-            if (wideJmps.count(src)) {
+            if (wideJmps.contains(src)) {
               if (d2.size() < kJmpLen) {
                 d2.widenBranch();
                 internalRefsNeedUpdating = true;
@@ -171,12 +171,12 @@ size_t relocateImpl(RelocationInfo& rel,
         }
       }
       if (di.hasImmediate()) {
-        if (fixups.addressImmediates.count(src)) {
+        if (fixups.addressImmediates.contains(src)) {
           if (size_t(di.immediate() - (uint64_t)start) < range) {
             hasInternalRefs = internalRefsNeedUpdating = true;
           }
         } else {
-          if (fixups.addressImmediates.count((TCA)~uintptr_t(src))) {
+          if (fixups.addressImmediates.contains((TCA)~uintptr_t(src))) {
             // Handle weird, encoded offset, used by LdSmashable
             always_assert(di.immediate() == ((uintptr_t(src) << 1) | 1));
             bool DEBUG_ONLY success =

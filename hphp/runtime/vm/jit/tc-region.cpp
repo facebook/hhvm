@@ -374,7 +374,7 @@ void smashOptBinds(CGMeta& meta,
   // inProgressTailJumps as it has already been smashed.
   GrowableVector<IncomingBranch> newTailJumps;
   for (auto& jump : meta.inProgressTailJumps) {
-    if (smashed.count(jump.toSmash()) == 0) {
+    if (!smashed.contains(jump.toSmash())) {
       newTailJumps.push_back(jump);
     } else {
       FTRACE(3, "smashOptBinds: removing {} from inProgressTailJumps\n",
@@ -466,7 +466,7 @@ std::string show(const SrcKeyTransMap& map) {
 void checkPublishedAddr(TCA tca, const jit::hash_set<TCA>& publishedSet) {
   always_assert_flog(code().inMainOrColdOrFrozen(tca),
                      "srcKeyTrans has address not in hot/main: {}", tca);
-  always_assert_flog(publishedSet.count(tca),
+  always_assert_flog(publishedSet.contains(tca),
                      "srcKeyTrans has unpublished translation @ {}", tca);
 }
 

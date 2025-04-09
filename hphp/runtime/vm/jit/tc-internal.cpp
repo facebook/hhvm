@@ -197,7 +197,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
       fullName = cls->name()->toCppString() + "::";
     }
     fullName.append(func->name()->data());
-    if (Cfg::Jit::FuncBlockList.count(fullName)) {
+    if (Cfg::Jit::FuncBlockList.contains(fullName)) {
       return TranslationResult::Scope::Process;
     }
   }

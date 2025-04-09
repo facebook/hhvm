@@ -232,7 +232,7 @@ RegionDesc::BlockData& RegionDesc::data(BlockId id) {
 }
 
 bool RegionDesc::hasBlock(BlockId id) const {
-  return m_data.count(id);
+  return m_data.contains(id);
 }
 
 RegionDesc::BlockPtr RegionDesc::block(BlockId id) const {
@@ -355,7 +355,7 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   // Fix predecessor sets for the successors.
   for (auto succId : m_data[newId].succs) {
     BlockIdSet& succPreds = m_data[succId].preds;
-    assertx(succPreds.count(oldId));
+    assertx(succPreds.contains(oldId));
     succPreds.erase(oldId);
     succPreds.insert(newId);
   }
@@ -363,7 +363,7 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   // Fix successor sets for the predecessors.
   for (auto predId : m_data[newId].preds) {
     BlockIdSet& predSuccs = m_data[predId].succs;
-    assertx(predSuccs.count(oldId));
+    assertx(predSuccs.contains(oldId));
     predSuccs.erase(oldId);
     predSuccs.insert(newId);
   }
@@ -404,7 +404,7 @@ void RegionDesc::prepend(const RegionDesc& other) {
 void RegionDesc::postOrderSort(RegionDesc::BlockId     bid,
                                RegionDesc::BlockIdSet& visited,
                                RegionDesc::BlockIdVec& outVec) {
-  if (visited.count(bid)) return;
+  if (visited.contains(bid)) return;
   visited.insert(bid);
 
   if (auto nextRetr = nextRetrans(bid)) {
@@ -436,7 +436,7 @@ void RegionDesc::sortBlocks() {
   // Remove unreachable blocks from `m_data'.
   for (auto it = m_blocks.begin(); it != m_blocks.end();) {
     auto bid = (*it)->id();
-    if (visited.count(bid) == 0) {
+    if (!visited.contains(bid)) {
       it = deleteBlock(it);
     } else {
       it++;
@@ -537,7 +537,7 @@ void mergeChains(Chain& dst, Chain& src, BlockToChainMap& b2c) {
 
 RegionDesc::BlockId findFirstInSet(const Chain& c, RegionDesc::BlockIdSet s) {
   for (auto bid : c.blocks) {
-    if (s.count(bid)) return bid;
+    if (s.contains(bid)) return bid;
   }
   always_assert(0);
 }
@@ -682,7 +682,7 @@ void RegionDesc::chainRetransBlocks() {
   for (auto b : blocks()) {
     auto& succSet = data(b->id()).succs;
     for (auto s : succSet) {
-      if (erased_ids.count(s)) continue;
+      if (erased_ids.contains(s)) continue;
       auto& c = chains[block2chain[s]];
       auto selectedSucc = findFirstInSet(c, succSet);
       for (auto other : c.blocks) {
@@ -1065,7 +1065,7 @@ struct DFSWalker {
     : m_region(region) { }
 
   void walk(RegionDesc::BlockId id) {
-    if (m_visited.count(id) > 0) return;
+    if (m_visited.contains(id)) return;
     m_visited.insert(id);
 
     if (auto nextRetrans = m_region.nextRetrans(id)) {
@@ -1126,7 +1126,7 @@ bool check(const RegionDesc& region, std::string& error) {
   for (auto b : region.blocks()) {
     auto bid = b->id();
     // 2) Each block in the region has a different id.
-    if (blockSet.count(bid)) {
+    if (blockSet.contains(bid)) {
       return bad(folly::sformat("many blocks with id {}", bid));
     }
     blockSet.insert(bid);
@@ -1142,13 +1142,13 @@ bool check(const RegionDesc& region, std::string& error) {
       SrcKey succSk = region.block(succ)->start();
 
       // 3) All arcs involve blocks within the region.
-      if (blockSet.count(succ) == 0) {
+      if (!blockSet.contains(succ)) {
         return bad(folly::sformat("arc with dst not in the region: {} -> {}",
                                   bid, succ));
       }
 
       // 11) Successors and predecessors sets are consistent.
-      if (region.preds(succ).count(bid) == 0) {
+      if (!region.preds(succ).contains(bid)) {
         return bad(folly::sformat("arc missing in succ's pred set: {} -> {}",
                                   bid, succ));
       }
@@ -1160,26 +1160,26 @@ bool check(const RegionDesc& region, std::string& error) {
 
       // 4) For each arc, the bytecode offset of the dst block must
       //    possibly follow the execution of the src block.
-      if (validSuccSrcKeys.count(succSk) == 0) {
+      if (!validSuccSrcKeys.contains(succSk)) {
         return bad(folly::sformat("arc with impossible control flow: {} -> {}",
                                   bid, succ));
       }
 
       // 5) Each block contains at most one successor corresponding to a
       //    given SrcKey.
-      if (succSrcKeys.count(succSk) > 0) {
+      if (succSrcKeys.contains(succSk)) {
         return bad(folly::sformat("block {} has multiple successors with SK {}",
                                   bid, show(succSk)));
       }
       succSrcKeys.insert(succSk);
     }
     for (auto pred : region.preds(bid)) {
-      if (blockSet.count(pred) == 0) {
+      if (!blockSet.contains(pred)) {
         return bad(folly::sformat("arc with src not in the region: {} -> {}",
                                   pred, bid));
       }
       // 11) Successors and predecessors sets are consistent.
-      if (region.succs(pred).count(bid) == 0) {
+      if (!region.succs(pred).contains(bid)) {
         return bad(folly::sformat("arc missing in pred's succ set: {} -> {}",
                                   pred, bid));
       }
@@ -1244,7 +1244,7 @@ bool check(const RegionDesc& region, std::string& error) {
     chainSet.insert(bid);
     while (auto next = region.nextRetrans(bid)) {
       auto nextId = next.value();
-      if (chainSet.count(nextId)) {
+      if (chainSet.contains(nextId)) {
         return bad(folly::sformat("cyclic retranslation chain for block {}",
                                   bid));
       }

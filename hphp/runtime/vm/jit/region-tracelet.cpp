@@ -518,7 +518,7 @@ RegionDescPtr form_region(Env& env) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              env.inst.toString(), exn.what());
       always_assert_flog(
-        !env.interp.count(env.sk),
+        !env.interp.contains(env.sk),
         "Double PUNT trying to translate {}\n", env.inst
       );
       env.interp.insert(env.sk);

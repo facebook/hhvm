@@ -75,7 +75,7 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx) {
   auto numBCInstrs = ctx.maxBCInstrs;
   FTRACE(1, "selectHotTrace: starting with maxBCInstrs = {}\n", numBCInstrs);
 
-  while (!selectedSet.count(tid)) {
+  while (!selectedSet.contains(tid)) {
     auto rec = ctx.profData->transRec(tid);
     auto blockRegion = rec->region();
     if (blockRegion == nullptr) break;

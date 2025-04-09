@@ -226,10 +226,10 @@ namespace {
       if (Cfg::Jit::BuiltinsInterceptableByDefault) {
         return true;
       } else {
-        return (Cfg::Eval::InterceptableBuiltins.count(fullname) == 1);
+        return (Cfg::Eval::InterceptableBuiltins.contains(fullname));
       }
     } else {
-      return Cfg::Eval::NonInterceptableFunctions.count(fullname) == 0;
+      return !Cfg::Eval::NonInterceptableFunctions.contains(fullname);
     }
   }
 }

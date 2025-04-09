@@ -613,7 +613,25 @@ cdef class ListTypeInfo(TypeInfoBase):
 
     cdef to_internal_from_values(self, object values, TypeInfoBase val_type_info):
         cdef size_t idx = 0
-        cdef tuple tpl = PyTuple_New(len(values))
+        cdef int value_len
+        try:
+            value_len = len(values)
+        except TypeError:
+            try: 
+                warnings.warn(
+                    f"list type should be a Sequence with length, got {type(values)}",
+                    RuntimeWarning,
+                )
+                # if there's no length, convert iterable to list
+                # if it's not an iterable, then raise TypeError
+                values = list(values)
+                value_len = len(values)
+            except Exception:
+                raise TypeError(
+                    f"values must be a Sequence with length, got {type(values)}"
+                )
+
+        cdef tuple tpl = PyTuple_New(value_len)
         for idx, value in enumerate(values):
             internal_data = val_type_info.to_internal_data(value)
             Py_INCREF(internal_data)

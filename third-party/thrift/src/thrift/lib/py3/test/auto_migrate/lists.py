@@ -208,6 +208,14 @@ class ListTests(unittest.TestCase):
         self.assertNotEqual(t_list, easy())
         self.assertNotEqual(easy(), t_list)
 
+    def test_list_from_iterable(self) -> None:
+        colors = map(Color, range(3))
+        self.assertEqual(
+            # pyre-ignore[6]: deliberately incompatible parameter type
+            ColorGroups(color_list=colors).color_list,
+            [Color.red, Color.blue, Color.green],
+        )
+
     @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(int_list, Container)

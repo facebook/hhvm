@@ -12,11 +12,10 @@ path = "../../hh24_test.rs"
 
 [dependencies]
 anyhow = "1.0.95"
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 direct_decl_parser = { version = "0.0.0", path = "../../../parser/api/cargo/direct_decl_parser" }
 hh24_types = { version = "0.0.0", path = "../../hh24_types" }
 names = { version = "0.0.0", path = "../../../naming/names_rust" }
-oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }
+oxidized = { version = "0.0.0", path = "../../../oxidized" }
 relative_path = { version = "0.0.0", path = "../../rust/relative_path" }
 tempfile = "3.15"
 

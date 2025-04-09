@@ -9,7 +9,6 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::Result;
-use bumpalo::Bump;
 use hh24_types::Checksum;
 use hh24_types::ToplevelSymbolHash;
 use names::FileSummary;
@@ -77,22 +76,19 @@ pub fn create_naming_table(path: &Path, files: &BTreeMap<&str, &str>) -> Result<
 }
 
 pub fn parse_and_summarize(relpath: &RelativePath, text: &str) -> Result<FileSummary> {
-    let arena = &Bump::new();
-    let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(
+    let parsed_file = direct_decl_parser::parse_decls_for_typechecking(
         &Default::default(),
         relpath.clone(),
         text.as_bytes(),
-        arena,
     );
     let remove_php_stdlib_if_hhi = true;
     let prefix = relpath.prefix();
-    let parsed_file_with_hashes = oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes::new(
+    let parsed_file_with_hashes = oxidized::direct_decl_parser::ParsedFileWithHashes::new(
         parsed_file,
         remove_php_stdlib_if_hhi,
         prefix,
-        arena,
     );
-    Ok(names::FileSummary::new_obr(&parsed_file_with_hashes))
+    Ok(names::FileSummary::new(&parsed_file_with_hashes))
 }
 
 pub fn calculate_checksum(summaries: &[(RelativePath, FileSummary)]) -> Checksum {

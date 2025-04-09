@@ -1,6 +1,6 @@
 class
   INSERT class
-  classname<this>
+  class<this>
 SORT TEXT: none
 SECOND_NAME
   INSERT SECOND_NAME

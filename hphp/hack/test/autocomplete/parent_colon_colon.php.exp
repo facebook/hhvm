@@ -4,7 +4,7 @@ fun_instance
 SORT TEXT: none
 class
   INSERT class
-  classname<this>
+  class<this>
 SORT TEXT: none
 fun_method
   INSERT fun_method()

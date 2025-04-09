@@ -351,7 +351,7 @@ let classname_variable_cases =
     ( ("classname_variable.php", 8, 4),
       [
         {
-          snippet = [Lsp.MarkedCode ("hack", "classname<ClassnameVariable>")];
+          snippet = [Lsp.MarkedCode ("hack", "class<ClassnameVariable>")];
           addendum = [];
           pos = pos_at (8, 3) (8, 6);
         };

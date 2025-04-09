@@ -304,8 +304,8 @@ Errors:
               (Expr
                  ((nothing), [49:3-21],
                   (Call { func = ((nothing), [49:4-18], (Class_const (((Foo), [49:4-7], (CI ([49:4-7], "\\Foo"))), ([49:10-17], "bar\\baz")))); targs = []; args = []; unpacked_arg = None }))));
-             ([51:3-14], (Expr ((classname<Foo>), [51:3-13], (Class_const (((Foo), [51:3-6], (CI ([51:3-6], "\\Foo"))), ([51:8-13], "class"))))));
-             ([52:3-16], (Expr ((classname<Foo>), [52:4-14], (Class_const (((Foo), [52:4-7], (CI ([52:4-7], "\\Foo"))), ([52:9-14], "class"))))));
+             ([51:3-14], (Expr ((class<Foo>), [51:3-13], (Class_const (((Foo), [51:3-6], (CI ([51:3-6], "\\Foo"))), ([51:8-13], "class"))))));
+             ([52:3-16], (Expr ((class<Foo>), [52:4-14], (Class_const (((Foo), [52:4-7], (CI ([52:4-7], "\\Foo"))), ([52:9-14], "class"))))));
              ([53:3-16],
               (Expr
                  ((int), [53:3-15],
@@ -344,8 +344,8 @@ Errors:
               (Expr
                  ((nothing), [69:3-24],
                   (Call { func = ((nothing), [69:4-21], (Class_const (((Foo), [69:4-7], (CI ([69:4-7], "\\Foo"))), ([69:10-20], "bar\\baz")))); targs = []; args = []; unpacked_arg = None }))));
-             ([71:3-18], (Expr ((classname<Foo>), [71:3-17], (Class_const (((Foo), [71:3-6], (CI ([71:3-6], "\\Foo"))), ([71:9-16], "class"))))));
-             ([72:3-20], (Expr ((classname<Foo>), [72:4-18], (Class_const (((Foo), [72:4-7], (CI ([72:4-7], "\\Foo"))), ([72:10-17], "class"))))));
+             ([71:3-18], (Expr ((class<Foo>), [71:3-17], (Class_const (((Foo), [71:3-6], (CI ([71:3-6], "\\Foo"))), ([71:9-16], "class"))))));
+             ([72:3-20], (Expr ((class<Foo>), [72:4-18], (Class_const (((Foo), [72:4-7], (CI ([72:4-7], "\\Foo"))), ([72:10-17], "class"))))));
              ([73:3-20],
               (Expr
                  ((int), [73:3-19],

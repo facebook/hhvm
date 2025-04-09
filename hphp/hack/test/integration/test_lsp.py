@@ -1261,7 +1261,7 @@ class TestLsp(LspTestBase):
                         {
                             "label": "class",
                             "kind": 21,
-                            "detail": "classname<this>",
+                            "detail": "class<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1650,7 +1650,7 @@ class TestLsp(LspTestBase):
                         {
                             "label": "class",
                             "kind": 21,
-                            "detail": "classname<this>",
+                            "detail": "class<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {

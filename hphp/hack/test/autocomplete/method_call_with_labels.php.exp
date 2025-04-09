@@ -1,6 +1,6 @@
 class
   INSERT class
-  classname<this>
+  class<this>
 SORT TEXT: none
 label_taker
   INSERT label_taker(${1:#label1}, ${2:\$i}, ${3:#label2})

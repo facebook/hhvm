@@ -1,10 +1,50 @@
 WARN: File "typing_error_arraykey.php", line 12, characters 10-12:
 Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 12, characters 20-22:
+Using a class pointer for B in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 12, characters 30-32:
+Using a class pointer for this in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 12, characters 40-42:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 12, characters 50-52:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
 WARN: File "typing_error_arraykey.php", line 13, characters 10-12:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 13, characters 20-22:
+Using a class pointer for B in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 13, characters 30-32:
+Using a class pointer for this in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 13, characters 40-42:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 13, characters 50-52:
 Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
 WARN: File "typing_error_arraykey.php", line 14, characters 12-14:
 Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 14, characters 17-19:
+Using a class pointer for B in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 14, characters 22-24:
+Using a class pointer for this in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 14, characters 27-29:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 14, characters 32-34:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
 WARN: File "typing_error_arraykey.php", line 15, characters 13-15:
 Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 15, characters 18-20:
+Using a class pointer for B in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 15, characters 23-25:
+Using a class pointer for this in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 15, characters 28-30:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 15, characters 33-35:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
 WARN: File "typing_error_arraykey.php", line 16, characters 10-12:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 16, characters 15-17:
+Using a class pointer for B in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 16, characters 20-22:
+Using a class pointer for this in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 16, characters 25-27:
+Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])
+WARN: File "typing_error_arraykey.php", line 16, characters 30-32:
 Using a class pointer for A in this position will trigger an implicit runtime conversion to string. You may use `HH\class_to_classname` to get the class name as a string. (Warn[12013])

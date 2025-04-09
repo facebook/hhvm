@@ -1,5 +1,5 @@
 File "acts_as_string.php", line 11, characters 3-13:
-  classname<Tr>
+  class<Tr>
 ERROR: File "acts_as_string.php", line 30, characters 8-9:
 Invalid argument (Typing[4110])
   File "pseudofunctions.hhi", line 44, characters 29-33:

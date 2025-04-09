@@ -4,5 +4,5 @@ __construct
 SORT TEXT: none
 class
   INSERT class
-  classname<this>
+  class<this>
 SORT TEXT: none

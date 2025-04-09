@@ -1,4 +1,0 @@
-ERROR: File "asio_low_pri.php", line 8, characters 3-14:
-Only non-generator async functions can be marked low priority. (Parsing[1002])
-ERROR: File "asio_low_pri.php", line 14, characters 3-14:
-Only non-generator async functions can be marked low priority. (Parsing[1002])

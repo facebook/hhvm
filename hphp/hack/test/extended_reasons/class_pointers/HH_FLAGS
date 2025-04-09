@@ -1,3 +1,2 @@
---config class_class_type=true
 --config warnings_default_all=false
 --error-format extended

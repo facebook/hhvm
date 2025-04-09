@@ -256,7 +256,7 @@ let class_id_cases =
     (("class_id.php", 5, 3), "A");
     (("class_id.php", 7, 3), "A");
     (("class_id.php", 9, 3), "A");
-    (("class_id.php", 12, 4), "classname<A>");
+    (("class_id.php", 12, 4), "class<A>");
   ]
 
 let files =

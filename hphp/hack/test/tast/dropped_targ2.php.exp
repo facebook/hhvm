@@ -36,7 +36,7 @@
        { f_span = [7:1-51]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((~?classname<C>), (Some ([7:17-30], (Hoption ([7:18-30], (Happly (([7:18-27], "\\HH\\classname"), [([7:28-29], (Happly (([7:28-29], "\\C"), [])))])))))));
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([7:33-49], (Return (Some ((classname<exact C>), [7:40-48], (Class_const (((C), [7:40-41], (CI ([7:40-41], "\\C"))), ([7:43-48], "class")))))))] }; 
+         f_body = { fb_ast = [([7:33-49], (Return (Some ((class<exact C>), [7:40-48], (Class_const (((C), [7:40-41], (CI ([7:40-41], "\\C"))), ([7:43-48], "class")))))))] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-13], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 

@@ -2,5 +2,5 @@ ERROR: File "acts_as_string_bad.php", line 15, characters 10-17:
 Invalid return type (Typing[4110])
   File "acts_as_string_bad.php", line 14, characters 15-17:
   Expected `int`
-  File "classname.hhi", line 14, characters 27-32:
-  But got `string`
+  File "acts_as_string_bad.php", line 12, characters 7-7:
+  But got `class<C>`; implicitly defined constant `::class` is a reference to class `C`

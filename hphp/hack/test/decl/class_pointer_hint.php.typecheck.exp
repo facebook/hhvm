@@ -1,12 +1,1 @@
-ERROR: File "class_pointer_hint.php", line 6, characters 35-42:
-Invalid return type (Typing[4110])
-  File "class_pointer_hint.php", line 6, characters 17-24:
-  Expected `class<C>`
-  File "classname.hhi", line 14, characters 27-32:
-  But got `string`
-ERROR: File "class_pointer_hint.php", line 7, characters 39-46:
-Invalid return type (Typing[4110])
-  File "class_pointer_hint.php", line 7, characters 22-28:
-  Expected `class<HH\BuiltinEnum<E>>`
-  File "classname.hhi", line 14, characters 27-32:
-  But got `string`
+No errors

@@ -1,5 +1,5 @@
 File "typename_array_literal_bad.php", line 10, characters 3-15:
-  dict<string, (classname<D> | typename<I>)>
+  dict<string, (class<D> | typename<I>)>
 ERROR: File "typename_array_literal_bad.php", line 11, characters 10-13:
 Invalid return type (Typing[4110])
   File "typename_array_literal_bad.php", line 8, characters 52-52:
@@ -8,5 +8,3 @@ Invalid return type (Typing[4110])
   But got `D`; implicitly defined constant `::class` is a reference to class `D`
   File "typename_array_literal_bad.php", line 9, characters 45-45:
     where the class `D` was referenced here
-  File "classname.hhi", line 21, characters 37-37:
-    via this generic `T`

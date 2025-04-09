@@ -1,2 +1,0 @@
-WARN: File "needs_concrete_5.php", line 16, characters 5-15:
-Unsafe call: B::nc2 has `<<__NeedsConcrete>>`, but the receiver might be abstract. (Warn[12016])

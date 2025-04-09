@@ -1325,19 +1325,6 @@ void HTTPSession::onSettingsAck() {
 }
 
 void HTTPSession::onPriority(HTTPCodec::StreamID streamID,
-                             const HTTPMessage::HTTP2Priority& pri) {
-  if (!getHTTP2PrioritiesEnabled()) {
-    return;
-  }
-  http2::PriorityUpdate h2Pri{
-      std::get<0>(pri), std::get<1>(pri), std::get<2>(pri)};
-  HTTPTransaction* txn = findTransaction(streamID);
-  if (!txn) {
-    txnEgressQueue_.addOrUpdatePriorityNode(streamID, h2Pri);
-  }
-}
-
-void HTTPSession::onPriority(HTTPCodec::StreamID streamID,
                              const HTTPPriority&) {
   if (getNumIncomingStreams() >= codec_->getEgressSettings()->getSetting(
                                      SettingsId::MAX_CONCURRENT_STREAMS,

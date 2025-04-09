@@ -87,9 +87,6 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
 
   void onSettingsAck() override;
 
-  void onPriority(StreamID stream,
-                  const HTTPMessage::HTTP2Priority& pri) override;
-
   void onPriority(StreamID stream, const HTTPPriority& pri) override;
 
   void onPushPriority(StreamID stream, const HTTPPriority& pri) override;

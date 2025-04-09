@@ -3973,18 +3973,17 @@ TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestControlMsgRateLimitExceeded) {
-  auto streamid = clientCodec_->createStream();
+  clientCodec_->createStream();
 
   httpSession_->setRateLimitParams(
       RateLimiter::Type::MISC_CONTROL_MSGS, 100, std::chrono::seconds(0));
 
-  // Send 97 PRIORITY, 1 SETTINGS, and 3 PING frames. This should exceed the
+  // Send 97 PING, 1 SETTINGS, and 3 PING frames. This should exceed the
   // limit of 10, causing us to drop the connection.
   for (uint32_t i = 0;
        i < ControlMessageRateLimiter::kMaxEventsPerIntervalLowerBound - 3;
        i++) {
-    clientCodec_->generatePriority(
-        requests_, streamid, HTTPMessage::HTTP2Priority(0, false, 3));
+    clientCodec_->generatePingRequest(requests_);
   }
 
   clientCodec_->generateSettings(requests_);

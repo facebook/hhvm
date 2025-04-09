@@ -278,14 +278,6 @@ class HTTPCodec {
     }
 
     /**
-     * Called upon receipt of a priority frame, for protocols that support
-     * dynamic priority
-     */
-    virtual void onPriority(StreamID /* stream */,
-                            const HTTPMessage::HTTP2Priority& /* pri */) {
-    }
-
-    /**
      * Experimental: this is the new HTTP Priority draft format of priority
      * update. This is called when a PRIORITY_UPDATE frame is received.
      */

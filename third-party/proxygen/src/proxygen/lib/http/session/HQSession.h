@@ -1256,11 +1256,6 @@ class HQSession
       VLOG(4) << __func__ << " txn=" << txn_;
     }
 
-    void onPriority(HTTPCodec::StreamID /* stream */,
-                    const HTTPMessage::HTTP2Priority& /* priority */) override {
-      VLOG(4) << __func__ << " txn=" << txn_;
-    }
-
     bool onNativeProtocolUpgrade(HTTPCodec::StreamID /* stream */,
                                  CodecProtocol /* protocol */,
                                  const std::string& /* protocolString */,

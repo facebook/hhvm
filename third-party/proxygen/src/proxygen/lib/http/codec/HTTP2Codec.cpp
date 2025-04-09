@@ -754,6 +754,10 @@ void HTTP2Codec::onDecodeError(HPACK::DecodeError decodeError) {
 }
 
 ErrorCode HTTP2Codec::parsePriority(Cursor& cursor) {
+  /* While we parse RFC 7540 priority frames for now, this information is
+   * discarded and we do not notify the application about it.
+   * Parsing/serializing for 7540 priorities will be removed soon.
+   */
   VLOG(4) << "parsing PRIORITY frame for stream=" << curHeader_.stream
           << " length=" << curHeader_.length;
   http2::PriorityUpdate pri;
@@ -766,16 +770,6 @@ ErrorCode HTTP2Codec::parsePriority(Cursor& cursor) {
         false);
     return ErrorCode::NO_ERROR;
   }
-  // Now we have two onPriority overloads, this function pointer has to be
-  // explicitly specified via a cast:
-  auto onPriFunc = static_cast<void (HTTPCodec::Callback::*)(
-      StreamID, const HTTPMessage::HTTP2Priority&)>(
-      &HTTPCodec::Callback::onPriority);
-  deliverCallbackIfAllowed(
-      onPriFunc,
-      "onPriority",
-      curHeader_.stream,
-      std::make_tuple(pri.streamDependency, pri.exclusive, pri.weight));
   return ErrorCode::NO_ERROR;
 }
 

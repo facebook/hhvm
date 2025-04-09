@@ -102,12 +102,6 @@ void HTTPCodecStatsFilter::onSettingsAck() {
 }
 
 void HTTPCodecStatsFilter::onPriority(StreamID stream,
-                                      const HTTPMessage::HTTP2Priority& pri) {
-  counters_->recordIngressPriority();
-  callback_->onPriority(stream, pri);
-}
-
-void HTTPCodecStatsFilter::onPriority(StreamID stream,
                                       const HTTPPriority& priority) {
   counters_->recordIngressPriority();
   callback_->onPriority(stream, priority);

@@ -1914,16 +1914,6 @@ TEST_F(HTTP2CodecTest, BadRFC9218Priority) {
   EXPECT_EQ(callbacks_.incremental, 1);
 }
 
-TEST_F(HTTP2CodecTest, BasicPriority) {
-  auto pri = HTTPMessage::HTTP2Priority(0, true, 1);
-  upstreamCodec_.generatePriority(output_, 1, pri);
-
-  EXPECT_TRUE(parse());
-  EXPECT_EQ(callbacks_.priority, pri);
-  EXPECT_EQ(callbacks_.streamErrors, 0);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-}
-
 TEST_F(HTTP2CodecTest, BadHeaderPriority) {
   HTTPMessage req = getGetRequest();
   req.setHTTP2Priority(HTTPMessage::HTTP2Priority(0, false, 7));

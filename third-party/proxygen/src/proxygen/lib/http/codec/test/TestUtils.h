@@ -216,11 +216,6 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
     recvPingReply = data;
   }
 
-  void onPriority(HTTPCodec::StreamID /*streamID*/,
-                  const HTTPMessage::HTTP2Priority& pri) override {
-    priority = pri;
-  }
-
   void onPriority(HTTPCodec::StreamID, const HTTPPriority& pri) override {
     urgency = pri.urgency;
     incremental = pri.incremental;

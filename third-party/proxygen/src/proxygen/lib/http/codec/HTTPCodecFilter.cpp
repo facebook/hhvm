@@ -104,11 +104,6 @@ void PassThroughHTTPCodecFilter::onSettingsAck() {
   callback_->onSettingsAck();
 }
 
-void PassThroughHTTPCodecFilter::onPriority(
-    StreamID stream, const HTTPMessage::HTTP2Priority& pri) {
-  callback_->onPriority(stream, pri);
-}
-
 void PassThroughHTTPCodecFilter::onPriority(StreamID stream,
                                             const HTTPPriority& pri) {
   callback_->onPriority(stream, pri);

@@ -451,8 +451,6 @@ class HTTPSession
   void onWindowUpdate(HTTPCodec::StreamID stream, uint32_t amount) override;
   void onSettings(const SettingsList& settings) override;
   void onSettingsAck() override;
-  void onPriority(HTTPCodec::StreamID stream,
-                  const HTTPMessage::HTTP2Priority&) override;
   void onPriority(HTTPCodec::StreamID, const HTTPPriority&) override;
   void onCertificateRequest(uint16_t requestId,
                             std::unique_ptr<folly::IOBuf> authRequest) override;

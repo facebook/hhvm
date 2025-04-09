@@ -162,17 +162,6 @@ class RateLimitFilter : public PassThroughHTTPCodecFilter {
                         rateLimiter->numEventsInCurrentInterval());
     }
   }
-  void onPriority(HTTPCodec::StreamID streamID,
-                  const HTTPMessage::HTTP2Priority& pri) override {
-    auto& rateLimiter = rateLimiters_[folly::to_underlying(
-        RateLimiter::Type::MISC_CONTROL_MSGS)];
-    if (!rateLimiter || !rateLimiter->incrementNumEventsInCurrentInterval()) {
-      callback_->onPriority(streamID, pri);
-    } else {
-      sendErrorCallback(http2::FrameType::PRIORITY,
-                        rateLimiter->numEventsInCurrentInterval());
-    }
-  }
 
   void onPriority(StreamID streamID, const HTTPPriority& pri) override {
     auto& rateLimiter = rateLimiters_[folly::to_underlying(

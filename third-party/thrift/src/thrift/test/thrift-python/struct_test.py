@@ -192,6 +192,47 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertEqual(w2, TestStructImmutable())
         self.assertIsNone(w2.optional_string)
 
+    def test_intrinsic_default_values_for_unqualified_fields(self) -> None:
+        # GIVEN
+        # Even though this test is primarily about
+        # the intrinsic default values for unqualified fields,
+        # for sanity, set the optional fields to None.
+        expected_primitive = TestStructAllThriftPrimitiveTypesImmutable(
+            unqualified_string="",
+            optional_string=None,
+            unqualified_i32=0,
+            optional_i32=None,
+            unqualified_double=0.0,
+            optional_double=None,
+            unqualified_bool=False,
+            optional_bool=None,
+            unqualified_byte=0,
+            optional_byte=None,
+            unqualified_i16=0,
+            optional_i16=None,
+            unqualified_i64=0,
+            optional_i64=None,
+            unqualified_float=0,
+            optional_float=None,
+        )
+
+        self.assertEqual(
+            expected_primitive, TestStructAllThriftPrimitiveTypesImmutable()
+        )
+
+        expected_container = TestStructAllThriftContainerTypesImmutable(
+            unqualified_list_i32=[],
+            optional_list_i32=None,
+            unqualified_set_string=set(),
+            optional_set_string=None,
+            unqualified_map_string_i32={},
+            optional_map_string_i32=None,
+        )
+
+        self.assertEqual(
+            expected_container, TestStructAllThriftContainerTypesImmutable()
+        )
+
     def test_default_values(self) -> None:
         # Custom default values:
         # Newly created instance has custom default values for non-optional
@@ -572,6 +613,43 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         w3 = w()
         self.assertIsNot(w, w3)
         self.assertEqual(w, w3)
+
+    def test_intrinsic_default_values_for_unqualified_fields(self) -> None:
+        # GIVEN
+        # Even though this test is primarily about
+        # the intrinsic default values for unqualified fields,
+        # for sanity, set the optional fields to None.
+        expected_primitive = TestStructAllThriftPrimitiveTypesMutable(
+            unqualified_string="",
+            optional_string=None,
+            unqualified_i32=0,
+            optional_i32=None,
+            unqualified_double=0.0,
+            optional_double=None,
+            unqualified_bool=False,
+            optional_bool=None,
+            unqualified_byte=0,
+            optional_byte=None,
+            unqualified_i16=0,
+            optional_i16=None,
+            unqualified_i64=0,
+            optional_i64=None,
+            unqualified_float=0,
+            optional_float=None,
+        )
+
+        self.assertEqual(expected_primitive, TestStructAllThriftPrimitiveTypesMutable())
+
+        expected_container = TestStructAllThriftContainerTypesMutable(
+            unqualified_list_i32=to_thrift_list([]),
+            optional_list_i32=None,
+            unqualified_set_string=to_thrift_set(set()),
+            optional_set_string=None,
+            unqualified_map_string_i32=to_thrift_map({}),
+            optional_map_string_i32=None,
+        )
+
+        self.assertEqual(expected_container, TestStructAllThriftContainerTypesMutable())
 
     def test_default_values(self) -> None:
         # Intrinsic default values:

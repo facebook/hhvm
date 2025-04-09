@@ -4,6 +4,28 @@ FoldedClass {
         Concrete,
     ),
     is_final: true,
+    static_methods: {
+        "foo": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+            sort_text: None,
+            overlapping_tparams: None,
+        },
+        "bar": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+            sort_text: None,
+            overlapping_tparams: None,
+        },
+    },
     consts: {
         "class": ClassConst {
             is_synthesized: true,
@@ -14,16 +36,4 @@ FoldedClass {
             refs: [],
         },
     },
-}
-FunElt {
-    deprecated: None,
-    module: None,
-    package: None,
-    internal: false,
-    ty: (function(): void),
-    pos: NPos,
-    php_std_lib: false,
-    support_dynamic_type: false,
-    no_auto_dynamic: false,
-    no_auto_likes: false,
 }

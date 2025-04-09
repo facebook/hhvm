@@ -1,0 +1,1 @@
+hack: hack:strict_unions=1 src/module.thrift

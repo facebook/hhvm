@@ -131,7 +131,9 @@ class t_hack_generator : public t_concat_generator {
     enum_transparenttype_ =
         option_is_specified(options, "enum_transparenttype");
     soft_attribute_ = option_is_specified(options, "soft_attribute");
-    protected_unions_ = option_is_specified(options, "protected_unions");
+    strict_unions_ = option_is_specified(options, "strict_unions");
+    protected_unions_ =
+        option_is_specified(options, "protected_unions") || strict_unions_;
     mangled_services_ = option_is_set(options, "mangledsvcs", false);
     typedef_ = option_is_specified(options, "typedef");
     server_stream_ = option_is_specified(options, "server_stream");
@@ -372,7 +374,8 @@ class t_hack_generator : public t_concat_generator {
       ThriftStructType type,
       const std::string& name = "",
       bool is_default_assignment = false,
-      bool skip_custom_default = false);
+      bool skip_custom_default = false,
+      bool first_field = false);
   void generate_php_struct_metadata_method(
       std::ofstream& out, const t_structured* tstruct);
   void generate_php_struct_structured_annotations_method(
@@ -1134,6 +1137,13 @@ class t_hack_generator : public t_concat_generator {
    * Whether to generate protected members for thrift unions
    */
   bool protected_unions_;
+
+  /**
+   * Whether to generate enforce single set field for unions.
+   *
+   * Setting this also implies protected_unions_
+   */
+  bool strict_unions_;
 
   /**
    * Whether to generate array sets or Set objects
@@ -4512,7 +4522,8 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
     ThriftStructType type,
     const std::string& struct_hack_name_with_ns,
     bool is_default_assignment,
-    bool skip_custom_default) {
+    bool skip_custom_default,
+    bool first_field) {
   if (skip_codegen(&field)) {
     return;
   }
@@ -4602,7 +4613,12 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   } else {
     if (tstruct->is_union()) {
       // Capture value from constructor and update _type field
-      out << indent() << "if ($" << field_name << " !== null) {\n";
+      if (strict_unions_ && !first_field) {
+        out << " else ";
+      } else {
+        out << indent();
+      }
+      out << "if ($" << field_name << " !== null) {\n";
     }
 
     std::string field_expr =
@@ -4617,7 +4633,10 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
     if (tstruct->is_union()) {
       out << indent() << "  $this->_type = "
           << union_field_to_enum(&field, struct_hack_name_with_ns) << ";\n"
-          << indent() << "}\n";
+          << indent() << "}";
+      if (!strict_unions_) {
+        out << "\n";
+      }
     }
   }
 }
@@ -4658,10 +4677,31 @@ void t_hack_generator::generate_php_struct_constructor(
         << union_field_to_enum(nullptr, struct_hack_name_with_ns) << ";\n";
   }
 
-  for (const auto& field : tstruct->fields()) {
-    if (!skip_codegen(&field)) {
-      generate_php_struct_constructor_field_assignment(
-          out, field, tstruct, type, struct_hack_name_with_ns);
+  if (strict_unions_ && tstruct->is_union()) {
+    bool is_first_field = true;
+    for (auto iter = tstruct->fields().rbegin();
+         iter != tstruct->fields().rend();
+         iter++) {
+      if (!skip_codegen(&*iter)) {
+        generate_php_struct_constructor_field_assignment(
+            out,
+            *iter,
+            tstruct,
+            type,
+            struct_hack_name_with_ns,
+            false,
+            false,
+            is_first_field);
+        is_first_field = false;
+      }
+    }
+    out << "\n";
+  } else {
+    for (const auto& field : tstruct->fields()) {
+      if (!skip_codegen(&field)) {
+        generate_php_struct_constructor_field_assignment(
+            out, field, tstruct, type, struct_hack_name_with_ns);
+      }
     }
   }
 
@@ -7598,6 +7638,7 @@ THRIFT_REGISTER_GENERATOR(
     "    structtrait      Add 'use [StructName]Trait;' to generated classes\n"
     "    shapes           Generate Shape definitions for structs\n"
     "    protected_unions Generate protected members for thrift unions\n"
+    "    strict_unions    Only allow single set field for thrift unions\n"
     "    shape_arraykeys  When generating Shape definition for structs:\n"
     "                        replace array<string, TValue> with "
     "array<arraykey, TValue>\n"

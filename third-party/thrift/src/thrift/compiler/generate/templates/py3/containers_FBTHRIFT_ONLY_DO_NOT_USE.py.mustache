@@ -33,7 +33,7 @@ want to include.
 
 }}
 {{> common/auto_generated_py}}
-{{^program:inplace_migrate?}}
+{{#program:gen_py3_cython?}}
 
 import thrift.py3.types
 import importlib
@@ -68,4 +68,19 @@ __all__.append('{{type:flat_name}}')
 
 
 {{/program:containerTypes}}
-{{/program:inplace_migrate?}}
+{{/program:gen_py3_cython?}}
+{{^program:gen_py3_cython?}}
+{{#program:hasContainerTypes}}
+from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.{{!
+}}{{#program:auto_migrate?}}{{!
+    }}types_auto_FBTHRIFT_ONLY_DO_NOT_USE{{!
+}}{{/program:auto_migrate?}}{{^program:auto_migrate?}}{{#program:inplace_migrate?}}{{!
+    }}types_inplace_FBTHRIFT_ONLY_DO_NOT_USE{{!
+}}{{/program:inplace_migrate?}}{{/program:auto_migrate?}}{{!
+    }} import (
+{{#program:containerTypes}}
+    {{type:flat_name}},
+{{/program:containerTypes}}
+)
+{{/program:hasContainerTypes}}
+{{/program:gen_py3_cython?}}

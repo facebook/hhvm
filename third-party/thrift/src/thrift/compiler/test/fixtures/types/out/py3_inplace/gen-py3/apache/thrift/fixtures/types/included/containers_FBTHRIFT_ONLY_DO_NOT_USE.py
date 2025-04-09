@@ -4,3 +4,7 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+from apache.thrift.fixtures.types.included.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE import (
+    std_unordered_map__Map__i32_string,
+    List__std_unordered_map__Map__i32_string,
+)

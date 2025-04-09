@@ -4,3 +4,10 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+from test.fixtures.basic.module.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE import (
+    Set__float,
+    List__i32,
+    Set__string,
+    Map__string_i64,
+    Map__string_List__i32,
+)

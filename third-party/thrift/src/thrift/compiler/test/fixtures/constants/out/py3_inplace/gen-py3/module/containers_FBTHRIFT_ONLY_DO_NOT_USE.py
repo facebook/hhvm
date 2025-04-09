@@ -4,3 +4,18 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+from module.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__i32,
+    Map__string_i32,
+    List__Map__string_i32,
+    Map__string_string,
+    List__Company,
+    List__Range,
+    List__Internship,
+    List__string,
+    Set__i32,
+    Set__string,
+    Map__i32_i32,
+    Map__i32_string,
+    Map__i32_bool,
+)

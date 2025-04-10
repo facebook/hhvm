@@ -46,8 +46,6 @@ inline folly::IOBuf makeKey<folly::IOBuf>(folly::StringPiece sp) {
 template <class Storage>
 class Keys {
  public:
-  FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(rawUnsafe());
-
   constexpr Keys() = default;
 
   explicit Keys(Storage&& key) noexcept : key_(std::move(key)) {
@@ -59,6 +57,14 @@ class Keys {
   }
 
   explicit Keys(const char* key) : key_(makeKey<Storage>(key)) {
+    update();
+  }
+
+  template <
+      typename S = Storage,
+      typename = std::enable_if_t<std::is_same_v<S, folly::IOBuf>>>
+  explicit Keys(std::string&& key)
+      : key_(*folly::IOBuf::fromString(std::move(key))) {
     update();
   }
 
@@ -228,6 +234,36 @@ class Keys {
     HashFunctionType typeId_{HashFunctionType::Unknown};
   };
   mutable HashData lastHash_;
+};
+
+struct KeysAdapter {
+  template <typename Storage>
+  static Keys<Storage> fromThrift(Storage value) {
+    return Keys<Storage>(std::move(value));
+  }
+
+  template <typename Storage>
+  static const Storage& toThrift(const Keys<Storage>& wrapper) {
+    return wrapper.rawUnsafe();
+  }
+  template <typename Storage>
+  static Storage& toThrift(Keys<Storage>& wrapper) {
+    return wrapper.rawUnsafe();
+  }
+
+  template <typename Storage>
+  static bool isEmpty(const Keys<Storage>& wrapper) {
+    return wrapper.empty();
+  }
+
+  template <typename Storage>
+  static bool equal(const Keys<Storage>& lhs, const Keys<Storage>& rhs) {
+    if constexpr (std::is_same_v<Storage, folly::IOBuf>) {
+      return folly::IOBufEqualTo{}(lhs.rawUnsafe(), rhs.rawUnsafe());
+    } else {
+      return lhs.rawUnsafe() == rhs.rawUnsafe();
+    }
+  }
 };
 
 } // namespace carbon

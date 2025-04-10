@@ -11,14 +11,11 @@ namespace py3 carbon.thrift
 cpp_include "<mcrouter/lib/carbon/Keys.h>"
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/thrift.thrift"
 
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.indirection": "1"}}
-@cpp.Type{name = "carbon::Keys<folly::IOBuf>"}
-typedef binary IOBufKey
+@cpp.Adapter{name = "::carbon::KeysAdapter"}
+typedef IOBuf IOBufKey
 
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.indirection": "1"}}
-@cpp.Type{name = "carbon::Keys<std::string>"}
+@cpp.Adapter{name = "::carbon::KeysAdapter"}
 typedef binary StringKey
 
 @cpp.Type{name = "uint8_t"}

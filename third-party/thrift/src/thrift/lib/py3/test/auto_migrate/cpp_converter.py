@@ -18,12 +18,10 @@
 import unittest
 
 import convertible.thrift_types as python_convertible
-import testing.thrift_types as python_testing
 
 import thrift.py3.test.cpp_converter_helper as converter
 
 from convertible.types import Color, Nested, Simple, Union
-from testing.types import NonCopyable
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 
 
@@ -85,16 +83,6 @@ class CppConverterEcho(unittest.TestCase):
         echo = converter.echo_nested(self.make_nested())
         self.assertEqual(self.make_nested(), echo)
         expected_type = python_convertible.Nested if is_auto_migrated() else Nested
-        self.assertIsInstance(echo, expected_type)
-
-    def test_noncopyable(self) -> None:
-        n = NonCopyable(num=64)
-        echo = converter.echo_noncopyable(n)
-        self.assertEqual(n, echo)
-        self.assertIsNot(n, echo)
-        expected_type = (
-            python_testing.NonCopyable if is_auto_migrated() else NonCopyable
-        )
         self.assertIsInstance(echo, expected_type)
 
     def test_echo_union(self) -> None:

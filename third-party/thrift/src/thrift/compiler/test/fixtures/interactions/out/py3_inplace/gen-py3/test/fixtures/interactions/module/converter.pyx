@@ -6,9 +6,8 @@
 #  @generated
 #
 
-from libcpp.memory cimport make_shared, unique_ptr
-from cython.operator cimport dereference as deref, address
-from libcpp.utility cimport move as cmove
+from libcpp.memory cimport make_shared
+from cython.operator cimport dereference as deref
 from thrift.py3.types cimport const_pointer_cast
 cimport test.fixtures.interactions.module.thrift_converter as _test_fixtures_interactions_module_thrift_converter
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types

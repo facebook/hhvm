@@ -4013,4 +4013,28 @@ TEST(FieldMaskTest, getValueAsString) {
   EXPECT_THROW(getValueAs("1", byteVal), std::runtime_error);
 }
 
+// TODO(dokwon): Consider providing isEmpty method in MaskRef.
+// Currently, empty mask does not have any semantic meaning.
+TEST(FieldMaskTest, emptyMask) {
+  Mask mask;
+  MaskRef maskRef{mask, false};
+  EXPECT_FALSE(maskRef.isAllMask());
+  EXPECT_FALSE(maskRef.isNoneMask());
+  EXPECT_THROW(maskRef.isAllMapMask(), std::runtime_error);
+  EXPECT_THROW(maskRef.isNoneMapMask(), std::runtime_error);
+  EXPECT_THROW(maskRef.isAllTypeMask(), std::runtime_error);
+  EXPECT_THROW(maskRef.isNoneTypeMask(), std::runtime_error);
+  EXPECT_FALSE(maskRef.isExclusive());
+  EXPECT_FALSE(maskRef.isFieldMask());
+  EXPECT_FALSE(maskRef.isIntegerMapMask());
+  EXPECT_FALSE(maskRef.isStringMapMask());
+  EXPECT_FALSE(maskRef.isTypeMask());
+
+  // get fails with empty mask
+  EXPECT_THROW(maskRef.get(FieldId{42}), std::runtime_error);
+  EXPECT_THROW(maskRef.get(MapId{42}), std::runtime_error);
+  EXPECT_THROW(maskRef.get("42"), std::runtime_error);
+  EXPECT_THROW(maskRef.get(type::Type::get<type::i32_t>()), std::runtime_error);
+}
+
 } // namespace apache::thrift::test

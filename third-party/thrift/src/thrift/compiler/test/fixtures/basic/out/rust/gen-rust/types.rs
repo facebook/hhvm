@@ -520,15 +520,15 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyIntField field of MyStruct")?),
-                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyStringField field of MyStruct")?),
-                (::fbthrift::TType::Struct, 3) => field_MyDataField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyDataField field of MyStruct")?),
-                (::fbthrift::TType::I32, 4) => field_myEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myEnum field of MyStruct")?),
-                (::fbthrift::TType::Bool, 5) => field_oneway = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising oneway field of MyStruct")?),
-                (::fbthrift::TType::Bool, 6) => field_readonly = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising readonly field of MyStruct")?),
-                (::fbthrift::TType::Bool, 7) => field_idempotent = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising idempotent field of MyStruct")?),
-                (::fbthrift::TType::Set, 8) => field_floatSet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising floatSet field of MyStruct")?),
-                (::fbthrift::TType::String, 9) => field_no_hack_codegen_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising no_hack_codegen_field field of MyStruct")?),
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyIntField field of MyStruct"))?),
+                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyStringField field of MyStruct"))?),
+                (::fbthrift::TType::Struct, 3) => field_MyDataField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyDataField field of MyStruct"))?),
+                (::fbthrift::TType::I32, 4) => field_myEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myEnum field of MyStruct"))?),
+                (::fbthrift::TType::Bool, 5) => field_oneway = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising oneway field of MyStruct"))?),
+                (::fbthrift::TType::Bool, 6) => field_readonly = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising readonly field of MyStruct"))?),
+                (::fbthrift::TType::Bool, 7) => field_idempotent = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising idempotent field of MyStruct"))?),
+                (::fbthrift::TType::Set, 8) => field_floatSet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising floatSet field of MyStruct"))?),
+                (::fbthrift::TType::String, 9) => field_no_hack_codegen_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising no_hack_codegen_field field of MyStruct"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -697,9 +697,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_I32List = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising I32List field of Containers")?),
-                (::fbthrift::TType::Set, 2) => field_StringSet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising StringSet field of Containers")?),
-                (::fbthrift::TType::Map, 3) => field_StringToI64Map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising StringToI64Map field of Containers")?),
+                (::fbthrift::TType::List, 1) => field_I32List = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising I32List field of Containers"))?),
+                (::fbthrift::TType::Set, 2) => field_StringSet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising StringSet field of Containers"))?),
+                (::fbthrift::TType::Map, 3) => field_StringToI64Map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising StringToI64Map field of Containers"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -926,19 +926,19 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::myEnum(::fbthrift::Deserialize::read(p).context("Error while deserialising myEnum field of MyUnion")?));
+                    alt = ::std::option::Option::Some(Self::myEnum(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myEnum field of MyUnion"))?));
                 }
                 (::fbthrift::TType::Struct, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::myStruct(::fbthrift::Deserialize::read(p).context("Error while deserialising myStruct field of MyUnion")?));
+                    alt = ::std::option::Option::Some(Self::myStruct(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myStruct field of MyUnion"))?));
                 }
                 (::fbthrift::TType::Struct, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::myDataItem(::fbthrift::Deserialize::read(p).context("Error while deserialising myDataItem field of MyUnion")?));
+                    alt = ::std::option::Option::Some(Self::myDataItem(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myDataItem field of MyUnion"))?));
                 }
                 (::fbthrift::TType::Set, 4, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::floatSet(::fbthrift::Deserialize::read(p).context("Error while deserialising floatSet field of MyUnion")?));
+                    alt = ::std::option::Option::Some(Self::floatSet(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising floatSet field of MyUnion"))?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -1100,10 +1100,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyIntField field of MyException")?),
-                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyStringField field of MyException")?),
-                (::fbthrift::TType::Struct, 3) => field_myStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myStruct field of MyException")?),
-                (::fbthrift::TType::Struct, 4) => field_myUnion = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myUnion field of MyException")?),
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyIntField field of MyException"))?),
+                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyStringField field of MyException"))?),
+                (::fbthrift::TType::Struct, 3) => field_myStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myStruct field of MyException"))?),
+                (::fbthrift::TType::Struct, 4) => field_myUnion = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myUnion field of MyException"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1244,10 +1244,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyIntField field of MyExceptionWithMessage")?),
-                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyStringField field of MyExceptionWithMessage")?),
-                (::fbthrift::TType::Struct, 3) => field_myStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myStruct field of MyExceptionWithMessage")?),
-                (::fbthrift::TType::Struct, 4) => field_myUnion = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myUnion field of MyExceptionWithMessage")?),
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyIntField field of MyExceptionWithMessage"))?),
+                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising MyStringField field of MyExceptionWithMessage"))?),
+                (::fbthrift::TType::Struct, 3) => field_myStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myStruct field of MyExceptionWithMessage"))?),
+                (::fbthrift::TType::Struct, 4) => field_myUnion = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myUnion field of MyExceptionWithMessage"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1376,7 +1376,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_reserved_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising reserved_field field of ReservedKeyword")?),
+                (::fbthrift::TType::I32, 1) => field_reserved_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising reserved_field field of ReservedKeyword"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1507,7 +1507,7 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::reserved_field(::fbthrift::Deserialize::read(p).context("Error while deserialising reserved_field field of UnionToBeRenamed")?));
+                    alt = ::std::option::Option::Some(Self::reserved_field(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising reserved_field field of UnionToBeRenamed"))?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(

@@ -657,8 +657,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_myEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myEnum field of MyStruct")?),
-                (::fbthrift::TType::I32, 2) => field_myBigEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising myBigEnum field of MyStruct")?),
+                (::fbthrift::TType::I32, 1) => field_myEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myEnum field of MyStruct"))?),
+                (::fbthrift::TType::I32, 2) => field_myBigEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising myBigEnum field of MyStruct"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

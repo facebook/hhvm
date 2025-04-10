@@ -96,7 +96,7 @@ where
                     once = true;
                     alt = ::std::option::Option::Some(Self::{{field:rust_name}}({{!
                     }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p).context("Error while deserialising {{field:name}} field of {{struct:name}}")?{{!
+                    }}{{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p).with_context(||format!("Error while deserialising {{field:name}} field of {{struct:name}}"))?{{!
                     }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
                     }}));
                 }{{!

@@ -125,7 +125,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising injected_field field of Fields")?),
+                (::fbthrift::TType::String, 100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising injected_field field of Fields"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -230,7 +230,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising injected_field field of FieldsInjectedToEmptyStruct")?),
+                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising injected_field field of FieldsInjectedToEmptyStruct"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -352,8 +352,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising string_field field of FieldsInjectedToStruct")?),
-                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising injected_field field of FieldsInjectedToStruct")?),
+                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising string_field field of FieldsInjectedToStruct"))?),
+                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising injected_field field of FieldsInjectedToStruct"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -496,10 +496,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising string_field field of FieldsInjectedWithIncludedStruct")?),
-                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising injected_field field of FieldsInjectedWithIncludedStruct")?),
-                (::fbthrift::TType::String, -1101) => field_injected_structured_annotation_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising injected_structured_annotation_field field of FieldsInjectedWithIncludedStruct")?),
-                (::fbthrift::TType::String, -1102) => field_injected_unstructured_annotation_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising injected_unstructured_annotation_field field of FieldsInjectedWithIncludedStruct")?),
+                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising string_field field of FieldsInjectedWithIncludedStruct"))?),
+                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising injected_field field of FieldsInjectedWithIncludedStruct"))?),
+                (::fbthrift::TType::String, -1101) => field_injected_structured_annotation_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising injected_structured_annotation_field field of FieldsInjectedWithIncludedStruct"))?),
+                (::fbthrift::TType::String, -1102) => field_injected_unstructured_annotation_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising injected_unstructured_annotation_field field of FieldsInjectedWithIncludedStruct"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

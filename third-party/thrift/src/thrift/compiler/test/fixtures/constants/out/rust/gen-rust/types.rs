@@ -579,11 +579,11 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_weeks = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising weeks field of Internship")?),
-                (::fbthrift::TType::String, 2) => field_title = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising title field of Internship")?),
-                (::fbthrift::TType::I32, 3) => field_employer = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising employer field of Internship")?),
-                (::fbthrift::TType::Double, 4) => field_compensation = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising compensation field of Internship")?),
-                (::fbthrift::TType::String, 5) => field_school = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising school field of Internship")?),
+                (::fbthrift::TType::I32, 1) => field_weeks = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising weeks field of Internship"))?),
+                (::fbthrift::TType::String, 2) => field_title = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising title field of Internship"))?),
+                (::fbthrift::TType::I32, 3) => field_employer = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising employer field of Internship"))?),
+                (::fbthrift::TType::Double, 4) => field_compensation = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising compensation field of Internship"))?),
+                (::fbthrift::TType::String, 5) => field_school = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising school field of Internship"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -707,8 +707,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_min = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising min field of Range")?),
-                (::fbthrift::TType::I32, 2) => field_max = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising max field of Range")?),
+                (::fbthrift::TType::I32, 1) => field_min = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising min field of Range"))?),
+                (::fbthrift::TType::I32, 2) => field_max = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising max field of Range"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -823,8 +823,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising a field of struct1")?),
-                (::fbthrift::TType::String, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising b field of struct1")?),
+                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising a field of struct1"))?),
+                (::fbthrift::TType::String, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising b field of struct1"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -953,10 +953,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising a field of struct2")?),
-                (::fbthrift::TType::String, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising b field of struct2")?),
-                (::fbthrift::TType::Struct, 3) => field_c = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising c field of struct2")?),
-                (::fbthrift::TType::List, 4) => field_d = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising d field of struct2")?),
+                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising a field of struct2"))?),
+                (::fbthrift::TType::String, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising b field of struct2"))?),
+                (::fbthrift::TType::Struct, 3) => field_c = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising c field of struct2"))?),
+                (::fbthrift::TType::List, 4) => field_d = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising d field of struct2"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1084,9 +1084,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising a field of struct3")?),
-                (::fbthrift::TType::I32, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising b field of struct3")?),
-                (::fbthrift::TType::Struct, 3) => field_c = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising c field of struct3")?),
+                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising a field of struct3"))?),
+                (::fbthrift::TType::I32, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising b field of struct3"))?),
+                (::fbthrift::TType::Struct, 3) => field_c = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising c field of struct3"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1215,9 +1215,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising a field of struct4")?),
-                (::fbthrift::TType::Double, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising b field of struct4")?),
-                (::fbthrift::TType::Byte, 3) => field_c = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising c field of struct4")?),
+                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising a field of struct4"))?),
+                (::fbthrift::TType::Double, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising b field of struct4"))?),
+                (::fbthrift::TType::Byte, 3) => field_c = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising c field of struct4"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1324,11 +1324,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::i(::fbthrift::Deserialize::read(p).context("Error while deserialising i field of union1")?));
+                    alt = ::std::option::Option::Some(Self::i(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising i field of union1"))?));
                 }
                 (::fbthrift::TType::Double, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::d(::fbthrift::Deserialize::read(p).context("Error while deserialising d field of union1")?));
+                    alt = ::std::option::Option::Some(Self::d(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising d field of union1"))?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -1455,19 +1455,19 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::i(::fbthrift::Deserialize::read(p).context("Error while deserialising i field of union2")?));
+                    alt = ::std::option::Option::Some(Self::i(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising i field of union2"))?));
                 }
                 (::fbthrift::TType::Double, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::d(::fbthrift::Deserialize::read(p).context("Error while deserialising d field of union2")?));
+                    alt = ::std::option::Option::Some(Self::d(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising d field of union2"))?));
                 }
                 (::fbthrift::TType::Struct, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p).context("Error while deserialising s field of union2")?));
+                    alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising s field of union2"))?));
                 }
                 (::fbthrift::TType::Struct, 4, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::u(::fbthrift::Deserialize::read(p).context("Error while deserialising u field of union2")?));
+                    alt = ::std::option::Option::Some(Self::u(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising u field of union2"))?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(

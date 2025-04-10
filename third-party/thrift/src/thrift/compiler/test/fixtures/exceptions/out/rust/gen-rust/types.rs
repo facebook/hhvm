@@ -278,7 +278,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising message field of Fiery")?),
+                (::fbthrift::TType::String, 1) => field_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising message field of Fiery"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -398,7 +398,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => fields.sonnet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising sonnet field of Serious")?),
+                (::fbthrift::TType::String, 1) => fields.sonnet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising sonnet field of Serious"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -530,8 +530,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising error_message field of ComplexFieldNames")?),
-                (::fbthrift::TType::String, 2) => field_internal_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising internal_error_message field of ComplexFieldNames")?),
+                (::fbthrift::TType::String, 1) => field_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising error_message field of ComplexFieldNames"))?),
+                (::fbthrift::TType::String, 2) => field_internal_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising internal_error_message field of ComplexFieldNames"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -655,8 +655,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising error_message field of CustomFieldNames")?),
-                (::fbthrift::TType::String, 2) => field_internal_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising internal_error_message field of CustomFieldNames")?),
+                (::fbthrift::TType::String, 1) => field_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising error_message field of CustomFieldNames"))?),
+                (::fbthrift::TType::String, 2) => field_internal_error_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising internal_error_message field of CustomFieldNames"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -780,8 +780,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising message field of ExceptionWithPrimitiveField")?),
-                (::fbthrift::TType::I32, 2) => field_error_code = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising error_code field of ExceptionWithPrimitiveField")?),
+                (::fbthrift::TType::String, 1) => field_message = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising message field of ExceptionWithPrimitiveField"))?),
+                (::fbthrift::TType::I32, 2) => field_error_code = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising error_code field of ExceptionWithPrimitiveField"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -905,8 +905,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_message_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising message_field field of ExceptionWithStructuredAnnotation")?),
-                (::fbthrift::TType::I32, 2) => field_error_code = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising error_code field of ExceptionWithStructuredAnnotation")?),
+                (::fbthrift::TType::String, 1) => field_message_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising message_field field of ExceptionWithStructuredAnnotation"))?),
+                (::fbthrift::TType::I32, 2) => field_error_code = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising error_code field of ExceptionWithStructuredAnnotation"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

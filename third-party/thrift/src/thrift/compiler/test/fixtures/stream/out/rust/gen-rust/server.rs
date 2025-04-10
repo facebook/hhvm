@@ -378,8 +378,8 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_i32_from = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising i32_from arg of returnstream")?),
-                (::fbthrift::TType::I32, 2) => field_i32_to = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising i32_to arg of returnstream")?),
+                (::fbthrift::TType::I32, 1) => field_i32_from = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising i32_from arg of returnstream"))?),
+                (::fbthrift::TType::I32, 2) => field_i32_to = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising i32_to arg of returnstream"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -412,7 +412,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo arg of streamthrows")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo arg of streamthrows"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -444,7 +444,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo arg of servicethrows")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo arg of servicethrows"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -476,7 +476,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo arg of servicethrows2")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo arg of servicethrows2"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -508,7 +508,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo arg of boththrows")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo arg of boththrows"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -540,7 +540,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo arg of responseandstreamstreamthrows")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo arg of responseandstreamstreamthrows"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -572,7 +572,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo arg of responseandstreamservicethrows")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo arg of responseandstreamservicethrows"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -604,7 +604,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo arg of responseandstreamboththrows")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising foo arg of responseandstreamboththrows"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -639,8 +639,8 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pu
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_i32_from = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising i32_from arg of returnstreamFast")?),
-                (::fbthrift::TType::I32, 2) => field_i32_to = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising i32_to arg of returnstreamFast")?),
+                (::fbthrift::TType::I32, 1) => field_i32_from = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising i32_from arg of returnstreamFast"))?),
+                (::fbthrift::TType::I32, 2) => field_i32_to = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising i32_to arg of returnstreamFast"))?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

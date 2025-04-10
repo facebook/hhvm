@@ -142,19 +142,17 @@ where
         let mut field_min_byte_field = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Limits")?;
         loop {
-            #![allow(unused_imports)]
-            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_max_i64_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising max_i64_field field of Limits"))?),
-                (::fbthrift::TType::I64, 2) => field_min_i64_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising min_i64_field field of Limits"))?),
-                (::fbthrift::TType::I32, 3) => field_max_i32_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising max_i32_field field of Limits"))?),
-                (::fbthrift::TType::I32, 4) => field_min_i32_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising min_i32_field field of Limits"))?),
-                (::fbthrift::TType::I16, 5) => field_max_i16_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising max_i16_field field of Limits"))?),
-                (::fbthrift::TType::I16, 6) => field_min_i16_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising min_i16_field field of Limits"))?),
-                (::fbthrift::TType::Byte, 7) => field_max_byte_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising max_byte_field field of Limits"))?),
-                (::fbthrift::TType::Byte, 8) => field_min_byte_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).with_context(||format!("Error while deserialising min_byte_field field of Limits"))?),
+                (::fbthrift::TType::I64, 1) => field_max_i64_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 2) => field_min_i64_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 3) => field_max_i32_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 4) => field_min_i32_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, 5) => field_max_i16_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, 6) => field_min_i16_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, 7) => field_max_byte_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, 8) => field_min_byte_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

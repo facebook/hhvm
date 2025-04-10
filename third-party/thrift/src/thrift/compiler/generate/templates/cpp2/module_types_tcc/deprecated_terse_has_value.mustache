@@ -30,8 +30,7 @@
 
 }}{{^field:cpp_ref?}}{{^type:resolves_to_container?}}{{^field:raw_string_or_binary?}}{{!
   }}{{#field:cpp_first_adapter}}{{!
-    // Must use == operator, and check against the default constructor (ignoring any IDL-specified default).
-    }}!({{> module_types_tcc/field_ref }} == {{type:cpp_type}}()){{!
+    }}!::apache::thrift::op::isEmpty<{{> field/tag}}>({{> field/member}}){{!
   }}{{/field:cpp_first_adapter}}{{!
   }}{{^field:cpp_first_adapter}}{{!
     // For all other cases, must not equal the default.

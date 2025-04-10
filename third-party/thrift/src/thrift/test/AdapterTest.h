@@ -205,6 +205,8 @@ struct CustomProtocolAdapter {
   static folly::IOBuf toThrift(const Num& num) {
     return folly::IOBuf::wrapBufferAsValue(&num.val, sizeof(int64_t));
   }
+
+  static bool isEmpty(const Num& num) { return num == Num{}; }
 };
 
 template <typename T, typename Struct, int16_t FieldId>

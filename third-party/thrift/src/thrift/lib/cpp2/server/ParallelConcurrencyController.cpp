@@ -119,6 +119,7 @@ bool ParallelConcurrencyControllerBase::trySchedule(bool onEnqueued) {
       if (!counters_.compare_exchange_weak(countersOld, counters)) {
         continue;
       }
+      limitHasBeenEnforced_.store(true);
     }
 
     return false;

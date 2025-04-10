@@ -85,6 +85,11 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
   };
 
   virtual void setObserver(std::shared_ptr<Observer> observer) = 0;
+
+ private:
+  friend class ConcurrencyControllerInterfaceUnsafeAPI;
+
+  virtual bool getLimitHasBeenEnforced() const { return false; }
 };
 
 } // namespace apache::thrift

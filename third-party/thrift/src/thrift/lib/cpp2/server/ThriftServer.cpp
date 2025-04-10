@@ -51,6 +51,7 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/MultiplexAsyncProcessor.h>
 #include <thrift/lib/cpp2/runtime/Init.h>
+#include <thrift/lib/cpp2/server/ConcurrencyControllerInterfaceUnsafeAPI.h>
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ExecutorToThreadManagerAdaptor.h>
@@ -1975,10 +1976,13 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
 
   // Log services that might break if ConcurrencyController's executionLimit is
   // unsynced from maxRequests and is synced with only concurrencyLimit instead.
-  if (folly::test_once(cancelSetMaxRequestsCallbackHandleFlag_) ||
-      folly::test_once(serviceMightRelyOnSyncedMaxRequestsFlag_)) {
-    // This is okay. Either maxRequests syncing was cancelled, or we already
-    // logged that the service might rely on the syncing.
+  if (resourcePoolSet().empty() ||
+      folly::test_once(cancelSetMaxRequestsCallbackHandleFlag_) ||
+      folly::test_once(serviceReliesOnSyncedMaxRequestsFlag_)) {
+    // This is okay. If we're not using resource pools, syncing was cancelled
+    // because setConcurrencyLimit was explicitly called, or we've already
+    // detected and logged reliance on maxRequests syncing with
+    // concurrencyLimit, we don't need to check anything else.
   } else if (
       thriftConfig_.getMaxRequests().get() ==
       thriftConfig_.getConcurrencyLimit().get()) {
@@ -1999,12 +2003,29 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
     // into the resource pool.
   } else {
     // This is not okay. When ConcurrencyController's executionLimit is unsynced
-    // from maxRequests and synced to concurrencyLimit instead, the service will
-    // encounter a behavioral change.
+    // from maxRequests and synced to concurrencyLimit instead, the service
+    // might encounter a behavioral change.
     folly::call_once(serviceMightRelyOnSyncedMaxRequestsFlag_, [this]() {
       LOG(WARNING) << "Service might rely on synced max requests.";
       THRIFT_SERVER_EVENT(serviceMightRelyOnSyncedMaxRequests).log(*this);
     });
+
+    if (auto concurrencyController =
+            resourcePoolSet()
+                .resourcePool(ResourcePoolHandle::defaultAsync())
+                .concurrencyController()) {
+      if (ConcurrencyControllerInterfaceUnsafeAPI(concurrencyController->get())
+              .getLimitHasBeenEnforced()) {
+        // Cncurrency limit has been enforced while still synced with
+        // maxRequests. This is the kind of case that absolutely must be
+        // migrated before completely decoupling maxRequests from
+        // concurrencyLimit.
+        folly::call_once(serviceReliesOnSyncedMaxRequestsFlag_, [this]() {
+          LOG(WARNING) << "Service relies on synced max requests.";
+          THRIFT_SERVER_EVENT(serviceReliesOnSyncedMaxRequests).log(*this);
+        });
+      }
+    }
   }
 
   // If active request tracking is disabled or we are using resource pools,

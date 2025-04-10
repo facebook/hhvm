@@ -91,11 +91,13 @@ where
         let mut field_bar = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising foo field of MyStruct")?),
-                (::fbthrift::TType::String, 2) => field_bar = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising bar field of MyStruct")?),
+                (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising foo field of MyStruct")?),
+                (::fbthrift::TType::String, 2) => field_bar = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising bar field of MyStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

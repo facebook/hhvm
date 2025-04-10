@@ -91,10 +91,12 @@ where
         let mut field_MyInt = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Foo")?;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyInt = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising MyInt field of Foo")?),
+                (::fbthrift::TType::I64, 1) => field_MyInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising MyInt field of Foo")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

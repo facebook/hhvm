@@ -86,6 +86,8 @@ where
         let {{#struct:fields?}}mut {{/struct:fields?}}once = false;
         let {{#struct:fields?}}mut {{/struct:fields?}}alt = ::std::option::Option::None;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32, once) {
                 (::fbthrift::TType::Stop, _, _) => break,{{!
@@ -94,7 +96,7 @@ where
                     once = true;
                     alt = ::std::option::Option::Some(Self::{{field:rust_name}}({{!
                     }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), "Error while deserialising {{field:name}} field of {{struct:name}}")?{{!
+                    }}{{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p).context("Error while deserialising {{field:name}} field of {{struct:name}}")?{{!
                     }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
                     }}));
                 }{{!

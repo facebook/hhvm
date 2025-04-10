@@ -277,10 +277,12 @@ where
         let mut field_name = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStructNestedAnnotation")?;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising name field of MyStructNestedAnnotation")?),
+                (::fbthrift::TType::String, 1) => field_name = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising name field of MyStructNestedAnnotation")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -362,6 +364,8 @@ where
         let once = false;
         let alt = ::std::option::Option::None;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32, once) {
                 (::fbthrift::TType::Stop, _, _) => break,
@@ -500,6 +504,8 @@ where
         };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyException")?;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
@@ -691,18 +697,20 @@ where
         let mut field_my_union = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 2) => field_major = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising major field of MyStruct")?),
-                (::fbthrift::TType::String, 1) => field_abstract = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising abstract field of MyStruct")?),
-                (::fbthrift::TType::String, 3) => field_annotation_with_quote = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising annotation_with_quote field of MyStruct")?),
-                (::fbthrift::TType::String, 4) => field_class_ = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising class_ field of MyStruct")?),
-                (::fbthrift::TType::String, 5) => field_annotation_with_trailing_comma = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising annotation_with_trailing_comma field of MyStruct")?),
-                (::fbthrift::TType::String, 6) => field_empty_annotations = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising empty_annotations field of MyStruct")?),
-                (::fbthrift::TType::I32, 7) => field_my_enum = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising my_enum field of MyStruct")?),
-                (::fbthrift::TType::List, 8) => field_cpp_type_annotation = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising cpp_type_annotation field of MyStruct")?),
-                (::fbthrift::TType::Struct, 9) => field_my_union = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising my_union field of MyStruct")?),
+                (::fbthrift::TType::I64, 2) => field_major = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising major field of MyStruct")?),
+                (::fbthrift::TType::String, 1) => field_abstract = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising abstract field of MyStruct")?),
+                (::fbthrift::TType::String, 3) => field_annotation_with_quote = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising annotation_with_quote field of MyStruct")?),
+                (::fbthrift::TType::String, 4) => field_class_ = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising class_ field of MyStruct")?),
+                (::fbthrift::TType::String, 5) => field_annotation_with_trailing_comma = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising annotation_with_trailing_comma field of MyStruct")?),
+                (::fbthrift::TType::String, 6) => field_empty_annotations = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising empty_annotations field of MyStruct")?),
+                (::fbthrift::TType::I32, 7) => field_my_enum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising my_enum field of MyStruct")?),
+                (::fbthrift::TType::List, 8) => field_cpp_type_annotation = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising cpp_type_annotation field of MyStruct")?),
+                (::fbthrift::TType::Struct, 9) => field_my_union = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising my_union field of MyStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -931,11 +939,13 @@ where
         let mut field_password = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SecretStruct")?;
         loop {
+            #![allow(unused_imports)]
+            use ::anyhow::Context;
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising id field of SecretStruct")?),
-                (::fbthrift::TType::String, 2) => field_password = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), "Error while deserialising password field of SecretStruct")?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising id field of SecretStruct")?),
+                (::fbthrift::TType::String, 2) => field_password = ::std::option::Option::Some(::fbthrift::Deserialize::read(p).context("Error while deserialising password field of SecretStruct")?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

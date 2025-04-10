@@ -1,4 +1,4 @@
 ERROR: File "type_structure_typeconst.php", line 12, characters 13-23:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 57, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-697:
   The shape is defined here

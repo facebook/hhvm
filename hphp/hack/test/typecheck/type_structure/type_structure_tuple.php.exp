@@ -16,17 +16,17 @@ File "type_structure_tuple.php", line 31, characters 3-30:
   TypeStructure<nonnull>
 ERROR: File "type_structure_tuple.php", line 19, characters 6-26:
 The field `optional_elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 63, characters 6-26:
+  File "typestructure.hhi", line 65, characters 6-26:
   This is where the field was declared as optional.
 ERROR: File "type_structure_tuple.php", line 21, characters 6-20:
 The field `variadic_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-20:
+  File "typestructure.hhi", line 66, characters 6-20:
   This is where the field was declared as optional.
 ERROR: File "type_structure_tuple.php", line 26, characters 6-20:
 The field `variadic_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-20:
+  File "typestructure.hhi", line 66, characters 6-20:
   This is where the field was declared as optional.
 ERROR: File "type_structure_tuple.php", line 30, characters 6-26:
 The field `optional_elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 63, characters 6-26:
+  File "typestructure.hhi", line 65, characters 6-26:
   This is where the field was declared as optional.

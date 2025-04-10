@@ -10,7 +10,7 @@ Invalid case type declaration. More than one variant of `DictData` could contain
   This is the type `mixed`, which includes **dicts**
   File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
   It may overlap with `TypeStructure<int>`, which includes **shapes** because shapes are dicts at runtime
-  File "typestructure.hhi", line 57, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-697:
     via the constraint on the newtype `TypeStructure`
   File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
   Because it is possible for values to be both **dicts** and **shapes**, `mixed` and `TypeStructure<int>` cannot be in the same case type
@@ -42,7 +42,7 @@ Invalid case type declaration. More than one variant of `DictData` could contain
   This is the type `nonnull`, which includes **dicts**
   File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
   It may overlap with `TypeStructure<int>`, which includes **shapes** because shapes are dicts at runtime
-  File "typestructure.hhi", line 57, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-697:
     via the constraint on the newtype `TypeStructure`
   File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
   Because it is possible for values to be both **dicts** and **shapes**, `nonnull` and `TypeStructure<int>` cannot be in the same case type
@@ -72,7 +72,7 @@ ERROR: File "case_type_overlapping_variants_arrays.php", line 4, characters 11-1
 Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
   This is the type `TypeStructure<int>`, which includes **shapes** because shapes are dicts at runtime
-  File "typestructure.hhi", line 57, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-697:
     via the constraint on the newtype `TypeStructure`
   File "case_type_overlapping_variants_arrays.php", line 9, characters 5-11:
   It may overlap with `shape()`, which includes **shapes** because shapes are dicts at runtime
@@ -82,7 +82,7 @@ ERROR: File "case_type_overlapping_variants_arrays.php", line 4, characters 11-1
 Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
   This is the type `TypeStructure<int>`, which includes **shapes** because shapes are dicts at runtime
-  File "typestructure.hhi", line 57, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-697:
     via the constraint on the newtype `TypeStructure`
   File "case_type_overlapping_variants_arrays.php", line 10, characters 5-18:
   It may overlap with `dict<int, int>`, which includes **dicts**

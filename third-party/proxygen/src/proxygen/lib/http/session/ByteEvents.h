@@ -20,7 +20,7 @@ class ByteEvent {
  public:
   enum class EventFlags : uint8_t { ACK = 0x01, TX = 0x02 };
 
-  enum EventType {
+  enum EventType : unsigned {
     FIRST_BYTE,
     LAST_BYTE,
     PING_REPLY_SENT,

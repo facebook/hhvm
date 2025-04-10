@@ -652,6 +652,18 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(expected_container, TestStructAllThriftContainerTypesMutable())
 
     def test_default_values(self) -> None:
+        # Newly created instance has custom default values for non-optional
+        # fields, but custom default values for optional fields are ignored.
+        self.assertEqual(
+            TestStructWithDefaultValuesMutable(),
+            TestStructWithDefaultValuesMutable(
+                unqualified_integer=42,
+                optional_integer=None,
+                unqualified_struct=TestStructMutable(unqualified_string="hello"),
+                optional_struct=None,
+            ),
+        )
+
         # Intrinsic default values:
         # optional struct field is None
         self.assertIsNone(

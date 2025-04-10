@@ -23,7 +23,12 @@ function thrift_protocol_write_binary(
   int $seqid,
   bool $strict_write,
   bool $oneway = false,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
+<<__PHPStdLib>>
+function thrift_protocol_write_binary_struct(
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
+): void;
 <<__PHPStdLib>>
 function thrift_protocol_read_binary(
   HH\FIXME\MISSING_PARAM_TYPE $transportobj,
@@ -31,6 +36,13 @@ function thrift_protocol_read_binary(
   bool $strict_read,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function thrift_protocol_read_binary_struct(
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
+  string $obj_typename,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+
 <<__PHPStdLib>>
 function thrift_protocol_set_compact_version(
   int $version,
@@ -44,7 +56,18 @@ function thrift_protocol_write_compact2(
   int $seqid,
   bool $oneway = false,
   int $version = 2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
+<<__PHPStdLib>>
+function thrift_protocol_write_compact_struct(
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
+  int $version = 2,
+): void;
+<<__PHPStdLib>>
+function thrift_protocol_write_compact_struct_to_string(
+  HH\FIXME\MISSING_PARAM_TYPE $struct,
+  int $version = 2,
+): string;
 <<__PHPStdLib>>
 function thrift_protocol_read_compact(
   HH\FIXME\MISSING_PARAM_TYPE $transportobj,
@@ -58,19 +81,8 @@ function thrift_protocol_read_compact_struct(
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_read_binary_struct(
-  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
+function thrift_protocol_read_compact_struct_from_string(
+  string $buffer,
   string $obj_typename,
   int $options = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
-function thrift_protocol_write_compact_struct(
-  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
-  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
-  int $version = 2,
-): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
-function thrift_protocol_write_binary_struct(
-  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
-  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
 ): HH\FIXME\MISSING_RETURN_TYPE;

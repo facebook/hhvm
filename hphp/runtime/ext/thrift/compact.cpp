@@ -1464,18 +1464,26 @@ struct CompactReader {
 Object compact_deserialize_from_string(
                      const String& serialized,
                      const String& thrift_typename, int64_t options) {
+  CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
   SuppressClassConversionNotice suppressor;
 
-  VMRegAnchor _;
+  VMRegAnchor _2;
   auto iobuf = folly::IOBuf::wrapBufferAsValue(
     serialized.data(),
     serialized.size());
-  CompactReader<folly::io::Cursor> reader(
-    folly::io::Cursor(&iobuf),
-    options);
-  return reader.readStruct(thrift_typename);
+
+  try {
+    CompactReader<folly::io::Cursor> reader(
+      folly::io::Cursor(&iobuf),
+      options);
+    return reader.readStruct(thrift_typename);
+  } catch (const std::exception& e) {
+    thrift_error(e.what(), ERR_UNKNOWN);
+  } catch (...) {
+    thrift_error("Unknown error", ERR_UNKNOWN);
+  }
 }
 
 String compact_serialize_to_string(const Object& thrift_struct,
@@ -1486,14 +1494,19 @@ String compact_serialize_to_string(const Object& thrift_struct,
   SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _2;
-
   folly::IOBuf iobuf{folly::IOBuf::CREATE, 1024};
   folly::io::Appender appender(&iobuf, 1024);
 
   CompactWriter<folly::io::Appender> writer(appender);
-  writer.setWriteVersion(version);
-  writer.write(thrift_struct);
-  return iobuf.toString();
+  try {
+    writer.setWriteVersion(version);
+    writer.write(thrift_struct);
+    return iobuf.toString();
+  } catch (const std::exception& e) {
+    thrift_error(e.what(), ERR_UNKNOWN);
+  } catch (...) {
+    thrift_error("Unknown error", ERR_UNKNOWN);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1517,6 +1530,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact2,
   // serialization and deserialization.
   SuppressClassConversionNotice suppressor;
 
+  VMRegAnchor _2;
   PHPOutputTransport transport(transportobj);
 
   CompactWriter<PHPOutputTransport> writer(transport);
@@ -1541,6 +1555,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact_struct,
   // serialization and deserialization.
   SuppressClassConversionNotice suppressor;
 
+  VMRegAnchor _2;
   PHPOutputTransport transport(transportobj);
 
   CompactWriter<PHPOutputTransport> writer(transport);
@@ -1575,11 +1590,12 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename,
                      int64_t options) {
+  CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
   SuppressClassConversionNotice suppressor;
 
-  VMRegAnchor _;
+  VMRegAnchor _2;
   CompactReader<PHPInputTransport> reader(
     PHPInputTransport(transportobj),
     options);

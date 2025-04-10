@@ -31,6 +31,8 @@ typedef set<AtoIValue> SetAtoIValue
 typedef set<I32List> SetI32Lists
 typedef set<SetI32Lists> SetSetI32Lists
 
+const set<string> constant_set = ["1", "2", "3"];
+
 struct easy {
   3: optional string name;
   1: i32 val;

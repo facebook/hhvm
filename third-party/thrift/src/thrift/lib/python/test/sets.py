@@ -33,6 +33,7 @@ from folly.iobuf import IOBuf
 from parameterized import parameterized_class
 from python_test.containers.thrift_types import Color, Foo, Sets
 from python_test.sets.thrift_types import (
+    constant_set,
     easy,
     EasySet,
     SetAtoIValue,
@@ -302,6 +303,24 @@ class ImmutableSetTests(unittest.TestCase):
     def test_set_module_name(self) -> None:
         easy_set = EasySet({easy()})
         self.assertEqual(easy_set.__class__.__module__, "thrift.python.types")
+
+    def test_constant_set(self) -> None:
+        self.assertEqual({"1", "2", "3"}, constant_set)
+        with self.assertRaisesRegex(
+            AttributeError,
+            "'thrift.python.types.Set' object has no attribute 'add'",
+        ):
+            # TODO: This should trigger a Pyre error. The type of the set constant
+            # is currently specified as `Set`, which needs to be corrected.
+            constant_set.add("4")
+
+        with self.assertRaisesRegex(
+            AttributeError,
+            "'thrift.python.types.Set' object has no attribute 'remove'",
+        ):
+            # TODO: This should trigger a Pyre error. The type of the set constant
+            # is currently specified as `Set`, which needs to be corrected.
+            constant_set.remove("3")
 
 
 # TODO: Collapse these two test cases into parameterized test above

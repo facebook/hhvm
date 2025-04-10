@@ -2312,16 +2312,18 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),
             ),
-            Ty_::Ttuple(TupleType {
-                required,
-                extra: TupleExtra::Textra { optional, variadic },
-            }) => {
-                let extra = TupleExtra::Textra {
-                    optional: optional
-                        .into_iter()
-                        .map(|targ| self.convert_tapply_to_tgeneric(targ))
-                        .collect(),
-                    variadic: self.convert_tapply_to_tgeneric(variadic),
+            Ty_::Ttuple(TupleType { required, extra }) => {
+                let extra = match extra {
+                    TupleExtra::Textra { optional, variadic } => TupleExtra::Textra {
+                        optional: optional
+                            .into_iter()
+                            .map(|targ| self.convert_tapply_to_tgeneric(targ))
+                            .collect(),
+                        variadic: self.convert_tapply_to_tgeneric(variadic),
+                    },
+                    TupleExtra::Tsplat(hint) => {
+                        TupleExtra::Tsplat(self.convert_tapply_to_tgeneric(hint))
+                    }
                 };
                 Ty_::Ttuple(TupleType {
                     required: required
@@ -2388,8 +2390,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             | Ty_::Tlabel(_)
             | Ty_::Tnewtype(_, _, _)
             | Ty_::Tvar(_)
-            | Ty_::TunappliedAlias(_)
-            | Ty_::Ttuple(_) => panic!("unexpected decl type in constraint"),
+            | Ty_::TunappliedAlias(_) => panic!("unexpected decl type in constraint"),
         };
         Ty(ty.0, Box::new(ty_))
     }

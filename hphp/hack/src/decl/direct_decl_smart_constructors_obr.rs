@@ -2448,18 +2448,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),
             ))),
-            Ty_::Ttuple(&TupleType {
-                required,
-                extra: TupleExtra::Textra { optional, variadic },
-            }) => {
-                let extra = self.alloc(TupleExtra::Textra {
-                    optional: self.slice(
-                        optional
-                            .iter()
-                            .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
-                    ),
-                    variadic: self.convert_tapply_to_tgeneric(variadic),
-                });
+            Ty_::Ttuple(&TupleType { required, extra }) => {
+                let extra = match extra {
+                    TupleExtra::Textra { optional, variadic } => self.alloc(TupleExtra::Textra {
+                        optional: self.slice(
+                            optional
+                                .iter()
+                                .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
+                        ),
+                        variadic: self.convert_tapply_to_tgeneric(variadic),
+                    }),
+                    TupleExtra::Tsplat(hint) => {
+                        self.alloc(TupleExtra::Tsplat(self.convert_tapply_to_tgeneric(hint)))
+                    }
+                };
                 Ty_::Ttuple(
                     self.alloc(TupleType {
                         required: self.slice(
@@ -2531,8 +2533,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             | Ty_::Tlabel(_)
             | Ty_::Tnewtype(_)
             | Ty_::Tvar(_)
-            | Ty_::TunappliedAlias(_)
-            | Ty_::Ttuple(_) => panic!("unexpected decl type in constraint"),
+            | Ty_::TunappliedAlias(_) => panic!("unexpected decl type in constraint"),
         };
         self.alloc(Ty(ty.0, ty_))
     }

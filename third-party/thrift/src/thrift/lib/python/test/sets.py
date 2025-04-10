@@ -310,16 +310,14 @@ class ImmutableSetTests(unittest.TestCase):
             AttributeError,
             "'thrift.python.types.Set' object has no attribute 'add'",
         ):
-            # TODO: This should trigger a Pyre error. The type of the set constant
-            # is currently specified as `Set`, which needs to be corrected.
+            # pyre-ignore[16]: `AbstractSet` has no attribute `add`
             constant_set.add("4")
 
         with self.assertRaisesRegex(
             AttributeError,
             "'thrift.python.types.Set' object has no attribute 'remove'",
         ):
-            # TODO: This should trigger a Pyre error. The type of the set constant
-            # is currently specified as `Set`, which needs to be corrected.
+            # pyre-ignore[16]: `AbstractSet` has no attribute `remove`
             constant_set.remove("3")
 
 

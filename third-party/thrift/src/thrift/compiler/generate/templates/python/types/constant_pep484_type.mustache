@@ -20,7 +20,7 @@ This is for constants PEP484 type
     }}{{#type:list?}}_typing.Sequence[{{!
         }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!
     }}]{{/type:list?}}{{!
-    }}{{#type:set?}}_typing.Set[{{!
+    }}{{#type:set?}}_typing.AbstractSet[{{!
         }}{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}{{!
     }}]{{/type:set?}}{{!
     }}{{#type:map?}}_typing.Mapping[{{!

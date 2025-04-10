@@ -28,7 +28,7 @@ struct Struct {
   2: binary iobuf;
   @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
   3: optional binary unique_iobuf;
-  @cpp.Type{name = "MockSize<std::vector<std::int64_t>>"}
+  @cpp.Type{name = "MockSize<std::list<std::int64_t>>"}
   4: list<i64> l;
   @cpp.Type{name = "MockSize<std::set<std::int64_t>>"}
   5: set<i64> s;

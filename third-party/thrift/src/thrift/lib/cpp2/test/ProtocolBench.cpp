@@ -175,7 +175,12 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   X2(Prefix, proto, MixedInt)           \
   X2(Prefix, proto, LargeMixed)         \
   X2(Prefix, proto, SmallListInt)       \
+  X2(Prefix, proto, BigListByte)        \
+  X2(Prefix, proto, BigListShort)       \
   X2(Prefix, proto, BigListInt)         \
+  X2(Prefix, proto, BigListBigInt)      \
+  X2(Prefix, proto, BigListFloat)       \
+  X2(Prefix, proto, BigListDouble)      \
   X2(Prefix, proto, BigListMixed)       \
   X2(Prefix, proto, BigListMixedInt)    \
   X2(Prefix, proto, LargeListMixed)     \
@@ -183,7 +188,7 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   X2(Prefix, proto, UnorderedSetInt)    \
   X2(Prefix, proto, SortedVecSetInt)    \
   X2(Prefix, proto, LargeMapInt)        \
-  X2(Prefix, proto, LargeMapMixed)        \
+  X2(Prefix, proto, LargeMapMixed)      \
   X2(Prefix, proto, LargeUnorderedMapMixed)        \
   X2(Prefix, proto, LargeSortedVecMapMixed)        \
   X2(Prefix, proto, UnorderedMapInt)    \
@@ -199,7 +204,7 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   OpEncodeX2(Prefix, proto, BigString)          \
   OpEncodeX2(Prefix, proto, Mixed)              \
   OpEncodeX2(Prefix, proto, MixedInt)           \
-  OpEncodeX2(Prefix, proto, LargeMixed)           \
+  OpEncodeX2(Prefix, proto, LargeMixed)         \
   OpEncodeX2(Prefix, proto, SmallListInt)       \
   OpEncodeX2(Prefix, proto, BigListInt)         \
   OpEncodeX2(Prefix, proto, BigListMixed)       \
@@ -209,7 +214,7 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   OpEncodeX2(Prefix, proto, UnorderedSetInt)    \
   OpEncodeX2(Prefix, proto, SortedVecSetInt)    \
   OpEncodeX2(Prefix, proto, LargeMapInt)        \
-  OpEncodeX2(Prefix, proto, LargeMapMixed)        \
+  OpEncodeX2(Prefix, proto, LargeMapMixed)      \
   OpEncodeX2(Prefix, proto, LargeUnorderedMapMixed)        \
   OpEncodeX2(Prefix, proto, LargeSortedVecMapMixed)        \
   OpEncodeX2(Prefix, proto, UnorderedMapInt)    \

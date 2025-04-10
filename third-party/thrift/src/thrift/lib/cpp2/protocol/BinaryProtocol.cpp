@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 
+#include <type_traits>
 #include <folly/Conv.h>
 #include <folly/portability/GFlags.h>
 
@@ -44,6 +45,85 @@ namespace apache::thrift {
           "No version identifier... old protocol client in strict mode? sz=",
           sz));
 }
+
+template <typename T>
+void BinaryProtocolReader::readArithmeticVector(
+    T* outputPtr, size_t numElements) {
+  const uint8_t* inPtr = in_.data();
+  size_t i = 0;
+  size_t loopLen = std::min(numElements, in_.length() / sizeof(T));
+  for (; i < loopLen; ++i) {
+    outputPtr[i] =
+        folly::Endian::big<T>(folly::loadUnaligned<T>(inPtr + i * sizeof(T)));
+  }
+  in_.skip(i * sizeof(T));
+  // read elements one-by-one beyond what initially fits into the buffer
+  for (; i < numElements; ++i) {
+    outputPtr[i] = in_.readBE<T>();
+  }
+}
+
+template void BinaryProtocolReader::readArithmeticVector<int64_t>(
+    int64_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<uint64_t>(
+    uint64_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<int32_t>(
+    int32_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<uint32_t>(
+    uint32_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<int16_t>(
+    int16_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<uint16_t>(
+    uint16_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<int8_t>(
+    int8_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<uint8_t>(
+    uint8_t* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<float>(
+    float* outputPtr, size_t numElements);
+template void BinaryProtocolReader::readArithmeticVector<double>(
+    double* outputPtr, size_t numElements);
+
+template <typename T>
+inline size_t BinaryProtocolWriter::writeArithmeticVector(
+    const T* inputPtr, size_t numElements) {
+  size_t len = numElements * sizeof(T);
+  out_.ensure(len);
+  uint8_t* outPtr = out_.writableData();
+  size_t i = 0;
+  size_t loopLen = std::min(numElements, out_.length() / sizeof(T));
+  for (; i < loopLen; ++i) {
+    folly::storeUnaligned<T>(
+        outPtr + i * sizeof(T), folly::Endian::big<T>(inputPtr[i]));
+  }
+  out_.append(i * sizeof(T));
+  // write out one-by-one beyond what initially fits into the buffer
+  for (; i < numElements; ++i) {
+    out_.writeBE(inputPtr[i]);
+  }
+  return len;
+}
+
+template size_t BinaryProtocolWriter::writeArithmeticVector<int64_t>(
+    const int64_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<uint64_t>(
+    const uint64_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<int32_t>(
+    const int32_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<uint32_t>(
+    const uint32_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<int16_t>(
+    const int16_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<uint16_t>(
+    const uint16_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<int8_t>(
+    const int8_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<uint8_t>(
+    const uint8_t* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<float>(
+    const float* inputPtr, size_t numElements);
+template size_t BinaryProtocolWriter::writeArithmeticVector<double>(
+    const double* inputPtr, size_t numElements);
 
 void BinaryProtocolReader::skip(TType type, int depth) {
   if (depth >= FLAGS_thrift_protocol_max_depth) {

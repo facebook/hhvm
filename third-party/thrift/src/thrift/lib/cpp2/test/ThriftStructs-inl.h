@@ -134,8 +134,9 @@ template <class T>
 inline T createList(int size) {
   std::mt19937 rng;
   T d;
-  while (size-- != 0) {
-    d.lst()->push_back(rng());
+  d.lst()->resize(size);
+  for (int i = 0; i < size; ++i) {
+    d.lst()->at(i) = rng();
   }
   return d;
 }
@@ -153,6 +154,17 @@ create<thrift::benchmark::OpSmallListInt>() {
 }
 
 template <>
+inline thrift::benchmark::BigListByte create<thrift::benchmark::BigListByte>() {
+  return createList<thrift::benchmark::BigListByte>(10000);
+}
+
+template <>
+inline thrift::benchmark::BigListShort
+create<thrift::benchmark::BigListShort>() {
+  return createList<thrift::benchmark::BigListShort>(10000);
+}
+
+template <>
 inline thrift::benchmark::BigListInt create<thrift::benchmark::BigListInt>() {
   return createList<thrift::benchmark::BigListInt>(10000);
 }
@@ -161,6 +173,22 @@ template <>
 inline thrift::benchmark::OpBigListInt
 create<thrift::benchmark::OpBigListInt>() {
   return createList<thrift::benchmark::OpBigListInt>(10000);
+}
+
+template <>
+inline thrift::benchmark::BigListBigInt
+create<thrift::benchmark::BigListBigInt>() {
+  return createList<thrift::benchmark::BigListBigInt>(10000);
+}
+template <>
+inline thrift::benchmark::BigListFloat
+create<thrift::benchmark::BigListFloat>() {
+  return createList<thrift::benchmark::BigListFloat>(10000);
+}
+template <>
+inline thrift::benchmark::BigListDouble
+create<thrift::benchmark::BigListDouble>() {
+  return createList<thrift::benchmark::BigListDouble>(10000);
 }
 
 template <>

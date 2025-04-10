@@ -1357,6 +1357,10 @@ ClassGetC <mode>                   [C]  ->  [C:Class]
   sampled notice otherwise. If the target class fails to load, we throw a
   catchable InvalidArgumentException.
 
+  UnsafeBackdoor mode:
+  Same as the last mode but skips the <<__DynamicallyReferenced>> check. Not
+  valid in repo mode and asserts in HHBBC.
+
 ClassGetTS                         [C:Dict]  ->  [C:Class]
 
   Fetch class from type-structure. This instruction checks if $1 is a valid
@@ -3009,7 +3013,7 @@ NativeImpl    []  ->  []
 
 ReifiedInit <local variable id> [C:Class|LazyClass C:Obj] -> []
 
-  Checks if the class in $1 or its parent has reified generics. If yes, assigns vec %1 
+  Checks if the class in $1 or its parent has reified generics. If yes, assigns vec %1
   to the reified generics of object $2. Throws a fatal error if $1 is not a class
   or lazy class.
 

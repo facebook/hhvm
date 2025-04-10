@@ -205,6 +205,7 @@ impl Display for FmtClassGetCMode {
         let s = match self.0 {
             ClassGetCMode::Normal => "normal",
             ClassGetCMode::ExplicitConversion => "explicit_conversion",
+            ClassGetCMode::UnsafeBackdoor => "unsafe_backdoor",
             _ => panic!("bad ClassGetCMode value"),
         };
         f.write_str(s)

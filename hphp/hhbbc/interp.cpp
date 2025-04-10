@@ -2360,6 +2360,16 @@ bool module_check_always_passes(ISS& env, const DCls& dcls) {
 
 void in(ISS& env, const bc::ClassGetC& op) {
   auto const kind = static_cast<ClassGetCMode>(op.subop1);
+  /**
+    * If this is triggered, HH\classname_to_class($foo, "cause_a_sev") was
+    * committed to a path that was included in a repo build, which is not
+    * allowed. This API is not exposed to Hack and requires HH_FIXME[4105]
+    * to suppress the "Too many arguments" error.
+    */
+  always_assert_flog(
+    kind != ClassGetCMode::UnsafeBackdoor,
+    "HH\\classname_to_class() unsafe backdoor is not allowed in repo builds"
+  );
   auto const t = topC(env);
 
   if (t.subtypeOf(BCls)) return reduce(env);
@@ -2378,6 +2388,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
         push(env, objcls(t));
         return;
       case ClassGetCMode::ExplicitConversion:
+      case ClassGetCMode::UnsafeBackdoor:
         unreachable(env);
         push(env, TBottom);
         return;
@@ -2391,6 +2402,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
           case ClassGetCMode::Normal:
             return Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0;
           case ClassGetCMode::ExplicitConversion:
+          case ClassGetCMode::UnsafeBackdoor:
             return rcls->mightCareAboutDynamicallyReferenced();
         }
       }();
@@ -3271,15 +3283,15 @@ void in(ISS& env, const bc::ReifiedInit& op) {
       is_specialized_cls(cls) &&
       dcls_of(cls).isExact()) {
     auto const& dcls = dcls_of(cls);
-    if (!dcls.cls().couldHaveReifiedGenerics() && 
+    if (!dcls.cls().couldHaveReifiedGenerics() &&
         !dcls.cls().couldHaveReifiedParent()) {
       // ReifiedInit is a no-op if the class isn't reified
       // and doesn't have a reified parent.
       return reduce(env, bc::PopC {}, bc::PopC {});
     }
-  
+
     // if the class has reified generics, and if generics
-    // were not specified at instantiation, then we must emit 
+    // were not specified at instantiation, then we must emit
     // CheckClsRgSoft to raise a warning or fatal.
     auto const cell = locAsCell(env, op.loc1);
     if (dcls.cls().mustHaveReifiedGenerics() && cell.subtypeOf(BVecE)) {
@@ -3290,7 +3302,7 @@ void in(ISS& env, const bc::ReifiedInit& op) {
       );
     }
 
-    if (dcls.cls().mustHaveReifiedGenerics() || 
+    if (dcls.cls().mustHaveReifiedGenerics() ||
         dcls.cls().mustHaveReifiedParent()) {
       return reduce(
         env,

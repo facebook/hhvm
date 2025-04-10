@@ -94,6 +94,7 @@ pub mod ffi {
     enum ClassGetCMode {
         Normal,
         ExplicitConversion,
+        UnsafeBackdoor,
     }
 
     #[repr(u8)]

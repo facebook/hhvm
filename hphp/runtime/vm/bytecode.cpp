@@ -969,7 +969,8 @@ void checkModuleBoundaryViolation(const Class& cls) {
 
 } // namespace
 
-static inline Class* classnameToClass(TypedValue* input) {
+static inline Class* classnameToClass(TypedValue* input,
+                                      bool checkDynamicallyReferenced) {
   auto const explicitFail = [&](const char* k, const char* n) {
     std::string msg;
     string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION, k, n);
@@ -979,7 +980,7 @@ static inline Class* classnameToClass(TypedValue* input) {
   if (tvIsString(input)) {
     auto const name = input->m_data.pstr;
     if (Class* class_ = Class::resolve(name, vmfp()->func())) {
-      if (!class_->isDynamicallyReferenced()) {
+      if (checkDynamicallyReferenced && !class_->isDynamicallyReferenced()) {
         raiseMissingDynamicallyReferenced(class_);
       }
       return class_;
@@ -1823,7 +1824,7 @@ OPTBLD_INLINE void iopReifiedInit(tv_lval val) {
   assertx(tvIsVec(genericsTv));
   auto generics = genericsTv.m_data.parr;
   auto objTv = vmStack().indC(1);
-  assertx(tvIsObject(objTv)); 
+  assertx(tvIsObject(objTv));
   auto obj = objTv->m_data.pobj;
   tryClassReifiedInit(class_, generics, obj);
   vmStack().popC();
@@ -2310,7 +2311,10 @@ OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
       case ClassGetCMode::Normal:
         return lookupClsRef(cell);
       case ClassGetCMode::ExplicitConversion:
-        return classnameToClass(cell);
+        return classnameToClass(cell, true);
+      case ClassGetCMode::UnsafeBackdoor:
+        assertx(!Cfg::Repo::Authoritative);
+        return classnameToClass(cell, false);
     }
   }();
   vmStack().popC();

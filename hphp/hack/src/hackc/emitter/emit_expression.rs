@@ -2792,6 +2792,13 @@ fn emit_special_function<'a, 'd>(
                 emit_expr(e, env, error::expect_normal_paramkind(cname)?)?,
                 instr::class_get_c(ClassGetCMode::ExplicitConversion),
             ]))),
+            [
+                ref cname,
+                aast::Argument::Anormal(Expr(_, _, Expr_::String(ref magic))),
+            ] if magic == "cause_a_sev" => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, error::expect_normal_paramkind(cname)?)?,
+                instr::class_get_c(ClassGetCMode::UnsafeBackdoor),
+            ]))),
             _ => Err(Error::fatal_runtime(
                 pos,
                 format!(

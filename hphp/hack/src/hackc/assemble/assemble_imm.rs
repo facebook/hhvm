@@ -27,7 +27,11 @@ assemble_imm_for_enum!(
 
 assemble_imm_for_enum!(
     hhbc::ClassGetCMode,
-    [ClassGetCMode::Normal, ClassGetCMode::ExplicitConversion,]
+    [
+        ClassGetCMode::Normal,
+        ClassGetCMode::ExplicitConversion,
+        ClassGetCMode::UnsafeBackdoor,
+    ]
 );
 
 assemble_imm_for_enum!(

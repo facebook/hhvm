@@ -78,7 +78,10 @@ enum class SpecialClsRef : uint8_t {
 
 #define CLASS_GET_C_MODES                                           \
   MODE(Normal) /* Result of compiling expressions like $c::foo() */ \
-  MODE(ExplicitConversion) /* Result of HH\classname_to_class() */
+  MODE(ExplicitConversion) /* Result of HH\classname_to_class() */  \
+  /* Undocumented, unsafe flavor of HH\classname_to_class() for     \
+     sandboxes that skips <<__DynamicallyReferenced>> check */      \
+  MODE(UnsafeBackdoor)
 
 enum class ClassGetCMode : uint8_t {
 #define MODE(op) op,
@@ -91,7 +94,7 @@ enum class ClassGetCMode : uint8_t {
   MODE(Warn)                                       \
   MODE(Define)                                     \
   MODE(Unset)                                      \
-  /* InOut mode restricts allowed bases to the
+  /* InOut mode restricts allowed bases to the     \
      array like types. */                          \
   MODE(InOut)
 

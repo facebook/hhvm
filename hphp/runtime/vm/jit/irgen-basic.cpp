@@ -34,6 +34,8 @@
 namespace HPHP::jit::irgen {
 
 void emitClassGetC(IRGS& env, ClassGetCMode mode) {
+  assertx(!(Cfg::Repo::Authoritative && mode == ClassGetCMode::UnsafeBackdoor));
+
   auto const name = topC(env);
 
   if (name->isA(TObj)) {
@@ -44,6 +46,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
         decRef(env, name);
         return;
       case ClassGetCMode::ExplicitConversion:
+      case ClassGetCMode::UnsafeBackdoor:
         interpOne(env);
         return;
     }
@@ -65,6 +68,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
       case ClassGetCMode::Normal:
         return LdClsFallback::Fatal;
       case ClassGetCMode::ExplicitConversion:
+      case ClassGetCMode::UnsafeBackdoor:
         // HH\classname_to_class throws a catchable InvalidArgumentException
         // instead of raising a fatal error
         if (name->isA(TStr)) {
@@ -104,6 +108,8 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
             );
           }
         }
+        break;
+      case ClassGetCMode::UnsafeBackdoor:
         break;
     }
   }

@@ -71,7 +71,9 @@ int32_t calculateMinSafePatchVersion(const protocol::Object& patch);
  * @param patch Object
  * @param value to be patched
  */
-inline constexpr detail::ApplyPatch applyPatch{};
+[[deprecated(
+    "Use DynamicPatch::apply instead.")]] inline constexpr detail::ApplyPatch
+    applyPatch{};
 
 /**
  * Extracted Thrift Masks from Thrift Patch. Read Thrift Mask contains fields or
@@ -92,7 +94,7 @@ using detail::ExtractedMasksFromPatch;
 /// integer map mask. Note that Mask contains pointer to `protocol::Value` in
 /// patch, so caller needs to make sure Patch has longer lifetime than the mask.
 [[deprecated(
-    "Use protocol::extractMaskFromPatch instead.")]] ExtractedMasksFromPatch
+    "Use DynamicPatch::extractMaskFromPatch instead.")]] ExtractedMasksFromPatch
 extractMaskViewFromPatch(const protocol::Object& patch);
 
 // Extracting mask from a temporary patch is dangerous and should be disallowed.
@@ -103,7 +105,9 @@ ExtractedMasksFromPatch extractMaskViewFromPatch(Object&& patch) = delete;
 /// modified by the Patch. It will construct nested Mask for map and object
 /// patches. For map, it only supports integer or string key. If the type of key
 /// map is not integer or string, it throws.
-ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch);
+[[deprecated(
+    "Use DynamicPatch::extractMaskFromPatch instead.")]] ExtractedMasksFromPatch
+extractMaskFromPatch(const protocol::Object& patch);
 
 /// @cond
 // Constructs read and write Thrift Map Mask of a given patch originating from
@@ -114,7 +118,8 @@ ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch);
 /// @endcond
 
 template <type::StandardProtocol Protocol>
-std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
+[[deprecated("Use DynamicPatch::apply instead.")]] std::unique_ptr<folly::IOBuf>
+applyPatchToSerializedData(
     const protocol::Object& patch, const folly::IOBuf& buf);
 
 /**
@@ -127,13 +132,15 @@ std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
  * Patch library in this process is not compatible with the minimum version
  * required by `SafePatch`).
  */
-Object fromSafePatch(const protocol::Object& safePatch);
+[[deprecated("Use DynamicPatch::fromSafePatch instead.")]] Object fromSafePatch(
+    const protocol::Object& safePatch);
 
 /**
  * Returns a `SafePatch` instance in Protocol Object corresponding to the
  * encoded Thrift Dynamic Patch.
  */
-Object toSafePatch(const protocol::Object& patch);
+[[deprecated("Use DynamicPatch::toSafePatch instead.")]] Object toSafePatch(
+    const protocol::Object& patch);
 
 } // namespace protocol
 } // namespace apache::thrift

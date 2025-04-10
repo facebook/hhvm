@@ -412,7 +412,11 @@ class SerializerForwardCompat(SerializerTestBase):
     def test_serialize_hard_struct_python_forward_compat(self) -> None:
         # note the implicit conversion from py3 Integers to python integers on creation
         control = python_hard(
-            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=Integers(tiny=1)
+            val=0,
+            val_list=[1, 2, 3, 4],
+            name="foo",
+            # pyre-fixme[6]: In call `python_hard.__init__`, for argument `an_int`, expected `Optional[thrift_types.Integer]` but got `Integers`.
+            an_int=Integers(tiny=1),
         )
         fixtures: Mapping[Protocol, bytes] = {
             Protocol.COMPACT: b"\x15\x00\x19E\x02\x04\x06\x08\x18\x03foo\x1c\x13\x01"

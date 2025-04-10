@@ -19,12 +19,12 @@
 Produce the pep484 container type for a given thrift-py3 container
 
 }}{{#type:list?}}_typing.Sequence[{{!
-    }}{{#type:list_elem_type}}{{> types/compatible_pep484_type}}{{/type:list_elem_type}}{{!
+    }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!
 }}]{{/type:list?}}{{!
 }}{{#type:set?}}_typing.AbstractSet[{{!
-    }}{{#type:set_elem_type}}{{> types/compatible_pep484_type}}{{/type:set_elem_type}}{{!
+    }}{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}{{!
 }}]{{/type:set?}}{{!
 }}{{#type:map?}}_typing.Mapping[{{!
     }}{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!
-    }}{{#type:value_type}}{{> types/compatible_pep484_type}}{{/type:value_type}}{{!
+    }}{{#type:value_type}}{{> types/pep484_type}}{{/type:value_type}}{{!
 }}]{{/type:map?}}

@@ -17,7 +17,7 @@ import itertools
 import module.thrift_types
 
 
-class AnEnum(thrift.python.types.Enum, int, module.thrift_types._fbthrift_compatible_with_AnEnum):
+class AnEnum(thrift.python.types.Enum, int):
     NOTSET: AnEnum = ...
     ONE: AnEnum = ...
     TWO: AnEnum = ...
@@ -30,7 +30,7 @@ class AnEnum(thrift.python.types.Enum, int, module.thrift_types._fbthrift_compat
     def __index__(self) -> int: ...
 
 
-class AnEnumRenamed(thrift.python.types.Enum, int, module.thrift_types._fbthrift_compatible_with_AnEnumRenamed):
+class AnEnumRenamed(thrift.python.types.Enum, int):
     name_: AnEnumRenamed = ...
     value_: AnEnumRenamed = ...
     renamed_: AnEnumRenamed = ...
@@ -41,7 +41,7 @@ class AnEnumRenamed(thrift.python.types.Enum, int, module.thrift_types._fbthrift
     def __index__(self) -> int: ...
 
 
-class Flags(thrift.python.types.Flag, module.thrift_types._fbthrift_compatible_with_Flags):
+class Flags(thrift.python.types.Flag):
     flag_A: Flags = ...
     flag_B: Flags = ...
     flag_C: Flags = ...
@@ -53,7 +53,7 @@ class Flags(thrift.python.types.Flag, module.thrift_types._fbthrift_compatible_w
     def __index__(self) -> int: ...
 
 
-class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_SimpleException):
+class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         err_code: bool
         pass
@@ -77,7 +77,7 @@ class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable, mo
     def _to_py3(self) -> SimpleException: ...
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...   # type: ignore
 
-class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_OptionalRefStruct):
+class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         optional_blob: bool
         pass
@@ -107,7 +107,7 @@ class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift
     def _to_py3(self) -> OptionalRefStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...   # type: ignore
 
-class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_SimpleStruct):
+class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         is_on: bool
         tiny_int: bool
@@ -146,7 +146,7 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_type
         something: _typing.Optional[_typing.Mapping[int, int]]=None,
         opt_default_int: _typing.Optional[int]=None,
         opt_default_str: _typing.Optional[str]=None,
-        opt_default_enum: _typing.Optional[module.thrift_types._fbthrift_compatible_with_AnEnum]=None
+        opt_default_enum: _typing.Optional[AnEnum]=None
     ) -> None: ...
 
     def __call__(
@@ -161,7 +161,7 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_type
         something: _typing.Union[_typing.Mapping[int, int], None]=None,
         opt_default_int: _typing.Union[int, None]=None,
         opt_default_str: _typing.Union[str, None]=None,
-        opt_default_enum: _typing.Union[module.thrift_types._fbthrift_compatible_with_AnEnum, None]=None
+        opt_default_enum: _typing.Union[AnEnum, None]=None
     ) -> SimpleStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['SimpleStruct'], bytes]]: ...
@@ -173,7 +173,7 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_type
     def _to_py3(self) -> SimpleStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...   # type: ignore
 
-class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_HiddenTypeFieldsStruct):
+class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
@@ -195,7 +195,7 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable, module.t
     def _to_py3(self) -> HiddenTypeFieldsStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...   # type: ignore
 
-class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_ComplexStruct):
+class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         structOne: bool
         structTwo: bool
@@ -220,11 +220,11 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_typ
 
     def __init__(
         self, *,
-        structOne: _typing.Optional[module.thrift_types._fbthrift_compatible_with_SimpleStruct]=None,
-        structTwo: _typing.Optional[module.thrift_types._fbthrift_compatible_with_SimpleStruct]=None,
+        structOne: _typing.Optional[SimpleStruct]=None,
+        structTwo: _typing.Optional[SimpleStruct]=None,
         an_integer: _typing.Optional[int]=None,
         name: _typing.Optional[str]=None,
-        an_enum: _typing.Optional[module.thrift_types._fbthrift_compatible_with_AnEnum]=None,
+        an_enum: _typing.Optional[AnEnum]=None,
         some_bytes: _typing.Optional[bytes]=None,
         sender: _typing.Optional[str]=None,
         cdef_: _typing.Optional[str]=None,
@@ -233,11 +233,11 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_typ
 
     def __call__(
         self, *,
-        structOne: _typing.Union[module.thrift_types._fbthrift_compatible_with_SimpleStruct, None]=None,
-        structTwo: _typing.Union[module.thrift_types._fbthrift_compatible_with_SimpleStruct, None]=None,
+        structOne: _typing.Union[SimpleStruct, None]=None,
+        structTwo: _typing.Union[SimpleStruct, None]=None,
         an_integer: _typing.Union[int, None]=None,
         name: _typing.Union[str, None]=None,
-        an_enum: _typing.Union[module.thrift_types._fbthrift_compatible_with_AnEnum, None]=None,
+        an_enum: _typing.Union[AnEnum, None]=None,
         some_bytes: _typing.Union[bytes, None]=None,
         sender: _typing.Union[str, None]=None,
         cdef_: _typing.Union[str, None]=None,
@@ -255,7 +255,7 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_typ
 
 _BinaryUnionValueType = _typing.Union[None, _fbthrift_iobuf.IOBuf]
 
-class BinaryUnion(thrift.py3.types.Union, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_BinaryUnion):
+class BinaryUnion(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
         iobuf_val: bool
         pass
@@ -289,7 +289,7 @@ class BinaryUnion(thrift.py3.types.Union, _typing.Hashable, module.thrift_types.
     def _to_py3(self) -> BinaryUnion: ...
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnion": ...   # type: ignore
 
-class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_BinaryUnionStruct):
+class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         u: bool
         pass
@@ -298,12 +298,12 @@ class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift
 
     def __init__(
         self, *,
-        u: _typing.Optional[module.thrift_types._fbthrift_compatible_with_BinaryUnion]=None
+        u: _typing.Optional[BinaryUnion]=None
     ) -> None: ...
 
     def __call__(
         self, *,
-        u: _typing.Union[module.thrift_types._fbthrift_compatible_with_BinaryUnion, None]=None
+        u: _typing.Union[BinaryUnion, None]=None
     ) -> BinaryUnionStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['BinaryUnionStruct'], bytes]]: ...
@@ -319,7 +319,7 @@ class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift
     def _to_py3(self) -> BinaryUnionStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnionStruct": ...   # type: ignore
 
-class CustomFields(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_CustomFields):
+class CustomFields(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         bool_field: bool
         integer_field: bool
@@ -352,7 +352,7 @@ class CustomFields(thrift.py3.types.Struct, _typing.Hashable, module.thrift_type
         list_field: _typing.Optional[_typing.Sequence[int]]=None,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=None,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=None,
-        struct_field: _typing.Optional[module.thrift_types._fbthrift_compatible_with_SimpleStruct]=None
+        struct_field: _typing.Optional[SimpleStruct]=None
     ) -> None: ...
 
     def __call__(
@@ -365,7 +365,7 @@ class CustomFields(thrift.py3.types.Struct, _typing.Hashable, module.thrift_type
         list_field: _typing.Union[_typing.Sequence[int], None]=None,
         set_field: _typing.Union[_typing.AbstractSet[int], None]=None,
         map_field: _typing.Union[_typing.Mapping[int, int], None]=None,
-        struct_field: _typing.Union[module.thrift_types._fbthrift_compatible_with_SimpleStruct, None]=None
+        struct_field: _typing.Union[SimpleStruct, None]=None
     ) -> CustomFields: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['CustomFields'], bytes]]: ...
@@ -377,7 +377,7 @@ class CustomFields(thrift.py3.types.Struct, _typing.Hashable, module.thrift_type
     def _to_py3(self) -> CustomFields: ...
     def _to_py_deprecated(self) -> "module.ttypes.CustomFields": ...   # type: ignore
 
-class CustomTypedefFields(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_CustomTypedefFields):
+class CustomTypedefFields(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         bool_field: bool
         integer_field: bool
@@ -410,7 +410,7 @@ class CustomTypedefFields(thrift.py3.types.Struct, _typing.Hashable, module.thri
         list_field: _typing.Optional[_typing.Sequence[int]]=None,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=None,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=None,
-        struct_field: _typing.Optional[module.thrift_types._fbthrift_compatible_with_SimpleStruct]=None
+        struct_field: _typing.Optional[SimpleStruct]=None
     ) -> None: ...
 
     def __call__(
@@ -423,7 +423,7 @@ class CustomTypedefFields(thrift.py3.types.Struct, _typing.Hashable, module.thri
         list_field: _typing.Union[_typing.Sequence[int], None]=None,
         set_field: _typing.Union[_typing.AbstractSet[int], None]=None,
         map_field: _typing.Union[_typing.Mapping[int, int], None]=None,
-        struct_field: _typing.Union[module.thrift_types._fbthrift_compatible_with_SimpleStruct, None]=None
+        struct_field: _typing.Union[SimpleStruct, None]=None
     ) -> CustomTypedefFields: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['CustomTypedefFields'], bytes]]: ...
@@ -435,7 +435,7 @@ class CustomTypedefFields(thrift.py3.types.Struct, _typing.Hashable, module.thri
     def _to_py3(self) -> CustomTypedefFields: ...
     def _to_py_deprecated(self) -> "module.ttypes.CustomTypedefFields": ...   # type: ignore
 
-class AdaptedTypedefFields(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_AdaptedTypedefFields):
+class AdaptedTypedefFields(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         bool_field: bool
         integer_field: bool
@@ -468,7 +468,7 @@ class AdaptedTypedefFields(thrift.py3.types.Struct, _typing.Hashable, module.thr
         list_field: _typing.Optional[_typing.Sequence[int]]=None,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=None,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=None,
-        struct_field: _typing.Optional[module.thrift_types._fbthrift_compatible_with_SimpleStruct]=None
+        struct_field: _typing.Optional[SimpleStruct]=None
     ) -> None: ...
 
     def __call__(
@@ -481,7 +481,7 @@ class AdaptedTypedefFields(thrift.py3.types.Struct, _typing.Hashable, module.thr
         list_field: _typing.Union[_typing.Sequence[int], None]=None,
         set_field: _typing.Union[_typing.AbstractSet[int], None]=None,
         map_field: _typing.Union[_typing.Mapping[int, int], None]=None,
-        struct_field: _typing.Union[module.thrift_types._fbthrift_compatible_with_SimpleStruct, None]=None
+        struct_field: _typing.Union[SimpleStruct, None]=None
     ) -> AdaptedTypedefFields: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AdaptedTypedefFields'], bytes]]: ...

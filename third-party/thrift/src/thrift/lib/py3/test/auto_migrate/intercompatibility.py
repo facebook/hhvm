@@ -26,18 +26,22 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 class PythonCompatibilityTest(unittest.TestCase):
     def test_init_py3_struct_with_python_union(self) -> None:
         python_integers = python_types.Integers(small=2023)
+        # pyre-fixme[6]: In call `py3_types.easy.__init__`, for argument `an_int`, expected `Optional[py3_types.Integers]` but got `python_types.Integers`.
         py3_easy = py3_types.easy(an_int=python_integers)
         self.assertEqual(2023, py3_easy.an_int.small)
 
     def test_update_py3_struct_with_python_union(self) -> None:
         py3_easy = py3_types.easy()
         python_integers = python_types.Integers(small=2023)
+        # pyre-fixme[6]: In call `py3_types.easy.__call__`, for argument `an_int`, expected `Optional[py3_types.Integers]` but got `python_types.Integers`
         py3_easy = py3_easy(an_int=python_integers)
         self.assertEqual(2023, py3_easy.an_int.small)
 
     def test_init_py3_struct_with_python_enum(self) -> None:
         py3_file = py3_types.File(
+            # pyre-fixme[6]: In call `py3_types.File.__init__`, for argument `permissions`, expected `Optional[py3_types.Perm]` but got `thrift_enums.Perm`.
             permissions=(python_types.Perm.read | python_types.Perm.read),
+            # pyre-fixme[6]: In call `py3_types.File.__init__`, for argument `type`, expected `Optional[py3_types.Kind]` but got `thrift_enums.Kind
             type=python_types.Kind.FIFO,
         )
         self.assertEqual(
@@ -49,7 +53,9 @@ class PythonCompatibilityTest(unittest.TestCase):
     def test_update_py3_struct_with_python_enum(self) -> None:
         py3_file = py3_types.File()
         py3_file = py3_file(
+            # pyre-fixme[6]: In call `py3_types.File.__call__`, for argument `permissions`, expected `Optional[py3_types.Perm]` but got `thrift_enums.Perm`.
             permissions=(python_types.Perm.read | python_types.Perm.read),
+            # pyre-fixme[6]: In call `py3_types.File.__call__`, for argument `type`, expected `Optional[py3_types.Kind]` but got `thrift_enums.Kind`.
             type=python_types.Kind.FIFO,
         )
         self.assertEqual(
@@ -60,6 +66,7 @@ class PythonCompatibilityTest(unittest.TestCase):
 
     def test_init_py3_union_with_python_struct(self) -> None:
         python_easy = python_types.easy(name="foo")
+        # pyre-fixme[6]: Incompatible parameter type. In call `py3_types.ComplexUnion.__init__`, for argument `easy_struct`, expected `Optional[py3_types.easy]` but got `python_types.easy`.Incompatible parameter type
         py3_complex_union = py3_types.ComplexUnion(easy_struct=python_easy)
         self.assertEqual("foo", py3_complex_union.easy_struct.name)
 

@@ -44,8 +44,7 @@ import {{> common/thrift_types_module_path}}
 {{#program:enums}}
 class {{enum:name}}(thrift.python.types.{{^enum:flags?}}Enum, int{{!
 }}{{/enum:flags?}}{{!
-}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-}}{{#program:intercompatible?}}, {{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{/program:intercompatible?}}):
+}}{{#enum:flags?}}Flag{{/enum:flags?}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...
     {{/enum:values}}
@@ -63,8 +62,7 @@ class {{enum:name}}(thrift.python.types.{{^enum:flags?}}Enum, int{{!
 _{{struct:name}}ValueType = _typing.Union[None, {{#struct:py3_fields}}{{^first?}}, {{/first?}}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/struct:py3_fields}}]
 
 {{/struct:union?}}
-class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
-}}{{#program:intercompatible?}}, {{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{struct:name}}{{/program:intercompatible?}}):
+class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
     class __fbthrift_IsSet:
     {{#struct:py3_fields}}
         {{#field:has_ref_accessor?}}
@@ -83,13 +81,13 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
 
     def __init__(
         self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
-        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/compatible_pep484_type}}{{/field:type}}]=None{{/struct:py3_fields}}
+        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=None{{/struct:py3_fields}}
     ) -> None: ...
 
     {{#struct:plain?}}
     def __call__(
         self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
-        {{field:py_name}}: _typing.Union[{{#field:type}}{{> types/compatible_pep484_type}}{{/field:type}}, None]=None{{/struct:py3_fields}}
+        {{field:py_name}}: _typing.Union[{{#field:type}}{{> types/pep484_type}}{{/field:type}}, None]=None{{/struct:py3_fields}}
     ) -> {{struct:name}}: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['{{struct:name}}'], bytes]]: ...

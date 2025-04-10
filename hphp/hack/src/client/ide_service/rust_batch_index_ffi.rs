@@ -21,7 +21,68 @@ use rayon::prelude::*;
 use relative_path::RelativePath;
 use unwrap_ocaml::UnwrapOcaml;
 
-fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
+fn parsed_file_to_file_info(file: oxidized::direct_decl_parser::ParsedFileWithHashes) -> FileInfo {
+    let mut info = FileInfo {
+        position_free_decl_hash: file_info::HashType(Some(Int64::from(
+            file.file_decls_hash.as_u64() as i64,
+        ))),
+        file_mode: file.mode,
+        ids: Ids {
+            funs: vec![],
+            classes: vec![],
+            typedefs: vec![],
+            consts: vec![],
+            modules: vec![],
+        },
+        comments: None,
+    };
+    let pos = |p: &oxidized::pos::Pos| file_info::Pos::Full(p.to_owned());
+    use oxidized::shallow_decl_defs::Decl;
+    for (name, decl, hash, sort_text) in file.into_iter() {
+        let hash = Int64::from(hash.as_u64() as i64);
+        match decl {
+            Decl::Class(x) => info.ids.classes.push(Id {
+                pos: pos(&x.name.0),
+                name,
+                decl_hash: Some(hash),
+                sort_text: sort_text.map(|s| s.to_string()),
+            }),
+            Decl::Fun(x) => info.ids.funs.push(Id {
+                pos: pos(&x.pos),
+                name,
+                decl_hash: Some(hash),
+                sort_text: None,
+            }),
+            Decl::Typedef(x) => info.ids.typedefs.push(Id {
+                pos: pos(&x.pos),
+                name,
+                decl_hash: Some(hash),
+                sort_text: None,
+            }),
+            Decl::Const(x) => info.ids.consts.push(Id {
+                pos: pos(&x.pos),
+                name,
+                decl_hash: Some(hash),
+                sort_text: None,
+            }),
+            Decl::Module(x) => info.ids.modules.push(Id {
+                pos: pos(&x.mdt_pos),
+                name,
+                decl_hash: Some(hash),
+                sort_text: None,
+            }),
+        }
+    }
+    // Match OCaml ordering
+    info.ids.classes.reverse();
+    info.ids.funs.reverse();
+    info.ids.typedefs.reverse();
+    info.ids.consts.reverse();
+    info.ids.modules.reverse();
+    info
+}
+
+fn parsed_file_to_file_info_obr<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
     let mut info = FileInfo {
         position_free_decl_hash: file_info::HashType(Some(Int64::from(
             file.file_decls_hash.as_u64() as i64,
@@ -81,7 +142,6 @@ fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
     info.ids.modules.reverse();
     info
 }
-
 ocaml_ffi! {
     fn batch_index_hackrs_ffi_root_relative_paths_only(
         parser_options: DeclParserOptions,
@@ -95,30 +155,49 @@ ocaml_ffi! {
             .map(|(relpath, contents)| {
                 let contents = match contents {
                     Some(contents) => contents,
-                    None => return (relpath, None)
+                    None => return (relpath, None),
                 };
+                if parser_options.use_oxidized_by_ref_decls2 {
+                    let arena = Bump::new();
 
-                let arena = Bump::new();
+                    let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(
+                        &parser_options,
+                        relpath.clone(),
+                        &contents,
+                        &arena,
+                    );
 
-                let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(
-                    &parser_options,
-                    relpath.clone(),
-                    &contents,
-                    &arena,
-                );
+                    let with_hashes = ParsedFileWithHashes::new(
+                        parsed_file,
+                        deregister_php_stdlib_if_hhi,
+                        relpath.prefix(),
+                        &arena,
+                    );
 
-                let with_hashes = ParsedFileWithHashes::new(
-                    parsed_file,
-                    deregister_php_stdlib_if_hhi,
-                    relpath.prefix(),
-                    &arena,
-                );
+                    let addenda = si_addendum::get_si_addenda_obr(&with_hashes);
+                    let file_decls_hash = Int64(with_hashes.file_decls_hash.as_u64() as i64);
+                    let file_info = parsed_file_to_file_info_obr(with_hashes);
 
-                let addenda = si_addendum::get_si_addenda(&with_hashes);
-                let file_decls_hash = Int64(with_hashes.file_decls_hash.as_u64() as i64);
-                let file_info = parsed_file_to_file_info(with_hashes);
+                    (relpath, Some((file_info, file_decls_hash, addenda)))
+                } else {
+                    let parsed_file = direct_decl_parser::parse_decls_for_typechecking(
+                        &parser_options,
+                        relpath.clone(),
+                        &contents,
+                    );
 
-                (relpath, Some((file_info, file_decls_hash, addenda)))
+                    let with_hashes = oxidized::direct_decl_parser::ParsedFileWithHashes::new(
+                        parsed_file,
+                        deregister_php_stdlib_if_hhi,
+                        relpath.prefix(),
+                    );
+
+                    let addenda = si_addendum::get_si_addenda(&with_hashes);
+                    let file_decls_hash = Int64(with_hashes.file_decls_hash.as_u64() as i64);
+                    let file_info = parsed_file_to_file_info(with_hashes);
+
+                    (relpath, Some((file_info, file_decls_hash, addenda)))
+                }
             })
             .collect()
     }

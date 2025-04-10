@@ -232,6 +232,6 @@ fn parse_file_with_addenda(
     let arena = bumpalo::Bump::new();
     let with_hashes = parse_file_with_hashes(&text, &arena, opts, decl_opts, path.clone())?;
     let summary = names::FileSummary::new_obr(&with_hashes);
-    let addenda = si_addendum::get_si_addenda(&with_hashes);
+    let addenda = si_addendum::get_si_addenda_obr(&with_hashes);
     Ok((path, summary, addenda))
 }

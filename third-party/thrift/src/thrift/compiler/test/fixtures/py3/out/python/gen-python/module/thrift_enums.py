@@ -13,11 +13,9 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import fbcode.thrift.python.types as _fbthrift_python_types
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_AnEnum:
-    pass
 
 
-class AnEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnum):
+class AnEnum(_fbthrift_python_types.Enum, int):
     NOTSET = 0
     ONE = 1
     TWO = 2
@@ -47,11 +45,9 @@ class AnEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnum)
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_AnEnumRenamed:
-    pass
 
 
-class AnEnumRenamed(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnumRenamed):
+class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     name_ = 0
     value_ = 1
     renamed_ = 2
@@ -79,11 +75,9 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_Flags:
-    pass
 
 
-class Flags(_fbthrift_python_types.Flag, _fbthrift_compatible_with_Flags):
+class Flags(_fbthrift_python_types.Flag):
     flag_A = 1
     flag_B = 2
     flag_C = 4

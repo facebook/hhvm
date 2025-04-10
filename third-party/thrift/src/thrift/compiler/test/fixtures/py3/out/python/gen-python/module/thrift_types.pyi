@@ -20,22 +20,15 @@ import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 from module.thrift_enums import (
     AnEnum as _fbthrift_AnEnum,
-    _fbthrift_compatible_with_AnEnum,
     AnEnumRenamed as _fbthrift_AnEnumRenamed,
-    _fbthrift_compatible_with_AnEnumRenamed,
     Flags as _fbthrift_Flags,
-    _fbthrift_compatible_with_Flags,
 )
 AnEnum = _fbthrift_AnEnum
 AnEnumRenamed = _fbthrift_AnEnumRenamed
 Flags = _fbthrift_Flags
 
 
-class _fbthrift_compatible_with_SimpleException:
-    pass
-
-
-class SimpleException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_SimpleException, _fbthrift_python_abstract_types.SimpleException):
+class SimpleException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.SimpleException):
     err_code: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -49,11 +42,7 @@ class SimpleException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...  # type: ignore
 _fbthrift_SimpleException = SimpleException
 
-class _fbthrift_compatible_with_OptionalRefStruct:
-    pass
-
-
-class OptionalRefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_OptionalRefStruct, _fbthrift_python_abstract_types.OptionalRefStruct):
+class OptionalRefStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.OptionalRefStruct):
     optional_blob: _typing.Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
     def __init__(
         self, *,
@@ -71,11 +60,7 @@ class OptionalRefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...  # type: ignore
 _fbthrift_OptionalRefStruct = OptionalRefStruct
 
-class _fbthrift_compatible_with_SimpleStruct:
-    pass
-
-
-class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SimpleStruct, _fbthrift_python_abstract_types.SimpleStruct):
+class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.SimpleStruct):
     is_on: _typing.Final[bool] = ...
     tiny_int: _typing.Final[int] = ...
     small_int: _typing.Final[int] = ...
@@ -101,7 +86,7 @@ class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Simp
         something: _typing.Optional[_typing.Mapping[int, int]]=...,
         opt_default_int: _typing.Optional[int]=...,
         opt_default_str: _typing.Optional[str]=...,
-        opt_default_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...
+        opt_default_enum: _typing.Optional[AnEnum]=...
     ) -> None: ...
 
     def __call__(
@@ -117,7 +102,7 @@ class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Simp
         something: _typing.Optional[_typing.Mapping[int, int]]=...,
         opt_default_int: _typing.Optional[int]=...,
         opt_default_str: _typing.Optional[str]=...,
-        opt_default_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...
+        opt_default_enum: _typing.Optional[AnEnum]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, int, _typing.Mapping[int, int], int, str, _fbthrift_AnEnum]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -126,26 +111,22 @@ class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Simp
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 _fbthrift_SimpleStruct = SimpleStruct
 
-class _fbthrift_compatible_with_HiddenTypeFieldsStruct:
-    pass
-
-
-class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HiddenTypeFieldsStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
+class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
     field1: _typing.Final[_fbthrift_SimpleStruct] = ...
     field2: _typing.Final[_typing.Sequence[_fbthrift_SimpleStruct]] = ...
     field3: _typing.Final[_typing.Mapping[int, _fbthrift_SimpleStruct]] = ...
     def __init__(
         self, *,
-        field1: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        field2: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]=...,
-        field3: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_SimpleStruct]]=...
+        field1: _typing.Optional[SimpleStruct]=...,
+        field2: _typing.Optional[_typing.Sequence[SimpleStruct]]=...,
+        field3: _typing.Optional[_typing.Mapping[int, SimpleStruct]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        field1: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        field2: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]=...,
-        field3: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_SimpleStruct]]=...
+        field1: _typing.Optional[SimpleStruct]=...,
+        field2: _typing.Optional[_typing.Sequence[SimpleStruct]]=...,
+        field3: _typing.Optional[_typing.Mapping[int, SimpleStruct]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_SimpleStruct, _typing.Sequence[_fbthrift_SimpleStruct], _typing.Mapping[int, _fbthrift_SimpleStruct]]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -154,11 +135,7 @@ class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct, _fbthrift_compatible
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...  # type: ignore
 _fbthrift_HiddenTypeFieldsStruct = HiddenTypeFieldsStruct
 
-class _fbthrift_compatible_with_AdaptedUnion:
-    pass
-
-
-class AdaptedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_AdaptedUnion, _fbthrift_python_abstract_types.AdaptedUnion):
+class AdaptedUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.AdaptedUnion):
     best: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -187,11 +164,7 @@ class AdaptedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Adapt
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedUnion": ...  # type: ignore
 _fbthrift_AdaptedUnion = AdaptedUnion
 
-class _fbthrift_compatible_with_HiddenException:
-    pass
-
-
-class HiddenException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_HiddenException, _fbthrift_python_abstract_types.HiddenException):
+class HiddenException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.HiddenException):
     test: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -205,11 +178,7 @@ class HiddenException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...  # type: ignore
 _fbthrift_HiddenException = HiddenException
 
-class _fbthrift_compatible_with_ComplexStruct:
-    pass
-
-
-class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexStruct, _fbthrift_python_abstract_types.ComplexStruct):
+class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.ComplexStruct):
     structOne: _typing.Final[_fbthrift_SimpleStruct] = ...
     structTwo: _typing.Final[_fbthrift_SimpleStruct] = ...
     an_integer: _typing.Final[int] = ...
@@ -221,11 +190,11 @@ class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Com
     bytes_with_cpp_type: _typing.Final[bytes] = ...
     def __init__(
         self, *,
-        structOne: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        structTwo: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        structOne: _typing.Optional[SimpleStruct]=...,
+        structTwo: _typing.Optional[SimpleStruct]=...,
         an_integer: _typing.Optional[int]=...,
         name: _typing.Optional[str]=...,
-        an_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...,
+        an_enum: _typing.Optional[AnEnum]=...,
         some_bytes: _typing.Optional[bytes]=...,
         sender: _typing.Optional[str]=...,
         cdef_: _typing.Optional[str]=...,
@@ -234,11 +203,11 @@ class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Com
 
     def __call__(
         self, *,
-        structOne: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        structTwo: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        structOne: _typing.Optional[SimpleStruct]=...,
+        structTwo: _typing.Optional[SimpleStruct]=...,
         an_integer: _typing.Optional[int]=...,
         name: _typing.Optional[str]=...,
-        an_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...,
+        an_enum: _typing.Optional[AnEnum]=...,
         some_bytes: _typing.Optional[bytes]=...,
         sender: _typing.Optional[str]=...,
         cdef_: _typing.Optional[str]=...,
@@ -251,11 +220,7 @@ class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Com
     def _to_py_deprecated(self) -> "module.ttypes.ComplexStruct": ...  # type: ignore
 _fbthrift_ComplexStruct = ComplexStruct
 
-class _fbthrift_compatible_with_BinaryUnion:
-    pass
-
-
-class BinaryUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_BinaryUnion, _fbthrift_python_abstract_types.BinaryUnion):
+class BinaryUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.BinaryUnion):
     iobuf_val: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
     def __init__(
         self, *,
@@ -284,20 +249,16 @@ class BinaryUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Binary
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnion": ...  # type: ignore
 _fbthrift_BinaryUnion = BinaryUnion
 
-class _fbthrift_compatible_with_BinaryUnionStruct:
-    pass
-
-
-class BinaryUnionStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BinaryUnionStruct, _fbthrift_python_abstract_types.BinaryUnionStruct):
+class BinaryUnionStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.BinaryUnionStruct):
     u: _typing.Final[_fbthrift_BinaryUnion] = ...
     def __init__(
         self, *,
-        u: _typing.Optional[_fbthrift_compatible_with_BinaryUnion]=...
+        u: _typing.Optional[BinaryUnion]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        u: _typing.Optional[_fbthrift_compatible_with_BinaryUnion]=...
+        u: _typing.Optional[BinaryUnion]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_BinaryUnion]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -306,11 +267,7 @@ class BinaryUnionStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnionStruct": ...  # type: ignore
 _fbthrift_BinaryUnionStruct = BinaryUnionStruct
 
-class _fbthrift_compatible_with_CustomFields:
-    pass
-
-
-class CustomFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomFields, _fbthrift_python_abstract_types.CustomFields):
+class CustomFields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.CustomFields):
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...
@@ -330,7 +287,7 @@ class CustomFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Cust
         list_field: _typing.Optional[_typing.Sequence[int]]=...,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> None: ...
 
     def __call__(
@@ -343,7 +300,7 @@ class CustomFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Cust
         list_field: _typing.Optional[_typing.Sequence[int]]=...,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], _fbthrift_SimpleStruct]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -352,11 +309,7 @@ class CustomFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Cust
     def _to_py_deprecated(self) -> "module.ttypes.CustomFields": ...  # type: ignore
 _fbthrift_CustomFields = CustomFields
 
-class _fbthrift_compatible_with_CustomTypedefFields:
-    pass
-
-
-class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomTypedefFields, _fbthrift_python_abstract_types.CustomTypedefFields):
+class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.CustomTypedefFields):
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...
@@ -376,7 +329,7 @@ class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_wi
         list_field: _typing.Optional[_typing.Sequence[int]]=...,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> None: ...
 
     def __call__(
@@ -389,7 +342,7 @@ class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_wi
         list_field: _typing.Optional[_typing.Sequence[int]]=...,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], _fbthrift_SimpleStruct]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -398,11 +351,7 @@ class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_wi
     def _to_py_deprecated(self) -> "module.ttypes.CustomTypedefFields": ...  # type: ignore
 _fbthrift_CustomTypedefFields = CustomTypedefFields
 
-class _fbthrift_compatible_with_AdaptedTypedefFields:
-    pass
-
-
-class AdaptedTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedTypedefFields, _fbthrift_python_abstract_types.AdaptedTypedefFields):
+class AdaptedTypedefFields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.AdaptedTypedefFields):
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...
@@ -422,7 +371,7 @@ class AdaptedTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_w
         list_field: _typing.Optional[_typing.Sequence[int]]=...,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> None: ...
 
     def __call__(
@@ -435,7 +384,7 @@ class AdaptedTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_w
         list_field: _typing.Optional[_typing.Sequence[int]]=...,
         set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
         map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], _fbthrift_SimpleStruct]]]: ...
     def _to_python(self) -> _typing.Self: ...

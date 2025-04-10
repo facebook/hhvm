@@ -11,11 +11,9 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_Metasyntactic:
-    pass
 
 
-class Metasyntactic(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Metasyntactic):
+class Metasyntactic(_fbthrift_python_types.Enum, int):
     FOO = 1
     BAR = 2
     BAZ = 3
@@ -44,11 +42,9 @@ class Metasyntactic(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_MyEnum1:
-    pass
 
 
-class MyEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum1):
+class MyEnum1(_fbthrift_python_types.Enum, int):
     ME1_0 = 0
     ME1_1 = 1
     ME1_2 = 2
@@ -79,11 +75,9 @@ class MyEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_MyEnum2:
-    pass
 
 
-class MyEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum2):
+class MyEnum2(_fbthrift_python_types.Enum, int):
     ME2_0 = 0
     ME2_1 = 1
     ME2_2 = 2
@@ -111,11 +105,9 @@ class MyEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_MyEnum3:
-    pass
 
 
-class MyEnum3(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum3):
+class MyEnum3(_fbthrift_python_types.Enum, int):
     ME3_0 = 0
     ME3_1 = 1
     ME3_N2 = -2
@@ -146,11 +138,9 @@ class MyEnum3(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_MyEnum4:
-    pass
 
 
-class MyEnum4(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum4):
+class MyEnum4(_fbthrift_python_types.Enum, int):
     ME4_A = 2147483645
     ME4_B = 2147483646
     ME4_C = 2147483647
@@ -179,11 +169,9 @@ class MyEnum4(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_MyBitmaskEnum1:
-    pass
 
 
-class MyBitmaskEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyBitmaskEnum1):
+class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
     ONE = 1
     TWO = 2
     FOUR = 4
@@ -211,11 +199,9 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_MyBitmaskEnum2:
-    pass
 
 
-class MyBitmaskEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyBitmaskEnum2):
+class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     ONE = 1
     TWO = 2
     FOUR = 4

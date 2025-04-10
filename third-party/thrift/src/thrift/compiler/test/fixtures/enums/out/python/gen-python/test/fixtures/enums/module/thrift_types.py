@@ -18,25 +18,18 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 from test.fixtures.enums.module.thrift_enums import (
     Metasyntactic,
     Metasyntactic as _fbthrift_Metasyntactic,
-    _fbthrift_compatible_with_Metasyntactic,
     MyEnum1,
     MyEnum1 as _fbthrift_MyEnum1,
-    _fbthrift_compatible_with_MyEnum1,
     MyEnum2,
     MyEnum2 as _fbthrift_MyEnum2,
-    _fbthrift_compatible_with_MyEnum2,
     MyEnum3,
     MyEnum3 as _fbthrift_MyEnum3,
-    _fbthrift_compatible_with_MyEnum3,
     MyEnum4,
     MyEnum4 as _fbthrift_MyEnum4,
-    _fbthrift_compatible_with_MyEnum4,
     MyBitmaskEnum1,
     MyBitmaskEnum1 as _fbthrift_MyBitmaskEnum1,
-    _fbthrift_compatible_with_MyBitmaskEnum1,
     MyBitmaskEnum2,
     MyBitmaskEnum2 as _fbthrift_MyBitmaskEnum2,
-    _fbthrift_compatible_with_MyBitmaskEnum2,
 )
 
 

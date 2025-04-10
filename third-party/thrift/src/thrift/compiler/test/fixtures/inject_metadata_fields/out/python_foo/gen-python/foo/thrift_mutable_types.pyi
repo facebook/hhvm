@@ -17,11 +17,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
-class _fbthrift_compatible_with_Fields:
-    pass
-
-
-class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Fields, _fbthrift_python_abstract_types.Fields):
+class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Fields):
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter

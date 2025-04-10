@@ -17,11 +17,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class _fbthrift_compatible_with_ComplexUnion:
-    pass
-
-
-class ComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ComplexUnion, _fbthrift_python_abstract_types.ComplexUnion):
+class ComplexUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.ComplexUnion):
     intValue: _typing.Final[int] = ...
     intListValue: _typing.Final[_typing.Sequence[int]] = ...
     stringListValue: _typing.Final[_typing.Sequence[str]] = ...
@@ -70,11 +66,7 @@ class ComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Compl
     def _to_py_deprecated(self) -> "module.ttypes.ComplexUnion": ...  # type: ignore
 _fbthrift_ComplexUnion = ComplexUnion
 
-class _fbthrift_compatible_with_ListUnion:
-    pass
-
-
-class ListUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ListUnion, _fbthrift_python_abstract_types.ListUnion):
+class ListUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.ListUnion):
     intListValue: _typing.Final[_typing.Sequence[int]] = ...
     stringListValue: _typing.Final[_typing.Sequence[str]] = ...
     def __init__(
@@ -107,11 +99,7 @@ class ListUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ListUnio
     def _to_py_deprecated(self) -> "module.ttypes.ListUnion": ...  # type: ignore
 _fbthrift_ListUnion = ListUnion
 
-class _fbthrift_compatible_with_DataUnion:
-    pass
-
-
-class DataUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_DataUnion, _fbthrift_python_abstract_types.DataUnion):
+class DataUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.DataUnion):
     binaryData: _typing.Final[bytes] = ...
     stringData: _typing.Final[str] = ...
     def __init__(
@@ -144,11 +132,7 @@ class DataUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_DataUnio
     def _to_py_deprecated(self) -> "module.ttypes.DataUnion": ...  # type: ignore
 _fbthrift_DataUnion = DataUnion
 
-class _fbthrift_compatible_with_Val:
-    pass
-
-
-class Val(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Val, _fbthrift_python_abstract_types.Val):
+class Val(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Val):
     strVal: _typing.Final[str] = ...
     intVal: _typing.Final[int] = ...
     typedefValue: _typing.Final[_typing.Mapping[int, str]] = ...
@@ -172,17 +156,13 @@ class Val(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Val, _fbthrif
     def _to_py_deprecated(self) -> "module.ttypes.Val": ...  # type: ignore
 _fbthrift_Val = Val
 
-class _fbthrift_compatible_with_ValUnion:
-    pass
-
-
-class ValUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ValUnion, _fbthrift_python_abstract_types.ValUnion):
+class ValUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.ValUnion):
     v1: _typing.Final[_fbthrift_Val] = ...
     v2: _typing.Final[_fbthrift_Val] = ...
     def __init__(
         self, *,
-        v1: _typing.Optional[_fbthrift_compatible_with_Val]=...,
-        v2: _typing.Optional[_fbthrift_compatible_with_Val]=...
+        v1: _typing.Optional[Val]=...,
+        v2: _typing.Optional[Val]=...
     ) -> None: ...
 
 
@@ -209,11 +189,7 @@ class ValUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ValUnion,
     def _to_py_deprecated(self) -> "module.ttypes.ValUnion": ...  # type: ignore
 _fbthrift_ValUnion = ValUnion
 
-class _fbthrift_compatible_with_VirtualComplexUnion:
-    pass
-
-
-class VirtualComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_VirtualComplexUnion, _fbthrift_python_abstract_types.VirtualComplexUnion):
+class VirtualComplexUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.VirtualComplexUnion):
     thingOne: _typing.Final[str] = ...
     thingTwo: _typing.Final[str] = ...
     def __init__(
@@ -246,11 +222,7 @@ class VirtualComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_wit
     def _to_py_deprecated(self) -> "module.ttypes.VirtualComplexUnion": ...  # type: ignore
 _fbthrift_VirtualComplexUnion = VirtualComplexUnion
 
-class _fbthrift_compatible_with_NonCopyableStruct:
-    pass
-
-
-class NonCopyableStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_NonCopyableStruct, _fbthrift_python_abstract_types.NonCopyableStruct):
+class NonCopyableStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.NonCopyableStruct):
     num: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -268,15 +240,11 @@ class NonCopyableStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableStruct": ...  # type: ignore
 _fbthrift_NonCopyableStruct = NonCopyableStruct
 
-class _fbthrift_compatible_with_NonCopyableUnion:
-    pass
-
-
-class NonCopyableUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_NonCopyableUnion, _fbthrift_python_abstract_types.NonCopyableUnion):
+class NonCopyableUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.NonCopyableUnion):
     s: _typing.Final[_fbthrift_NonCopyableStruct] = ...
     def __init__(
         self, *,
-        s: _typing.Optional[_fbthrift_compatible_with_NonCopyableStruct]=...
+        s: _typing.Optional[NonCopyableStruct]=...
     ) -> None: ...
 
 

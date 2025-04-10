@@ -24,11 +24,7 @@ import typeshed_two
 import typeshed_one
 
 
-class _fbthrift_compatible_with_MyStruct:
-    pass
-
-
-class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
+class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def a(self) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B]: ...
     @a.setter

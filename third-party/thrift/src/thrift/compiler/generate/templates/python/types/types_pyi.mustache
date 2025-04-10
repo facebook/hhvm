@@ -51,17 +51,12 @@ import {{module_path}}
 {{#program:structs}}
 
 
-class _fbthrift_compatible_with_{{> structs/unadapted_name}}:
-    pass
-
-
 class {{> structs/unadapted_name}}({{!
         }}{{#struct:union?}}{{> types/union_base }}{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!
         }}{{#struct:exception?}}{{> types/exception_base }}{{/struct:exception?}}{{!
         }}{{^struct:exception?}}{{> types/struct_base }}{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
-        }}, _fbthrift_compatible_with_{{> structs/unadapted_name}}{{!
         }}{{#program:enable_abstract_types?}}{{!
         }}, _fbthrift_python_abstract_types.{{> structs/unadapted_name}}{{!
         }}{{/program:enable_abstract_types?}}{{!

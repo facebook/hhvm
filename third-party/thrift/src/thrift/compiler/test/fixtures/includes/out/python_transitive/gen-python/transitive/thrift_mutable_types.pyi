@@ -17,11 +17,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
-class _fbthrift_compatible_with_Foo:
-    pass
-
-
-class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Foo, _fbthrift_python_abstract_types.Foo):
+class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Foo):
     @property
     def a(self) -> int: ...
     @a.setter

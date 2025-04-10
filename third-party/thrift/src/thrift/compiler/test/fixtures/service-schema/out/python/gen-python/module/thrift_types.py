@@ -21,7 +21,6 @@ import include.thrift_types as _fbthrift__include__thrift_types
 from module.thrift_enums import (
     Result,
     Result as _fbthrift_Result,
-    _fbthrift_compatible_with_Result,
 )
 
 

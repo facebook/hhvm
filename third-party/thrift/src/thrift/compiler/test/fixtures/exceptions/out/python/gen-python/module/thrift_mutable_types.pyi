@@ -17,11 +17,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
-class _fbthrift_compatible_with_Fiery:
-    pass
-
-
-class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Fiery, _fbthrift_python_abstract_types.Fiery):
+class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.Fiery):
     @property
     def message(self) -> str: ...
     @message.setter
@@ -39,11 +35,7 @@ class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
 _fbthrift_Fiery = Fiery
 
-class _fbthrift_compatible_with_Serious:
-    pass
-
-
-class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Serious, _fbthrift_python_abstract_types.Serious):
+class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.Serious):
     @property
     def not_sonnet(self) -> _typing.Optional[str]: ...
     @not_sonnet.setter
@@ -61,11 +53,7 @@ class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthri
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
 _fbthrift_Serious = Serious
 
-class _fbthrift_compatible_with_ComplexFieldNames:
-    pass
-
-
-class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ComplexFieldNames, _fbthrift_python_abstract_types.ComplexFieldNames):
+class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.ComplexFieldNames):
     @property
     def error_message(self) -> str: ...
     @error_message.setter
@@ -89,11 +77,7 @@ class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedErro
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
 _fbthrift_ComplexFieldNames = ComplexFieldNames
 
-class _fbthrift_compatible_with_CustomFieldNames:
-    pass
-
-
-class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomFieldNames, _fbthrift_python_abstract_types.CustomFieldNames):
+class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.CustomFieldNames):
     @property
     def error_message(self) -> str: ...
     @error_message.setter
@@ -117,11 +101,7 @@ class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
 _fbthrift_CustomFieldNames = CustomFieldNames
 
-class _fbthrift_compatible_with_ExceptionWithPrimitiveField:
-    pass
-
-
-class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField, _fbthrift_python_abstract_types.ExceptionWithPrimitiveField):
+class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.ExceptionWithPrimitiveField):
     @property
     def message(self) -> str: ...
     @message.setter
@@ -145,11 +125,7 @@ class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGen
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
 _fbthrift_ExceptionWithPrimitiveField = ExceptionWithPrimitiveField
 
-class _fbthrift_compatible_with_ExceptionWithStructuredAnnotation:
-    pass
-
-
-class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation, _fbthrift_python_abstract_types.ExceptionWithStructuredAnnotation):
+class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.ExceptionWithStructuredAnnotation):
     @property
     def message_field(self) -> str: ...
     @message_field.setter
@@ -173,11 +149,7 @@ class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.Muta
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
 _fbthrift_ExceptionWithStructuredAnnotation = ExceptionWithStructuredAnnotation
 
-class _fbthrift_compatible_with_Banal:
-    pass
-
-
-class Banal(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Banal, _fbthrift_python_abstract_types.Banal):
+class Banal(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.Banal):
     def __init__(
         self,
     ) -> None: ...

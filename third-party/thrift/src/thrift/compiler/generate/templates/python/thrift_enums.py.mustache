@@ -27,14 +27,11 @@ import typing as _std_python_typing
 {{!
     This is necessary because thrift_abstract_types.py imports this.
 }}
-class _fbthrift_compatible_with_{{enum:name}}:
-    pass
 
 
 class {{enum:name}}(_fbthrift_python_types.{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
         }}{{^enum:flags?}}Enum, int{{/enum:flags?}}{{!
-        }}, _fbthrift_compatible_with_{{enum:name}}{{!
         }}):
     {{#enum:values}}
     {{enum_value:py_name}} = {{enum_value:value}}

@@ -17,11 +17,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import foo.thrift_types as _fbthrift__foo__thrift_types
 
 
-class _fbthrift_compatible_with_Fields:
-    pass
-
-
-class Fields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Fields, _fbthrift_python_abstract_types.Fields):
+class Fields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Fields):
     injected_field: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -39,11 +35,7 @@ class Fields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Fields, _f
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
 _fbthrift_Fields = Fields
 
-class _fbthrift_compatible_with_FieldsInjectedToEmptyStruct:
-    pass
-
-
-class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
+class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
     injected_field: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -61,11 +53,7 @@ class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_compa
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
-class _fbthrift_compatible_with_FieldsInjectedToStruct:
-    pass
-
-
-class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToStruct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
+class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
     injected_field: _typing.Final[str] = ...
     string_field: _typing.Final[str] = ...
     def __init__(
@@ -86,11 +74,7 @@ class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_compatible
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
-class _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct:
-    pass
-
-
-class FieldsInjectedWithIncludedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
+class FieldsInjectedWithIncludedStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
     injected_unstructured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_structured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_field: _typing.Final[str] = ...

@@ -30,10 +30,8 @@ import test.fixtures.python_capi.thrift_dep.thrift_types as _fbthrift__test__fix
 from test.fixtures.python_capi.module.thrift_enums import (
     MyEnum,
     MyEnum as _fbthrift_MyEnum,
-    _fbthrift_compatible_with_MyEnum,
     AnnoyingEnum,
     AnnoyingEnum as _fbthrift_AnnoyingEnum,
-    _fbthrift_compatible_with_AnnoyingEnum,
 )
 
 

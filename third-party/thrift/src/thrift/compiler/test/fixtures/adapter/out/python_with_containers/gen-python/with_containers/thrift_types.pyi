@@ -16,11 +16,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import my
 
 
-class _fbthrift_compatible_with__fbthrift_unadapted_AnnotationWithContainers:
-    pass
-
-
-class _fbthrift_unadapted_AnnotationWithContainers(_fbthrift_python_types.Struct, _fbthrift_compatible_with__fbthrift_unadapted_AnnotationWithContainers, _fbthrift_python_abstract_types._fbthrift_unadapted_AnnotationWithContainers):
+class _fbthrift_unadapted_AnnotationWithContainers(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types._fbthrift_unadapted_AnnotationWithContainers):
     names: _typing.Final[_typing.Sequence[str]] = ...
     counts: _typing.Final[_typing.Mapping[str, int]] = ...
     def __init__(
@@ -42,11 +38,7 @@ class _fbthrift_unadapted_AnnotationWithContainers(_fbthrift_python_types.Struct
 AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithContainers]
 _fbthrift_AnnotationWithContainers = AnnotationWithContainers
 
-class _fbthrift_compatible_with__fbthrift_unadapted_MyStruct:
-    pass
-
-
-class _fbthrift_unadapted_MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with__fbthrift_unadapted_MyStruct, _fbthrift_python_abstract_types._fbthrift_unadapted_MyStruct):
+class _fbthrift_unadapted_MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types._fbthrift_unadapted_MyStruct):
     abc: _typing.Final[my.AdaptedType[int]] = ...
     def __init__(
         self, *,

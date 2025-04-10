@@ -19,11 +19,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import includes.thrift_mutable_types as _fbthrift__includes__thrift_mutable_types
 
 
-class _fbthrift_compatible_with_MyStruct:
-    pass
-
-
-class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
+class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def MyIncludedField(self) -> _fbthrift__includes__thrift_mutable_types.Included: ...
     @MyIncludedField.setter
@@ -41,15 +37,15 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
 
     def __init__(
         self, *,
-        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types._fbthrift_compatible_with_Included]=...,
-        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types._fbthrift_compatible_with_Included]=...,
+        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types.Included]=...,
+        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types.Included]=...,
         MyIncludedInt: _typing.Optional[int]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types._fbthrift_compatible_with_Included]=...,
-        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types._fbthrift_compatible_with_Included]=...,
+        MyIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types.Included]=...,
+        MyOtherIncludedField: _typing.Optional[_fbthrift__includes__thrift_mutable_types.Included]=...,
         MyIncludedInt: _typing.Optional[int]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift__includes__thrift_mutable_types.Included, _fbthrift__includes__thrift_mutable_types.Included, int]]]: ...

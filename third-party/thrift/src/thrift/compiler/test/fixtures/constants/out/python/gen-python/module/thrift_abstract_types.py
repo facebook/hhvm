@@ -23,13 +23,10 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 from module.thrift_enums import (
     EmptyEnum,
     EmptyEnum as _fbthrift_EmptyEnum,
-    _fbthrift_compatible_with_EmptyEnum,
     City,
     City as _fbthrift_City,
-    _fbthrift_compatible_with_City,
     Company,
     Company as _fbthrift_Company,
-    _fbthrift_compatible_with_Company,
 )
 
 class Internship(_abc.ABC):

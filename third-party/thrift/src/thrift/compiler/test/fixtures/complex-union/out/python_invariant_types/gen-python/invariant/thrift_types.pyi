@@ -17,11 +17,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class _fbthrift_compatible_with_StructForInvariantTypes:
-    pass
-
-
-class StructForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_compatible_with_StructForInvariantTypes, _fbthrift_python_abstract_types.StructForInvariantTypes):
+class StructForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.StructForInvariantTypes):
     num: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -39,11 +35,7 @@ class StructForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_compatibl
     def _to_py_deprecated(self) -> "invariant.ttypes.StructForInvariantTypes": ...  # type: ignore
 _fbthrift_StructForInvariantTypes = StructForInvariantTypes
 
-class _fbthrift_compatible_with_UnionForInvariantTypes:
-    pass
-
-
-class UnionForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_compatible_with_UnionForInvariantTypes, _fbthrift_python_abstract_types.UnionForInvariantTypes):
+class UnionForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.UnionForInvariantTypes):
     num32: _typing.Final[int] = ...
     num64: _typing.Final[int] = ...
     def __init__(
@@ -64,11 +56,7 @@ class UnionForInvariantTypes(_fbthrift_python_types.Struct, _fbthrift_compatible
     def _to_py_deprecated(self) -> "invariant.ttypes.UnionForInvariantTypes": ...  # type: ignore
 _fbthrift_UnionForInvariantTypes = UnionForInvariantTypes
 
-class _fbthrift_compatible_with_InvariantTypes:
-    pass
-
-
-class InvariantTypes(_fbthrift_python_types.Union, _fbthrift_compatible_with_InvariantTypes, _fbthrift_python_abstract_types.InvariantTypes):
+class InvariantTypes(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.InvariantTypes):
     struct_map: _typing.Final[_typing.Mapping[_fbthrift_StructForInvariantTypes, int]] = ...
     union_map: _typing.Final[_typing.Mapping[_fbthrift_UnionForInvariantTypes, int]] = ...
     def __init__(

@@ -28,19 +28,13 @@ import test.fixtures.python_capi.thrift_dep.thrift_mutable_types as _fbthrift__t
 
 from test.fixtures.python_capi.module.thrift_enums import (
     MyEnum as _fbthrift_MyEnum,
-    _fbthrift_compatible_with_MyEnum,
     AnnoyingEnum as _fbthrift_AnnoyingEnum,
-    _fbthrift_compatible_with_AnnoyingEnum,
 )
 MyEnum = _fbthrift_MyEnum
 AnnoyingEnum = _fbthrift_AnnoyingEnum
 
 
-class _fbthrift_compatible_with_MyStruct:
-    pass
-
-
-class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
+class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyStruct):
     @property
     def inty(self) -> int: ...
     @inty.setter
@@ -85,8 +79,8 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
         self, *,
         inty: _typing.Optional[int]=...,
         stringy: _typing.Optional[str]=...,
-        myItemy: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
-        myEnumy: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
+        myItemy: _typing.Optional[MyDataItem]=...,
+        myEnumy: _typing.Optional[MyEnum]=...,
         booly: _typing.Optional[bool]=...,
         floatListy: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[float] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         strMappy: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
@@ -97,8 +91,8 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
         self, *,
         inty: _typing.Optional[int]=...,
         stringy: _typing.Optional[str]=...,
-        myItemy: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
-        myEnumy: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
+        myItemy: _typing.Optional[MyDataItem]=...,
+        myEnumy: _typing.Optional[MyEnum]=...,
         booly: _typing.Optional[bool]=...,
         floatListy: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[float] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         strMappy: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
@@ -111,11 +105,7 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
-class _fbthrift_compatible_with_MyDataItem:
-    pass
-
-
-class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyDataItem, _fbthrift_python_abstract_types.MyDataItem):
+class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MyDataItem):
     @property
     def s(self) -> str: ...
     @s.setter
@@ -137,11 +127,7 @@ class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 _fbthrift_MyDataItem = MyDataItem
 
-class _fbthrift_compatible_with_TransitiveDoubler:
-    pass
-
-
-class TransitiveDoubler(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_TransitiveDoubler, _fbthrift_python_abstract_types.TransitiveDoubler):
+class TransitiveDoubler(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.TransitiveDoubler):
     def __init__(
         self,
     ) -> None: ...
@@ -156,11 +142,7 @@ class TransitiveDoubler(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.TransitiveDoubler": ...  # type: ignore
 _fbthrift_TransitiveDoubler = TransitiveDoubler
 
-class _fbthrift_compatible_with_DoubledPair:
-    pass
-
-
-class DoubledPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_DoubledPair, _fbthrift_python_abstract_types.DoubledPair):
+class DoubledPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.DoubledPair):
     @property
     def s(self) -> str: ...
     @s.setter
@@ -189,11 +171,7 @@ class DoubledPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compat
     def _to_py_deprecated(self) -> "module.ttypes.DoubledPair": ...  # type: ignore
 _fbthrift_DoubledPair = DoubledPair
 
-class _fbthrift_compatible_with_StringPair:
-    pass
-
-
-class StringPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_StringPair, _fbthrift_python_abstract_types.StringPair):
+class StringPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.StringPair):
     @property
     def normal(self) -> str: ...
     @normal.setter
@@ -222,11 +200,7 @@ class StringPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_py_deprecated(self) -> "module.ttypes.StringPair": ...  # type: ignore
 _fbthrift_StringPair = StringPair
 
-class _fbthrift_compatible_with_EmptyStruct:
-    pass
-
-
-class EmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_EmptyStruct, _fbthrift_python_abstract_types.EmptyStruct):
+class EmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.EmptyStruct):
     def __init__(
         self,
     ) -> None: ...
@@ -241,11 +215,7 @@ class EmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compat
     def _to_py_deprecated(self) -> "module.ttypes.EmptyStruct": ...  # type: ignore
 _fbthrift_EmptyStruct = EmptyStruct
 
-class _fbthrift_compatible_with_PrimitiveStruct:
-    pass
-
-
-class PrimitiveStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_PrimitiveStruct, _fbthrift_python_abstract_types.PrimitiveStruct):
+class PrimitiveStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.PrimitiveStruct):
     @property
     def booly(self) -> bool: ...
     @booly.setter
@@ -339,11 +309,11 @@ class PrimitiveStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
         bytey: _typing.Optional[bytes]=...,
         buffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         pointbuffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
-        patched_struct: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
-        empty_struct: _typing.Optional[_fbthrift_compatible_with_EmptyStruct]=...,
+        patched_struct: _typing.Optional[MyStruct]=...,
+        empty_struct: _typing.Optional[EmptyStruct]=...,
         fbstring: _typing.Optional[bytes]=...,
         managed_string_view: _typing.Optional[str]=...,
-        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_SomeError]=...
+        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.SomeError]=...
     ) -> None: ...
 
     def __call__(
@@ -359,11 +329,11 @@ class PrimitiveStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
         bytey: _typing.Optional[bytes]=...,
         buffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         pointbuffy: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
-        patched_struct: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
-        empty_struct: _typing.Optional[_fbthrift_compatible_with_EmptyStruct]=...,
+        patched_struct: _typing.Optional[MyStruct]=...,
+        empty_struct: _typing.Optional[EmptyStruct]=...,
         fbstring: _typing.Optional[bytes]=...,
         managed_string_view: _typing.Optional[str]=...,
-        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_SomeError]=...
+        some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.SomeError]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, str, bytes, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, _fbthrift_MyStruct, _fbthrift_EmptyStruct, bytes, str, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.SomeError]]]: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.PrimitiveStruct": ...  # type: ignore
@@ -372,11 +342,7 @@ class PrimitiveStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
     def _to_py_deprecated(self) -> "module.ttypes.PrimitiveStruct": ...  # type: ignore
 _fbthrift_PrimitiveStruct = PrimitiveStruct
 
-class _fbthrift_compatible_with_AdaptedFields:
-    pass
-
-
-class AdaptedFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_AdaptedFields, _fbthrift_python_abstract_types.AdaptedFields):
+class AdaptedFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AdaptedFields):
     @property
     def adapted_int(self) -> int: ...
     @adapted_int.setter
@@ -419,11 +385,7 @@ class AdaptedFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedFields": ...  # type: ignore
 _fbthrift_AdaptedFields = AdaptedFields
 
-class _fbthrift_compatible_with_ListStruct:
-    pass
-
-
-class ListStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ListStruct, _fbthrift_python_abstract_types.ListStruct):
+class ListStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ListStruct):
     @property
     def boolz(self) -> _fbthrift_python_mutable_containers.MutableList[bool]: ...
     @boolz.setter
@@ -501,11 +463,7 @@ class ListStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_py_deprecated(self) -> "module.ttypes.ListStruct": ...  # type: ignore
 _fbthrift_ListStruct = ListStruct
 
-class _fbthrift_compatible_with_SetStruct:
-    pass
-
-
-class SetStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SetStruct, _fbthrift_python_abstract_types.SetStruct):
+class SetStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.SetStruct):
     @property
     def enumz(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyEnum]: ...
     @enumz.setter
@@ -543,7 +501,7 @@ class SetStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
 
     def __init__(
         self, *,
-        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         intz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[bytes] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         encoded: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[bytes] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
@@ -554,7 +512,7 @@ class SetStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
 
     def __call__(
         self, *,
-        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         intz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[bytes] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         encoded: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[bytes] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
@@ -569,11 +527,7 @@ class SetStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
     def _to_py_deprecated(self) -> "module.ttypes.SetStruct": ...  # type: ignore
 _fbthrift_SetStruct = SetStruct
 
-class _fbthrift_compatible_with_MapStruct:
-    pass
-
-
-class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MapStruct, _fbthrift_python_abstract_types.MapStruct):
+class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MapStruct):
     @property
     def enumz(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str]: ...
     @enumz.setter
@@ -628,7 +582,7 @@ class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
         self, *,
         enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         intz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_compatible_with_PrimitiveStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, PrimitiveStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         encoded: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[str, float] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         flotz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, float] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         map_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[int, int]] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
@@ -642,7 +596,7 @@ class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
         self, *,
         enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         intz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_compatible_with_PrimitiveStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, PrimitiveStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         encoded: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[str, float] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         flotz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, float] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         map_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[int, int]] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
@@ -658,11 +612,7 @@ class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
     def _to_py_deprecated(self) -> "module.ttypes.MapStruct": ...  # type: ignore
 _fbthrift_MapStruct = MapStruct
 
-class _fbthrift_compatible_with_ComposeStruct:
-    pass
-
-
-class ComposeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ComposeStruct, _fbthrift_python_abstract_types.ComposeStruct):
+class ComposeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ComposeStruct):
     @property
     def enum_(self) -> _fbthrift_MyEnum: ...
     @enum_.setter
@@ -715,30 +665,30 @@ class ComposeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
 
     def __init__(
         self, *,
-        enum_: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
-        renamed_: _typing.Optional[_fbthrift_compatible_with_AnnoyingEnum]=...,
-        primitive: _typing.Optional[_fbthrift_compatible_with_PrimitiveStruct]=...,
-        aliased: _typing.Optional[_fbthrift_compatible_with_ListStruct]=...,
-        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_DepEnum]=...,
-        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_DepStruct]=...,
-        friends: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_DepStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedStruct]=...,
-        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedUnion]=...,
-        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedError]=...
+        enum_: _typing.Optional[MyEnum]=...,
+        renamed_: _typing.Optional[AnnoyingEnum]=...,
+        primitive: _typing.Optional[PrimitiveStruct]=...,
+        aliased: _typing.Optional[ListStruct]=...,
+        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepEnum]=...,
+        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct]=...,
+        friends: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedStruct]=...,
+        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedUnion]=...,
+        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedError]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        enum_: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
-        renamed_: _typing.Optional[_fbthrift_compatible_with_AnnoyingEnum]=...,
-        primitive: _typing.Optional[_fbthrift_compatible_with_PrimitiveStruct]=...,
-        aliased: _typing.Optional[_fbthrift_compatible_with_ListStruct]=...,
-        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_DepEnum]=...,
-        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_DepStruct]=...,
-        friends: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_DepStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedStruct]=...,
-        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedUnion]=...,
-        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedError]=...
+        enum_: _typing.Optional[MyEnum]=...,
+        renamed_: _typing.Optional[AnnoyingEnum]=...,
+        primitive: _typing.Optional[PrimitiveStruct]=...,
+        aliased: _typing.Optional[ListStruct]=...,
+        xenum: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepEnum]=...,
+        xstruct: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct]=...,
+        friends: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        serial_struct: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedStruct]=...,
+        serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedUnion]=...,
+        serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedError]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_MyEnum, _fbthrift_AnnoyingEnum, _fbthrift_PrimitiveStruct, _fbthrift_ListStruct, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepEnum, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct, _fbthrift_python_mutable_containers.MutableList[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct], _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedStruct, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedUnion, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedError]]]: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.ComposeStruct": ...  # type: ignore
@@ -747,11 +697,7 @@ class ComposeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_py_deprecated(self) -> "module.ttypes.ComposeStruct": ...  # type: ignore
 _fbthrift_ComposeStruct = ComposeStruct
 
-class _fbthrift_compatible_with_Onion:
-    pass
-
-
-class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_Onion, _fbthrift_python_abstract_types.Onion):
+class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.Onion):
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
     @myEnum.setter
@@ -789,8 +735,8 @@ class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_wi
 
     def __init__(
         self, *,
-        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
-        myStruct: _typing.Optional[_fbthrift_compatible_with_PrimitiveStruct]=...,
+        myEnum: _typing.Optional[MyEnum]=...,
+        myStruct: _typing.Optional[PrimitiveStruct]=...,
         myString: _typing.Optional[str]=...,
         intSet: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         doubleList: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[float] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
@@ -820,11 +766,7 @@ class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_wi
     def _to_py_deprecated(self) -> "module.ttypes.Onion": ...  # type: ignore
 _fbthrift_Onion = Onion
 
-class _fbthrift_compatible_with_SomeBinary:
-    pass
-
-
-class SomeBinary(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_SomeBinary, _fbthrift_python_abstract_types.SomeBinary):
+class SomeBinary(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.SomeBinary):
     @property
     def iobuf(self) -> _fbthrift_iobuf.IOBuf: ...
     @iobuf.setter

@@ -15,11 +15,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class _fbthrift_compatible_with_FooStreamEx:
-    pass
-
-
-class FooStreamEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooStreamEx, _fbthrift_python_abstract_types.FooStreamEx):
+class FooStreamEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.FooStreamEx):
     def __init__(
         self,
     ) -> None: ...
@@ -31,11 +27,7 @@ class FooStreamEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatib
     def _to_py_deprecated(self) -> "module.ttypes.FooStreamEx": ...  # type: ignore
 _fbthrift_FooStreamEx = FooStreamEx
 
-class _fbthrift_compatible_with_FooEx:
-    pass
-
-
-class FooEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooEx, _fbthrift_python_abstract_types.FooEx):
+class FooEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.FooEx):
     def __init__(
         self,
     ) -> None: ...
@@ -47,11 +39,7 @@ class FooEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_wit
     def _to_py_deprecated(self) -> "module.ttypes.FooEx": ...  # type: ignore
 _fbthrift_FooEx = FooEx
 
-class _fbthrift_compatible_with_FooEx2:
-    pass
-
-
-class FooEx2(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooEx2, _fbthrift_python_abstract_types.FooEx2):
+class FooEx2(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.FooEx2):
     def __init__(
         self,
     ) -> None: ...

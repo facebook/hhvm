@@ -20,13 +20,10 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 from module.thrift_enums import (
     EmptyEnum,
     EmptyEnum as _fbthrift_EmptyEnum,
-    _fbthrift_compatible_with_EmptyEnum,
     City,
     City as _fbthrift_City,
-    _fbthrift_compatible_with_City,
     Company,
     Company as _fbthrift_Company,
-    _fbthrift_compatible_with_Company,
 )
 
 

@@ -22,7 +22,6 @@ import include.thrift_abstract_types as _fbthrift__include__thrift_abstract_type
 from module.thrift_enums import (
     Result,
     Result as _fbthrift_Result,
-    _fbthrift_compatible_with_Result,
 )
 
 class CustomException(_fbthrift_python_abstract_types.AbstractGeneratedError):

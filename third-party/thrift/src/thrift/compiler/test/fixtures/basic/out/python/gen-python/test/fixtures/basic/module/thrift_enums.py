@@ -11,11 +11,9 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_MyEnum:
-    pass
 
 
-class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
+class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue1 = 0
     MyValue2 = 1
     @staticmethod
@@ -42,11 +40,9 @@ class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum)
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_HackEnum:
-    pass
 
 
-class HackEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_HackEnum):
+class HackEnum(_fbthrift_python_types.Enum, int):
     Value1 = 0
     Value2 = 1
     @staticmethod

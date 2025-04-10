@@ -18,16 +18,11 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 from module.thrift_enums import (
     MyEnum as _fbthrift_MyEnum,
-    _fbthrift_compatible_with_MyEnum,
 )
 MyEnum = _fbthrift_MyEnum
 
 
-class _fbthrift_compatible_with_MyStructFloatFieldThrowExp:
-    pass
-
-
-class MyStructFloatFieldThrowExp(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructFloatFieldThrowExp, _fbthrift_python_abstract_types.MyStructFloatFieldThrowExp):
+class MyStructFloatFieldThrowExp(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStructFloatFieldThrowExp):
     myLongField: _typing.Final[int] = ...
     MyByteField: _typing.Final[int] = ...
     myStringField: _typing.Final[str] = ...
@@ -54,11 +49,7 @@ class MyStructFloatFieldThrowExp(_fbthrift_python_types.Struct, _fbthrift_compat
     def _to_py_deprecated(self) -> "module.ttypes.MyStructFloatFieldThrowExp": ...  # type: ignore
 _fbthrift_MyStructFloatFieldThrowExp = MyStructFloatFieldThrowExp
 
-class _fbthrift_compatible_with_MyStructMapFloatThrowExp:
-    pass
-
-
-class MyStructMapFloatThrowExp(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructMapFloatThrowExp, _fbthrift_python_abstract_types.MyStructMapFloatThrowExp):
+class MyStructMapFloatThrowExp(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStructMapFloatThrowExp):
     myLongField: _typing.Final[int] = ...
     mapListOfFloats: _typing.Final[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]] = ...
     def __init__(
@@ -79,11 +70,7 @@ class MyStructMapFloatThrowExp(_fbthrift_python_types.Struct, _fbthrift_compatib
     def _to_py_deprecated(self) -> "module.ttypes.MyStructMapFloatThrowExp": ...  # type: ignore
 _fbthrift_MyStructMapFloatThrowExp = MyStructMapFloatThrowExp
 
-class _fbthrift_compatible_with_MyStruct:
-    pass
-
-
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStruct):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     MyDataField: _typing.Final[_fbthrift_MyDataItem] = ...
@@ -116,8 +103,8 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        MyDataField: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
-        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
+        MyDataField: _typing.Optional[MyDataItem]=...,
+        myEnum: _typing.Optional[MyEnum]=...,
         MyBoolField: _typing.Optional[bool]=...,
         MyByteField: _typing.Optional[int]=...,
         MyShortField: _typing.Optional[int]=...,
@@ -132,12 +119,12 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
         lByte: _typing.Optional[_typing.Sequence[int]]=...,
         mShortString: _typing.Optional[_typing.Mapping[int, str]]=...,
         mIntegerString: _typing.Optional[_typing.Mapping[int, str]]=...,
-        mStringMyStruct: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_MyStruct]]=...,
+        mStringMyStruct: _typing.Optional[_typing.Mapping[str, MyStruct]]=...,
         mStringBool: _typing.Optional[_typing.Mapping[str, bool]]=...,
         mIntegerInteger: _typing.Optional[_typing.Mapping[int, int]]=...,
         mIntegerBool: _typing.Optional[_typing.Mapping[int, bool]]=...,
         sShort: _typing.Optional[_typing.AbstractSet[int]]=...,
-        sMyStruct: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]=...,
+        sMyStruct: _typing.Optional[_typing.AbstractSet[MyStruct]]=...,
         sLong: _typing.Optional[_typing.AbstractSet[int]]=...,
         sString: _typing.Optional[_typing.AbstractSet[str]]=...,
         sByte: _typing.Optional[_typing.AbstractSet[int]]=...,
@@ -148,8 +135,8 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        MyDataField: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
-        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
+        MyDataField: _typing.Optional[MyDataItem]=...,
+        myEnum: _typing.Optional[MyEnum]=...,
         MyBoolField: _typing.Optional[bool]=...,
         MyByteField: _typing.Optional[int]=...,
         MyShortField: _typing.Optional[int]=...,
@@ -164,12 +151,12 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
         lByte: _typing.Optional[_typing.Sequence[int]]=...,
         mShortString: _typing.Optional[_typing.Mapping[int, str]]=...,
         mIntegerString: _typing.Optional[_typing.Mapping[int, str]]=...,
-        mStringMyStruct: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_MyStruct]]=...,
+        mStringMyStruct: _typing.Optional[_typing.Mapping[str, MyStruct]]=...,
         mStringBool: _typing.Optional[_typing.Mapping[str, bool]]=...,
         mIntegerInteger: _typing.Optional[_typing.Mapping[int, int]]=...,
         mIntegerBool: _typing.Optional[_typing.Mapping[int, bool]]=...,
         sShort: _typing.Optional[_typing.AbstractSet[int]]=...,
-        sMyStruct: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]=...,
+        sMyStruct: _typing.Optional[_typing.AbstractSet[MyStruct]]=...,
         sLong: _typing.Optional[_typing.AbstractSet[int]]=...,
         sString: _typing.Optional[_typing.AbstractSet[str]]=...,
         sByte: _typing.Optional[_typing.AbstractSet[int]]=...,
@@ -182,11 +169,7 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
-class _fbthrift_compatible_with_SimpleStruct:
-    pass
-
-
-class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SimpleStruct, _fbthrift_python_abstract_types.SimpleStruct):
+class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.SimpleStruct):
     age: _typing.Final[int] = ...
     name: _typing.Final[str] = ...
     def __init__(
@@ -207,11 +190,7 @@ class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Simp
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 _fbthrift_SimpleStruct = SimpleStruct
 
-class _fbthrift_compatible_with_defaultStruct:
-    pass
-
-
-class defaultStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_defaultStruct, _fbthrift_python_abstract_types.defaultStruct):
+class defaultStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.defaultStruct):
     myLongDFset: _typing.Final[int] = ...
     myLongDF: _typing.Final[int] = ...
     portDFset: _typing.Final[int] = ...
@@ -248,16 +227,16 @@ class defaultStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_def
         myDoubleDFZero: _typing.Optional[float]=...,
         myDouble: _typing.Optional[float]=...,
         field3: _typing.Optional[_typing.Mapping[int, str]]=...,
-        myList: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyEnum]]=...,
+        myList: _typing.Optional[_typing.Sequence[MyEnum]]=...,
         mySet: _typing.Optional[_typing.AbstractSet[str]]=...,
-        simpleStruct: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        listStructDFset: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]=...,
-        myUnion: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
-        listUnionDFset: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyUnion]]=...,
-        mapNestlistStructDfSet: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]]=...,
+        simpleStruct: _typing.Optional[SimpleStruct]=...,
+        listStructDFset: _typing.Optional[_typing.Sequence[SimpleStruct]]=...,
+        myUnion: _typing.Optional[MyUnion]=...,
+        listUnionDFset: _typing.Optional[_typing.Sequence[MyUnion]]=...,
+        mapNestlistStructDfSet: _typing.Optional[_typing.Mapping[int, _typing.Sequence[SimpleStruct]]]=...,
         mapJavaTypeDFset: _typing.Optional[_typing.Mapping[int, str]]=...,
         emptyMap: _typing.Optional[_typing.Mapping[int, int]]=...,
-        enumMapDFset: _typing.Optional[_typing.Mapping[str, _typing.Mapping[int, _fbthrift_compatible_with_MyEnum]]]=...
+        enumMapDFset: _typing.Optional[_typing.Mapping[str, _typing.Mapping[int, MyEnum]]]=...
     ) -> None: ...
 
     def __call__(
@@ -274,16 +253,16 @@ class defaultStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_def
         myDoubleDFZero: _typing.Optional[float]=...,
         myDouble: _typing.Optional[float]=...,
         field3: _typing.Optional[_typing.Mapping[int, str]]=...,
-        myList: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyEnum]]=...,
+        myList: _typing.Optional[_typing.Sequence[MyEnum]]=...,
         mySet: _typing.Optional[_typing.AbstractSet[str]]=...,
-        simpleStruct: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        listStructDFset: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]=...,
-        myUnion: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
-        listUnionDFset: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyUnion]]=...,
-        mapNestlistStructDfSet: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]]=...,
+        simpleStruct: _typing.Optional[SimpleStruct]=...,
+        listStructDFset: _typing.Optional[_typing.Sequence[SimpleStruct]]=...,
+        myUnion: _typing.Optional[MyUnion]=...,
+        listUnionDFset: _typing.Optional[_typing.Sequence[MyUnion]]=...,
+        mapNestlistStructDfSet: _typing.Optional[_typing.Mapping[int, _typing.Sequence[SimpleStruct]]]=...,
         mapJavaTypeDFset: _typing.Optional[_typing.Mapping[int, str]]=...,
         emptyMap: _typing.Optional[_typing.Mapping[int, int]]=...,
-        enumMapDFset: _typing.Optional[_typing.Mapping[str, _typing.Mapping[int, _fbthrift_compatible_with_MyEnum]]]=...
+        enumMapDFset: _typing.Optional[_typing.Mapping[str, _typing.Mapping[int, MyEnum]]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int, int, bytes, bytes, int, int, float, float, float, _typing.Mapping[int, str], _typing.Sequence[_fbthrift_MyEnum], _typing.AbstractSet[str], _fbthrift_SimpleStruct, _typing.Sequence[_fbthrift_SimpleStruct], _fbthrift_MyUnion, _typing.Sequence[_fbthrift_MyUnion], _typing.Mapping[int, _typing.Sequence[_fbthrift_SimpleStruct]], _typing.Mapping[int, str], _typing.Mapping[int, int], _typing.Mapping[str, _typing.Mapping[int, _fbthrift_MyEnum]]]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -292,11 +271,7 @@ class defaultStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_def
     def _to_py_deprecated(self) -> "module.ttypes.defaultStruct": ...  # type: ignore
 _fbthrift_defaultStruct = defaultStruct
 
-class _fbthrift_compatible_with_MyStructTypeDef:
-    pass
-
-
-class MyStructTypeDef(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructTypeDef, _fbthrift_python_abstract_types.MyStructTypeDef):
+class MyStructTypeDef(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyStructTypeDef):
     myLongField: _typing.Final[int] = ...
     myLongTypeDef: _typing.Final[int] = ...
     myStringField: _typing.Final[str] = ...
@@ -338,11 +313,7 @@ class MyStructTypeDef(_fbthrift_python_types.Struct, _fbthrift_compatible_with_M
     def _to_py_deprecated(self) -> "module.ttypes.MyStructTypeDef": ...  # type: ignore
 _fbthrift_MyStructTypeDef = MyStructTypeDef
 
-class _fbthrift_compatible_with_MyDataItem:
-    pass
-
-
-class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem, _fbthrift_python_abstract_types.MyDataItem):
+class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MyDataItem):
     def __init__(
         self,
     ) -> None: ...
@@ -357,11 +328,7 @@ class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyData
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 _fbthrift_MyDataItem = MyDataItem
 
-class _fbthrift_compatible_with_MyUnion:
-    pass
-
-
-class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, _fbthrift_python_abstract_types.MyUnion):
+class MyUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.MyUnion):
     myEnum: _typing.Final[_fbthrift_MyEnum] = ...
     myStruct: _typing.Final[_fbthrift_MyStruct] = ...
     myDataItem: _typing.Final[_fbthrift_MyDataItem] = ...
@@ -370,10 +337,10 @@ class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, _
     intValue: _typing.Final[int] = ...
     def __init__(
         self, *,
-        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
-        myStruct: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
-        myDataItem: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
-        complexNestedStruct: _typing.Optional[_fbthrift_compatible_with_ComplexNestedStruct]=...,
+        myEnum: _typing.Optional[MyEnum]=...,
+        myStruct: _typing.Optional[MyStruct]=...,
+        myDataItem: _typing.Optional[MyDataItem]=...,
+        complexNestedStruct: _typing.Optional[ComplexNestedStruct]=...,
         longValue: _typing.Optional[int]=...,
         intValue: _typing.Optional[int]=...
     ) -> None: ...
@@ -410,21 +377,17 @@ class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, _
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 _fbthrift_MyUnion = MyUnion
 
-class _fbthrift_compatible_with_MyUnionFloatFieldThrowExp:
-    pass
-
-
-class MyUnionFloatFieldThrowExp(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnionFloatFieldThrowExp, _fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp):
+class MyUnionFloatFieldThrowExp(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp):
     myEnum: _typing.Final[_fbthrift_MyEnum] = ...
     setFloat: _typing.Final[_typing.Sequence[_typing.Sequence[float]]] = ...
     myDataItem: _typing.Final[_fbthrift_MyDataItem] = ...
     complexNestedStruct: _typing.Final[_fbthrift_ComplexNestedStruct] = ...
     def __init__(
         self, *,
-        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
+        myEnum: _typing.Optional[MyEnum]=...,
         setFloat: _typing.Optional[_typing.Sequence[_typing.Sequence[float]]]=...,
-        myDataItem: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
-        complexNestedStruct: _typing.Optional[_fbthrift_compatible_with_ComplexNestedStruct]=...
+        myDataItem: _typing.Optional[MyDataItem]=...,
+        complexNestedStruct: _typing.Optional[ComplexNestedStruct]=...
     ) -> None: ...
 
 
@@ -455,11 +418,7 @@ class MyUnionFloatFieldThrowExp(_fbthrift_python_types.Union, _fbthrift_compatib
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionFloatFieldThrowExp": ...  # type: ignore
 _fbthrift_MyUnionFloatFieldThrowExp = MyUnionFloatFieldThrowExp
 
-class _fbthrift_compatible_with_ComplexNestedStruct:
-    pass
-
-
-class ComplexNestedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexNestedStruct, _fbthrift_python_abstract_types.ComplexNestedStruct):
+class ComplexNestedStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.ComplexNestedStruct):
     setOfSetOfInt: _typing.Final[_typing.AbstractSet[_typing.AbstractSet[int]]] = ...
     listofListOfListOfListOfEnum: _typing.Final[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_MyEnum]]]]] = ...
     listOfListOfMyStruct: _typing.Final[_typing.Sequence[_typing.Sequence[_fbthrift_MyStruct]]] = ...
@@ -481,44 +440,44 @@ class ComplexNestedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_wi
     def __init__(
         self, *,
         setOfSetOfInt: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[int]]]=...,
-        listofListOfListOfListOfEnum: _typing.Optional[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyEnum]]]]]=...,
-        listOfListOfMyStruct: _typing.Optional[_typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        listofListOfListOfListOfEnum: _typing.Optional[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[MyEnum]]]]]=...,
+        listOfListOfMyStruct: _typing.Optional[_typing.Sequence[_typing.Sequence[MyStruct]]]=...,
         setOfListOfListOfLong: _typing.Optional[_typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]]]=...,
         setOfSetOfsetOfLong: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]]]=...,
-        mapStructListOfListOfLong: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]]=...,
+        mapStructListOfListOfLong: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[MyStruct]]]]=...,
         mKeyStructValInt: _typing.Optional[_typing.Mapping[_fbthrift_MyStruct, int]]=...,
         listOfMapKeyIntValInt: _typing.Optional[_typing.Sequence[_typing.Mapping[int, int]]]=...,
-        listOfMapKeyStrValList: _typing.Optional[_typing.Sequence[_typing.Mapping[str, _typing.Sequence[_fbthrift_compatible_with_MyStruct]]]]=...,
+        listOfMapKeyStrValList: _typing.Optional[_typing.Sequence[_typing.Mapping[str, _typing.Sequence[MyStruct]]]]=...,
         mapKeySetValLong: _typing.Optional[_typing.Mapping[_typing.AbstractSet[int], int]]=...,
         mapKeyListValLong: _typing.Optional[_typing.Mapping[_typing.Sequence[str], int]]=...,
         mapKeyMapValMap: _typing.Optional[_typing.Mapping[_typing.Mapping[int, str], _typing.Mapping[int, str]]]=...,
         mapKeySetValMap: _typing.Optional[_typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]]]=...,
         NestedMaps: _typing.Optional[_typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]]]=...,
-        mapKeyIntValList: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        mapKeyIntValList: _typing.Optional[_typing.Mapping[int, _typing.Sequence[MyStruct]]]=...,
         mapKeyIntValSet: _typing.Optional[_typing.Mapping[int, _typing.AbstractSet[bool]]]=...,
-        mapKeySetValInt: _typing.Optional[_typing.Mapping[_typing.AbstractSet[bool], _fbthrift_compatible_with_MyEnum]]=...,
+        mapKeySetValInt: _typing.Optional[_typing.Mapping[_typing.AbstractSet[bool], MyEnum]]=...,
         mapKeyListValSet: _typing.Optional[_typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
         setOfSetOfInt: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[int]]]=...,
-        listofListOfListOfListOfEnum: _typing.Optional[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyEnum]]]]]=...,
-        listOfListOfMyStruct: _typing.Optional[_typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        listofListOfListOfListOfEnum: _typing.Optional[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[MyEnum]]]]]=...,
+        listOfListOfMyStruct: _typing.Optional[_typing.Sequence[_typing.Sequence[MyStruct]]]=...,
         setOfListOfListOfLong: _typing.Optional[_typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]]]=...,
         setOfSetOfsetOfLong: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]]]=...,
-        mapStructListOfListOfLong: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]]=...,
+        mapStructListOfListOfLong: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[MyStruct]]]]=...,
         mKeyStructValInt: _typing.Optional[_typing.Mapping[_fbthrift_MyStruct, int]]=...,
         listOfMapKeyIntValInt: _typing.Optional[_typing.Sequence[_typing.Mapping[int, int]]]=...,
-        listOfMapKeyStrValList: _typing.Optional[_typing.Sequence[_typing.Mapping[str, _typing.Sequence[_fbthrift_compatible_with_MyStruct]]]]=...,
+        listOfMapKeyStrValList: _typing.Optional[_typing.Sequence[_typing.Mapping[str, _typing.Sequence[MyStruct]]]]=...,
         mapKeySetValLong: _typing.Optional[_typing.Mapping[_typing.AbstractSet[int], int]]=...,
         mapKeyListValLong: _typing.Optional[_typing.Mapping[_typing.Sequence[str], int]]=...,
         mapKeyMapValMap: _typing.Optional[_typing.Mapping[_typing.Mapping[int, str], _typing.Mapping[int, str]]]=...,
         mapKeySetValMap: _typing.Optional[_typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]]]=...,
         NestedMaps: _typing.Optional[_typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]]]=...,
-        mapKeyIntValList: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        mapKeyIntValList: _typing.Optional[_typing.Mapping[int, _typing.Sequence[MyStruct]]]=...,
         mapKeyIntValSet: _typing.Optional[_typing.Mapping[int, _typing.AbstractSet[bool]]]=...,
-        mapKeySetValInt: _typing.Optional[_typing.Mapping[_typing.AbstractSet[bool], _fbthrift_compatible_with_MyEnum]]=...,
+        mapKeySetValInt: _typing.Optional[_typing.Mapping[_typing.AbstractSet[bool], MyEnum]]=...,
         mapKeyListValSet: _typing.Optional[_typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.AbstractSet[_typing.AbstractSet[int]], _typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_MyEnum]]]], _typing.Sequence[_typing.Sequence[_fbthrift_MyStruct]], _typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]], _typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]], _typing.Mapping[int, _typing.Sequence[_typing.Sequence[_fbthrift_MyStruct]]], _typing.Mapping[_fbthrift_MyStruct, int], _typing.Sequence[_typing.Mapping[int, int]], _typing.Sequence[_typing.Mapping[str, _typing.Sequence[_fbthrift_MyStruct]]], _typing.Mapping[_typing.AbstractSet[int], int], _typing.Mapping[_typing.Sequence[str], int], _typing.Mapping[_typing.Mapping[int, str], _typing.Mapping[int, str]], _typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]], _typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]], _typing.Mapping[int, _typing.Sequence[_fbthrift_MyStruct]], _typing.Mapping[int, _typing.AbstractSet[bool]], _typing.Mapping[_typing.AbstractSet[bool], _fbthrift_MyEnum], _typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]]]]: ...
@@ -528,11 +487,7 @@ class ComplexNestedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_wi
     def _to_py_deprecated(self) -> "module.ttypes.ComplexNestedStruct": ...  # type: ignore
 _fbthrift_ComplexNestedStruct = ComplexNestedStruct
 
-class _fbthrift_compatible_with_TypeRemapped:
-    pass
-
-
-class TypeRemapped(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TypeRemapped, _fbthrift_python_abstract_types.TypeRemapped):
+class TypeRemapped(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.TypeRemapped):
     lsMap: _typing.Final[_typing.Mapping[int, str]] = ...
     ioMap: _typing.Final[_typing.Mapping[int, _typing.Mapping[int, int]]] = ...
     BigInteger: _typing.Final[int] = ...
@@ -559,11 +514,7 @@ class TypeRemapped(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Type
     def _to_py_deprecated(self) -> "module.ttypes.TypeRemapped": ...  # type: ignore
 _fbthrift_TypeRemapped = TypeRemapped
 
-class _fbthrift_compatible_with_emptyXcep:
-    pass
-
-
-class emptyXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_emptyXcep, _fbthrift_python_abstract_types.emptyXcep):
+class emptyXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.emptyXcep):
     def __init__(
         self,
     ) -> None: ...
@@ -575,11 +526,7 @@ class emptyXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible
     def _to_py_deprecated(self) -> "module.ttypes.emptyXcep": ...  # type: ignore
 _fbthrift_emptyXcep = emptyXcep
 
-class _fbthrift_compatible_with_reqXcep:
-    pass
-
-
-class reqXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_reqXcep, _fbthrift_python_abstract_types.reqXcep):
+class reqXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.reqXcep):
     message: _typing.Final[str] = ...
     errorCode: _typing.Final[int] = ...
     def __init__(
@@ -595,11 +542,7 @@ class reqXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_w
     def _to_py_deprecated(self) -> "module.ttypes.reqXcep": ...  # type: ignore
 _fbthrift_reqXcep = reqXcep
 
-class _fbthrift_compatible_with_optXcep:
-    pass
-
-
-class optXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_optXcep, _fbthrift_python_abstract_types.optXcep):
+class optXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.optXcep):
     message: _typing.Final[_typing.Optional[str]] = ...
     errorCode: _typing.Final[_typing.Optional[int]] = ...
     def __init__(
@@ -615,11 +558,7 @@ class optXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_w
     def _to_py_deprecated(self) -> "module.ttypes.optXcep": ...  # type: ignore
 _fbthrift_optXcep = optXcep
 
-class _fbthrift_compatible_with_complexException:
-    pass
-
-
-class complexException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_complexException, _fbthrift_python_abstract_types.complexException):
+class complexException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.complexException):
     message: _typing.Final[str] = ...
     listStrings: _typing.Final[_typing.Sequence[str]] = ...
     errorEnum: _typing.Final[_fbthrift_MyEnum] = ...
@@ -630,9 +569,9 @@ class complexException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_com
         self, *,
         message: _typing.Optional[str]=...,
         listStrings: _typing.Optional[_typing.Sequence[str]]=...,
-        errorEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
-        unionError: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
-        structError: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
+        errorEnum: _typing.Optional[MyEnum]=...,
+        unionError: _typing.Optional[MyUnion]=...,
+        structError: _typing.Optional[MyStruct]=...,
         lsMap: _typing.Optional[_typing.Mapping[int, str]]=...
     ) -> None: ...
 
@@ -643,11 +582,7 @@ class complexException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_com
     def _to_py_deprecated(self) -> "module.ttypes.complexException": ...  # type: ignore
 _fbthrift_complexException = complexException
 
-class _fbthrift_compatible_with_Containers:
-    pass
-
-
-class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Containers, _fbthrift_python_abstract_types.Containers):
+class Containers(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Containers):
     struct_list: _typing.Final[_typing.Sequence[_fbthrift_MyStruct]] = ...
     union_list: _typing.Final[_typing.Sequence[_fbthrift_MyUnion]] = ...
     enum_list: _typing.Final[_typing.Sequence[_fbthrift_MyEnum]] = ...
@@ -687,18 +622,18 @@ class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Contai
     map_i32_map_list_struct_i32: _typing.Final[_typing.Mapping[int, _typing.Sequence[_typing.Mapping[_fbthrift_MyStruct, int]]]] = ...
     def __init__(
         self, *,
-        struct_list: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]=...,
-        union_list: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyUnion]]=...,
-        enum_list: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyEnum]]=...,
-        struct_set: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]=...,
-        union_set: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyUnion]]=...,
-        enum_set: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyEnum]]=...,
+        struct_list: _typing.Optional[_typing.Sequence[MyStruct]]=...,
+        union_list: _typing.Optional[_typing.Sequence[MyUnion]]=...,
+        enum_list: _typing.Optional[_typing.Sequence[MyEnum]]=...,
+        struct_set: _typing.Optional[_typing.AbstractSet[MyStruct]]=...,
+        union_set: _typing.Optional[_typing.AbstractSet[MyUnion]]=...,
+        enum_set: _typing.Optional[_typing.AbstractSet[MyEnum]]=...,
         struct_map: _typing.Optional[_typing.Mapping[_fbthrift_MyStruct, int]]=...,
         union_map: _typing.Optional[_typing.Mapping[_fbthrift_MyUnion, int]]=...,
         enum_map: _typing.Optional[_typing.Mapping[_fbthrift_MyEnum, int]]=...,
-        struct_map_2: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]=...,
-        union_map_2: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_MyUnion]]=...,
-        enum_map_2: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_MyEnum]]=...,
+        struct_map_2: _typing.Optional[_typing.Mapping[int, MyStruct]]=...,
+        union_map_2: _typing.Optional[_typing.Mapping[int, MyUnion]]=...,
+        enum_map_2: _typing.Optional[_typing.Mapping[int, MyEnum]]=...,
         list_map: _typing.Optional[_typing.Mapping[_typing.Sequence[int], int]]=...,
         list_map_2: _typing.Optional[_typing.Mapping[int, _typing.Sequence[int]]]=...,
         set_map: _typing.Optional[_typing.Mapping[_typing.AbstractSet[int], int]]=...,
@@ -706,40 +641,40 @@ class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Contai
         map_map: _typing.Optional[_typing.Mapping[_typing.Mapping[int, int], int]]=...,
         map_map_2: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, int]]]=...,
         list_list_i32: _typing.Optional[_typing.Sequence[_typing.Sequence[int]]]=...,
-        list_list_struct: _typing.Optional[_typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        list_list_struct: _typing.Optional[_typing.Sequence[_typing.Sequence[MyStruct]]]=...,
         list_set_i32: _typing.Optional[_typing.Sequence[_typing.AbstractSet[int]]]=...,
-        list_set_struct: _typing.Optional[_typing.Sequence[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]]=...,
+        list_set_struct: _typing.Optional[_typing.Sequence[_typing.AbstractSet[MyStruct]]]=...,
         list_map_i32_i32: _typing.Optional[_typing.Sequence[_typing.Mapping[int, int]]]=...,
-        list_map_i32_struct: _typing.Optional[_typing.Sequence[_typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]]=...,
+        list_map_i32_struct: _typing.Optional[_typing.Sequence[_typing.Mapping[int, MyStruct]]]=...,
         list_map_struct_i32: _typing.Optional[_typing.Sequence[_typing.Mapping[_fbthrift_MyStruct, int]]]=...,
         set_list_i32: _typing.Optional[_typing.AbstractSet[_typing.Sequence[int]]]=...,
-        set_list_struct: _typing.Optional[_typing.AbstractSet[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        set_list_struct: _typing.Optional[_typing.AbstractSet[_typing.Sequence[MyStruct]]]=...,
         set_set_i32: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[int]]]=...,
-        set_set_struct: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]]=...,
+        set_set_struct: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[MyStruct]]]=...,
         set_map_i32_i32: _typing.Optional[_typing.AbstractSet[_typing.Mapping[int, int]]]=...,
-        set_map_i32_struct: _typing.Optional[_typing.AbstractSet[_typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]]=...,
+        set_map_i32_struct: _typing.Optional[_typing.AbstractSet[_typing.Mapping[int, MyStruct]]]=...,
         set_map_struct_i32: _typing.Optional[_typing.AbstractSet[_typing.Mapping[_fbthrift_MyStruct, int]]]=...,
         map_i32_map_i32_i32: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, int]]]=...,
         map_i32_map_struct_i32: _typing.Optional[_typing.Mapping[int, _typing.Mapping[_fbthrift_MyStruct, int]]]=...,
-        map_i32_map_i32_struct: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]]=...,
+        map_i32_map_i32_struct: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, MyStruct]]]=...,
         map_i32_map_list_i32_i32: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Mapping[int, int]]]]=...,
         map_i32_map_list_struct_i32: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Mapping[_fbthrift_MyStruct, int]]]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        struct_list: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]=...,
-        union_list: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyUnion]]=...,
-        enum_list: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_MyEnum]]=...,
-        struct_set: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]=...,
-        union_set: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyUnion]]=...,
-        enum_set: _typing.Optional[_typing.AbstractSet[_fbthrift_compatible_with_MyEnum]]=...,
+        struct_list: _typing.Optional[_typing.Sequence[MyStruct]]=...,
+        union_list: _typing.Optional[_typing.Sequence[MyUnion]]=...,
+        enum_list: _typing.Optional[_typing.Sequence[MyEnum]]=...,
+        struct_set: _typing.Optional[_typing.AbstractSet[MyStruct]]=...,
+        union_set: _typing.Optional[_typing.AbstractSet[MyUnion]]=...,
+        enum_set: _typing.Optional[_typing.AbstractSet[MyEnum]]=...,
         struct_map: _typing.Optional[_typing.Mapping[_fbthrift_MyStruct, int]]=...,
         union_map: _typing.Optional[_typing.Mapping[_fbthrift_MyUnion, int]]=...,
         enum_map: _typing.Optional[_typing.Mapping[_fbthrift_MyEnum, int]]=...,
-        struct_map_2: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]=...,
-        union_map_2: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_MyUnion]]=...,
-        enum_map_2: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_MyEnum]]=...,
+        struct_map_2: _typing.Optional[_typing.Mapping[int, MyStruct]]=...,
+        union_map_2: _typing.Optional[_typing.Mapping[int, MyUnion]]=...,
+        enum_map_2: _typing.Optional[_typing.Mapping[int, MyEnum]]=...,
         list_map: _typing.Optional[_typing.Mapping[_typing.Sequence[int], int]]=...,
         list_map_2: _typing.Optional[_typing.Mapping[int, _typing.Sequence[int]]]=...,
         set_map: _typing.Optional[_typing.Mapping[_typing.AbstractSet[int], int]]=...,
@@ -747,22 +682,22 @@ class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Contai
         map_map: _typing.Optional[_typing.Mapping[_typing.Mapping[int, int], int]]=...,
         map_map_2: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, int]]]=...,
         list_list_i32: _typing.Optional[_typing.Sequence[_typing.Sequence[int]]]=...,
-        list_list_struct: _typing.Optional[_typing.Sequence[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        list_list_struct: _typing.Optional[_typing.Sequence[_typing.Sequence[MyStruct]]]=...,
         list_set_i32: _typing.Optional[_typing.Sequence[_typing.AbstractSet[int]]]=...,
-        list_set_struct: _typing.Optional[_typing.Sequence[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]]=...,
+        list_set_struct: _typing.Optional[_typing.Sequence[_typing.AbstractSet[MyStruct]]]=...,
         list_map_i32_i32: _typing.Optional[_typing.Sequence[_typing.Mapping[int, int]]]=...,
-        list_map_i32_struct: _typing.Optional[_typing.Sequence[_typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]]=...,
+        list_map_i32_struct: _typing.Optional[_typing.Sequence[_typing.Mapping[int, MyStruct]]]=...,
         list_map_struct_i32: _typing.Optional[_typing.Sequence[_typing.Mapping[_fbthrift_MyStruct, int]]]=...,
         set_list_i32: _typing.Optional[_typing.AbstractSet[_typing.Sequence[int]]]=...,
-        set_list_struct: _typing.Optional[_typing.AbstractSet[_typing.Sequence[_fbthrift_compatible_with_MyStruct]]]=...,
+        set_list_struct: _typing.Optional[_typing.AbstractSet[_typing.Sequence[MyStruct]]]=...,
         set_set_i32: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[int]]]=...,
-        set_set_struct: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[_fbthrift_compatible_with_MyStruct]]]=...,
+        set_set_struct: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[MyStruct]]]=...,
         set_map_i32_i32: _typing.Optional[_typing.AbstractSet[_typing.Mapping[int, int]]]=...,
-        set_map_i32_struct: _typing.Optional[_typing.AbstractSet[_typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]]=...,
+        set_map_i32_struct: _typing.Optional[_typing.AbstractSet[_typing.Mapping[int, MyStruct]]]=...,
         set_map_struct_i32: _typing.Optional[_typing.AbstractSet[_typing.Mapping[_fbthrift_MyStruct, int]]]=...,
         map_i32_map_i32_i32: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, int]]]=...,
         map_i32_map_struct_i32: _typing.Optional[_typing.Mapping[int, _typing.Mapping[_fbthrift_MyStruct, int]]]=...,
-        map_i32_map_i32_struct: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, _fbthrift_compatible_with_MyStruct]]]=...,
+        map_i32_map_i32_struct: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, MyStruct]]]=...,
         map_i32_map_list_i32_i32: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Mapping[int, int]]]]=...,
         map_i32_map_list_struct_i32: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Mapping[_fbthrift_MyStruct, int]]]]=...
     ) -> _typing.Self: ...

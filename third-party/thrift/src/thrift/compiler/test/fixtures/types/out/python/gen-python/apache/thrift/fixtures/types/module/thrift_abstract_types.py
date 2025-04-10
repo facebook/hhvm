@@ -22,13 +22,10 @@ import apache.thrift.fixtures.types.included.thrift_abstract_types as _fbthrift_
 from apache.thrift.fixtures.types.module.thrift_enums import (
     has_bitwise_ops,
     has_bitwise_ops as _fbthrift_has_bitwise_ops,
-    _fbthrift_compatible_with_has_bitwise_ops,
     is_unscoped,
     is_unscoped as _fbthrift_is_unscoped,
-    _fbthrift_compatible_with_is_unscoped,
     MyForwardRefEnum,
     MyForwardRefEnum as _fbthrift_MyForwardRefEnum,
-    _fbthrift_compatible_with_MyForwardRefEnum,
 )
 
 class empty_struct(_abc.ABC):

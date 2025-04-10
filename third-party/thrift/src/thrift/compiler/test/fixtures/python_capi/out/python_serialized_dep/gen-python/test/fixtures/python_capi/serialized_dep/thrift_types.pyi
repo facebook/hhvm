@@ -17,11 +17,7 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class _fbthrift_compatible_with_SerializedStruct:
-    pass
-
-
-class SerializedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SerializedStruct, _fbthrift_python_abstract_types.SerializedStruct):
+class SerializedStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.SerializedStruct):
     s: _typing.Final[str] = ...
     i: _typing.Final[int] = ...
     os: _typing.Final[_typing.Optional[str]] = ...
@@ -48,11 +44,7 @@ class SerializedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedStruct": ...  # type: ignore
 _fbthrift_SerializedStruct = SerializedStruct
 
-class _fbthrift_compatible_with_SerializedUnion:
-    pass
-
-
-class SerializedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_SerializedUnion, _fbthrift_python_abstract_types.SerializedUnion):
+class SerializedUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.SerializedUnion):
     s: _typing.Final[str] = ...
     i: _typing.Final[int] = ...
     def __init__(
@@ -85,11 +77,7 @@ class SerializedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Se
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedUnion": ...  # type: ignore
 _fbthrift_SerializedUnion = SerializedUnion
 
-class _fbthrift_compatible_with_SerializedError:
-    pass
-
-
-class SerializedError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_SerializedError, _fbthrift_python_abstract_types.SerializedError):
+class SerializedError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.SerializedError):
     msg: _typing.Final[str] = ...
     os: _typing.Final[_typing.Optional[str]] = ...
     rs: _typing.Final[str] = ...
@@ -107,11 +95,7 @@ class SerializedError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedError": ...  # type: ignore
 _fbthrift_SerializedError = SerializedError
 
-class _fbthrift_compatible_with_MarshalStruct:
-    pass
-
-
-class MarshalStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MarshalStruct, _fbthrift_python_abstract_types.MarshalStruct):
+class MarshalStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.MarshalStruct):
     s: _typing.Final[str] = ...
     i: _typing.Final[int] = ...
     os: _typing.Final[_typing.Optional[str]] = ...
@@ -138,11 +122,7 @@ class MarshalStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Mar
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalStruct": ...  # type: ignore
 _fbthrift_MarshalStruct = MarshalStruct
 
-class _fbthrift_compatible_with_MarshalUnion:
-    pass
-
-
-class MarshalUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MarshalUnion, _fbthrift_python_abstract_types.MarshalUnion):
+class MarshalUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_types.MarshalUnion):
     s: _typing.Final[str] = ...
     i: _typing.Final[int] = ...
     def __init__(
@@ -175,11 +155,7 @@ class MarshalUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Marsh
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalUnion": ...  # type: ignore
 _fbthrift_MarshalUnion = MarshalUnion
 
-class _fbthrift_compatible_with_MarshalError:
-    pass
-
-
-class MarshalError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MarshalError, _fbthrift_python_abstract_types.MarshalError):
+class MarshalError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.MarshalError):
     msg: _typing.Final[str] = ...
     os: _typing.Final[_typing.Optional[str]] = ...
     rs: _typing.Final[str] = ...

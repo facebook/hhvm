@@ -19,11 +19,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import foo.thrift_mutable_types as _fbthrift__foo__thrift_mutable_types
 
 
-class _fbthrift_compatible_with_Fields:
-    pass
-
-
-class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Fields, _fbthrift_python_abstract_types.Fields):
+class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Fields):
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
@@ -45,11 +41,7 @@ class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
 _fbthrift_Fields = Fields
 
-class _fbthrift_compatible_with_FieldsInjectedToEmptyStruct:
-    pass
-
-
-class FieldsInjectedToEmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
+class FieldsInjectedToEmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
@@ -71,11 +63,7 @@ class FieldsInjectedToEmptyStruct(_fbthrift_python_mutable_types.MutableStruct, 
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
-class _fbthrift_compatible_with_FieldsInjectedToStruct:
-    pass
-
-
-class FieldsInjectedToStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToStruct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
+class FieldsInjectedToStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
@@ -104,11 +92,7 @@ class FieldsInjectedToStruct(_fbthrift_python_mutable_types.MutableStruct, _fbth
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
-class _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct:
-    pass
-
-
-class FieldsInjectedWithIncludedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
+class FieldsInjectedWithIncludedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
     @property
     def injected_unstructured_annotation_field(self) -> _typing.Optional[str]: ...
     @injected_unstructured_annotation_field.setter

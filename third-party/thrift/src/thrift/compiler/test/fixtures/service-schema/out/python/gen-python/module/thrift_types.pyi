@@ -18,22 +18,17 @@ import include.thrift_types as _fbthrift__include__thrift_types
 
 from module.thrift_enums import (
     Result as _fbthrift_Result,
-    _fbthrift_compatible_with_Result,
 )
 Result = _fbthrift_Result
 
 
-class _fbthrift_compatible_with_CustomException:
-    pass
-
-
-class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_CustomException, _fbthrift_python_abstract_types.CustomException):
+class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.CustomException):
     name: _typing.Final[str] = ...
     result: _typing.Final[_fbthrift_Result] = ...
     def __init__(
         self, *,
         name: _typing.Optional[str]=...,
-        result: _typing.Optional[_fbthrift_compatible_with_Result]=...
+        result: _typing.Optional[Result]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_Result]]]: ...

@@ -19,11 +19,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types
 
 
-class _fbthrift_compatible_with_CustomException:
-    pass
-
-
-class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomException, _fbthrift_python_abstract_types.CustomException):
+class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.CustomException):
     @property
     def message(self) -> str: ...
     @message.setter
@@ -41,11 +37,7 @@ class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.CustomException": ...  # type: ignore
 _fbthrift_CustomException = CustomException
 
-class _fbthrift_compatible_with_ShouldBeBoxed:
-    pass
-
-
-class ShouldBeBoxed(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ShouldBeBoxed, _fbthrift_python_abstract_types.ShouldBeBoxed):
+class ShouldBeBoxed(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ShouldBeBoxed):
     @property
     def sessionId(self) -> str: ...
     @sessionId.setter

@@ -19,11 +19,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
-class _fbthrift_compatible_with_StructForInvariantTypes:
-    pass
-
-
-class StructForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_StructForInvariantTypes, _fbthrift_python_abstract_types.StructForInvariantTypes):
+class StructForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.StructForInvariantTypes):
     @property
     def num(self) -> int: ...
     @num.setter
@@ -45,11 +41,7 @@ class StructForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbt
     def _to_py_deprecated(self) -> "invariant.ttypes.StructForInvariantTypes": ...  # type: ignore
 _fbthrift_StructForInvariantTypes = StructForInvariantTypes
 
-class _fbthrift_compatible_with_UnionForInvariantTypes:
-    pass
-
-
-class UnionForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_UnionForInvariantTypes, _fbthrift_python_abstract_types.UnionForInvariantTypes):
+class UnionForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.UnionForInvariantTypes):
     @property
     def num32(self) -> int: ...
     @num32.setter
@@ -78,11 +70,7 @@ class UnionForInvariantTypes(_fbthrift_python_mutable_types.MutableStruct, _fbth
     def _to_py_deprecated(self) -> "invariant.ttypes.UnionForInvariantTypes": ...  # type: ignore
 _fbthrift_UnionForInvariantTypes = UnionForInvariantTypes
 
-class _fbthrift_compatible_with_InvariantTypes:
-    pass
-
-
-class InvariantTypes(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_InvariantTypes, _fbthrift_python_abstract_types.InvariantTypes):
+class InvariantTypes(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.InvariantTypes):
     @property
     def struct_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_StructForInvariantTypes, int]: ...
     @struct_map.setter

@@ -22,22 +22,15 @@ import fbcode.thrift.python.mutable_containers as _fbthrift_python_mutable_conta
 
 from module.thrift_enums import (
     AnEnum as _fbthrift_AnEnum,
-    _fbthrift_compatible_with_AnEnum,
     AnEnumRenamed as _fbthrift_AnEnumRenamed,
-    _fbthrift_compatible_with_AnEnumRenamed,
     Flags as _fbthrift_Flags,
-    _fbthrift_compatible_with_Flags,
 )
 AnEnum = _fbthrift_AnEnum
 AnEnumRenamed = _fbthrift_AnEnumRenamed
 Flags = _fbthrift_Flags
 
 
-class _fbthrift_compatible_with_SimpleException:
-    pass
-
-
-class SimpleException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_SimpleException, _fbthrift_python_abstract_types.SimpleException):
+class SimpleException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.SimpleException):
     @property
     def err_code(self) -> int: ...
     @err_code.setter
@@ -55,11 +48,7 @@ class SimpleException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...  # type: ignore
 _fbthrift_SimpleException = SimpleException
 
-class _fbthrift_compatible_with_OptionalRefStruct:
-    pass
-
-
-class OptionalRefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_OptionalRefStruct, _fbthrift_python_abstract_types.OptionalRefStruct):
+class OptionalRefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.OptionalRefStruct):
     @property
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]: ...
     @optional_blob.setter
@@ -81,11 +70,7 @@ class OptionalRefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...  # type: ignore
 _fbthrift_OptionalRefStruct = OptionalRefStruct
 
-class _fbthrift_compatible_with_SimpleStruct:
-    pass
-
-
-class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SimpleStruct, _fbthrift_python_abstract_types.SimpleStruct):
+class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.SimpleStruct):
     @property
     def is_on(self) -> bool: ...
     @is_on.setter
@@ -159,7 +144,7 @@ class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
         something: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         opt_default_int: _typing.Optional[int]=...,
         opt_default_str: _typing.Optional[str]=...,
-        opt_default_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...
+        opt_default_enum: _typing.Optional[AnEnum]=...
     ) -> None: ...
 
     def __call__(
@@ -175,7 +160,7 @@ class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
         something: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         opt_default_int: _typing.Optional[int]=...,
         opt_default_str: _typing.Optional[str]=...,
-        opt_default_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...
+        opt_default_enum: _typing.Optional[AnEnum]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, int, _fbthrift_python_mutable_containers.MutableMap[int, int], int, str, _fbthrift_AnEnum]]]: ...
     def _to_python(self) -> "module.thrift_types.SimpleStruct": ...  # type: ignore
@@ -184,11 +169,7 @@ class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 _fbthrift_SimpleStruct = SimpleStruct
 
-class _fbthrift_compatible_with_HiddenTypeFieldsStruct:
-    pass
-
-
-class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_HiddenTypeFieldsStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
+class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
     @property
     def field1(self) -> _fbthrift_SimpleStruct: ...
     @field1.setter
@@ -206,16 +187,16 @@ class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbth
 
     def __init__(
         self, *,
-        field1: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        field2: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        field3: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
+        field1: _typing.Optional[SimpleStruct]=...,
+        field2: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        field3: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        field1: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        field2: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        field3: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
+        field1: _typing.Optional[SimpleStruct]=...,
+        field2: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        field3: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_SimpleStruct, _fbthrift_python_mutable_containers.MutableList[_fbthrift_SimpleStruct], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_SimpleStruct]]]]: ...
     def _to_python(self) -> "module.thrift_types.HiddenTypeFieldsStruct": ...  # type: ignore
@@ -224,11 +205,7 @@ class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbth
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...  # type: ignore
 _fbthrift_HiddenTypeFieldsStruct = HiddenTypeFieldsStruct
 
-class _fbthrift_compatible_with_AdaptedUnion:
-    pass
-
-
-class AdaptedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_AdaptedUnion, _fbthrift_python_abstract_types.AdaptedUnion):
+class AdaptedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.AdaptedUnion):
     @property
     def best(self) -> int: ...
     @best.setter
@@ -255,11 +232,7 @@ class AdaptedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compat
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedUnion": ...  # type: ignore
 _fbthrift_AdaptedUnion = AdaptedUnion
 
-class _fbthrift_compatible_with_HiddenException:
-    pass
-
-
-class HiddenException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_HiddenException, _fbthrift_python_abstract_types.HiddenException):
+class HiddenException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.HiddenException):
     @property
     def test(self) -> int: ...
     @test.setter
@@ -277,11 +250,7 @@ class HiddenException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
     def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...  # type: ignore
 _fbthrift_HiddenException = HiddenException
 
-class _fbthrift_compatible_with_ComplexStruct:
-    pass
-
-
-class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ComplexStruct, _fbthrift_python_abstract_types.ComplexStruct):
+class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.ComplexStruct):
     @property
     def structOne(self) -> _fbthrift_SimpleStruct: ...
     @structOne.setter
@@ -329,11 +298,11 @@ class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
 
     def __init__(
         self, *,
-        structOne: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        structTwo: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        structOne: _typing.Optional[SimpleStruct]=...,
+        structTwo: _typing.Optional[SimpleStruct]=...,
         an_integer: _typing.Optional[int]=...,
         name: _typing.Optional[str]=...,
-        an_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...,
+        an_enum: _typing.Optional[AnEnum]=...,
         some_bytes: _typing.Optional[bytes]=...,
         sender: _typing.Optional[str]=...,
         cdef_: _typing.Optional[str]=...,
@@ -342,11 +311,11 @@ class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
 
     def __call__(
         self, *,
-        structOne: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
-        structTwo: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        structOne: _typing.Optional[SimpleStruct]=...,
+        structTwo: _typing.Optional[SimpleStruct]=...,
         an_integer: _typing.Optional[int]=...,
         name: _typing.Optional[str]=...,
-        an_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...,
+        an_enum: _typing.Optional[AnEnum]=...,
         some_bytes: _typing.Optional[bytes]=...,
         sender: _typing.Optional[str]=...,
         cdef_: _typing.Optional[str]=...,
@@ -359,11 +328,7 @@ class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_py_deprecated(self) -> "module.ttypes.ComplexStruct": ...  # type: ignore
 _fbthrift_ComplexStruct = ComplexStruct
 
-class _fbthrift_compatible_with_BinaryUnion:
-    pass
-
-
-class BinaryUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_BinaryUnion, _fbthrift_python_abstract_types.BinaryUnion):
+class BinaryUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.BinaryUnion):
     @property
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf: ...
     @iobuf_val.setter
@@ -390,11 +355,7 @@ class BinaryUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compati
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnion": ...  # type: ignore
 _fbthrift_BinaryUnion = BinaryUnion
 
-class _fbthrift_compatible_with_BinaryUnionStruct:
-    pass
-
-
-class BinaryUnionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_BinaryUnionStruct, _fbthrift_python_abstract_types.BinaryUnionStruct):
+class BinaryUnionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.BinaryUnionStruct):
     @property
     def u(self) -> _fbthrift_BinaryUnion: ...
     @u.setter
@@ -402,12 +363,12 @@ class BinaryUnionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
 
     def __init__(
         self, *,
-        u: _typing.Optional[_fbthrift_compatible_with_BinaryUnion]=...
+        u: _typing.Optional[BinaryUnion]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        u: _typing.Optional[_fbthrift_compatible_with_BinaryUnion]=...
+        u: _typing.Optional[BinaryUnion]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_BinaryUnion]]]: ...
     def _to_python(self) -> "module.thrift_types.BinaryUnionStruct": ...  # type: ignore
@@ -416,11 +377,7 @@ class BinaryUnionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnionStruct": ...  # type: ignore
 _fbthrift_BinaryUnionStruct = BinaryUnionStruct
 
-class _fbthrift_compatible_with_CustomFields:
-    pass
-
-
-class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_CustomFields, _fbthrift_python_abstract_types.CustomFields):
+class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CustomFields):
     @property
     def bool_field(self) -> bool: ...
     @bool_field.setter
@@ -476,7 +433,7 @@ class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
         list_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         set_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         map_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> None: ...
 
     def __call__(
@@ -489,7 +446,7 @@ class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
         list_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         set_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         map_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableMap[int, int], _fbthrift_SimpleStruct]]]: ...
     def _to_python(self) -> "module.thrift_types.CustomFields": ...  # type: ignore
@@ -498,11 +455,7 @@ class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
     def _to_py_deprecated(self) -> "module.ttypes.CustomFields": ...  # type: ignore
 _fbthrift_CustomFields = CustomFields
 
-class _fbthrift_compatible_with_CustomTypedefFields:
-    pass
-
-
-class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_CustomTypedefFields, _fbthrift_python_abstract_types.CustomTypedefFields):
+class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.CustomTypedefFields):
     @property
     def bool_field(self) -> bool: ...
     @bool_field.setter
@@ -558,7 +511,7 @@ class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrif
         list_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         set_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         map_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> None: ...
 
     def __call__(
@@ -571,7 +524,7 @@ class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrif
         list_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         set_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         map_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableMap[int, int], _fbthrift_SimpleStruct]]]: ...
     def _to_python(self) -> "module.thrift_types.CustomTypedefFields": ...  # type: ignore
@@ -580,11 +533,7 @@ class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrif
     def _to_py_deprecated(self) -> "module.ttypes.CustomTypedefFields": ...  # type: ignore
 _fbthrift_CustomTypedefFields = CustomTypedefFields
 
-class _fbthrift_compatible_with_AdaptedTypedefFields:
-    pass
-
-
-class AdaptedTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_AdaptedTypedefFields, _fbthrift_python_abstract_types.AdaptedTypedefFields):
+class AdaptedTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.AdaptedTypedefFields):
     @property
     def bool_field(self) -> bool: ...
     @bool_field.setter
@@ -640,7 +589,7 @@ class AdaptedTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthri
         list_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         set_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         map_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> None: ...
 
     def __call__(
@@ -653,7 +602,7 @@ class AdaptedTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthri
         list_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         set_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         map_field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
-        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+        struct_field: _typing.Optional[SimpleStruct]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableMap[int, int], _fbthrift_SimpleStruct]]]: ...
     def _to_python(self) -> "module.thrift_types.AdaptedTypedefFields": ...  # type: ignore

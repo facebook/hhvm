@@ -17,11 +17,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import test.fixtures.another_interactions.shared.thrift_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_types
 
 
-class _fbthrift_compatible_with_CustomException:
-    pass
-
-
-class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_CustomException, _fbthrift_python_abstract_types.CustomException):
+class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_python_abstract_types.CustomException):
     message: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -35,11 +31,7 @@ class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.CustomException": ...  # type: ignore
 _fbthrift_CustomException = CustomException
 
-class _fbthrift_compatible_with_ShouldBeBoxed:
-    pass
-
-
-class ShouldBeBoxed(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ShouldBeBoxed, _fbthrift_python_abstract_types.ShouldBeBoxed):
+class ShouldBeBoxed(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.ShouldBeBoxed):
     sessionId: _typing.Final[str] = ...
     def __init__(
         self, *,

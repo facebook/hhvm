@@ -20,7 +20,6 @@
 {{!
     from module_path.thrift_enums import *
 
-below does not import private symbols _fbthrift_compatible_with_*.
 These are referenced in the generated pyi files and, for simplicity,
 need to be imported through the types modules.
 }}
@@ -33,7 +32,6 @@ from {{program:module_path}}.thrift_enums import (
     {{enum:name}},
 {{/program:is_source_file?}}
     {{enum:name}} as {{> private/alias_prefix}}{{enum:name}},
-    _fbthrift_compatible_with_{{enum:name}},
 {{#last?}}
 )
 {{/last?}}

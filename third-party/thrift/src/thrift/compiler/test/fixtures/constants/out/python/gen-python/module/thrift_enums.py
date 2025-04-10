@@ -11,11 +11,9 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_EmptyEnum:
-    pass
 
 
-class EmptyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_EmptyEnum):
+class EmptyEnum(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.EmptyEnum"
@@ -40,11 +38,9 @@ class EmptyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Empt
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_City:
-    pass
 
 
-class City(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_City):
+class City(_fbthrift_python_types.Enum, int):
     NYC = 0
     MPK = 1
     SEA = 2
@@ -73,11 +69,9 @@ class City(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_City):
         return self.value
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_Company:
-    pass
 
 
-class Company(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Company):
+class Company(_fbthrift_python_types.Enum, int):
     FACEBOOK = 0
     WHATSAPP = 1
     OCULUS = 2

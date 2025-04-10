@@ -11,11 +11,9 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
 import typing as _std_python_typing
 
-class _fbthrift_compatible_with_Result:
-    pass
 
 
-class Result(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Result):
+class Result(_fbthrift_python_types.Enum, int):
     OK = 0
     SO_SO = 1
     GOOD = 2

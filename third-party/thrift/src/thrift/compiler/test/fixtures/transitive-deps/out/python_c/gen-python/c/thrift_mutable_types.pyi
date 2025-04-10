@@ -17,11 +17,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
-class _fbthrift_compatible_with_C:
-    pass
-
-
-class C(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_C, _fbthrift_python_abstract_types.C):
+class C(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.C):
     @property
     def i(self) -> int: ...
     @i.setter
@@ -43,11 +39,7 @@ class C(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_
     def _to_py_deprecated(self) -> "c.ttypes.C": ...  # type: ignore
 _fbthrift_C = C
 
-class _fbthrift_compatible_with_E:
-    pass
-
-
-class E(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_E, _fbthrift_python_abstract_types.E):
+class E(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.E):
     def __init__(
         self,
     ) -> None: ...

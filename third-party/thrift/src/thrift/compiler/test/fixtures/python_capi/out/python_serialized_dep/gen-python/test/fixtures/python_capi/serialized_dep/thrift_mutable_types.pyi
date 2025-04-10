@@ -19,11 +19,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 
-class _fbthrift_compatible_with_SerializedStruct:
-    pass
-
-
-class SerializedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SerializedStruct, _fbthrift_python_abstract_types.SerializedStruct):
+class SerializedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.SerializedStruct):
     @property
     def s(self) -> str: ...
     @s.setter
@@ -66,11 +62,7 @@ class SerializedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_c
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedStruct": ...  # type: ignore
 _fbthrift_SerializedStruct = SerializedStruct
 
-class _fbthrift_compatible_with_SerializedUnion:
-    pass
-
-
-class SerializedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_SerializedUnion, _fbthrift_python_abstract_types.SerializedUnion):
+class SerializedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.SerializedUnion):
     @property
     def s(self) -> str: ...
     @s.setter
@@ -104,11 +96,7 @@ class SerializedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_com
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedUnion": ...  # type: ignore
 _fbthrift_SerializedUnion = SerializedUnion
 
-class _fbthrift_compatible_with_SerializedError:
-    pass
-
-
-class SerializedError(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_SerializedError, _fbthrift_python_abstract_types.SerializedError):
+class SerializedError(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.SerializedError):
     @property
     def msg(self) -> str: ...
     @msg.setter
@@ -138,11 +126,7 @@ class SerializedError(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedError": ...  # type: ignore
 _fbthrift_SerializedError = SerializedError
 
-class _fbthrift_compatible_with_MarshalStruct:
-    pass
-
-
-class MarshalStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MarshalStruct, _fbthrift_python_abstract_types.MarshalStruct):
+class MarshalStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.MarshalStruct):
     @property
     def s(self) -> str: ...
     @s.setter
@@ -185,11 +169,7 @@ class MarshalStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalStruct": ...  # type: ignore
 _fbthrift_MarshalStruct = MarshalStruct
 
-class _fbthrift_compatible_with_MarshalUnion:
-    pass
-
-
-class MarshalUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_MarshalUnion, _fbthrift_python_abstract_types.MarshalUnion):
+class MarshalUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abstract_types.MarshalUnion):
     @property
     def s(self) -> str: ...
     @s.setter
@@ -223,11 +203,7 @@ class MarshalUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compat
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalUnion": ...  # type: ignore
 _fbthrift_MarshalUnion = MarshalUnion
 
-class _fbthrift_compatible_with_MarshalError:
-    pass
-
-
-class MarshalError(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_MarshalError, _fbthrift_python_abstract_types.MarshalError):
+class MarshalError(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_python_abstract_types.MarshalError):
     @property
     def msg(self) -> str: ...
     @msg.setter

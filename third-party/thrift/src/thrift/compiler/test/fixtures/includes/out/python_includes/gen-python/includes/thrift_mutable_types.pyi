@@ -19,11 +19,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import transitive.thrift_mutable_types as _fbthrift__transitive__thrift_mutable_types
 
 
-class _fbthrift_compatible_with_Included:
-    pass
-
-
-class Included(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Included, _fbthrift_python_abstract_types.Included):
+class Included(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Included):
     @property
     def MyIntField(self) -> int: ...
     @MyIntField.setter
@@ -37,13 +33,13 @@ class Included(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
     def __init__(
         self, *,
         MyIntField: _typing.Optional[int]=...,
-        MyTransitiveField: _typing.Optional[_fbthrift__transitive__thrift_mutable_types._fbthrift_compatible_with_Foo]=...
+        MyTransitiveField: _typing.Optional[_fbthrift__transitive__thrift_mutable_types.Foo]=...
     ) -> None: ...
 
     def __call__(
         self, *,
         MyIntField: _typing.Optional[int]=...,
-        MyTransitiveField: _typing.Optional[_fbthrift__transitive__thrift_mutable_types._fbthrift_compatible_with_Foo]=...
+        MyTransitiveField: _typing.Optional[_fbthrift__transitive__thrift_mutable_types.Foo]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift__transitive__thrift_mutable_types.Foo]]]: ...
     def _to_python(self) -> "includes.thrift_types.Included": ...  # type: ignore

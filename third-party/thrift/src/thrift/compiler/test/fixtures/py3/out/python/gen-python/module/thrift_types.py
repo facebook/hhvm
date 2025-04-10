@@ -20,13 +20,10 @@ import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 from module.thrift_enums import (
     AnEnum,
     AnEnum as _fbthrift_AnEnum,
-    _fbthrift_compatible_with_AnEnum,
     AnEnumRenamed,
     AnEnumRenamed as _fbthrift_AnEnumRenamed,
-    _fbthrift_compatible_with_AnEnumRenamed,
     Flags,
     Flags as _fbthrift_Flags,
-    _fbthrift_compatible_with_Flags,
 )
 
 

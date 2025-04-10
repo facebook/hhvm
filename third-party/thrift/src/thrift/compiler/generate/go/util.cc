@@ -510,7 +510,7 @@ bool is_type_go_struct(const t_type* type) {
   //   * Thrift struct    - represented by Go struct pointer
   //   * Thrift union     - represented by Go struct pointer
   //   * Thrift exception - represented by Go struct pointer
-  return type->is_struct_or_union() || type->is_union() || type->is_exception();
+  return type->is_struct_or_union() || type->is_exception();
 }
 
 bool is_type_go_nilable(const t_type* type) {
@@ -550,17 +550,15 @@ bool is_type_go_comparable(
   }
 
   if (real_type->is_struct_or_union()) {
-    auto as_struct = dynamic_cast<const t_struct*>(real_type);
-    if (as_struct != nullptr) {
-      for (auto member : as_struct->get_members()) {
-        auto member_type = member->type().get_type();
-        auto member_name = member_type->get_full_name();
-        // Insert 0 if member_name is not yet in the map.
-        auto emplace_pair = visited_type_names.emplace(member_name, 0);
-        emplace_pair.first->second += 1;
-        if (!is_type_go_comparable(member_type, visited_type_names)) {
-          return false;
-        }
+    const auto* as_struct = dynamic_cast<const t_structured*>(real_type);
+    for (auto member : as_struct->get_members()) {
+      auto member_type = member->type().get_type();
+      auto member_name = member_type->get_full_name();
+      // Insert 0 if member_name is not yet in the map.
+      auto emplace_pair = visited_type_names.emplace(member_name, 0);
+      emplace_pair.first->second += 1;
+      if (!is_type_go_comparable(member_type, visited_type_names)) {
+        return false;
       }
     }
   }

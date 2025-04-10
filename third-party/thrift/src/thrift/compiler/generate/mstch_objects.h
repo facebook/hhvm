@@ -491,7 +491,7 @@ class mstch_program : public mstch_base {
   mstch::node has_unions() {
     auto& structs = program_->structs_and_unions();
     return std::any_of(
-        structs.cbegin(), structs.cend(), std::mem_fn(&t_struct::is_union));
+        structs.cbegin(), structs.cend(), std::mem_fn(&t_structured::is_union));
   }
 
   mstch::node has_thrift_uris();
@@ -882,6 +882,8 @@ class mstch_type : public mstch_base {
   mstch::node is_floating_point() {
     return resolved_type_->is_floating_point();
   }
+  // TODO(T219861020): Evaluate if unions should be here and rename method as
+  // neccessary.
   mstch::node is_struct() {
     return resolved_type_->is_struct_or_union() ||
         resolved_type_->is_exception();

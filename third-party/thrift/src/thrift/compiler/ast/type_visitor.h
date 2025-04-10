@@ -60,8 +60,11 @@ decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
     case t_type::type::t_structured: {
       const t_structured* s = dynamic_cast<const t_structured*>(&ty);
       if (s->is_struct_or_union()) {
-        return std::invoke(f, dynamic_cast<const t_struct&>(ty));
+        return std::invoke(f, dynamic_cast<const t_structured&>(ty));
       } else if (s->is_union()) {
+        // TODO(T219861020): A union is_struct_or_union method returns true,
+        // hence this case is unreachable. After the todo is finished, the
+        // is_struct case can be downscorped back to casting to a t_struct
         return std::invoke(f, dynamic_cast<const t_union&>(ty));
       } else if (s->is_exception()) {
         return std::invoke(f, dynamic_cast<const t_exception&>(ty));

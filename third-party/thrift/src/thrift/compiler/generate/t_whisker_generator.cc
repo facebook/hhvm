@@ -84,6 +84,8 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("double?",           mem_fn(&t_type::is_double));
   def.property("typedef?",          mem_fn(&t_type::is_typedef));
   def.property("enum?",             mem_fn(&t_type::is_enum));
+  // TODO(T219861020): Evaluate if unions should be included and rename as
+  // needed.
   def.property("struct?",           mem_fn(&t_type::is_struct_or_union));
   def.property("union?",            mem_fn(&t_type::is_union));
   def.property("exception?",        mem_fn(&t_type::is_exception));
@@ -137,7 +139,7 @@ prototype<t_throws>::ptr t_whisker_generator::make_prototype_for_throws(
 
 prototype<t_union>::ptr t_whisker_generator::make_prototype_for_union(
     const prototype_database& proto) const {
-  auto def = prototype_builder<h_union>::extends(proto.of<t_struct>());
+  auto def = prototype_builder<h_union>::extends(proto.of<t_structured>());
   return std::move(def).make();
 }
 

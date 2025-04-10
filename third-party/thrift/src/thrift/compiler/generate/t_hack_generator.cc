@@ -78,11 +78,11 @@ class t_result_struct final : public t_structured {
 
   std::string getResultReturnType() const { return result_return_type; }
 
-  // Both get_type_value() and is_struct() are implemented below for historical
-  // reasons: t_result_struct used to be a subclass of t_struct. It was moved to
-  // this anonymous namespace because it is only used in this file, and made to
-  // inherit from t_structured (as we are decoupling all other types from
-  // t_struct).
+  // Both get_type_value() and is_struct_or_union() are implemented below for
+  // historical reasons: t_result_struct used to be a subclass of t_struct. It
+  // was moved to this anonymous namespace because it is only used in this
+  // file, and made to inherit from t_structured (as we are decoupling all
+  // other types from t_struct).
   t_type::type get_type_value() const override {
     return t_type::type::t_structured;
   }
@@ -395,7 +395,7 @@ class t_hack_generator : public t_concat_generator {
   void generate_hack_array_from_shape_lambda(
       std::ostream& out, t_name_generator& namer, const t_set* t);
   void generate_hack_array_from_shape_lambda(
-      std::ostream& out, t_name_generator& namer, const t_struct* t);
+      std::ostream& out, t_name_generator& namer, const t_structured* t);
   void generate_shape_from_hack_array_lambda(
       std::ostream& out, t_name_generator& namer, const t_type* t);
   void generate_php_struct_from_shape(
@@ -545,7 +545,7 @@ class t_hack_generator : public t_concat_generator {
   void generate_json_struct(
       std::ofstream& out,
       t_name_generator& namer,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::string& prefix_thrift,
       const std::string& prefix_json);
 
@@ -1267,7 +1267,7 @@ void t_hack_generator::generate_json_enum(
 void t_hack_generator::generate_json_struct(
     std::ofstream& out,
     t_name_generator& namer,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const std::string& prefix_thrift,
     const std::string& prefix_json) {
   std::string enc = namer("$_tmp");
@@ -1299,7 +1299,7 @@ void t_hack_generator::generate_json_field(
 
   std::string name = prefix_thrift + tfield->name() + suffix_thrift;
 
-  if (const auto* tstruct = dynamic_cast<const t_struct*>(type)) {
+  if (const auto* tstruct = dynamic_cast<const t_structured*>(type)) {
     generate_json_struct(out, namer, tstruct, name, prefix_json);
   } else if (const auto* tconatiner = dynamic_cast<const t_container*>(type)) {
     generate_json_container(out, namer, tconatiner, name, prefix_json);
@@ -2011,7 +2011,7 @@ std::string t_hack_generator::render_const_value_helper(
     } else {
       out << hack_name(tenum) << "::coerce(" << value->get_integer() << ")";
     }
-  } else if (const auto* tstruct = dynamic_cast<const t_struct*>(type)) {
+  } else if (const auto* tstruct = dynamic_cast<const t_structured*>(type)) {
     std::string struct_name = hack_name(type);
     auto [wrapper, name, ns] = find_hack_wrapper(type);
     if (wrapper) {
@@ -2282,7 +2282,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
     }
   } else if (type->is_enum()) {
     dval = "null";
-  } else if (const auto* tstruct = dynamic_cast<const t_struct*>(type)) {
+  } else if (const auto* tstruct = dynamic_cast<const t_structured*>(type)) {
     if (no_nullables_) {
       dval = hack_name(tstruct) + "::withDefaultValues()";
     } else {
@@ -2953,7 +2953,7 @@ void t_hack_generator::generate_php_type_spec(
     indent(out) << "'enum' => " << hack_name(t) << "::class,\n";
   } else if (t->is_struct_or_union() || t->is_exception()) {
     auto sname = hack_name(t);
-    if (const auto* tstruct = dynamic_cast<const t_struct*>(t)) {
+    if (const auto* tstruct = dynamic_cast<const t_structured*>(t)) {
       auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
       if (wrapper) {
         sname = hack_wrapped_type_name(name, ns);
@@ -3311,7 +3311,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
-    std::ostream& out, t_name_generator&, const t_struct* t) {
+    std::ostream& out, t_name_generator&, const t_structured* t) {
   out << "\n";
   indent_up();
   indent(out) << "|> ";
@@ -3330,7 +3330,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
         out, namer, static_cast<const t_list*>(t));
   } else if (t->is_struct_or_union()) {
     generate_hack_array_from_shape_lambda(
-        out, namer, static_cast<const t_struct*>(t));
+        out, namer, static_cast<const t_structured*>(t));
   } else if (t->is_set()) {
     generate_hack_array_from_shape_lambda(
         out, namer, static_cast<const t_set*>(t));
@@ -3634,7 +3634,7 @@ bool t_hack_generator::
     return false;
   }
   if (is_shape_method) {
-    if (const auto* tstruct = dynamic_cast<const t_struct*>(ttype)) {
+    if (const auto* tstruct = dynamic_cast<const t_structured*>(ttype)) {
       bool is_async = is_async_shapish_struct(tstruct);
       auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
       std::string struct_name;
@@ -3784,7 +3784,7 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
     out << val;
     return false;
   }
-  if (const auto* tstruct = dynamic_cast<const t_struct*>(ttype)) {
+  if (const auto* tstruct = dynamic_cast<const t_structured*>(ttype)) {
     if (is_async_shapish_struct(tstruct)) {
       out << val << "->__genToShape()";
       return true;
@@ -4082,7 +4082,7 @@ bool t_hack_generator::is_async_type(
     } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
       return is_async_type(tmap->get_val_type(), check_nested_structs);
     }
-  } else if (const auto* tstruct = dynamic_cast<const t_struct*>(type)) {
+  } else if (const auto* tstruct = dynamic_cast<const t_structured*>(type)) {
     if (check_nested_structs) {
       return is_async_shapish_struct(tstruct);
     }
@@ -4902,7 +4902,7 @@ bool t_hack_generator::is_base_exception_property(const t_field* field) {
 std::string t_hack_generator::render_service_metadata_response(
     const t_service* service, const bool mangle) {
   std::vector<const t_enum*> enums;
-  std::vector<const t_struct*> structs;
+  std::vector<const t_structured*> structs;
   std::vector<const t_exception*> exceptions;
   std::vector<const t_service*> services;
 
@@ -4953,7 +4953,7 @@ std::string t_hack_generator::render_service_metadata_response(
       }
     } else if (const auto* tenum = dynamic_cast<const t_enum*>(next)) {
       enums.push_back(tenum);
-    } else if (const auto* tstruct = dynamic_cast<const t_struct*>(next)) {
+    } else if (const auto* tstruct = dynamic_cast<const t_structured*>(next)) {
       for (const auto& field : tstruct->fields()) {
         queue.push(field.get_type());
       }

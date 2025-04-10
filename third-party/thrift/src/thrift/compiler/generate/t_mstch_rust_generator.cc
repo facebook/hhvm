@@ -379,7 +379,7 @@ bool type_has_transitive_adapter(
                  map_type->get_val_type(), step_through_newtypes);
     }
   } else if (type->is_struct_or_union()) {
-    auto struct_type = dynamic_cast<const t_struct*>(type);
+    auto struct_type = dynamic_cast<const t_structured*>(type);
     if (struct_type) {
       return node_has_adapter(*struct_type);
     }
@@ -1787,7 +1787,7 @@ class mstch_rust_value : public mstch_base {
         const_value_->get_map().at(0).first->kind() == value_type::CV_STRING;
   }
   mstch::node union_variant() {
-    auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
+    auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
     if (!struct_type) {
       return mstch::node();
     }
@@ -1812,7 +1812,7 @@ class mstch_rust_value : public mstch_base {
     return mstch::node();
   }
   mstch::node union_value() {
-    auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
+    auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
     if (!struct_type) {
       return mstch::node();
     }
@@ -2026,7 +2026,7 @@ mstch::node mstch_rust_value::map_entries() {
 }
 
 mstch::node mstch_rust_value::struct_fields() {
-  auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
+  auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
   if (!struct_type) {
     return mstch::node();
   }
@@ -2049,7 +2049,7 @@ mstch::node mstch_rust_value::struct_fields() {
 }
 
 mstch::node mstch_rust_value::is_exhaustive() {
-  auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
+  auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
   return struct_type &&
       struct_type->has_structured_annotation(kRustExhaustiveUri);
 }

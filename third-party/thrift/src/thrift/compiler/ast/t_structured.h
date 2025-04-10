@@ -16,9 +16,7 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cassert>
-#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -71,6 +69,8 @@ class t_structured : public t_type {
     auto it = fields_by_name_.find(name);
     return it != fields_by_name_.end() ? it->second : nullptr;
   }
+
+  type get_type_value() const override;
 
   ~t_structured() override;
 

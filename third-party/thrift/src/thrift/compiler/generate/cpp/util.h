@@ -173,7 +173,8 @@ void for_each_transitive_field(const t_structured* s, F f) {
     if (!f(field)) {
       return;
     }
-    if (const auto* sub = dynamic_cast<const t_struct*>(field->get_type())) {
+    if (const auto* sub =
+            dynamic_cast<const t_structured*>(field->get_type())) {
       fields.push_back({sub, 0});
     }
   }

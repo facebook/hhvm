@@ -23,10 +23,12 @@ namespace apache::thrift::compiler {
 /**
  * Represents a union definition.
  */
-// TODO(afuller): Inherit from t_structured instead.
-class t_union : public t_struct {
+class t_union : public t_structured {
  public:
-  using t_struct::t_struct;
+  using t_structured::t_structured;
+
+  t_union(const t_program* program, std::string name)
+      : t_structured(program, std::move(name)) {}
 
   ~t_union() override;
   // TODO(afuller): Remove everything below this comment. It is only provided
@@ -34,9 +36,12 @@ class t_union : public t_struct {
  public:
   bool is_union() const override { return true; }
 
+  // TODO(T219861020): remove this is_struct override
+  bool is_struct_or_union() const override { return true; }
+
  private:
-  friend class t_struct;
-  t_union* clone_DO_NOT_USE() const override {
+  friend class t_structured;
+  t_union* clone_DO_NOT_USE() const {
     auto clone = std::make_unique<t_union>(program_, name_);
     clone_structured(clone.get());
     return clone.release();

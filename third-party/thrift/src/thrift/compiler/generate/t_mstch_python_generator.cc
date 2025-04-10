@@ -130,8 +130,8 @@ bool is_invariant_container_type(const t_type* type) {
   if (true_type->is_map()) {
     const t_map* map_type = dynamic_cast<const t_map*>(true_type);
     const t_type* key_type = map_type->get_key_type()->get_true_type();
-    return key_type->is_struct_or_union() || key_type->is_union() ||
-        key_type->is_exception() || key_type->is_container() ||
+    return key_type->is_struct_or_union() || key_type->is_exception() ||
+        key_type->is_container() ||
         is_invariant_container_type(map_type->get_val_type());
   } else if (true_type->is_list()) {
     return is_invariant_container_type(
@@ -1096,7 +1096,7 @@ bool validate_enum(sema_context& ctx, const t_enum& enm) {
   return true;
 }
 
-bool validate_union(sema_context& ctx, const t_struct& s) {
+bool validate_union(sema_context& ctx, const t_union& s) {
   auto predicate = [](const auto& pyname) {
     return pyname == "type" || pyname == "value" || pyname == "Type";
   };

@@ -800,7 +800,7 @@ class cpp_mstch_program : public mstch_program {
                 typedf, context_);
           }
           return make_mstch_element_cached(
-              static_cast<const t_struct*>(node),
+              static_cast<const t_structured*>(node),
               *context_.struct_factory,
               context_.struct_cache,
               id,
@@ -1288,7 +1288,7 @@ class cpp_mstch_type : public mstch_type {
         type_, {"cpp.use_allocator"});
   }
   mstch::node is_non_empty_struct() {
-    auto as_struct = resolved_type_->try_as<t_struct>();
+    auto as_struct = resolved_type_->try_as<t_structured>();
     return as_struct && as_struct->has_fields();
   }
   mstch::node qualified_namespace() {
@@ -1770,8 +1770,10 @@ class cpp_mstch_struct : public mstch_struct {
         return ret = 8;
       case t_type::type::t_structured: {
         size_t align = 1;
-        const auto& strct = type->get_true_type()->as<t_struct>();
-        for (const auto& field_2 : strct.fields()) {
+        const t_structured* strct =
+            dynamic_cast<const t_structured*>(type->get_true_type());
+        assert(strct);
+        for (const auto& field_2 : strct->fields()) {
           size_t field_align = compute_alignment(&field_2, memo);
           align = std::max(align, field_align);
           if (align == kMaxAlign) {
@@ -2825,7 +2827,7 @@ class validate_splits {
 
 void forbid_deprecated_terse_writes_ref(
     sema_context& ctx,
-    const t_struct& strct,
+    const t_structured& strct,
     const t_mstch_generator::compiler_options_map& options) {
   for (auto& field : strct.fields()) {
     const bool isUniqueRef =

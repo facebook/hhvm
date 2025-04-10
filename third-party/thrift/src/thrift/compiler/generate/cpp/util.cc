@@ -154,7 +154,7 @@ gen_dependency_graph(
     auto& deps = edges[obj];
 
     std::function<void(const t_type*, bool)> add_dependency =
-        [&](const t_type* type, bool include_structs) {
+        [&](const t_type* type, bool include_structured_types) {
           if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
             // Resolve unnamed typedefs
             if (typedf->typedef_kind() != t_typedef::kind::defined) {
@@ -165,25 +165,29 @@ gen_dependency_graph(
           if (auto map = dynamic_cast<t_map const*>(type)) {
             add_dependency(
                 map->get_key_type(),
-                include_structs && !container_supports_incomplete_params(*map));
+                include_structured_types &&
+                    !container_supports_incomplete_params(*map));
             return add_dependency(
                 map->get_val_type(),
-                include_structs && !container_supports_incomplete_params(*map));
+                include_structured_types &&
+                    !container_supports_incomplete_params(*map));
           } else if (auto set = dynamic_cast<t_set const*>(type)) {
             return add_dependency(
                 set->get_elem_type(),
-                include_structs && !container_supports_incomplete_params(*set));
+                include_structured_types &&
+                    !container_supports_incomplete_params(*set));
           } else if (auto list = dynamic_cast<t_list const*>(type)) {
             return add_dependency(
                 list->get_elem_type(),
-                include_structs &&
+                include_structured_types &&
                     !container_supports_incomplete_params(*list));
           } else if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
             // Transitively depend on true type if necessary, since typedefs
             // generally don't depend on their underlying types.
-            add_dependency(typedf->get_true_type(), include_structs);
-          } else if (!(dynamic_cast<t_struct const*>(type) &&
-                       (include_structs || has_dependent_adapter(*type)))) {
+            add_dependency(typedf->get_true_type(), include_structured_types);
+          } else if (!(dynamic_cast<t_structured const*>(type) &&
+                       (include_structured_types ||
+                        has_dependent_adapter(*type)))) {
             return;
           }
 
@@ -202,7 +206,7 @@ gen_dependency_graph(
       // specified.
       const auto* type = &*typedf->type();
       add_dependency(type, has_dependent_adapter(*typedf));
-    } else if (auto* strct = dynamic_cast<t_struct const*>(obj)) {
+    } else if (auto* strct = dynamic_cast<t_structured const*>(obj)) {
       // The adjacency list of a struct is the structs and typedefs named in its
       // fields.
       for (const auto& field : strct->fields()) {
@@ -275,18 +279,17 @@ bool is_orderable_walk(
                         memo, next, &type, context, forceCustomTypeOrderable) &&
         (!(real().is_set() || real().is_map()) ||
          !has_disqualifying_annotation);
-  } else if (type.is_struct_or_union() || type.is_exception()) {
-    const auto& as_struct = static_cast<t_struct const&>(type);
+  } else if (const auto* as_struct = dynamic_cast<const t_structured*>(&type)) {
     return result = std::all_of(
-               as_struct.fields().begin(),
-               as_struct.fields().end(),
+               as_struct->fields().begin(),
+               as_struct->fields().end(),
                [&](const auto& f) {
                  return is_orderable_walk(
                      memo,
                      f.type().deref(),
                      &type,
                      context,
-                     !as_struct.uri().empty());
+                     !as_struct->uri().empty());
                });
   } else if (type.is_list()) {
     return result = is_orderable_walk(
@@ -446,7 +449,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
   if (result != eligible::unknown) {
     return result == eligible::yes;
   }
-  if (const auto* s = dynamic_cast<const t_struct*>(type)) {
+  if (const auto* s = dynamic_cast<const t_structured*>(type)) {
     result = eligible::yes;
     for_each_transitive_field(s, [&](const t_field* field) {
       result = check(field->get_type());
@@ -505,7 +508,7 @@ static void get_mixins_and_members_impl(
     if (is_mixin(member)) {
       assert(member.type()->get_true_type()->is_struct_or_union());
       auto mixin_struct =
-          static_cast<const t_struct*>(member.type()->get_true_type());
+          static_cast<const t_structured*>(member.type()->get_true_type());
       const auto& mixin =
           top_level_mixin != nullptr ? *top_level_mixin : member;
 

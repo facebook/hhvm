@@ -2758,7 +2758,7 @@ void t_cocoa_generator::print_const_value(
         << std::endl
         << std::endl;
   } else if (type->is_struct_or_union() || type->is_exception()) {
-    const auto* as_struct = static_cast<const t_struct*>(type);
+    const auto* as_struct = static_cast<const t_structured*>(type);
     if (defval) {
       out << type_name(type) << " ";
     }

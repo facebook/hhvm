@@ -805,7 +805,7 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
         // extend the look-up to any sealed key type.
         return protocol_value_builder{*map.get_val_type()};
       },
-      [&](const t_struct& strct) {
+      [&](const t_structured& strct) {
         assert(
             key.kind() == t_const_value::CV_STRING &&
             "A struct only has named fields");
@@ -827,7 +827,7 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
   }
 
   return ty_->visit(
-      [&](const t_struct&) {
+      [&](const t_structured&) {
         assert(
             key.kind() == t_const_value::CV_STRING &&
             "A struct only has named fields");

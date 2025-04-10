@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/async/InterceptorFlags.h>
+#pragma once
 
 namespace apache::thrift {
 
-THRIFT_FLAG_DEFINE_bool(enable_client_interceptor_framework_metadata, false);
-
-THRIFT_FLAG_DEFINE_bool(enable_service_interceptor_framework_metadata, false);
-
-THRIFT_FLAG_DEFINE_bool(disable_all_client_interceptors, false);
-
-THRIFT_FLAG_DEFINE_string(disabled_service_interceptors, "");
+class ClientInterceptorControl {
+ public:
+  bool isDisabled() const;
+};
 
 } // namespace apache::thrift

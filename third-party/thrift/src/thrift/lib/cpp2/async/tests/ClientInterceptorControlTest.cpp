@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
+#include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/async/ClientInterceptorControl.h>
 #include <thrift/lib/cpp2/async/InterceptorFlags.h>
+
+using namespace ::testing;
 
 namespace apache::thrift {
 
-THRIFT_FLAG_DEFINE_bool(enable_client_interceptor_framework_metadata, false);
+TEST(ClientInterceptorControlTest, NotDisabledByDefault) {
+  ClientInterceptorControl control;
+  EXPECT_FALSE(control.isDisabled());
+}
 
-THRIFT_FLAG_DEFINE_bool(enable_service_interceptor_framework_metadata, false);
-
-THRIFT_FLAG_DEFINE_bool(disable_all_client_interceptors, false);
-
-THRIFT_FLAG_DEFINE_string(disabled_service_interceptors, "");
+TEST(ClientInterceptorControlTest, Disable) {
+  ClientInterceptorControl control;
+  THRIFT_FLAG_SET_MOCK(disable_all_client_interceptors, true);
+  EXPECT_TRUE(control.isDisabled());
+}
 
 } // namespace apache::thrift

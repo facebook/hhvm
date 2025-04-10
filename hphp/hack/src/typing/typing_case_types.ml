@@ -945,6 +945,12 @@ let filter_variants_using_datatype
   in
   Typing_utils.union_list env reason tyl
 
+let are_locl_tys_disjoint env ty1 ty2 =
+  let safe_for_are_disjoint = true in
+  let (env, tags1) = DataType.fromTy ~safe_for_are_disjoint env ty1 in
+  let (env, tags2) = DataType.fromTy ~safe_for_are_disjoint env ty2 in
+  DataType.Set.are_disjoint env tags1 tags2
+
 let has_where_clauses variants =
   List.exists variants ~f:(fun v -> not @@ List.is_empty @@ snd v)
 

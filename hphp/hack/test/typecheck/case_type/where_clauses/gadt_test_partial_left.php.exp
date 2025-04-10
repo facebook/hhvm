@@ -1,0 +1,6 @@
+ERROR: File "gadt_test_partial_left.php", line 14, characters 12-23:
+Invalid return type (Typing[4110])
+  File "gadt_test_partial_left.php", line 10, characters 34-34:
+  Expected `T`
+  File "gadt_test_partial_left.php", line 14, characters 16-21:
+  But got `MyBool`

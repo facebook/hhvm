@@ -1,0 +1,12 @@
+ERROR: File "gadt_test_span.php", line 13, characters 12-22:
+Invalid return type (Typing[4110])
+  File "gadt_test_span.php", line 10, characters 59-59:
+  Expected `T`
+  File "gadt_test_span.php", line 13, characters 16-20:
+  But got `MyInt`
+ERROR: File "gadt_test_span.php", line 15, characters 12-23:
+Invalid return type (Typing[4110])
+  File "gadt_test_span.php", line 10, characters 59-59:
+  Expected `T`
+  File "gadt_test_span.php", line 15, characters 16-21:
+  But got `MyBool`

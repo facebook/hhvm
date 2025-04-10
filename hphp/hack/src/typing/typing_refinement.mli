@@ -29,7 +29,8 @@ type ty_partition = {
   left: dnf_ty;
   span: dnf_ty;
   right: dnf_ty;
-  assumptions: Typing_logic.subtype_prop;
+  true_assumptions: Typing_logic.subtype_prop;
+  false_assumptions: Typing_logic.subtype_prop;
 }
 
 (**

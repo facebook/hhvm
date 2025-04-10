@@ -71,6 +71,10 @@ val filter_variants_using_datatype :
   locl_ty ->
   env * locl_ty
 
+(* returns true iff the two given types are known to be disjoint based on
+   comparison of their datatypes *)
+val are_locl_tys_disjoint : env -> locl_ty -> locl_ty -> bool
+
 (**
   Return whether or not any of the case type variants have a where clause
 *)

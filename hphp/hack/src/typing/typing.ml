@@ -2476,6 +2476,13 @@ module Valkind = struct
       false
 end
 
+type type_split_info = {
+  ty_trues: env -> env * locl_ty list;
+  ty_falses: env -> env * locl_ty list;
+  true_assumptions: Typing_logic.subtype_prop;
+  false_assumptions: Typing_logic.subtype_prop;
+}
+
 module rec Expr : sig
   module Context : sig
     type t = {
@@ -7526,7 +7533,14 @@ end = struct
       let (env, ty_true_ty_false_assumptions) =
         List.map_env env partitions ~f:(fun env partition ->
             let Typing_refinement.
-                  { left; span; right; assumptions; predicate = _ } =
+                  {
+                    left;
+                    span;
+                    right;
+                    true_assumptions;
+                    false_assumptions;
+                    predicate = _;
+                  } =
               partition
             in
             (* See Type_switch.simplify_ for why we update span and right for the false side  *)
@@ -7558,40 +7572,48 @@ end = struct
                 span_for_false
                 ~refine:(MakeType.neg reason predicate)
             in
-            (env, (ty_trues, ty_falses, assumptions)))
+            (env, { ty_trues; ty_falses; true_assumptions; false_assumptions }))
+      in
+      let update_env_and_union env extract_ty_f extract_assumptions =
+        let assumptions =
+          match
+            List.map ty_true_ty_false_assumptions ~f:extract_assumptions
+          with
+          (* Avoid creating a unary Disj -- this avoids the is_unsat prop
+             filtering that we do in update_env_with_assumptions.
+             This is a sneaky way of handling cases such as where we have a
+             like type whose non-dynamic part is disjoint and we get
+             `prop &&& FALSE` and we'd like to not filter it out and apply
+             `prop` to mimic current (unsound) behavior (T214130596) *)
+          | [prop] -> prop
+          | props -> Typing_logic.Disj (None, props)
+        in
+        let env = update_env_with_assumptions env assumptions in
+        let (env, tys) =
+          List.fold_left_env
+            env
+            ty_true_ty_false_assumptions
+            ~init:[]
+            ~f:(fun env acc four_tuple ->
+              let ty_f = extract_ty_f four_tuple in
+              let (env, tys) = ty_f env in
+              (env, tys @ acc))
+        in
+        let tys =
+          match like_type_dynamic with
+          | Some dyn -> dyn :: tys
+          | None -> tys
+        in
+        union env reason tys
       in
       ( env,
         (fun env ->
-          let assumptions =
-            let props =
-              List.map ty_true_ty_false_assumptions ~f:(fun (_, _, a) -> a)
-            in
-            match props with
-            (* Avoid creating a unary Disj -- this avoids the is_unsat prop
-               filtering that we do in update_env_with_assumptions.
-               This is a sneaky way of handling cases such as where we have a
-               like type whose non-dynamic part is disjoint and we get
-               `prop &&& FALSE` and we'd like to not filter it out and apply
-               `prop` to mimic current (unsound) behavior (T214130596) *)
-            | [prop] -> prop
-            | props -> Typing_logic.Disj (None, props)
-          in
-          let env = update_env_with_assumptions env assumptions in
-          let (env, ty_trues) =
-            List.fold_left_env
+          let (env, ty_true) =
+            update_env_and_union
               env
-              ty_true_ty_false_assumptions
-              ~init:[]
-              ~f:(fun env acc (ty_trues, _, _) ->
-                let (env, ty_trues) = ty_trues env in
-                (env, ty_trues @ acc))
+              (fun { ty_trues; _ } -> ty_trues)
+              (fun { true_assumptions; _ } -> true_assumptions)
           in
-          let ty_trues =
-            match like_type_dynamic with
-            | Some dyn -> dyn :: ty_trues
-            | None -> ty_trues
-          in
-          let (env, ty_true) = union env reason ty_trues in
           let (env, ty_true) =
             Inter.intersect
               env
@@ -7601,21 +7623,12 @@ end = struct
           in
           refine_local ty_true env),
         fun env ->
-          let (env, ty_falses) =
-            List.fold_left_env
+          let (env, ty_false) =
+            update_env_and_union
               env
-              ty_true_ty_false_assumptions
-              ~init:[]
-              ~f:(fun env acc (_, ty_falses, _) ->
-                let (env, ty_falses) = ty_falses env in
-                (env, ty_falses @ acc))
+              (fun { ty_falses; _ } -> ty_falses)
+              (fun { false_assumptions; _ } -> false_assumptions)
           in
-          let ty_falses =
-            match like_type_dynamic with
-            | Some dyn -> dyn :: ty_falses
-            | None -> ty_falses
-          in
-          let (env, ty_false) = union env reason ty_falses in
           refine_local ty_false env )
 
   (** [tparamet] = false means the expression is negated. *)

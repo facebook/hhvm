@@ -13,6 +13,18 @@ module Cls = Folded_class
 module Env = Typing_env
 module DataType = Typing_case_types.AtomicDataTypes
 
+(* given [a..z] *)
+(* return [(a, [b..z]); (b, [a;c..z]); (c, [a..b;d..z]); ... (z, [b..z])] *)
+(* i.e. map each element in the input to a pair of that element and the other
+    elements of the input*)
+let list_to_list_of_e_and_others xs =
+  let rec helper prefix rest =
+    match rest with
+    | h :: tail -> (h, prefix @ tail) :: helper (prefix @ [h]) tail
+    | [] -> []
+  in
+  helper [] xs
+
 module TyPredicate = struct
   let rec of_ty env (ty : locl_ty) =
     Result.map ~f:(fun pred -> (get_reason ty, pred))
@@ -142,6 +154,8 @@ module TyPredicate = struct
       Typing_make_type.shape reason (Typing_make_type.nothing reason) map
 end
 
+let cartesian = Partition.cartesian
+
 module TyPartition = struct
   module Partition = Partition.Make (struct
     type t = locl_ty
@@ -151,7 +165,7 @@ module TyPartition = struct
 
   type assumptions = Typing_logic.subtype_prop
 
-  type t = Partition.t * assumptions
+  type t = Partition.t * assumptions * assumptions
 
   type base_ty =
     | ClassTy of pos_id * exact * locl_ty list
@@ -194,32 +208,58 @@ module TyPartition = struct
     | _ -> assume env OtherTy predicate
 
   let mk_left ~env ~predicate ty =
-    (Partition.mk_left ty, assume env ty predicate)
+    (Partition.mk_left ty, assume env ty predicate, invalid)
 
   let mk_span ~env ~predicate ty =
-    (Partition.mk_span ty, assume env ty predicate)
+    let assumptions = assume env ty predicate in
+    (* the false assumptions is `valid` because `valid` is the value that means
+       "I don't know anything" since it has the property that it is subsumed
+       under the "meet" (conjunction) operation and is the subsumer under the
+       "join" (disjunction) operation.
+       We always use a trivial `valid` here because, unlike with true assumptions,
+       non-trivial false assumptions are filled external to mk_* functions. *)
+    (Partition.mk_span ty, assumptions, valid)
 
-  let mk_right ~env:_ ~predicate:_ ty = (Partition.mk_right ty, invalid)
+  let mk_right ~env:_ ~predicate:_ ty = (Partition.mk_right ty, invalid, valid)
 
-  let mk_bottom = (Partition.mk_bottom, invalid)
+  let mk_bottom = (Partition.mk_bottom, invalid, invalid)
 
-  let join (partition1, assumption1) (partition2, assumption2) =
+  let join (partition1, t1, f1) (partition2, t2, f2) =
     ( Partition.join partition1 partition2,
-      Typing_logic.disj ~fail:None assumption1 assumption2 )
+      Typing_logic.disj ~fail:None t1 t2,
+      Typing_logic.disj ~fail:None f1 f2 )
 
-  let meet (partition1, assumption1) (partition2, assumption2) =
+  let meet (partition1, t1, f1) (partition2, t2, f2) =
     ( Partition.meet partition1 partition2,
-      Typing_logic.conj assumption1 assumption2 )
+      Typing_logic.conj t1 t2,
+      Typing_logic.conj f1 f2 )
 
   let product ~f sub_splits_and_assumptions =
-    let (sub_splits, sub_assumptions) = List.unzip sub_splits_and_assumptions in
-    let assumptions =
-      List.fold ~init:valid ~f:Typing_logic.conj sub_assumptions
+    let sub_splits = List.map sub_splits_and_assumptions ~f:fst3 in
+    let assumption_pairs =
+      List.map sub_splits_and_assumptions ~f:(fun (_, t, f) -> [t; f])
     in
-    (Partition.product f sub_splits, assumptions)
+    let assumption_sets = cartesian assumption_pairs in
+    let (true_assumptions, false_assumptions) =
+      match assumption_sets with
+      (* the split () by () case *)
+      | [] -> (valid, invalid)
+      (* we rely on the detail that the first element in the result of cartesian
+         is the first element of every input list *)
+      | all_true_assumptions :: rest ->
+        let true_assumptions =
+          List.fold ~init:valid ~f:Typing_logic.conj all_true_assumptions
+        in
+        let false_assumptions =
+          List.fold ~init:invalid ~f:(Typing_logic.disj ~fail:None)
+          @@ List.map rest ~f:(List.fold ~init:valid ~f:Typing_logic.conj)
+        in
+        (true_assumptions, false_assumptions)
+    in
+    (Partition.product f sub_splits, true_assumptions, false_assumptions)
 
-  let simplify (partition, assumptions) ty =
-    (Partition.simplify partition ty, assumptions)
+  let simplify (partition, true_assumptions, false_assumptions) ty =
+    (Partition.simplify partition ty, true_assumptions, false_assumptions)
 
   let left = Partition.left
 
@@ -235,7 +275,8 @@ type ty_partition = {
   left: dnf_ty;
   span: dnf_ty;
   right: dnf_ty;
-  assumptions: Typing_logic.subtype_prop;
+  true_assumptions: Typing_logic.subtype_prop;
+  false_assumptions: Typing_logic.subtype_prop;
 }
 
 let rec split_ty_by_tuple
@@ -263,7 +304,7 @@ let rec split_ty_by_tuple
             predicate_ty_pairs
             ~init:env
             ~f:(fun env (predicate, ty) ->
-              split_ty ~expansions env ty ~predicate)
+              split_ty ~other_intersected_tys:[] ~expansions env ty ~predicate)
         in
         ( env,
           TyPartition.product ~f:(Typing_make_type.tuple ty_reason) sub_splits
@@ -352,7 +393,12 @@ and split_ty_by_shape
                    (_field, { sfp_predicate }) )
                ->
               let (env, splits) =
-                split_ty ~expansions env sft_ty ~predicate:sfp_predicate
+                split_ty
+                  ~other_intersected_tys:[]
+                  ~expansions
+                  env
+                  sft_ty
+                  ~predicate:sfp_predicate
               in
               (env, (field, splits)))
         in
@@ -397,6 +443,7 @@ and split_ty_by_tag
     (env, TyPartition.mk_span ~env ~predicate ty)
 
 and split_ty
+    ~(other_intersected_tys : locl_ty list)
     ~(expansions : SSet.t)
     (env : env)
     (ty : locl_ty)
@@ -423,18 +470,28 @@ and split_ty
         predicate
     | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag predicate
   in
-  let split_union ~expansions env (tys : locl_ty list) =
+  let split_union ~other_intersected_tys ~expansions env (tys : locl_ty list) =
     let (env, partitions) =
-      List.fold_map ~init:env ~f:(split_ty ~expansions ~predicate) tys
+      List.fold_map
+        ~init:env
+        ~f:(split_ty ~expansions ~predicate ~other_intersected_tys)
+        tys
     in
     let partition =
       List.fold ~init:TyPartition.mk_bottom ~f:TyPartition.join partitions
     in
     (env, partition)
   in
-  let split_intersection ~init env ~expansions (tys : locl_ty list) =
+  let split_intersection
+      ~other_intersected_tys ~init env ~expansions (tys : locl_ty list) =
+    let ty_others_pairs = list_to_list_of_e_and_others tys in
     let (env, partitions) =
-      List.fold_map ~init:env ~f:(split_ty ~expansions ~predicate) tys
+      List.fold_map
+        ~init:env
+        ~f:(fun env (ty, others) ->
+          let other_intersected_tys = others @ other_intersected_tys in
+          split_ty ~other_intersected_tys ~expansions ~predicate env ty)
+        ty_others_pairs
     in
     let partition = List.fold ~init ~f:TyPartition.meet partitions in
     (env, partition)
@@ -482,9 +539,10 @@ and split_ty
       partition_f (env, dty)
     | Tprim Aast.Tnoreturn -> (env, TyPartition.mk_bottom)
     (* Types we can split into a union of types *)
-    | Tunion tyl -> split_union ~expansions env tyl
+    | Tunion tyl -> split_union ~other_intersected_tys ~expansions env tyl
     | Tprim Aast.Tnum ->
       split_union
+        ~other_intersected_tys
         env
         ~expansions
         [
@@ -493,6 +551,7 @@ and split_ty
         ]
     | Tprim Aast.Tarraykey ->
       split_union
+        ~other_intersected_tys
         env
         ~expansions
         [
@@ -501,6 +560,7 @@ and split_ty
         ]
     | Tvec_or_dict (tk, tv) ->
       split_union
+        ~other_intersected_tys
         env
         ~expansions
         [
@@ -509,19 +569,30 @@ and split_ty
         ]
     | Toption ty_opt ->
       split_union
+        ~other_intersected_tys
         env
         ~expansions
         [Typing_make_type.null (get_reason ty); ty_opt]
     (* Types we need to split across an intersection *)
     | Tintersection [] ->
-      split_ty ~expansions ~predicate env
+      split_ty ~other_intersected_tys ~expansions ~predicate env
       @@ Typing_make_type.mixed (get_reason ty)
     | Tintersection (ty :: tyl) ->
-      let (env, init) = split_ty ~expansions ~predicate env ty in
-      split_intersection env ~init ~expansions tyl
+      let (env, init) =
+        split_ty
+          ~other_intersected_tys:(other_intersected_tys @ tyl)
+          ~expansions
+          ~predicate
+          env
+          ty
+      in
+      let other_intersected_tys = ty :: other_intersected_tys in
+      split_intersection ~other_intersected_tys env ~init ~expansions tyl
     (* Below are types of the form T <: U. We treat these as T & U *)
     | Tdependent (_, super_ty) ->
-      let (env, partition) = split_ty ~expansions ~predicate env super_ty in
+      let (env, partition) =
+        split_ty ~other_intersected_tys ~expansions ~predicate env super_ty
+      in
       (env, TyPartition.(meet (mk_span ~env ~predicate ty) partition))
     | Tgeneric (name, _)
     | Tnewtype (name, _, _)
@@ -533,7 +604,12 @@ and split_ty
         Env.get_upper_bounds env name tyl |> Typing_set.elements
       in
       let init = TyPartition.mk_span ~env ~predicate ty in
-      split_intersection env ~init ~expansions upper_bounds
+      split_intersection
+        ~other_intersected_tys
+        env
+        ~init
+        ~expansions
+        upper_bounds
     | Tnewtype (name, tyl, as_ty) ->
       let init = TyPartition.mk_span ~env ~predicate ty in
       let expansions = SSet.add name expansions in
@@ -557,19 +633,100 @@ and split_ty
                       Decl_subst.make_locl td_tparams tyl);
                 }
           in
-          (* TODO T201569125 - do I need to do something with the where constraints here? *)
-          let tyl = List.map (variant :: variants) ~f:fst in
-          let (env, tyl) =
-            List.fold_map tyl ~init:env ~f:(fun env variant ->
-                let ((env, _ty_err_opt), variant) = localize env variant in
-                (env, variant))
+          let variants = variant :: variants in
+          let mk_subtype_prop sub super =
+            Typing_logic.IsSubtype (None, LoclType sub, LoclType super)
           in
-          let (env, partition_tyl) = split_union env ~expansions tyl in
+          let where_constraint_to_prop env (left, ck, right) =
+            let ((env, _err), local_left) = localize env left in
+            let ((env, _err), local_right) = localize env right in
+            let prop =
+              match ck with
+              | Ast_defs.Constraint_as -> mk_subtype_prop local_left local_right
+              | Ast_defs.Constraint_super ->
+                mk_subtype_prop local_right local_left
+              | Ast_defs.Constraint_eq ->
+                Typing_logic.conj
+                  (mk_subtype_prop local_left local_right)
+                  (mk_subtype_prop local_right local_left)
+            in
+            (env, prop)
+          in
+          let where_constraints_to_prop env wcs =
+            let (env, props) =
+              List.fold_map ~init:env ~f:where_constraint_to_prop wcs
+            in
+            (env, Typing_logic.conj_list props)
+          in
+          let (env, ty_prop_pairs) =
+            List.fold_map variants ~init:env ~f:(fun env variant ->
+                let (hint, constraints) = variant in
+                let ((env, _ty_err_opt), ty) = localize env hint in
+                let (env, prop) = where_constraints_to_prop env constraints in
+                (env, (ty, prop)))
+          in
+          let (env, partition_tyl) =
+            (* This works for unconditional case types too but its superfluous
+               to produce the assumptions in that case. *)
+            if Typing_case_types.has_where_clauses variants then
+              (* filter tyl that are disjoint from &(other_intersected_tys) *)
+              let filter_ty =
+                Typing_make_type.intersection Reason.none other_intersected_tys
+              in
+              let ty_prop_pairs =
+                List.filter ty_prop_pairs ~f:(fun (ty, _prop) ->
+                    not
+                    @@ Typing_case_types.are_locl_tys_disjoint env filter_ty ty)
+              in
+              let (env, partitions) =
+                List.fold_map
+                  ~init:env
+                  ~f:(fun env (current_ty, current_prop) ->
+                    let (env, (partition_, true_assumptions, false_assumptions))
+                        =
+                      split_ty
+                        ~other_intersected_tys
+                        ~expansions
+                        ~predicate
+                        env
+                        current_ty
+                    in
+                    (* Here we conj the where clause with the true and false
+                       assumptions from the split; we do this so that any
+                       FALSE from the split will eliminate the clause *)
+                    ( env,
+                      ( partition_,
+                        Typing_logic.conj true_assumptions current_prop,
+                        Typing_logic.conj false_assumptions current_prop ) ))
+                  ty_prop_pairs
+              in
+              let partition =
+                List.fold
+                  ~init:TyPartition.mk_bottom
+                  ~f:TyPartition.join
+                  partitions
+              in
+              (env, partition)
+            else
+              let tyl = List.map ty_prop_pairs ~f:fst in
+              split_union ~other_intersected_tys env ~expansions tyl
+          in
           let (env, partition_as_ty) =
-            split_intersection env ~init ~expansions [as_ty]
+            split_intersection
+              ~other_intersected_tys
+              env
+              ~init
+              ~expansions
+              [as_ty]
           in
           (env, TyPartition.meet partition_tyl partition_as_ty)
-        | _ -> split_intersection env ~init ~expansions [as_ty]
+        | _ ->
+          split_intersection
+            ~other_intersected_tys
+            env
+            ~init
+            ~expansions
+            [as_ty]
       end
   in
   (* If one side of the partition is empty that means [ty] falls completely
@@ -579,8 +736,8 @@ and split_ty
   (env, partition)
 
 let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
-  let (env, (partition, assumptions)) =
-    split_ty ~expansions:SSet.empty ~predicate env ty
+  let (env, (partition, true_assumptions, false_assumptions)) =
+    split_ty ~other_intersected_tys:[] ~expansions:SSet.empty ~predicate env ty
   in
   let left = TyPartition.left partition in
   let span = TyPartition.span partition in
@@ -597,7 +754,12 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
           @ from_list "right" right
           @ [
               Log_head
-                ( "assumptions = " ^ Typing_print.subtype_prop env assumptions,
+                ( "true_assumptions = "
+                  ^ Typing_print.subtype_prop env true_assumptions,
+                  [] );
+              Log_head
+                ( "false_assumptions = "
+                  ^ Typing_print.subtype_prop env false_assumptions,
                   [] );
             ]
         in
@@ -608,4 +770,4 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
             Log_head
               ("partition " ^ show_type_predicate_ @@ snd predicate, structures);
           ]));
-  (env, { predicate; left; span; right; assumptions })
+  (env, { predicate; left; span; right; true_assumptions; false_assumptions })

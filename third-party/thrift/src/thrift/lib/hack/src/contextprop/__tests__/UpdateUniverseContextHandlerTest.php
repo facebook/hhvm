@@ -70,33 +70,34 @@ final class UpdateUniverseContextHandlerTest
 
   public async function testUpdatedToRequestSinceAssetInvalid(
   ): Awaitable<void> {
-    await $this->genInitPZ2();
-    $this->assertNullUniverse();
+    await $this->genInitPZ2(async () ==> {
+      $this->assertNullUniverse();
 
-    $handler = new UpdateUniverseContextHandler();
+      $handler = new UpdateUniverseContextHandler();
 
-    $params = shape(
-      'service_name' =>
-        "service_name_holder_to_be_updated_for_universe_propagation",
-      'fn_name' =>
-        "function_name_holder_to_be_updated_for_universe_propagation",
-      'thrift_class' => ThriftClientBase::class,
-      'client' =>
-        new ThriftShimClient(new TBinaryProtocol(new TNullTransport())),
-      'service_interface' =>
-        "service_name_holder_to_be_updated_for_universe_propagation",
-    );
+      $params = shape(
+        'service_name' =>
+          "service_name_holder_to_be_updated_for_universe_propagation",
+        'fn_name' =>
+          "function_name_holder_to_be_updated_for_universe_propagation",
+        'thrift_class' => ThriftClientBase::class,
+        'client' =>
+          new ThriftShimClient(new TBinaryProtocol(new TNullTransport())),
+        'service_interface' =>
+          "service_name_holder_to_be_updated_for_universe_propagation",
+      );
 
-    $immutable_ctx =
-      new ImmutableThriftContextPropState(ThriftContextPropState::get());
-    $mutable_tfm = ThriftFrameworkMetadata::withDefaultValues();
+      $immutable_ctx =
+        new ImmutableThriftContextPropState(ThriftContextPropState::get());
+      $mutable_tfm = ThriftFrameworkMetadata::withDefaultValues();
 
-    $handler->onOutgoingDownstream($params, $mutable_tfm, $immutable_ctx);
+      $handler->onOutgoingDownstream($params, $mutable_tfm, $immutable_ctx);
 
-    $this->assertUniverse(
-      UniverseDesignator::withXsu(Universe\XSUIdentifier::FACEBOOK),
-      $mutable_tfm,
-    );
+      $this->assertUniverse(
+        UniverseDesignator::withXsu(Universe\XSUIdentifier::FACEBOOK),
+        $mutable_tfm,
+      );
+    });
   }
 
   <<DataProvider('dataProvider')>>
@@ -105,45 +106,45 @@ final class UpdateUniverseContextHandlerTest
     string $thrift_method_name,
     UniverseDesignator $expected_universe_designator,
   ): Awaitable<void> {
-    await $this->genInitPZ2();
+    await $this->genInitPZ2(async () ==> {
+      $this->assertNullUniverse();
+      $handler = new UpdateUniverseContextHandler();
 
-    $this->assertNullUniverse();
-    $handler = new UpdateUniverseContextHandler();
+      $params = shape(
+        'thrift_class' => $thrift_service_name,
+        'client' =>
+          new ThriftShimClient(new TBinaryProtocol(new TNullTransport())),
+        'service_name' => 'EXAMPLE_SR_CONFIG_SERVICE_NAME',
+      );
+      $transport =
+        TServiceRouterTransport::create($thrift_service_name, dict[], dict[]);
+      $client_handler = new TContextPropV2ClientHandler($transport, $params);
 
-    $params = shape(
-      'thrift_class' => $thrift_service_name,
-      'client' =>
-        new ThriftShimClient(new TBinaryProtocol(new TNullTransport())),
-      'service_name' => 'EXAMPLE_SR_CONFIG_SERVICE_NAME',
-    );
-    $transport =
-      TServiceRouterTransport::create($thrift_service_name, dict[], dict[]);
-    $client_handler = new TContextPropV2ClientHandler($transport, $params);
+      $client_handler->addHandler($handler);
+      $client_handler->preSend(
+        $thrift_method_name,
+        null,
+        0,
+        $thrift_service_name,
+      );
 
-    $client_handler->addHandler($handler);
-    $client_handler->preSend(
-      $thrift_method_name,
-      null,
-      0,
-      $thrift_service_name,
-    );
+      $write_headers = $transport->getWriteHeaders();
+      expect($write_headers)->toContainKey(
+        ThriftFrameworkMetadata_CONSTANTS::ThriftFrameworkMetadataHeaderKey,
+      );
+      $encoded_request_tfm = $write_headers[
+        ThriftFrameworkMetadata_CONSTANTS::ThriftFrameworkMetadataHeaderKey
+      ];
 
-    $write_headers = $transport->getWriteHeaders();
-    expect($write_headers)->toContainKey(
-      ThriftFrameworkMetadata_CONSTANTS::ThriftFrameworkMetadataHeaderKey,
-    );
-    $encoded_request_tfm = $write_headers[
-      ThriftFrameworkMetadata_CONSTANTS::ThriftFrameworkMetadataHeaderKey
-    ];
+      $tfm = ThriftFrameworkMetadata::withDefaultValues();
+      $tfm->read(
+        new TCompactProtocolAccelerated(
+          new TMemoryBuffer(Base64::decode($encoded_request_tfm)),
+        ),
+      );
 
-    $tfm = ThriftFrameworkMetadata::withDefaultValues();
-    $tfm->read(
-      new TCompactProtocolAccelerated(
-        new TMemoryBuffer(Base64::decode($encoded_request_tfm)),
-      ),
-    );
-
-    $this->assertUniverse($expected_universe_designator, $tfm);
+      $this->assertUniverse($expected_universe_designator, $tfm);
+    });
   }
 
   public async function testUniverseContextPropKillswitch(): Awaitable<void> {
@@ -202,8 +203,11 @@ final class UpdateUniverseContextHandlerTest
 
   }
 
-  private async function genInitPZ2(): Awaitable<void> {
-    await MockPZ2::genInitRequest(
+  private async function genInitPZ2<T>(
+    (function(): Awaitable<T>) $f,
+  ): Awaitable<T> {
+    return await MockPZ2::genZoned(
+      $f,
       PZ2AnnotationSimpleConcrete::get(
         PZXSUPolicy::create(PZXSUPolicyState::FACEBOOK),
       ),

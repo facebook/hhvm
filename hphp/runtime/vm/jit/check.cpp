@@ -72,7 +72,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 6. Every instruction must have a catch block attached to it if and only if it
  *    has the MayRaiseError flag.
  * 7. Any path from this block to a Block that expects values must be
- *    from a Jmp instruciton.
+ *    from a Jmp instruction.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
  */
 bool checkBlock(Block* b) {

@@ -12,68 +12,8 @@ import module.thrift_enums as _fbthrift_python_enums
 _fbthrift__module_name__ = "module.types"
 
 
-
-class MyEnum(thrift.py3.types.CompiledEnum, int):
-    Zero = 0
-    One = 1
-
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_MyEnum()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.MyEnum"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.MyEnum(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
-
-class TypedEnum(thrift.py3.types.CompiledEnum, int):
-    VAL1 = 0
-    VAL2 = 1
-
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_TypedEnum()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.TypedEnum"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.TypedEnum(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
+MyEnum = _fbthrift_python_enums.MyEnum
+TypedEnum = _fbthrift_python_enums.TypedEnum
 
 
 class __MyUnionType(enum.Enum):

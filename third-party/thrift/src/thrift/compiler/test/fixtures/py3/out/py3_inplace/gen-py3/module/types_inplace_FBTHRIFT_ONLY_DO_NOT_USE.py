@@ -39,126 +39,18 @@ __all__ = []
 
 ### Enums ###
 
-class AnEnum(thrift.py3.types.CompiledEnum, int):
-    NOTSET = 0
-    ONE = 1
-    TWO = 2
-    THREE = 3
-    FOUR = 4
+AnEnum = _fbthrift_python_enums.AnEnum
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_AnEnum()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.AnEnum"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.AnEnum(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.AnEnum) -> AnEnum:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(AnEnum, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("AnEnum")
 
 
-class AnEnumRenamed(thrift.py3.types.CompiledEnum, int):
-    name_ = 0
-    value_ = 1
-    renamed_ = 2
+AnEnumRenamed = _fbthrift_python_enums.AnEnumRenamed
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_AnEnumRenamed()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.AnEnumRenamed"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.AnEnumRenamed(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.AnEnumRenamed) -> AnEnumRenamed:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(AnEnumRenamed, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("AnEnumRenamed")
 
 
-class Flags(thrift.py3.types.Flag):
-    flag_A = 1
-    flag_B = 2
-    flag_C = 4
-    flag_D = 8
+Flags = _fbthrift_python_enums.Flags
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_Flags()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.Flags"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.Flags(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.Flags) -> Flags:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(Flags, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("Flags")
 
 
@@ -1334,10 +1226,7 @@ class List__AnEnum(thrift.py3.types.List):
 
     @staticmethod
     def from_python(python_list: thrift.python.types.List) -> List__AnEnum:
-        _items = [
-            AnEnum.from_python(item)
-            for item in python_list
-        ]
+        _items = list(python_list)
         return List__AnEnum(
             items=_items,
             private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
@@ -1900,10 +1789,7 @@ class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
 
     @staticmethod
     def from_python(python_map: thrift.python.types.Map) -> Map__AnEnumRenamed_i32:
-        _keys = (
-            AnEnumRenamed.from_python(key)
-            for key in python_map.keys()
-        )
+        _keys = python_map.keys()
         _values = python_map.values()
         return Map__AnEnumRenamed_i32(
             items=dict(zip(_keys, _values)),
@@ -2117,7 +2003,6 @@ class SimpleStruct(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__smaller_real",
         "_fbthrift_inner__something",
-        "_fbthrift_inner__opt_default_enum",
     )
     _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.SimpleStruct
     _FBTHRIFT__FIELD_NAMES = (
@@ -2136,7 +2021,6 @@ class SimpleStruct(thrift.py3.types.Struct):
     _fbthrift__inner : _fbthrift_python_types.SimpleStruct
     _fbthrift_inner__smaller_real : float | None
     _fbthrift_inner__something : _typing.Mapping[int, int] | None
-    _fbthrift_inner__opt_default_enum : AnEnum | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -2146,7 +2030,6 @@ class SimpleStruct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         instance._fbthrift_inner__smaller_real = None
         instance._fbthrift_inner__something = None
-        instance._fbthrift_inner__opt_default_enum = None
         return instance
 
     def __call__(self, **kwargs) -> SimpleStruct:
@@ -2239,13 +2122,10 @@ class SimpleStruct(thrift.py3.types.Struct):
 
     @_python__property
     def opt_default_enum(self) -> AnEnum:
-        if self._fbthrift_inner__opt_default_enum is None:
-            __python_val = self._fbthrift__inner.opt_default_enum
-            if __python_val is None:
-                __python_val = AnEnum.THREE
-            self._fbthrift_inner__opt_default_enum = AnEnum.from_python(__python_val)
-
-        return self._fbthrift_inner__opt_default_enum
+        __python_val = self._fbthrift__inner.opt_default_enum
+        if __python_val is None:
+            return AnEnum.THREE
+        return __python_val
 
 
     @classmethod
@@ -2363,7 +2243,6 @@ class ComplexStruct(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__structOne",
         "_fbthrift_inner__structTwo",
-        "_fbthrift_inner__an_enum",
     )
     _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ComplexStruct
     _FBTHRIFT__FIELD_NAMES = (
@@ -2380,7 +2259,6 @@ class ComplexStruct(thrift.py3.types.Struct):
     _fbthrift__inner : _fbthrift_python_types.ComplexStruct
     _fbthrift_inner__structOne : SimpleStruct | None
     _fbthrift_inner__structTwo : SimpleStruct | None
-    _fbthrift_inner__an_enum : AnEnum | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -2390,7 +2268,6 @@ class ComplexStruct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         instance._fbthrift_inner__structOne = None
         instance._fbthrift_inner__structTwo = None
-        instance._fbthrift_inner__an_enum = None
         return instance
 
     def __call__(self, **kwargs) -> ComplexStruct:
@@ -2453,11 +2330,7 @@ class ComplexStruct(thrift.py3.types.Struct):
 
     @_python__property
     def an_enum(self) -> AnEnum:
-        if self._fbthrift_inner__an_enum is None:
-            __python_val = self._fbthrift__inner.an_enum
-            self._fbthrift_inner__an_enum = AnEnum.from_python(__python_val)
-
-        return self._fbthrift_inner__an_enum
+        return self._fbthrift__inner.an_enum
 
     @_python__property
     def some_bytes(self) -> bytes:

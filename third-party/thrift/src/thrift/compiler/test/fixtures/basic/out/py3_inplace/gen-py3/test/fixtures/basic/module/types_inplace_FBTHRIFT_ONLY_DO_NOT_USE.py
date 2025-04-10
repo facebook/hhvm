@@ -39,81 +39,13 @@ __all__ = []
 
 ### Enums ###
 
-class MyEnum(thrift.py3.types.CompiledEnum, int):
-    MyValue1 = 0
-    MyValue2 = 1
+MyEnum = _fbthrift_python_enums.MyEnum
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_MyEnum()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.MyEnum"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.MyEnum(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.MyEnum) -> MyEnum:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(MyEnum, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("MyEnum")
 
 
-class HackEnum(thrift.py3.types.CompiledEnum, int):
-    Value1 = 0
-    Value2 = 1
+HackEnum = _fbthrift_python_enums.HackEnum
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_HackEnum()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.HackEnum"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.HackEnum(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.HackEnum) -> HackEnum:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(HackEnum, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("HackEnum")
 
 
@@ -428,7 +360,6 @@ class MyStruct(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__MyDataField",
-        "_fbthrift_inner__myEnum",
         "_fbthrift_inner__floatSet",
     )
     _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyStruct
@@ -445,7 +376,6 @@ class MyStruct(thrift.py3.types.Struct):
     )
     _fbthrift__inner : _fbthrift_python_types.MyStruct
     _fbthrift_inner__MyDataField : MyDataItem | None
-    _fbthrift_inner__myEnum : MyEnum | None
     _fbthrift_inner__floatSet : _typing.AbstractSet[float] | None
 
 
@@ -455,7 +385,6 @@ class MyStruct(thrift.py3.types.Struct):
     def __new__(cls, *args, **kwargs) -> MyStruct:
         instance = super().__new__(cls)
         instance._fbthrift_inner__MyDataField = None
-        instance._fbthrift_inner__myEnum = None
         instance._fbthrift_inner__floatSet = None
         return instance
 
@@ -511,11 +440,7 @@ class MyStruct(thrift.py3.types.Struct):
 
     @_python__property
     def myEnum(self) -> MyEnum:
-        if self._fbthrift_inner__myEnum is None:
-            __python_val = self._fbthrift__inner.myEnum
-            self._fbthrift_inner__myEnum = MyEnum.from_python(__python_val)
-
-        return self._fbthrift_inner__myEnum
+        return self._fbthrift__inner.myEnum
 
     @_python__property
     def oneway(self) -> bool:
@@ -802,7 +727,6 @@ class MyUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
-        "_fbthrift_inner__myEnum",
         "_fbthrift_inner__myStruct",
         "_fbthrift_inner__myDataItem",
         "_fbthrift_inner__floatSet",
@@ -818,7 +742,6 @@ class MyUnion(thrift.py3.types.Union):
     )
     Type = _fbthrift_python_types.MyUnion.Type
     _fbthrift__inner : _fbthrift_python_types.MyUnion
-    _fbthrift_inner__myEnum : MyEnum | None
     _fbthrift_inner__myStruct : MyStruct | None
     _fbthrift_inner__myDataItem : MyDataItem | None
     _fbthrift_inner__floatSet : _typing.AbstractSet[float] | None
@@ -831,7 +754,6 @@ class MyUnion(thrift.py3.types.Union):
 
     def __new__(cls, *args, **kwargs) -> MyUnion:
         instance = super().__new__(cls)
-        instance._fbthrift_inner__myEnum = None
         instance._fbthrift_inner__myStruct = None
         instance._fbthrift_inner__myDataItem = None
         instance._fbthrift_inner__floatSet = None
@@ -872,13 +794,7 @@ class MyUnion(thrift.py3.types.Union):
 
     @_python__property
     def myEnum(self) -> MyEnum:
-        if self._fbthrift_inner__myEnum is None:
-            __python_val = self._fbthrift__inner.myEnum
-            if __python_val is None:
-                return None
-            self._fbthrift_inner__myEnum = MyEnum.from_python(__python_val)
-
-        return self._fbthrift_inner__myEnum
+        return self._fbthrift__inner.myEnum
 
     @_python__property
     def myStruct(self) -> MyStruct:
@@ -917,8 +833,6 @@ class MyUnion(thrift.py3.types.Union):
     @_python__property
     def value(self) -> MyEnum | MyStruct | MyDataItem | _typing.AbstractSet[float] | None:
         match self._fbthrift__inner.type:
-            case _fbthrift_python_types.MyUnion.Type.myEnum:
-                return self.myEnum
             case _fbthrift_python_types.MyUnion.Type.myStruct:
                 return self.myStruct
             case _fbthrift_python_types.MyUnion.Type.myDataItem:

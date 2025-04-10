@@ -39,123 +39,18 @@ __all__ = []
 
 ### Enums ###
 
-class EmptyEnum(thrift.py3.types.CompiledEnum, int):
+EmptyEnum = _fbthrift_python_enums.EmptyEnum
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_EmptyEnum()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.EmptyEnum"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.EmptyEnum(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.EmptyEnum) -> EmptyEnum:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(EmptyEnum, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("EmptyEnum")
 
 
-class City(thrift.py3.types.CompiledEnum, int):
-    NYC = 0
-    MPK = 1
-    SEA = 2
-    LON = 3
+City = _fbthrift_python_enums.City
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_City()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.City"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.City(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.City) -> City:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(City, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("City")
 
 
-class Company(thrift.py3.types.CompiledEnum, int):
-    FACEBOOK = 0
-    WHATSAPP = 1
-    OCULUS = 2
-    INSTAGRAM = 3
-    __FRIEND__FEED = 4
+Company = _fbthrift_python_enums.Company
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_Company()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.Company"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.Company(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.Company) -> Company:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(Company, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("Company")
 
 
@@ -452,10 +347,7 @@ class List__Company(thrift.py3.types.List):
 
     @staticmethod
     def from_python(python_list: thrift.python.types.List) -> List__Company:
-        _items = [
-            Company.from_python(item)
-            for item in python_list
-        ]
+        _items = list(python_list)
         return List__Company(
             items=_items,
             private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
@@ -916,7 +808,6 @@ class Internship(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
-        "_fbthrift_inner__employer",
     )
     _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.Internship
     _FBTHRIFT__FIELD_NAMES = (
@@ -927,7 +818,6 @@ class Internship(thrift.py3.types.Struct):
         "school",
     )
     _fbthrift__inner : _fbthrift_python_types.Internship
-    _fbthrift_inner__employer : _typing.Optional[Company] | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -935,7 +825,6 @@ class Internship(thrift.py3.types.Struct):
 
     def __new__(cls, *args, **kwargs) -> Internship:
         instance = super().__new__(cls)
-        instance._fbthrift_inner__employer = None
         return instance
 
     def __call__(self, **kwargs) -> Internship:
@@ -982,13 +871,7 @@ class Internship(thrift.py3.types.Struct):
 
     @_python__property
     def employer(self) -> _typing.Optional[Company]:
-        if self._fbthrift_inner__employer is None:
-            __python_val = self._fbthrift__inner.employer
-            if __python_val is None:
-                return None
-            self._fbthrift_inner__employer = Company.from_python(__python_val)
-
-        return self._fbthrift_inner__employer
+        return self._fbthrift__inner.employer
 
     @_python__property
     def compensation(self) -> _typing.Optional[float]:

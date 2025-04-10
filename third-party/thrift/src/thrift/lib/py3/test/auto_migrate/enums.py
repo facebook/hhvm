@@ -237,7 +237,7 @@ class EnumTests(unittest.TestCase):
 
     def test_enum_module(self) -> None:
         # py3 enums are now the same as thrift-python enums
-        self.assertEqual(Color.__module__, f"testing.thrift_enums")
+        self.assertEqual(Color.__module__, "testing.thrift_enums")
 
     def test_enum_print(self) -> None:
         for i, color in enumerate("red blue green".split(), 0):

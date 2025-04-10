@@ -40,123 +40,18 @@ __all__ = []
 
 ### Enums ###
 
-class has_bitwise_ops(thrift.py3.types.CompiledEnum, int):
-    none = 0
-    zero = 1
-    one = 2
-    two = 4
-    three = 8
+has_bitwise_ops = _fbthrift_python_enums.has_bitwise_ops
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_has_bitwise_ops()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.has_bitwise_ops"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.has_bitwise_ops(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.has_bitwise_ops) -> has_bitwise_ops:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(has_bitwise_ops, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("has_bitwise_ops")
 
 
-class is_unscoped(thrift.py3.types.CompiledEnum, int):
-    hello = 0
-    world = 1
+is_unscoped = _fbthrift_python_enums.is_unscoped
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_is_unscoped()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.is_unscoped"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.is_unscoped(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.is_unscoped) -> is_unscoped:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(is_unscoped, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("is_unscoped")
 
 
-class MyForwardRefEnum(thrift.py3.types.CompiledEnum, int):
-    ZERO = 0
-    NONZERO = 12
+MyForwardRefEnum = _fbthrift_python_enums.MyForwardRefEnum
 
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_python_enums.gen_metadata_enum_MyForwardRefEnum()
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.MyForwardRefEnum"
-
-    def _to_python(self):
-        return _fbthrift_python_enums.MyForwardRefEnum(self._fbthrift_value_)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self._fbthrift_value_
-
-    @staticmethod
-    def from_python(python_enum: _fbthrift_python_enums.MyForwardRefEnum) -> MyForwardRefEnum:
-        if isinstance(python_enum, thrift.python.types.BadEnum):
-            return thrift.python.types.BadEnum(MyForwardRefEnum, int(python_enum))
-        return python_enum._to_py3()
-
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
 __all__.append("MyForwardRefEnum")
 
 
@@ -1894,8 +1789,6 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
-        "_fbthrift_inner__a",
-        "_fbthrift_inner__b",
     )
     _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyStructWithForwardRefEnum
     _FBTHRIFT__FIELD_NAMES = (
@@ -1903,8 +1796,6 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
         "b",
     )
     _fbthrift__inner : _fbthrift_python_types.MyStructWithForwardRefEnum
-    _fbthrift_inner__a : MyForwardRefEnum | None
-    _fbthrift_inner__b : MyForwardRefEnum | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -1912,8 +1803,6 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
 
     def __new__(cls, *args, **kwargs) -> MyStructWithForwardRefEnum:
         instance = super().__new__(cls)
-        instance._fbthrift_inner__a = None
-        instance._fbthrift_inner__b = None
         return instance
 
     def __call__(self, **kwargs) -> MyStructWithForwardRefEnum:
@@ -1952,19 +1841,11 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
 
     @_python__property
     def a(self) -> MyForwardRefEnum:
-        if self._fbthrift_inner__a is None:
-            __python_val = self._fbthrift__inner.a
-            self._fbthrift_inner__a = MyForwardRefEnum.from_python(__python_val)
-
-        return self._fbthrift_inner__a
+        return self._fbthrift__inner.a
 
     @_python__property
     def b(self) -> MyForwardRefEnum:
-        if self._fbthrift_inner__b is None:
-            __python_val = self._fbthrift__inner.b
-            self._fbthrift_inner__b = MyForwardRefEnum.from_python(__python_val)
-
-        return self._fbthrift_inner__b
+        return self._fbthrift__inner.b
 
 
     @classmethod

@@ -1434,6 +1434,8 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       {"erl.default_value", erlang("DefaultValue")},
       {"iq.node_type", erlang("Iq")},
   };
+  // Add a replacement to `deprecations` map if a removed unstructured
+  // annotation has a structured annotation replacement.
   std::set<std::string> removed_annotations = {
       "code",
       "cpp2.declare_bitwise_ops",

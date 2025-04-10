@@ -141,7 +141,6 @@ let exec_command_with_config
     ServerConfig.load
       ~silent:(not @@ ClientArgs.dump_config command)
       ~from
-      ~ai_options:None
       ~cli_config_overrides:
         (ClientArgs.config command |> Option.value ~default:[])
   in

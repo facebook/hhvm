@@ -96,7 +96,6 @@ module Program = struct
         ServerConfig.load
           ~silent:false
           ~from:(ServerArgs.from genv.options)
-          ~ai_options:None
           ~cli_config_overrides:(ServerArgs.config genv.options)
       in
       if not (ServerConfig.is_compatible genv.config new_config) then (
@@ -1385,7 +1384,6 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
       ~silent:false
       ~from:(ServerArgs.from options)
       ~cli_config_overrides:(ServerArgs.config options)
-      ~ai_options:None
   in
   Option.iter local_config.ServerLocalConfig.memtrace_dir ~f:(fun dir ->
       Daemon.start_memtracing (Filename.concat dir "memtrace.server.ctf"));

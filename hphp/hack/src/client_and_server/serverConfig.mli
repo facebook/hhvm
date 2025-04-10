@@ -25,7 +25,6 @@ val load :
   silent:bool ->
   from:string ->
   cli_config_overrides:(string * string) list ->
-  ai_options:Ai_options.t option ->
   t * ServerLocalConfig.t
 
 val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
@@ -75,7 +74,7 @@ val convert_auto_namespace_to_map : string -> (string * string) list
 val warnings_generated_files : t -> Str.regexp list
 
 val make_sharedmem_config :
-  ?ai_options:Ai_options.t ->
-  Config_file.t ->
-  ServerLocalConfig.t ->
-  SharedMem.config
+  Config_file.t -> ServerLocalConfig.t -> SharedMem.config
+
+val update_config_with_ai_options :
+  t -> ServerLocalConfig.t -> Ai_options.t option -> t * ServerLocalConfig.t

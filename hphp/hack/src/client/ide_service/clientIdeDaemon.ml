@@ -352,11 +352,7 @@ let initialize1
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
   let (config, local_config) =
-    ServerConfig.load
-      ~silent:true
-      ~cli_config_overrides:config
-      ~from:""
-      ~ai_options:None
+    ServerConfig.load ~silent:true ~cli_config_overrides:config ~from:""
   in
   HackEventLogger.set_hhconfig_version
     (ServerConfig.version config |> Config_file.version_to_string_opt);

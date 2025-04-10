@@ -68,7 +68,7 @@ let make_gc_control config =
   in
   { GlobalConfig.gc_control with Gc.Control.minor_heap_size; space_overhead }
 
-let make_sharedmem_config ?ai_options config local_config =
+let make_sharedmem_config config local_config =
   let { SharedMem.global_size; heap_size; shm_min_avail; _ } =
     SharedMem.default_config
   in
@@ -95,26 +95,18 @@ let make_sharedmem_config ?ai_options config local_config =
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config
   in
-  let config =
-    {
-      SharedMem.global_size;
-      heap_size;
-      hash_table_pow;
-      log_level;
-      sample_rate;
-      shm_dirs;
-      shm_use_sharded_hashtbl;
-      shm_cache_size;
-      shm_min_avail;
-      compression;
-    }
-  in
-  let config =
-    match ai_options with
-    | None -> config
-    | Some ai_options -> Ai_options.modify_shared_mem ai_options config
-  in
-  config
+  {
+    SharedMem.global_size;
+    heap_size;
+    hash_table_pow;
+    log_level;
+    sample_rate;
+    shm_dirs;
+    shm_use_sharded_hashtbl;
+    shm_cache_size;
+    shm_min_avail;
+    compression;
+  }
 
 let config_list_regexp = Str.regexp "[, \t]+"
 
@@ -526,7 +518,6 @@ let load_local_config
     (config : Config_file_common.t)
     (version : Config_file_version.version)
     ~(command_line_overrides : Config_file_common.t)
-    ~is_ai
     ~silent
     ~from : ServerLocalConfig.t =
   let current_rolled_out_flag_idx =
@@ -535,37 +526,16 @@ let load_local_config
   let deactivate_saved_state_rollout =
     bool_ "deactivate_saved_state_rollout" ~default:false config
   in
-  let local_config =
-    ServerLocalConfigLoad.load
-      ~silent
-      ~current_version:version
-      ~current_rolled_out_flag_idx
-      ~deactivate_saved_state_rollout
-      ~from
-      ~overrides:command_line_overrides
-  in
-  if is_ai then
-    let open ServerLocalConfig in
-    {
-      local_config with
-      watchman =
-        {
-          local_config.watchman with
-          Watchman.enabled = false;
-          subscribe = false;
-        };
-      interrupt_on_watchman = false;
-      interrupt_on_client = false;
-      trace_parsing = false;
-    }
-  else
-    local_config
-
-let load
+  ServerLocalConfigLoad.load
     ~silent
+    ~current_version:version
+    ~current_rolled_out_flag_idx
+    ~deactivate_saved_state_rollout
     ~from
-    ~(cli_config_overrides : (string * string) list)
-    ~(ai_options : Ai_options.t option) : t * ServerLocalConfig.t =
+    ~overrides:command_line_overrides
+
+let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
+    t * ServerLocalConfig.t =
   let command_line_overrides = Config_file.of_list cli_config_overrides in
   let hhconfig_abs_path = Relative_path.to_absolute repo_config_path in
   let hhconfig = Config_file.parse_hhconfig hhconfig_abs_path in
@@ -580,13 +550,7 @@ let load
     Config_file.parse_version (Config_file.Getters.string_opt "version" config)
   in
   let local_config =
-    load_local_config
-      config
-      version
-      ~command_line_overrides
-      ~is_ai:(Option.is_some ai_options)
-      ~silent
-      ~from
+    load_local_config config version ~command_line_overrides ~silent ~from
   in
   Option.iter
     ~f:Config_file_common.set_pkgconfig_path
@@ -667,7 +631,7 @@ let load
          * to wait indefinitely *)
         int_ "load_script_timeout" ~default:0 config;
       gc_control = make_gc_control config;
-      sharedmem_config = make_sharedmem_config config local_config ?ai_options;
+      sharedmem_config = make_sharedmem_config config local_config;
       tc_options = global_opts;
       parser_options = global_opts.GlobalOptions.po;
       glean_options = global_opts;
@@ -751,3 +715,25 @@ let warn_on_non_opt_build config = config.warn_on_non_opt_build
 let ide_fall_back_to_full_index config = config.ide_fall_back_to_full_index
 
 let warnings_generated_files config = config.warnings_generated_files
+
+let update_config_with_ai_options config local_config ai_options =
+  match ai_options with
+  | None -> (config, local_config)
+  | Some ai ->
+    ( {
+        config with
+        sharedmem_config =
+          Ai_options.modify_shared_mem ai config.sharedmem_config;
+      },
+      {
+        local_config with
+        watchman =
+          {
+            local_config.watchman with
+            Watchman.enabled = false;
+            subscribe = false;
+          };
+        interrupt_on_watchman = false;
+        interrupt_on_client = false;
+        trace_parsing = false;
+      } )

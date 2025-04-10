@@ -91,11 +91,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
   let (hhconfig, _) =
-    ServerConfig.load
-      ~silent:true
-      ~from:""
-      ~ai_options:None
-      ~cli_config_overrides:[]
+    ServerConfig.load ~silent:true ~from:"" ~cli_config_overrides:[]
   in
   let popt = ServerConfig.parser_options hhconfig in
   let tcopt = ServerConfig.typechecker_options hhconfig in

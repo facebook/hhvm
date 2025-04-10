@@ -19,7 +19,6 @@ let test () =
     ServerConfig.load
       ~silent:false
       ~from:""
-      ~ai_options:None
       ~cli_config_overrides:
         [("timeout", "747"); ("informant_min_distance_restart", "711")]
   in

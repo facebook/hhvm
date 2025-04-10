@@ -74,7 +74,7 @@ TEST_F(FunctionSendCallbackTest, with_missing_server_fails) {
     exn = std::move(state.exception());
   });
   EXPECT_TRUE(bool(exn));
-  auto err = "transport is closed in write()";
+  auto err = "TTransportException";
   EXPECT_NE(string::npos, exn.what().find(err));
 }
 

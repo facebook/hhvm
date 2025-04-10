@@ -52,7 +52,7 @@ abstract class ThriftAsyncProcessor
         shape("class_name" => static::class, "method_name" => $methodname),
       ));
     }
-    if (!PHP\method_exists($this, $methodname)) {
+    if (!$this->isSupportedMethod($methodname)) {
       $handler_ctx = $this->eventHandler_->getHandlerContext($fname);
       $this->eventHandler_->preRead($handler_ctx, $fname, dict[]);
       $input->skip(TType::STRUCT);

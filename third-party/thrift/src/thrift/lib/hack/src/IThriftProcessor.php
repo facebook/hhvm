@@ -43,4 +43,6 @@ interface IThriftProcessor {
   )[write_props]: this;
 
   public function isSubRequest()[]: bool;
+
+  public function isSupportedMethod(string $fname_with_prefix)[]: bool;
 }

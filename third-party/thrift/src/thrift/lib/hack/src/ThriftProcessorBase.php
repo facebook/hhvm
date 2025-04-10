@@ -154,6 +154,10 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     }
     await $server_stream->genStream<TStreamType>($stream, $payload_encoder);
   }
+
+  final public function isSupportedMethod(string $fname_with_prefix)[]: bool {
+    return PHP\method_exists($this, $fname_with_prefix);
+  }
 }
 
 /**

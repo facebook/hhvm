@@ -252,36 +252,43 @@ vector<McrouterOptionMismatch> McrouterOptionsBase::compare(
       errors.push_back(std::move(e));
     } else {
       auto subValue = options::substituteTemplates(it->second);
-      auto currValue = toString(value);
 
-      // config_params is a string of comma separated key-value pairs
-      // e.g. "key1:value1,key2:value2", and are stored as
-      // McrouterOptionData::Type::string_map. we need to compare as maps
-      bool isSame = false;
-      if (type == McrouterOptionData::Type::string_map) {
-        unordered_map<string, string> newValueMap;
-        boost::any newValue{boost::any(
-            const_cast<unordered_map<string, string>*>(&newValueMap))};
-        auto oldValuePtr =
-            boost::any_cast<unordered_map<string, string>*>(&value);
-        if (oldValuePtr != nullptr &&
-            tryFromString<unordered_map<string, string>>(subValue, newValue)) {
+      try {
+        auto currValue = toString(value);
+        // config_params is a string of comma-separated key-value pairs
+        // e.g. "key1:value1,key2:value2", and are stored as
+        // McrouterOptionData::Type::string_map. We need to compare as maps
+        bool isSame = false;
+        if (type == McrouterOptionData::Type::string_map) {
+          unordered_map<string, string> newValueMap;
+          boost::any newValue{boost::any(
+              const_cast<unordered_map<string, string>*>(&newValueMap))};
+          auto oldValuePtr =
+              boost::any_cast<unordered_map<string, string>*>(&value);
+          if (oldValuePtr == nullptr) {
+            throw std::runtime_error("could not cast config_params to a map");
+          }
+          fromString(subValue, newValue);
           isSame = **boost::any_cast<unordered_map<string, string>*>(
                        &newValue) == **oldValuePtr;
         } else {
-          isSame = false;
+          isSame = currValue == subValue;
         }
-      } else {
-        isSame = currValue == subValue;
-      }
-
-      if (!isSame) {
+        if (!isSame) {
+          McrouterOptionMismatch e;
+          e.optionName = name;
+          e.lunaValue = it->second;
+          e.errorMsg = "luna value " + it->second +
+              " and current mcrouter_options value " + currValue +
+              " are different";
+          errors.push_back(std::move(e));
+        }
+      } catch (const std::exception& ex) {
         McrouterOptionMismatch e;
         e.optionName = name;
         e.lunaValue = it->second;
-        e.errorMsg = "luna value " + it->second +
-            " and current mcrouter_options value " + toString(value) +
-            " are different";
+        e.errorMsg = "couldn't convert value to " + optionTypeToString(type) +
+            ". Exception: " + ex.what();
         errors.push_back(std::move(e));
       }
     }

@@ -50,6 +50,7 @@ list(APPEND THIRD_PARTY_MODULES timelib)
 # Required by folly
 add_subdirectory(double-conversion)
 add_subdirectory(boost)
+add_subdirectory(fast_float)
 add_subdirectory(fmt)
 add_subdirectory(jemalloc)
 add_subdirectory(libsodium)
@@ -140,3 +141,5 @@ endif()
 
 ##### --- new style, but only depends on old style --- #####
 add_subdirectory(watchman)
+
+add_subdirectory(usdt)

@@ -650,6 +650,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
 
   template <typename Protocol, typename ContainerType, typename ElementType>
   static constexpr bool kShouldProcessAsArithmeticVector =
+      !std::is_same_v<elem_type, bool> &&
       folly::is_contiguous_range_v<ContainerType> &&
       std::is_arithmetic_v<ElementType> &&
       SupportsArithmeticVectors<Protocol>::value;

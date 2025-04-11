@@ -49,7 +49,7 @@ class TransportPeeker : public folly::AsyncTransport::ReadCallback,
 
  protected:
   ~TransportPeeker() override {
-    if (transport_->getReadCallback() == this) {
+    if (transport_ && transport_->getReadCallback() == this) {
       transport_->setReadCB(nullptr);
     }
   }
@@ -97,6 +97,9 @@ class TransportPeeker : public folly::AsyncTransport::ReadCallback,
     if (read_ == peekBytes_.size()) {
       transport_->setReadCB(nullptr);
       auto callback = std::exchange(transportCallback_, nullptr);
+      // transportCallback_->peekSuccess() may destroy the underlying
+      // transport_, set it to nullptr to avoid use-after-free in dtor.
+      transport_ = nullptr;
       callback->peekSuccess(std::move(peekBytes_));
     }
   }

@@ -69,7 +69,7 @@ TEST_F(ChannelTestFixture, SingleRpcChannelErrorEmptyBody) {
   EchoProcessor processor("extrakey", "extravalue", "<eom>", eventBase_.get());
   unordered_map<string, string> inputHeaders;
   inputHeaders["key1"] = "value1";
-  string inputPayload = "";
+  string inputPayload;
   unordered_map<string, string>* outputHeaders;
   IOBuf* outputPayload;
   sendAndReceiveStream(

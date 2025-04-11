@@ -1,0 +1,54 @@
+--- ocaml
++++ rupro
+@@ -1,17 +1,51 @@
+ FoldedClass {
++    name: "\\A",
++    pos: Pos(root|conditional_class_decl.php, 13:9-10),
++    kind: Cclass(
++        Concrete,
++    ),
++    consts: {
++        "class": ClassConst {
++            is_synthesized: true,
++            kind: CCConcrete,
++            pos: Pos(root|conditional_class_decl.php, 13:9-10),
++            ty: class<this>,
++            origin: "\\A",
++            refs: [],
++        },
++    },
++}
++FoldedClass {
++    name: "\\B",
++    pos: Pos(root|conditional_class_decl.php, 15:9-10),
++    kind: Cclass(
++        Concrete,
++    ),
++    consts: {
++        "class": ClassConst {
++            is_synthesized: true,
++            kind: CCConcrete,
++            pos: Pos(root|conditional_class_decl.php, 15:9-10),
++            ty: class<this>,
++            origin: "\\B",
++            refs: [],
++        },
++    },
++}
++FoldedClass {
+     name: "\\C",
+     pos: Pos(root|conditional_class_decl.php, 18:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|conditional_class_decl.php, 18:7-8),
+             ty: class<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+ }

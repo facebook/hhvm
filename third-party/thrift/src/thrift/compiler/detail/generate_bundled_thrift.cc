@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <map>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 // Input:
 //   A directory containing ".thrift" files. All files (recursively) in the
@@ -34,21 +39,27 @@ namespace fs = std::filesystem;
 
 namespace {
 
+using lines_t = std::vector<std::string>;
+
 void populate_one_file(
     const fs::path& root,
-    std::map<std::string, std::string>& out,
+    std::map<std::string, lines_t>& out,
     const fs::path& path) {
   std::ifstream file(path);
-  auto buf = std::string(
-      std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+  lines_t lines;
+  std::string line;
+  while (std::getline(file, line)) {
+    lines.push_back(line);
+  }
+
   std::string key = fmt::format(
       "{}/{}", root.generic_string(), path.lexically_normal().generic_string());
-  out[std::move(key)] = std::move(buf);
+  out[std::move(key)] = std::move(lines);
 }
 
 void populate_recursively(
     const fs::path& root,
-    std::map<std::string, std::string>& out,
+    std::map<std::string, lines_t>& out,
     const fs::path& path) {
   for (const auto& entry : fs::directory_iterator(path)) {
     const auto& filepath = entry.path();
@@ -58,6 +69,60 @@ void populate_recursively(
       populate_one_file(root, out, filepath);
     }
   }
+}
+
+template <typename Func>
+void for_each_chunk(const lines_t& lines, std::size_t chunk_size, Func func) {
+  auto begin = lines.begin();
+  auto end = lines.end();
+  while (begin != end) {
+    auto chunk_end = begin;
+    auto distance = std::min(
+        chunk_size, static_cast<std::size_t>(std::distance(begin, end)));
+    std::advance(chunk_end, distance);
+    func(begin, chunk_end);
+    begin = chunk_end;
+  }
+}
+
+void print_one_file(std::string_view filename, const lines_t& content) {
+  // The "chunking" logic here is to avoid the generated file being too big.
+  // Specifically, MSVC produces C2026 when...
+  //     The string was longer than the limit of 16380 single-byte characters.
+  // https://learn.microsoft.com/en-us/cpp/error-messages/compiler-errors-1/compiler-error-c2026?view=msvc-170
+
+  // The size limit is around 16KB and with a *very* conservative estimate of
+  // around ~100 bytes per line, we can fit ~150 lines in one string literal.
+  // The goal here is not to maximize the number of characters that fit but to
+  // avoid the noise from raw string literal delimiter (i.e. __FBTHRIFT_TAG__).
+  constexpr std::size_t num_chunk_lines = 150;
+
+  fmt::print("  {{\"{0}\",\n", filename);
+  for_each_chunk(content, num_chunk_lines, [](auto begin, auto end) {
+    fmt::print(
+        "R\"{0}({1}){0}\"\n", "__FBTHRIFT_TAG__", fmt::join(begin, end, "\n"));
+  });
+  fmt::print("}},\n");
+}
+
+void print_all_files(
+    std::string_view function_name,
+    const std::map<std::string, lines_t>& files) {
+  fmt::print(
+      "namespace apache::thrift::detail {{\n"
+      "\n"
+      "const std::map<std::string, std::string>& {0}() {{\n"
+      "  static const std::map<std::string, std::string> files = {{\n",
+      function_name);
+  for (const auto& [name, content] : files) {
+    print_one_file(name, content);
+  }
+  fmt::print(
+      "  }};\n"
+      "  return files;\n"
+      "}}\n"
+      "\n"
+      "}} // namespace apache::thrift::detail\n");
 }
 
 } // namespace
@@ -85,27 +150,9 @@ int main(int argc, char** argv) {
       '@');
 
   // Read the files.
-  std::map<std::string, std::string> files;
+  std::map<std::string, lines_t> files;
   populate_recursively(root, files, directory);
 
   // Print the content.
-  fmt::print(
-      "namespace apache::thrift::detail {{\n"
-      "\n"
-      "const std::map<std::string, std::string>& {0}() {{\n"
-      "  static const std::map<std::string, std::string> files = {{\n",
-      function_name);
-  for (const auto& [name, content] : files) {
-    fmt::print(
-        "   {{\"{1}\", R\"{0}({2}){0}\"}},\n",
-        "__FBTHRIFT_TAG__",
-        name,
-        content);
-  }
-  fmt::print(
-      "  }};\n"
-      "  return files;\n"
-      "}}\n"
-      "\n"
-      "}} // namespace apache::thrift::detail\n");
+  print_all_files(function_name, files);
 }

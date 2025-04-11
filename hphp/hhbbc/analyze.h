@@ -472,7 +472,11 @@ std::tuple<Type, bool, bool> verify_param_type(const IIndex&,
  */
 Type adjust_type_for_prop(const IIndex& index,
                           const php::Class& propCls,
-                          const TypeConstraint* tc,
+                          const TypeConstraint& tc,
+                          const Type& ty);
+Type adjust_type_for_prop(const IIndex& index,
+                          const php::Class& propCls,
+                          const TypeIntersectionConstraint* tc,
                           const Type& ty);
 
 /*

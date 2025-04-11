@@ -151,7 +151,7 @@ std::string show(Context);
  */
 struct PropStateElem {
   Type ty;
-  const TypeConstraint* tc = nullptr;
+  const TypeIntersectionConstraint* tc = nullptr;
   Attr attrs;
   bool everModified;
 

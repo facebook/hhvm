@@ -1023,11 +1023,11 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         t = TBottom;
       } else if (!(prop.attrs & AttrSystemInitialValue)) {
         t = adjust_type_for_prop(
-            index, *ctx.cls, prop.typeConstraints.mainPtr(), t);
+            index, *ctx.cls, &prop.typeConstraints, t);
       }
       auto& elem = clsAnalysis.privateProperties[prop.name];
       elem.ty = std::move(t);
-      elem.tc = prop.typeConstraints.mainPtr();
+      elem.tc = &prop.typeConstraints;
       elem.attrs = prop.attrs;
       elem.everModified = false;
     } else {
@@ -1039,10 +1039,10 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         : (prop.attrs & AttrSystemInitialValue)
           ? cellTy
           : adjust_type_for_prop(
-              index, *ctx.cls, prop.typeConstraints.mainPtr(), cellTy);
+              index, *ctx.cls, &prop.typeConstraints, cellTy);
       auto& elem = clsAnalysis.privateStatics[prop.name];
       elem.ty = std::move(t);
-      elem.tc = prop.typeConstraints.mainPtr();
+      elem.tc = &prop.typeConstraints;
       elem.attrs = prop.attrs;
       elem.everModified = false;
     }
@@ -1831,15 +1831,27 @@ std::tuple<Type, bool, bool> verify_param_type(const IIndex& index,
 
 Type adjust_type_for_prop(const IIndex& index,
                           const php::Class& propCls,
-                          const TypeConstraint* tc,
+                          const TypeIntersectionConstraint* tcs,
                           const Type& ty) {
-  if (!tc) return ty;
-  assertx(tc->validForProp());
+  if (!tcs) return ty;
+  auto result = ty;
+  for (auto const& tc : tcs->range()) {
+    result = adjust_type_for_prop(index, propCls, tc, result);
+    if (result.is(BBottom)) return result;
+  }
+  return result;
+}
+
+Type adjust_type_for_prop(const IIndex& index,
+                          const php::Class& propCls,
+                          const TypeConstraint& tc,
+                          const Type& ty) {
+  assertx(tc.validForProp());
   if (Cfg::Eval::CheckPropTypeHints <= 2) return ty;
   auto lookup = lookup_constraint(
     index,
     Context { nullptr, nullptr, &propCls },
-    *tc,
+    tc,
     ty
   );
   auto upper = unctx(lookup.upper);

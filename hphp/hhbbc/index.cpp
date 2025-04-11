@@ -285,14 +285,14 @@ PropState make_unknown_propstate(const IIndex& index,
       elem.ty = adjust_type_for_prop(
         index,
         cls,
-        prop.typeConstraints.mainPtr(),
+        &prop.typeConstraints,
         TCell
       );
       if (prop.attrs & AttrSystemInitialValue) {
         auto initial = loosen_all(from_cell(prop.val));
         if (!initial.subtypeOf(BUninit)) elem.ty |= initial;
       }
-      elem.tc = prop.typeConstraints.mainPtr();
+      elem.tc = &prop.typeConstraints;
       elem.attrs = prop.attrs;
       elem.everModified = true;
     }
@@ -8377,7 +8377,7 @@ Type initial_type_for_public_sprop(const Index& index,
   return adjust_type_for_prop(
     IndexAdaptor { index },
     cls,
-    prop.typeConstraints.mainPtr(),
+    &prop.typeConstraints,
     ty
   );
 }
@@ -8411,7 +8411,7 @@ Type lookup_public_prop_impl(
   auto ty = adjust_type_for_prop(
     IndexAdaptor { *data.m_index },
     *knownCls,
-    prop->typeConstraints.mainPtr(),
+    &prop->typeConstraints,
     TCell
   );
   // We might have to include the initial value which might be outside of the
@@ -8492,16 +8492,16 @@ PropMergeResult prop_tc_effects(const Index& index,
   auto const check = [&] (const TypeConstraint& tc, const Type& t) {
     // If the type as is satisfies the constraint, we won't throw and
     // the type is unchanged.
-      if (t.moreRefined(
-            lookup_constraint(IndexAdaptor { index }, ctx, tc, t).lower)
-         ) {
-      return R{ t, TriBool:: No };
+    if (t.moreRefined(
+          lookup_constraint(IndexAdaptor { index }, ctx, tc, t).lower)
+       ) {
+    return R{ t, TriBool:: No };
     }
     // Otherwise adjust the type. If we get a Bottom we'll definitely
     // throw. We already know the type doesn't completely satisfy the
     // constraint, so we'll at least maybe throw.
     auto adjusted =
-      adjust_type_for_prop(IndexAdaptor { index }, *ctx.cls, &tc, t);
+      adjust_type_for_prop(IndexAdaptor { index }, *ctx.cls, tc, t);
     auto const throws = yesOrMaybe(adjusted.subtypeOf(BBottom));
     return R{ std::move(adjusted), throws };
   };
@@ -8561,7 +8561,7 @@ PropLookupResult lookup_static_impl(IndexData& data,
             adjust_type_for_prop(
               IndexAdaptor { *data.m_index },
               *ci->cls,
-              prop.typeConstraints.mainPtr(),
+              &prop.typeConstraints,
               TInitCell
             ),
             initial_type_for_public_sprop(*data.m_index, *ci->cls, prop)
@@ -19449,7 +19449,7 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
             adjust_type_for_prop(
               IndexAdaptor { *this },
               *cls,
-              prop.typeConstraints.mainPtr(),
+              &prop.typeConstraints,
               TInitCell
             ),
             initial_type_for_public_sprop(*this, *cls, prop)
@@ -19474,7 +19474,7 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
       prop.name,
       PropStateElem{
         std::move(ty),
-        prop.typeConstraints.mainPtr(),
+        &prop.typeConstraints,
         prop.attrs,
         everModified
       }
@@ -20238,7 +20238,7 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
         auto newType = adjust_type_for_prop(
           IndexAdaptor { *this },
           *cinfo->cls,
-          prop.typeConstraints.mainPtr(),
+          &prop.typeConstraints,
           unctx(union_of(std::move(knownClsType), std::move(unknownClsType)))
         );
 

@@ -312,7 +312,6 @@ void HQStreamCodec::generatePushPromise(folly::IOBufQueue& writeBuf,
   generateHeaderImpl(
       writeBuf, msg, pushId, size, folly::none /* extraHeaders */);
 }
-
 void HQStreamCodec::generateHeaderImpl(
     folly::IOBufQueue& writeBuf,
     const HTTPMessage& msg,
@@ -340,12 +339,13 @@ void HQStreamCodec::generateHeaderImpl(
   // HTTP/2 serializes priority here, but HQ priorities need to go on the
   // control stream
 
-  WriteResult res;
-  if (pushId) {
-    res = hq::writePushPromise(writeBuf, *pushId, std::move(result));
-  } else {
-    res = hq::writeHeaders(writeBuf, std::move(result));
-  }
+  auto res = [&]() -> WriteResult {
+    if (pushId) {
+      return hq::writePushPromise(writeBuf, *pushId, std::move(result));
+    } else {
+      return hq::writeHeaders(writeBuf, std::move(result));
+    }
+  }();
 
   if (res.hasError()) {
     LOG(ERROR) << __func__ << ": failed to write "
@@ -384,7 +384,6 @@ size_t HQStreamCodec::generateBodyDSR(StreamID stream,
   // Assuming we have generated a single DATA frame.
   return length;
 }
-
 size_t HQStreamCodec::generateTrailers(folly::IOBufQueue& writeBuf,
                                        StreamID stream,
                                        const HTTPHeaders& trailers) {
@@ -402,8 +401,9 @@ size_t HQStreamCodec::generateTrailers(folly::IOBufQueue& writeBuf,
       std::string(),
       trailers,
       debugLevel_);
-  WriteResult res;
-  res = hq::writeHeaders(writeBuf, std::move(encodeRes.stream));
+  auto res = [&]() -> WriteResult {
+    return hq::writeHeaders(writeBuf, std::move(encodeRes.stream));
+  }();
 
   if (res.hasError()) {
     LOG(ERROR) << __func__ << ": failed to write trailers: " << res.error();

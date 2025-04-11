@@ -96,7 +96,7 @@ quic::PriorityQueue::Priority toQuicPriority(
 }
 
 // Get the size of the WebTransport stream preface without actually encoding it
-folly::Expected<size_t, quic::TransportErrorCode> getWebTransportPrefaceSize(
+folly::Expected<size_t, quic::QuicError> getWebTransportPrefaceSize(
     proxygen::HTTPCodec::StreamID streamId, quic::StreamId wtSessionId) {
   // The preface contains two QuicIntegers: One which represents whether the
   // stream is unidirectional or bidirectional, and the other of which

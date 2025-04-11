@@ -37,7 +37,7 @@ const size_t kUnframedDataFrameLen = 0;
 using PushId = uint64_t;
 
 using ParseResult = folly::Optional<HTTP3::ErrorCode>;
-using WriteResult = folly::Expected<size_t, quic::TransportErrorCode>;
+using WriteResult = folly::Expected<size_t, quic::QuicError>;
 
 enum class UnidirectionalStreamType : uint64_t {
   CONTROL = 0x00,

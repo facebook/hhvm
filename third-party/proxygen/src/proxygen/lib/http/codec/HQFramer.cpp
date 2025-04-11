@@ -424,7 +424,8 @@ std::ostream& operator<<(std::ostream& os, FrameType type) {
 WriteResult writeGreaseFrame(folly::IOBufQueue& writeBuf) noexcept {
   auto greaseId = getGreaseId(folly::Random::rand32(16));
   if (!greaseId) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return folly::makeUnexpected(quic::QuicError(
+        quic::TransportErrorCode::INTERNAL_ERROR, "Invalid grease id"));
   }
   uint64_t uiFrameType = *greaseId;
   auto frameTypeSize = quic::getQuicIntegerSize(uiFrameType);

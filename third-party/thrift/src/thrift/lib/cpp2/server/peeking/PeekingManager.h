@@ -166,7 +166,7 @@ class TransportPeekingManager : public PeekingManagerBase,
       : PeekingManagerBase(
             std::move(acceptor), clientAddr, std::move(tinfo), server),
         socket_(std::move(socket)),
-        peeker_(new wangle::TransportPeeker(*socket_, this, kPeekBytes)) {
+        peeker_(new wangle::TransportPeeker(socket_.get(), this, kPeekBytes)) {
     peeker_->start();
   }
 

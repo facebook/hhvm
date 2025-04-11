@@ -47,12 +47,14 @@ class TransportPeeker : public folly::AsyncTransport::ReadCallback,
     }
   }
 
+ protected:
   ~TransportPeeker() override {
     if (transport_.getReadCallback() == this) {
       transport_.setReadCB(nullptr);
     }
   }
 
+ public:
   void start() {
     if (peekBytes_.size() == 0) {
       // No peeking necessary.

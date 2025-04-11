@@ -87,20 +87,24 @@ template void BinaryProtocolReader::readArithmeticVector<double>(
 template <typename T>
 inline size_t BinaryProtocolWriter::writeArithmeticVector(
     const T* inputPtr, size_t numElements) {
-  size_t len = numElements * sizeof(T);
-  out_.ensure(len);
-  uint8_t* outPtr = out_.writableData();
-  size_t i = 0;
-  size_t loopLen = std::min(numElements, out_.length() / sizeof(T));
-  for (; i < loopLen; ++i) {
-    folly::storeUnaligned<T>(
-        outPtr + i * sizeof(T), folly::Endian::big<T>(inputPtr[i]));
+  const size_t len = numElements * sizeof(T);
+
+  while (numElements > 0) {
+    // if we are at the end of the buffer, ensure() will allocate a new buffer
+    // according to the default growth strategy
+    out_.ensure(sizeof(T));
+    uint8_t* outPtr = out_.writableData();
+    size_t i = 0;
+    size_t loopLen = std::min(numElements, out_.length() / sizeof(T));
+    for (; i < loopLen; ++i) {
+      folly::storeUnaligned<T>(
+          outPtr + i * sizeof(T), folly::Endian::big<T>(inputPtr[i]));
+    }
+    out_.append(i * sizeof(T));
+    numElements -= i;
+    inputPtr += i;
   }
-  out_.append(i * sizeof(T));
-  // write out one-by-one beyond what initially fits into the buffer
-  for (; i < numElements; ++i) {
-    out_.writeBE(inputPtr[i]);
-  }
+
   return len;
 }
 

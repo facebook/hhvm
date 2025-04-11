@@ -103,7 +103,11 @@ TYPED_TEST(ArithmeticTypeListBinaryProtocolTest, readBigListFixedInt) {
       auto w = BinaryProtocolWriter();
       auto q = folly::IOBufQueue();
       w.setOutput(&q);
-      std::vector<TypeParam> intList(i);
+
+      // Make sure we exercise the multi-IOBuf case
+      const size_t intListSize = randomInit ? i : (i + 128 * 1024);
+      std::vector<TypeParam> intList(intListSize);
+
       // Specify the engine and distribution.
       if (randomInit) {
         std::mt19937 mersenne_engine(1337); // Generates random integers

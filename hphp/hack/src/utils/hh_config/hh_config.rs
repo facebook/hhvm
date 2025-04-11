@@ -567,8 +567,6 @@ impl HhConfig {
             needs_concrete: hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?,
             allow_class_string_cast: hhconfig
                 .get_bool_or("allow_class_string_cast", default.allow_class_string_cast)?,
-            tco_new_exhaustivity_check: hhconfig
-                .get_bool_or("new_exhaustivity_check", default.tco_new_exhaustivity_check)?,
         };
         let mut c = Self {
             opts,

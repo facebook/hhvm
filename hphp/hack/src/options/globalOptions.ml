@@ -194,7 +194,6 @@ type t = {
   safe_abstract: bool;
   needs_concrete: bool;
   allow_class_string_cast: bool;
-  tco_new_exhaustivity_check: bool;
 }
 [@@deriving eq, show]
 
@@ -307,7 +306,6 @@ let default =
     safe_abstract = false;
     needs_concrete = false;
     allow_class_string_cast = true;
-    tco_new_exhaustivity_check = true;
   }
 
 let set
@@ -417,7 +415,6 @@ let set
     ?safe_abstract
     ?needs_concrete
     ?allow_class_string_cast
-    ?tco_new_exhaustivity_check
     options =
   let setting setting option =
     match setting with
@@ -703,8 +700,6 @@ let set
     needs_concrete = setting needs_concrete options.needs_concrete;
     allow_class_string_cast =
       setting allow_class_string_cast options.allow_class_string_cast;
-    tco_new_exhaustivity_check =
-      setting tco_new_exhaustivity_check options.tco_new_exhaustivity_check;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

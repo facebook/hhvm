@@ -1406,30 +1406,31 @@ class ProgramNode final : folly::MoveOnly,
   using IncludesList = std::vector<folly::not_null<const ProgramNode*>>;
   IncludesList includes() const;
 
+  using Definitions = std::vector<folly::not_null<const DefinitionNode*>>;
+  Definitions definitions() const { return definitions_; }
+
   using DefinitionsByName = folly::
       F14FastMap<std::string_view, folly::not_null<const DefinitionNode*>>;
-  DefinitionsByName definitions() const;
+  DefinitionsByName definitionsByName() const;
+
   const SyntaxGraph& syntaxGraph() const;
 
  private:
-  using DefinitionKeysByName =
-      folly::F14FastMap<std::string_view, detail::DefinitionKeyRef>;
-
   std::string_view path_;
   std::vector<apache::thrift::type::ProgramId> includes_;
-  DefinitionKeysByName definitionKeysByName_;
+  Definitions definitions_;
 
   ProgramNode(
       const detail::Resolver& resolver,
       std::string_view path,
       std::string_view name,
       std::vector<apache::thrift::type::ProgramId> includes,
-      DefinitionKeysByName definitionKeysByName)
+      Definitions definitions)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         path_(path),
         includes_(std::move(includes)),
-        definitionKeysByName_(std::move(definitionKeysByName)) {}
+        definitions_(std::move(definitions)) {}
 
   friend class detail::Resolver;
 };

@@ -586,10 +586,10 @@ ProgramNode::IncludesList ProgramNode::includes() const {
   return includes;
 }
 
-ProgramNode::DefinitionsByName ProgramNode::definitions() const {
+ProgramNode::DefinitionsByName ProgramNode::definitionsByName() const {
   DefinitionsByName result;
-  for (const auto& [name, definitionKey] : definitionKeysByName_) {
-    result.emplace(name, &detail::lazyResolve(resolver(), definitionKey));
+  for (folly::not_null<const DefinitionNode*> definition : definitions_) {
+    result.emplace(definition->name(), definition);
   }
   return result;
 }
@@ -795,11 +795,11 @@ Resolver::ProgramsById Resolver::createProgramsById(
     const type::Schema& schema, const DefinitionsByKey& definitionsByKey) {
   ProgramsById result;
   for (const type::Program& program : *schema.programs()) {
-    ProgramNode::DefinitionKeysByName definitionKeysByName;
+    ProgramNode::Definitions definitions;
     for (const type::DefinitionKey& definitionKey : *program.definitionKeys()) {
       if (const DefinitionNode* definition =
               folly::get_ptr(definitionsByKey, definitionKey)) {
-        definitionKeysByName.emplace(definition->name(), definitionKey);
+        definitions.emplace_back(definition);
       }
     }
     result.emplace(
@@ -809,7 +809,7 @@ Resolver::ProgramsById Resolver::createProgramsById(
             *program.path(),
             *program.name(),
             *program.includes(),
-            std::move(definitionKeysByName)));
+            std::move(definitions)));
   }
   return result;
 }

@@ -5434,7 +5434,10 @@ end = struct
     let (env, new_ty) =
       let (cid_ty, _, _) = tcid in
       let (env, cid_ty) = Env.expand_type env cid_ty in
-      if is_generic cid_ty then
+      let stripped_cid_ty =
+        snd (Typing_dynamic_utils.strip_dynamic env cid_ty)
+      in
+      if is_generic stripped_cid_ty then
         (env, cid_ty)
       else if check_parent then
         (env, ty)

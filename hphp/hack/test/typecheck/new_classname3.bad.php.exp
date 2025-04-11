@@ -1,0 +1,16 @@
+ERROR: File "new_classname3.bad.php", line 5, characters 23-26:
+Unbound name: `TAux` (Naming[2049])
+ERROR: File "new_classname3.bad.php", line 10, characters 12-21:
+Invalid return type (Typing[4110])
+  File "new_classname3.bad.php", line 8, characters 27-29:
+  Expected `int`
+  File "new_classname3.bad.php", line 5, characters 15-16:
+  But got `T3 as D<TAux>`
+  File "new_classname3.bad.php", line 6, characters 49-50:
+    via this generic `T3`
+ERROR: File "new_classname3.bad.php", line 10, characters 12-21:
+Invalid return type (Typing[4110])
+  File "new_classname3.bad.php", line 8, characters 27-29:
+  Expected `int`
+  File "new_classname3.bad.php", line 5, characters 21-27:
+  But got `D<TAux>`

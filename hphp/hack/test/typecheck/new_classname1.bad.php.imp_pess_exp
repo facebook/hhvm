@@ -1,0 +1,14 @@
+ERROR: File "new_classname1.bad.php", line 8, characters 12-21:
+Invalid return type (Typing[4110])
+  File "new_classname1.bad.php", line 6, characters 27-29:
+  Expected `int`
+  File "new_classname1.bad.php", line 3, characters 15-16:
+  But got `T1`
+  File "new_classname1.bad.php", line 4, characters 49-50:
+    via this generic `T1`
+ERROR: File "new_classname1.bad.php", line 8, characters 12-21:
+Invalid return type (Typing[4110])
+  File "new_classname1.bad.php", line 6, characters 27-29:
+  Expected `int`
+  File "new_classname1.bad.php", line 3, characters 15-16:
+  But got `mixed`

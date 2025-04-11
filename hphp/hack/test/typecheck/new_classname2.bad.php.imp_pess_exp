@@ -1,0 +1,20 @@
+ERROR: File "new_classname2.bad.php", line 11, characters 12-21:
+Invalid return type (Typing[4110])
+  File "new_classname2.bad.php", line 9, characters 27-29:
+  Expected `int`
+  File "new_classname2.bad.php", line 6, characters 15-16:
+  But got `T2 as E`
+  File "new_classname2.bad.php", line 7, characters 49-50:
+    via this generic `T2`
+ERROR: File "new_classname2.bad.php", line 11, characters 12-21:
+Invalid return type (Typing[4110])
+  File "new_classname2.bad.php", line 9, characters 27-29:
+  Expected `int`
+  File "new_classname2.bad.php", line 6, characters 21-21:
+  But got `E`
+ERROR: File "new_classname2.bad.php", line 11, characters 12-21:
+Invalid return type (Typing[4110])
+  File "new_classname2.bad.php", line 9, characters 27-29:
+  Expected `int`
+  File "new_classname2.bad.php", line 11, characters 16-19:
+  But got `T2 as E`

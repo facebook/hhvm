@@ -478,6 +478,20 @@ struct MaybeManaged {
   std::variant<T, const T*> storage_;
 };
 
+/**
+ * In most cases, using SyntaxGraph completely abstracts away DefinitionKeys.
+ * This is because SyntaxGraph only creates one DefinitionNode per key. So
+ * comparing two nodes by their address is equivalent to comparing their keys.
+ *
+ * However, some APIs that predate SyntaxGraph expose the raw schema.thrift,
+ * along with relevant DefinitionKeys. In such cases, there is no way easy
+ * migration path without an escape hatch like this.
+ *
+ * Throws std::out_of_range if the key is not found in the graph.
+ */
+const DefinitionNode& lookUpDefinition(
+    const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);
+
 } // namespace detail
 
 class FieldNode final : folly::MoveOnly,
@@ -1493,6 +1507,8 @@ class SyntaxGraph final {
   explicit SyntaxGraph(ManagedSchema&&);
 
   friend class detail::Resolver;
+  friend const DefinitionNode& detail::lookUpDefinition(
+      const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);
 };
 static_assert(std::is_move_constructible_v<SyntaxGraph>);
 static_assert(std::is_move_assignable_v<SyntaxGraph>);

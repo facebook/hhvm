@@ -218,7 +218,24 @@ class Resolver final {
    * function performs a lookup to access an interned value by its ID.
    */
   const protocol::Value& valueOf(const type::ValueId&) const;
+
+  /**
+   * Returns the graph node representing the definition with the given key, or
+   * nullptr if it doesn't exist.
+   */
+  const DefinitionNode* definitionOf(const type::DefinitionKey&) const;
 };
+
+const DefinitionNode& lookUpDefinition(
+    const SyntaxGraph& syntaxGraph,
+    const apache::thrift::type::DefinitionKey& definitionKey) {
+  if (const DefinitionNode* def =
+          syntaxGraph.resolver_->definitionOf(definitionKey)) {
+    return *def;
+  }
+  folly::throw_exception<std::out_of_range>(
+      fmt::format("Definition not found for key '{}'", definitionKey));
+}
 
 } // namespace detail
 
@@ -789,6 +806,11 @@ TypeRef Resolver::typeOf(const type::TypeStruct& type) const {
 const protocol::Value& Resolver::valueOf(const type::ValueId& id) const {
   return folly::get_or_throw<InvalidSyntaxGraphError>(
       valuesById_, id, "Unknown ValueId: ");
+}
+
+const DefinitionNode* Resolver::definitionOf(
+    const type::DefinitionKey& definitionKey) const {
+  return folly::get_ptr(definitionsByKey_, definitionKey);
 }
 
 Resolver::ProgramsById Resolver::createProgramsById(

@@ -45,6 +45,14 @@ class ServiceSchemaTest : public testing::Test {
         .schema;
   }
 
+  template <typename ServiceTag>
+  std::vector<type::DefinitionKey> definitionKeysFor() {
+    return apache::thrift::ServiceHandler<ServiceTag>()
+        .getServiceSchema()
+        .value()
+        .definitions;
+  }
+
   static folly::not_null<const ProgramNode*> findProgramByName(
       const SyntaxGraph& graph, std::string_view name) {
     auto programs = graph.programs();
@@ -434,6 +442,21 @@ TEST_F(ServiceSchemaTest, RecursiveStruct) {
 
   EXPECT_EQ(s.fields().size(), 1);
   EXPECT_EQ(s.fields()[0].type(), TypeRef::of(s));
+}
+
+TEST_F(ServiceSchemaTest, LookupByDefinitionKeys) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  std::vector<type::DefinitionKey> serviceDefinitionKeys =
+      definitionKeysFor<test::TestService>();
+
+  // Otherwise, the test is not meaningful
+  ASSERT_FALSE(serviceDefinitionKeys.empty());
+
+  for (const auto& definitionKey : serviceDefinitionKeys) {
+    const DefinitionNode& definition =
+        detail::lookUpDefinition(syntaxGraph, definitionKey);
+    EXPECT_TRUE(definition.isService());
+  }
 }
 
 } // namespace apache::thrift::schema

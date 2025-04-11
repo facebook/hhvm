@@ -15,15 +15,17 @@
 
 # pyre-unsafe
 
+import atexit
 import os
 import re
 import shlex
 import typing
+from contextlib import ExitStack
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Optional
 
-import pkg_resources
+import importlib_resources
 
 
 @dataclass
@@ -251,6 +253,17 @@ def _parse_fixture_cmd(
         ) from err
 
 
+def _get_binary(filename: str) -> Optional[Path]:
+    """
+    Returns path to the binary, or None if not be found.
+    """
+    file_manager = ExitStack()
+    atexit.register(file_manager.close)
+    resource = importlib_resources.files(__name__) / filename
+    path = file_manager.enter_context(importlib_resources.as_file(resource))
+    return path if path.is_file() else None
+
+
 def get_thrift_binary_path(
     thrift_bin_arg: typing.Optional[str],
 ) -> typing.Optional[Path]:
@@ -264,7 +277,7 @@ def get_thrift_binary_path(
           its parents.
     """
     if thrift_bin_arg is None:
-        return Path(pkg_resources.resource_filename(__name__, "thrift"))
+        return _get_binary("thrift")
 
     return _ascend_find_exe(Path.cwd(), thrift_bin_arg)
 
@@ -279,9 +292,7 @@ def get_thrift2ast_binary_path() -> typing.Optional[Path]:
           executable with this name in the current working directory or any of
           its parents.
     """
-    if pkg_resources.resource_exists(__name__, "thrift2ast"):
-        return Path(pkg_resources.resource_filename(__name__, "thrift2ast"))
-    return None
+    return _get_binary("thrift2ast")
 
 
 def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:

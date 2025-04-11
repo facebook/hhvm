@@ -49,18 +49,15 @@ class {{enum:name}}(_fbthrift_python_types.{{!
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_{{enum:name}}()
 
-    {{#enum:legacy_api?}}
     def _to_python(self) -> "{{enum:name}}":
         return self
 
-    def _to_py3(self) -> "{{program:module_path}}.types.{{enum:name}}": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("{{program:module_path}}.types")
-        return py3_types.{{enum:name}}(self.value)
+    def _to_py3(self) -> "{{enum:name}}":
+    {{! NB: thrift-py3 now uses thrift-python enums}}
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
-    {{/enum:legacy_api?}}
 {{/program:enums}}
 
 {{#program:enums}}

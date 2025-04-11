@@ -36,10 +36,8 @@ class AnEnum(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "AnEnum":
         return self
 
-    def _to_py3(self) -> "module.types.AnEnum": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.AnEnum(self.value)
+    def _to_py3(self) -> "AnEnum":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -66,10 +64,8 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "AnEnumRenamed":
         return self
 
-    def _to_py3(self) -> "module.types.AnEnumRenamed": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.AnEnumRenamed(self.value)
+    def _to_py3(self) -> "AnEnumRenamed":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -97,10 +93,8 @@ class Flags(_fbthrift_python_types.Flag):
     def _to_python(self) -> "Flags":
         return self
 
-    def _to_py3(self) -> "module.types.Flags": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.Flags(self.value)
+    def _to_py3(self) -> "Flags":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value

@@ -34,10 +34,8 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyEnum":
         return self
 
-    def _to_py3(self) -> "module.types.MyEnum": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.MyEnum(self.value)
+    def _to_py3(self) -> "MyEnum":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value

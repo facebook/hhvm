@@ -1030,7 +1030,6 @@ class python_mstch_enum : public mstch_enum {
         this,
         {
             {"enum:flags?", &python_mstch_enum::has_flags},
-            {"enum:legacy_api?", &python_mstch_enum::legacy_api},
         });
   }
 
@@ -1038,9 +1037,6 @@ class python_mstch_enum : public mstch_enum {
     return enum_->has_unstructured_annotation("py3.flags") ||
         enum_->has_structured_annotation(kPythonFlagsUri);
   }
-
-  // DEPRECATED!
-  mstch::node legacy_api() { return true; }
 };
 
 class python_mstch_enum_value : public mstch_enum_value {

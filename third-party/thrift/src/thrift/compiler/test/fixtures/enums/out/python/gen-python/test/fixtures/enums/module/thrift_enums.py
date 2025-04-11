@@ -33,10 +33,8 @@ class Metasyntactic(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "Metasyntactic":
         return self
 
-    def _to_py3(self) -> "test.fixtures.enums.module.types.Metasyntactic": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        return py3_types.Metasyntactic(self.value)
+    def _to_py3(self) -> "Metasyntactic":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -66,10 +64,8 @@ class MyEnum1(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyEnum1":
         return self
 
-    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum1": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        return py3_types.MyEnum1(self.value)
+    def _to_py3(self) -> "MyEnum1":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -96,10 +92,8 @@ class MyEnum2(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyEnum2":
         return self
 
-    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum2": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        return py3_types.MyEnum2(self.value)
+    def _to_py3(self) -> "MyEnum2":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -129,10 +123,8 @@ class MyEnum3(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyEnum3":
         return self
 
-    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum3": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        return py3_types.MyEnum3(self.value)
+    def _to_py3(self) -> "MyEnum3":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -160,10 +152,8 @@ class MyEnum4(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyEnum4":
         return self
 
-    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum4": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        return py3_types.MyEnum4(self.value)
+    def _to_py3(self) -> "MyEnum4":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -190,10 +180,8 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyBitmaskEnum1":
         return self
 
-    def _to_py3(self) -> "test.fixtures.enums.module.types.MyBitmaskEnum1": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        return py3_types.MyBitmaskEnum1(self.value)
+    def _to_py3(self) -> "MyBitmaskEnum1":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -220,10 +208,8 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyBitmaskEnum2":
         return self
 
-    def _to_py3(self) -> "test.fixtures.enums.module.types.MyBitmaskEnum2": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        return py3_types.MyBitmaskEnum2(self.value)
+    def _to_py3(self) -> "MyBitmaskEnum2":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value

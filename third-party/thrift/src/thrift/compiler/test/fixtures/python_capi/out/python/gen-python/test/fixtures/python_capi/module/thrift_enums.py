@@ -31,10 +31,8 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "MyEnum":
         return self
 
-    def _to_py3(self) -> "test.fixtures.python_capi.module.types.MyEnum": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
-        return py3_types.MyEnum(self.value)
+    def _to_py3(self) -> "MyEnum":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -60,10 +58,8 @@ class AnnoyingEnum(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "AnnoyingEnum":
         return self
 
-    def _to_py3(self) -> "test.fixtures.python_capi.module.types.AnnoyingEnum": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
-        return py3_types.AnnoyingEnum(self.value)
+    def _to_py3(self) -> "AnnoyingEnum":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value

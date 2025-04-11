@@ -29,10 +29,8 @@ class EmptyEnum(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "EmptyEnum":
         return self
 
-    def _to_py3(self) -> "module.types.EmptyEnum": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.EmptyEnum(self.value)
+    def _to_py3(self) -> "EmptyEnum":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -60,10 +58,8 @@ class City(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "City":
         return self
 
-    def _to_py3(self) -> "module.types.City": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.City(self.value)
+    def _to_py3(self) -> "City":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value
@@ -92,10 +88,8 @@ class Company(_fbthrift_python_types.Enum, int):
     def _to_python(self) -> "Company":
         return self
 
-    def _to_py3(self) -> "module.types.Company": # type: ignore
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.Company(self.value)
+    def _to_py3(self) -> "Company":
+        return self
 
     def _to_py_deprecated(self) -> int:
         return self.value

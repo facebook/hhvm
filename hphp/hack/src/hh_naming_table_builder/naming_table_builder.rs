@@ -184,7 +184,23 @@ impl ExitStatus {
     }
 }
 
-fn parse_file_with_hashes<'a>(
+fn parse_file_with_hashes(
+    text: &[u8],
+    opts: &ParserOptions,
+    decl_opts: &DeclParserOptions,
+    path: RelativePath,
+) -> anyhow::Result<oxidized::direct_decl_parser::ParsedFileWithHashes> {
+    let prefix = path.prefix();
+    let parsed_file = direct_decl_parser::parse_decls_for_typechecking(decl_opts, path, text);
+    let with_hashes = oxidized::direct_decl_parser::ParsedFileWithHashes::new(
+        parsed_file,
+        opts.deregister_php_stdlib,
+        prefix,
+    );
+    Ok(with_hashes)
+}
+
+fn parse_file_with_hashes_obr<'a>(
     text: &'a [u8],
     arena: &'a bumpalo::Bump,
     opts: &ParserOptions,
@@ -211,10 +227,16 @@ fn parse_file(
         relative_path::Prefix::Hhi => hhi_path.join(path.path()),
         prefix => panic!("Unexpected RelativePath prefix: {prefix}"),
     })?;
-    let arena = bumpalo::Bump::new();
-    let with_hashes = parse_file_with_hashes(&text, &arena, opts, decl_opts, path.clone())?;
-    let summary = names::FileSummary::new_obr(&with_hashes);
-    Ok((path, summary))
+    if opts.use_oxidized_by_ref_decls2 {
+        let arena = bumpalo::Bump::new();
+        let with_hashes = parse_file_with_hashes_obr(&text, &arena, opts, decl_opts, path.clone())?;
+        let summary = names::FileSummary::new_obr(&with_hashes);
+        Ok((path, summary))
+    } else {
+        let with_hashes = parse_file_with_hashes(&text, opts, decl_opts, path.clone())?;
+        let summary = names::FileSummary::new(&with_hashes);
+        Ok((path, summary))
+    }
 }
 
 fn parse_file_with_addenda(
@@ -229,9 +251,16 @@ fn parse_file_with_addenda(
         relative_path::Prefix::Hhi => hhi_path.join(path.path()),
         prefix => panic!("Unexpected RelativePath prefix: {prefix}"),
     })?;
-    let arena = bumpalo::Bump::new();
-    let with_hashes = parse_file_with_hashes(&text, &arena, opts, decl_opts, path.clone())?;
-    let summary = names::FileSummary::new_obr(&with_hashes);
-    let addenda = si_addendum::get_si_addenda_obr(&with_hashes);
-    Ok((path, summary, addenda))
+    if opts.use_oxidized_by_ref_decls2 {
+        let arena = bumpalo::Bump::new();
+        let with_hashes = parse_file_with_hashes_obr(&text, &arena, opts, decl_opts, path.clone())?;
+        let summary = names::FileSummary::new_obr(&with_hashes);
+        let addenda = si_addendum::get_si_addenda_obr(&with_hashes);
+        Ok((path, summary, addenda))
+    } else {
+        let with_hashes = parse_file_with_hashes(&text, opts, decl_opts, path.clone())?;
+        let summary = names::FileSummary::new(&with_hashes);
+        let addenda = si_addendum::get_si_addenda(&with_hashes);
+        Ok((path, summary, addenda))
+    }
 }

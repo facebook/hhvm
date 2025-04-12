@@ -1011,7 +1011,7 @@ version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1137cd7e7fc0fb5d3c5a8678be38ec56e819125d8d7907411fe24ccb943faca8"
 dependencies = [
- "crossbeam-channel 0.5.14",
+ "crossbeam-channel 0.5.15",
  "crossbeam-deque",
  "crossbeam-epoch",
  "crossbeam-queue",
@@ -1039,9 +1039,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.5.14"
+version = "0.5.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06ba6d68e24814cb8de6bb986db8222d3a027d15872cabc0d18817bc3c0e4471"
+checksum = "82b8f8f868b36967f9606790d1903570de9ceaf870a7bf9fbbd3016d636a2cb2"
 dependencies = [
  "crossbeam-utils 0.8.20",
 ]
@@ -3222,7 +3222,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9321642ca94a4282428e6ea4af8cc2ca4eac48ac7a6a4ea8f33f76d0ce70926"
 dependencies = [
  "async-lock",
- "crossbeam-channel 0.5.14",
+ "crossbeam-channel 0.5.15",
  "crossbeam-epoch",
  "crossbeam-utils 0.8.20",
  "event-listener 5.3.1",

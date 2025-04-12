@@ -59,21 +59,23 @@ class AsyncTestSetup : public TestSetup {
 
   template <class SocketT = folly::AsyncSocket>
   void connectToServer(
-      folly::Function<folly::coro::Task<void>(Client&)> callMe) {
-    folly::coro::blockingWait([this, &callMe]() -> folly::coro::Task<void> {
-      CHECK_GT(serverPort_, 0) << "Check if the server has started already";
-      folly::Executor* executor = co_await folly::coro::co_current_executor;
-      auto channel = PooledRequestChannel::newChannel(
-          executor, ioThread_, [&](folly::EventBase& evb) {
-            auto channel = apache::thrift::RocketClientChannel::newChannel(
-                folly::AsyncSocket::UniquePtr(
-                    new SocketT(&evb, "::1", serverPort_)));
-            channel->setTimeout(500 /* ms */);
-            return channel;
-          });
-      Client client(std::move(channel));
-      co_await callMe(client);
-    }());
+      folly::Function<folly::coro::Task<void>(Client&)> callMe,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds{500}) {
+    folly::coro::blockingWait(
+        [this, &callMe, &timeout]() -> folly::coro::Task<void> {
+          CHECK_GT(serverPort_, 0) << "Check if the server has started already";
+          folly::Executor* executor = co_await folly::coro::co_current_executor;
+          auto channel = PooledRequestChannel::newChannel(
+              executor, ioThread_, [&](folly::EventBase& evb) {
+                auto channel = apache::thrift::RocketClientChannel::newChannel(
+                    folly::AsyncSocket::UniquePtr(
+                        new SocketT(&evb, "::1", serverPort_)));
+                channel->setTimeout(timeout.count() /* timeoutMs */);
+                return channel;
+              });
+          Client client(std::move(channel));
+          co_await callMe(client);
+        }());
   }
 
  protected:

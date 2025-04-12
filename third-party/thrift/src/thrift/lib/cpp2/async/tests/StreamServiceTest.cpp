@@ -429,6 +429,41 @@ TYPED_TEST(MultiStreamServiceTest, UncompletedPublisherMoveAssignment) {
       });
 }
 
+class MultiStreamStressedServiceTest
+    : public AsyncTestSetup<
+          TestStreamMultiPublisherWithHeaderService,
+          Client<TestStreamService>> {
+ protected:
+  MultiStreamStressedServiceTest() {
+    this->numIOThreads_ = 16;
+    this->numWorkerThreads_ = 16;
+  }
+};
+
+TEST_F(MultiStreamStressedServiceTest, SubscriptionStressTest) {
+  const uint32_t kNumStreams = 1000;
+  this->connectToServer(
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
+        std::vector<folly::coro::Task<void>> tasks;
+        tasks.reserve(kNumStreams);
+        for (uint32_t streamCount = 0; streamCount < kNumStreams;
+             streamCount++) {
+          tasks.push_back(folly::coro::co_invoke(
+              [&client, streamCount]() -> folly::coro::Task<void> {
+                auto gen = (co_await client.co_rangePassiveSubscription())
+                               .toAsyncGenerator();
+                co_await folly::coro::co_reschedule_on_current_executor;
+                co_await folly::coro::co_awaitTry(folly::coro::timeout(
+                    gen.next(), std::chrono::milliseconds(streamCount)));
+                // To delay disconnection a little bit more
+                co_await folly::coro::co_reschedule_on_current_executor;
+              }));
+        }
+        co_await folly::coro::collectAllRange(std::move(tasks));
+      },
+      std::chrono::seconds{2} /* timeout */);
+}
+
 class StreamClientCallbackTest : public AsyncTestSetup<
                                      TestStreamClientCallbackService,
                                      Client<TestStreamService>> {};

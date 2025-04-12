@@ -128,6 +128,8 @@ class TestStreamMultiPublisherWithHeaderService
   apache::thrift::ServerStream<int32_t> rangeWaitForCancellation(
       int32_t from, int32_t to) override;
 
+  apache::thrift::ServerStream<int32_t> rangePassiveSubscription() override;
+
   apache::thrift::ServerStream<int32_t> uncompletedPublisherDestructor()
       override;
 

@@ -178,7 +178,7 @@ class ServerStreamMultiPublisher {
       std::weak_ptr<EncodeToStreams> encodeToStreamsWeak, size_t streamIndex) {
     if (auto encodeToStreams = encodeToStreamsWeak.lock()) {
       encodeToStreams->withWLock([=](auto& map) {
-        for (auto it = map.begin(); it != map.end();) {
+        for (auto it = map.begin(); it != map.end(); it++) {
           auto& streams = it->second;
           if (streams.erase(streamIndex)) {
             if (streams.empty()) {

@@ -256,6 +256,11 @@ ServerStream<int32_t> TestStreamMultiPublisherWithHeaderService::rangeThrowUDE(
 }
 
 ServerStream<int32_t>
+TestStreamMultiPublisherWithHeaderService::rangePassiveSubscription() {
+  return multipub_.addStream([] {});
+}
+
+ServerStream<int32_t>
 TestStreamMultiPublisherWithHeaderService::uncompletedPublisherDestructor() {
   auto stream = multipub_.addStream();
   EXPECT_DEATH(

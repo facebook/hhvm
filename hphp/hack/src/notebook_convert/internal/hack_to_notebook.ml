@@ -105,7 +105,8 @@ let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
 let hack_to_notebook (hack : string) :
     (Hh_json.json, Notebook_convert_error.t) result =
   let open Result.Let_syntax in
-  let* Notebook_level_metadata.{ notebook_number = _; kernelspec } =
+  let* Notebook_level_metadata.
+         { notebook_number = raw_notebook_number; kernelspec } =
     List.take (String.split_lines hack) 50
     |> List.find_map ~f:Notebook_level_metadata.of_comment
     |> Result.of_option
@@ -113,6 +114,12 @@ let hack_to_notebook (hack : string) :
            (Notebook_convert_error.Invalid_input
               {|Could not find notebook-level metadata. Expected a valid comment like: //@bento-notebook:{"notebook_number": "notebook_number", kernelspec: $THE_KERNEL_SPEC_SEE_IPYNB_SPEC}|})
   in
+  let* notebook_number =
+    Notebook_convert_rewrite.create_notebook_number raw_notebook_number
+    |> Result.map_error ~f:(fun err_msg ->
+           Notebook_convert_error.Invalid_input err_msg)
+  in
+  let hack = Notebook_convert_rewrite.unmangle notebook_number hack in
   let* chunks = Hack_to_notebook_chunks.go hack in
   let chunks = List.map ~f:format_chunk chunks in
   let+ ipynb = Ipynb.ipynb_of_chunks chunks ~kernelspec in

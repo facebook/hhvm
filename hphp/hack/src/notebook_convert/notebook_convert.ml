@@ -10,10 +10,15 @@ open Hh_prelude
 let notebook_to_hack ~(notebook_number : string) ~(header : string) :
     Exit_status.t =
   let source = Sys_utils.read_stdin_to_string () in
-  let ipynb_json = Hh_json.json_of_string source in
-  match
-    Notebook_to_hack.notebook_to_hack ~notebook_number ~header ipynb_json
-  with
+  (* workaround for hh_json not dealing with unicode characters encoded as \u....*)
+  let hack =
+    match Yojson.Safe.from_string source with
+    | exception Yojson.Json_error e -> Error e
+    | ipynb_yojson ->
+      let ipynb_json = Hh_json.of_yojson ipynb_yojson in
+      Notebook_to_hack.notebook_to_hack ~notebook_number ~header ipynb_json
+  in
+  match hack with
   | Ok hack ->
     let () = Printf.printf "%s" hack in
     Exit_status.No_error

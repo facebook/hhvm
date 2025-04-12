@@ -121,8 +121,10 @@ let chunks_of_cells_exn (cells : Ipynb.cell list) : annotated_chunk list =
 * - We convert top-level statements into a single top-level function
 *)
 let hack_of_ipynb_exn
-    ~(notebook_number : string) ~(header : string) Ipynb.{ cells; kernelspec } :
-    string =
+    (notebook_number : Notebook_convert_rewrite.notebook_number)
+    ~(raw_notebook_number : string)
+    ~(header : string)
+    Ipynb.{ cells; kernelspec } : string =
   let (non_stmts, stmts) =
     cells
     |> chunks_of_cells_exn
@@ -141,13 +143,13 @@ let hack_of_ipynb_exn
            block |> String.split_lines |> List.map ~f:(Printf.sprintf "    %s"))
     |> String.concat ~sep:"\n"
     |> Printf.sprintf
-         "async function %s%s(): Awaitable<void> {\n%s\n}"
+         "async function %s(): Awaitable<void> {\n%s\n}"
          Notebook_convert_constants.main_function_prefix
-         notebook_number
   in
   let unformatted =
     let notebook_metadata_comment =
-      Notebook_level_metadata.(to_comment { notebook_number; kernelspec })
+      Notebook_level_metadata.(
+        to_comment { notebook_number = raw_notebook_number; kernelspec })
     in
     Printf.sprintf
       "<?hh\n%s\n%s\n%s\n\n%s\n"
@@ -156,14 +158,24 @@ let hack_of_ipynb_exn
       non_stmts_code
       main_fn_code
   in
-  Notebook_convert_util.hackfmt unformatted
+  unformatted
+  |> Notebook_convert_rewrite.mangle notebook_number
+  |> Notebook_convert_util.hackfmt
 
 let notebook_to_hack
-    ~(notebook_number : string) ~(header : string) (ipynb_json : Hh_json.json) :
-    (string, string) Result.t =
-  try
-    ipynb_json
-    |> Ipynb.ipynb_of_json
-    |> Result.map ~f:(hack_of_ipynb_exn ~notebook_number ~header)
-  with
-  | e -> Error (Exn.to_string e)
+    ~notebook_number:(raw_notebook_number : string)
+    ~(header : string)
+    (ipynb_json : Hh_json.json) : (string, string) Result.t =
+  Notebook_convert_rewrite.create_notebook_number raw_notebook_number
+  |> Result.bind ~f:(fun notebook_number ->
+         try
+           ipynb_json
+           |> Ipynb.ipynb_of_json
+           |> Result.map
+                ~f:
+                  (hack_of_ipynb_exn
+                     notebook_number
+                     ~raw_notebook_number
+                     ~header)
+         with
+         | e -> Error (Exn.to_string e))

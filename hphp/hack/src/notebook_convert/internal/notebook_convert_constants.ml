@@ -5,4 +5,4 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-let main_function_prefix = "gen_notebook_main_"
+let main_function_prefix = "gen_notebook_main"

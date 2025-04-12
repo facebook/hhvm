@@ -6,7 +6,8 @@
   hackfmt
   relative_path
   sys_utils
-  utils_core)
+  utils_core
+  redeclarations)
  (preprocess
   (pps ppx_deriving.std)))
 (include_subdirs unqualified)

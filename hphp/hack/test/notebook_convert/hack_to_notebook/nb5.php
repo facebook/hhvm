@@ -13,7 +13,7 @@ test this is markdown
 */
 //@bento-cell-end
 
-async function gen_notebook_main_N6203962(): Awaitable<void> {
+async function gen_n1234_notebook_main_(): Awaitable<void> {
   //@bento-cell:{"id": 2, "cell_type": "code"}
   $a = 10;
   //@bento-cell-end

@@ -235,7 +235,7 @@ class ThreadManager::Impl : public ThreadManager,
         state_(ThreadManager::UNINITIALIZED),
         tasks_(N_SOURCES * numPriorities),
         deadWorkers_(),
-        namePrefix_(""),
+
         namePrefixCounter_(0),
         codelEnabled_(false || FLAGS_codel_enabled) {}
 

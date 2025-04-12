@@ -821,7 +821,7 @@ TEST_F(ThreadManagerTest, DISABLED_PriorityQueueThreadManagerExecutor) {
   // block the TM
   threadManager->add([&] { reqSyncBaton.wait(); });
 
-  std::string foo = "";
+  std::string foo;
   threadManager->addWithPriority(
       [&] {
         foo += "a";

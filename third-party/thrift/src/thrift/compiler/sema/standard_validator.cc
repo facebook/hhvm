@@ -1438,10 +1438,12 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
   // annotation has a structured annotation replacement.
   std::set<std::string> removed_annotations = {
       "code",
+      "cpp.indirection",
       "cpp2.declare_bitwise_ops",
       "cpp2.enum_type",
       "cpp2.deprecated_enum_unscoped",
-      "process_in_event_base"};
+      "process_in_event_base",
+  };
   std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};
 
   for (const auto& [k, v] : node.unstructured_annotations()) {

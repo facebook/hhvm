@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import timeit
 
+from typing import Callable
+
 import click
 
 from tabulate import tabulate
@@ -44,6 +46,14 @@ inst = MyStruct(
     val_list=to_thrift_list({val_list}),
     val_set=to_thrift_set({val_set}),
     val_map=to_thrift_map({val_map}),
+)
+"""
+
+INIT_STATEMENT_MyStruct_str = """
+inst = MyStruct(
+    val_string="hello world",
+    str_list=to_thrift_list({str_list}),
+    str_map=to_thrift_map({str_map}),
 )
 """
 
@@ -310,11 +320,21 @@ def get_serialize_setup(flavor: str) -> str:
     return f"{get_import(flavor)}\n{init_statement}\n{SERIALIZER_IMPORT[flavor]}"
 
 
+def get_serialize_str_setup(flavor: str) -> str:
+    str_list = [f"str_{i}" for i in range(100)]
+    str_map = {f"k_{i}": f"v_{i}" for i in range(100)}
+    init_statement = INIT_STATEMENT_MyStruct_str.format(
+        str_list=str_list,
+        str_map=str_map,
+    )
+    return f"{get_import(flavor)}\n{init_statement}\n{SERIALIZER_IMPORT[flavor]}"
+
+
 def get_deserialize_setup(flavor: str) -> str:
     return f"{get_serialize_setup(flavor)}\nserialized = serialize(inst)"
 
 
-def benchmark_serializer():
+def benchmark_serializer_impl(get_serialize_setup: Callable[[str], str]) -> None:
     def benchmark_serialize(flavor: str) -> str:
         timer = timeit.Timer(
             setup=get_serialize_setup(flavor),
@@ -387,6 +407,29 @@ def init_benchmark() -> None:
 
 
 @click.command()
+def init_string_benchmark() -> None:
+    for size in [1, 100, 1000]:
+        str_list = [f"str_{i}" for i in range(size)]
+        init_statement = INIT_STATEMENT_MyStruct_str.format(
+            str_list=str_list,
+            str_map={},
+        )
+        benchmark_init(init_statement, f"MyStruct with {size} strings for list")
+        print("\n")
+
+    for size in [1, 100, 1000]:
+        str_map = {f"k_{i}": f"v_{i}" for i in range(size)}
+        init_statement = INIT_STATEMENT_MyStruct_str.format(
+            str_list=[],
+            str_map=str_map,
+        )
+        benchmark_init(
+            init_statement, f"MyStruct with {size} string key-values for map"
+        )
+        print("\n")
+
+
+@click.command()
 def field_access_benchmark() -> None:
     benchmark_field_access()
 
@@ -398,7 +441,12 @@ def container_benchmark() -> None:
 
 @click.command()
 def serializer_benchmark() -> None:
-    benchmark_serializer()
+    benchmark_serializer_impl(get_serialize_setup)
+
+
+@click.command()
+def serializer_string_benchmark() -> None:
+    benchmark_serializer_impl(get_serialize_str_setup)
 
 
 @click.command()
@@ -419,9 +467,11 @@ def main() -> None:
     cli.add_command(run_all)
     cli.add_command(import_benchmark)
     cli.add_command(init_benchmark)
+    cli.add_command(init_string_benchmark)
     cli.add_command(field_access_benchmark)
     cli.add_command(container_benchmark)
     cli.add_command(serializer_benchmark)
+    cli.add_command(serializer_string_benchmark)
     cli()
 
 

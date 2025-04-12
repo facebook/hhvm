@@ -31,6 +31,7 @@ struct MyStruct {
   9: list<i64> val_list;
   10: list<string> str_list;
   11: map<i32, string> val_map;
+  12: map<string, string> str_map;
   15: set<i32> val_set;
   18: map<i32, Included> val_map_structs;
   20: StringBucket val_struct;

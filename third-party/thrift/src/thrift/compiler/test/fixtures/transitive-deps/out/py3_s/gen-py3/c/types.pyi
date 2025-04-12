@@ -17,6 +17,7 @@ import itertools
 import c.thrift_types
 
 
+
 class C(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         i: bool

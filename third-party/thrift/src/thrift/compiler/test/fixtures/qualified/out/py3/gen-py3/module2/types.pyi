@@ -19,6 +19,7 @@ import module1.types as _module1_types
 import module2.thrift_types
 
 
+
 class Struct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         first: bool

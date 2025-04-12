@@ -17,6 +17,7 @@ import itertools
 import transitive.thrift_types
 
 
+
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         a: bool

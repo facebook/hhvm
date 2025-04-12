@@ -40,9 +40,7 @@ class Py3CompatibilityTest(unittest.TestCase):
 
     def test_init_python_struct_with_py3_enum(self) -> None:
         python_file = python_types.File(
-            # pyre-fixme[6]: In call `python_types.File.__init__`, for argument `permissions`, expected `Optional[thrift_types.Perm]` but got `Perm`
             permissions=(py3_types.Perm.read | py3_types.Perm.read),
-            # pyre-fixme[6]: In call `python_types.File.__init__`, for argument `type`, expected `Optional[thrift_types.Kind]` but got `Kind`
             type=py3_types.Kind.FIFO,
         )
         self.assertEqual(
@@ -54,9 +52,7 @@ class Py3CompatibilityTest(unittest.TestCase):
     def test_update_python_struct_with_py3_enum(self) -> None:
         python_file = python_types.File()
         python_file = python_file(
-            # pyre-fixme[6]: In call `python_types.File.__init__`, for argument `permissions`, expected `Optional[thrift_types.Perm]` but got `Perm`
             permissions=(py3_types.Perm.read | py3_types.Perm.read),
-            # pyre-fixme[6]: In call `python_types.File.__init__`, for argument `type`, expected `Optional[thrift_types.Kind]` but got `Kind`
             type=py3_types.Kind.FIFO,
         )
         self.assertEqual(

@@ -18,6 +18,7 @@ import thrift.py3.stream
 import module.thrift_types
 
 
+
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         value: bool

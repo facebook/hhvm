@@ -18,6 +18,7 @@ import thrift.py3.stream
 import module.thrift_types
 
 
+
 class FooStreamEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         pass

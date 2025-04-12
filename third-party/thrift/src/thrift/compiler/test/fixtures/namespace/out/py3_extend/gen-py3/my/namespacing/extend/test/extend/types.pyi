@@ -18,3 +18,4 @@ import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 import my.namespacing.extend.test.extend.thrift_types
 
 
+

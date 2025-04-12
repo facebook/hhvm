@@ -17,6 +17,7 @@ import itertools
 import test.namespace_from_package_without_module_name.module.thrift_types
 
 
+
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         MyInt: bool

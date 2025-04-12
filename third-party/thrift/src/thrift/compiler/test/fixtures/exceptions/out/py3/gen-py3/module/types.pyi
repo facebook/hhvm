@@ -17,6 +17,7 @@ import itertools
 import module.thrift_types
 
 
+
 class Fiery(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         message: bool

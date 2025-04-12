@@ -42,21 +42,9 @@ import {{> common/thrift_types_module_path}}
 
 
 {{#program:enums}}
-class {{enum:name}}(thrift.python.types.{{^enum:flags?}}Enum, int{{!
-}}{{/enum:flags?}}{{!
-}}{{#enum:flags?}}Flag{{/enum:flags?}}):
-    {{#enum:values}}
-    {{enum_value:py_name}}: {{enum:name}} = ...
-    {{/enum:values}}
-    {{!TODO: accommodate root_module_prefix}}
-    def _to_python(self) -> {{> common/thrift_types_module_path}}.{{enum:name}}: ...
-    def _to_py3(self) -> {{enum:name}}: ...
-    def _to_py_deprecated(self) -> int: ...
-    def __int__(self) -> int: ...
-    def __index__(self) -> int: ...
-
-
+{{enum:name}} = {{> common/thrift_types_module_path}}.{{enum:name}}
 {{/program:enums}}
+
 {{#program:filtered_structs}}
 {{#struct:union?}}
 _{{struct:name}}ValueType = _typing.Union[None, {{#struct:py3_fields}}{{^first?}}, {{/first?}}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/struct:py3_fields}}]

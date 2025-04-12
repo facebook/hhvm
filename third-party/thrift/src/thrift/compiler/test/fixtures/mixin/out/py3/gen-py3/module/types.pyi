@@ -17,6 +17,7 @@ import itertools
 import module.thrift_types
 
 
+
 class Mixin1(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         field1: bool

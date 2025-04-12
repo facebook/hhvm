@@ -17,6 +17,7 @@ import itertools
 import module.thrift_types
 
 
+
 class Limits(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         max_i64_field: bool

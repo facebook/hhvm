@@ -17,6 +17,7 @@ import itertools
 import foo.thrift_types
 
 
+
 class Fields(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         injected_field: bool

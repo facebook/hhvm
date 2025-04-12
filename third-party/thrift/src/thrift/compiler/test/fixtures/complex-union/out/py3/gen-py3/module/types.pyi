@@ -17,6 +17,7 @@ import itertools
 import module.thrift_types
 
 
+
 _ComplexUnionValueType = _typing.Union[None, int, str, _typing.Sequence[int], _typing.Sequence[str], _typing.Mapping[int, str], str]
 
 class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):

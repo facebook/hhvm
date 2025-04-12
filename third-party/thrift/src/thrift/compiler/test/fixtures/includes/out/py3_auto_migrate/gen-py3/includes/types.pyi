@@ -18,6 +18,7 @@ import transitive.types as _transitive_types
 import includes.thrift_types
 
 
+
 class Included(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         MyIntField: bool

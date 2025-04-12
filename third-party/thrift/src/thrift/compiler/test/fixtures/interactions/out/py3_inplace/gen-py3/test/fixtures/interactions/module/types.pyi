@@ -19,6 +19,7 @@ import test.fixtures.another_interactions.shared.types as _test_fixtures_another
 import test.fixtures.interactions.module.thrift_types
 
 
+
 class CustomException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         message: bool

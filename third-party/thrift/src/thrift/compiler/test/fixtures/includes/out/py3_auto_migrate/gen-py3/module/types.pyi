@@ -18,6 +18,7 @@ import includes.types as _includes_types
 import module.thrift_types
 
 
+
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         MyIncludedField: bool

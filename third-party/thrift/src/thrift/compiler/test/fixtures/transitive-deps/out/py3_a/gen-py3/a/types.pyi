@@ -19,6 +19,7 @@ import c.types as _c_types
 import a.thrift_types
 
 
+
 class A(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         b: bool

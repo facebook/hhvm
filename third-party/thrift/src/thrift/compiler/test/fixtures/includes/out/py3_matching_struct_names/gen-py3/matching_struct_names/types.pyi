@@ -18,6 +18,7 @@ import module.types as _module_types
 import matching_struct_names.thrift_types
 
 
+
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         field: bool

@@ -17,6 +17,7 @@ import itertools
 import test.fixtures.another_interactions.shared.thrift_types
 
 
+
 class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         s_res: bool

@@ -20,5 +20,6 @@ import transitive.types as _transitive_types
 import service.thrift_types
 
 
+
 IncludesIncluded = _includes_types.Included
 IncludesTransitiveFoo = _transitive_types.Foo

@@ -30,13 +30,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.base64.Base64;
-import io.netty.handler.codec.base64.Base64Dialect;
 import io.netty.util.ReferenceCountUtil;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import reactor.core.Exceptions;
 
 /**
@@ -300,70 +299,17 @@ public final class SerializerUtil {
     }
   }
 
-  public static byte[] toBase64(
-      ThriftSerializable writer, SerializationProtocol protocol, boolean urlSafe) {
-    ByteBuf base64encoded = null;
-    try {
-      base64encoded = toBase64Impl(writer, urlSafe, protocol);
-      return ByteBufUtil.getBytes(base64encoded);
-    } finally {
-      ReferenceCountUtil.safeRelease(base64encoded);
-    }
-  }
-
   public static String toBase64(
       ThriftSerializable writer, boolean urlSafe, SerializationProtocol protocol) {
-    ByteBuf base64encoded = null;
-    try {
-      base64encoded = toBase64Impl(writer, urlSafe, protocol);
-      return base64encoded.toString(StandardCharsets.UTF_8);
-    } finally {
-      ReferenceCountUtil.safeRelease(base64encoded);
-    }
-  }
-
-  private static ByteBuf toBase64Impl(
-      ThriftSerializable writer, boolean urlSafe, SerializationProtocol protocol) {
-    ByteBuf thriftEncoded = RpcResources.getByteBufAllocator().buffer();
-    try {
-      ByteBufTProtocol tProtocol = toByteBufProtocol(protocol, thriftEncoded);
-      writer.write0(tProtocol);
-
-      Base64Dialect dialect = urlSafe ? Base64Dialect.URL_SAFE : Base64Dialect.STANDARD;
-      ByteBuf base64encoded = Base64.encode(thriftEncoded, false, dialect);
-
-      return base64encoded;
-    } finally {
-      ReferenceCountUtil.safeRelease(thriftEncoded);
-    }
-  }
-
-  public static <T> T fromBase64(
-      Reader<T> reader, byte[] base64, boolean urlSafe, SerializationProtocol protocol) {
-    ByteBuf utf8Bytes = Unpooled.wrappedBuffer(base64);
-
-    return fromBase64Impl(reader, utf8Bytes, urlSafe, protocol);
+    byte[] bytes = doToByteArray(writer::write0, protocol);
+    Base64.Encoder encoder = urlSafe ? Base64.getUrlEncoder() : Base64.getEncoder();
+    return new String(encoder.encode(bytes), StandardCharsets.UTF_8);
   }
 
   public static <T> T fromBase64(
       Reader<T> reader, String base64String, boolean urlSafe, SerializationProtocol protocol) {
-    ByteBuf utf8Bytes = Unpooled.copiedBuffer(base64String, StandardCharsets.UTF_8);
-
-    return fromBase64Impl(reader, utf8Bytes, urlSafe, protocol);
-  }
-
-  private static <T> T fromBase64Impl(
-      Reader<T> reader, ByteBuf buf, boolean urlSafe, SerializationProtocol protocol) {
-    ByteBuf base64decoded = null;
-    try {
-      Base64Dialect dialect = urlSafe ? Base64Dialect.URL_SAFE : Base64Dialect.STANDARD;
-      base64decoded = Base64.decode(buf, dialect);
-
-      ByteBufTProtocol byteBufTProtocol = toByteBufProtocol(protocol, base64decoded);
-      return reader.read(byteBufTProtocol);
-    } finally {
-      ReferenceCountUtil.safeRelease(buf);
-      ReferenceCountUtil.safeRelease(base64decoded);
-    }
+    Base64.Decoder decoder = urlSafe ? Base64.getUrlDecoder() : Base64.getDecoder();
+    byte[] bytes = decoder.decode(base64String.getBytes(StandardCharsets.UTF_8));
+    return fromByteArray(reader, bytes, protocol);
   }
 }

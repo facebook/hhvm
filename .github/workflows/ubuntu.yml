@@ -3,69 +3,121 @@ name: Ubuntu CI
 on:
   push:
     branches-ignore:
-      # Exclude the push event for exported diffs, because the CI for export
-      # should have been covered by GitHub Actions triggered by pull requests.
       - 'export-D+'
   pull_request:
 
 concurrency:
-  # If the workflow is triggered by a pull request, then cancel previous runs
-  # for the same pull request, which share the same `github.ref`, otherwise the
-  # run ID is used to identify the concurrency group, which is a no-op because
-  # the run ID is always unique for each trigged event.
   group: ubuntu-ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: true
 
-# OUT needs to be global. Ideally it would be local to the job so we could
-# store it in ${{ runner.temp }} instead of the checkout directory.
-# Unfortunately this is hitting some GitHub Action inconsistency with `env`:
-# https://github.com/actions/runner/issues/480
 env:
   OUT: ${{ format('{0}/out', github.workspace) }}
   DEBIAN_FRONTEND: "noninteractive"
+  CLANG_VERSION: 12
+  # For ccache - adjust path if needed
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
 
 jobs:
   build_ubuntu_focal_nightly:
-    runs-on: 16-core
+    runs-on: 16-core # Or ubuntu-latest if using standard runners
     container:
+      # OPTION A: Keep base image, rely heavily on caching
       image: ubuntu:focal
+      # OPTION B: Use a pre-built image with deps included (Recommended)
+      # image: ghcr.io/your-org/your-repo/hhvm-builder:focal-llvm12
       env:
         DISTRO: ubuntu-20.04-focal
         IS_NIGHTLY: 1
-        CLANG_VERSION: 12
+        # Pass ccache dir to container
+        CCACHE_DIR: ${{ env.CCACHE_DIR }}
+
     steps:
-    - name: Installing dependencies to bootstrap env
-      run: apt update -y && apt install -y git wget lsb-release software-properties-common gpg
-    - name: Installing llvm
+    # --- Caching Steps (Place BEFORE the steps they cache) ---
+    - name: Cache apt packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          /var/cache/apt/archives
+          /var/lib/apt/lists
+        # Key based on OS and potentially list of required packages if static
+        key: ${{ runner.os }}-apt-llvm${{ env.CLANG_VERSION }}-${{ hashFiles('**/ci/bin/make-debianish-package') }} # Add other dep files if needed
+        restore-keys: |
+          ${{ runner.os }}-apt-llvm${{ env.CLANG_VERSION }}-
+
+    # --- ccache Setup ---
+    - name: Setup ccache directory # Ensure dir exists for caching step
+      run: mkdir -p ${{ env.CCACHE_DIR }}
+
+    - name: Cache ccache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        # Key needs to be carefully constructed. Include compiler version, source files, etc.
+        key: ${{ runner.os }}-ccache-llvm${{ env.CLANG_VERSION }}-${{ github.ref }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-ccache-llvm${{ env.CLANG_VERSION }}-${{ github.ref }}-
+          ${{ runner.os }}-ccache-llvm${{ env.CLANG_VERSION }}-
+
+    # --- Environment Setup (Skip parts if using pre-built image) ---
+    - name: Installing dependencies (incl. ccache)
       run: |
-        wget https://apt.llvm.org/llvm.sh
+        apt update -y
+        apt install -y --no-install-recommends git wget lsb-release software-properties-common gpg ccache # Added ccache
+
+    - name: Cache LLVM install script
+      uses: actions/cache@v3
+      id: cache-llvm-script # Give it an ID to check cache hit
+      with:
+        path: llvm.sh
+        key: llvm-script-v1 # Simple key for the script itself
+
+    - name: Installing llvm
+      # Run only if script wasn't restored from cache OR if you always want latest llvm.sh
+      # if: steps.cache-llvm-script.outputs.cache-hit != 'true' # Example condition
+      run: |
+        wget https://apt.llvm.org/llvm.sh -O llvm.sh
         chmod +x llvm.sh
-        # Note: Keep this version in sync with the one in the Debian control file.
-        ./llvm.sh ${CLANG_VERSION}
+        ./llvm.sh ${CLANG_VERSION} all # Install all components needed
+      # If using pre-built image, this step might be removed
+
     - name: Making LLVM the default compiler
       run: |
-        if [ -f /etc/alternatives/cc ]
-        then
-          update-alternatives --remove-all cc
-        fi
-
-        if [ -f /etc/alternatives/c++ ]
-        then
-          update-alternatives --remove-all c++
-        fi
-        
-        update-alternatives --install /usr/bin/cc cc /usr/bin/clang++-${CLANG_VERSION} 500
-        update-alternatives --set cc /usr/bin/clang++-${CLANG_VERSION}
+        # (Consider putting this logic into the custom image)
+        # Ensure update-alternatives commands run correctly
+        update-alternatives --install /usr/bin/cc cc /usr/bin/clang-${CLANG_VERSION} 500
         update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-${CLANG_VERSION} 500
+        update-alternatives --set cc /usr/bin/clang-${CLANG_VERSION}
         update-alternatives --set c++ /usr/bin/clang++-${CLANG_VERSION}
+        # Link ccache AFTER setting alternatives if prepending commands
+        # OR configure build system to use ccache clang / ccache clang++ directly
+
+    # --- Checkout and Build ---
     - name: Fetching HHVM and its submodules
       uses: actions/checkout@v3
       with:
         submodules: 'recursive'
+        fetch-depth: 1 # Optional: Use shallow clone
+
+    - name: Configure ccache
+      run: |
+        ccache --set-config max_size=2G # Adjust size as needed
+        ccache --show-stats # Show stats before build
+        # Prepend ccache to PATH - Simpler than modifying build script sometimes
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+
     - name: Installing HHVM deps and building HHVM
-      run: ci/bin/make-debianish-package
+      env:
+         # Potentially set CC/CXX here if build system respects them and PATH isn't enough
+         # CC: ccache clang-${CLANG_VERSION}
+         # CXX: ccache clang++-${CLANG_VERSION}
+      run: ci/bin/make-debianish-package # Ensure this script uses parallel build (-j flags)
+
+    - name: Show ccache stats after build
+      run: ccache --show-stats
+
+    # --- Artifact Upload ---
     - name: Uploading artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: out-directory
+        name: out-directory-${{ env.DISTRO }} # Be more specific with artifact name
         path: ${{ env.OUT }}

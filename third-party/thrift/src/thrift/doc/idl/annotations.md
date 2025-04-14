@@ -159,31 +159,6 @@ This is to avoid generating copy constructor/copy assignment constructor and ove
 
 Adds a `std::hash` and `std::equal_to` specialization for the Thrift struct. You need to provide your own hash and equal_to implementation. Use this annotation if you want to use your Thrift struct as the key type of `std::unordered_map` or other unordered associative containers.
 
-##### cpp.indirection
-
-* Where to use: field type
-* Value: a method to call from the base type
-* Example:
-
-```
-## Thrift file
-typedef i64 (cpp.type = "Seconds", cpp.indirection) seconds
-struct MyStruct {
-  1: seconds s;
-}
-// C++ file
-
-struct Seconds : private boost::totally_ordered<Seconds> {
-  FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(number);
-  std::int64_t number = 0;
-  Seconds() = default;
-  Seconds(std::int64_t number_) : number(number_) {}
-  bool operator==(Seconds that) const { return number == that.number; }
-  bool operator<(Seconds that) const { return number < that.number; }
-};
-```
-Together with `cpp.type` annotation, this annotation defines a new type and uses the indirect method to access its value. Only supported in cpp.
-
 #### Annotations for C++ Allocator Awareness
 
 Example C++:

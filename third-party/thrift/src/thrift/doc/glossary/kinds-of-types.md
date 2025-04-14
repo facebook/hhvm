@@ -157,17 +157,6 @@ one of the following:
    underlying type is the adapted type of the nested adapter, otherwise
 2. the underlying type is the (typically, default) type being adapted.
 
-##### Legacy Customization
-Historically (i.e., prior to 2022), the only mechanism for doing so relied on a
-patchwork of complex, poorly documented customization mechanisms. In C++ for
-example, these typically involved a combination of annotations
-(`cpp.indirection`, `cpp.type`) and template specializations
-(`protocol_methods`). In addition to being difficult to understand, these
-mechanisms have proven to be extremely error prone. We therefore refer to such
-these as **legacy customized types**, and strongly discourage their use in favor
-of adapted types.
-
-
 #### Unsupported Types
 
 All other native types do not satisfy the conditions needed to be compliant with

@@ -1,0 +1,9 @@
+error: Parsing[1002] This is an invalid use of '__RequirePackage' because this is not a literal string expression [1]
+
+ill_formed_requirepackage_attr.php:5:34
+    3 | <<file: __EnableUnstableFeatures('require_package')>>
+    4 | 
+[1] 5 | <<__EntryPoint, __RequirePackage(123)>> // parse error
+    6 | function test() : void {}
+
+1 error found

@@ -51,9 +51,6 @@ import builtins as _builtins
 import importlib
 
 import module.thrift_types as _fbthrift_python_types
-from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
-    __NadaType,
-)
 
 
 _fbthrift__module_name__ = "module.types"
@@ -161,6 +158,7 @@ cdef class Empty(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Empty, self)
 
+__NadaType = _fbthrift_python_types.Nada.Type
 
 
 @__cython.auto_pickle(False)

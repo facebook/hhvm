@@ -55,10 +55,6 @@ from module.thrift_enums import (
     MyEnum,
     TypedEnum,
 )
-from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
-    __MyUnionType,
-    __NonTriviallyDestructibleUnionType,
-)
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__RecursiveStruct,
@@ -75,6 +71,7 @@ cdef object get_types_reflection():
         "module.types_reflection"
     )
 
+__MyUnionType = _fbthrift_python_types.MyUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -252,6 +249,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
 
+__NonTriviallyDestructibleUnionType = _fbthrift_python_types.NonTriviallyDestructibleUnion.Type
 
 
 @__cython.auto_pickle(False)

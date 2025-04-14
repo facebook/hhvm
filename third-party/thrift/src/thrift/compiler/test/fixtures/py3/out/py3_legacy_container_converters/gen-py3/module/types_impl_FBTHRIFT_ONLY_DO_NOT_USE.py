@@ -16,10 +16,3 @@ AnEnum = _fbthrift_python_enums.AnEnum
 AnEnumRenamed = _fbthrift_python_enums.AnEnumRenamed
 Flags = _fbthrift_python_enums.Flags
 
-
-class __BinaryUnionType(enum.Enum):
-    iobuf_val = 1
-    EMPTY = 0
-
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()

@@ -15,20 +15,3 @@ _fbthrift__module_name__ = "test.fixtures.basic.module.types"
 MyEnum = _fbthrift_python_enums.MyEnum
 HackEnum = _fbthrift_python_enums.HackEnum
 
-
-class __MyUnionType(enum.Enum):
-    myEnum = 1
-    myStruct = 2
-    myDataItem = 3
-    floatSet = 4
-    EMPTY = 0
-
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-class __UnionToBeRenamedType(enum.Enum):
-    reserved_field = 1
-    EMPTY = 0
-
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()

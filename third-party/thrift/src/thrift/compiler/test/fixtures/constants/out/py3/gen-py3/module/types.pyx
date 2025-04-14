@@ -56,10 +56,6 @@ from module.thrift_enums import (
     City,
     Company,
 )
-from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
-    __union1Type,
-    __union2Type,
-)
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i32,
@@ -884,6 +880,7 @@ cdef class struct4(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.struct4, self)
 
+__union1Type = _fbthrift_python_types.union1.Type
 
 
 @__cython.auto_pickle(False)
@@ -1067,6 +1064,7 @@ cdef class union1(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.union1, self)
 
+__union2Type = _fbthrift_python_types.union2.Type
 
 
 @__cython.auto_pickle(False)

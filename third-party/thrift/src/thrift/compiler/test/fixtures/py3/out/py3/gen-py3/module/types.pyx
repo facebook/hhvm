@@ -57,9 +57,6 @@ from module.thrift_enums import (
     AnEnumRenamed,
     Flags,
 )
-from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
-    __BinaryUnionType,
-)
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i16,
@@ -826,6 +823,7 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexStruct, self)
 
+__BinaryUnionType = _fbthrift_python_types.BinaryUnion.Type
 
 
 @__cython.auto_pickle(False)

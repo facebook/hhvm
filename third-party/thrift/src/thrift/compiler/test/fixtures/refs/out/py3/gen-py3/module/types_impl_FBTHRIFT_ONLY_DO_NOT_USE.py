@@ -15,18 +15,3 @@ _fbthrift__module_name__ = "module.types"
 MyEnum = _fbthrift_python_enums.MyEnum
 TypedEnum = _fbthrift_python_enums.TypedEnum
 
-
-class __MyUnionType(enum.Enum):
-    anInteger = 1
-    aString = 2
-    EMPTY = 0
-
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-class __NonTriviallyDestructibleUnionType(enum.Enum):
-    int_field = 1
-    EMPTY = 0
-
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()

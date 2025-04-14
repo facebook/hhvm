@@ -404,6 +404,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// object.
   template <class Id>
   decltype(auto) patch() {
+    static_assert(!std::is_same_v<Id, op::get_ordinal<T, Id>>);
     using FieldPatchType = typename patch_type::underlying_type;
     using Ret = op::get_native_type<FieldPatchType, Id>;
     return *reinterpret_cast<Ret*>(

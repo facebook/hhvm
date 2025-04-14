@@ -361,11 +361,24 @@ let const env { Aast.cc_type; _ } =
 
 let consts env cs = List.concat_map ~f:(const env) cs
 
-let typeconsts env tcs =
+let typeconsts env tcs cls_name =
+  let get_class_const =
+    match Env.get_class env.tenv (snd cls_name) with
+    | Decl_entry.Found cls -> begin
+      fun const_sid ->
+        match Folded_class.get_typeconst cls (snd const_sid) with
+        | Some ttc -> `Found ttc
+        | None -> `Missing
+    end
+    | _ -> (fun _ -> `Skip)
+  in
   let f tconst =
-    (* TODO(milliechen): only allow reifiable abstract typeconsts *)
     let ignore_package_errors =
-      Env.package_v2_allow_reifiable_tconst_violations env.tenv
+      match get_class_const tconst.c_tconst_name with
+      | `Found ttc ->
+        Option.is_none ttc.ttc_reifiable
+        || Env.package_v2_allow_reifiable_tconst_violations env.tenv
+      | _ -> true
     in
     match tconst.c_tconst_kind with
     | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
@@ -434,7 +447,7 @@ let class_ tenv c =
     c_is_xhp = _;
     c_has_xhp_keyword = _;
     c_kind;
-    c_name = _;
+    c_name;
     c_tparams;
     c_extends;
     c_uses;
@@ -498,7 +511,7 @@ let class_ tenv c =
       hints ~in_signature:false env c_implements;
       hints ~in_signature:false env c_uses;
       requirements env c_reqs;
-      typeconsts env c_typeconsts;
+      typeconsts env c_typeconsts c_name;
       class_vars env c_static_vars;
       class_vars env c_vars;
       consts env c_consts;

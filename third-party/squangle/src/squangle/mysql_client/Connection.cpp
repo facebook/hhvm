@@ -15,19 +15,6 @@ using namespace std::chrono_literals;
 
 namespace facebook::common::mysql_client {
 
-namespace {
-// Helper function to return QueryException when conn is invalid/null
-QueryException getInvalidConnException() {
-  return QueryException(
-      0,
-      OperationResult::Failed,
-      static_cast<int>(SquangleErrno::SQ_INVALID_CONN),
-      "Invalid argument, connection is null",
-      std::make_shared<MysqlConnectionKey>(),
-      0ms);
-}
-} // namespace
-
 bool Connection::isSSL() const {
   CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
   return mysql_connection_->isSSL();
@@ -204,7 +191,7 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
     QueryCallback&& cb,
     QueryOptions&& options) {
   if (conn == nullptr) {
-    throw getInvalidConnException();
+    throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginQuery(std::move(conn), std::move(query));
@@ -222,7 +209,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
   if (conn == nullptr) {
-    throw getInvalidConnException();
+    throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
@@ -240,7 +227,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
   if (conn == nullptr) {
-    throw getInvalidConnException();
+    throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));

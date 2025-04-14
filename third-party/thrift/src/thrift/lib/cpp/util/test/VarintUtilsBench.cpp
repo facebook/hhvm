@@ -26,6 +26,46 @@
 
 using namespace apache::thrift::util;
 
+extern "C" FOLLY_KEEP uint8_t
+check_thrift_read_varint_u8_cursor(folly::io::Cursor* cur) {
+  return apache::thrift::util::readVarint<uint8_t>(*cur);
+}
+
+extern "C" FOLLY_KEEP uint16_t
+check_thrift_read_varint_u16_cursor(folly::io::Cursor* cur) {
+  return apache::thrift::util::readVarint<uint16_t>(*cur);
+}
+
+extern "C" FOLLY_KEEP uint32_t
+check_thrift_read_varint_u32_cursor(folly::io::Cursor* cur) {
+  return apache::thrift::util::readVarint<uint32_t>(*cur);
+}
+
+extern "C" FOLLY_KEEP uint64_t
+check_thrift_read_varint_u64_cursor(folly::io::Cursor* cur) {
+  return apache::thrift::util::readVarint<uint64_t>(*cur);
+}
+
+extern "C" FOLLY_KEEP size_t
+check_thrift_read_varint_u8_unrolled(uint8_t& val, const uint8_t* ptr) {
+  return apache::thrift::util::detail::readVarintMediumSlowUnrolled(val, ptr);
+}
+
+extern "C" FOLLY_KEEP size_t
+check_thrift_read_varint_u16_unrolled(uint16_t& val, const uint8_t* ptr) {
+  return apache::thrift::util::detail::readVarintMediumSlowUnrolled(val, ptr);
+}
+
+extern "C" FOLLY_KEEP size_t
+check_thrift_read_varint_u32_unrolled(uint32_t& val, const uint8_t* ptr) {
+  return apache::thrift::util::detail::readVarintMediumSlowUnrolled(val, ptr);
+}
+
+extern "C" FOLLY_KEEP size_t
+check_thrift_read_varint_u64_unrolled(uint64_t& val, const uint8_t* ptr) {
+  return apache::thrift::util::detail::readVarintMediumSlowUnrolled(val, ptr);
+}
+
 extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u8_cursor(
     folly::io::QueueAppender* cur, uint8_t val) {
   return writeVarint(*cur, val);

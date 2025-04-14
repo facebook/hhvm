@@ -116,6 +116,51 @@ NativeSet::Specialized<T>* NativeSet::if_type() noexcept {
   return std::get_if<Specialized<T>>(&kind_);
 }
 
+// ---- NativeMap ---- //
+
+template <typename... Args>
+NativeMap::NativeMap(MapOf<Args...>&& m) noexcept : kind_(std::move(m)) {}
+
+template <typename T>
+bool NativeMap::is_type() const noexcept {
+  static_assert(
+      detail::is_map_v<T> && !std::is_same_v<T, NativeMap>,
+      "NativeMap is always a map type");
+  return std::holds_alternative<Specialized<T>>(kind_);
+}
+
+template <typename T>
+const NativeMap::Specialized<T>& NativeMap::as_type() const {
+  static_assert(
+      detail::is_map_v<T> && !std::is_same_v<T, NativeMap>,
+      "NativeMap is always a map type");
+  return std::get<Specialized<T>>(kind_);
+}
+
+template <typename T>
+NativeMap::Specialized<T>& NativeMap::as_type() {
+  static_assert(
+      detail::is_map_v<T> && !std::is_same_v<T, NativeMap>,
+      "NativeMap is always a map type");
+  return std::get<Specialized<T>>(kind_);
+}
+
+template <typename T>
+const NativeMap::Specialized<T>* NativeMap::if_type() const noexcept {
+  static_assert(
+      detail::is_map_v<T> && !std::is_same_v<T, NativeMap>,
+      "NativeMap is always a map type");
+  return std::get_if<Specialized<T>>(&kind_);
+}
+
+template <typename T>
+NativeMap::Specialized<T>* NativeMap::if_type() noexcept {
+  static_assert(
+      detail::is_map_v<T> && !std::is_same_v<T, NativeMap>,
+      "NativeMap is always a map type");
+  return std::get_if<Specialized<T>>(&kind_);
+}
+
 // ---- Object ---- //
 
 template <typename... Args>

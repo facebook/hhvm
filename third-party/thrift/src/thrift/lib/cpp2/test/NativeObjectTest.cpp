@@ -410,6 +410,23 @@ experimental::SetOf<T> into_set(const std::set<T>& set) {
   return newSet;
 }
 
+template <typename Key, typename Value>
+experimental::detail::map_t<Key, Value> into_map(
+    const std::map<Key, Value>& map) {
+  experimental::detail::map_t<Key, Value> newMap;
+  for (const auto& [key, val] : map) {
+    if constexpr (std::is_same_v<Key, std::string>) {
+      static_assert(std::is_same_v<
+                    typename experimental::detail::map_t<Key, Value>::key_type,
+                    Bytes>);
+      newMap.emplace(Bytes::fromStdString(key), val);
+    } else {
+      newMap.emplace(key, val);
+    }
+  }
+  return newMap;
+}
+
 template <typename T>
 void assertSetType() {
   T t;
@@ -455,18 +472,16 @@ void assertSetType() {
           FAIL() << "Expected set type";
         }
       } else if (const auto* map = obj_in_set.if_map()) {
-        // TODO(sadroeck) - Enable with map support
-        std::ignore = map;
-        // const auto* map_string_i32 = std::get_if<experimental::MapOf<
-        //     experimental::Bytes,
-        //     experimental::PrimitiveValue>>(&map->kind());
-        // if constexpr (std::is_same_v<
-        //                   SetElemTy,
-        //                   std::map<std::string, std::int32_t>>) {
-        //   EXPECT_EQ(into_map(item), *map_string_i32);
-        // } else {
-        //   FAIL() << "Expected map type";
-        // }
+        const auto* map_string_i32 = map->if_type<experimental::MapOf<
+            experimental::Bytes,
+            experimental::ValueHolder>>();
+        if constexpr (std::is_same_v<
+                          SetElemTy,
+                          std::map<std::string, std::int32_t>>) {
+          EXPECT_EQ(into_map(item), *map_string_i32);
+        } else {
+          FAIL() << "Expected map type";
+        }
       } else {
         ASSERT_TRUE(false);
       }
@@ -499,4 +514,75 @@ TEST(NativeObjectTest, set_fields) {
       testset::struct_set_string,
       testset::struct_set_struct_empty,
       testset::struct_set_set_i32>();
+}
+
+template <typename T>
+void assertMapType() {
+  T t;
+  using MapFieldTy =
+      std::remove_cvref_t<typename decltype(t.field_1())::value_type>;
+  using MapKeyTy = typename MapFieldTy::key_type;
+  using MapValueTy = typename MapFieldTy::mapped_type;
+
+  auto map_value = MapFieldTy{};
+  for (int i = 0; i < 10; ++i) {
+    map_value.emplace(random_val<MapKeyTy>(), random_val<MapValueTy>());
+  }
+  t.field_1().emplace(map_value);
+
+  const auto obj = testSerDe<StandardProtocol::Binary>(t);
+  ASSERT_EQ(obj.size(), 1);
+  const NativeValue& field_obj = obj.at(1);
+
+  using ResultMapTy = experimental::detail::map_t<MapKeyTy, MapValueTy>;
+  using ResultValueTy = typename ResultMapTy::mapped_type;
+
+  ASSERT_TRUE(field_obj.is_map());
+  const auto& resultMap = field_obj.as_map().as_type<ResultMapTy>();
+  ASSERT_EQ(resultMap.size(), map_value.size());
+
+  for (const auto& [key, value] : map_value) {
+    if constexpr (std::is_same_v<experimental::ValueHolder, ResultValueTy>) {
+      if constexpr (std::is_same_v<MapKeyTy, std::string>) {
+        Bytes objKey = Bytes::fromStdString(key);
+        const auto it = resultMap.find(objKey);
+        ASSERT_NE(it, resultMap.end());
+        const experimental::ValueHolder& inner_val = it->second;
+        ASSERT_EQ(inner_val.as_type<MapValueTy>(), value);
+      } else {
+        const auto& primVal = folly::get_or_throw(resultMap, key);
+        ASSERT_EQ(
+            std::get<experimental::detail::native_value_type_t<MapValueTy>>(
+                primVal),
+            value);
+      }
+    } else if constexpr (std::is_same_v<
+                             experimental::ValueHolder,
+                             ResultValueTy>) {
+      const auto& val = folly::get_or_throw(resultMap, key);
+      ASSERT_TRUE(val.template is_type<MapValueTy>());
+      const auto& wrappedValue = val.template as_type<MapValueTy>();
+      ASSERT_EQ(wrappedValue, value);
+    } else {
+      static_assert(false, "Not implemented");
+    }
+  }
+}
+
+template <typename... Ts>
+void assertMapTypes() {
+  (assertMapType<Ts>(), ...);
+}
+
+TEST(NativeObjectTest, map_string_to_primitive) {
+  assertMapTypes<
+      testset::struct_map_string_bool,
+      testset::struct_map_string_byte,
+      testset::struct_map_string_i16,
+      testset::struct_map_string_i32,
+      testset::struct_map_string_i64,
+      testset::struct_map_string_float,
+      testset::struct_map_string_double,
+      testset::struct_map_string_string,
+      testset::struct_map_string_binary>();
 }

@@ -139,6 +139,23 @@ bool NativeSet::operator!=(const NativeSet& other) const {
   return !(*this == other);
 }
 
+// ---- NativeMap ---- //
+
+NativeMap::NativeMap(const NativeMap& other) : kind_(other.kind_) {}
+
+bool NativeMap::operator==(const NativeMap& other) const {
+  return kind_ == other.kind_;
+}
+bool NativeMap::operator!=(const NativeMap& other) const {
+  return !(kind_ == other.kind_);
+}
+const NativeMap::Kind& NativeMap::inner() const {
+  return kind_;
+}
+NativeMap::NativeMap(Kind&& kind) noexcept : kind_(std::move(kind)) {}
+
+NativeMap::NativeMap(const Kind& kind) : kind_(kind) {}
+
 // ------- parsing functions ------- //
 
 template <typename Protocol, typename T>
@@ -204,6 +221,16 @@ SetOf<ValueHolder> read_value_set_as(Protocol& prot, std::uint32_t size);
 
 template <typename Protocol, bool StringToBinary>
 NativeMap read_map(Protocol& prot);
+
+template <typename Protocol, bool StringToBinary>
+NativeMap read_kv_map(
+    Protocol& prot, TType keyType, TType valType, std::uint32_t size);
+
+template <typename Protocol, typename Key, bool StringToBinary>
+NativeMap read_v_map_as(Protocol& prot, TType valType, std::uint32_t size);
+
+template <typename Protocol, typename Key, typename Value, bool StringToBinary>
+detail::map_t<Key, Value> read_map_as(Protocol& prot, std::uint32_t size);
 
 template <typename Protocol, bool StringToBinary>
 Object read_struct(Protocol& prot);
@@ -433,10 +460,178 @@ NativeSet read_set(Protocol& prot) {
   }
 }
 
+template <typename Protocol, typename K, typename V, bool StringToBinary>
+detail::map_t<K, V> read_map_as(Protocol& prot, std::uint32_t size) {
+  detail::map_t<K, V> map{};
+  map.reserve(size);
+
+  using MapKeyTy = typename detail::map_t<K, V, StringToBinary>::key_type;
+  using MapValueTy = typename detail::map_t<K, V, StringToBinary>::mapped_type;
+
+  auto readKey = [&]() -> MapKeyTy {
+    if constexpr (std::is_same_v<MapKeyTy, detail::native_value_type_t<K>>) {
+      static_assert(detail::is_primitive_v<K>);
+      return read_primitive_as<Protocol, detail::native_value_type_t<K>>(prot);
+    } else {
+      static_assert(std::is_same_v<MapKeyTy, ValueHolder>);
+      if constexpr (detail::is_primitive_v<K>) {
+        return Value{read_primitive_as<Protocol, K>(prot)};
+      } else {
+        return Value{read_struct<Protocol, StringToBinary>(prot)};
+      }
+    }
+  };
+
+  auto readValue = [&]() -> MapValueTy {
+    if constexpr (std::is_same_v<MapValueTy, Object>) {
+      return read_struct<Protocol, StringToBinary>(prot);
+    } else {
+      static_assert(std::is_same_v<MapValueTy, ValueHolder>);
+      if constexpr (detail::is_primitive_v<V>) {
+        return Value{read_primitive_as<Protocol, V>(prot)};
+      } else {
+        return Value{read_struct<Protocol, StringToBinary>(prot)};
+      }
+    }
+  };
+
+  for (uint32_t i = 0; i < size; ++i) {
+    map.emplace(readKey(), readValue());
+  }
+  return map;
+}
+
+template <typename Protocol, typename Key, bool StringToBinary>
+NativeMap read_v_map_as(Protocol& prot, TType valType, std::uint32_t size) {
+  switch (valType) {
+    case TType::T_BOOL: {
+      return read_map_as<Protocol, Key, Bool, StringToBinary>(prot, size);
+    }
+    case TType::T_BYTE: {
+      return read_map_as<Protocol, Key, I8, StringToBinary>(prot, size);
+    }
+    case TType::T_I16: {
+      return read_map_as<Protocol, Key, I16, StringToBinary>(prot, size);
+    }
+    case TType::T_I32: {
+      return read_map_as<Protocol, Key, I32, StringToBinary>(prot, size);
+    }
+    case TType::T_I64: {
+      return read_map_as<Protocol, Key, I64, StringToBinary>(prot, size);
+    }
+    case TType::T_FLOAT: {
+      return read_map_as<Protocol, Key, Float, StringToBinary>(prot, size);
+    }
+    case TType::T_DOUBLE: {
+      return read_map_as<Protocol, Key, Double, StringToBinary>(prot, size);
+    }
+    case TType::T_STRING: {
+      if constexpr (StringToBinary) {
+        return read_map_as<Protocol, Key, Bytes, StringToBinary>(prot, size);
+      } else {
+        return read_map_as<Protocol, Key, String, StringToBinary>(prot, size);
+      }
+    }
+    case TType::T_STRUCT: {
+      return read_map_as<Protocol, Key, Object, StringToBinary>(prot, size);
+    }
+    case TType::T_LIST: {
+      return read_map_as<Protocol, Key, NativeList, StringToBinary>(prot, size);
+    }
+    case TType::T_SET: {
+      return read_map_as<Protocol, Key, NativeSet, StringToBinary>(prot, size);
+    }
+    case TType::T_MAP: {
+      return read_map_as<Protocol, Key, NativeMap, StringToBinary>(prot, size);
+    }
+    case T_STOP:
+    case T_VOID:
+    case T_U64:
+    case T_UTF8:
+    case T_UTF16:
+    case T_STREAM:
+      TProtocolException::throwInvalidSkipType(valType);
+      break;
+  }
+}
+
+template <typename Protocol, bool StringToBinary>
+NativeMap read_kv_map(
+    Protocol& prot, TType keyType, TType valType, std::uint32_t size) {
+  switch (keyType) {
+    case TType::T_BOOL: {
+      return read_v_map_as<Protocol, Bool, StringToBinary>(prot, valType, size);
+    }
+    case TType::T_BYTE: {
+      return read_v_map_as<Protocol, I8, StringToBinary>(prot, valType, size);
+    }
+    case TType::T_I16: {
+      return read_v_map_as<Protocol, I16, StringToBinary>(prot, valType, size);
+    }
+    case TType::T_I32: {
+      return read_v_map_as<Protocol, I32, StringToBinary>(prot, valType, size);
+    }
+    case TType::T_I64: {
+      return read_v_map_as<Protocol, I64, StringToBinary>(prot, valType, size);
+    }
+    case TType::T_FLOAT: {
+      return read_v_map_as<Protocol, Float, StringToBinary>(
+          prot, valType, size);
+    }
+    case TType::T_DOUBLE: {
+      return read_v_map_as<Protocol, Float, StringToBinary>(
+          prot, valType, size);
+    }
+    case TType::T_STRING: {
+      if constexpr (StringToBinary) {
+        return read_v_map_as<Protocol, Bytes, StringToBinary>(
+            prot, valType, size);
+      } else {
+        return read_v_map_as<Protocol, String, StringToBinary>(
+            prot, valType, size);
+      }
+    }
+    case TType::T_STRUCT: {
+      return read_v_map_as<Protocol, Object, StringToBinary>(
+          prot, valType, size);
+    }
+    case TType::T_LIST: {
+      return read_v_map_as<Protocol, NativeList, StringToBinary>(
+          prot, valType, size);
+    }
+    case TType::T_SET: {
+      return read_v_map_as<Protocol, NativeSet, StringToBinary>(
+          prot, valType, size);
+    }
+    case TType::T_MAP: {
+      return read_v_map_as<Protocol, NativeMap, StringToBinary>(
+          prot, valType, size);
+    }
+    case T_STOP:
+    case T_VOID:
+    case T_U64:
+    case T_UTF8:
+    case T_UTF16:
+    case T_STREAM:
+      TProtocolException::throwInvalidSkipType(keyType);
+      break;
+  }
+}
+
 template <typename Protocol, bool StringToBinary>
 NativeMap read_map(Protocol& prot) {
-  std::ignore = prot;
-  return NativeMap{};
+  TType keyType{};
+  TType valType{};
+  uint32_t size{};
+
+  prot.readMapBegin(keyType, valType, size);
+  if (!canReadNElements(prot, size, {keyType, valType})) {
+    TProtocolException::throwTruncatedData();
+  }
+  SCOPE_SUCCESS {
+    prot.readMapEnd();
+  };
+  return read_kv_map<Protocol, StringToBinary>(prot, keyType, valType, size);
 }
 template <typename... Args>
 auto make_value(Args&&... args) {
@@ -573,6 +768,8 @@ template <typename Protocol, typename... Args>
 std::uint32_t write(Protocol& prot, const ListOf<Args...>& list);
 template <typename Protocol, typename... Args>
 std::uint32_t write(Protocol& prot, const SetOf<Args...>& set);
+template <typename Protocol, typename... Args>
+std::uint32_t write(Protocol& prot, const MapOf<Args...>& map);
 template <typename Protocol>
 std::uint32_t write(Protocol&, const std::monostate&) {
   return 0;
@@ -706,11 +903,52 @@ std::uint32_t write(Protocol& prot, const NativeSet& set) {
       [&](const auto& s) { return write(prot, s); });
 }
 
+template <typename Protocol, typename K, typename V, typename... Args>
+std::uint32_t write(Protocol& prot, const MapOf<K, V, Args...>& map) {
+  uint32_t serializedSize = 0;
+  if constexpr (
+      std::is_same_v<K, ValueHolder> && std::is_same_v<V, ValueHolder>) {
+    const TType keyType =
+        map.size() > 0 ? map.begin()->first.get_ttype() : TType::T_I64;
+    const TType valType =
+        map.size() > 0 ? map.begin()->second.get_ttype() : TType::T_I64;
+    serializedSize += prot.writeMapBegin(keyType, valType, map.size());
+    for (const auto& [key, val] : map) {
+      ensure_same_type(key, keyType);
+      ensure_same_type(val, valType);
+      serializedSize += write(prot, key);
+      serializedSize += write(prot, val);
+    }
+  } else if constexpr (std::is_same_v<V, ValueHolder>) {
+    using KeyTag = detail::native_value_type<K, true>::tag;
+    const TType valType =
+        map.size() > 0 ? map.begin()->second.get_ttype() : TType::T_I64;
+    serializedSize +=
+        prot.writeMapBegin(op::typeTagToTType<KeyTag>, valType, map.size());
+    for (const auto& [key, val] : map) {
+      serializedSize += write(prot, key);
+      ensure_same_type(val, valType);
+      serializedSize += write(prot, val);
+    }
+  } else {
+    using KeyTag = detail::native_value_type<K, true>::tag;
+    using ValueTag = detail::native_value_type<V, true>::tag;
+    static_assert(
+        !std::is_same_v<K, ValueHolder> && !std::is_same_v<V, ValueHolder>);
+    serializedSize += prot.writeMapBegin(
+        op::typeTagToTType<KeyTag>, op::typeTagToTType<ValueTag>, map.size());
+    for (const auto& [key, val] : map) {
+      serializedSize += write(prot, key);
+      serializedSize += write(prot, val);
+    }
+  }
+  return serializedSize;
+}
+
 template <typename Protocol>
 std::uint32_t write(Protocol& prot, const NativeMap& map) {
-  std::ignore = prot;
-  std::ignore = map;
-  return 0;
+  return folly::variant_match(
+      map.inner(), [&](const auto& m) { return write(prot, m); });
 }
 
 template <typename Protocol>
@@ -742,6 +980,7 @@ std::uint32_t detail::serializeValueVia(
 
 const std::size_t OBJECT_HASH_SEED = 0xFE << 24;
 const std::size_t SET_HASH_SEED = 0xFD << 24;
+const std::size_t MAP_HASH_SEED = 0xFC << 24;
 
 struct ValueHasher {
   size_t operator()(const Value& v) const;
@@ -766,6 +1005,8 @@ struct ValueHasher {
   size_t operator()(const ListOf<T>& l) const;
   template <typename T>
   size_t operator()(const SetOf<T>& s) const;
+  template <typename Key, typename Value>
+  size_t operator()(const MapOf<Key, Value>& map) const;
 };
 
 size_t ValueHasher::operator()(const Value& v) const {
@@ -814,8 +1055,7 @@ size_t ValueHasher::operator()(const NativeSet& s) const {
   return s.inner().index() + folly::variant_match(s.inner(), ValueHasher{});
 }
 size_t ValueHasher::operator()(const NativeMap& m) const {
-  std::ignore = m;
-  return 0;
+  return m.inner().index() + folly::variant_match(m.inner(), ValueHasher{});
 }
 
 template <typename T, typename U>
@@ -837,6 +1077,13 @@ size_t ValueHasher::operator()(const SetOf<T>& s) const {
   // Note: Hash must be order-independent
   return folly::hash::commutative_hash_combine_range_generic(
       SET_HASH_SEED, ValueHasher{}, s.begin(), s.end());
+}
+
+template <typename Key, typename Value>
+size_t ValueHasher::operator()(const MapOf<Key, Value>& map) const {
+  // Note: Hash must be order-independent
+  return folly::hash::commutative_hash_combine_range_generic(
+      MAP_HASH_SEED, ValueHasher{}, map.begin(), map.end());
 }
 
 size_t ValueHasher::operator()(const std::monostate&) const {
@@ -960,5 +1207,70 @@ FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Bytes>, set_of_bytes)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<String>, set_of_string)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Object>, set_of_object)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<ValueHolder>, set_of_value)
+
+// ------- Type traits tests to verify the MapOf type system ------- //
+
+template <
+    typename ResultKey,
+    typename ResultValue,
+    typename Key,
+    typename Value,
+    bool StringToBinary = true>
+constexpr bool native_map_type_is_v = std::is_same_v<
+    detail::map_t<Key, Value, StringToBinary>,
+    MapOf<ResultKey, ResultValue>>;
+
+// TODO(sadroeck) - Add StringToBinary support
+template <
+    typename ResultKey,
+    typename ResultValue,
+    typename Key,
+    typename... Values>
+constexpr bool
+    native_map_type_is_v<ResultKey, ResultValue, Key, std::tuple<Values...>> =
+        (native_map_type_is_v<ResultKey, ResultValue, Key, Values> && ...);
+
+template <typename Key, typename Value>
+constexpr bool native_map_is_fallback_v =
+    std::is_same_v<MapOf<ValueHolder, ValueHolder>, detail::map_t<Key, Value>>;
+
+template <typename Key, typename... Values>
+constexpr bool native_map_is_fallback_v<Key, std::tuple<Values...>> =
+    (native_map_is_fallback_v<Key, Values> && ...);
+
+using primitives_t =
+    std::tuple<Bool, I8, I16, I32, I64, Float, Double, String, Bytes>;
+using non_primitives_t = std::tuple<NativeList, NativeSet, NativeMap>;
+
+static_assert(
+    native_map_type_is_v<I8, ValueHolder, I8, non_primitives_t>,
+    "Specialization of I8 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<I16, ValueHolder, I16, non_primitives_t>,
+    "Specialization of I16 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<I32, ValueHolder, I32, non_primitives_t>,
+    "Specialization of I32 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<I64, ValueHolder, I64, non_primitives_t>,
+    "Specialization of I64 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Float, ValueHolder, Float, non_primitives_t>,
+    "Specialization of Float -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Double, ValueHolder, Double, non_primitives_t>,
+    "Specialization of Double -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Bytes, ValueHolder, Bytes, non_primitives_t>,
+    "Specialization of Bytes -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Bytes, ValueHolder, String, non_primitives_t>,
+    "Specialization of String -> ValueHolder (Converts to Bytes)");
+static_assert(
+    native_map_is_fallback_v<Object, primitives_t>,
+    "Fallback for Object -> PrimitiveValue");
+static_assert(
+    native_map_is_fallback_v<Object, non_primitives_t>,
+    "Fallback for Object -> T");
 
 } // namespace apache::thrift::protocol::experimental

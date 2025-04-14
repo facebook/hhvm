@@ -190,6 +190,9 @@ using ListOf = std::vector<Ts...>;
 template <typename... Ts>
 using SetOf = folly::F14FastSet<Ts...>;
 
+template <typename... Ts>
+using MapOf = folly::F14FastMap<Ts...>;
+
 // ---- ValueAccess API ---- //
 
 #define FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(TYPE, NAME) \
@@ -325,12 +328,6 @@ class Object {
 
  private:
   Fields fields;
-};
-
-// ---- placeholders ---- //
-class NativeMap {
- public:
-  bool operator==(const NativeMap&) const = default;
 };
 
 // ---- NativeList ---- //
@@ -506,6 +503,84 @@ class NativeSet {
   Kind kind_;
 };
 
+// ---- NativeMap ---- //
+
+namespace detail {
+
+template <typename K, typename V, bool StringToBinary = true>
+using map_with_primitive_key_t =
+    MapOf<typename native_value_type<K, StringToBinary>::type, ValueHolder>;
+
+template <typename K, typename V, bool StringToBinary = true>
+using map_t = std::conditional_t<
+    is_primitive_v<K, StringToBinary>,
+    map_with_primitive_key_t<K, V>,
+    MapOf<ValueHolder, ValueHolder>>;
+
+} // namespace detail
+
+class NativeMap {
+ public:
+  using Kind = std::variant<
+      std::monostate,
+
+      // Specialization of primitive -> Value maps
+      MapOf<Bool, ValueHolder>,
+      MapOf<I8, ValueHolder>,
+      MapOf<I16, ValueHolder>,
+      MapOf<I32, ValueHolder>,
+      MapOf<I64, ValueHolder>,
+      MapOf<Float, ValueHolder>,
+      MapOf<Double, ValueHolder>,
+      MapOf<Bytes, ValueHolder>,
+      MapOf<String, ValueHolder>,
+
+      // Unspecialized as fallback
+      MapOf<ValueHolder, ValueHolder>>;
+
+  template <typename T>
+  using Specialized = detail::map_t<
+      std::remove_cv_t<typename T::key_type>,
+      std::remove_cv_t<typename T::mapped_type>>;
+
+  const Kind& inner() const;
+
+  // Default ops
+  NativeMap() = default;
+  ~NativeMap() = default;
+  NativeMap(const NativeMap& other);
+  NativeMap(NativeMap&& other) noexcept = default;
+  NativeMap& operator=(const NativeMap& other) = default;
+  NativeMap& operator=(NativeMap&& other) noexcept = default;
+
+  // Variant ctors
+  /* implicit */ NativeMap(const Kind& kind);
+  /* implicit */ NativeMap(Kind&& kind) noexcept;
+  template <typename... Args>
+  /* implicit */ NativeMap(MapOf<Args...>&& m) noexcept;
+
+  bool operator==(const NativeMap& other) const;
+  bool operator!=(const NativeMap& other) const;
+
+  template <typename T>
+  bool is_type() const noexcept;
+
+  template <typename T>
+  const Specialized<T>& as_type() const;
+
+  template <typename T>
+  Specialized<T>& as_type();
+
+  template <typename T>
+  const Specialized<T>* if_type() const noexcept;
+
+  template <typename T>
+  Specialized<T>* if_type() noexcept;
+
+ private:
+  Kind kind_;
+};
+
 namespace detail {
 
 // ----- Type traits for Value's specialization ----- //
@@ -622,6 +697,20 @@ struct native_value_type<NativeMap, StringToBinary> {
       map<::apache::thrift::type::struct_c, ::apache::thrift::type::struct_c>;
 };
 
+template <typename... Ts, bool StringToBinary>
+struct native_value_type<MapOf<Ts...>, StringToBinary> {
+  using type = NativeMap;
+  using tag = ::apache::thrift::type::
+      map<::apache::thrift::type::struct_c, ::apache::thrift::type::struct_c>;
+};
+
+template <typename... Ts, bool StringToBinary>
+struct native_value_type<std::map<Ts...>, StringToBinary> {
+  using type = NativeMap;
+  using tag = ::apache::thrift::type::
+      map<::apache::thrift::type::struct_c, ::apache::thrift::type::struct_c>;
+};
+
 } // namespace detail
 
 // ---- Definition of a Thrift Value ---- //
@@ -715,6 +804,13 @@ template <typename T>
 constexpr bool is_set_v = ::apache::thrift::type::is_a_v<
     typename native_value_type<T, true>::tag,
     ::apache::thrift::type::set_c>;
+
+// ------- Type traits to verify the MapOf type system ------- //
+
+template <typename T>
+constexpr bool is_map_v = ::apache::thrift::type::is_a_v<
+    typename native_value_type<T, true>::tag,
+    ::apache::thrift::type::map_c>;
 
 // ---- Parsing functions ---- //
 

@@ -221,13 +221,13 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => field_the_map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 2) => field_the_bin = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(crate::r#impl::read(p)?),
-                (::fbthrift::TType::String, 4) => field_the_bytes = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 5) => field_inline_bytes = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Double, 6) => field_floaty = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Double, 7) => field_doublefloaty = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 1) => field_the_map = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_map", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 2) => field_the_bin = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bin", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(::anyhow::Context::context(crate::r#impl::read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bin", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 4) => field_the_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bytes", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 5) => field_inline_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bytes", strct: "MyStruct"})?),
+                (::fbthrift::TType::Double, 6) => field_floaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "floaty", strct: "MyStruct"})?),
+                (::fbthrift::TType::Double, 7) => field_doublefloaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "doublefloaty", strct: "MyStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

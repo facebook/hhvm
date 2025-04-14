@@ -61,3 +61,17 @@ pub enum NonthrowingFunctionError {
     #[error(transparent)]
     ThriftError(#[from] Error),
 }
+
+#[derive(Debug, Error)]
+#[error("Error while deserializing {arg} arg of {function}")]
+pub struct DeserializingArgError {
+    pub arg: &'static str,
+    pub function: &'static str,
+}
+
+#[derive(Debug, Error)]
+#[error("Error while deserializing {field} field of {strct}")]
+pub struct DeserializingFieldError {
+    pub field: &'static str,
+    pub strct: &'static str,
+}

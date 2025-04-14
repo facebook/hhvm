@@ -44,7 +44,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
                 ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
                     }}field_{{field:name}} = ::std::option::Option::Some({{!
                     }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
+                    }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingArgError { arg: "{{field:name}}", function: "{{function:name}}"})?{{!
                     }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
                     }}),{{!
                 }}{{/function:args}}

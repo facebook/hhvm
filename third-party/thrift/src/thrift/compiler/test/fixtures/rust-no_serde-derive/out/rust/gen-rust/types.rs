@@ -101,7 +101,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "NoSerde"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -214,7 +214,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "Serde"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

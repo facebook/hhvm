@@ -166,27 +166,27 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I64, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::intValue(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::intValue(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "intValue", strct: "ComplexUnion"})?));
                 }
                 (::fbthrift::TType::String, 5, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringValue(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::stringValue(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "stringValue", strct: "ComplexUnion"})?));
                 }
                 (::fbthrift::TType::List, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::intListValue(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::intListValue(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "intListValue", strct: "ComplexUnion"})?));
                 }
                 (::fbthrift::TType::List, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringListValue(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::stringListValue(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "stringListValue", strct: "ComplexUnion"})?));
                 }
                 (::fbthrift::TType::Map, 9, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::typedefValue(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::typedefValue(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "typedefValue", strct: "ComplexUnion"})?));
                 }
                 (::fbthrift::TType::String, 14, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringRef(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::stringRef(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "stringRef", strct: "ComplexUnion"})?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -321,11 +321,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::List, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::intListValue(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::intListValue(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "intListValue", strct: "ListUnion"})?));
                 }
                 (::fbthrift::TType::List, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringListValue(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::stringListValue(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "stringListValue", strct: "ListUnion"})?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -438,11 +438,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::String, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::binaryData(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::binaryData(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "binaryData", strct: "DataUnion"})?));
                 }
                 (::fbthrift::TType::String, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::stringData(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::stringData(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "stringData", strct: "DataUnion"})?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -573,9 +573,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_strVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 2) => field_intVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Map, 9) => field_typedefValue = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_strVal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "strVal", strct: "Val"})?),
+                (::fbthrift::TType::I32, 2) => field_intVal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "intVal", strct: "Val"})?),
+                (::fbthrift::TType::Map, 9) => field_typedefValue = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "typedefValue", strct: "Val"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -680,11 +680,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::Struct, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::v1(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::v1(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "v1", strct: "ValUnion"})?));
                 }
                 (::fbthrift::TType::Struct, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::v2(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::v2(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "v2", strct: "ValUnion"})?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -797,11 +797,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::String, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::thingOne(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::thingOne(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "thingOne", strct: "VirtualComplexUnion"})?));
                 }
                 (::fbthrift::TType::String, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::thingTwo(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::thingTwo(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "thingTwo", strct: "VirtualComplexUnion"})?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -918,7 +918,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_num = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_num = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "num", strct: "NonCopyableStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1011,7 +1011,7 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::Struct, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::s(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "s", strct: "NonCopyableUnion"})?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(

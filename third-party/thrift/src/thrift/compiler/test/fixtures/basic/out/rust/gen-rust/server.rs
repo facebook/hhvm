@@ -460,7 +460,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_FB
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_int_parameter = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_int_parameter = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "int_parameter", function: "simple_rpc"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1103,7 +1103,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_sink = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_sink = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "sink", function: "sink"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1136,8 +1136,8 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "id", function: "putDataById"})?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "data", function: "putDataById"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1168,7 +1168,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "id", function: "hasDataById"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1198,7 +1198,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "id", function: "getDataById"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1228,7 +1228,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "id", function: "deleteDataById"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1261,8 +1261,8 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "id", function: "lobDataById"})?),
+                (::fbthrift::TType::String, 2) => field_data = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "data", function: "lobDataById"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2355,7 +2355,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Db
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_key = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_key = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "key", function: "getDataByKey0"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2385,7 +2385,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Db
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_key = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_key = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "key", function: "getDataByKey1"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

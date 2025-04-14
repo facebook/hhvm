@@ -998,7 +998,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "decorated_struct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1156,14 +1156,14 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 12) => field_fieldA = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 2) => field_fieldB = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 3) => field_fieldC = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 4) => field_fieldD = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 5) => field_fieldE = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 6) => field_fieldF = ::std::option::Option::Some(crate::r#impl::read(p)?),
-                (::fbthrift::TType::Map, 7) => field_fieldG = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Map, 8) => field_fieldH = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 12) => field_fieldA = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldA", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::List, 2) => field_fieldB = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldB", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::List, 3) => field_fieldC = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldC", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::List, 4) => field_fieldD = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldD", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::List, 5) => field_fieldE = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldE", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::Set, 6) => field_fieldF = ::std::option::Option::Some(::anyhow::Context::context(crate::r#impl::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldF", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::Map, 7) => field_fieldG = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldG", strct: "ContainerStruct"})?),
+                (::fbthrift::TType::Map, 8) => field_fieldH = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldH", strct: "ContainerStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1348,7 +1348,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_fieldA = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => field_fieldA = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldA", strct: "CppTypeStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1468,7 +1468,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "VirtualStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1584,8 +1584,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "MyStructWithForwardRefEnum"})?),
+                (::fbthrift::TType::I32, 2) => field_b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "MyStructWithForwardRefEnum"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1704,8 +1704,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Bool, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "TrivialNumeric"})?),
+                (::fbthrift::TType::Bool, 2) => field_b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "TrivialNumeric"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1828,8 +1828,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_z = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_z = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "z", strct: "TrivialNestedWithDefault"})?),
+                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "n", strct: "TrivialNestedWithDefault"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1952,8 +1952,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Map, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "ComplexString"})?),
+                (::fbthrift::TType::Map, 2) => field_b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "ComplexString"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2086,8 +2086,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_z = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_z = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "z", strct: "ComplexNestedWithDefault"})?),
+                (::fbthrift::TType::Struct, 2) => field_n = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "n", strct: "ComplexNestedWithDefault"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2241,11 +2241,11 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I64, 2) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 4) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "small", strct: "MinPadding"})?),
+                (::fbthrift::TType::I64, 2) => field_big = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "big", strct: "MinPadding"})?),
+                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "medium", strct: "MinPadding"})?),
+                (::fbthrift::TType::I32, 4) => field_biggish = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "biggish", strct: "MinPadding"})?),
+                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "tiny", strct: "MinPadding"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2403,11 +2403,11 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 2) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I64, 4) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "small", strct: "MinPaddingWithCustomType"})?),
+                (::fbthrift::TType::I32, 2) => field_biggish = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "biggish", strct: "MinPaddingWithCustomType"})?),
+                (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "medium", strct: "MinPaddingWithCustomType"})?),
+                (::fbthrift::TType::I64, 4) => field_big = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "big", strct: "MinPaddingWithCustomType"})?),
+                (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "tiny", strct: "MinPaddingWithCustomType"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2598,10 +2598,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I64, 3) => field_majorVer = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 4) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_MyIntField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyIntField", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 2) => field_MyStringField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "MyStringField", strct: "MyStruct"})?),
+                (::fbthrift::TType::I64, 3) => field_majorVer = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "majorVer", strct: "MyStruct"})?),
+                (::fbthrift::TType::Struct, 4) => field_data = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "data", strct: "MyStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2819,7 +2819,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "Renaming"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2963,8 +2963,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_binary_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 2) => field_list_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "AnnotatedTypes"})?),
+                (::fbthrift::TType::List, 2) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "AnnotatedTypes"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3091,8 +3091,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.ForwardUsageStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 2) => fields.ForwardUsageByRef = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => fields.ForwardUsageStruct = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "ForwardUsageStruct", strct: "ForwardUsageRoot"})?),
+                (::fbthrift::TType::Struct, 2) => fields.ForwardUsageByRef = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "ForwardUsageByRef", strct: "ForwardUsageRoot"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3216,7 +3216,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "ForwardUsageStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3338,7 +3338,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "foo", strct: "ForwardUsageByRef"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3460,7 +3460,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "IncompleteMap"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3672,7 +3672,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "CompleteMap"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3895,7 +3895,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "IncompleteList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4118,7 +4118,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "CompleteList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4341,7 +4341,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "AdaptedList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4447,7 +4447,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "AdaptedListDep"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4580,7 +4580,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "DependentAdaptedList"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4692,7 +4692,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I16, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, 1) => fields.field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field", strct: "DependentAdaptedListDep"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4867,13 +4867,13 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_aa_list = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 2) => field_aa_set = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Map, 3) => field_aa_map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 4) => field_aa_string = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 5) => field_not_a_container = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 6) => field_aa_unique = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 7) => field_aa_shared = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => field_aa_list = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_list", strct: "AllocatorAware"})?),
+                (::fbthrift::TType::Set, 2) => field_aa_set = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_set", strct: "AllocatorAware"})?),
+                (::fbthrift::TType::Map, 3) => field_aa_map = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_map", strct: "AllocatorAware"})?),
+                (::fbthrift::TType::String, 4) => field_aa_string = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_string", strct: "AllocatorAware"})?),
+                (::fbthrift::TType::I32, 5) => field_not_a_container = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "not_a_container", strct: "AllocatorAware"})?),
+                (::fbthrift::TType::I32, 6) => field_aa_unique = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_unique", strct: "AllocatorAware"})?),
+                (::fbthrift::TType::I32, 7) => field_aa_shared = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "aa_shared", strct: "AllocatorAware"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5047,8 +5047,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_not_a_container = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 2) => field_box_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_not_a_container = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "not_a_container", strct: "AllocatorAware2"})?),
+                (::fbthrift::TType::I32, 2) => field_box_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "box_field", strct: "AllocatorAware2"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5183,9 +5183,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_i32_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 2) => field_IntTypedef_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 3) => field_UintTypedef_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_i32_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "i32_field", strct: "TypedefStruct"})?),
+                (::fbthrift::TType::I32, 2) => field_IntTypedef_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "IntTypedef_field", strct: "TypedefStruct"})?),
+                (::fbthrift::TType::I32, 3) => field_UintTypedef_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "UintTypedef_field", strct: "TypedefStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5300,7 +5300,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field___field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field___field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "__field", strct: "StructWithDoubleUnderscores"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

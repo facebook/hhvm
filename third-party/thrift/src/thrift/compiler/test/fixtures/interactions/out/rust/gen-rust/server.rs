@@ -2219,7 +2219,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "arg", function: "interact"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4453,7 +4453,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fa
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "arg", function: "interact"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -8691,7 +8691,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Bo
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_req = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => field_req = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "req", function: "getABoxSession"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

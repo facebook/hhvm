@@ -176,7 +176,7 @@ where
                     }}{{^struct:all_optional?}}field_{{field:name}}{{/struct:all_optional?}}{{!
                     }} = ::std::option::Option::Some({{!
                     }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
+                    }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
                     }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
                     }}),{{!
                 }}{{/struct:fields}}

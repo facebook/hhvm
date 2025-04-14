@@ -93,7 +93,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Te
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_int1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => field_int1 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "int1", function: "init"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

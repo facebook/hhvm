@@ -96,8 +96,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_return = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Bool, 2) => field_super = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, 1) => field_return = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "return", strct: "ThereAreNoPascalCaseKeywords"})?),
+                (::fbthrift::TType::Bool, 2) => field_super = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "super", strct: "ThereAreNoPascalCaseKeywords"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

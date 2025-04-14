@@ -44,6 +44,7 @@ pub mod builtin_types;
 pub mod compact_protocol;
 pub mod context_stack;
 pub mod deserialize;
+pub mod errors;
 pub mod export;
 pub mod framing;
 pub mod metadata;
@@ -58,7 +59,6 @@ pub mod uri;
 
 mod bufext;
 mod client;
-mod errors;
 mod exceptions;
 mod varint;
 

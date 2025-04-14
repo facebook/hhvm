@@ -124,6 +124,21 @@ bool NativeList::operator!=(const NativeList& other) const {
 
 NativeList::NativeList(const NativeList& other) : kind_(other.kind_) {}
 
+// ---- NativeSet ---- //
+
+NativeSet::NativeSet(const NativeSet& other) : kind_(other.kind_) {}
+
+NativeSet::NativeSet(Kind&& kind) : kind_(std::move(kind)) {}
+const NativeSet::Kind& NativeSet::inner() const {
+  return kind_;
+}
+bool NativeSet::operator==(const NativeSet& other) const {
+  return kind_ == other.kind_;
+}
+bool NativeSet::operator!=(const NativeSet& other) const {
+  return !(*this == other);
+}
+
 // ------- parsing functions ------- //
 
 template <typename Protocol, typename T>
@@ -180,6 +195,12 @@ ListOf<ValueHolder> read_value_list_as(Protocol& prot, std::uint32_t size);
 
 template <typename Protocol, bool StringToBinary>
 NativeSet read_set(Protocol& prot);
+
+template <typename Protocol, typename T, bool StringToBinary>
+SetOf<T> read_set_as(Protocol& prot, std::uint32_t size);
+
+template <typename Protocol, typename T, bool StringToBinary>
+SetOf<ValueHolder> read_value_set_as(Protocol& prot, std::uint32_t size);
 
 template <typename Protocol, bool StringToBinary>
 NativeMap read_map(Protocol& prot);
@@ -314,10 +335,102 @@ NativeList read_list(Protocol& prot) {
   }
 }
 
+template <typename Protocol, typename T, bool StringToBinary>
+SetOf<T> read_set_as(Protocol& prot, std::uint32_t size) {
+  SetOf<T> set;
+  set.reserve(size);
+  for (std::uint32_t i = 0; i < size; ++i) {
+    if constexpr (std::is_same_v<T, Object>) {
+      set.insert(read_struct<Protocol, StringToBinary>(prot));
+    } else {
+      static_assert(detail::is_primitive_v<T>);
+      set.insert(read_primitive_as<Protocol, T>(prot));
+    }
+  }
+  return set;
+}
+
+template <typename Protocol, typename T, bool StringToBinary>
+SetOf<ValueHolder> read_value_set_as(Protocol& prot, std::uint32_t size) {
+  SetOf<ValueHolder> set;
+  set.reserve(size);
+  for (std::uint32_t i = 0; i < size; ++i) {
+    if constexpr (std::is_same_v<T, NativeList>) {
+      set.insert(Value{read_list<Protocol, StringToBinary>(prot)});
+    } else if constexpr (std::is_same_v<T, NativeSet>) {
+      set.insert(Value{read_set<Protocol, StringToBinary>(prot)});
+    } else if constexpr (std::is_same_v<T, NativeMap>) {
+      set.insert(Value{read_map<Protocol, StringToBinary>(prot)});
+    } else {
+      static_assert(false, "Missing value set specialization");
+    }
+  }
+  return set;
+}
+
 template <typename Protocol, bool StringToBinary>
 NativeSet read_set(Protocol& prot) {
-  std::ignore = prot;
-  return NativeSet{};
+  TType elemType{};
+  uint32_t size{};
+  prot.readSetBegin(elemType, size);
+  if (!canReadNElements(prot, size, {elemType})) {
+    TProtocolException::throwTruncatedData();
+  }
+  SCOPE_SUCCESS {
+    prot.readSetEnd();
+  };
+
+  switch (elemType) {
+    case TType::T_BOOL: {
+      return read_set_as<Protocol, Bool, StringToBinary>(prot, size);
+    }
+    case TType::T_BYTE: {
+      return read_set_as<Protocol, I8, StringToBinary>(prot, size);
+    }
+    case TType::T_I16: {
+      return read_set_as<Protocol, I16, StringToBinary>(prot, size);
+    }
+    case TType::T_I32: {
+      return read_set_as<Protocol, I32, StringToBinary>(prot, size);
+    }
+    case TType::T_I64: {
+      return read_set_as<Protocol, I64, StringToBinary>(prot, size);
+    }
+    case TType::T_DOUBLE: {
+      return read_set_as<Protocol, Double, StringToBinary>(prot, size);
+    }
+    case TType::T_FLOAT: {
+      return read_set_as<Protocol, Float, StringToBinary>(prot, size);
+    }
+    case TType::T_STRING: {
+      if constexpr (StringToBinary) {
+        return read_set_as<Protocol, Bytes, StringToBinary>(prot, size);
+      } else {
+        return read_set_as<Protocol, String, StringToBinary>(prot, size);
+      }
+    }
+    case TType::T_STRUCT: {
+      return read_set_as<Protocol, Object, StringToBinary>(prot, size);
+    }
+    case TType::T_LIST: {
+      return read_value_set_as<Protocol, NativeList, StringToBinary>(
+          prot, size);
+    }
+    case TType::T_SET: {
+      return read_value_set_as<Protocol, NativeSet, StringToBinary>(prot, size);
+    }
+    case TType::T_MAP: {
+      return read_value_set_as<Protocol, NativeMap, StringToBinary>(prot, size);
+    }
+    case T_STOP:
+    case T_VOID:
+    case T_U64:
+    case T_UTF8:
+    case T_UTF16:
+    case T_STREAM:
+      TProtocolException::throwInvalidSkipType(elemType);
+      break;
+  }
 }
 
 template <typename Protocol, bool StringToBinary>
@@ -458,6 +571,8 @@ PROTOTYPE_WRITE(NativeMap)
 
 template <typename Protocol, typename... Args>
 std::uint32_t write(Protocol& prot, const ListOf<Args...>& list);
+template <typename Protocol, typename... Args>
+std::uint32_t write(Protocol& prot, const SetOf<Args...>& set);
 template <typename Protocol>
 std::uint32_t write(Protocol&, const std::monostate&) {
   return 0;
@@ -553,11 +668,42 @@ std::uint32_t write(Protocol& prot, const NativeList& list) {
       [&](auto& l) { return write(prot, l); });
 }
 
+template <typename Protocol, typename... Args>
+std::uint32_t write(Protocol& prot, const SetOf<ValueHolder, Args...>& set) {
+  uint32_t serializedSize = 0;
+  const TType elementType =
+      set.size() > 0 ? set.begin()->get_ttype() : TType::T_I64;
+  serializedSize += prot.writeSetBegin(elementType, set.size());
+  for (const auto& elem : set) {
+    ensure_same_type(elem, elementType);
+    serializedSize += write(prot, elem);
+  }
+  serializedSize += prot.writeSetEnd();
+  return serializedSize;
+}
+
+template <typename Protocol, typename T, typename... Args>
+std::uint32_t write(Protocol& prot, const SetOf<T, Args...>& set) {
+  uint32_t serializedSize = 0;
+  using Tag = detail::native_value_type<T, true>::tag;
+  serializedSize += prot.writeSetBegin(op::typeTagToTType<Tag>, set.size());
+  for (const auto& elem : set) {
+    serializedSize += write(prot, elem);
+  }
+  serializedSize += prot.writeSetEnd();
+  return serializedSize;
+}
+
 template <typename Protocol>
 std::uint32_t write(Protocol& prot, const NativeSet& set) {
-  std::ignore = prot;
-  std::ignore = set;
-  return 0;
+  return folly::variant_match(
+      set.inner(),
+      [&](const std::monostate&) {
+        // Note: Write an empty set with a default ttype
+        return prot.writeSetBegin(DEFAULT_CONTAINER_TTYPE, 0) +
+            prot.writeSetEnd();
+      },
+      [&](const auto& s) { return write(prot, s); });
 }
 
 template <typename Protocol>
@@ -595,6 +741,7 @@ std::uint32_t detail::serializeValueVia(
 // ---- Hashing utilities ---- //
 
 const std::size_t OBJECT_HASH_SEED = 0xFE << 24;
+const std::size_t SET_HASH_SEED = 0xFD << 24;
 
 struct ValueHasher {
   size_t operator()(const Value& v) const;
@@ -617,6 +764,8 @@ struct ValueHasher {
   size_t operator()(const std::pair<T, U>& p) const;
   template <typename T>
   size_t operator()(const ListOf<T>& l) const;
+  template <typename T>
+  size_t operator()(const SetOf<T>& s) const;
 };
 
 size_t ValueHasher::operator()(const Value& v) const {
@@ -662,8 +811,7 @@ size_t ValueHasher::operator()(const NativeList& l) const {
   return l.inner().index() + folly::variant_match(l.inner(), ValueHasher{});
 }
 size_t ValueHasher::operator()(const NativeSet& s) const {
-  std::ignore = s;
-  return 0;
+  return s.inner().index() + folly::variant_match(s.inner(), ValueHasher{});
 }
 size_t ValueHasher::operator()(const NativeMap& m) const {
   std::ignore = m;
@@ -682,6 +830,13 @@ size_t ValueHasher::operator()(const ListOf<T>& l) const {
   } else {
     return folly::hash::hash_range(l.begin(), l.end(), 0, ValueHasher{});
   }
+}
+
+template <typename T>
+size_t ValueHasher::operator()(const SetOf<T>& s) const {
+  // Note: Hash must be order-independent
+  return folly::hash::commutative_hash_combine_range_generic(
+      SET_HASH_SEED, ValueHasher{}, s.begin(), s.end());
 }
 
 size_t ValueHasher::operator()(const std::monostate&) const {
@@ -791,5 +946,19 @@ FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Bytes>, list_of_bytes)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<String>, list_of_string)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Object>, list_of_object)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<ValueHolder>, list_of_value)
+
+// ---- NativeSet API ---- //
+
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Bool>, set_of_bool)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<I8>, set_of_i8)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<I16>, set_of_i16)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<I32>, set_of_i32)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<I64>, set_of_i64)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Float>, set_of_float)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Double>, set_of_double)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Bytes>, set_of_bytes)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<String>, set_of_string)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Object>, set_of_object)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<ValueHolder>, set_of_value)
 
 } // namespace apache::thrift::protocol::experimental

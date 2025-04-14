@@ -66,6 +66,56 @@ NativeList::Specialized<T>* NativeList::if_type() noexcept {
   return std::get_if<Specialized<T>>(&kind_);
 }
 
+// ---- NativeSet ---- //
+
+template <typename T>
+NativeSet::NativeSet(SetOf<T>&& s) : kind_(std::move(s)) {}
+
+template <typename T>
+bool NativeSet::has_element() const noexcept {
+  return std::holds_alternative<detail::set_t<T>>(kind_);
+}
+
+template <typename T>
+bool NativeSet::is_type() const noexcept {
+  static_assert(
+      detail::is_set_v<T> && !std::is_same_v<T, NativeSet>,
+      "NativeSet is always a set type");
+  return std::holds_alternative<Specialized<T>>(kind_);
+}
+
+template <typename T>
+const NativeSet::Specialized<T>& NativeSet::as_type() const {
+  static_assert(
+      detail::is_set_v<T> && !std::is_same_v<T, NativeSet>,
+      "NativeSet is always a set type");
+  return std::get<Specialized<T>>(kind_);
+}
+
+template <typename T>
+NativeSet::Specialized<T>& NativeSet::as_type() {
+  static_assert(
+      detail::is_set_v<T> && !std::is_same_v<T, NativeSet>,
+      "NativeSet is always a set type");
+  return std::get<Specialized<T>>(kind_);
+}
+
+template <typename T>
+const NativeSet::Specialized<T>* NativeSet::if_type() const noexcept {
+  static_assert(
+      detail::is_set_v<T> && !std::is_same_v<T, NativeSet>,
+      "NativeSet is always a set type");
+  return std::get_if<Specialized<T>>(&kind_);
+}
+
+template <typename T>
+NativeSet::Specialized<T>* NativeSet::if_type() noexcept {
+  static_assert(
+      detail::is_set_v<T> && !std::is_same_v<T, NativeSet>,
+      "NativeSet is always a set type");
+  return std::get_if<Specialized<T>>(&kind_);
+}
+
 // ---- Object ---- //
 
 template <typename... Args>

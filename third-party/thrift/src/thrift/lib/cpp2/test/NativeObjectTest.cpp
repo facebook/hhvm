@@ -113,6 +113,11 @@ random_val<std::map<std::string, std::int32_t>>() {
 }
 
 template <>
+testset::struct_empty random_val<testset::struct_empty>() {
+  return testset::struct_empty{};
+}
+
+template <>
 testset::struct_i32 random_val<testset::struct_i32>() {
   using T = std::decay_t<decltype(testset::struct_i32{}.field_1().value())>;
   testset::struct_i32 val{};
@@ -394,4 +399,104 @@ TEST(NativeObjectTest, list_with_boxed_fields) {
       testset::struct_list_list_binary,
       testset::struct_list_list_string,
       testset::struct_list_list_struct_empty>();
+}
+
+template <typename T>
+experimental::SetOf<T> into_set(const std::set<T>& set) {
+  experimental::SetOf<T> newSet;
+  for (const auto& val : set) {
+    newSet.insert(val);
+  }
+  return newSet;
+}
+
+template <typename T>
+void assertSetType() {
+  T t;
+  using SetFieldTy =
+      std::remove_cvref_t<typename decltype(t.field_1())::value_type>;
+  using SetElemTy = typename SetFieldTy::value_type;
+
+  auto set_val = SetFieldTy{};
+  for (int i = 0; i < 1; ++i) {
+    set_val.emplace(random_val<SetElemTy>());
+  }
+  t.field_1().emplace(set_val);
+
+  const auto obj = testSerDe<StandardProtocol::Binary>(t);
+  ASSERT_EQ(obj.size(), 1);
+  const NativeValue& field_obj = obj.at(1);
+
+  using ResultSetTy = std::conditional_t<
+      apache::thrift::is_thrift_class_v<SetElemTy>,
+      experimental::SetOf<Object>,
+      experimental::detail::set_t<SetElemTy>>;
+
+  using ResultElemTy = typename ResultSetTy::value_type;
+
+  ASSERT_TRUE(field_obj.is_set());
+  const auto& objSet = field_obj.as_set().as_type<ResultSetTy>();
+  ASSERT_EQ(objSet.size(), set_val.size());
+  for (const auto& item : set_val) {
+    if constexpr (std::is_same_v<ResultElemTy, ValueHolder>) {
+      const NativeValue& obj_in_set = *objSet.begin();
+      if (const auto* list = obj_in_set.if_list();
+          list && list->is_list_of_i32()) {
+        if constexpr (std::is_same_v<SetElemTy, std::vector<std::int32_t>>) {
+          EXPECT_EQ(item, list->as_list_of_i32());
+        } else {
+          FAIL() << "Expected list type";
+        }
+      } else if (const auto* set = obj_in_set.if_set();
+                 set && set->is_set_of_i32()) {
+        if constexpr (std::is_same_v<SetElemTy, std::set<std::int32_t>>) {
+          EXPECT_EQ(into_set(item), set->as_set_of_i32());
+        } else {
+          FAIL() << "Expected set type";
+        }
+      } else if (const auto* map = obj_in_set.if_map()) {
+        // TODO(sadroeck) - Enable with map support
+        std::ignore = map;
+        // const auto* map_string_i32 = std::get_if<experimental::MapOf<
+        //     experimental::Bytes,
+        //     experimental::PrimitiveValue>>(&map->kind());
+        // if constexpr (std::is_same_v<
+        //                   SetElemTy,
+        //                   std::map<std::string, std::int32_t>>) {
+        //   EXPECT_EQ(into_map(item), *map_string_i32);
+        // } else {
+        //   FAIL() << "Expected map type";
+        // }
+      } else {
+        ASSERT_TRUE(false);
+      }
+    } else if constexpr (std::is_same_v<ResultElemTy, Object>) {
+      Object strct{};
+      ASSERT_TRUE(objSet.contains(strct));
+    } else if constexpr (std::is_same_v<ResultElemTy, Bytes>) {
+      ASSERT_TRUE(objSet.contains(Bytes::fromStdString(item)));
+    } else {
+      ASSERT_TRUE(objSet.contains(item));
+    }
+  }
+}
+
+template <typename... Ts>
+void assertSetTypes() {
+  (assertSetType<Ts>(), ...);
+}
+
+TEST(NativeObjectTest, set_fields) {
+  assertSetTypes<
+      testset::struct_set_bool,
+      testset::struct_set_byte,
+      testset::struct_set_i16,
+      testset::struct_set_i32,
+      testset::struct_set_i64,
+      testset::struct_set_float,
+      testset::struct_set_double,
+      testset::struct_set_binary,
+      testset::struct_set_string,
+      testset::struct_set_struct_empty,
+      testset::struct_set_set_i32>();
 }

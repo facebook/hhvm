@@ -187,6 +187,9 @@ constexpr bool is_native_object_type_v = is_primitive_v<T, StringToBinary> ||
 template <typename... Ts>
 using ListOf = std::vector<Ts...>;
 
+template <typename... Ts>
+using SetOf = folly::F14FastSet<Ts...>;
+
 // ---- ValueAccess API ---- //
 
 #define FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(TYPE, NAME) \
@@ -325,10 +328,6 @@ class Object {
 };
 
 // ---- placeholders ---- //
-class NativeSet {
- public:
-  bool operator==(const NativeSet&) const = default;
-};
 class NativeMap {
  public:
   bool operator==(const NativeMap&) const = default;
@@ -401,6 +400,89 @@ class NativeList {
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<String>, list_of_string)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<Object>, list_of_object)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<ValueHolder>, list_of_value)
+
+  template <typename T>
+  bool has_element() const noexcept;
+
+  template <typename T>
+  bool is_type() const noexcept;
+
+  template <typename T>
+  const Specialized<T>& as_type() const;
+
+  template <typename T>
+  Specialized<T>& as_type();
+
+  template <typename T>
+  const Specialized<T>* if_type() const noexcept;
+
+  template <typename T>
+  Specialized<T>* if_type() noexcept;
+
+ private:
+  Kind kind_;
+};
+
+namespace detail {
+
+template <typename T, bool StringToBinary = true>
+using set_t = std::conditional_t<
+    is_primitive_v<T> || is_structured_v<T>,
+    SetOf<typename native_value_type<T, StringToBinary>::type>,
+    SetOf<ValueHolder>>;
+
+}
+
+class NativeSet {
+ public:
+  using Kind = std::variant<
+      std::monostate,
+      // Specialization for Primitive elements
+      SetOf<Bool>,
+      SetOf<I8>,
+      SetOf<I16>,
+      SetOf<I32>,
+      SetOf<I64>,
+      SetOf<Float>,
+      SetOf<Double>,
+      SetOf<Bytes>,
+      SetOf<String>,
+      SetOf<Object>,
+      // Fallback for list/map//set
+      SetOf<ValueHolder>>;
+
+  template <typename T>
+  using Specialized = detail::set_t<std::remove_cv_t<typename T::value_type>>;
+
+  // Default ops
+  NativeSet() = default;
+  ~NativeSet() = default;
+  NativeSet(const NativeSet& other);
+  NativeSet(NativeSet&& other) noexcept = default;
+  NativeSet& operator=(const NativeSet& other) = default;
+  NativeSet& operator=(NativeSet&& other) noexcept = default;
+
+  // Variant ctors
+  /* implicit */ NativeSet(Kind&& kind);
+  template <typename T>
+  /* implicit */ NativeSet(SetOf<T>&& s);
+
+  const Kind& inner() const;
+
+  bool operator==(const NativeSet& other) const;
+  bool operator!=(const NativeSet& other) const;
+
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Bool>, set_of_bool)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I8>, set_of_i8)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I16>, set_of_i16)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I32>, set_of_i32)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I64>, set_of_i64)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Float>, set_of_float)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Double>, set_of_double)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Bytes>, set_of_bytes)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<String>, set_of_string)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Object>, set_of_object)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<ValueHolder>, set_of_value)
 
   template <typename T>
   bool has_element() const noexcept;
@@ -521,6 +603,18 @@ struct native_value_type<NativeSet, StringToBinary> {
   using tag = ::apache::thrift::type::set<::apache::thrift::type::struct_c>;
 };
 
+template <typename... Ts, bool StringToBinary>
+struct native_value_type<std::set<Ts...>, StringToBinary> {
+  using type = NativeSet;
+  using tag = ::apache::thrift::type::set<::apache::thrift::type::struct_c>;
+};
+
+template <typename... Ts, bool StringToBinary>
+struct native_value_type<SetOf<Ts...>, StringToBinary> {
+  using type = NativeSet;
+  using tag = ::apache::thrift::type::set<::apache::thrift::type::struct_c>;
+};
+
 template <bool StringToBinary>
 struct native_value_type<NativeMap, StringToBinary> {
   using type = NativeMap;
@@ -614,6 +708,13 @@ template <typename T>
 constexpr bool is_list_v = ::apache::thrift::type::is_a_v<
     typename native_value_type<T, true>::tag,
     ::apache::thrift::type::list_c>;
+
+// ------- Type traits to verify the SetOf type system ------- //
+
+template <typename T>
+constexpr bool is_set_v = ::apache::thrift::type::is_a_v<
+    typename native_value_type<T, true>::tag,
+    ::apache::thrift::type::set_c>;
 
 // ---- Parsing functions ---- //
 

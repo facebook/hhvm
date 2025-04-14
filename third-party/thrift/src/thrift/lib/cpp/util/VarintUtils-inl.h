@@ -81,33 +81,29 @@ constexpr std::make_unsigned_t<T> signedIntToZigzag(T n) {
   return ((Unsigned)n << 1) ^ (Unsigned)((Signed)n >> (sizeof(n) * 8 - 1));
 }
 
-template <class T, class CursorT>
-void readVarintSlow(CursorT& c, T& value) {
-  // ceil(sizeof(T) * 8) / 7
-  static const size_t maxSize = (8 * sizeof(T) + 6) / 7;
-  T retVal = 0;
-  uint8_t shift = 0;
-  uint8_t rsize = 0;
-  while (true) {
-    uint8_t byte = c.template read<uint8_t>();
-    rsize++;
-    retVal |= (uint64_t)(byte & 0x7f) << shift;
-    shift += 7;
-    if (!(byte & 0x80)) {
-      value = retVal;
-      return;
-    }
-    if (rsize >= maxSize) {
-      // Too big for return type
-      throw std::out_of_range("invalid varint read");
-    }
-  }
-}
+template <typename T>
+constexpr size_t kVarintMaxBytes =
+    (8 * sizeof(T) + 6) / 7; // ceil(8 * sizeof(T)) / 7
 
 // This is a simple function that just throws an exception. It is defined out
 // line to make the caller (readVarint) smaller and simpler (assembly-wise),
 // which gives us 5% perf win (even when the exception is not actually thrown).
 [[noreturn]] void throwInvalidVarint();
+
+template <class T, class CursorT>
+FOLLY_NOINLINE void readVarintSlow(CursorT& c, T& value) {
+  T result = 0;
+  FOLLY_PRAGMA_UNROLL_N(1)
+  for (size_t i = 0; i < kVarintMaxBytes<T>; ++i) {
+    auto const byte = c.template read<uint8_t>();
+    result |= T(byte & 0x7f) << (i * 7);
+    if (!(byte & 0x80)) {
+      value = result;
+      return;
+    }
+  }
+  throwInvalidVarint();
+}
 
 template <class T>
 size_t readVarintMediumSlowUnrolledX86(T& value, const uint8_t* p) {
@@ -330,9 +326,7 @@ void readVarintMediumSlow(CursorT& c, T& value, const uint8_t* p, size_t len) {
       sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8,
       "Trying to deserialize into an unsupported type");
 
-  static const size_t maxSize = (8 * sizeof(T) + 6) / 7;
-
-  if (FOLLY_LIKELY(len >= maxSize)) {
+  if (FOLLY_LIKELY(len >= kVarintMaxBytes<T>)) {
     size_t bytesRead;
     if (sizeof(T) <= 4) {
       // NOTE: BMI2-based decoding for 32-bit integers appears not to
@@ -380,10 +374,9 @@ namespace detail {
 // Cursor class must have ensure() and append() (e.g. QueueAppender)
 template <class Cursor, class T>
 uint8_t writeVarintSlow(Cursor& c, T value) {
-  enum { maxSize = (8 * sizeof(T) + 6) / 7 };
   auto unval = folly::to_unsigned(value);
 
-  c.ensure(maxSize);
+  c.ensure(kVarintMaxBytes<T>);
 
   uint8_t* p = c.writableData();
   uint8_t* orig_p = p;

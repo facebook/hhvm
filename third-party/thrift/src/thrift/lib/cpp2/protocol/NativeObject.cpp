@@ -110,6 +110,20 @@ const Value::Kind& Value::inner() const {
   return kind_;
 }
 
+// ---- NativeList ---- //
+
+const NativeList::Kind& NativeList::inner() const {
+  return kind_;
+}
+bool NativeList::operator==(const NativeList& other) const {
+  return kind_ == other.kind_;
+}
+bool NativeList::operator!=(const NativeList& other) const {
+  return !(*this == other);
+}
+
+NativeList::NativeList(const NativeList& other) : kind_(other.kind_) {}
+
 // ------- parsing functions ------- //
 
 template <typename Protocol, typename T>
@@ -158,6 +172,12 @@ T read_primitive_as(Protocol& prot) {
 template <typename Protocol, bool StringToBinary>
 NativeList read_list(Protocol& prot);
 
+template <typename Protocol, typename T, bool StringToBinary>
+ListOf<T> read_list_as(Protocol& prot, std::uint32_t size);
+
+template <typename Protocol, typename T, bool StringToBinary>
+ListOf<ValueHolder> read_value_list_as(Protocol& prot, std::uint32_t size);
+
 template <typename Protocol, bool StringToBinary>
 NativeSet read_set(Protocol& prot);
 
@@ -192,10 +212,106 @@ constexpr bool is_primitive(TType type) {
   }
 }
 
+template <typename Protocol, typename T, bool StringToBinary>
+ListOf<T> read_list_as(Protocol& prot, std::uint32_t size) {
+  ListOf<T> list{};
+  list.reserve(size);
+  for (std::uint32_t i = 0; i < size; ++i) {
+    if constexpr (std::is_same_v<T, Object>) {
+      list.emplace_back(read_struct<Protocol, StringToBinary>(prot));
+    } else if constexpr (detail::is_primitive_v<T>) {
+      list.emplace_back(read_primitive_as<Protocol, T>(prot));
+    } else {
+      static_assert(false, "Invalid list specialization");
+    }
+  }
+  return list;
+}
+
+template <typename Protocol, typename T, bool StringToBinary>
+ListOf<ValueHolder> read_value_list_as(Protocol& prot, std::uint32_t size) {
+  ListOf<ValueHolder> list;
+  list.reserve(size);
+  for (std::uint32_t i = 0; i < size; ++i) {
+    if constexpr (std::is_same_v<T, NativeList>) {
+      list.emplace_back(Value(read_list<Protocol, StringToBinary>(prot)));
+    } else if constexpr (std::is_same_v<T, NativeSet>) {
+      list.emplace_back(Value(read_set<Protocol, StringToBinary>(prot)));
+    } else if constexpr (std::is_same_v<T, NativeMap>) {
+      list.emplace_back(Value{read_map<Protocol, StringToBinary>(prot)});
+    } else {
+      static_assert(false, "Missing value list specialization");
+    }
+  }
+  return list;
+}
+
 template <typename Protocol, bool StringToBinary>
 NativeList read_list(Protocol& prot) {
-  std::ignore = prot;
-  return NativeList{};
+  TType elemType{};
+  std::uint32_t size{};
+  prot.readListBegin(elemType, size);
+  if (!canReadNElements(prot, size, {elemType})) {
+    TProtocolException::throwTruncatedData();
+  }
+  SCOPE_SUCCESS {
+    prot.readListEnd();
+  };
+
+  switch (elemType) {
+    case TType::T_BOOL: {
+      return read_list_as<Protocol, Bool, StringToBinary>(prot, size);
+    }
+    case TType::T_BYTE: {
+      return read_list_as<Protocol, I8, StringToBinary>(prot, size);
+    }
+    case TType::T_I16: {
+      return read_list_as<Protocol, I16, StringToBinary>(prot, size);
+    }
+    case TType::T_I32: {
+      return read_list_as<Protocol, I32, StringToBinary>(prot, size);
+    }
+    case TType::T_I64: {
+      return read_list_as<Protocol, I64, StringToBinary>(prot, size);
+    }
+    case TType::T_DOUBLE: {
+      return read_list_as<Protocol, Double, StringToBinary>(prot, size);
+    }
+    case TType::T_FLOAT: {
+      return read_list_as<Protocol, Float, StringToBinary>(prot, size);
+    }
+    case TType::T_STRING: {
+      if constexpr (StringToBinary) {
+        return read_list_as<Protocol, Bytes, StringToBinary>(prot, size);
+      } else {
+        return read_list_as<Protocol, String, StringToBinary>(prot, size);
+      }
+    }
+    case TType::T_STRUCT: {
+      return read_list_as<Protocol, Object, StringToBinary>(prot, size);
+    }
+    case TType::T_LIST: {
+      return read_value_list_as<Protocol, NativeList, StringToBinary>(
+          prot, size);
+    }
+    case TType::T_SET: {
+      return read_value_list_as<Protocol, NativeSet, StringToBinary>(
+          prot, size);
+      break;
+    }
+    case TType::T_MAP: {
+      return read_value_list_as<Protocol, NativeMap, StringToBinary>(
+          prot, size);
+    }
+    case T_STOP:
+    case T_VOID:
+    case T_U64:
+    case T_UTF8:
+    case T_UTF16:
+    case T_STREAM:
+      TProtocolException::throwInvalidSkipType(elemType);
+      break;
+  }
 }
 
 template <typename Protocol, bool StringToBinary>
@@ -340,6 +456,8 @@ PROTOTYPE_WRITE(NativeList)
 PROTOTYPE_WRITE(NativeSet)
 PROTOTYPE_WRITE(NativeMap)
 
+template <typename Protocol, typename... Args>
+std::uint32_t write(Protocol& prot, const ListOf<Args...>& list);
 template <typename Protocol>
 std::uint32_t write(Protocol&, const std::monostate&) {
   return 0;
@@ -392,11 +510,47 @@ inline void ensure_same_type(const Value& a, TType b) {
   }
 }
 
+// Default ttype for empty containers := I64
+constexpr TType DEFAULT_CONTAINER_TTYPE = TType::T_I64;
+
+template <typename Protocol>
+std::uint32_t write(Protocol& prot, const ListOf<ValueHolder>& list) {
+  uint32_t serializedSize = 0;
+  const TType elementType =
+      list.size() > 0 ? list[0].get_ttype() : DEFAULT_CONTAINER_TTYPE;
+  serializedSize += prot.writeListBegin(elementType, list.size());
+  for (const auto& elem : list) {
+    ensure_same_type(elem, elementType);
+    serializedSize += write(prot, elem);
+  }
+  serializedSize += prot.writeListEnd();
+  return serializedSize;
+}
+
+template <typename Protocol, typename... Args>
+std::uint32_t write(Protocol& prot, const ListOf<Args...>& list) {
+  using ListElemTy = typename std::remove_cvref_t<decltype(list)>::value_type;
+  constexpr TType value_ttag = op::typeTagToTType<
+      typename detail::native_value_type<ListElemTy, true>::tag>;
+  uint32_t serializedSize = 0;
+  serializedSize += prot.writeListBegin(value_ttag, list.size());
+  for (const auto& elem : list) {
+    serializedSize += write(prot, elem);
+  }
+  serializedSize += prot.writeListEnd();
+  return serializedSize;
+}
+
 template <typename Protocol>
 std::uint32_t write(Protocol& prot, const NativeList& list) {
-  std::ignore = prot;
-  std::ignore = list;
-  return 0;
+  return folly::variant_match(
+      list.inner(),
+      [&](const std::monostate&) {
+        // Note: Write an empty list with a default tag of I64
+        return prot.writeListBegin(DEFAULT_CONTAINER_TTYPE, 0) +
+            prot.writeListEnd();
+      },
+      [&](auto& l) { return write(prot, l); });
 }
 
 template <typename Protocol>
@@ -461,6 +615,8 @@ struct ValueHasher {
   size_t operator()(const std::monostate&) const;
   template <typename T, typename U>
   size_t operator()(const std::pair<T, U>& p) const;
+  template <typename T>
+  size_t operator()(const ListOf<T>& l) const;
 };
 
 size_t ValueHasher::operator()(const Value& v) const {
@@ -503,8 +659,7 @@ size_t ValueHasher::operator()(const Object& o) const {
   return 0;
 }
 size_t ValueHasher::operator()(const NativeList& l) const {
-  std::ignore = l;
-  return 0;
+  return l.inner().index() + folly::variant_match(l.inner(), ValueHasher{});
 }
 size_t ValueHasher::operator()(const NativeSet& s) const {
   std::ignore = s;
@@ -518,6 +673,15 @@ size_t ValueHasher::operator()(const NativeMap& m) const {
 template <typename T, typename U>
 size_t ValueHasher::operator()(const std::pair<T, U>& p) const {
   return folly::hash::hash_combine_generic(ValueHasher{}, p.first, p.second);
+}
+
+template <typename T>
+size_t ValueHasher::operator()(const ListOf<T>& l) const {
+  if constexpr (std::is_same_v<T, Bool>) {
+    return std::hash<ListOf<Bool>>{}(l);
+  } else {
+    return folly::hash::hash_range(l.begin(), l.end(), 0, ValueHasher{});
+  }
 }
 
 size_t ValueHasher::operator()(const std::monostate&) const {
@@ -586,5 +750,46 @@ const Value* Object::if_contains(FieldId i) const {
   const auto* ptr = folly::get_ptr(fields, i);
   return ptr ? &ptr->as_value() : nullptr;
 }
+
+#define FBTHRIFT_DEF_MAIN_TYPE_ACCESS(CLASS, TYPE, NAME)     \
+  bool CLASS::is_##NAME() const {                            \
+    return std::holds_alternative<TYPE>(kind_);              \
+  }                                                          \
+  const TYPE& CLASS::as_##NAME() const {                     \
+    return std::get<TYPE>(kind_);                            \
+  }                                                          \
+  TYPE& CLASS::as_##NAME() {                                 \
+    return std::get<TYPE>(kind_);                            \
+  }                                                          \
+  const TYPE* CLASS::if_##NAME() const {                     \
+    return std::get_if<TYPE>(&kind_);                        \
+  }                                                          \
+  TYPE* CLASS::if_##NAME() {                                 \
+    return std::get_if<TYPE>(&kind_);                        \
+  }                                                          \
+  decltype(auto) CLASS::ensure_##NAME() {                    \
+    if (!std::holds_alternative<TYPE>(kind_)) {              \
+      return kind_.emplace<TYPE>();                          \
+    }                                                        \
+    return std::get<TYPE>(kind_);                            \
+  }                                                          \
+  template <typename... Args>                                \
+  decltype(auto) CLASS::emplace_##NAME(Args&&... args) {     \
+    return kind_.emplace<TYPE>(std::forward<Args>(args)...); \
+  }
+
+// ---- NativeList API ---- //
+
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Bool>, list_of_bool)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<I8>, list_of_i8)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<I16>, list_of_i16)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<I32>, list_of_i32)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<I64>, list_of_i64)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Float>, list_of_float)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Double>, list_of_double)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Bytes>, list_of_bytes)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<String>, list_of_string)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Object>, list_of_object)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<ValueHolder>, list_of_value)
 
 } // namespace apache::thrift::protocol::experimental

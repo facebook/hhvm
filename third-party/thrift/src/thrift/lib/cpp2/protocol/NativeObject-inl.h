@@ -18,6 +18,54 @@
 
 namespace apache::thrift::protocol::experimental {
 
+// ---- NativeList ---- //
+
+template <typename T>
+NativeList::NativeList(ListOf<T>&& l) : kind_(std::move(l)) {}
+template <typename T>
+NativeList::NativeList(const ListOf<T>& l) : kind_(l) {}
+template <typename T>
+bool NativeList::has_element() const noexcept {
+  return std::holds_alternative<
+      ::apache::thrift::protocol::experimental::detail::list_t<T>>(kind_);
+}
+template <typename T>
+bool NativeList::is_type() const noexcept {
+  static_assert(
+      detail::is_list_v<T> && !std::is_same_v<T, NativeList>,
+      "NativeList is always a list type");
+  using ElemTy = std::remove_cv_t<typename T::value_type>;
+  return std::holds_alternative<detail::list_t<ElemTy>>(kind_);
+}
+template <typename T>
+const NativeList::Specialized<T>& NativeList::as_type() const {
+  static_assert(
+      detail::is_list_v<T> && !std::is_same_v<T, NativeList>,
+      "NativeList is always a list type");
+  return std::get<Specialized<T>>(kind_);
+}
+template <typename T>
+NativeList::Specialized<T>& NativeList::as_type() {
+  static_assert(
+      detail::is_list_v<T> && !std::is_same_v<T, NativeList>,
+      "NativeList is always a list type");
+  return std::get<Specialized<T>>(kind_);
+}
+template <typename T>
+const NativeList::Specialized<T>* NativeList::if_type() const noexcept {
+  static_assert(
+      detail::is_list_v<T> && !std::is_same_v<T, NativeList>,
+      "NativeList is always a list type");
+  return std::get_if<Specialized<T>>(&kind_);
+}
+template <typename T>
+NativeList::Specialized<T>* NativeList::if_type() noexcept {
+  static_assert(
+      detail::is_list_v<T> && !std::is_same_v<T, NativeList>,
+      "NativeList is always a list type");
+  return std::get_if<Specialized<T>>(&kind_);
+}
+
 // ---- Object ---- //
 
 template <typename... Args>

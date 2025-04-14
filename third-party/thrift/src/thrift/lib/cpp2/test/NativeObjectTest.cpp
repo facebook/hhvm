@@ -278,3 +278,120 @@ TEST(NativeObjectTest, struct_with_primitive_fields) {
       testset::struct_binary,
       testset::struct_string>();
 }
+
+template <typename T>
+void assertListType() {
+  T t;
+  using ListFieldTy =
+      std::remove_cvref_t<typename decltype(t.field_1())::value_type>;
+  using ListElemTy = typename ListFieldTy::value_type;
+
+  auto list_val = ListFieldTy{};
+  for (int i = 0; i < 10; ++i) {
+    list_val.push_back(random_val<ListElemTy>());
+  }
+  t.field_1().emplace(list_val);
+
+  const auto obj = testSerDe<StandardProtocol::Binary>(t);
+  ASSERT_EQ(obj.size(), 1);
+  const NativeValue& field_obj = obj.at(1);
+
+  ASSERT_TRUE(field_obj.is_list());
+  using ResultListTy = experimental::detail::list_t<ListElemTy>;
+  ASSERT_TRUE(field_obj.as_list().is_type<ResultListTy>());
+  const auto& objList = field_obj.as_list().as_type<ResultListTy>();
+  if constexpr (std::is_same_v<ResultListTy, experimental::ListOf<Bytes>>) {
+    ASSERT_EQ(list_val.size(), objList.size());
+    for (size_t i = 0; i < list_val.size(); ++i) {
+      ASSERT_EQ(Bytes::fromStdString(list_val[i]), objList[i]);
+    }
+  } else {
+    ASSERT_EQ(objList, list_val);
+  }
+}
+
+template <typename... Ts>
+void assertListTypes() {
+  (assertListType<Ts>(), ...);
+}
+
+TEST(NativeObjectTest, list_with_primitive_fields) {
+  assertListTypes<
+      testset::struct_list_bool,
+      testset::struct_list_byte,
+      testset::struct_list_i16,
+      testset::struct_list_i32,
+      testset::struct_list_i64,
+      testset::struct_list_float,
+      testset::struct_list_double,
+      testset::struct_list_binary,
+      testset::struct_list_string>();
+}
+
+template <typename T>
+void assertValueListType() {
+  T t;
+  using OuterListTy =
+      std::remove_cvref_t<typename decltype(t.field_1())::value_type>;
+  using InnerContainerTy = typename OuterListTy::value_type;
+  using ListElemTy = typename InnerContainerTy::value_type;
+  constexpr bool isStructTy = std::is_same_v<ListElemTy, testset::struct_empty>;
+
+  auto list_val = OuterListTy{};
+  for (int i = 0; i < 10; ++i) {
+    auto inner_container = InnerContainerTy{};
+    for (int j = 0; j < 10; ++j) {
+      if constexpr (isStructTy) {
+        inner_container.emplace_back();
+      } else {
+        inner_container.push_back(random_val<ListElemTy>());
+      }
+    }
+    list_val.push_back(std::move(inner_container));
+  }
+  t.field_1().emplace(list_val);
+
+  const auto obj = testSerDe<StandardProtocol::Binary>(t);
+  ASSERT_EQ(obj.size(), 1);
+  const NativeValue& field_obj = obj.at(1);
+
+  ASSERT_TRUE(field_obj.is_list());
+  const auto& valueList = field_obj.as_list().as_list_of_value();
+  for (size_t i = 0; i < list_val.size(); ++i) {
+    ASSERT_TRUE(valueList.at(i).is_list());
+    const auto& innerList = valueList.at(i).as_list();
+
+    using ResultingContainerTy = std::conditional_t<
+        isStructTy,
+        experimental::ListOf<Object>,
+        experimental::detail::list_t<ListElemTy>>;
+
+    ASSERT_TRUE(innerList.is_type<ResultingContainerTy>());
+    const auto& values = innerList.as_type<ResultingContainerTy>();
+    ASSERT_EQ(values.size(), list_val[i].size());
+    for (size_t j = 0; j < list_val[i].size(); ++j) {
+      if constexpr (!isStructTy) {
+        ASSERT_EQ(values.at(j), list_val[i][j]);
+      }
+    }
+  }
+}
+
+template <typename... Ts>
+void assertValueListTypes() {
+  (assertValueListType<Ts>(), ...);
+}
+
+TEST(NativeObjectTest, list_with_boxed_fields) {
+  assertValueListTypes<
+      testset::struct_list_list_bool,
+      testset::struct_list_list_byte,
+      testset::struct_list_list_i16,
+      testset::struct_list_list_i32,
+      testset::struct_list_list_i64,
+      testset::struct_list_list_float,
+      testset::struct_list_list_double,
+      testset::struct_list_list_binary,
+      testset::struct_list_list_string,
+      testset::struct_list_list_struct_empty>();
+}

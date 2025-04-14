@@ -2,7 +2,7 @@
 <?hh
 // package pkg1
 function test(): void {
-   $b = B1::class; // ::class should not cause a package boundary violation
+   $b = B1::class; // error when package_v2_allow_class_const_violations is off
 }
 
 //// b.php

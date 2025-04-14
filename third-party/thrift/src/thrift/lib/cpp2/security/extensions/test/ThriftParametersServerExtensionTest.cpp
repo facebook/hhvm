@@ -65,12 +65,15 @@ TEST_F(ThriftParametersServerExtensionTest, NoExtensions) {
   EXPECT_EQ(exts.size(), 0);
 }
 
-TEST_F(ThriftParametersServerExtensionTest, IncompatibleCompresionAlgorithms) {
-  setUpClientThriftParameters({
-      static_cast<CompressionAlgorithm>(
-          folly::to_underlying(TEnumTraits<CompressionAlgorithm>::max()) +
-          1u), // definitely fake
-  });
+TEST_F(ThriftParametersServerExtensionTest, IncompatibleCompressionAlgorithms) {
+  // The problem is that at some point CompressionAlgorithm enum stopped being a
+  // continuous range. So the code below ASSUMES that 10 is the non-existing
+  // value.
+  // See thrift/lib/thrift/RpcMetadata.thrift.
+  auto nonExistingCompressionAlgorithm = 10;
+
+  setUpClientThriftParameters(
+      {static_cast<CompressionAlgorithm>(nonExistingCompressionAlgorithm)});
 
   auto exts = extensions_->getExtensions(chlo_);
   EXPECT_EQ(exts.size(), 1);

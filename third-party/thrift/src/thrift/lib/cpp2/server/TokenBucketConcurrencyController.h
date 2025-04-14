@@ -173,11 +173,23 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
 
   bool consumeTokens(double tokens) {
     auto qpsLimit = qpsLimit_.load();
+
+    if (qpsLimit == 0) {
+      XLOG_EVERY_MS(WARNING, 60'000)
+          << "QPS limit is 0, so TokenBucketConcurrencyController is not enforcing any limit, your DLS might be misconfigured";
+    }
+
     return qpsTokenBucket_.consume(tokens, qpsLimit, qpsLimit);
   }
 
   bool blockingConsumeTokens(double tokens) {
     auto qpsLimit = qpsLimit_.load();
+
+    if (qpsLimit == 0) {
+      XLOG_EVERY_MS(WARNING, 60'000)
+          << "QPS limit is 0, so TokenBucketConcurrencyController is not enforcing any limit, your DLS might be misconfigured";
+    }
+
     return qpsTokenBucket_.consumeWithBorrowAndWait(tokens, qpsLimit, qpsLimit);
   }
 

@@ -263,7 +263,38 @@ class ValueAccess {
 
 // ---- Structured types ---- //
 
-constexpr std::size_t SIZE_OF_VALUE = 56;
+namespace detail {
+
+// We don't know the exaxct size of what `Value` is going to be at compile time,
+// however we can derive it from its properties. As `NativeObject` contains a
+// F14FastMap of `field id` -> `Value`, we assume the static size of the map
+// is equivalent for all `large` structures, so we use a large array here as a
+// equivalent.
+using QuasiValue = std::array<std::uint8_t, 512>;
+using QuasiObject =
+    folly::F14FastMap<std::int16_t, std::array<std::uint8_t, 512>>;
+
+using QuasiList = std::variant<ListOf<Bool>, ListOf<QuasiObject>>;
+using QuasiSet = std::variant<SetOf<bool>, SetOf<QuasiObject>>;
+using QuasiMap =
+    std::variant<MapOf<I16, QuasiObject>, MapOf<QuasiObject, QuasiObject>>;
+using QuasiValueKind = std::variant<
+    Bool,
+    I8,
+    I16,
+    I32,
+    I64,
+    Float,
+    Double,
+    String,
+    Bytes,
+    QuasiList,
+    QuasiSet,
+    QuasiMap,
+    QuasiObject>;
+} // namespace detail
+
+constexpr std::size_t SIZE_OF_VALUE = sizeof(detail::QuasiValueKind);
 constexpr std::size_t ALIGN_OF_VALUE = 8;
 
 // TODO(sadroeck) - Figure out a better name for this
@@ -779,13 +810,12 @@ class Value : public ValueAccess<Value> {
   Kind kind_;
 }; // namespace apache::thrift::protocol::experimental
 
-// TODO(sadroeck) - Re-enable these after adding containers
-// static_assert(
-//     sizeof(Value) == SIZE_OF_VALUE,
-//     "The size of Value must match the size of ValueHolder");
-// static_assert(
-//     alignof(Value) == alignof(ValueHolder),
-//     "The alignment of Value must match the alignment of ValueHolder");
+static_assert(
+    sizeof(Value) == SIZE_OF_VALUE,
+    "The size of Value must match the size of ValueHolder");
+static_assert(
+    alignof(Value) == alignof(ValueHolder),
+    "The alignment of Value must match the alignment of ValueHolder");
 
 #undef FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD
 

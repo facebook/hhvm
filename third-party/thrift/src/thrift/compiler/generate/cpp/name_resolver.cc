@@ -526,13 +526,6 @@ std::string cpp_name_resolver::gen_type_tag(const t_type& type) {
       ? gen_type_tag(*static_cast<const t_typedef&>(type).get_type())
       : gen_thrift_type_tag(type);
 
-  if (type.find_unstructured_annotation_or_null("cpp.indirection")) {
-    return fmt::format(
-        "::apache::thrift::type::indirected<{}, {}>",
-        get_native_type(type),
-        tag);
-  }
-
   if (cpp_name_resolver::find_type(type) ||
       cpp_name_resolver::find_template(type)) {
     return fmt::format(

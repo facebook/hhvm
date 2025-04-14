@@ -620,17 +620,6 @@ void lower_deprecated_annotations(
         map.erase(annot);
       }
 
-      // cpp.indirection does not handle typedefs correctly
-      if (auto* typedf = dynamic_cast<t_typedef*>(&node);
-          typedf && map.count("cpp.indirection")) {
-        add_annotations_to_node_type(
-            *typedf,
-            {{"cpp.indirection", map.at("cpp.indirection").value}},
-            mCtx.program(),
-            deprecated_annotation_value::origin::lowered_unstructured);
-        map.erase("cpp.indirection");
-      }
-
       node.reset_annotations(std::move(map));
     } else {
       update_annotations(node);

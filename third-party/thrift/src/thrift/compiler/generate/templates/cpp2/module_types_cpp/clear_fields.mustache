@@ -20,8 +20,7 @@
       }}  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>({{field:cpp_storage_name}}, *this);{{!
     }}{{/field:cpp_first_adapter}}{{!
     }}{{^field:cpp_first_adapter}}{{!
-      TODO(dokwon): Replace special cases after replacing StringTraits and cpp.indirection with cpp.adapter.
-      }}  {{> types/apply_indirection_pre}}{{> field/member}}{{> types/apply_indirection_post}} = {{!
+      }}  {{> field/member}} = {{!
       }}{{#field:deprecated_clear?}}{{> field/default}};{{/field:deprecated_clear?}}{{!
       }}{{^field:deprecated_clear?}}{{> field/intrinsic_default}};{{/field:deprecated_clear?}}{{!
     }}{{/field:cpp_first_adapter}}{{!

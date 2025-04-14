@@ -110,12 +110,6 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
   auto map = t_map(&i32, &t_primitive_type::t_double());
   EXPECT_FALSE(is_eligible_for_constexpr(&map));
 
-  for (auto a : {"cpp.indirection"}) {
-    auto ref = t_primitive_type::t_i32();
-    ref.set_unstructured_annotation(a, "true");
-    EXPECT_FALSE(is_eligible_for_constexpr(&ref));
-  }
-
   for (auto a : {"cpp.template", "cpp2.template", "cpp.type", "cpp2.type"}) {
     auto type = i32;
     type.set_unstructured_annotation(a, "custom_int");

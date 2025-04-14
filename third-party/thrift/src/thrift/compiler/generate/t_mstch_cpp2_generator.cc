@@ -1173,7 +1173,6 @@ class cpp_mstch_type : public mstch_type {
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
             {"type:resolved_cpp_type", &cpp_mstch_type::resolved_cpp_type},
             {"type:cpp_template", &cpp_mstch_type::cpp_template},
-            {"type:cpp_indirection?", &cpp_mstch_type::cpp_indirection},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
             {"type:qualified_namespace", &cpp_mstch_type::qualified_namespace},
             {"type:cpp_declare_hash", &cpp_mstch_type::cpp_declare_hash},
@@ -1181,8 +1180,6 @@ class cpp_mstch_type : public mstch_type {
              &cpp_mstch_type::cpp_declare_equal_to},
             {"type:type_class", &cpp_mstch_type::type_class},
             {"type:type_tag", &cpp_mstch_type::type_tag},
-            {"type:type_class_with_indirection",
-             &cpp_mstch_type::type_class_with_indirection},
             {"type:program_name", &cpp_mstch_type::program_name},
             {"type:cpp_use_allocator?", &cpp_mstch_type::cpp_use_allocator},
             {"type:use_op_encode?", &cpp_mstch_type::use_op_encode},
@@ -1272,9 +1269,6 @@ class cpp_mstch_type : public mstch_type {
     return resolved_type_->is_string_or_binary();
   }
   mstch::node cpp_template() { return get_cpp_template(type_); }
-  mstch::node cpp_indirection() {
-    return resolved_type_->has_unstructured_annotation("cpp.indirection");
-  }
   mstch::node cpp_declare_hash() {
     return resolved_type_->has_unstructured_annotation(
         {"cpp.declare_hash", "cpp2.declare_hash"});
@@ -1298,9 +1292,6 @@ class cpp_mstch_type : public mstch_type {
   mstch::node type_class() { return cpp2::get_gen_type_class(*resolved_type_); }
   mstch::node type_tag() {
     return cpp_context_->resolver().get_type_tag(*type_);
-  }
-  mstch::node type_class_with_indirection() {
-    return cpp2::get_gen_type_class_with_indirection(*resolved_type_);
   }
   mstch::node program_name() {
     std::string name;

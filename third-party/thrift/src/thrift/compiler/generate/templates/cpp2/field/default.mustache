@@ -29,8 +29,7 @@
     }}apache::thrift::StringTraits<{{> types/indirected_string_type}}>::fromStringLiteral(""){{!
   }}{{/type:string_or_binary?}}{{!
   }}{{^type:string_or_binary?}}{{!
-    }}{{#type:cpp_indirection?}}0{{/type:cpp_indirection?}}{{!
-    }}{{^type:cpp_indirection?}}{{type:cpp_standard_type}}(){{/type:cpp_indirection?}}{{!
+    }}{{type:cpp_standard_type}}(){{!
   }}{{/type:string_or_binary?}}{{!
 }}{{/field:value}}{{!
 }}{{#field:cpp_first_adapter}}{{!

@@ -19,12 +19,7 @@
 Deduces the underlying string type after indirection
 
 }}{{#type:resolved_cpp_type}}{{!
-  }}{{#type:cpp_indirection?}}{{!
-    }}::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, {{type:resolved_cpp_type}} const&>>{{!
-  }}{{/type:cpp_indirection?}}{{!
-  }}{{^type:cpp_indirection?}}{{!
-    }}{{type:resolved_cpp_type}}{{!
-  }}{{/type:cpp_indirection?}}{{!
+  }}{{type:resolved_cpp_type}}{{!
 }}{{/type:resolved_cpp_type}}{{!
 }}{{^type:resolved_cpp_type}}{{!
   }}std::string{{!

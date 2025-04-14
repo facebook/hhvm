@@ -426,11 +426,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
       return it->second ? eligible::yes : eligible::no;
     }
     bool result = false;
-    if (t->has_unstructured_annotation("cpp.indirection")) {
-      // Custom types may not have constexpr constructors.
-      result = false;
-    } else if (
-        t->is_any_int() || t->is_floating_point() || t->is_bool() ||
+    if (t->is_any_int() || t->is_floating_point() || t->is_bool() ||
         t->is_enum()) {
       result = true;
     } else if (t->is_union() || t->is_exception()) {
@@ -529,78 +525,49 @@ std::vector<mixin_member> get_mixins_and_members(const t_structured& strct) {
   return ret;
 }
 
-namespace {
-struct get_gen_type_class_options {
-  bool gen_indirection = false;
-  bool gen_indirection_inner_ = false;
-};
-
-std::string get_gen_type_class_(
-    t_type const& type_, get_gen_type_class_options opts) {
+std::string get_gen_type_class(t_type const& type) {
   std::string const ns = "::apache::thrift::";
   std::string const tc = ns + "type_class::";
 
-  auto const& type = *type_.get_true_type();
+  auto const& ttype = *type.get_true_type();
 
-  bool const ind = type.has_unstructured_annotation("cpp.indirection");
-  if (ind && opts.gen_indirection && !opts.gen_indirection_inner_) {
-    opts.gen_indirection_inner_ = true;
-    auto const inner = get_gen_type_class_(type_, opts);
-    auto const tag = ns + "detail::indirection_tag";
-    auto const fun = ns + "detail::apply_indirection_fn";
-    return tag + "<" + inner + ", " + fun + ">";
-  }
-  opts.gen_indirection_inner_ = false;
-
-  if (type.is_void()) {
+  if (ttype.is_void()) {
     return tc + "nothing";
-  } else if (type.is_bool() || type.is_byte() || type.is_any_int()) {
+  } else if (ttype.is_bool() || ttype.is_byte() || ttype.is_any_int()) {
     return tc + "integral";
-  } else if (type.is_floating_point()) {
+  } else if (ttype.is_floating_point()) {
     return tc + "floating_point";
-  } else if (type.is_enum()) {
+  } else if (ttype.is_enum()) {
     return tc + "enumeration";
-  } else if (type.is_string()) {
+  } else if (ttype.is_string()) {
     return tc + "string";
-  } else if (type.is_binary()) {
+  } else if (ttype.is_binary()) {
     return tc + "binary";
-  } else if (type.is_list()) {
-    auto& list = dynamic_cast<t_list const&>(type);
+  } else if (ttype.is_list()) {
+    auto& list = dynamic_cast<t_list const&>(ttype);
     auto& elem = *list.get_elem_type();
-    auto elem_tc = get_gen_type_class_(elem, opts);
+    auto elem_tc = get_gen_type_class(elem);
     return tc + "list<" + elem_tc + ">";
-  } else if (type.is_set()) {
-    auto& set = dynamic_cast<t_set const&>(type);
+  } else if (ttype.is_set()) {
+    auto& set = dynamic_cast<t_set const&>(ttype);
     auto& elem = *set.get_elem_type();
-    auto elem_tc = get_gen_type_class_(elem, opts);
+    auto elem_tc = get_gen_type_class(elem);
     return tc + "set<" + elem_tc + ">";
-  } else if (type.is_map()) {
-    auto& map = dynamic_cast<t_map const&>(type);
+  } else if (ttype.is_map()) {
+    auto& map = dynamic_cast<t_map const&>(ttype);
     auto& key = *map.get_key_type();
     auto& val = *map.get_val_type();
-    auto key_tc = get_gen_type_class_(key, opts);
-    auto val_tc = get_gen_type_class_(val, opts);
+    auto key_tc = get_gen_type_class(key);
+    auto val_tc = get_gen_type_class(val);
     return tc + "map<" + key_tc + ", " + val_tc + ">";
-  } else if (type.is_union()) {
+  } else if (ttype.is_union()) {
     return tc + "variant";
-  } else if (type.is_struct_or_union() || type.is_exception()) {
+  } else if (ttype.is_struct_or_union() || ttype.is_exception()) {
     return tc + "structure";
   } else {
-    throw std::runtime_error("unknown type class for: " + type.get_full_name());
+    throw std::runtime_error(
+        "unknown type class for: " + ttype.get_full_name());
   }
-}
-
-} // namespace
-
-std::string get_gen_type_class(t_type const& type) {
-  get_gen_type_class_options opts;
-  return get_gen_type_class_(type, opts);
-}
-
-std::string get_gen_type_class_with_indirection(t_type const& type) {
-  get_gen_type_class_options opts;
-  opts.gen_indirection = true;
-  return get_gen_type_class_(type, opts);
 }
 
 std::string sha256_hex(std::string const& in) {

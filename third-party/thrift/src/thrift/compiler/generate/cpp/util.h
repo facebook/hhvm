@@ -222,15 +222,10 @@ struct mixin_member {
 std::vector<mixin_member> get_mixins_and_members(const t_structured& strct);
 
 //  get_gen_type_class
-//  get_gen_type_class_with_indirection
 //
 //  Returns a string with the fully-qualified name of the C++ type class type
 //  representing the given type.
-//
-//  The _with_indirection variant intersperses indirection_tag wherever the
-//  annotation cpp.indirection appears in the corresponding definitions.
 std::string get_gen_type_class(const t_type& type);
-std::string get_gen_type_class_with_indirection(const t_type& type);
 
 std::string sha256_hex(const std::string& in);
 

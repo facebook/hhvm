@@ -68,7 +68,7 @@
 {{/field:non_opt_cpp_ref?}}
 {{#field:lazy?}}
     written_lazy_field_{{field:cpp_name}}:
-    indexWriter.template recordFieldEnd<decltype({{> module_types_tcc/pm_value}})>({{type:type_class_with_indirection}}{}, {{field:key}});
+    indexWriter.template recordFieldEnd<decltype({{> module_types_tcc/pm_value}})>({{type:type_class}}{}, {{field:key}});
 {{/field:lazy?}}
     xfer += prot_->writeFieldEnd();
 {{#struct:union?}}

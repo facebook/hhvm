@@ -12,7 +12,8 @@ class Bar<reify T> {}
 function bar<reify T>(): void {}
 
 function test(): void {
-  // No errors
+  // No errors when package_v2_allow_reified_generics is on
+  // All error when package_v2_allow_reified_generics is off
   bar<TFoo>();
   bar<Foo>();
   $_ = new Bar<TFoo>();

@@ -1458,10 +1458,17 @@ let localize_targ_with_kind
       ((env, None, []), (ty, hint))
   | (hint_pos, _) ->
     let ty = Decl_hint.hint env.decl_env hint in
+    let in_non_reified =
+      (KindDefs.Simple.to_full_kind_without_bounds kind).reified
+      |> Aast.is_erased
+    in
+    let ignore_package_errors =
+      in_non_reified || Env.package_v2_allow_reified_generics_violations env
+    in
     if check_well_kinded then
       TIntegrity.Simple.check_well_kinded
         ~in_signature:false
-        ~ignore_package_errors:true (* ignore package errors for targs *)
+        ~ignore_package_errors
         env
         ty
         nkind;

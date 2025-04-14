@@ -350,8 +350,12 @@ module Simple = struct
   and check_targ_well_kinded ~in_signature env tyarg (nkind : Simple.named_kind)
       =
     let kind = snd nkind in
-    (* ignore package errors for targs *)
-    let ignore_package_errors = true in
+    let in_non_reified =
+      (Simple.to_full_kind_without_bounds kind).reified |> Aast.is_erased
+    in
+    let ignore_package_errors =
+      in_non_reified || Env.package_v2_allow_reified_generics_violations env
+    in
     match get_node tyarg with
     | Twildcard ->
       let is_higher_kinded = Simple.get_arity kind > 0 in

@@ -209,7 +209,9 @@ class TServerObserver {
   // The observer has to specify a sample rate for callCompleted notifications
   inline uint32_t getSampleRate() const { return sampleRate_; }
 
-  virtual std::string getName() const final { return typeid(*this).name(); }
+  virtual std::string getName() const final {
+    return folly::demangle(typeid(*this)).toStdString();
+  }
 
  protected:
   uint32_t sampleRate_;

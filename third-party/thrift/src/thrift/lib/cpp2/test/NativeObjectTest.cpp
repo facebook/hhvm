@@ -586,3 +586,80 @@ TEST(NativeObjectTest, map_string_to_primitive) {
       testset::struct_map_string_string,
       testset::struct_map_string_binary>();
 }
+
+// ------- Type traits tests to verify the MapOf type system ------- //
+
+template <
+    typename ResultKey,
+    typename ResultValue,
+    typename Key,
+    typename Value,
+    bool StringToBinary = true>
+constexpr bool native_map_type_is_v = std::is_same_v<
+    experimental::detail::map_t<Key, Value, StringToBinary>,
+    experimental::MapOf<ResultKey, ResultValue>>;
+
+template <
+    typename ResultKey,
+    typename ResultValue,
+    typename Key,
+    typename... Values>
+constexpr bool
+    native_map_type_is_v<ResultKey, ResultValue, Key, std::tuple<Values...>> =
+        (native_map_type_is_v<ResultKey, ResultValue, Key, Values> && ...);
+
+template <typename Key, typename Value>
+constexpr bool native_map_is_fallback_v = std::is_same_v<
+    experimental::MapOf<ValueHolder, ValueHolder>,
+    experimental::detail::map_t<Key, Value>>;
+
+template <typename Key, typename... Values>
+constexpr bool native_map_is_fallback_v<Key, std::tuple<Values...>> =
+    (native_map_is_fallback_v<Key, Values> && ...);
+
+using I8 = experimental::I8;
+using I16 = experimental::I16;
+using I32 = experimental::I32;
+using I64 = experimental::I64;
+using Float = experimental::Float;
+using Double = experimental::Double;
+using String = experimental::String;
+using Bytes = experimental::Bytes;
+using NativeList = experimental::NativeList;
+using NativeSet = experimental::NativeSet;
+using NativeMap = experimental::NativeMap;
+
+using primitives_t = std::
+    tuple<experimental::Bool, I8, I16, I32, I64, Float, Double, String, Bytes>;
+using non_primitives_t = std::tuple<NativeList, NativeSet, NativeMap>;
+
+static_assert(
+    native_map_type_is_v<I8, ValueHolder, I8, non_primitives_t>,
+    "Specialization of I8 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<I16, ValueHolder, I16, non_primitives_t>,
+    "Specialization of I16 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<I32, ValueHolder, I32, non_primitives_t>,
+    "Specialization of I32 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<I64, ValueHolder, I64, non_primitives_t>,
+    "Specialization of I64 -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Float, ValueHolder, Float, non_primitives_t>,
+    "Specialization of Float -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Double, ValueHolder, Double, non_primitives_t>,
+    "Specialization of Double -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Bytes, ValueHolder, Bytes, non_primitives_t>,
+    "Specialization of Bytes -> ValueHolder");
+static_assert(
+    native_map_type_is_v<Bytes, ValueHolder, String, non_primitives_t>,
+    "Specialization of String -> ValueHolder (Converts to Bytes)");
+static_assert(
+    native_map_is_fallback_v<Object, primitives_t>,
+    "Fallback for Object -> PrimitiveValue");
+static_assert(
+    native_map_is_fallback_v<Object, non_primitives_t>,
+    "Fallback for Object -> T");

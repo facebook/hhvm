@@ -640,8 +640,15 @@ let is_package_loaded env package = SSet.mem package env.loaded_packages
 
 let package_v2 env = TypecheckerOptions.package_v2 @@ get_tcopt env
 
-let package_v2_bypass_package_check_for_classptr_migration env =
-  TypecheckerOptions.package_v2_bypass_package_check_for_classptr_migration
+let package_v2_allow_classconst_violations env =
+  TypecheckerOptions.package_v2_allow_classconst_violations @@ get_tcopt env
+
+let package_v2_allow_reifiable_tconst_violations env =
+  TypecheckerOptions.package_v2_allow_reifiable_tconst_violations
+  @@ get_tcopt env
+
+let package_v2_allow_reified_generics_violations env =
+  TypecheckerOptions.package_v2_allow_reified_generics_violations
   @@ get_tcopt env
 
 let load_packages env packages =

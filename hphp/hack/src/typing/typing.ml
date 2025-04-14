@@ -10256,9 +10256,8 @@ end = struct
                  || is_attribute
                  || is_catch
                  || is_function_pointer
-                 || Env.package_v2_bypass_package_check_for_classptr_migration
-                      env
-                    && is_const)
+                 || (Env.package_v2_allow_classconst_violations env && is_const)
+                 )
             in
             List.iter
               ~f:(Typing_error_utils.add_typing_error ~env)

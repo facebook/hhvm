@@ -538,9 +538,17 @@ impl HhConfig {
             warnings_in_sandcastle: hhconfig
                 .get_bool_or("warnings_in_sandcastle", default.warnings_in_sandcastle)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
-            tco_package_v2_bypass_package_check_for_classptr_migration: hhconfig.get_bool_or(
-                "package_v2_bypass_package_check_for_classptr_migration",
-                default.tco_package_v2_bypass_package_check_for_classptr_migration,
+            tco_package_v2_allow_classconst_violations: hhconfig.get_bool_or(
+                "package_v2_allow_classconst_violations",
+                default.tco_package_v2_allow_classconst_violations,
+            )?,
+            tco_package_v2_allow_reifiable_tconst_violations: hhconfig.get_bool_or(
+                "package_v2_allow_reifiable_tconst_violations",
+                default.tco_package_v2_allow_reifiable_tconst_violations,
+            )?,
+            tco_package_v2_allow_reified_generics_violations: hhconfig.get_bool_or(
+                "package_v2_allow_reified_generics_violations",
+                default.tco_package_v2_allow_reified_generics_violations,
             )?,
             tco_package_v2_exclude_patterns: hhconfig
                 .get_str("package_v2_exclude_patterns")

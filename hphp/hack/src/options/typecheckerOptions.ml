@@ -304,8 +304,14 @@ let set_package_info t package_info =
 let package_v2_support_multifile_tests t =
   t.GlobalOptions.po.ParserOptions.package_v2_support_multifile_tests
 
-let package_v2_bypass_package_check_for_classptr_migration t =
-  t.GlobalOptions.tco_package_v2_bypass_package_check_for_classptr_migration
+let package_v2_allow_classconst_violations t =
+  t.GlobalOptions.tco_package_v2_allow_classconst_violations
+
+let package_v2_allow_reifiable_tconst_violations t =
+  t.GlobalOptions.tco_package_v2_allow_reifiable_tconst_violations
+
+let package_v2_allow_reified_generics_violations t =
+  t.GlobalOptions.tco_package_v2_allow_reified_generics_violations
 
 let package_v2_exclude_patterns t =
   t.GlobalOptions.tco_package_v2_exclude_patterns

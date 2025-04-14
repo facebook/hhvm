@@ -162,9 +162,12 @@ set(NAMING_SPECIAL_NAMES_SRCS
    "${NAMING_SPECIAL_NAMES_PREFIX}/naming_special_names_ffi_cbindgen.rs"
 )
 
-set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi")
+
+set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi")
 set(FFI_SRCS
-   "${FFI_PREFIX}/ffi.rs"
+#   "${FFI_PREFIX}/ffi.rs"
+   "${FFI_PREFIX}/maybe.rs"
+   "${FFI_PREFIX}/vector.rs"
    "${FFI_PREFIX}/ffi_ffi_cbindgen.rs"
 )
 
@@ -185,9 +188,10 @@ set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
 set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 set(TYPE_CONSTRAINT_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-flags.h")
 set(FCALL_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/fcall-args-flags.h")
+set(ITER_ARGS_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/iter-args-flags.h")
 set(HHBC_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/hhbc-shared.h")
 set(ATTR_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/base/attr.h")
-set(FFI_EXTRA_HEADER "${CMAKE_SOURCE_DIR}/hphp/hack/src/utils/ffi/ffi_extra.h")
+set(FFI_EXTRA_HEADER "${CMAKE_SOURCE_DIR}/hphp/hack/src/hackc/ffi/ffi_extra.h")
 
 add_custom_command(
   OUTPUT ${HHBC_AST_HEADER}
@@ -203,7 +207,7 @@ add_custom_command(
       ${NAMING_SPECIAL_NAMES_SRCS} &&
     ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --bin ffi_cbindgen
       --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
-      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
+      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${ITER_ARGS_HEADER},${HHBC_HEADER}"
       ${HHBC_AST_SRCS}
   DEPENDS rustc cargo "${RUST_OPCODES}"
   COMMENT "Generating hhbc-unit.h"
@@ -242,7 +246,7 @@ HHVM_RENDER_CONFIG_SPECIFICATION(
 #   `lib` are extra link libraries to include in the bridge.
 #
 function(build_cxx_bridge NAME)
-  cmake_parse_arguments(CXX_BRIDGE "" "DIR" "EXTRA_SRCS;LINK_LIBS" ${ARGN})
+  cmake_parse_arguments(CXX_BRIDGE "" "DIR" "EXTRA_SRCS;LINK_LIBS;DEPENDS" ${ARGN})
 
   if ("${CXX_BRIDGE_DIR}" STREQUAL "")
     message(FATAL_ERROR "Missing DIR parameter")
@@ -280,6 +284,10 @@ function(build_cxx_bridge NAME)
     DEPENDS ${RUST_PART_LIB}
   )
   add_library("${NAME}" STATIC ${RUST_PART_CXX} ${CXX_BRIDGE_EXTRA_SRCS} )
+  if (NOT "${CXX_BRIDGE_DEPENDS}" STREQUAL "")
+    add_dependencies("${NAME}" "${CXX_BRIDGE_DEPENDS}")
+  endif()
+
   add_dependencies(hack_rust_ffi_bridge_targets "${NAME}")
   add_library("${NAME}_rust_part" STATIC IMPORTED)
   add_dependencies("${NAME}_rust_part" "${NAME}_cxx")
@@ -316,6 +324,7 @@ build_cxx_bridge(
   DIR "src/hackc/ffi_bridge"
   EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi_bridge/external_decl_provider.cpp"
   LINK_LIBS hdf
+  DEPENDS hackc_options
 )
 build_cxx_bridge(
   hdf

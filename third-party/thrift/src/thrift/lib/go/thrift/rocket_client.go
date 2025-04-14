@@ -215,15 +215,13 @@ func decodeResponse(protoID types.ProtocolID, data []byte, response ReadableStru
 	}
 }
 
-func unionMaps(dst, src map[string]string) map[string]string {
-	if dst == nil {
-		return src
+func unionMaps(args ...map[string]string) map[string]string {
+	// Creates a brand new unified map and copies contents of 'args' into it.
+	unifiedMap := make(map[string]string)
+	for _, arg := range args {
+		maps.Copy(unifiedMap, arg)
 	}
-	if src == nil {
-		return dst
-	}
-	maps.Copy(dst, src)
-	return dst
+	return unifiedMap
 }
 
 func (p *rocketClient) ReadMessageBegin() (string, types.MessageType, int32, error) {

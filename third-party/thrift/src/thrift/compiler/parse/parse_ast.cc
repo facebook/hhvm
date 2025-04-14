@@ -16,8 +16,6 @@
 
 #include <thrift/compiler/parse/parse_ast.h>
 
-#include <stdlib.h>
-#include <cstddef>
 #include <limits>
 #include <optional>
 #include <set>
@@ -39,10 +37,11 @@
 #include <thrift/compiler/parse/parser.h>
 #include <thrift/compiler/sema/sema.h>
 #include <thrift/compiler/source_location.h>
+#include <thrift/lib/thrift/bundled_lib_thrift.h>
 
 namespace apache::thrift::compiler {
 namespace {
-constexpr bool bundle_annotations() {
+constexpr bool should_bundle_std_files() {
 #ifdef THRIFT_OSS
   return false;
 #else
@@ -985,15 +984,17 @@ std::unique_ptr<t_program_bundle> parse_ast(
     const parsing_params& params,
     const sema_params* sparams,
     t_program_bundle* already_parsed) {
-  if constexpr (bundle_annotations()) {
-    const auto& annotation_files =
-        apache::thrift::detail::bundled_annotation_files();
-    for (const auto& [annot_path, content] : annotation_files) {
-      auto found_or_error =
-          sm.find_include_file(annot_path, path, params.incl_searchpath);
-      if (found_or_error.index() != 0) {
-        // Fall back to the bundled annotation files.
-        sm.add_virtual_file(annot_path, content);
+  if constexpr (should_bundle_std_files()) {
+    for (const auto& annotation_files :
+         {apache::thrift::detail::bundled_annotation_files(),
+          apache::thrift::detail::bundled_lib_thrift_files()}) {
+      for (const auto& [annot_path, content] : annotation_files) {
+        auto found_or_error =
+            sm.find_include_file(annot_path, path, params.incl_searchpath);
+        if (found_or_error.index() != 0) {
+          // Fall back to the bundled annotation files.
+          sm.add_virtual_file(annot_path, content);
+        }
       }
     }
   }

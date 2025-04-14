@@ -2249,6 +2249,15 @@ TEST(CompilerTest, not_bundled_annotation) {
       )",
       {},
       options);
+
+  // The (hard-coded) bundles should still exist without implicit includes.
+  check_compile(
+      R"(
+      include "thrift/annotation/cpp.thrift"
+      include "thrift/lib/thrift/schema.thrift"
+      )",
+      {},
+      options);
 }
 
 TEST(CompilerTest, circular_typedef) {

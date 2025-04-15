@@ -155,13 +155,23 @@ TEST(PayloadSerializerTest, TestCompressionAndUncompression) {
               DefaultPayloadSerializerStrategy>(options)),
       true);
 
-  std::vector<CompressionAlgorithm> compressionAlgorithms = {
-      CompressionAlgorithm::NONE,
-      CompressionAlgorithm::ZSTD,
-      CompressionAlgorithm::ZLIB,
-      CompressionAlgorithm::LZ4,
-      CompressionAlgorithm::CUSTOM,
-  };
+  std::vector<CompressionAlgorithm> compressionAlgorithms;
+  if (folly::kIsApple) {
+    compressionAlgorithms = {
+        CompressionAlgorithm::NONE,
+        CompressionAlgorithm::ZSTD,
+        CompressionAlgorithm::ZLIB,
+        CompressionAlgorithm::CUSTOM,
+    };
+  } else {
+    compressionAlgorithms = {
+        CompressionAlgorithm::NONE,
+        CompressionAlgorithm::ZSTD,
+        CompressionAlgorithm::ZLIB,
+        CompressionAlgorithm::LZ4,
+        CompressionAlgorithm::CUSTOM,
+    };
+  }
 
   std::string const expected = "hello world";
 

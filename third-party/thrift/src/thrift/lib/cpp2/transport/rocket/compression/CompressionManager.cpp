@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
-
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 
 namespace apache {

@@ -1072,6 +1072,7 @@ TEST(DynamicPatchTest, InvalidToPatchType) {
   EXPECT_THROW(
       toPatchType(type::Type::get<type::struct_t<MyStructSafePatch>>()),
       std::runtime_error);
+  EXPECT_THROW(toPatchType(type::Type::get<type::i32_t>()), std::runtime_error);
 }
 
 TEST(DynamicPatchTest, ToSafePatchType) {

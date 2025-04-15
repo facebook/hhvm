@@ -289,11 +289,14 @@ std::string fromPatchUri(std::string s) {
 }
 /// @endcond
 
-type::Type toSafePatchType(type::Type input) {
+namespace {
+// Helper function to handle URI transformation for both Patch and SafePatch
+type::Type transformPatchTypeUri(
+    type::Type input, std::function<std::string(std::string)> uriTransformer) {
   auto& name = input.toThrift().name().value();
   auto handleUri = [&](auto& type) {
     if (auto p = type.uri_ref()) {
-      *p = detail::toSafePatchUri(*p);
+      *p = uriTransformer(*p);
       return std::move(input);
     }
     folly::throw_exception<std::runtime_error>(fmt::format(
@@ -304,7 +307,7 @@ type::Type toSafePatchType(type::Type input) {
   if (auto structType = name.structType_ref()) {
     return handleUri(*structType);
   } else if (auto unionType = name.unionType_ref()) {
-    // All Thrift SafePatch is struct type.
+    // All Thrift SafePatch/Patch are struct type.
     auto temp = std::move(*unionType);
     name.structType_ref() = std::move(temp);
     return handleUri(*name.structType_ref());
@@ -314,31 +317,14 @@ type::Type toSafePatchType(type::Type input) {
       "Unsupported type: {}",
       apache::thrift::util::enumNameSafe(name.getType())));
 }
+} // namespace
+
+type::Type toSafePatchType(type::Type input) {
+  return transformPatchTypeUri(std::move(input), detail::toSafePatchUri);
+}
 
 type::Type toPatchType(type::Type input) {
-  auto& name = input.toThrift().name().value();
-  auto handleUri = [&](auto& type) {
-    if (auto p = type.uri_ref()) {
-      *p = toPatchUri(*p);
-      return std::move(input);
-    }
-    folly::throw_exception<std::runtime_error>(fmt::format(
-        "Unsupported Uri: {}",
-        apache::thrift::util::enumNameSafe(type.getType())));
-  };
-
-  if (auto structType = name.structType_ref()) {
-    return handleUri(*structType);
-  } else if (auto unionType = name.unionType_ref()) {
-    // All Thrift Patch is struct type.
-    auto temp = std::move(*unionType);
-    name.structType_ref() = std::move(temp);
-    return handleUri(*name.structType_ref());
-  }
-
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "Unsupported type: {}",
-      apache::thrift::util::enumNameSafe(name.getType())));
+  return transformPatchTypeUri(std::move(input), toPatchUri);
 }
 
 DynamicListPatch& DynamicPatch::getStoredPatchByTag(type::list_c) {

@@ -654,6 +654,9 @@ let package_v2_allow_reified_generics_violations env =
   TypecheckerOptions.package_v2_allow_reified_generics_violations
   @@ get_tcopt env
 
+let package_v2_allow_all_generics_violations env =
+  TypecheckerOptions.package_v2_allow_all_generics_violations @@ get_tcopt env
+
 let load_packages env packages =
   { env with loaded_packages = SSet.union env.loaded_packages packages }
 

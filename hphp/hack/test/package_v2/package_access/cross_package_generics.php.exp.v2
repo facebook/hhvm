@@ -6,7 +6,7 @@ error: Typing[4472] Cannot access an element which belongs to package pkg2 from 
 
 cross_package_generics.php--bar.php:9:23
     7 | 
-    8 | class Bar1 implements IBar<TFoo> {} // ok
+    8 | class Bar1 implements IBar<TFoo> {} // error when package_v2_allow_all_generics_violations is turned off
 [1] 9 | class Bar2 implements IFoo<TBar> {} // error
    10 | class Bar3<T as TFoo> {} // ok
    11 | class Bar4<T as Foo> {} // ok

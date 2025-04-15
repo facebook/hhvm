@@ -487,6 +487,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt "package_v2_allow_reified_generics_violations" config)
     ?tco_package_v2_allow_all_tconst_violations:
       (bool_opt "package_v2_allow_all_tconst_violations" config)
+    ?tco_package_v2_allow_all_generics_violations:
+      (bool_opt "package_v2_allow_all_generics_violations" config)
     ?tco_package_v2_exclude_patterns:
       (string_list_opt "package_v2_exclude_patterns" config)
     ?tco_extended_reasons:(reasons_config_opt config)

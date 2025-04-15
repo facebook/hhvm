@@ -354,7 +354,10 @@ module Simple = struct
       (Simple.to_full_kind_without_bounds kind).reified |> Aast.is_erased
     in
     let ignore_package_errors =
-      in_non_reified || Env.package_v2_allow_reified_generics_violations env
+      if not (Env.package_v2_allow_all_generics_violations env) then
+        false
+      else
+        in_non_reified || Env.package_v2_allow_reified_generics_violations env
     in
     match get_node tyarg with
     | Twildcard ->

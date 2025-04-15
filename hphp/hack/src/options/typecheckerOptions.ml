@@ -316,6 +316,9 @@ let package_v2_allow_all_tconst_violations t =
 let package_v2_allow_reified_generics_violations t =
   t.GlobalOptions.tco_package_v2_allow_reified_generics_violations
 
+let package_v2_allow_all_generics_violations t =
+  t.GlobalOptions.tco_package_v2_allow_all_generics_violations
+
 let package_v2_exclude_patterns t =
   t.GlobalOptions.tco_package_v2_exclude_patterns
 

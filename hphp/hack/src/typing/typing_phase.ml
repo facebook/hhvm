@@ -1463,7 +1463,10 @@ let localize_targ_with_kind
       |> Aast.is_erased
     in
     let ignore_package_errors =
-      in_non_reified || Env.package_v2_allow_reified_generics_violations env
+      if not (Env.package_v2_allow_all_generics_violations env) then
+        false
+      else
+        in_non_reified || Env.package_v2_allow_reified_generics_violations env
     in
     if check_well_kinded then
       TIntegrity.Simple.check_well_kinded

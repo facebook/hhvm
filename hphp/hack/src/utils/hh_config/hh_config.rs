@@ -554,6 +554,10 @@ impl HhConfig {
                 "package_v2_allow_reified_generics_violations",
                 default.tco_package_v2_allow_reified_generics_violations,
             )?,
+            tco_package_v2_allow_all_generics_violations: hhconfig.get_bool_or(
+                "package_v2_allow_all_generics_violations",
+                default.tco_package_v2_allow_all_generics_violations,
+            )?,
             tco_package_v2_exclude_patterns: hhconfig
                 .get_str("package_v2_exclude_patterns")
                 .map_or(default.tco_package_v2_exclude_patterns, parse_svec),

@@ -13,7 +13,7 @@
         "    echo \"hello\";\n",
         "  }\n",
         "}\n",
-        "async function gen_n1234_notebook_main(): Awaitable<void> {"
+        "async function notebook_main(): Awaitable<void> {"
       ]
     },
     {

@@ -16,6 +16,8 @@ class N1234MyClass {
     echo "hello";
   }
 }
+function n1234_foo(): void {}
+function gen_n1234_bar(): void {}
 //@bento-cell-end
 async function gen_n1234_notebook_main(): Awaitable<void> {
   //@bento-cell:{"cell_bento_metadata":{"output": {"id":1247934846418027,"loadingStatus":"loaded"}, "collapsed": true},"cell_type":"code","id":1}

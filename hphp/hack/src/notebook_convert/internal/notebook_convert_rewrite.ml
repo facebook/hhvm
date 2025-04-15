@@ -43,10 +43,16 @@ let mangle (Notebook_number prefix) (hack_source_code : string) : string =
   DeclarationsRewriter.rename_decls ~rename ~hack_source_code
 
 let unmangle (Notebook_number prefix) (hack_source_code : string) : string =
+  let uppercase_prefix = String.uppercase prefix in
+  let lowercase_prefix = String.lowercase prefix in
   let rename (name : string) : string =
     List.fold
       [
-        prefix (* example: n1234 *); String.uppercase prefix (* example: N1234 *);
+        uppercase_prefix (* example: N1234MyClass to MyClass *);
+        Printf.sprintf "%s_" lowercase_prefix (* example: n1234_foo to foo *);
+        Printf.sprintf
+          "gen_%s_"
+          lowercase_prefix (* example: gen_n1234_foo to foo*);
       ]
       ~init:name
       ~f:(fun name prefix ->

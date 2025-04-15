@@ -12,7 +12,9 @@
         "  public function hello(): void {\n",
         "    echo \"hello\";\n",
         "  }\n",
-        "}"
+        "}\n",
+        "function foo(): void {}\n",
+        "function bar(): void {}"
       ]
     },
     {

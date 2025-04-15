@@ -146,10 +146,6 @@ trait RaiserClientBase {
    *   doBland();
    */
   public async function doBland(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_doBland_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "doBland", $args);
@@ -166,10 +162,6 @@ trait RaiserClientBase {
    *           3: Serious s);
    */
   public async function doRaise(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_doRaise_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "doRaise", $args);
@@ -183,10 +175,6 @@ trait RaiserClientBase {
    *   get200();
    */
   public async function get200(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_get200_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "get200", $args);
@@ -203,10 +191,6 @@ trait RaiserClientBase {
    *           3: Serious s);
    */
   public async function get500(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_get500_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "get500", $args);

@@ -78,10 +78,6 @@ trait InteractWithSharedClientBase {
    *   do_some_similar_things();
    */
   public async function do_some_similar_things(): Awaitable<DoSomethingResult> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(InteractWithSharedStaticMetadata::THRIFT_SVC_NAME, "do_some_similar_things", $args);
@@ -128,10 +124,6 @@ class InteractWithShared_MyInteraction extends \ThriftClientBase {
    *   throws (1: CustomException ex);
    */
   public async function frobnicate(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = InteractWithShared_MyInteraction_frobnicate_args::withDefaultValues();
@@ -184,10 +176,6 @@ class InteractWithShared_MyInteraction extends \ThriftClientBase {
    *   ping();
    */
   public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = InteractWithShared_MyInteraction_ping_args::withDefaultValues();
@@ -368,10 +356,6 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
    *   init();
    */
   public async function init(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = InteractWithShared_SharedInteraction_init_args::withDefaultValues();
@@ -424,10 +408,6 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
    *   do_something();
    */
   public async function do_something(): Awaitable<DoSomethingResult> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = InteractWithShared_SharedInteraction_do_something_args::withDefaultValues();
@@ -480,10 +460,6 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
    *   tear_down();
    */
   public async function tear_down(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = InteractWithShared_SharedInteraction_tear_down_args::withDefaultValues();

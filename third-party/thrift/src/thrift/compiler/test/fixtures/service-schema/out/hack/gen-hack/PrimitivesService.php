@@ -114,10 +114,6 @@ trait PrimitivesServiceClientBase {
    *        2: i64 param1);
    */
   public async function init(int $param0, int $param1): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = PrimitivesService_init_args::fromShape(shape(
       'param0' => $param0,
@@ -135,10 +131,6 @@ trait PrimitivesServiceClientBase {
    *   throws (1: CustomException e);
    */
   public async function method_that_throws(): Awaitable<Result> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = PrimitivesService_method_that_throws_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "method_that_throws", $args);
@@ -152,10 +144,6 @@ trait PrimitivesServiceClientBase {
    *   return_void_method(1: i64 id);
    */
   public async function return_void_method(int $id): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = PrimitivesService_return_void_method_args::fromShape(shape(
       'id' => $id,

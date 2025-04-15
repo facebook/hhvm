@@ -225,10 +225,6 @@ internal trait MyServiceClientBase {
    *   ping();
    */
   public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
@@ -242,10 +238,6 @@ internal trait MyServiceClientBase {
    *   getRandomData();
    */
   public async function getRandomData(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getRandomData", $args);
@@ -259,10 +251,6 @@ internal trait MyServiceClientBase {
    *   sink(1: i64 sink);
    */
   public async function sink(int $sink): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
       'sink' => $sink,
@@ -279,10 +267,6 @@ internal trait MyServiceClientBase {
    *               2: string data);
    */
   public async function putDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
       'id' => $id,
@@ -299,10 +283,6 @@ internal trait MyServiceClientBase {
    *   hasDataById(1: i64 id);
    */
   public async function hasDataById(int $id): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
       'id' => $id,
@@ -318,10 +298,6 @@ internal trait MyServiceClientBase {
    *   getDataById(1: i64 id);
    */
   public async function getDataById(int $id): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
       'id' => $id,
@@ -337,10 +313,6 @@ internal trait MyServiceClientBase {
    *   deleteDataById(1: i64 id);
    */
   public async function deleteDataById(int $id): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
       'id' => $id,
@@ -357,10 +329,6 @@ internal trait MyServiceClientBase {
    *               2: string data);
    */
   public async function lobDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
       'id' => $id,

@@ -72,10 +72,6 @@ trait BadServiceClientBase {
    *   bar();
    */
   public async function bar(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = BadService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(BadServiceStaticMetadata::THRIFT_SVC_NAME, "bar", $args);
@@ -121,10 +117,6 @@ class BadService_BadInteraction extends \ThriftClientBase {
    *   foo();
    */
   public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = BadService_BadInteraction_foo_args::withDefaultValues();

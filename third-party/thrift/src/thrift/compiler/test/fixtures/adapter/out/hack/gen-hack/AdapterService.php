@@ -92,10 +92,6 @@ trait AdapterServiceClientBase {
    *   count();
    */
   public async function count(): Awaitable<\facebook\thrift\test\CountingStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "count", $args);
@@ -109,10 +105,6 @@ trait AdapterServiceClientBase {
    *   adaptedTypes(1: HeapAllocated arg);
    */
   public async function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): Awaitable<\facebook\thrift\test\HeapAllocated> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \facebook\thrift\test\AdapterService_adaptedTypes_args::fromShape(shape(
       'arg' => $arg,

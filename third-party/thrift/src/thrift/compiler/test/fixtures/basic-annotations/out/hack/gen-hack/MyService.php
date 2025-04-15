@@ -201,10 +201,6 @@ trait MyServiceClientBase {
    *   throws (1: MyException myExcept);
    */
   public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
@@ -218,10 +214,6 @@ trait MyServiceClientBase {
    *   getRandomData();
    */
   public async function getRandomData(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_getRandomData_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getRandomData", $args);
@@ -235,10 +227,6 @@ trait MyServiceClientBase {
    *   hasDataById(1: i64 id);
    */
   public async function hasDataById(int $id): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_hasDataById_args::fromShape(shape(
       'id' => $id,
@@ -254,10 +242,6 @@ trait MyServiceClientBase {
    *   getDataById(1: i64 id);
    */
   public async function getDataById(int $id): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_getDataById_args::fromShape(shape(
       'id' => $id,
@@ -274,10 +258,6 @@ trait MyServiceClientBase {
    *               2: string data);
    */
   public async function putDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_putDataById_args::fromShape(shape(
       'id' => $id,
@@ -295,10 +275,6 @@ trait MyServiceClientBase {
    *               2: string data);
    */
   public async function lobDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_lobDataById_args::fromShape(shape(
       'id' => $id,
@@ -315,10 +291,6 @@ trait MyServiceClientBase {
    *   doNothing();
    */
   public async function doNothing(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_doNothing_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "doNothing", $args);

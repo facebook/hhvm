@@ -71,10 +71,6 @@ trait TestServiceClientBase {
    *   ping(1: string str_arg);
    */
   public async function ping(string $str_arg): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack_ns2\TestService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,

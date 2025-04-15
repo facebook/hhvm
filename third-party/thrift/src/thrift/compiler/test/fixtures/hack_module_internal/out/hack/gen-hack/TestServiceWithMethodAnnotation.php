@@ -89,10 +89,6 @@ internal trait TestServiceWithMethodAnnotationClientBase {
    *   testMethodWithAnnotation();
    */
   internal async function testMethodWithAnnotation(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithAnnotation", $args);
@@ -106,10 +102,6 @@ internal trait TestServiceWithMethodAnnotationClientBase {
    *   testMethodWithoutAnnotation();
    */
   public async function testMethodWithoutAnnotation(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithoutAnnotation", $args);

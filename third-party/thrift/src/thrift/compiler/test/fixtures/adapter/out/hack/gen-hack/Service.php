@@ -79,10 +79,6 @@ trait ServiceClientBase {
    *        3: Foo arg3);
    */
   public async function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \facebook\thrift\test\Service_func_args::fromShape(shape(
       'arg1' => $arg1,

@@ -93,10 +93,6 @@ trait MyServiceClientBase {
    *        2: MyStruct arg2);
    */
   public async function func(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_func_args::fromShape(shape(
       'arg1' => $arg1,
@@ -114,10 +110,6 @@ trait MyServiceClientBase {
    *         2: MyStruct arg2);
    */
   public async function func1(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_func1_args::fromShape(shape(
       'arg1' => $arg1,

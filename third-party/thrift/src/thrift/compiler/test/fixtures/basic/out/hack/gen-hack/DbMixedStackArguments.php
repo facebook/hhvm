@@ -93,10 +93,6 @@ internal trait DbMixedStackArgumentsClientBase {
    *   getDataByKey0(1: string key);
    */
   public async function getDataByKey0(string $key): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
       'key' => $key,
@@ -112,10 +108,6 @@ internal trait DbMixedStackArgumentsClientBase {
    *   getDataByKey1(1: string key);
    */
   public async function getDataByKey1(string $key): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
       'key' => $key,

@@ -71,10 +71,6 @@ trait TestServiceClientBase {
    *   init(1: i64 int1);
    */
   public async function init(int $int1): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\namespace_from_package\module\TestService_init_args::fromShape(shape(
       'int1' => $int1,

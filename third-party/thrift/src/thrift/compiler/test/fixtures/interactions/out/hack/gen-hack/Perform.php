@@ -84,10 +84,6 @@ trait PerformClientBase {
    *   foo();
    */
   public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Perform_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(PerformStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
@@ -134,10 +130,6 @@ class Perform_MyInteraction extends \ThriftClientBase {
    *   throws (1: CustomException ex);
    */
   public async function frobnicate(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = Perform_MyInteraction_frobnicate_args::withDefaultValues();
@@ -190,10 +182,6 @@ class Perform_MyInteraction extends \ThriftClientBase {
    *   ping();
    */
   public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = Perform_MyInteraction_ping_args::withDefaultValues();
@@ -374,10 +362,6 @@ class Perform_MyInteractionFast extends \ThriftClientBase {
    *   frobnicate();
    */
   public async function frobnicate(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = Perform_MyInteractionFast_frobnicate_args::withDefaultValues();
@@ -430,10 +414,6 @@ class Perform_MyInteractionFast extends \ThriftClientBase {
    *   ping();
    */
   public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = Perform_MyInteractionFast_ping_args::withDefaultValues();
@@ -614,10 +594,6 @@ class Perform_SerialInteraction extends \ThriftClientBase {
    *   frobnicate();
    */
   public async function frobnicate(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
     $args = Perform_SerialInteraction_frobnicate_args::withDefaultValues();

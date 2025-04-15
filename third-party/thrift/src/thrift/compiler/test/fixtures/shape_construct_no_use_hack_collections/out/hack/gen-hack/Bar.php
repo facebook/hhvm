@@ -81,10 +81,6 @@ trait BarClientBase {
    *       5: i64 e);
    */
   public async function baz(dict<int, bool> $a, KeyedContainer<int, KeyedContainer<int, dict<string, bool>>> $b, int $c, ?Foo $d, int $e): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Bar_baz_args::fromShape(shape(
       'a' => $a,
@@ -110,10 +106,6 @@ trait BarClientBase {
    *       5: i64 e);
    */
   public async function baz__LEGACY_ARRAYS(dict<int, bool> $a, KeyedContainer<int, KeyedContainer<int, dict<string, bool>>> $b, int $c, ?Foo $d, int $e): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Bar_baz_args::fromShape(shape(
       'a' => $a,

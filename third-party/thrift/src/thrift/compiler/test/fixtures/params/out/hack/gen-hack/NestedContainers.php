@@ -149,10 +149,6 @@ trait NestedContainersClientBase {
    *   mapList(1: map<i32, list<i32>> foo);
    */
   public async function mapList(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = NestedContainers_mapList_args::fromShape(shape(
       'foo' => (new Map($foo))->map(
@@ -170,10 +166,6 @@ trait NestedContainersClientBase {
    *   mapSet(1: map<i32, set<i32>> foo);
    */
   public async function mapSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = NestedContainers_mapSet_args::fromShape(shape(
       'foo' => new Map($foo),
@@ -189,10 +181,6 @@ trait NestedContainersClientBase {
    *   listMap(1: list<map<i32, i32>> foo);
    */
   public async function listMap(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = NestedContainers_listMap_args::fromShape(shape(
       'foo' => (new Vector($foo))->map(
@@ -210,10 +198,6 @@ trait NestedContainersClientBase {
    *   listSet(1: list<set<i32>> foo);
    */
   public async function listSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = NestedContainers_listSet_args::fromShape(shape(
       'foo' => new Vector($foo),
@@ -229,10 +213,6 @@ trait NestedContainersClientBase {
    *   turtles(1: list<list<map<i32, map<i32, set<i32>>>>> foo);
    */
   public async function turtles(KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, Set<int>>>>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = NestedContainers_turtles_args::fromShape(shape(
       'foo' => (new Vector($foo))->map(

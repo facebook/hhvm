@@ -65,10 +65,6 @@ trait MyServiceClientBase {
    *   second(1: i64 count);
    */
   public async function second(int $count): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_second_args::fromShape(shape(
       'count' => $count,

@@ -69,10 +69,6 @@ trait BarClientBase {
    *       2: list<map<i32, set<string>>> b);
    */
   public async function baz(keyset<int> $a, KeyedContainer<int, KeyedContainer<int, keyset<string>>> $b): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Bar_baz_args::fromShape(shape(
       'a' => $a,

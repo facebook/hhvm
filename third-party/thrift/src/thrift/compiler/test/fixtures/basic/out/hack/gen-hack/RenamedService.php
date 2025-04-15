@@ -72,10 +72,6 @@ internal trait RenamedServiceClientBase {
    *   simple_rpc();
    */
   public async function simple_rpc(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RenamedServiceStaticMetadata::THRIFT_SVC_NAME, "simple_rpc", $args);

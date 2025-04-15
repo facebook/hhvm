@@ -107,10 +107,6 @@ trait FooBarBazServiceClientBase {
    *   foo();
    */
   public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
@@ -124,10 +120,6 @@ trait FooBarBazServiceClientBase {
    *   bar();
    */
   public async function bar(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "bar", $args);
@@ -141,10 +133,6 @@ trait FooBarBazServiceClientBase {
    *   baz();
    */
   public async function baz(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_baz_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "baz", $args);

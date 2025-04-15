@@ -69,10 +69,6 @@ trait ServiceClientBase {
    *        2: include.MyStruct arg2);
    */
   public async function func(string $arg1, ?MyStruct $arg2): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Service_func_args::fromShape(shape(
       'arg1' => $arg1,

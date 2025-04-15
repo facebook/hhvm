@@ -86,10 +86,6 @@ trait MyServicePrioParentClientBase {
    *   ping();
    */
   public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyServicePrioParent_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
@@ -103,10 +99,6 @@ trait MyServicePrioParentClientBase {
    *   pong();
    */
   public async function pong(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyServicePrioParent_pong_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME, "pong", $args);

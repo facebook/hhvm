@@ -7234,13 +7234,6 @@ void t_hack_generator::_generate_service_client_child_fn(
     indent_up();
   }
 
-  indent(out) << "$hh_frame_metadata = $this->getHHFrameMetadata();\n";
-  indent(out) << "if ($hh_frame_metadata !== null) {\n";
-  indent_up();
-  indent(out) << "\\HH\\set_frame_metadata($hh_frame_metadata);\n";
-  indent_down();
-  indent(out) << "}\n";
-
   indent(out) << "$rpc_options = $this->getAndResetOptions() ?? "
               << (tservice->is_interaction()
                       ? "new \\RpcOptions()"

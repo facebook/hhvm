@@ -92,10 +92,6 @@ trait MyServiceClientBase {
    *   first();
    */
   public async function first(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "first", $args);
@@ -109,10 +105,6 @@ trait MyServiceClientBase {
    *   second(1: i64 count);
    */
   public async function second(int $count): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
       'count' => $count,

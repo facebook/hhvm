@@ -28,9 +28,9 @@ use ir_core::instr::Terminator;
 use ir_core::instr::Tmp;
 use ir_core::*;
 
+use crate::FmtEscapedString;
 use crate::formatters::*;
 use crate::util::FmtSep;
-use crate::FmtEscapedString;
 
 pub(crate) struct FuncContext {
     pub(crate) cur_loc: SrcLoc,

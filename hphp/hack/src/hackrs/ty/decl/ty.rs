@@ -38,9 +38,9 @@ use pos::Symbol;
 use pos::ToOxidized;
 use pos::TypeConstName;
 use pos::TypeName;
-use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 use utils::core::Ident;
 
 use crate::reason;

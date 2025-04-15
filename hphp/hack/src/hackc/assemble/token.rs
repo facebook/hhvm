@@ -5,9 +5,9 @@
 
 use std::fmt;
 
+use anyhow::Result;
 use anyhow::anyhow;
 use anyhow::bail;
-use anyhow::Result;
 use newtype::newtype_int;
 
 // 1-based line number.

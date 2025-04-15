@@ -3,11 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use newtype::newtype_int;
 use newtype::IdVec;
+use newtype::newtype_int;
 
-use crate::block::BlockIdIterator;
-use crate::instr::Terminator;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
@@ -25,6 +23,8 @@ use crate::Param;
 use crate::SrcLoc;
 use crate::ValueId;
 use crate::ValueIdMap;
+use crate::block::BlockIdIterator;
+use crate::instr::Terminator;
 
 pub type Function = FunctionImpl<IrRepr>;
 pub type Method = MethodImpl<IrRepr>;

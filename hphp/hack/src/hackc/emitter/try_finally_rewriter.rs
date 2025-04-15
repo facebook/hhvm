@@ -6,10 +6,10 @@ use std::collections::BTreeMap;
 
 use bitflags::bitflags;
 use emit_pos::emit_pos;
-use env::emitter::Emitter;
-use env::jump_targets as jt;
 use env::Env;
 use env::LocalGen;
+use env::emitter::Emitter;
+use env::jump_targets as jt;
 use error::Result;
 use hhbc::Instruct;
 use hhbc::IsTypeOp;
@@ -18,8 +18,8 @@ use hhbc::Label;
 use hhbc::Opcode;
 use hhbc::Pseudo;
 use indexmap::IndexSet;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use oxidized::pos::Pos;
 
 use super::TypeRefinementInHint;

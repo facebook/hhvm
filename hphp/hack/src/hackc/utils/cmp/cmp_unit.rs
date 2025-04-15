@@ -24,15 +24,15 @@ use hhbc::TypedValue;
 use hhbc::Typedef;
 use hhbc::Unit;
 
+use crate::CmpContext;
+use crate::CmpError;
+use crate::MapName;
+use crate::Result;
 use crate::cmp_eq;
 use crate::cmp_map_t;
 use crate::cmp_option;
 use crate::cmp_set_t;
 use crate::cmp_slice;
-use crate::CmpContext;
-use crate::CmpError;
-use crate::MapName;
-use crate::Result;
 
 impl MapName for hhbc::Class {
     fn get_name(&self) -> String {

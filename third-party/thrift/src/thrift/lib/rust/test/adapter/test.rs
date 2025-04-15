@@ -20,7 +20,6 @@ use std::num::NonZeroI64;
 use adapters::CustomString;
 use adapters::SortedVec;
 use fbthrift::simplejson_protocol;
-use thrift_test::consts;
 use thrift_test::AdaptedListNewType;
 use thrift_test::Asset;
 use thrift_test::AssetType;
@@ -30,6 +29,7 @@ use thrift_test::TransitiveStructWrapper;
 use thrift_test::WrappedAdaptedBytes;
 use thrift_test::WrappedAdaptedString;
 use thrift_test::WrappedAdaptedWrappedAdaptedBytes;
+use thrift_test::consts;
 
 #[test]
 fn test_foo_default() {

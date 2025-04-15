@@ -18,8 +18,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 
-use ir_core::instr::HasLoc;
-use ir_core::instr::Special;
 use ir_core::BareThisOp;
 use ir_core::CollectionType;
 use ir_core::DictEntry;
@@ -32,6 +30,8 @@ use ir_core::SetOpOp;
 use ir_core::SpecialClsRef;
 use ir_core::SrcLoc;
 use ir_core::UpperBound;
+use ir_core::instr::HasLoc;
+use ir_core::instr::Special;
 use ir_core::*;
 
 use crate::print::FuncContext;

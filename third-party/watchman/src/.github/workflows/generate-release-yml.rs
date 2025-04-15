@@ -18,10 +18,10 @@ use anyhow::anyhow;
 use anyhow::bail;
 use atomicwrites::AllowOverwrite;
 use atomicwrites::AtomicFile;
-use yaml_rust::yaml::Hash;
 use yaml_rust::Yaml;
 use yaml_rust::YamlEmitter;
 use yaml_rust::YamlLoader;
+use yaml_rust::yaml::Hash;
 
 type Pattern = Box<dyn Fn(&str, &str) -> String + 'static>;
 

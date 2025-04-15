@@ -5,8 +5,8 @@
 
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::package::Package;
-use oxidized::package_info_impl::package_info_to_vec;
 use oxidized::package_info_impl::Errors;
+use oxidized::package_info_impl::package_info_to_vec;
 
 ocaml_ffi! {
     fn extract_packages_from_text_strict_ffi(

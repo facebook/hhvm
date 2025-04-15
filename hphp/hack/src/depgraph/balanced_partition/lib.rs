@@ -15,7 +15,7 @@ mod balance;
 mod config;
 mod timers;
 
-pub use balance::optimize_doc_order;
 pub use balance::Doc;
 pub use balance::ExternalId;
+pub use balance::optimize_doc_order;
 pub use config::BalanceConfig;

@@ -5,10 +5,10 @@
 use std::marker::PhantomData;
 
 use ast_scope::Scope;
-use emit_type_hint::hint_to_type_info;
 use emit_type_hint::Kind;
-use env::emitter::Emitter;
+use emit_type_hint::hint_to_type_info;
 use env::Env;
+use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use ffi::Maybe;
@@ -20,8 +20,8 @@ use hhbc::StringIdMap;
 use hhbc::StringIdSet;
 use hhbc::TypeInfo;
 use hhbc_string_utils::locals::strip_dollar;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::aast_visitor;

@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use nast::ClassReq;
 use nast::Class_;
+use nast::ClassReq;
 use nast::ClassishKind;
 use nast::Hint;
 use nast::RequireKind;

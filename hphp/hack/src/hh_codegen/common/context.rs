@@ -6,8 +6,8 @@
 use std::collections::VecDeque;
 use std::path::Path;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use hash::IndexMap;
 use hash::IndexSet;
 use synstructure::Structure;

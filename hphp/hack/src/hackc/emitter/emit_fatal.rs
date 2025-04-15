@@ -5,8 +5,8 @@
 
 use emit_pos::emit_pos;
 use hhbc::FatalOp;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use oxidized::pos::Pos;
 
 pub fn emit_fatal(op: FatalOp, pos: &Pos, msg: impl AsRef<str>) -> InstrSeq {

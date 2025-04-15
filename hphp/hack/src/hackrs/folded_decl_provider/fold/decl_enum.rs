@@ -8,10 +8,10 @@ use pos::ClassConstName;
 use pos::Positioned;
 use pos::TypeName;
 use special_names as sn;
-use ty::decl::folded::ClassConst;
 use ty::decl::Prim;
 use ty::decl::Ty;
 use ty::decl::Ty_;
+use ty::decl::folded::ClassConst;
 use ty::reason::Reason;
 
 use super::DeclFolder;

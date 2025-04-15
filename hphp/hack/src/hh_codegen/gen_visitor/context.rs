@@ -8,8 +8,8 @@ use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::path::Path;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use proc_macro2::TokenStream;
 use quote::format_ident;
 use syn::*;

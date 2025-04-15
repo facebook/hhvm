@@ -5,8 +5,8 @@
 
 use std::sync::Arc;
 
-use direct_decl_parser::parse_decls_for_bytecode_obr;
 use direct_decl_parser::Decls;
+use direct_decl_parser::parse_decls_for_bytecode_obr;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
 use oxidized_by_ref::shallow_decl_defs::FunDecl;

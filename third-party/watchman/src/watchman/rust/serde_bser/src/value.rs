@@ -8,11 +8,11 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+use serde::Serialize;
 use serde::de::Deserialize;
 use serde::de::MapAccess;
 use serde::de::SeqAccess;
 use serde::de::Visitor;
-use serde::Serialize;
 
 use crate::bytestring::ByteString;
 

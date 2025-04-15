@@ -6,10 +6,6 @@
 use std::collections::BTreeMap;
 
 use pos::TypeName;
-use ty::decl::subst::Subst;
-use ty::decl::ty::ShapeType;
-use ty::decl::ty::TupleExtra;
-use ty::decl::ty::TupleType;
 use ty::decl::AbstractTypeconst;
 use ty::decl::ClassConst;
 use ty::decl::ClassRefinement;
@@ -27,6 +23,10 @@ use ty::decl::Ty_;
 use ty::decl::TypeConst;
 use ty::decl::Typeconst;
 use ty::decl::WhereConstraint;
+use ty::decl::subst::Subst;
+use ty::decl::ty::ShapeType;
+use ty::decl::ty::TupleExtra;
+use ty::decl::ty::TupleType;
 use ty::reason::Reason;
 
 // note(sf, 2022-02-14): c.f. `Decl_subst`, `Decl_instantiate`

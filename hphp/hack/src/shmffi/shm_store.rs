@@ -15,12 +15,12 @@ use std::num::NonZeroUsize;
 
 use anyhow::Result;
 use md5::Digest;
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use parking_lot::Mutex;
-use serde::de::DeserializeOwned;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 /// A `datastore::Store` which writes its values to sharedmem (via the `shmffi`
 /// crate) as bincode-serialized values. Can be configured to compress the

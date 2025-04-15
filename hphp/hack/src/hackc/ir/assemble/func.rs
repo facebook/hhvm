@@ -3,27 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Result;
-use ir_core::func::ExFrame;
-use ir_core::instr;
-use ir_core::instr::BaseOp;
-use ir_core::instr::CallDetail;
-use ir_core::instr::CmpOp;
-use ir_core::instr::FinalOp;
-use ir_core::instr::Hhbc;
-use ir_core::instr::IncludeEval;
-use ir_core::instr::IncludeKind;
-use ir_core::instr::Instr;
-use ir_core::instr::IntermediateOp;
-use ir_core::instr::MemberKey;
-use ir_core::instr::MemberOp;
-use ir_core::instr::MemoGet;
-use ir_core::instr::MemoGetEager;
-use ir_core::instr::Predicate;
-use ir_core::instr::Special;
-use ir_core::instr::Terminator;
+use anyhow::anyhow;
 use ir_core::Block;
 use ir_core::BlockId;
 use ir_core::BytesId;
@@ -60,6 +42,24 @@ use ir_core::UnnamedLocalId;
 use ir_core::UpperBound;
 use ir_core::ValueId;
 use ir_core::Visibility;
+use ir_core::func::ExFrame;
+use ir_core::instr;
+use ir_core::instr::BaseOp;
+use ir_core::instr::CallDetail;
+use ir_core::instr::CmpOp;
+use ir_core::instr::FinalOp;
+use ir_core::instr::Hhbc;
+use ir_core::instr::IncludeEval;
+use ir_core::instr::IncludeKind;
+use ir_core::instr::Instr;
+use ir_core::instr::IntermediateOp;
+use ir_core::instr::MemberKey;
+use ir_core::instr::MemberOp;
+use ir_core::instr::MemoGet;
+use ir_core::instr::MemoGetEager;
+use ir_core::instr::Predicate;
+use ir_core::instr::Special;
+use ir_core::instr::Terminator;
 use itertools::Itertools;
 use parse_macro_ir::parse;
 

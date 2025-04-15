@@ -8,13 +8,13 @@ use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::parse::Parser;
-use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 use syn::Error;
 use syn::Expr;
 use syn::LitByteStr;
 use syn::Token;
+use syn::parse::Parser;
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 
 type Result<T> = std::result::Result<T, Error>;
 

@@ -18,10 +18,6 @@ use pos::Symbol;
 use pos::TypeConstName;
 use pos::TypeName;
 use special_names as sn;
-use ty::decl::folded::ConstraintRequirement;
-use ty::decl::folded::Constructor;
-use ty::decl::subst::Subst;
-use ty::decl::ty::DeclConstraintRequirement;
 use ty::decl::AbstractTypeconst;
 use ty::decl::Abstraction;
 use ty::decl::CeVisibility;
@@ -45,12 +41,16 @@ use ty::decl::Ty;
 use ty::decl::TypeConst;
 use ty::decl::Typeconst;
 use ty::decl::Visibility;
+use ty::decl::folded::ConstraintRequirement;
+use ty::decl::folded::Constructor;
+use ty::decl::subst::Subst;
+use ty::decl::ty::DeclConstraintRequirement;
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 
-use super::inherit::Inherited;
 use super::Result;
 use super::Substitution;
+use super::inherit::Inherited;
 
 mod decl_enum;
 

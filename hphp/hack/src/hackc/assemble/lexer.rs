@@ -5,10 +5,10 @@
 
 use std::str::FromStr;
 
+use anyhow::Result;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::ensure;
-use anyhow::Result;
 
 use crate::token::Line;
 use crate::token::Token;

@@ -3,9 +3,9 @@
 use std::collections::hash_map::Entry;
 use std::rc::Rc;
 
+use anyhow::Result;
 use anyhow::anyhow;
 use anyhow::bail;
-use anyhow::Result;
 use hash::HashMap;
 use hhbc::BytesId;
 use hhbc::ClassName;

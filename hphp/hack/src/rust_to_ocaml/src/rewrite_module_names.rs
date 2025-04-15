@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::ir;
 use crate::Config;
+use crate::ir;
 
 pub fn rewrite_file(config: &'static Config, file: &mut ir::File) {
     let rewriter = Rewriter { config };

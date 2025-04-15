@@ -8,8 +8,8 @@ use clap::Args;
 use facts::Facts;
 use relative_path::Prefix;
 use relative_path::RelativePath;
-use serde_json::json;
 use serde_json::Value;
+use serde_json::json;
 
 /// Facts subcommand options
 #[derive(Args, Debug, Default)]

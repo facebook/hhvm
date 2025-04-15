@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ir::Requirement;
+use ir::SymbolRefs;
 use ir::func::DefaultValue;
 use ir::func::ExFrame;
 use ir::instr::BaseOp;
@@ -14,20 +16,18 @@ use ir::instr::MemberKey;
 use ir::instr::MemberOp;
 use ir::instr::Special;
 use ir::instr::Terminator;
-use ir::Requirement;
-use ir::SymbolRefs;
 // This is reasonable because if we compare everything then we'll end up pulling
 // in everything...
 use ir::*;
 
-use crate::cmp_eq;
-use crate::cmp_map_t;
-use crate::cmp_option;
-use crate::cmp_slice;
 use crate::CmpContext;
 use crate::CmpError;
 use crate::MapName;
 use crate::Result;
+use crate::cmp_eq;
+use crate::cmp_map_t;
+use crate::cmp_option;
+use crate::cmp_slice;
 
 pub fn cmp_ir(a: &Unit, b: &Unit) -> Result {
     cmp_unit(a, b).with_raw(|| "unit".to_string())

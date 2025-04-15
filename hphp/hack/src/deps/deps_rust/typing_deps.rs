@@ -13,8 +13,8 @@ use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
-use ocamlrep_custom::caml_serialize_default_impls;
 use ocamlrep_custom::CamlSerialize;
+use ocamlrep_custom::caml_serialize_default_impls;
 use rpds::HashTrieSet;
 
 mod dep_graph_with_delta;

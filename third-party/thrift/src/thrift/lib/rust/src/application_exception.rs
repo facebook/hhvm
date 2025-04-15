@@ -16,6 +16,7 @@
 
 use std::any::Any;
 
+use crate::Result;
 use crate::deserialize::Deserialize;
 use crate::exceptions::ExceptionInfo;
 use crate::exceptions::ResultInfo;
@@ -26,7 +27,6 @@ use crate::protocol::ProtocolWriter;
 use crate::serialize::Serialize;
 use crate::thrift_protocol::ProtocolID;
 use crate::ttype::TType;
-use crate::Result;
 
 // Reference is thrift/lib/cpp/TApplicationException.h
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]

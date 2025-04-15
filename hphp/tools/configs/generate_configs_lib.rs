@@ -71,6 +71,7 @@ use std::path::PathBuf;
 
 use convert_case::Case;
 use convert_case::Casing;
+use nom::IResult;
 use nom::branch::alt;
 use nom::bytes::complete::escaped;
 use nom::bytes::complete::tag;
@@ -90,18 +91,17 @@ use nom::combinator::map;
 use nom::combinator::opt;
 use nom::combinator::recognize;
 use nom::combinator::value;
-use nom::error::context;
 use nom::error::ContextError;
 use nom::error::ParseError;
+use nom::error::context;
 use nom::multi::count;
+use nom::multi::many_till;
 use nom::multi::many0;
 use nom::multi::many1;
-use nom::multi::many_till;
 use nom::multi::separated_list1;
 use nom::sequence::delimited;
 use nom::sequence::preceded;
 use nom::sequence::tuple;
-use nom::IResult;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ConfigValue {

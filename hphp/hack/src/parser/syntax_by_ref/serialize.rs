@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use serde::ser::SerializeSeq;
-use serde::ser::SerializeStruct;
 use serde::Serialize;
 use serde::Serializer;
+use serde::ser::SerializeSeq;
+use serde::ser::SerializeStruct;
 
 use super::positioned_token::PositionedTokenFullTrivia;
 use crate::indexed_source_text::IndexedSourceText;

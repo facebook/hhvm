@@ -18,8 +18,8 @@ mod fallback {
     use std::io;
     use std::io::Write;
 
-    use anyhow::anyhow;
     use anyhow::Result;
+    use anyhow::anyhow;
 
     pub struct FbReporter {}
 

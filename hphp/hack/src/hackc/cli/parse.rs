@@ -4,18 +4,18 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::HashSet;
-use std::io::stdin;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Write;
+use std::io::stdin;
 use std::path::PathBuf;
 use std::sync::Arc;
 
 use aast_parser::AastParser;
 use anyhow::Context;
 use anyhow::Result;
-use clap::builder::TypedValueParser;
 use clap::Args;
+use clap::builder::TypedValueParser;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;

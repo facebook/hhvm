@@ -3,23 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ir::func_builder::TransformInstr;
-use ir::func_builder::TransformState;
-use ir::instr::CallDetail;
-use ir::instr::CmpOp;
-use ir::instr::HasLoc;
-use ir::instr::HasLocals;
-use ir::instr::HasOperands;
-use ir::instr::Hhbc;
-use ir::instr::IteratorArgs;
-use ir::instr::MemberOp;
-use ir::instr::MemoGet;
-use ir::instr::MemoGetEager;
-use ir::instr::Predicate;
-use ir::instr::Special;
-use ir::instr::Terminator;
-use ir::instr::Textual;
-use ir::type_struct::TypeStruct;
 use ir::BareThisOp;
 use ir::Call;
 use ir::FCallArgsFlags;
@@ -45,14 +28,31 @@ use ir::StringId;
 use ir::TypeStructEnforceKind;
 use ir::TypeStructResolveOp;
 use ir::ValueId;
+use ir::func_builder::TransformInstr;
+use ir::func_builder::TransformState;
+use ir::instr::CallDetail;
+use ir::instr::CmpOp;
+use ir::instr::HasLoc;
+use ir::instr::HasLocals;
+use ir::instr::HasOperands;
+use ir::instr::Hhbc;
+use ir::instr::IteratorArgs;
+use ir::instr::MemberOp;
+use ir::instr::MemoGet;
+use ir::instr::MemoGetEager;
+use ir::instr::Predicate;
+use ir::instr::Special;
+use ir::instr::Terminator;
+use ir::instr::Textual;
+use ir::type_struct::TypeStruct;
 use itertools::Itertools;
 use naming_special_names_rust::special_idents;
 
 use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
+use crate::func::FuncInfo;
 use crate::func::lookup_constant;
 use crate::func::lookup_constant_string;
-use crate::func::FuncInfo;
 use crate::hack;
 
 /// Lower individual Instrs in the Func to simpler forms.

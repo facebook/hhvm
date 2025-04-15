@@ -9,8 +9,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::ToOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use oxidized::naming_types;
 use pos::RelativePath;
 use rust_provider_backend_api::RustProviderBackend;

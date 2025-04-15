@@ -13,8 +13,8 @@ use std::slice::Iter;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use bstr::BString;
 use bstr::B;
+use bstr::BString;
 use bumpalo::Bump;
 use escaper::*;
 use hash::HashMap;
@@ -31,9 +31,9 @@ use naming_special_names_rust::special_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints as special_typehints;
 use naming_special_names_rust::user_attributes as special_attrs;
+use ocaml_helper::ParseIntError;
 use ocaml_helper::int_of_string_opt;
 use ocaml_helper::parse_int;
-use ocaml_helper::ParseIntError;
 use oxidized::aast;
 use oxidized::aast::Binop;
 use oxidized::aast_defs::ClassName;
@@ -3911,14 +3911,14 @@ fn rewrite_effect_polymorphism<'a>(
     contexts: Option<&ast::Contexts>,
     where_constraints: &mut Vec<ast::WhereConstraintHint>,
 ) {
-    use ast::Hint;
-    use ast::Hint_;
-    use ast::ReifyKind;
-    use ast::Variance;
     use Hint_::Haccess;
     use Hint_::Happly;
     use Hint_::HfunContext;
     use Hint_::Hvar;
+    use ast::Hint;
+    use ast::Hint_;
+    use ast::ReifyKind;
+    use ast::Variance;
 
     if !has_polymorphic_context(env, contexts) {
         return;
@@ -4633,8 +4633,8 @@ fn mk_suspension_kind_(has_async: bool) -> SuspensionKind {
 }
 
 fn mk_fun_kind(suspension_kind: SuspensionKind, yield_: bool) -> ast::FunKind {
-    use ast::FunKind::*;
     use SuspensionKind::*;
+    use ast::FunKind::*;
     match (suspension_kind, yield_) {
         (SKSync, true) => FGenerator,
         (SKAsync, true) => FAsyncGenerator,

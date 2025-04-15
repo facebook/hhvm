@@ -6,9 +6,9 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
 
 use anyhow::Result;
 use datastore::ChangesStore;
@@ -21,9 +21,9 @@ use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::LazyFoldedDeclProvider;
 use naming_provider::NamingProvider;
 use naming_table::NamingTable;
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use oxidized::decl_fold_options::DeclFoldOptions;
 use oxidized::file_info::NameType;
 use oxidized::file_info::Names;

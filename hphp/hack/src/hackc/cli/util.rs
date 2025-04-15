@@ -8,8 +8,8 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::bail;
 use anyhow::Result;
+use anyhow::bail;
 use parking_lot::Mutex;
 
 pub type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;

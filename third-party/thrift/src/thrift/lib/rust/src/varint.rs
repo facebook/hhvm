@@ -17,8 +17,8 @@
 use bytes::Buf;
 use bytes::BufMut;
 
-use crate::errors::ProtocolError;
 use crate::Result;
+use crate::errors::ProtocolError;
 
 // To encode a u64 we break the number up into groups of 7 bits. A given number
 // will require some number of these groups (smaller numbers use less than

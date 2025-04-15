@@ -6,8 +6,8 @@
 use std::ops::ControlFlow;
 
 use nast::Class_;
-use nast::FunDef;
 use nast::Fun_;
+use nast::FunDef;
 use nast::Method_;
 use nast::UserAttribute;
 use nast::Visibility;

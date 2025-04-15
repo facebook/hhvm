@@ -2,8 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use env::emitter::Emitter;
 use env::Env;
+use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use hhbc::Attribute;

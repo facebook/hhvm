@@ -12,8 +12,8 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use clap::Parser;
 use proc_macro2::TokenStream;
 use quote::format_ident;

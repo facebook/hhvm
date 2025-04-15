@@ -17,16 +17,16 @@
 use std::ffi::CStr;
 use std::sync::Arc;
 
+use futures::FutureExt;
 use futures::future;
 use futures::future::BoxFuture;
 use futures::stream::BoxStream;
-use futures::FutureExt;
 
-use crate::help::Spawner;
 use crate::Framing;
 use crate::FramingDecoded;
 use crate::FramingEncodedFinal;
 use crate::Protocol;
+use crate::help::Spawner;
 
 #[derive(Debug)]
 pub enum ClientStreamElement<Payload> {

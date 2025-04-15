@@ -4,12 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 use emit_pos::emit_pos;
 use emit_pos::emit_pos_then;
-use env::emitter::Emitter;
 use env::Env;
+use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use hack_macros::hack_expr;
-use hhbc::string_id;
 use hhbc::ClassName;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
@@ -23,8 +22,9 @@ use hhbc::MethodName;
 use hhbc::QueryMOp;
 use hhbc::ReadonlyOp;
 use hhbc::SetRangeOp;
-use instruction_sequence::instr;
+use hhbc::string_id;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use lazy_static::lazy_static;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
@@ -39,11 +39,11 @@ use oxidized::pos::Pos;
 use regex::Regex;
 use statement_state::StatementState;
 
-use crate::emit_expression::emit_await;
-use crate::emit_expression::emit_expr;
 use crate::emit_expression::LValOp;
 use crate::emit_expression::SetRange;
 use crate::emit_expression::VecDictIndex;
+use crate::emit_expression::emit_await;
+use crate::emit_expression::emit_expr;
 use crate::emit_expression::{self as emit_expr};
 use crate::emit_fatal;
 use crate::try_finally_rewriter as tfr;

@@ -8,14 +8,14 @@ use pos::Pos;
 
 use super::ty::TypedefCaseTypeVariant;
 use crate::decl;
+use crate::decl::Ty;
+use crate::decl::Ty_;
 use crate::decl::folded;
 use crate::decl::folded::ConstraintRequirement;
 use crate::decl::shallow;
 use crate::decl::ty;
 use crate::decl::ty::DeclConstraintRequirement;
 use crate::decl::ty::TypedefTypeAssignment;
-use crate::decl::Ty;
-use crate::decl::Ty_;
 use crate::reason::Reason;
 
 #[inline]
@@ -145,8 +145,8 @@ impl<R: Reason> From<obr::typing_defs::TupleExtra<'_>> for ty::TupleExtra<R> {
 
 impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
     fn from(ty: &obr::typing_defs::Ty<'_>) -> Self {
-        use obr::typing_defs_core;
         use Ty_::*;
+        use obr::typing_defs_core;
         let reason = R::from(*ty.0);
         let ty_ = match ty.1 {
             typing_defs_core::Ty_::Tthis => Tthis,

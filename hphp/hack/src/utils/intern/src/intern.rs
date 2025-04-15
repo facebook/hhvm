@@ -13,9 +13,9 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::num::NonZeroU32;
+use std::sync::OnceLock;
 use std::sync::atomic::AtomicU32;
 use std::sync::atomic::Ordering;
-use std::sync::OnceLock;
 
 use serde::Deserialize;
 use serde::Deserializer;

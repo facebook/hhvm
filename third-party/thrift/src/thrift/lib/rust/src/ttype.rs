@@ -24,8 +24,8 @@ use std::sync::Arc;
 use bytes::Bytes;
 use ordered_float::OrderedFloat;
 
-use crate::errors::ProtocolError;
 use crate::Result;
+use crate::errors::ProtocolError;
 
 /// Will be able to add missing types once #![feature(associated_consts)] lands
 #[derive(PartialEq, Copy, Clone, Debug)]

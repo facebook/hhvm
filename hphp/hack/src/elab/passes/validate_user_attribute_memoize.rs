@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use nast::FunParam;
 use nast::Fun_;
+use nast::FunParam;
 use nast::Method_;
 
 use crate::prelude::*;

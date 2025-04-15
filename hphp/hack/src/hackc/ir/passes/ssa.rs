@@ -1,16 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 use std::collections::hash_map::Entry;
 
-use analysis::compute_predecessor_blocks;
 use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
 use analysis::Predecessors;
-use ir_core::func_builder::TransformInstr;
-use ir_core::func_builder::TransformState;
-use ir_core::instr::Special;
-use ir_core::instr::Terminator;
-use ir_core::instr::Tmp;
-use ir_core::newtype::VarIdMap;
+use analysis::compute_predecessor_blocks;
 use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::FuncBuilder;
@@ -19,6 +13,12 @@ use ir_core::InstrId;
 use ir_core::IrRepr;
 use ir_core::ValueId;
 use ir_core::VarId;
+use ir_core::func_builder::TransformInstr;
+use ir_core::func_builder::TransformState;
+use ir_core::instr::Special;
+use ir_core::instr::Terminator;
+use ir_core::instr::Tmp;
+use ir_core::newtype::VarIdMap;
 use itertools::Itertools;
 use newtype::IdVec;
 
@@ -447,13 +447,13 @@ pub fn run(func: &mut Func) -> bool {
 
 #[cfg(test)]
 mod test {
-    use ir_core::instr::HasOperands;
-    use ir_core::instr::Predicate;
-    use ir_core::instr::Terminator;
     use ir_core::FuncBuilder;
     use ir_core::FunctionName;
     use ir_core::Immediate;
     use ir_core::LocId;
+    use ir_core::instr::HasOperands;
+    use ir_core::instr::Predicate;
+    use ir_core::instr::Terminator;
 
     use super::*;
 

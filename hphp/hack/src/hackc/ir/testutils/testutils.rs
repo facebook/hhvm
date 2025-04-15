@@ -4,7 +4,6 @@
 
 use hash::HashMap;
 use hash::HashSet;
-use ir_core::instr;
 use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::FuncBuilder;
@@ -15,6 +14,7 @@ use ir_core::Instr;
 use ir_core::IrRepr;
 use ir_core::LocId;
 use ir_core::ValueId;
+use ir_core::instr;
 
 /// Given a simple CFG description, create a Func that matches it.
 pub fn build_test_func(testcase: &[Block]) -> Func {

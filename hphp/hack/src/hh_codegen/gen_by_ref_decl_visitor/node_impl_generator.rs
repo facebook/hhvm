@@ -6,8 +6,8 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use super::visitor_trait_generator;
 use super::Context;
+use super::visitor_trait_generator;
 use crate::common::gen_helpers;
 
 pub fn gen(ctx: &Context) -> TokenStream {

@@ -13,13 +13,13 @@ use pos::MethodName;
 use pos::ModuleName;
 use pos::PropName;
 use pos::TypeName;
-use ty::decl::shallow::ModuleDecl;
-use ty::decl::shallow::NamedDecl;
 use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
 use ty::decl::ShallowClass;
 use ty::decl::Ty;
 use ty::decl::TypedefDecl;
+use ty::decl::shallow::ModuleDecl;
+use ty::decl::shallow::NamedDecl;
 use ty::reason::Reason;
 
 /// A datastore for shallow declarations (i.e., the information we get from

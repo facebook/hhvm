@@ -3,20 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use anyhow::bail;
-use anyhow::ensure;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::bail;
+use anyhow::ensure;
 use convert_case::Case;
 use convert_case::Casing;
 
+use crate::Config;
 use crate::ir;
 use crate::ir::Def;
 use crate::ir::FieldName;
 use crate::ir::File;
 use crate::ir::TypeName;
 use crate::ir::VariantName;
-use crate::Config;
 
 pub fn convert_file(
     config: &'static Config,

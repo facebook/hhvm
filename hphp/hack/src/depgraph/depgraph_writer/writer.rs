@@ -11,8 +11,8 @@ use bytemuck::Pod;
 use bytemuck::Zeroable;
 pub use dep::Dep;
 use log::info;
-use newtype::newtype_int;
 use newtype::IdVec;
+use newtype::newtype_int;
 
 // A 32-bit index into a table of Deps.
 newtype_int!(HashIndex, u32, HashIndexMap, HashIndexSet, Pod, Zeroable);

@@ -35,6 +35,7 @@ use crate::Locals;
 use crate::MOpMode;
 use crate::MemberKey;
 use crate::MethodName;
+use crate::NUM_ACT_REC_CELLS;
 use crate::NumParams;
 use crate::OODeclExistsOp;
 use crate::ObjMethodOp;
@@ -52,7 +53,6 @@ use crate::Targets;
 use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::TypedValue;
-use crate::NUM_ACT_REC_CELLS;
 
 #[emit_opcodes_macro::emit_opcodes]
 #[derive(Clone, Debug, Targets, Hash, Eq, PartialEq, Serialize, Flow, Locals)]

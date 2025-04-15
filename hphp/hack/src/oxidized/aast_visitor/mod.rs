@@ -17,10 +17,10 @@ pub use node::Node;
 pub use node_mut::NodeMut;
 pub use type_params::Params;
 pub use type_params_defaults::AstParams;
-pub use visitor::visit;
 pub use visitor::Visitor;
-pub use visitor_mut::visit as visit_mut;
+pub use visitor::visit;
 pub use visitor_mut::VisitorMut;
+pub use visitor_mut::visit as visit_mut;
 
 mod type_params_defaults {
     pub struct P<Context, Error, Ex, En>(std::marker::PhantomData<(Context, Error, Ex, En)>);

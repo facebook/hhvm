@@ -19,9 +19,9 @@ use rayon::prelude::*;
 use relative_path::Prefix;
 use relative_path::RelativePath;
 
+use crate::FileOpts;
 use crate::compile::SingleFileOpts;
 use crate::util::SyncWrite;
-use crate::FileOpts;
 
 #[derive(Args, Debug)]
 pub struct Opts {

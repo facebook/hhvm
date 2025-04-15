@@ -2,7 +2,6 @@
 
 use newtype::IdVec;
 
-use crate::instr::HasOperands;
 use crate::BlockId;
 use crate::Instr;
 use crate::InstrId;
@@ -10,6 +9,7 @@ use crate::IrRepr;
 use crate::TryCatchId;
 use crate::ValueId;
 use crate::ValueIdMap;
+use crate::instr::HasOperands;
 
 /// A Block represents a basic-block in a CFG. A well-formed Block contains zero
 /// or more non-terminal InstrIds followed by a terminal InstrId. The

@@ -2,8 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use env::emitter::Emitter;
 use env::Env;
+use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use ffi::Maybe::*;
@@ -15,8 +15,8 @@ use hhbc::TypedValue;
 use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::user_attributes as ua;
 use oxidized::aast_defs;

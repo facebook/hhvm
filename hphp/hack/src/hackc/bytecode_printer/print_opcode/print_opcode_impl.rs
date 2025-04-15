@@ -9,9 +9,8 @@ use hhbc_gen::OpcodeData;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
-use quote::quote;
 use quote::ToTokens;
-use syn::spanned::Spanned;
+use quote::quote;
 use syn::DeriveInput;
 use syn::Error;
 use syn::Lit;
@@ -22,6 +21,7 @@ use syn::MetaList;
 use syn::MetaNameValue;
 use syn::NestedMeta;
 use syn::Result;
+use syn::spanned::Spanned;
 
 // ----------------------------------------------------------------------------
 

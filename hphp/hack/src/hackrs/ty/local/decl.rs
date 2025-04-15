@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use pos::TypeName;
 
-use crate::decl::folded;
 use crate::decl::Ty;
+use crate::decl::folded;
 use crate::reason::Reason;
 
 #[derive(Debug)]

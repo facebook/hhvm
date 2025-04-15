@@ -6,9 +6,9 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use super::contains_ocaml_attr;
 use super::Context;
 use super::Direction;
+use super::contains_ocaml_attr;
 
 pub fn gen(ctx: &Context) -> TokenStream {
     let pass_methods: Vec<_> = ctx

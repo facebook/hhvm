@@ -1,14 +1,14 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 #![feature(box_patterns)]
 
-use proc_macro2::token_stream::IntoIter;
 use proc_macro2::Delimiter;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
+use proc_macro2::token_stream::IntoIter;
+use quote::ToTokens;
 use quote::quote;
 use quote::quote_spanned;
-use quote::ToTokens;
 
 type TokenIter = std::iter::Peekable<IntoIter>;
 

@@ -5,8 +5,8 @@
 
 use std::cell::RefCell;
 use std::fs::File;
-use std::io::stdout;
 use std::io::Write;
+use std::io::stdout;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -52,8 +52,8 @@ use tempfile::TempDir;
 use ty::reason::NReason;
 use ty::reason::Reason;
 
-use crate::util::SyncWrite;
 use crate::FileOpts;
+use crate::util::SyncWrite;
 
 #[derive(Args, Debug)]
 pub struct Opts {

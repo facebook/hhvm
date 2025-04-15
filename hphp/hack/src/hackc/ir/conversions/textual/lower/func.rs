@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ir::instr::Hhbc;
 use ir::ClassGetCMode;
 use ir::Func;
 use ir::FuncBuilder;
@@ -19,6 +18,7 @@ use ir::ReadonlyOp;
 use ir::SpecialClsRef;
 use ir::SrcLoc;
 use ir::TypedValue;
+use ir::instr::Hhbc;
 use log::trace;
 
 use crate::func::FuncInfo;

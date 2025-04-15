@@ -17,11 +17,11 @@
 use std::io::Cursor;
 
 use bufsize::SizeCounter;
-use bytes::buf::Chain;
 use bytes::Buf;
 use bytes::BufMut;
 use bytes::Bytes;
 use bytes::BytesMut;
+use bytes::buf::Chain;
 
 use crate::varint;
 

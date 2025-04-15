@@ -12,8 +12,8 @@ use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
 
-use arena_deserializer::serde::Deserialize;
 use arena_deserializer::ArenaDeserializer;
+use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use direct_decl_parser::Decls;
 use direct_decl_parser::ParsedFile;

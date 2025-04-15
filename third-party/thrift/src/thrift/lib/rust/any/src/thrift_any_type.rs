@@ -15,8 +15,8 @@
  */
 
 use any::Any;
-use anyhow::bail;
 use anyhow::Result;
+use anyhow::bail;
 use standard::TypeName;
 use standard::TypeUri;
 
@@ -107,13 +107,13 @@ where
 mod tests {
 
     use any::Any;
-    use anyhow::anyhow;
     use anyhow::Result;
+    use anyhow::anyhow;
+    use base64::Engine;
     use base64::alphabet::STANDARD;
+    use base64::engine::DecodePaddingMode;
     use base64::engine::general_purpose::GeneralPurpose;
     use base64::engine::general_purpose::GeneralPurposeConfig;
-    use base64::engine::DecodePaddingMode;
-    use base64::Engine;
     use standard::TypeName;
     use standard::TypeUri;
     use type_::Type;

@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
 
 // We don't use the ocaml_ffi! macro here because we want precise

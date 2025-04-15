@@ -1,5 +1,4 @@
 use bstr::ByteSlice;
-use ir::instr;
 use ir::Attr;
 use ir::Attribute;
 use ir::Class;
@@ -22,6 +21,7 @@ use ir::TypeConstraintFlags;
 use ir::TypeInfo;
 use ir::TypedValue;
 use ir::Visibility;
+use ir::instr;
 use log::trace;
 
 use crate::class::IsStatic;

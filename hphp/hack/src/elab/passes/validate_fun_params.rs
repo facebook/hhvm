@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use nast::FunParam;
 use nast::Fun_;
+use nast::FunParam;
 use nast::Method_;
 
 use crate::prelude::*;

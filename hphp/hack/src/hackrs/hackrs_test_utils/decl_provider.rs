@@ -18,8 +18,8 @@ use shallow_decl_provider::ShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclStore;
 use ty::reason::Reason;
 
-use crate::serde_store::StoreOpts;
 use crate::SerializingStore;
+use crate::serde_store::StoreOpts;
 
 pub fn make_folded_decl_provider<R: Reason>(
     store_opts: StoreOpts,

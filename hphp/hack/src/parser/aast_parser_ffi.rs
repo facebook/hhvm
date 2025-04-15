@@ -6,8 +6,8 @@
 
 use std::collections::HashSet;
 
-use aast_parser::rust_aast_parser_types::Env;
 use aast_parser::AastParser;
+use aast_parser::rust_aast_parser_types::Env;
 use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use parser_core_types::indexed_source_text::IndexedSourceText;

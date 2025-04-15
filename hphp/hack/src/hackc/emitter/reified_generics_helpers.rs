@@ -4,13 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::TypeDecl;
-use env::emitter::Emitter;
 use env::ClassExpr;
 use env::Env;
+use env::emitter::Emitter;
 use error::Result;
 use hash::HashSet;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use naming_special_names_rust as sn;
 use oxidized::aast;
 use oxidized::aast_defs::TupleInfo;

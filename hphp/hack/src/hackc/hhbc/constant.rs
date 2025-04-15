@@ -11,8 +11,8 @@ use ffi::Maybe;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::typed_value::TypedValue;
 use crate::ConstName;
+use crate::typed_value::TypedValue;
 
 #[derive(Debug, Clone, Serialize)]
 #[repr(C)]

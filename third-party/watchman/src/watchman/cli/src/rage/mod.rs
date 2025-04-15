@@ -19,14 +19,14 @@ use duct::Expression;
 use structopt::StructOpt;
 use sysinfo::System;
 #[cfg(target_os = "linux")]
-use tabular::row;
-#[cfg(target_os = "linux")]
 use tabular::Table;
-use watchman_client::prelude::GetConfigRequest;
+#[cfg(target_os = "linux")]
+use tabular::row;
 use watchman_client::CanonicalPath;
 use watchman_client::Client;
 use watchman_client::Connector;
 use watchman_client::ResolvedRoot;
+use watchman_client::prelude::GetConfigRequest;
 
 #[cfg(feature = "fb")]
 mod facebook;

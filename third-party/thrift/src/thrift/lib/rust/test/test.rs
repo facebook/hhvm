@@ -22,12 +22,12 @@ use std::fmt::Debug;
 use std::io::Cursor;
 
 use bytes::Bytes;
-use fbthrift::serialize;
 use fbthrift::CompactProtocol;
 use fbthrift::Deserialize;
 use fbthrift::Protocol;
 use fbthrift::Serialize;
 use fbthrift::ThriftEnum;
+use fbthrift::serialize;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use interface::TestBytesShared;

@@ -11,7 +11,7 @@ pub mod pos_span_tiny;
 pub mod with_erased_lines;
 
 mod pos_impl;
-pub use pos_impl::map;
 pub use pos_impl::Pos;
 pub use pos_impl::PosR;
 pub use pos_impl::PosString;
+pub use pos_impl::map;

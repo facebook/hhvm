@@ -16,8 +16,8 @@
 
 use std::io::Cursor;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use bufsize::SizeCounter;
 use bytes::Bytes;
 use bytes::BytesMut;

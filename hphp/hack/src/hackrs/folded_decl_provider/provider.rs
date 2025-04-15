@@ -19,10 +19,10 @@ use ty::decl::Ty;
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 
-use super::fold::DeclFolder;
 use super::Error;
 use super::Result;
 use super::TypeDecl;
+use super::fold::DeclFolder;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 

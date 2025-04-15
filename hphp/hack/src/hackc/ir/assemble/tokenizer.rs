@@ -11,8 +11,8 @@ use std::io::Read;
 use std::rc::Rc;
 use std::sync::OnceLock;
 
-use anyhow::bail;
 use anyhow::Result;
+use anyhow::bail;
 use hash::HashSet;
 use log::trace;
 

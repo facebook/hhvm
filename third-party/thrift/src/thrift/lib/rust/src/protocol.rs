@@ -16,6 +16,7 @@
 
 use anyhow::bail;
 
+use crate::Result;
 use crate::binary_type::CopyFromBuf;
 use crate::binary_type::Discard;
 use crate::bufext::BufMutExt;
@@ -28,7 +29,6 @@ use crate::thrift_protocol::MessageType;
 use crate::thrift_protocol::ProtocolID;
 use crate::ttype::GetTType;
 use crate::ttype::TType;
-use crate::Result;
 
 /// The maximum recursive depth the skip() function will traverse
 pub const DEFAULT_RECURSION_DEPTH: i32 = 64;

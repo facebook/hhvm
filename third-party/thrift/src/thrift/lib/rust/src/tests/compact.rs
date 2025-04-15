@@ -30,16 +30,16 @@ use super::FLOAT_VALUES;
 use super::INT16_VALUES;
 use super::INT32_VALUES;
 use super::INT64_VALUES;
+use crate::CompactProtocol;
+use crate::Protocol;
+use crate::ProtocolReader;
+use crate::ProtocolWriter;
 use crate::bufext::BufMutExt as _;
 use crate::compact_protocol::CType;
 use crate::deserialize::Deserialize;
 use crate::errors::ProtocolError;
 use crate::thrift_protocol::MessageType;
 use crate::ttype::TType;
-use crate::CompactProtocol;
-use crate::Protocol;
-use crate::ProtocolReader;
-use crate::ProtocolWriter;
 
 #[test]
 fn read_write_bool_list() {
@@ -553,11 +553,11 @@ fn skip_i32_ok() {
 // Test for T29755131
 #[test]
 fn skip_stop() {
+    use crate::ProtocolError;
     use crate::compact_protocol::CompactProtocolDeserializer;
     use crate::compact_protocol::CompactProtocolSerializer;
     use crate::protocol::ProtocolReader;
     use crate::protocol::ProtocolWriter;
-    use crate::ProtocolError;
 
     let buf = {
         let mut serialize =
@@ -582,11 +582,11 @@ fn skip_stop() {
 // Test for T29755131
 #[test]
 fn skip_stop_in_container() {
+    use crate::ProtocolError;
     use crate::compact_protocol::CompactProtocolDeserializer;
     use crate::compact_protocol::CompactProtocolSerializer;
     use crate::protocol::ProtocolReader;
     use crate::protocol::ProtocolWriter;
-    use crate::ProtocolError;
 
     let buf = {
         let mut serialize =

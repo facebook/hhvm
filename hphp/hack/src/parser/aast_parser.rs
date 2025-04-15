@@ -9,10 +9,10 @@ use std::time::Instant;
 
 use bumpalo::Bump;
 use hash::HashSet;
-use lowerer::lower;
 use lowerer::ScourComment;
-use mode_parser::parse_mode;
+use lowerer::lower;
 use mode_parser::Language;
+use mode_parser::parse_mode;
 use namespaces_rust as namespaces;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;

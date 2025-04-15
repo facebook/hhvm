@@ -7,8 +7,6 @@ use std::collections::VecDeque;
 
 use hhbc::BytesId;
 use hhbc::Instruct;
-use ir::instr;
-use ir::instr::Special;
 use ir::BlockId;
 use ir::BlockIdMap;
 use ir::FuncBuilder;
@@ -17,6 +15,8 @@ use ir::LocId;
 use ir::LocalId;
 use ir::ValueId;
 use ir::VarId;
+use ir::instr;
+use ir::instr::Special;
 use newtype::newtype_int;
 
 use crate::sequence::Sequence;

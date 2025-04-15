@@ -20,8 +20,8 @@ use hhbc::StringId;
 use hhbc::Targets;
 use instruction_sequence::InstrSeq;
 use priority_queue::PriorityQueue;
-use smallvec::smallvec;
 use smallvec::SmallVec;
+use smallvec::smallvec;
 
 struct Block<'b> {
     id: usize,

@@ -18,8 +18,8 @@ pub mod deterministic_accumulator;
 pub mod deterministic_protocol;
 pub mod hasher;
 use anyhow::Result;
-use fbthrift::protocol::ProtocolWriter;
 use fbthrift::Serialize;
+use fbthrift::protocol::ProtocolWriter;
 
 pub use crate::deterministic_accumulator::DeterministicAccumulator;
 pub use crate::deterministic_accumulator::DeterministicAccumulatorError;

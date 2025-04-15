@@ -456,8 +456,8 @@ mod reverse_naming_table {
     use datastore::ReadonlyStore;
     use hh24_types::ToplevelCanonSymbolHash;
     use hh24_types::ToplevelSymbolHash;
-    use serde::de::DeserializeOwned;
     use serde::Serialize;
+    use serde::de::DeserializeOwned;
     use shm_store::OcamlShmStore;
     use shm_store::ShmStore;
 

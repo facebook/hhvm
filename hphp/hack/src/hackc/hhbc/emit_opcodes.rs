@@ -518,10 +518,10 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
     use convert_case::Case;
     use convert_case::Casing;
     use proc_macro2::TokenTree;
-    use syn::parse::ParseStream;
-    use syn::parse::Parser;
     use syn::Error;
     use syn::Token;
+    use syn::parse::ParseStream;
+    use syn::parse::Parser;
 
     #[derive(Debug)]
     struct Helper<'a> {

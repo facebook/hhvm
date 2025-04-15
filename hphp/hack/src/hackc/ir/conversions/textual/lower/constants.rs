@@ -3,10 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ir::instr;
-use ir::instr::HasOperands;
-use ir::instr::Terminator;
-use ir::newtype::ImmIdSet;
 use ir::BlockId;
 use ir::BlockIdSet;
 use ir::Func;
@@ -18,6 +14,10 @@ use ir::Instr;
 use ir::IrRepr;
 use ir::ValueId;
 use ir::ValueIdMap;
+use ir::instr;
+use ir::instr::HasOperands;
+use ir::instr::Terminator;
+use ir::newtype::ImmIdSet;
 use log::trace;
 
 /// Write the complex constants to the start of the entry block (and 'default'

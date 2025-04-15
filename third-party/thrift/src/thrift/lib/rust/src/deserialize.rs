@@ -24,10 +24,10 @@ use std::sync::Arc;
 use bytes::Bytes;
 use ordered_float::OrderedFloat;
 
-use crate::protocol::should_break;
-use crate::protocol::ProtocolReader;
-use crate::ttype::GetTType;
 use crate::Result;
+use crate::protocol::ProtocolReader;
+use crate::protocol::should_break;
+use crate::ttype::GetTType;
 
 // Read trait. Every type that needs to be deserialized will implement this trait.
 pub trait Deserialize<P>: Sized

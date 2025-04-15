@@ -5,8 +5,8 @@
 
 use core_utils_rust as utils;
 use emit_type_hint::Kind;
-use env::emitter::Emitter;
 use env::Env;
+use env::emitter::Emitter;
 use error::Result;
 use ffi::Maybe;
 use hhbc::Coeffects;
@@ -17,8 +17,8 @@ use hhbc::Span;
 use hhbc::TypedValue;
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use oxidized::ast;
 
 use crate::emit_body;

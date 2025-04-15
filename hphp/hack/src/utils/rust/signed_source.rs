@@ -115,14 +115,14 @@ pub struct TokenNotFoundError;
 
 #[cfg(test)]
 mod test {
+    use super::SIGNING_TOKEN;
+    use super::SignCheckResponse;
+    use super::TOKEN;
+    use super::TokenNotFoundError;
     use super::is_signed;
     use super::make_signing_token;
     use super::sign_utf8_file;
     use super::verify_signature;
-    use super::SignCheckResponse;
-    use super::TokenNotFoundError;
-    use super::SIGNING_TOKEN;
-    use super::TOKEN;
 
     static NO_TOKEN: &str = concat!("// @", "generated\nfn foo() {}");
     static INVALID: &str = concat!(

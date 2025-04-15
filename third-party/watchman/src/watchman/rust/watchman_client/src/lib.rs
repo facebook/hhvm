@@ -46,9 +46,9 @@ use std::io::Write;
 use std::marker::PhantomData;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
 
 use bytes::Bytes;
 use bytes::BytesMut;
@@ -64,11 +64,11 @@ use tokio::io::AsyncWriteExt;
 #[cfg(unix)]
 use tokio::net::UnixStream;
 use tokio::process::Command;
+use tokio::sync::Mutex;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio::sync::Mutex;
 use tokio_util::codec::Decoder;
 use tokio_util::codec::FramedRead;
 
@@ -78,14 +78,14 @@ static SUB_ID: AtomicUsize = AtomicUsize::new(1);
 /// `use watchman_client::prelude::*` for convenient access to the types
 /// provided by this crate
 pub mod prelude {
-    pub use crate::expr::*;
-    pub use crate::fields::*;
-    pub use crate::pdu::*;
-    pub use crate::query_result_type;
     pub use crate::CanonicalPath;
     pub use crate::Client;
     pub use crate::Connector;
     pub use crate::ResolvedRoot;
+    pub use crate::expr::*;
+    pub use crate::fields::*;
+    pub use crate::pdu::*;
+    pub use crate::query_result_type;
 }
 
 use prelude::*;

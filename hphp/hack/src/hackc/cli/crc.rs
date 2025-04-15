@@ -9,14 +9,14 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
-use anyhow::bail;
 use anyhow::Result;
+use anyhow::bail;
 use clap::Args;
 use multifile_rust as multifile;
 use parking_lot::Mutex;

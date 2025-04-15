@@ -44,8 +44,8 @@ pub(crate) mod ffi {
 mod test {
     use std::ffi::CStr;
 
-    use cxx::let_cxx_string;
     use cxx::UniquePtr;
+    use cxx::let_cxx_string;
 
     use super::*;
 

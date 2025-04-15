@@ -19,10 +19,10 @@ use std::io::Cursor;
 
 use anyhow::Result;
 use approx::assert_relative_eq;
+use fbthrift::Deserialize;
+use fbthrift::simplejson_protocol::SimpleJsonProtocolDeserializer;
 use fbthrift::simplejson_protocol::deserialize;
 use fbthrift::simplejson_protocol::serialize;
-use fbthrift::simplejson_protocol::SimpleJsonProtocolDeserializer;
-use fbthrift::Deserialize;
 use fbthrift_test_if::Basic;
 use fbthrift_test_if::Containers;
 use fbthrift_test_if::En;

@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use nast::Class_;
 use nast::ClassId;
 use nast::ClassId_;
-use nast::Class_;
 use nast::Expr_;
 use nast::Hint;
 use nast::Hint_;

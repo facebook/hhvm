@@ -9,19 +9,19 @@ use std::cell::RefCell;
 use std::ffi::OsString;
 
 use dep::Dep;
+use deps_rust::DEP_GRAPH;
 use deps_rust::DepSet;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::VisitedSet;
-use deps_rust::DEP_GRAPH;
 use hash::HashSet;
 use ocamlrep::Value;
 use ocamlrep_custom::CamlSerialize;
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use rpds::HashTrieSet;
+use typing_deps_hash::DepType;
 use typing_deps_hash::hash1;
 use typing_deps_hash::hash2;
-use typing_deps_hash::DepType;
 
 fn tag_to_dep_type(tag: u8) -> DepType {
     match DepType::from_u8(tag) {

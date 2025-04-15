@@ -22,13 +22,12 @@ use std::fmt;
 use std::fmt::Display;
 use std::future::Future;
 
-use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::bail;
 use bytes::Buf;
 use thiserror::Error;
 
-use crate::serialize;
 use crate::ApplicationException;
 use crate::BufExt;
 use crate::ContextStack;
@@ -44,6 +43,7 @@ use crate::ResultType;
 use crate::Serialize;
 use crate::SerializedMessage;
 use crate::Transport;
+use crate::serialize;
 
 // Note: `variants_by_number` must be sorted by the i32 values.
 pub fn enum_display(

@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use anyhow::bail;
 use anyhow::Result;
+use anyhow::bail;
 
 pub(crate) fn unescape(string: &str) -> Result<Vec<u8>> {
     let mut output = Vec::new();

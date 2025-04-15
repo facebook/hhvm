@@ -10,9 +10,8 @@ use std::borrow::Cow;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
-use quote::quote;
 use quote::ToTokens;
-use syn::spanned::Spanned;
+use quote::quote;
 use syn::Attribute;
 use syn::Data;
 use syn::DataEnum;
@@ -24,6 +23,7 @@ use syn::Meta;
 use syn::NestedMeta;
 use syn::Result;
 use syn::Variant;
+use syn::spanned::Spanned;
 
 use crate::simple_type::SimpleType;
 use crate::util::InterestingFields;

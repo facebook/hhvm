@@ -22,6 +22,7 @@
 //! versions of the same parser with some small tweaks necessary for
 //! particular applications in `hackc` / `hh_server`.
 
+use parser::NoState;
 use parser::lexer::Lexer;
 use parser::parser::Parser;
 use parser::parser_env::ParserEnv;
@@ -32,7 +33,6 @@ use parser::smart_constructors_wrappers::WithKind;
 use parser::source_text::SourceText;
 use parser::syntax_error::SyntaxError;
 use parser::token_factory::SimpleTokenFactoryImpl;
-use parser::NoState;
 use positioned_smart_constructors::*;
 
 pub type SmartConstructors = WithKind<

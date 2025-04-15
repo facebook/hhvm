@@ -5,23 +5,23 @@
 #![feature(box_patterns)]
 
 use itertools::Itertools;
-use proc_macro2::Literal;
-use proc_macro2::TokenStream;
+use proc_macro_error::ResultExt;
 use proc_macro_error::abort;
 use proc_macro_error::proc_macro_error;
-use proc_macro_error::ResultExt;
+use proc_macro2::Literal;
+use proc_macro2::TokenStream;
 use quote::quote;
+use syn::Attribute;
+use syn::DeriveInput;
+use syn::Ident;
+use syn::Result;
+use syn::Token;
 use syn::parenthesized;
 use syn::parse::Parse;
 use syn::parse::ParseStream;
 use syn::parse_macro_input;
 use syn::punctuated::Punctuated;
 use syn::token;
-use syn::Attribute;
-use syn::DeriveInput;
-use syn::Ident;
-use syn::Result;
-use syn::Token;
 
 /// This macro is used to derive the TextualDecl trait for builtins.
 ///

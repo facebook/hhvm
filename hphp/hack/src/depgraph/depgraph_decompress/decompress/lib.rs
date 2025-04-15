@@ -9,11 +9,11 @@ use std::path::Path;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
+use depgraph_reader::Dep;
 use depgraph_reader::compress::ByteApproximatedLen;
 use depgraph_reader::compress::CompressedHeader;
 use depgraph_reader::compress::RleBlock;
 use depgraph_reader::compress::UncompressedHeader;
-use depgraph_reader::Dep;
 use rayon::prelude::*;
 
 const IN_HEADER_SIZE: usize = std::mem::size_of::<CompressedHeader>();

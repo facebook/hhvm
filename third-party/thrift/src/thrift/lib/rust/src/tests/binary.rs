@@ -30,14 +30,14 @@ use super::FLOAT_VALUES;
 use super::INT16_VALUES;
 use super::INT32_VALUES;
 use super::INT64_VALUES;
-use crate::deserialize::Deserialize;
-use crate::errors::ProtocolError;
-use crate::thrift_protocol::MessageType;
-use crate::ttype::TType;
 use crate::BinaryProtocol;
 use crate::Protocol;
 use crate::ProtocolReader;
 use crate::ProtocolWriter;
+use crate::deserialize::Deserialize;
+use crate::errors::ProtocolError;
+use crate::thrift_protocol::MessageType;
+use crate::ttype::TType;
 
 #[test]
 fn read_write_bool_list() {

@@ -84,8 +84,8 @@ pub mod gen_helpers {
 pub mod syn_helpers {
     use std::collections::HashSet;
 
-    use anyhow::anyhow;
     use anyhow::Result;
+    use anyhow::anyhow;
     use syn::*;
 
     pub fn get_ty_def_name(i: &Item) -> Result<String> {

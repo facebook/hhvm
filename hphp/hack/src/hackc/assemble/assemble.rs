@@ -9,11 +9,11 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 use std::path::PathBuf;
 
+use anyhow::Context;
+use anyhow::Result;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::ensure;
-use anyhow::Context;
-use anyhow::Result;
 use ffi::Maybe;
 use ffi::Vector;
 use hash::HashMap;

@@ -5,8 +5,8 @@
 
 use proc_macro2::TokenStream;
 use quote::quote;
-use synstructure::decl_derive;
 use synstructure::Structure;
+use synstructure::decl_derive;
 
 decl_derive!([EqModuloPos] => derive_eq_modulo_pos);
 

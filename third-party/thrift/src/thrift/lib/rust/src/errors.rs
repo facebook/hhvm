@@ -17,8 +17,8 @@
 use anyhow::Error;
 use thiserror::Error;
 
-use crate::ttype::TType;
 use crate::ApplicationException;
+use crate::ttype::TType;
 
 #[derive(Debug, Error, PartialEq)]
 #[allow(dead_code)]

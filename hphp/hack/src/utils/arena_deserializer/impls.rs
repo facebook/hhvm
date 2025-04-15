@@ -6,13 +6,13 @@
 use std::fmt;
 use std::marker::PhantomData;
 
-use bumpalo::collections::Vec as ArenaVec;
 use bumpalo::Bump;
+use bumpalo::collections::Vec as ArenaVec;
 use ocamlrep_caml_builtins::Int64;
+use serde::Deserialize;
 use serde::de::Deserializer;
 use serde::de::SeqAccess;
 use serde::de::Visitor;
-use serde::Deserialize;
 
 use crate::seed::ArenaSeed;
 

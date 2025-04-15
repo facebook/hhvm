@@ -7,9 +7,9 @@
 
 use serde::de;
 
+use super::Deserializer;
 use super::read::DeRead;
 use super::reentrant::ReentrantGuard;
-use super::Deserializer;
 use crate::errors::*;
 
 macro_rules! impl_enum_access {

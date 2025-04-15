@@ -7,10 +7,10 @@ use hhbc::Body;
 use hhbc::Function;
 use hhbc::Method;
 use hhbc::ParamEntry;
-use ir::func::DefaultValue;
-use ir::instr::Terminator;
 use ir::Instr;
 use ir::LocalId;
+use ir::func::DefaultValue;
+use ir::instr::Terminator;
 use log::trace;
 use newtype::IdVec;
 

@@ -8,8 +8,8 @@ mod compiler_ffi_impl;
 mod ext_decl;
 pub mod external_decl_provider;
 
-use std::ffi::c_void;
 use std::ffi::OsStr;
+use std::ffi::c_void;
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 use std::sync::Arc;

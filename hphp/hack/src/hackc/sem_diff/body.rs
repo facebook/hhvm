@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::bail;
 use hash::HashMap;
 use hhbc::Instruct;
 use hhbc::Label;

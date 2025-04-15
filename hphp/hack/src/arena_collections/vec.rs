@@ -5,9 +5,9 @@
 use std::ops::Deref;
 use std::slice;
 
-use bumpalo::collections::vec::IntoIter;
-use bumpalo::collections::Vec as BVec;
 use bumpalo::Bump;
+use bumpalo::collections::Vec as BVec;
+use bumpalo::collections::vec::IntoIter;
 
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Vec<'a, T>(BVec<'a, T>);

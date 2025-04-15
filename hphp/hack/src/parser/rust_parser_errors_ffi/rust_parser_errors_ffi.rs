@@ -11,8 +11,8 @@
 use std::collections::HashSet;
 
 use bumpalo::Bump;
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::experimental_features;
 use oxidized::namespace_env::Mode;

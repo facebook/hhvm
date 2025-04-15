@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::instr::Hhbc;
-use crate::instr::Predicate;
-use crate::type_struct::TypeStruct;
 use crate::BaseType;
 use crate::EnforceableType;
 use crate::FuncBuilder;
@@ -17,6 +14,9 @@ use crate::TypeConstraintFlags;
 use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::ValueId;
+use crate::instr::Hhbc;
+use crate::instr::Predicate;
+use crate::type_struct::TypeStruct;
 
 /// Helpers for emitting more complex constructs.
 pub trait FuncBuilderEx {

@@ -6,8 +6,8 @@
 use convert_case::Case;
 use convert_case::Casing;
 
-use crate::ir;
 use crate::Config;
+use crate::ir;
 
 pub fn rewrite_file(config: &'static Config, file: &mut ir::File) {
     Rewriter::rewrite_module(config, &mut file.root)

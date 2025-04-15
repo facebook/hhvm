@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::emitter::Emitter;
 use env::LabelGen;
+use env::emitter::Emitter;
 use hash::HashMap;
 use hash::HashSet;
 use hhbc::Instruct;

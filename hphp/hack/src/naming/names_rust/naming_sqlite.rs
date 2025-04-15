@@ -12,9 +12,9 @@ use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info::NameType;
 use relative_path::RelativePath;
-use rusqlite::params;
 use rusqlite::Connection;
 use rusqlite::OptionalExtension;
+use rusqlite::params;
 
 pub struct Names {
     conn: rusqlite::Connection,

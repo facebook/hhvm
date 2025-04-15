@@ -4,8 +4,8 @@ mod hhvm_config;
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use clap::ArgAction;
 use clap::Parser;
 pub use hhvm_config::*;

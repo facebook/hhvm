@@ -61,6 +61,7 @@ use write_bytes::write_bytes;
 use crate::coeffects;
 use crate::context::Context;
 use crate::write;
+use crate::write::Error;
 use crate::write::angle;
 use crate::write::braces;
 use crate::write::concat;
@@ -77,7 +78,6 @@ use crate::write::quotes;
 use crate::write::square;
 use crate::write::triple_quotes;
 use crate::write::wrap_by;
-use crate::write::Error;
 
 macro_rules! write_if {
     ($pred:expr, $($rest:tt)*) => {

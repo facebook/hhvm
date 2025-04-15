@@ -6,17 +6,17 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::LowerHex;
 
-use ocamlrep::from;
 use ocamlrep::Allocator;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
+use ocamlrep::from;
 use serde::Deserialize;
 use serde::Serialize;
+use typing_deps_hash::DepType;
 use typing_deps_hash::declares_hash;
 use typing_deps_hash::hash2;
-use typing_deps_hash::DepType;
 
 #[repr(transparent)]
 #[derive(Clone, Copy, Default, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]

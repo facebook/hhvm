@@ -1,6 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use crate::instr::HasOperands;
 use crate::ArcVec;
 use crate::BytesId;
 use crate::ClassName;
@@ -10,6 +9,7 @@ use crate::DictEntry;
 use crate::FloatBits;
 use crate::TypedValue;
 use crate::ValueId;
+use crate::instr::HasOperands;
 
 /// An immediate constant value.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]

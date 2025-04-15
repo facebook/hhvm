@@ -12,11 +12,11 @@ use pos::FunName;
 use pos::ModuleName;
 use pos::RelativePath;
 use pos::TypeName;
+use ty::decl::ShallowClass;
 use ty::decl::shallow::ConstDecl;
 use ty::decl::shallow::FunDecl;
 use ty::decl::shallow::ModuleDecl;
 use ty::decl::shallow::TypedefDecl;
-use ty::decl::ShallowClass;
 use ty::reason::Reason;
 
 mod provider;

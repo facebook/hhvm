@@ -5,8 +5,8 @@
 
 use std::io;
 
-use slog::o;
 use slog::Drain;
+use slog::o;
 
 const TIMESTAMP_FORMAT: &str = "[%Y-%m-%d %H:%M:%S%.3f]";
 

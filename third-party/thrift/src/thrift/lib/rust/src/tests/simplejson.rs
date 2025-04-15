@@ -23,13 +23,13 @@ use serde_json::json;
 use super::BOOL_VALUES;
 use super::DOUBLE_VALUES;
 use super::INT64_VALUES;
+use crate::Deserialize;
+use crate::ProtocolWriter;
+use crate::SimpleJsonProtocol;
 use crate::simplejson_protocol;
 use crate::simplejson_protocol::SimpleJsonProtocolDeserializer;
 use crate::thrift_protocol::MessageType;
 use crate::ttype::TType;
-use crate::Deserialize;
-use crate::ProtocolWriter;
-use crate::SimpleJsonProtocol;
 
 #[test]
 fn write_bool_list() {

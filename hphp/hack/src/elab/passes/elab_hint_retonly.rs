@@ -69,8 +69,8 @@ impl Pass for ElabHintRetonlyPass {
 mod tests {
 
     use nast::Block;
-    use nast::FunParam;
     use nast::Fun_;
+    use nast::FunParam;
     use nast::FuncBody;
     use nast::HintFun;
     use nast::Id;

@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
+use nast::Class_;
 use nast::ClassHint;
 use nast::ClassReq;
 use nast::ClassVar;
-use nast::Class_;
 use nast::ClassishKind;
 use nast::Expr_;
 use nast::Hint;

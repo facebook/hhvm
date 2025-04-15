@@ -13,9 +13,9 @@ use ocamlrep::ToOcamlRep;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;
-use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 mod relative_path;
 mod symbol;

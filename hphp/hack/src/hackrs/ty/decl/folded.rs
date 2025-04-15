@@ -26,10 +26,6 @@ use pos::TypeName;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub use crate::decl::subst::Subst;
-use crate::decl::ty::ConsistentKind;
-use crate::decl::ty::Enforceable;
-use crate::decl::ty::XhpEnumValue;
 use crate::decl::CeVisibility;
 use crate::decl::ClassConstKind;
 use crate::decl::ClassConstRef;
@@ -39,6 +35,10 @@ use crate::decl::Tparam;
 use crate::decl::Ty;
 use crate::decl::Typeconst;
 use crate::decl::XhpAttribute;
+pub use crate::decl::subst::Subst;
+use crate::decl::ty::ConsistentKind;
+use crate::decl::ty::Enforceable;
+use crate::decl::ty::XhpEnumValue;
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
 

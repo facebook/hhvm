@@ -7,10 +7,10 @@
 use oxidized::aast::Expr;
 use oxidized::aast::Expr_;
 use oxidized::aast::Program;
-use oxidized::aast_visitor::visit;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::visit;
 use parser_core_types::syntax_error::SyntaxError;
 
 struct Checker {

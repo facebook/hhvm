@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use naming_special_names_rust as sn;
-use nast::ClassConst;
 use nast::Class_;
+use nast::ClassConst;
 use nast::ConstraintKind;
 use nast::Enum_;
 use nast::Expr_;

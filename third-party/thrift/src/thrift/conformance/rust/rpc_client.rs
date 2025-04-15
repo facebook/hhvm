@@ -18,8 +18,8 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use clap::Parser;
 use futures::stream::StreamExt;
 use rpc::rpc::SinkBasicClientInstruction;
@@ -50,18 +50,18 @@ use rpc::rpc::StreamInitialUndeclaredExceptionClientInstruction;
 use rpc::rpc::StreamInitialUndeclaredExceptionClientTestResult;
 use rpc::rpc::StreamUndeclaredExceptionClientInstruction;
 use rpc::rpc::StreamUndeclaredExceptionClientTestResult;
+use rpc_clients::rpc::RPCConformanceServiceExt;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::SinkChunkTimeoutSinkFinalError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::SinkDeclaredExceptionSinkError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::SinkUndeclaredExceptionSinkError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::StreamDeclaredExceptionStreamError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::StreamInitialDeclaredExceptionError;
-use rpc_clients::rpc::RPCConformanceServiceExt;
 use tracing_glog::Glog;
 use tracing_glog::GlogFields;
-use tracing_subscriber::filter::Directive;
-use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Registry;
+use tracing_subscriber::filter::Directive;
+use tracing_subscriber::layer::SubscriberExt;
 
 #[derive(Parser, Debug)]
 struct Arguments {
@@ -146,10 +146,10 @@ use rpc::rpc::RequestResponseTimeoutClientInstruction;
 use rpc::rpc::RequestResponseTimeoutClientTestResult;
 use rpc::rpc::RequestResponseUndeclaredExceptionClientInstruction;
 use rpc::rpc::RequestResponseUndeclaredExceptionClientTestResult;
+use rpc_clients::rpc::BasicInteraction;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::RequestResponseDeclaredExceptionError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::RequestResponseTimeoutError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::RequestResponseUndeclaredExceptionError;
-use rpc_clients::rpc::BasicInteraction;
 
 async fn test(client: &dyn RPCConformanceServiceExt<thriftclient::ThriftChannel>) -> Result<()> {
     use ClientInstruction::*;

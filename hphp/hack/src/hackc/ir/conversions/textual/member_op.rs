@@ -3,16 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use anyhow::bail;
 use anyhow::Error;
+use anyhow::bail;
 use ascii::AsciiString;
-use ir::instr::BaseOp;
-use ir::instr::FinalOp;
-use ir::instr::MemberKey;
 use ir::InstrId;
 use ir::LocalId;
 use ir::QueryMOp;
 use ir::ValueId;
+use ir::instr::BaseOp;
+use ir::instr::FinalOp;
+use ir::instr::MemberKey;
 use itertools::Itertools;
 use naming_special_names_rust::special_idents;
 use textual::Expr;

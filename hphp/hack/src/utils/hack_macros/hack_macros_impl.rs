@@ -10,8 +10,8 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-use aast_parser::rust_aast_parser_types::Env;
 use aast_parser::Error as AastError;
+use aast_parser::rust_aast_parser_types::Env;
 use naming_special_names_rust::modules as special_modules;
 use oxidized::ast;
 use oxidized::ast::Def;
@@ -27,16 +27,12 @@ use parser_core_types::syntax_error::SyntaxError;
 use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
-use quote::quote;
 use quote::ToTokens;
+use quote::quote;
 use regex::Match;
 use regex::Regex;
 use relative_path::Prefix;
 use relative_path::RelativePath;
-use syn::parse::ParseStream;
-use syn::parse::Parser;
-use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 use syn::Error;
 use syn::Expr;
 use syn::ExprLit;
@@ -46,6 +42,10 @@ use syn::LitStr;
 use syn::Path;
 use syn::Result;
 use syn::Token;
+use syn::parse::ParseStream;
+use syn::parse::Parser;
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 
 use crate::ast_writer::Replacement;
 

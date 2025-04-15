@@ -9,9 +9,9 @@ use hhbc::Coeffects;
 use oxidized::ast_defs::Abstraction;
 use oxidized::ast_defs::ClassishKind;
 use oxidized::namespace_env::Env as NamespaceEnv;
-use unique_id_builder::get_unique_id_for_method;
 use unique_id_builder::SMap;
 use unique_id_builder::SSet;
+use unique_id_builder::get_unique_id_for_method;
 
 #[derive(Debug, Clone)]
 pub struct ClosureEnclosingClassInfo {

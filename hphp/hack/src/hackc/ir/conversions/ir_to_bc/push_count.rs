@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ir::Instr;
 use ir::instr;
 use ir::instr::IrToBc;
 use ir::instr::Special;
-use ir::Instr;
 
 pub(crate) trait PushCount<'a> {
     /// How many values are pushed onto the stack?

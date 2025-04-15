@@ -7,9 +7,9 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use relative_path::RelativePath;
 
 pub const INVALID: char = '\x00';

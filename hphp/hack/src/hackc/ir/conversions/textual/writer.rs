@@ -6,8 +6,8 @@
 use std::cmp::Ordering;
 use std::path::Path;
 
-use anyhow::bail;
 use anyhow::Result;
+use anyhow::bail;
 use hash::HashMap;
 use itertools::Itertools;
 use strum::IntoEnumIterator;

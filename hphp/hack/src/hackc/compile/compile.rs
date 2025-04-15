@@ -13,13 +13,13 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
+use aast_parser::AastParser;
+use aast_parser::Error as AastError;
 use aast_parser::rust_aast_parser_types::Env as AastEnv;
 use aast_parser::rust_aast_parser_types::ParserProfile;
 use aast_parser::rust_aast_parser_types::ParserResult;
-use aast_parser::AastParser;
-use aast_parser::Error as AastError;
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use bstr::ByteSlice;
 use bytecode_printer::Context;
 use decl_provider::DeclProvider;

@@ -17,8 +17,8 @@
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
-use crate::errors::ProtocolError;
 use crate::Result;
+use crate::errors::ProtocolError;
 
 /// Protocol kind. int16
 #[repr(i16)]

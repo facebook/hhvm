@@ -7,10 +7,10 @@
 use naming_special_names_rust::coeffects;
 use naming_special_names_rust::special_idents;
 use oxidized::aast;
-use oxidized::aast_visitor::visit;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::visit;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::namespace_env::Mode;

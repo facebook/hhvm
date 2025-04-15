@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ir_core::instr::Terminator;
 use ir_core::BlockId;
 use ir_core::Call;
 use ir_core::Func;
 use ir_core::FuncBuilder;
 use ir_core::Instr;
+use ir_core::instr::Terminator;
 
 /// Turn async calls into normal calls by following the eager return edge.
 ///
@@ -67,8 +67,8 @@ fn rewrite_async_call(builder: &mut FuncBuilder, call: Call, [_lazy, eager]: [Bl
 
 #[cfg(test)]
 mod test {
-    use testutils::build_test_func;
     use testutils::Block;
+    use testutils::build_test_func;
 
     use super::*;
 

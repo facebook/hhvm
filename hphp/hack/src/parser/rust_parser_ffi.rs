@@ -6,13 +6,13 @@
 
 use bumpalo::Bump;
 use mode_parser::parse_mode;
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::Allocator;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep_ocamlpool::Pool;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::to_ocaml;
-use ocamlrep_ocamlpool::Pool;
 use operator::Assoc;
 use operator::Operator;
 use oxidized::file_info;

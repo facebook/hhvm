@@ -85,8 +85,8 @@ where
         t: &PositionedTrivium,
         acc: &mut ScouredComments,
     ) {
-        use relative_path::Prefix;
         use TriviaKind::*;
+        use relative_path::Prefix;
         match t.kind() {
             WhiteSpace | EndOfLine | FallThrough | ExtraTokenError => {}
             DelimitedComment => {

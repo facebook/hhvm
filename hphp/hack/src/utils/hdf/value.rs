@@ -6,8 +6,8 @@ use std::ffi::CStr;
 use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 
-use cxx::let_cxx_string;
 use cxx::UniquePtr;
+use cxx::let_cxx_string;
 use thiserror::Error;
 
 use crate::hdf::ffi;

@@ -9,14 +9,14 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use ::assemble as _;
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use clap::Args;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 
-use crate::util::SyncWrite;
 use crate::FileOpts;
+use crate::util::SyncWrite;
 
 #[derive(Args, Debug)]
 pub struct Opts {

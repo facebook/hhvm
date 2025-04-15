@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::bail;
 use fbthrift::binary_protocol;
 use fbthrift::compact_protocol;
 use fbthrift::simplejson_protocol;
@@ -24,11 +24,11 @@ use standard::ByteBuffer;
 use standard::StandardProtocol;
 use type_rep::ProtocolUnion;
 
+use crate::AnyError;
+use crate::GetThriftAnyType;
 use crate::compression::decompress_any;
 use crate::compression::is_compressed;
 use crate::thrift_any_type::ensure_thrift_any_type;
-use crate::AnyError;
-use crate::GetThriftAnyType;
 
 // For convenience
 pub trait DeserializableFromAny:
@@ -105,13 +105,13 @@ where
 #[cfg(test)]
 mod tests {
     use any::Any;
-    use anyhow::anyhow;
     use anyhow::Result;
+    use anyhow::anyhow;
+    use base64::Engine;
     use base64::alphabet::STANDARD;
+    use base64::engine::DecodePaddingMode;
     use base64::engine::general_purpose::GeneralPurpose;
     use base64::engine::general_purpose::GeneralPurposeConfig;
-    use base64::engine::DecodePaddingMode;
-    use base64::Engine;
     use standard::StandardProtocol;
     use standard::TypeName;
     use standard::TypeUri;

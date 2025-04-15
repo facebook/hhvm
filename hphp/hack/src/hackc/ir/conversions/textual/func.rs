@@ -9,13 +9,6 @@ use std::sync::Arc;
 
 use anyhow::Error;
 use bstr::ByteSlice;
-use ir::instr::HasLoc;
-use ir::instr::HasLocals;
-use ir::instr::Hhbc;
-use ir::instr::Predicate;
-use ir::instr::Special;
-use ir::instr::Terminator;
-use ir::instr::Textual;
 use ir::BlockId;
 use ir::ClassName;
 use ir::Func;
@@ -34,6 +27,13 @@ use ir::MethodName;
 use ir::SpecialClsRef;
 use ir::StringId;
 use ir::ValueId;
+use ir::instr::HasLoc;
+use ir::instr::HasLocals;
+use ir::instr::Hhbc;
+use ir::instr::Predicate;
+use ir::instr::Special;
+use ir::instr::Terminator;
+use ir::instr::Textual;
 use itertools::Itertools;
 use log::trace;
 use naming_special_names_rust::special_idents;
@@ -52,9 +52,9 @@ use crate::mangle::VarName;
 use crate::member_op;
 use crate::textual;
 use crate::textual::Expr;
+use crate::textual::NOTNULL;
 use crate::textual::Sid;
 use crate::textual::TextualFile;
-use crate::textual::NOTNULL;
 use crate::typed_value;
 use crate::types::convert_ty;
 use crate::util;
@@ -1000,8 +1000,8 @@ fn write_set_var(state: &mut FuncState<'_, '_, '_>, lid: LocalId, vid: ValueId) 
 }
 
 fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) -> Result {
-    use ir::instr::CallDetail;
     use ir::FCallArgsFlags;
+    use ir::instr::CallDetail;
 
     let ir::Call {
         ref operands,

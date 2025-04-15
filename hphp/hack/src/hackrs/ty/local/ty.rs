@@ -16,9 +16,9 @@ use pos::Symbol;
 use pos::ToOxidizedByRef;
 use pos::TypeName;
 
+use crate::decl::UserAttribute;
 pub use crate::decl::ty::Exact;
 pub use crate::decl::ty::Prim;
-use crate::decl::UserAttribute;
 use crate::local::tyvar::Tyvar;
 use crate::reason::Reason;
 use crate::visitor::Visitor;

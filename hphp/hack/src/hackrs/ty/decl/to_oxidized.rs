@@ -95,8 +95,8 @@ fn oxidize_shape_field_name<P: Pos>(
     name: TshapeFieldName,
     field_name_pos: ShapeFieldNamePos<P>,
 ) -> o::typing_defs::TshapeFieldName {
-    use o::typing_defs::TshapeFieldName as O;
     use ShapeFieldNamePos as SfnPos;
+    use o::typing_defs::TshapeFieldName as O;
     match (name, field_name_pos) {
         (TshapeFieldName::TSFregexGroup(x), SfnPos::Simple(p)) => {
             O::TSFregexGroup(o::typing_defs::PosString(p.to_oxidized(), x.to_oxidized()))

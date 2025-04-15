@@ -15,8 +15,8 @@ use rayon::iter::ParallelIterator;
 use shallow_decl_provider::ShallowDeclStore;
 use ty::reason::Reason;
 
-use crate::serde_store::StoreOpts;
 use crate::SerializingStore;
+use crate::serde_store::StoreOpts;
 
 pub fn make_shallow_decl_store<R: Reason>(opts: StoreOpts) -> ShallowDeclStore<R> {
     match opts {

@@ -3,13 +3,13 @@
 
 use std::fmt;
 
-use proc_macro2::token_stream::IntoIter;
 use proc_macro2::Delimiter;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
-use quote::quote;
+use proc_macro2::token_stream::IntoIter;
 use quote::ToTokens;
+use quote::quote;
 
 type TokenIter = std::iter::Peekable<IntoIter>;
 

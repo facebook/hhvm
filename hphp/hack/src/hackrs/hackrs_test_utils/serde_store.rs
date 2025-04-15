@@ -8,8 +8,8 @@ use std::hash::Hash;
 
 use anyhow::Result;
 use hash::DashMap;
-use serde::de::DeserializeOwned;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 pub struct SerializingStore<K: Hash + Eq, V: Serialize + DeserializeOwned> {
     /// A non-evicting store for serialized values.

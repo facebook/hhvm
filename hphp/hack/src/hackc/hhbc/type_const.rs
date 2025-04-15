@@ -6,8 +6,8 @@
 use ffi::Maybe;
 use serde::Serialize;
 
-use crate::typed_value::TypedValue;
 use crate::StringId;
+use crate::typed_value::TypedValue;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize)]
 #[repr(C)]

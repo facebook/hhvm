@@ -159,10 +159,10 @@ pub mod ffi {
     }
 }
 
-use ffi::type_flags_to_string_ffi;
 pub use ffi::Attr;
 pub use ffi::TypeConstraintFlags;
 pub use ffi::TypeStructureKind;
+use ffi::type_flags_to_string_ffi;
 
 impl Default for Attr {
     fn default() -> Self {

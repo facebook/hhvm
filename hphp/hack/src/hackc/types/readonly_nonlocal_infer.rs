@@ -8,8 +8,8 @@
 //// - For propagating `readonly`s within a function, there should be no change in the logic in ./readonly_check.rs as compared to what is in the parser today.
 //// - The code is biased toward speed of development to get signal about what we can infer.
 use std::borrow::Cow;
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::env;
 use std::sync::Arc;
 

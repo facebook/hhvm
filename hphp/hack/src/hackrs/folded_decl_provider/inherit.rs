@@ -12,9 +12,6 @@ use pos::MethodName;
 use pos::PropName;
 use pos::TypeConstName;
 use pos::TypeName;
-use ty::decl::folded::Constructor;
-use ty::decl::subst::Subst;
-use ty::decl::ty::ConsistentKind;
 use ty::decl::AbstractTypeconst;
 use ty::decl::Abstraction;
 use ty::decl::CeVisibility;
@@ -28,10 +25,13 @@ use ty::decl::SubstContext;
 use ty::decl::Ty;
 use ty::decl::TypeConst;
 use ty::decl::Typeconst;
+use ty::decl::folded::Constructor;
+use ty::decl::subst::Subst;
+use ty::decl::ty::ConsistentKind;
 use ty::reason::Reason;
 
-use super::subst::Substitution;
 use super::Result;
+use super::subst::Substitution;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_inherit.ml
 

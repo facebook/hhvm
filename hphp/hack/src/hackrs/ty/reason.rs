@@ -23,9 +23,9 @@ use pos::Symbol;
 use pos::ToOxidized;
 use pos::ToOxidizedByRef;
 use pos::TypeName;
-use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 use crate::decl;
 use crate::local;
@@ -85,9 +85,9 @@ pub trait Reason:
 
     fn from_oxidized(reason: oxidized::typing_reason::T_) -> Self {
         Self::mk(|| {
-            use oxidized::typing_reason::WitnessDecl as WD;
-            use oxidized::typing_reason::T_ as OR;
             use ReasonImpl as RI;
+            use oxidized::typing_reason::T_ as OR;
+            use oxidized::typing_reason::WitnessDecl as WD;
 
             match reason {
                 OR::NoReason => RI::NoReason,
@@ -131,9 +131,9 @@ pub trait Reason:
 
     fn from_oxidized_by_ref(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
         Self::mk(|| {
-            use oxidized_by_ref::typing_reason::WitnessDecl as WD;
-            use oxidized_by_ref::typing_reason::T_ as OR;
             use ReasonImpl as RI;
+            use oxidized_by_ref::typing_reason::T_ as OR;
+            use oxidized_by_ref::typing_reason::WitnessDecl as WD;
 
             match reason {
                 OR::NoReason => RI::NoReason,

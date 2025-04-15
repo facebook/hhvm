@@ -8,9 +8,9 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use super::contains_ocaml_attr;
 use super::Context;
 use super::Direction;
+use super::contains_ocaml_attr;
 use crate::common::to_snake;
 
 pub fn gen(ctx: &Context) -> TokenStream {

@@ -18,9 +18,9 @@ use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
-use anyhow::bail;
 use anyhow::Error;
 use anyhow::Result;
+use anyhow::bail;
 use async_trait::async_trait;
 use futures::stream::BoxStream;
 

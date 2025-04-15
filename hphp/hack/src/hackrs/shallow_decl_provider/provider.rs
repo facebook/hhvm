@@ -14,12 +14,12 @@ use pos::FunName;
 use pos::ModuleName;
 use pos::RelativePath;
 use pos::TypeName;
-use ty::decl::shallow::NamedDecl;
 use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
 use ty::decl::ModuleDecl;
 use ty::decl::ShallowClass;
 use ty::decl::TypedefDecl;
+use ty::decl::shallow::NamedDecl;
 use ty::reason::Reason;
 
 use super::Error;

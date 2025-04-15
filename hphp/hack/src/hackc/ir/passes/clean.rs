@@ -6,14 +6,14 @@
 use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
 use analysis::Predecessors;
-use ir_core::instr::HasOperands;
-use ir_core::instr::Terminator;
 use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::Instr;
 use ir_core::InstrId;
 use ir_core::ValueId;
 use ir_core::ValueIdMap;
+use ir_core::instr::HasOperands;
+use ir_core::instr::Terminator;
 use itertools::Itertools;
 use log::trace;
 use newtype::IdVec;
@@ -417,8 +417,8 @@ fn remapper(
 
 #[cfg(test)]
 mod test {
-    use testutils::build_test_func;
     use testutils::Block;
+    use testutils::build_test_func;
 
     use super::*;
 

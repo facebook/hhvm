@@ -17,14 +17,14 @@
 use std::any::TypeId;
 use std::collections::HashMap;
 
-use anyhow::anyhow;
-use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
+use anyhow::anyhow;
+use anyhow::bail;
+use fbthrift::GetUri;
 use fbthrift::binary_protocol;
 use fbthrift::compact_protocol;
 use fbthrift::simplejson_protocol;
-use fbthrift::GetUri;
 use itertools::Itertools;
 use protocol::StandardProtocol;
 use universal_name::get_universal_hash_prefix_sha_256;

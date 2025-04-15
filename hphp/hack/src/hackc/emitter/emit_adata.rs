@@ -7,8 +7,8 @@ use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use hhbc::TypedValue;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 
 pub fn typed_value_into_instr(e: &mut Emitter<'_>, tv: TypedValue) -> Result<InstrSeq> {
     match tv {

@@ -5,14 +5,14 @@
 
 use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
-use ir_core::instr::HasEdges;
-use ir_core::instr::Terminator;
 use ir_core::BlockId;
 use ir_core::BlockIdMap;
 use ir_core::Func;
 use ir_core::InstrId;
 use ir_core::IrRepr;
 use ir_core::ValueId;
+use ir_core::instr::HasEdges;
+use ir_core::instr::Terminator;
 use newtype::IdVec;
 
 /// Attempt to merge simple blocks together. Returns true if the Func was
@@ -159,12 +159,12 @@ fn forward_edge(
 
 #[cfg(test)]
 mod test {
-    use ir_core::func::DefaultValue;
     use ir_core::BlockId;
     use ir_core::Instr;
     use ir_core::InstrId;
     use ir_core::Maybe;
     use ir_core::Param;
+    use ir_core::func::DefaultValue;
 
     fn mk_param(name: &str, dv: BlockId) -> (Param, Option<DefaultValue>) {
         (

@@ -6,13 +6,12 @@
 use std::collections::BTreeMap;
 
 use emit_property::PropAndInit;
-use env::emitter::Emitter;
 use env::Env;
+use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use hhbc::string_id;
 use hhbc::Class;
 use hhbc::ClassName;
 use hhbc::Coeffects;
@@ -37,11 +36,12 @@ use hhbc::TypeConstant;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Visibility;
+use hhbc::string_id;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
-use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use itertools::Itertools;
 use oxidized::ast;
 use oxidized::ast::ClassReq;

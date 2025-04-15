@@ -10,8 +10,8 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::sync::Weak;
 
-use dashmap::mapref::entry::Entry;
 use dashmap::DashMap;
+use dashmap::mapref::entry::Entry;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 pub use once_cell::sync::Lazy;

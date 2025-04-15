@@ -111,8 +111,8 @@ fn oxidize_shape_field_name<'a, P: Pos>(
     name: TshapeFieldName,
     field_name_pos: &ShapeFieldNamePos<P>,
 ) -> obr::typing_defs::TshapeFieldName<'a> {
-    use obr::typing_defs::TshapeFieldName as Obr;
     use ShapeFieldNamePos as SfnPos;
+    use obr::typing_defs::TshapeFieldName as Obr;
     let simple_pos = || match field_name_pos {
         SfnPos::Simple(p) => p.to_oxidized_by_ref(arena),
         SfnPos::ClassConst(..) => panic!("expected ShapeFieldNamePos::Simple"),

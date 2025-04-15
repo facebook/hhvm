@@ -4,21 +4,21 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::fs::File;
-use std::io::stdout;
 use std::io::Write;
+use std::io::stdout;
 use std::path::Path;
 use std::path::PathBuf;
 
 use ::assemble as _;
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use clap::Args;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 use relative_path::RelativePath;
 
-use crate::util::SyncWrite;
 use crate::FileOpts;
+use crate::util::SyncWrite;
 
 #[derive(Args, Debug)]
 pub struct Opts {

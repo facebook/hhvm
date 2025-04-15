@@ -16,8 +16,8 @@
 
 use fbthrift::builtin_types::BTreeMap;
 use fbthrift::builtin_types::BTreeSet;
-use fbthrift_deterministic_hash::deterministic_hash;
 use fbthrift_deterministic_hash::Sha256Hasher;
+use fbthrift_deterministic_hash::deterministic_hash;
 use maplit::btreemap;
 use teststructs::ComplexStruct;
 use teststructs::ComplexStructSha256Hash;

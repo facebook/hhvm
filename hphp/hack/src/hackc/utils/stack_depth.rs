@@ -17,8 +17,8 @@ use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
 use hhbc_gen::Outputs;
 use log::debug;
-use newtype::newtype_int;
 use newtype::IdVec;
+use newtype::newtype_int;
 use thiserror::Error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;

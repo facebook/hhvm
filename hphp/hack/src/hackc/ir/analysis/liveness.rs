@@ -7,7 +7,6 @@
 
 use std::collections::VecDeque;
 
-use ir_core::instr::HasOperands;
 use ir_core::BlockId;
 use ir_core::BlockIdMap;
 use ir_core::BlockIdSet;
@@ -15,6 +14,7 @@ use ir_core::Func;
 use ir_core::InstrId;
 use ir_core::InstrIdSet;
 use ir_core::ValueId;
+use ir_core::instr::HasOperands;
 use itertools::Itertools;
 use newtype::IdVec;
 

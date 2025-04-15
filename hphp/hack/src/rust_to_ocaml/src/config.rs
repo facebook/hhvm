@@ -5,10 +5,10 @@
 
 use std::str::FromStr;
 
-use indexmap::indexmap;
-use indexmap::indexset;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
+use indexmap::indexmap;
+use indexmap::indexset;
 use serde::Deserialize;
 use serde::Serialize;
 

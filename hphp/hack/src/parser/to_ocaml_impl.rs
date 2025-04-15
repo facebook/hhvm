@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::Allocator;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::positioned_trivia::PositionedTrivium;
 use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;

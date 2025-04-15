@@ -10,8 +10,8 @@ use std::fmt;
 use std::io;
 use std::result;
 
-use anyhow::bail;
 use anyhow::Context as _;
+use anyhow::bail;
 use byteorder::ByteOrder;
 use byteorder::NativeEndian;
 

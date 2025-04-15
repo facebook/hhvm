@@ -13,9 +13,9 @@ mod test;
 #[cfg(test)]
 extern crate self as write_bytes;
 
-pub use arguments::write_bytes_fmt;
 pub use arguments::Argument;
 pub use arguments::Arguments;
+pub use arguments::write_bytes_fmt;
 pub use bytes_formatter::BytesFormatter;
 pub use bytes_formatter::FmtSpec;
 pub use display_bytes::DisplayBytes;

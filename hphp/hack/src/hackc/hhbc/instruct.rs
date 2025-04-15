@@ -6,7 +6,6 @@
 use ffi::Vector;
 use serde::Serialize;
 
-use crate::opcodes::Opcode;
 use crate::BytesId;
 use crate::FCallArgsFlags;
 use crate::IterArgsFlags;
@@ -14,6 +13,7 @@ use crate::PropName;
 use crate::ReadonlyOp;
 use crate::SrcLoc;
 use crate::StringId;
+use crate::opcodes::Opcode;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType = StringId;

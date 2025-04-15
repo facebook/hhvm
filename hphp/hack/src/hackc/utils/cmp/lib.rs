@@ -23,10 +23,10 @@ mod util;
 type Result<T = (), E = CmpError> = std::result::Result<T, E>;
 
 use context::CmpContext;
+pub use util::CmpError;
+use util::MapName;
 use util::cmp_eq;
 use util::cmp_map_t;
 use util::cmp_option;
 use util::cmp_set_t;
 use util::cmp_slice;
-pub use util::CmpError;
-use util::MapName;

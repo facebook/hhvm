@@ -22,31 +22,43 @@ import os
 import shutil
 import subprocess
 import sys
+import textwrap
 import typing
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from xplat.thrift.compiler.test import fixture_utils
 
 """
-* Invoke from the `fbsource` directory using `buck run`:
-
-    buck run xplat/thrift/compiler/test:build_fixtures
-
-will build all fixtures under `xplat/thrift/compiler/test/fixtures`. Or
-
-    buck run xplat/thrift/compiler/test:build_fixtures -- --fixture-names [$FIXTURENAMES]
-
-will only build selected fixtures under `xplat/thrift/compiler/test/fixtures`.
-
-$FIXTURENAMES is a space-separated list of fixture names to build specifically
-(default is to build all fixtures).
+See instructions in the epilog of the argparse parser below
+in the parsed_args() function.
 """
 DEFAULT_FIXTURE_ROOT = "."
 
 
-def parsed_args():
-    parser = argparse.ArgumentParser()
+def _build_parser():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="Builds thrift fixtures (see IMPORTANT instructions below).",
+        epilog=textwrap.dedent(
+            """
+            IMPORTANT:
+            Invoke `buck run' from the `fbsource` directory.
+            Any other root directory will result in an error.
+
+                buck run xplat/thrift/compiler/test:build_fixtures
+
+            builds all fixtures under `xplat/thrift/compiler/test/fixtures`. Or
+
+                buck run xplat/thrift/compiler/test:build_fixtures -- --fixture-names FIXTURENAMES
+
+            will only build selected fixtures under `xplat/thrift/compiler/test/fixtures`.
+
+            FIXTURENAMES is a space-separated list of fixture names to build specifically
+            (default is to build all fixtures).            
+            """
+        ),
+    )
     parser.add_argument(
         "--thrift-bin",
         dest="thrift_bin",
@@ -63,7 +75,7 @@ def parsed_args():
         help=(
             "Path to the root of the 'repository' that contains all files "
             "related to thrift fixtures, i.e. "
-            "$FIXTUREROOT/thrift/compiler/test/fixtures is where the "
+            "FIXTUREROOT/thrift/compiler/test/fixtures is where the "
             "fixtures are located. Defaults to the current working dir."
         ),
         type=str,
@@ -77,7 +89,7 @@ def parsed_args():
         nargs="*",
         default=None,
     )
-    return parser.parse_args()
+    return parser
 
 
 # Will be set to true if any fixture-generating subprocess fails.
@@ -172,8 +184,9 @@ async def _get_fixture_names(args, fixtures_root_dir_path: Path) -> list[str]:
     return fixture_utils.get_all_fixture_names(fixtures_root_dir_path)
 
 
-async def main() -> int:
-    args = parsed_args()
+async def main(argv: List[str]) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv[1:])
 
     thrift_bin_path: typing.Optional[Path] = fixture_utils.get_thrift_binary_path(
         args.thrift_bin
@@ -190,7 +203,7 @@ async def main() -> int:
     )
 
     repo_root_dir_abspath = Path(args.repo_root_dir).resolve(strict=True)
-    assert repo_root_dir_abspath.is_dir()
+    fixture_utils.validate_that_root_path_is_a_dir(repo_root_dir_abspath)
     repo_root_dir_abspath = repo_root_dir_abspath / "xplat"
 
     # Directory that contains all fixture directories (one fixture per sub-dir).
@@ -230,7 +243,7 @@ async def main() -> int:
 
 
 def invoke_main() -> None:
-    sys.exit(asyncio.run(main()))
+    sys.exit(asyncio.run(main(sys.argv)))
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ import atexit
 import os
 import re
 import shlex
+import textwrap
 import typing
 from contextlib import ExitStack
 from dataclasses import dataclass
@@ -309,9 +310,7 @@ def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:
     ```
     """
 
-    assert (
-        fixtures_root_dir_path.is_dir()
-    ), f"{fixtures_root_dir_path} is not a directory"
+    validate_that_root_path_is_a_dir(fixtures_root_dir_path)
 
     fixture_dirs = (
         fixture_dir
@@ -320,3 +319,19 @@ def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:
     )
 
     return sorted((fixture_dir.name for fixture_dir in fixture_dirs))
+
+
+def validate_that_root_path_is_a_dir(root_path: Path) -> None:
+    if not root_path.is_dir():
+        raise RuntimeError(
+            textwrap.dedent(
+                f"""\
+                Expected {root_path} to be a directory.
+                This usually means either an incorrect current directory
+                or an incorrect `--fixture-root` option.
+                
+                For complete help, run:
+                buck run xplat/thrift/compiler/test:build_fixtures -- --help
+                """
+            )
+        )

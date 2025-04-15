@@ -1967,6 +1967,7 @@ struct ChangesSinceV2Params {
   6: optional list<string> includedSuffixes;
   7: optional list<string> excludedSuffixes;
   8: optional PathString root;
+  9: SyncBehavior sync;
 }
 
 /*

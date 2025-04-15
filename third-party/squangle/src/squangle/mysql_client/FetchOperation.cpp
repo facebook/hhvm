@@ -87,6 +87,29 @@ const InternalConnection& FetchOperationImpl::getInternalConnection() const {
   return conn().getInternalConnection();
 }
 
+std::string FetchOperationImpl::generateTimeoutError(
+    std::string rowdata,
+    Millis elapsed) const {
+  auto cbDelay = client_.callbackDelayAvg();
+  bool stalled = cbDelay >= kCallbackDelayStallThreshold;
+
+  std::vector<std::string> parts;
+  parts.push_back(fmt::format(
+      "[{}]({}) Query timed out",
+      static_cast<uint16_t>(
+          stalled ? SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT_LOOP_STALLED
+                  : SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT),
+      kErrorPrefix));
+
+  parts.push_back(std::move(rowdata));
+  parts.push_back(timeoutMessage(elapsed));
+  if (stalled) {
+    parts.push_back(threadOverloadMessage(cbDelay));
+  }
+
+  return folly::join(" ", parts);
+}
+
 void FetchOperationImpl::cancel() {
   // Free any allocated results before the connection is closed
   // We need to do this in the mysql_thread for async versions as the

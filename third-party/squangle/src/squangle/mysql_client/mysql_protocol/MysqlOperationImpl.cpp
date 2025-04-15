@@ -140,20 +140,6 @@ void MysqlOperationImpl::completeOperationInner(OperationResult result) {
   deferRemoveOperation(op_);
 }
 
-std::string MysqlOperationImpl::threadOverloadMessage(double cbDelayUs) const {
-  // This message is used here https://fburl.com/code/d6t3td0r to perform
-  // matching for SLA calculation. Please update the string if you change the
-  // message.
-  return fmt::format(
-      "(CLIENT_OVERLOADED: cb delay {}ms, {} active conns)",
-      std::lround(cbDelayUs / 1000.0),
-      client_.numStartedAndOpenConnections());
-}
-
-std::string MysqlOperationImpl::timeoutMessage(Millis delta) const {
-  return fmt::format("(took {}, timeout was {})", delta, getTimeoutMs());
-}
-
 /*static*/ std::string MysqlOperationImpl::connectStageString(
     connect_stage stage) {
   return MysqlConnection::findConnectStageName(stage).value_or("");

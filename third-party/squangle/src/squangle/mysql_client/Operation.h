@@ -448,6 +448,11 @@ class OperationBase {
 
   virtual void timeoutTriggered() = 0;
 
+  static constexpr Duration kCallbackDelayStallThreshold{50000};
+
+  std::string timeoutMessage(Millis delta) const;
+  std::string threadOverloadMessage(Duration cbDelay) const;
+
   ObserverCallback observer_callback_;
 
   std::shared_ptr<db::ConnectionContextBase> connection_context_;

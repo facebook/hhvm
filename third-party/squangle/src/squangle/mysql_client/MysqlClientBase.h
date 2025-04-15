@@ -119,8 +119,8 @@ class MysqlClientBase {
   virtual uint32_t numStartedAndOpenConnections() {
     return 0;
   }
-  virtual double callbackDelayMicrosAvg() {
-    return 0.0;
+  virtual Duration callbackDelayAvg() const {
+    return Duration(0);
   }
 
   virtual bool supportsLocalFiles() = 0;

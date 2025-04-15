@@ -208,37 +208,23 @@ void MysqlConnectOperationImpl::tcpConnectTimeoutTriggered() {
 void MysqlConnectOperationImpl::timeoutHandler(
     bool isTcpTimeout,
     bool isPoolConnection) {
-  auto delta = opElapsedMs();
-
-  auto cbDelayUs = client_.callbackDelayMicrosAvg();
-  bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
-
-  // Overall the message looks like this:
-  //   [<errno>](Mysql Client) Connect[Pool] to <host>:<port> timed out
-  //   [at stage <connect_stage>] (took Nms, timeout was Nms)
-  //   [(CLIENT_OVERLOADED: cb delay Nms, N active conns)] [TcpTimeout:N]
-  std::vector<std::string> parts;
-  parts.push_back(fmt::format(
-      "[{}]({})Connect{} to {}:{} timed out",
-      static_cast<uint16_t>(
-          stalled ? SquangleErrno::SQ_ERRNO_CONN_TIMEOUT_LOOP_STALLED
-                  : SquangleErrno::SQ_ERRNO_CONN_TIMEOUT),
-      kErrorPrefix,
-      isPoolConnection ? "Pool" : "",
-      conn_key_->host(),
-      conn_key_->port()));
+  std::optional<std::string> location;
   if (!isPoolConnection) {
-    parts.push_back(fmt::format(
-        "at stage {}", getMysqlConnection()->getConnectStageName()));
+    location =
+        fmt::format("at stage {}", getMysqlConnection()->getConnectStageName());
   }
+  auto errorStr = generateTimeoutError(
+      opElapsedMs(),
+      [](bool stalled) {
+        return static_cast<uint16_t>(
+            stalled ? SquangleErrno::SQ_ERRNO_CONN_TIMEOUT_LOOP_STALLED
+                    : SquangleErrno::SQ_ERRNO_CONN_TIMEOUT);
+      },
+      isPoolConnection ? "ConnectPool" : "Connect",
+      std::move(location),
+      fmt::format("(TcpTimeout:{})", (isTcpTimeout ? 1 : 0)));
 
-  parts.push_back(timeoutMessage(delta));
-  if (stalled) {
-    parts.push_back(threadOverloadMessage(cbDelayUs));
-  }
-  parts.push_back(fmt::format("(TcpTimeout:{})", (isTcpTimeout ? 1 : 0)));
-
-  getOp().setAsyncClientError(CR_SERVER_LOST, folly::join(" ", parts));
+  getOp().setAsyncClientError(CR_SERVER_LOST, errorStr);
   attemptFailed(OperationResult::TimedOut);
 }
 

@@ -297,8 +297,8 @@ class AsyncMysqlClient : public MysqlClientBase {
     return active_connection_counter_;
   }
 
-  double callbackDelayMicrosAvg() override {
-    return stats_tracker_->callbackDelayAvg.value();
+  Duration callbackDelayAvg() const override {
+    return Duration((uint64_t)stats_tracker_->callbackDelayAvg.value());
   }
 
   void cleanupCompletedOperations();

@@ -142,6 +142,13 @@ class ConnectOperationImpl : virtual public OperationBase {
   [[nodiscard]] InternalConnection& getInternalConnection();
   ConnectionHolder* mysqlConnection() const;
 
+  [[nodiscard]] std::string generateTimeoutError(
+      Millis elapsed,
+      const std::function<uint16_t(bool)>& getErrorNo,
+      std::string apiName,
+      std::optional<std::string> location,
+      std::optional<std::string> extra) const;
+
   ConnectionOptions conn_options_;
   std::shared_ptr<const ConnectionKey> conn_key_;
   uint32_t attempts_made_ = 0;

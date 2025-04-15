@@ -169,34 +169,6 @@ std::ostream& operator<<(std::ostream& os, const PoolKey& key) {
 }
 
 template <>
-std::string AsyncConnectPoolOperationImpl::createTimeoutErrorMessage(
-    const PoolKeyStats& pool_key_stats,
-    size_t per_key_limit) {
-  auto delta = opElapsedMs();
-  auto cbDelayUs = conn().client().callbackDelayMicrosAvg();
-  bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
-
-  std::vector<std::string> parts;
-  const auto& key = getKeyRef();
-  parts.push_back(fmt::format(
-      "[{}]({})Connection to {}:{} timed out in pool",
-      static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
-      kErrorPrefix,
-      key.host(),
-      key.port()));
-  parts.push_back(fmt::format(
-      "(open {}, opening {}, key limit {})",
-      pool_key_stats.open_connections,
-      pool_key_stats.pending_connections,
-      per_key_limit));
-  parts.push_back(timeoutMessage(delta));
-  if (stalled) {
-    parts.push_back(threadOverloadMessage(cbDelayUs));
-  }
-  return folly::join(" ", parts);
-}
-
-template <>
 std::unique_ptr<ConnectPoolOperationImpl<AsyncMysqlClient>>
 createConnectPoolOperationImpl(
     std::weak_ptr<ConnectionPool<AsyncMysqlClient>> pool,

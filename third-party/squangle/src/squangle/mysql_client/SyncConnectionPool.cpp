@@ -59,26 +59,6 @@ void SyncConnectionPool::openNewConnectionFinish(
 }
 
 template <>
-std::string SyncConnectPoolOperationImpl::createTimeoutErrorMessage(
-    const PoolKeyStats& pool_key_stats,
-    size_t per_key_limit) {
-  auto delta = opElapsedMs();
-
-  const auto& key = getConnectPoolOp().getKeyRef();
-  return fmt::format(
-      "[{}]({})Connection to {}:{} timed out in pool "
-      "(open {}, opening {}, key limit {}) {}",
-      static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
-      kErrorPrefix,
-      key.host(),
-      key.port(),
-      pool_key_stats.open_connections,
-      pool_key_stats.pending_connections,
-      per_key_limit,
-      timeoutMessage(delta));
-}
-
-template <>
 void SyncConnectPoolOperationImpl::specializedRun() {
   // No special thread manipulation needed for sync client
   MysqlConnectPoolOperationImpl::specializedRunImpl();

@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/chrono.h>
 #include <folly/Memory.h>
 #include <folly/container/F14Map.h>
 #include <folly/small_vector.h>
@@ -286,6 +287,20 @@ InternalConnection& OperationBase::getInternalConnection() {
 
 void OperationBase::deferRemoveOperation(Operation* op) const {
   client_.deferRemoveOperation(op);
+}
+
+std::string OperationBase::timeoutMessage(Millis delta) const {
+  return fmt::format("(took {}, timeout was {})", delta, getTimeoutMs());
+}
+
+std::string OperationBase::threadOverloadMessage(Duration cbDelay) const {
+  // This message is used here https://fburl.com/code/d6t3td0r to perform
+  // matching for SLA calculation. Please update the string if you change the
+  // message.
+  return fmt::format(
+      "(CLIENT_OVERLOADED: cb delay {}, {} active conns)",
+      std::chrono::duration_cast<std::chrono::milliseconds>(cbDelay),
+      client_.numStartedAndOpenConnections());
 }
 
 void OperationBase::setPreOperationCallback(ChainedCallback chainedCallback) {

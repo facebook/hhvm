@@ -193,6 +193,10 @@ class FetchOperationImpl : virtual public OperationBase {
   // Functions to deal with the connection
   [[nodiscard]] const InternalConnection& getInternalConnection() const;
 
+  [[nodiscard]] std::string generateTimeoutError(
+      std::string rowData,
+      Millis elapsed) const;
+
   std::shared_ptr<folly::fbstring> rendered_query_;
 
   // Current query data

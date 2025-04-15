@@ -148,6 +148,41 @@ ConnectionHolder* ConnectOperationImpl::mysqlConnection() const {
   return conn().mysqlConnection();
 }
 
+[[nodiscard]] std::string ConnectOperationImpl::generateTimeoutError(
+    Millis elapsed,
+    const std::function<uint16_t(bool)>& getErrorNo,
+    std::string apiName,
+    std::optional<std::string> location,
+    std::optional<std::string> extra) const {
+  auto cbDelay = client_.callbackDelayAvg();
+  bool stalled = (cbDelay >= kCallbackDelayStallThreshold);
+
+  // Overall the message looks like this:
+  //   [<errno>](Mysql Client) <API name> to <host>:<port> timed out [in pool]
+  //   [at stage <connect_stage>] (took Nms, timeout was Nms)
+  //   [(CLIENT_OVERLOADED: cb delay Nms, N active conns)] [TcpTimeout:N]
+  std::vector<std::string> parts;
+  parts.push_back(fmt::format(
+      "[{}]({}){} to {}:{} timed out",
+      getErrorNo(stalled),
+      kErrorPrefix,
+      apiName,
+      conn_key_->host(),
+      conn_key_->port()));
+  if (location) {
+    parts.push_back(std::move(*location));
+  }
+  parts.push_back(timeoutMessage(elapsed));
+  if (stalled) {
+    parts.push_back(threadOverloadMessage(cbDelay));
+  }
+  if (extra) {
+    parts.push_back(std::move(*extra));
+  }
+
+  return folly::join(" ", parts);
+}
+
 void ConnectOperation::mustSucceed() {
   run().wait();
   if (!ok()) {

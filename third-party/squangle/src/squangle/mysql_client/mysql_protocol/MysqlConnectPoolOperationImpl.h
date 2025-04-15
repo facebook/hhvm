@@ -57,9 +57,25 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
       if (!(num_open == 0 &&
             (num_opening > 0 ||
              locked_pool->canCreateMoreConnections(pool_key)))) {
+        auto location = fmt::format(
+            "in pool (open {}, opening {}, key limit {})",
+            key_stats.open_connections,
+            key_stats.pending_connections,
+            locked_pool->perKeyLimit());
+
+        auto errorStr = generateTimeoutError(
+            opElapsedMs(),
+            [](bool /*stalled*/) {
+              return static_cast<uint16_t>(
+                  SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT);
+            },
+            "Connection",
+            std::move(location),
+            std::nullopt);
+
         op.setAsyncClientError(
             static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
-            createTimeoutErrorMessage(key_stats, locked_pool->perKeyLimit()));
+            std::move(errorStr));
         attemptFailed(OperationResult::TimedOut);
         return;
       }
@@ -189,10 +205,6 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
       baton_->post();
     }
   }
-
-  std::string createTimeoutErrorMessage(
-      const PoolKeyStats& pool_key_stats,
-      size_t per_key_limit);
 
   std::weak_ptr<ConnectionPool<Client>> pool_;
 

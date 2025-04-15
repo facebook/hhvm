@@ -48,8 +48,6 @@ class MysqlOperationImpl : virtual public OperationBase,
   static std::string connectStageString(connect_stage stage);
 
  protected:
-  static constexpr double kCallbackDelayStallThresholdUs = 50 * 1000;
-
   MysqlOperationImpl();
 
   MysqlConnection* getMysqlConnection();
@@ -91,9 +89,6 @@ class MysqlOperationImpl : virtual public OperationBase,
 
   bool isInEventBaseThread() const;
   bool isEventBaseSet() const;
-
-  std::string threadOverloadMessage(double cbDelayUs) const;
-  std::string timeoutMessage(Millis delta) const;
 
   // This will contain the max block time of the thread
   Duration max_thread_block_time_ = Duration(0);

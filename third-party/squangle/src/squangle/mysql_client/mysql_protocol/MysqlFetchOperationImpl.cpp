@@ -355,24 +355,9 @@ void MysqlFetchOperationImpl::specializedTimeoutTriggered() {
     rows = "(no rows seen)";
   }
 
-  auto cbDelayUs = client_.callbackDelayMicrosAvg();
-  bool stalled = cbDelayUs >= kCallbackDelayStallThresholdUs;
+  auto errorStr = generateTimeoutError(std::move(rows), delta);
 
-  std::vector<std::string> parts;
-  parts.push_back(fmt::format(
-      "[{}]({}) Query timed out",
-      static_cast<uint16_t>(
-          stalled ? SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT_LOOP_STALLED
-                  : SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT),
-      kErrorPrefix));
-
-  parts.push_back(std::move(rows));
-  parts.push_back(timeoutMessage(delta));
-  if (stalled) {
-    parts.push_back(threadOverloadMessage(cbDelayUs));
-  }
-
-  getOp().setAsyncClientError(CR_NET_READ_INTERRUPTED, folly::join(" ", parts));
+  getOp().setAsyncClientError(CR_NET_READ_INTERRUPTED, errorStr);
   completeOperation(OperationResult::TimedOut);
 }
 

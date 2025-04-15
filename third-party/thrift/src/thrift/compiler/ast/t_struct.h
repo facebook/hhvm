@@ -40,6 +40,7 @@ class t_struct : public t_structured {
   // for backwards compatibility.
  public:
   bool is_struct_or_union() const override { return !is_exception(); }
+  bool is_struct() const override { return !is_exception(); }
 
   using t_structured::clone_DO_NOT_USE;
 

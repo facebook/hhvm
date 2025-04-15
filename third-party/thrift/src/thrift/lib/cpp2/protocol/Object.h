@@ -75,12 +75,8 @@ Object parseObject(Protocol& prot, bool string_to_binary = true) {
 
 // Schemaless deserialization of thrift serialized data with mask.
 // Only parses values that are masked.
-//
-// Note, this implementation is deprecated as it requires deprecated usage of
-// mask view from `protocol::extractViewMaskFromPatch` to partially deserialize
-// maps.
 template <typename Protocol>
-[[deprecated]] Object parseObjectWithoutExcludedData(
+Object parseObjectWithoutExcludedData(
     const folly::IOBuf& buf, const Mask& mask, bool string_to_binary = true) {
   return detail::parseObject<Protocol, false>(
              buf, mask, noneMask(), string_to_binary)
@@ -89,12 +85,8 @@ template <typename Protocol>
 
 // Schemaless deserialization of thrift serialized data with mask.
 // Only parses values that are masked. Unmasked fields are stored in MaskedData.
-//
-// Note, this implementation is deprecated as it requires deprecated usage of
-// mask view from `protocol::extractViewMaskFromPatch` to partially deserialize
-// maps.
 template <typename Protocol>
-[[deprecated]] MaskedDecodeResult parseObject(
+MaskedDecodeResult parseObject(
     const folly::IOBuf& buf, const Mask& mask, bool string_to_binary = true) {
   return detail::parseObject<Protocol, true>(
       buf, mask, noneMask(), string_to_binary);
@@ -107,12 +99,8 @@ template <typename Protocol>
 //
 // This is designed to be used with Thrift Patch to avoid full deserialization
 // when applying Thrift Patch to serialized data in a binary blob.
-//
-// Note, this implementation is deprecated as it requires deprecated usage of
-// mask view from `protocol::extractViewMaskFromPatch` to partially deserialize
-// maps.
 template <typename Protocol>
-[[deprecated]] MaskedDecodeResult parseObject(
+MaskedDecodeResult parseObject(
     const folly::IOBuf& buf,
     const Mask& readMask,
     const Mask& writeMask,

@@ -1144,18 +1144,18 @@ void testParseObjectWithMapMask(bool testSerialize) {
 
   // masks obj[1][10]["foo"] and obj[2]
   Mask mask;
-  Value key10 = asValueStruct<type::i16_t>(10);
-  Value key20 = asValueStruct<type::i16_t>(20);
-  Value keyFoo = asValueStruct<type::string_t>("foo");
-  Value keyBar = asValueStruct<type::string_t>("bar");
+  int16_t key10 = 10;
+  int16_t key20 = 20;
+  std::string keyFoo = "foo";
+  std::string keyBar = "bar";
   auto& includes = mask.includes_ref().emplace();
   includes[1]
       .includes_map_ref()
-      .emplace()[(int64_t)&key10]
-      .includes_map_ref()
-      .emplace()[(int64_t)&keyFoo] = allMask();
+      .emplace()[key10]
+      .includes_string_map_ref()
+      .emplace()[keyFoo] = allMask();
   // This is treated as allMask() as the type is set. It tests the edge case
-  // that a set field may have a map mask, since extractMaskViewFromPatch cannot
+  // that a set field may have a map mask, since extractMaskFromPatch cannot
   // determine if a patch is for map or set for some operators.
   includes[2].excludes_map_ref().emplace()[99] = allMask();
 
@@ -1184,7 +1184,7 @@ void testParseObjectWithMapMask(bool testSerialize) {
   auto& keys = *result.excluded.keys();
   EXPECT_EQ(keys.size(), 3); // 10, 20, and "bar"
 
-  auto getKeyValueId = [&](Value& key) {
+  auto getKeyValueId = [&](const Value& key) {
     auto it = std::find(keys.begin(), keys.end(), key);
     EXPECT_NE(it, keys.end()); // It should find the value.
     return type::ValueId{apache::thrift::util::i32ToZigzag(it - keys.begin())};
@@ -1197,20 +1197,30 @@ void testParseObjectWithMapMask(bool testSerialize) {
   // check map[20]
   {
     auto& mapEncoded = detail::getByValueId(
-        values, excludedKeys.at(getKeyValueId(key20)).full_ref().value());
+        values,
+        excludedKeys.at(getKeyValueId(asValueStruct<type::i16_t>(key20)))
+            .full_ref()
+            .value());
     Value v =
         parseValueFromEncodedValue<protocol_reader_t<Protocol>, type::map_c>(
             mapEncoded);
-    EXPECT_EQ(v.as_map(), obj[FieldId{1}].as_map()[key20].as_map());
+    EXPECT_EQ(
+        v.as_map(),
+        obj[FieldId{1}].as_map()[asValueStruct<type::i16_t>(key20)].as_map());
   }
   // check map[10]["bar"]
   {
     auto& nestedExcludedKeys =
-        excludedKeys.at(getKeyValueId(key10)).values_ref().value();
+        excludedKeys.at(getKeyValueId(asValueStruct<type::i16_t>(key10)))
+            .values_ref()
+            .value();
     EXPECT_EQ(nestedExcludedKeys.size(), 1);
     auto& i32Encoded = detail::getByValueId(
         values,
-        nestedExcludedKeys.at(getKeyValueId(keyBar)).full_ref().value());
+        nestedExcludedKeys
+            .at(getKeyValueId(asValueStruct<type::string_t>(keyBar)))
+            .full_ref()
+            .value());
     Value v =
         parseValueFromEncodedValue<protocol_reader_t<Protocol>, type::i32_t>(
             i32Encoded);
@@ -1371,10 +1381,10 @@ void testParseObjectWithTwoMasks() {
       type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
       {{10, {{"foo", 1}, {"bar", 2}}}, {20, {{"baz", 3}}}});
 
-  Value key10 = asValueStruct<type::i16_t>(10);
-  Value key20 = asValueStruct<type::i16_t>(20);
-  Value keyFoo = asValueStruct<type::string_t>("foo");
-  Value keyBaz = asValueStruct<type::string_t>("baz");
+  int16_t key10 = 10;
+  int16_t key20 = 20;
+  std::string keyFoo = "foo";
+  std::string keyBaz = "baz";
 
   // masks obj[2] and obj[4][10]["foo"]
   Mask readMask;
@@ -1383,9 +1393,9 @@ void testParseObjectWithTwoMasks() {
     includes[2] = allMask();
     includes[4]
         .includes_map_ref()
-        .emplace()[(int64_t)&key10]
-        .includes_map_ref()
-        .emplace()[(int64_t)&keyFoo] = allMask();
+        .emplace()[key10]
+        .includes_string_map_ref()
+        .emplace()[keyFoo] = allMask();
   }
 
   // masks obj[1][1], obj[3], obj[4][10], and obj[4][20]["baz"]
@@ -1395,10 +1405,8 @@ void testParseObjectWithTwoMasks() {
     includes[1].includes_ref().emplace()[1] = allMask();
     includes[3] = allMask();
     auto& includes_map = includes[4].includes_map_ref().emplace();
-    includes_map[(int64_t)&key10] = allMask();
-    includes_map[(int64_t)&key20]
-        .includes_map_ref()
-        .emplace()[(int64_t)&keyBaz] = allMask();
+    includes_map[key10] = allMask();
+    includes_map[key20].includes_string_map_ref().emplace()[keyBaz] = allMask();
   }
 
   // serialize the object and deserialize with mask

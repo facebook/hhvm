@@ -376,6 +376,35 @@ void setMaskedDataFull(
   maskedData.full_ref() = type::ValueId{apache::thrift::util::i32ToZigzag(pos)};
 }
 
+inline MaskRef getKeyMaskRefByValue(MaskRef maskRef, const Value& value) {
+  switch (value.getType()) {
+    case Value::Type::byteValue:
+      return maskRef.get(MapId{value.as_byte()});
+    case Value::Type::i16Value:
+      return maskRef.get(MapId{value.as_i16()});
+    case Value::Type::i32Value:
+      return maskRef.get(MapId{value.as_i32()});
+    case Value::Type::i64Value:
+      return maskRef.get(MapId{value.as_i64()});
+    case Value::Type::stringValue:
+      return maskRef.get(value.as_string());
+    case Value::Type::binaryValue: {
+      // TODO(dokwon): Optimize the binary key look up.
+      std::string key = value.as_binary().toString();
+      return maskRef.get(key);
+    }
+    case Value::Type::boolValue:
+    case Value::Type::floatValue:
+    case Value::Type::doubleValue:
+    case Value::Type::objectValue:
+    case Value::Type::listValue:
+    case Value::Type::setValue:
+    case Value::Type::mapValue:
+    case Value::Type::__EMPTY__:
+      folly::throw_exception<std::runtime_error>("Value is empty");
+  }
+}
+
 // parseValue with readMaskRef and writeMaskRef
 template <bool KeepExcludedData, typename Protocol>
 MaskedDecodeResultValue parseValueWithMask(
@@ -463,14 +492,10 @@ MaskedDecodeResultValue parseValueWithMask(
         prot.readMapEnd();
         return result;
       }
-      auto readValueIndex = buildValueIndex(readMaskRef.mask);
-      auto writeValueIndex = buildValueIndex(writeMaskRef.mask);
       for (uint32_t i = 0; i < size; i++) {
         auto keyValue = parseValue(prot, keyType, string_to_binary);
-        MaskRef nextRead = readMaskRef.get(
-            getMapIdValueAddressFromIndex(readValueIndex, keyValue));
-        MaskRef nextWrite = writeMaskRef.get(
-            getMapIdValueAddressFromIndex(writeValueIndex, keyValue));
+        MaskRef nextRead = getKeyMaskRefByValue(readMaskRef, keyValue);
+        MaskRef nextWrite = getKeyMaskRefByValue(writeMaskRef, keyValue);
         MaskedDecodeResultValue nestedResult =
             parseValueWithMask<KeepExcludedData>(
                 prot,

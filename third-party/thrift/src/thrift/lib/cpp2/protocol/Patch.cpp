@@ -1053,7 +1053,7 @@ std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
       Protocol == type::StandardProtocol::Binary,
       BinaryProtocolWriter,
       CompactProtocolWriter>;
-  auto masks = protocol::extractMaskViewFromPatch(patch);
+  auto masks = protocol::extractMaskFromPatch(patch);
   MaskedDecodeResult result =
       parseObject<ProtocolReader>(buf, masks.read, masks.write);
   applyPatch(patch, result.included);

@@ -53,8 +53,7 @@ const K& getKeyOrElem(const std::pair<const K, V>& value) {
   return value.first;
 }
 
-// Put allMask() if the key was never included in the mask before. `view`
-// specifies whether to use address of Value to populate map mask (deprecated).
+// Put allMask() if the key was never included in the mask before.
 inline void insertKeysToMask(Mask& mask, int64_t k) {
   mask.includes_map_ref().ensure().emplace(k, allMask());
 }
@@ -62,18 +61,7 @@ inline void insertKeysToMask(Mask& mask, std::string k) {
   mask.includes_string_map_ref().ensure().emplace(std::move(k), allMask());
 }
 template <typename Container>
-void insertKeysToMask(Mask& mask, const Container& c, bool view) {
-  if (view) {
-    auto writeValueIndex = buildValueIndex(mask);
-    for (const auto& elem : c) {
-      const auto& v = getKeyOrElem(elem);
-      auto id = static_cast<int64_t>(
-          getMapIdValueAddressFromIndex(writeValueIndex, v));
-      mask.includes_map_ref().ensure().emplace(id, allMask());
-    }
-    return;
-  }
-
+void insertKeysToMask(Mask& mask, const Container& c) {
   for (const auto& elem : c) {
     const auto& v = getKeyOrElem(elem);
 
@@ -88,11 +76,11 @@ void insertKeysToMask(Mask& mask, const Container& c, bool view) {
 }
 
 template <typename Container>
-void insertKeysToMaskIfNotAllMask(Mask& mask, const Container& c, bool view) {
+void insertKeysToMaskIfNotAllMask(Mask& mask, const Container& c) {
   if (isAllMask(mask)) {
     return;
   }
-  insertKeysToMask(mask, c, view);
+  insertKeysToMask(mask, c);
 }
 
 inline void insertFieldsToMask(Mask& mask, FieldId id) {

@@ -1417,7 +1417,7 @@ ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
       if (set.empty()) {
         return;
       }
-      detail::insertKeysToMaskIfNotAllMask(masks.write, set, false);
+      detail::insertKeysToMaskIfNotAllMask(masks.write, set);
     }
     void tryPutMulti(const ValueMap& map) {
       // granular read/write operation if not empty
@@ -1431,13 +1431,12 @@ ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
       if (map.empty()) {
         return;
       }
-      detail::insertKeysToMaskIfNotAllMask(masks.write, map, false);
+      detail::insertKeysToMaskIfNotAllMask(masks.write, map);
     }
     void finalize() {
       if (ensure_) {
-        detail::insertKeysToMask(masks.read, ensure_->get(), false);
-        detail::insertKeysToMaskIfNotAllMask(
-            masks.write, ensure_->get(), false);
+        detail::insertKeysToMask(masks.read, ensure_->get());
+        detail::insertKeysToMaskIfNotAllMask(masks.write, ensure_->get());
       }
       detail::ensureRWMaskInvariant(masks);
     }

@@ -87,20 +87,6 @@ int32_t calculateMinSafePatchVersion(const protocol::Object& patch);
  */
 using detail::ExtractedMasksFromPatch;
 
-/// @cond
-/// Constructs read and write Thrift Mask that only contain fields that are
-/// modified by the Patch. It will construct nested Mask for map and object
-/// patches. For map, it uses the address of Value key as the key for the
-/// integer map mask. Note that Mask contains pointer to `protocol::Value` in
-/// patch, so caller needs to make sure Patch has longer lifetime than the mask.
-[[deprecated(
-    "Use DynamicPatch::extractMaskFromPatch instead.")]] ExtractedMasksFromPatch
-extractMaskViewFromPatch(const protocol::Object& patch);
-
-// Extracting mask from a temporary patch is dangerous and should be disallowed.
-ExtractedMasksFromPatch extractMaskViewFromPatch(Object&& patch) = delete;
-/// @endcond
-
 /// Constructs read and write Thrift Mask that only contain fields that are
 /// modified by the Patch. It will construct nested Mask for map and object
 /// patches. For map, it only supports integer or string key. If the type of key

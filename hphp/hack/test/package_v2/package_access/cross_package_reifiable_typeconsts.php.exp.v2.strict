@@ -1,0 +1,52 @@
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_reifiable_typeconsts.php--bar.php [2]
+-> cross_package_reifiable_typeconsts.php--bar.php belongs to package pkg2 [3]
+-> But cross_package_reifiable_typeconsts.php--foo.php is in package pkg1 [4]
+-> And package pkg1 does not include package pkg2 [4]
+
+cross_package_reifiable_typeconsts.php--foo.php:10:19
+     8 | 
+     9 | class MyProd extends MyProdBase {
+[1] 10 |   const type T1 = MyInternClass; // error when package_v2_allow_all_tconst_violations is turned off
+    11 |   const type T2 = MyInternClass; // error when package_v2_allow_reifiable_tconst_violations is off
+    12 | }
+
+cross_package_reifiable_typeconsts.php--bar.php:4:7
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | class MyInternClass {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_reifiable_typeconsts.php--bar.php [2]
+-> cross_package_reifiable_typeconsts.php--bar.php belongs to package pkg2 [3]
+-> But cross_package_reifiable_typeconsts.php--foo.php is in package pkg1 [4]
+-> And package pkg1 does not include package pkg2 [4]
+
+cross_package_reifiable_typeconsts.php--foo.php:11:19
+     9 | class MyProd extends MyProdBase {
+    10 |   const type T1 = MyInternClass; // error when package_v2_allow_all_tconst_violations is turned off
+[1] 11 |   const type T2 = MyInternClass; // error when package_v2_allow_reifiable_tconst_violations is off
+    12 | }
+
+cross_package_reifiable_typeconsts.php--bar.php:4:7
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | class MyInternClass {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+2 errors found

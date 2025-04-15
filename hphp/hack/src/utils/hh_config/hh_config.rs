@@ -546,6 +546,10 @@ impl HhConfig {
                 "package_v2_allow_reifiable_tconst_violations",
                 default.tco_package_v2_allow_reifiable_tconst_violations,
             )?,
+            tco_package_v2_allow_all_tconst_violations: hhconfig.get_bool_or(
+                "package_v2_allow_all_tconst_violations",
+                default.tco_package_v2_allow_all_tconst_violations,
+            )?,
             tco_package_v2_allow_reified_generics_violations: hhconfig.get_bool_or(
                 "package_v2_allow_reified_generics_violations",
                 default.tco_package_v2_allow_reified_generics_violations,

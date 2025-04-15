@@ -1,0 +1,84 @@
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_type_consts.php--foo.php [2]
+-> cross_package_type_consts.php--foo.php belongs to package pkg2 [3]
+-> But cross_package_type_consts.php--bar.php is in package pkg1 [4]
+-> And package pkg1 does not include package pkg2 [4]
+
+cross_package_type_consts.php--bar.php:5:19
+    3 | 
+    4 | class Bar {
+[1] 5 |   const type T1 = BarImpl;
+    6 |   const type T2 = TFoo1;
+    7 |   const type T3 = TFoo2;
+
+cross_package_type_consts.php--foo.php:4:7
+    1 | <?hh
+    2 | // package pkg2
+[3] 3 | <<file: __PackageOverride('pkg2')>>
+[2] 4 | class BarImpl {};
+    5 | type TFoo1 = int;
+    6 | newtype TFoo2 = string;
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_type_consts.php--foo.php [2]
+-> cross_package_type_consts.php--foo.php belongs to package pkg2 [3]
+-> But cross_package_type_consts.php--bar.php is in package pkg1 [4]
+-> And package pkg1 does not include package pkg2 [4]
+
+cross_package_type_consts.php--bar.php:6:19
+    4 | class Bar {
+    5 |   const type T1 = BarImpl;
+[1] 6 |   const type T2 = TFoo1;
+    7 |   const type T3 = TFoo2;
+    8 | }
+
+cross_package_type_consts.php--foo.php:5:6
+    1 | <?hh
+    2 | // package pkg2
+[3] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | class BarImpl {};
+[2] 5 | type TFoo1 = int;
+    6 | newtype TFoo2 = string;
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_type_consts.php--foo.php [2]
+-> cross_package_type_consts.php--foo.php belongs to package pkg2 [3]
+-> But cross_package_type_consts.php--bar.php is in package pkg1 [4]
+-> And package pkg1 does not include package pkg2 [4]
+
+cross_package_type_consts.php--bar.php:7:19
+    5 |   const type T1 = BarImpl;
+    6 |   const type T2 = TFoo1;
+[1] 7 |   const type T3 = TFoo2;
+    8 | }
+
+cross_package_type_consts.php--foo.php:6:9
+    1 | <?hh
+    2 | // package pkg2
+[3] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | class BarImpl {};
+    5 | type TFoo1 = int;
+[2] 6 | newtype TFoo2 = string;
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+3 errors found

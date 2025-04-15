@@ -310,6 +310,9 @@ let package_v2_allow_classconst_violations t =
 let package_v2_allow_reifiable_tconst_violations t =
   t.GlobalOptions.tco_package_v2_allow_reifiable_tconst_violations
 
+let package_v2_allow_all_tconst_violations t =
+  t.GlobalOptions.tco_package_v2_allow_all_tconst_violations
+
 let package_v2_allow_reified_generics_violations t =
   t.GlobalOptions.tco_package_v2_allow_reified_generics_violations
 

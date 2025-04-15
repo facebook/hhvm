@@ -6,7 +6,7 @@ error: Typing[4472] Cannot access an element which belongs to package pkg2 from 
 
 cross_package_reifiable_typeconsts.php--foo.php:11:19
      9 | class MyProd extends MyProdBase {
-    10 |   const type T1 = MyInternClass; // ok
+    10 |   const type T1 = MyInternClass; // error when package_v2_allow_all_tconst_violations is turned off
 [1] 11 |   const type T2 = MyInternClass; // error when package_v2_allow_reifiable_tconst_violations is off
     12 | }
 

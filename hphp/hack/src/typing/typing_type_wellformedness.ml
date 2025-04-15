@@ -374,11 +374,14 @@ let typeconsts env tcs cls_name =
   in
   let f tconst =
     let ignore_package_errors =
-      match get_class_const tconst.c_tconst_name with
-      | `Found ttc ->
-        Option.is_none ttc.ttc_reifiable
-        || Env.package_v2_allow_reifiable_tconst_violations env.tenv
-      | _ -> true
+      if not @@ Env.package_v2_allow_all_tconst_violations env.tenv then
+        false
+      else
+        match get_class_const tconst.c_tconst_name with
+        | `Found ttc ->
+          Option.is_none ttc.ttc_reifiable
+          || Env.package_v2_allow_reifiable_tconst_violations env.tenv
+        | _ -> true
     in
     match tconst.c_tconst_kind with
     | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }

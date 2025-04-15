@@ -14,6 +14,6 @@ abstract class MyProdBase {
 }
 
 class MyProd extends MyProdBase {
-  const type T1 = MyInternClass; // ok
+  const type T1 = MyInternClass; // error when package_v2_allow_all_tconst_violations is turned off
   const type T2 = MyInternClass; // error when package_v2_allow_reifiable_tconst_violations is off
 }

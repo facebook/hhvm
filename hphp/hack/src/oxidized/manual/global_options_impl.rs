@@ -136,6 +136,7 @@ impl Default for GlobalOptions {
             tco_package_v2_exclude_patterns: vec![String::from(".*/__tests__/.*")],
             tco_package_v2_allow_classconst_violations: true,
             tco_package_v2_allow_reifiable_tconst_violations: true,
+            tco_package_v2_allow_all_tconst_violations: true,
             tco_package_v2_allow_reified_generics_violations: true,
             re_no_cache: false,
             hh_distc_should_disable_trace_store: false,

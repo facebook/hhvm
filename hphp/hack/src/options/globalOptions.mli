@@ -256,13 +256,18 @@ type t = {
       (** Patterns for files excluded from the package boundary check. *)
   tco_package_v2_allow_classconst_violations: bool;
       (** Option for package v2 to bypass package boundary violation errors on ::class during
-          the ::class to nameof migration to unblock V0 of intern-prod separation *)
+          the ::class to nameof migration to unblock V1 of intern-prod separation *)
   tco_package_v2_allow_reifiable_tconst_violations: bool;
       (** Option for package v2 to bypass package boundary violation errors on definitions of
-          reifiable abstract type constants to unblock V0 of intern-prod separation *)
+          reifiable abstract type constants to unblock V1 of intern-prod separation *)
+  tco_package_v2_allow_all_tconst_violations: bool;
+      (** Option for package v2 to bypass package boundary violation errors on definitions of
+          all type constants to unblock V1 of intern-prod separation. This flag controls the
+          superset of violations controlled by `tco_package_v2_allow_reifiable_tconst_violations`
+          and will be switched off as a step further in tightening the packgage boundary endforcement. *)
   tco_package_v2_allow_reified_generics_violations: bool;
       (** Option for package v2 to bypass package boundary violation errors on reified generics
-          to unblock V0 of intern-prod separation *)
+          to unblock V1 of intern-prod separation *)
   re_no_cache: bool;
       (** Disable RE cache when calling hh_distc. Useful for performance testing.
         Corresponds to the `--no-cache` options of hh_distc. *)
@@ -382,6 +387,7 @@ val set :
   ?tco_package_v2_exclude_patterns:string list ->
   ?tco_package_v2_allow_classconst_violations:bool ->
   ?tco_package_v2_allow_reifiable_tconst_violations:bool ->
+  ?tco_package_v2_allow_all_tconst_violations:bool ->
   ?tco_package_v2_allow_reified_generics_violations:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->

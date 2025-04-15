@@ -647,6 +647,9 @@ let package_v2_allow_reifiable_tconst_violations env =
   TypecheckerOptions.package_v2_allow_reifiable_tconst_violations
   @@ get_tcopt env
 
+let package_v2_allow_all_tconst_violations env =
+  TypecheckerOptions.package_v2_allow_all_tconst_violations @@ get_tcopt env
+
 let package_v2_allow_reified_generics_violations env =
   TypecheckerOptions.package_v2_allow_reified_generics_violations
   @@ get_tcopt env

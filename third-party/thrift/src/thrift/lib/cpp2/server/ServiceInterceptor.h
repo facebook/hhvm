@@ -18,6 +18,7 @@
 
 #include <folly/stop_watch.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorControl.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 
 #if FOLLY_HAS_COROUTINES
@@ -51,13 +52,16 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   virtual void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept {}
 
   const ServiceInterceptorQualifiedName& getQualifiedName() const final {
-    CHECK(qualifiedName_.has_value())
+    CHECK(qualifiedName_.isValid())
         << "Broken Invariant: ServiceInterceptor::getQualifiedName() was called before ServiceInterceptor::setModuleName()";
-    return *qualifiedName_;
+    return qualifiedName_;
   }
 
  private:
   void internal_onConnection(ConnectionInfo connectionInfo) final {
+    if (isDisabled()) {
+      return;
+    }
     auto* storage = connectionInfo.storage;
     if (auto value = onConnection(std::move(connectionInfo))) {
       storage->emplace<ConnectionState>(std::move(*value));
@@ -65,6 +69,9 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
   void internal_onConnectionClosed(
       ConnectionInfo connectionInfo) noexcept final {
+    if (isDisabled()) {
+      return;
+    }
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
     onConnectionClosed(connectionState, std::move(connectionInfo));
@@ -74,6 +81,9 @@ class ServiceInterceptor : public ServiceInterceptorBase {
       ConnectionInfo connectionInfo,
       RequestInfo requestInfo,
       InterceptorMetricCallback& interceptorMetricCallback) final {
+    if (isDisabled()) {
+      co_return;
+    }
     folly::stop_watch<std::chrono::milliseconds> onRequestTimer;
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
@@ -88,6 +98,9 @@ class ServiceInterceptor : public ServiceInterceptorBase {
 
   folly::coro::Task<void> internal_onResponse(
       ConnectionInfo connectionInfo, ResponseInfo responseInfo) final {
+    if (isDisabled()) {
+      co_return;
+    }
     auto* requestState = getValueAsType<RequestState>(*responseInfo.storage);
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
@@ -95,12 +108,21 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
 
   void setModuleName(const std::string& moduleName) final {
-    CHECK(!qualifiedName_.has_value())
+    CHECK(!qualifiedName_.isValid())
         << "Broken Invariant: ServiceInterceptor::setModuleName() was called more than once";
-    qualifiedName_ = {.moduleName = moduleName, .interceptorName = getName()};
+    auto interceptorName = getName();
+    CHECK(!interceptorName.empty()) << "Interceptor name cannot be empty";
+    CHECK(interceptorName.find_first_of(".,") == std::string::npos)
+        << "Interceptor name cannot contain '.' or ',' - got: "
+        << interceptorName;
+    qualifiedName_.moduleName = moduleName;
+    qualifiedName_.interceptorName = std::move(interceptorName);
   }
 
-  std::optional<ServiceInterceptorQualifiedName> qualifiedName_;
+  bool isDisabled() const { return control_.isDisabled(); }
+
+  ServiceInterceptorQualifiedName qualifiedName_;
+  ServiceInterceptorControl control_{qualifiedName_};
 };
 
 } // namespace apache::thrift

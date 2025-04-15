@@ -44,6 +44,16 @@ using namespace apache::thrift::test;
 using namespace apache::thrift::test2;
 using namespace ::testing;
 
+namespace apache::thrift::detail {
+
+// This is a helper since the flag exists in the apache::thrift::detail
+// namespace
+void setDisabledServiceInterceptorsFlag(std::string flagValue) {
+  THRIFT_FLAG_SET_MOCK(disabled_service_interceptors, std::move(flagValue));
+}
+
+} // namespace apache::thrift::detail
+
 namespace {
 using TransportType = Cpp2ConnContext::TransportType;
 
@@ -488,6 +498,42 @@ CO_TEST_P(ServiceInterceptorTestP, BasicEB) {
   co_await client->co_echo_eb("");
   EXPECT_EQ(interceptor->onRequestCount, 2);
   EXPECT_EQ(interceptor->onResponseCount, 2);
+}
+
+CO_TEST_P(ServiceInterceptorTestP, InterceptorControl) {
+  struct BrokenInterceptor : public NamedServiceInterceptor<folly::Unit> {
+    using NamedServiceInterceptor::NamedServiceInterceptor;
+
+    [[noreturn]] std::optional<folly::Unit> onConnection(
+        ConnectionInfo) override {
+      throw std::runtime_error("Broken");
+    }
+
+    // onConnectionClosed is noexcept
+
+    [[noreturn]] folly::coro::Task<std::optional<folly::Unit>> onRequest(
+        folly::Unit*, RequestInfo) override {
+      throw std::runtime_error("Broken");
+    }
+
+    [[noreturn]] folly::coro::Task<void> onResponse(
+        folly::Unit*, folly::Unit*, ResponseInfo) override {
+      throw std::runtime_error("Broken");
+    }
+  };
+
+  auto interceptor = std::make_shared<BrokenInterceptor>("BrokenInterceptor");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+
+  // Setting the flag disables the interceptor, allowing the call to succeed
+  apache::thrift::detail::setDisabledServiceInterceptorsFlag(
+      "TestModule.BrokenInterceptor");
+  co_await client->co_echo("Should not throw");
 }
 
 // void return calls HandlerCallback::done() instead of

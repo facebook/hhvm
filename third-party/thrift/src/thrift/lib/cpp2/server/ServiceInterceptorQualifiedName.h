@@ -34,6 +34,8 @@ struct ServiceInterceptorQualifiedName {
   std::string toString() const {
     return fmt::format("{}.{}", moduleName, interceptorName);
   }
+
+  bool isValid() const { return !moduleName.empty(); }
 };
 
 } // namespace apache::thrift

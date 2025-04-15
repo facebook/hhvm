@@ -2487,6 +2487,17 @@ std::string ThriftServer::RuntimeServerActions::explain() const {
   return result;
 }
 
+namespace {
+
+void checkModuleNameIsValid(const std::string& moduleName) {
+  CHECK(!moduleName.empty()) << "Module name cannot be empty";
+  CHECK(moduleName.find_first_of(".,") == std::string::npos)
+      << "The character '.' is not allowed in module names - got: "
+      << moduleName;
+}
+
+} // namespace
+
 /* static */ ThriftServer::ProcessedModuleSet
 ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   ProcessedModuleSet result;
@@ -2494,6 +2505,7 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   class ServiceInterceptorsCollector {
    public:
     void addModule(const ModulesSpecification::Info& moduleSpec) {
+      checkModuleNameIsValid(moduleSpec.name);
       std::vector<std::shared_ptr<ServiceInterceptorBase>> serviceInterceptors =
           moduleSpec.module->getServiceInterceptors();
 

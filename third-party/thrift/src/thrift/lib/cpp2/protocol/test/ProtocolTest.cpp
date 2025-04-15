@@ -16,12 +16,15 @@
 
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
+#include <algorithm>
+#include <random>
 #include <folly/String.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/JSONProtocol.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
@@ -162,6 +165,71 @@ void runSkipCheckDepth(
   }
 }
 
+template <
+    typename ProtocolWriter,
+    typename ProtocolReader,
+    typename ArithmeticType>
+void runBigListTest(
+    folly::tag_t<ProtocolWriter, ProtocolReader>, ArithmeticType) {
+  for (int randomInit = 0; randomInit <= 1; ++randomInit) {
+    for (int i = 1; i < 256; ++i) {
+      auto w = ProtocolWriter();
+      auto q = folly::IOBufQueue();
+      w.setOutput(&q);
+
+      // Make sure we exercise the multi-IOBuf case
+      const size_t intListSize = randomInit ? i : (i + 32 * 1024);
+      std::vector<ArithmeticType> intList(intListSize);
+
+      // Specify the engine and distribution.
+      if (randomInit) {
+        std::mt19937 mersenne_engine(1337); // Generates random integers
+        if constexpr (std::is_floating_point_v<ArithmeticType>) {
+          std::uniform_real_distribution<ArithmeticType> dist{};
+          std::generate(intList.begin(), intList.end(), [&]() {
+            return dist(mersenne_engine);
+          });
+        } else {
+          std::uniform_int_distribution<ArithmeticType> dist{};
+          std::generate(intList.begin(), intList.end(), [&]() {
+            return dist(mersenne_engine);
+          });
+        }
+
+      } else {
+        ArithmeticType t = 0;
+        std::generate_n(intList.begin(), intList.size(), [&]() { return ++t; });
+      }
+      using prot_method_integral =
+          ::apache::thrift::detail::pm::protocol_methods<
+              ::apache::thrift::type_class::list<
+                  ::apache::thrift::type_class::integral>,
+              ::std::vector<ArithmeticType>>;
+      using prot_method_float = ::apache::thrift::detail::pm::protocol_methods<
+          ::apache::thrift::type_class::list<
+              ::apache::thrift::type_class::floating_point>,
+          ::std::vector<ArithmeticType>>;
+
+      if constexpr (std::is_floating_point_v<ArithmeticType>) {
+        prot_method_float::write(w, intList);
+      } else {
+        prot_method_integral::write(w, intList);
+      }
+
+      auto r = ProtocolReader();
+      r.setInput(q.front());
+      std::vector<ArithmeticType> outList;
+      outList.resize(intList.size());
+      if constexpr (std::is_floating_point_v<ArithmeticType>) {
+        prot_method_float::read(r, outList);
+      } else {
+        prot_method_integral::read(r, outList);
+      }
+      ASSERT_EQ(intList, outList);
+    }
+  }
+}
+
 using BinaryProtocol = folly::tag_t<BinaryProtocolWriter, BinaryProtocolReader>;
 using CompactProtocol =
     folly::tag_t<CompactProtocolWriter, CompactProtocolReader>;
@@ -195,4 +263,36 @@ TEST_F(ProtocolTest, skip_check_depth_simple_json) {
   runSkipCheckDepth(SimpleJSONProtocol{}, TType::T_LIST);
   runSkipCheckDepth(SimpleJSONProtocol{}, TType::T_SET);
   runSkipCheckDepth(SimpleJSONProtocol{}, TType::T_MAP);
+}
+
+TEST_F(ProtocolTest, big_arithmetic_list_binary_shard0) {
+  runBigListTest(BinaryProtocol{}, int64_t{});
+  runBigListTest(BinaryProtocol{}, uint64_t{});
+  runBigListTest(BinaryProtocol{}, int32_t{});
+  runBigListTest(BinaryProtocol{}, uint32_t{});
+}
+
+TEST_F(ProtocolTest, big_arithmetic_list_binary_shard1) {
+  runBigListTest(BinaryProtocol{}, int16_t{});
+  runBigListTest(BinaryProtocol{}, uint16_t{});
+  runBigListTest(BinaryProtocol{}, int8_t{});
+  runBigListTest(BinaryProtocol{}, uint8_t{});
+  runBigListTest(BinaryProtocol{}, float{});
+  runBigListTest(BinaryProtocol{}, double{});
+}
+
+TEST_F(ProtocolTest, big_arithmetic_list_compact_shard0) {
+  runBigListTest(CompactProtocol{}, int64_t{});
+  runBigListTest(CompactProtocol{}, uint64_t{});
+  runBigListTest(CompactProtocol{}, int32_t{});
+  runBigListTest(CompactProtocol{}, uint32_t{});
+}
+
+TEST_F(ProtocolTest, big_arithmetic_list_compact_shard1) {
+  runBigListTest(CompactProtocol{}, int16_t{});
+  runBigListTest(CompactProtocol{}, uint16_t{});
+  runBigListTest(CompactProtocol{}, int8_t{});
+  runBigListTest(CompactProtocol{}, uint8_t{});
+  runBigListTest(CompactProtocol{}, float{});
+  runBigListTest(CompactProtocol{}, double{});
 }

@@ -177,41 +177,6 @@ void throwIfContainsMapMask(const Mask& mask) {
   }
 }
 
-MapId findMapIdByValueAddress(const Mask& mask, const Value& newKey) {
-  MapId mapId = MapId{reinterpret_cast<int64_t>(&newKey)};
-  if (!(mask.includes_map_ref() || mask.excludes_map_ref())) {
-    return mapId;
-  }
-  const auto& mapIdToMask = mask.includes_map_ref() ? *mask.includes_map_ref()
-                                                    : *mask.excludes_map_ref();
-  auto it = std::find_if(
-      mapIdToMask.begin(), mapIdToMask.end(), [&newKey](const auto& kv) {
-        return *(reinterpret_cast<Value*>(kv.first)) == newKey;
-      });
-  return it == mapIdToMask.end() ? mapId : MapId{it->first};
-}
-
-MapId getMapIdValueAddressFromIndex(
-    const ValueIndex& index, const Value& newKey) {
-  if (auto it = index.find(newKey); it != index.end()) {
-    return MapId{reinterpret_cast<int64_t>(&(it->get()))};
-  }
-  return MapId{reinterpret_cast<int64_t>(&newKey)};
-}
-
-ValueIndex buildValueIndex(const Mask& mask) {
-  ValueIndex index;
-  const auto* mapIdToMask = getIntegerMapMask(mask);
-  if (!mapIdToMask) {
-    return index;
-  }
-  index.reserve(mapIdToMask->size());
-  for (auto& [key, _] : *mapIdToMask) {
-    index.insert(std::cref(*reinterpret_cast<Value*>(key)));
-  }
-  return index;
-}
-
 void validateSinglePath(const Mask& mask) {
   if (isAllMask(mask)) {
     return;

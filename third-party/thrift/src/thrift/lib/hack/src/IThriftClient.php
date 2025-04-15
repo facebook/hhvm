@@ -32,6 +32,5 @@ interface IThriftClient {
     TClientAsyncHandler $handler,
   )[write_props]: this;
   public function getHHFrameMetadata()[]: ?string;
-  public function setHHFrameMetadata(string $frame_metadata)[write_props]: this;
   abstract const string THRIFT_SVC_NAME;
 }

@@ -32,7 +32,6 @@ abstract class ThriftClientBase implements IThriftClient {
   protected ?IThriftMigrationAsyncChannel $channel_;
   protected TClientAsyncHandler $asyncHandler_;
   protected TClientEventHandler $eventHandler_;
-  protected ?string $frameMetadata_;
   protected ?RpcOptions $options_;
 
   protected int $seqid_ = 0;
@@ -85,14 +84,7 @@ abstract class ThriftClientBase implements IThriftClient {
     return $this->eventHandler_;
   }
 
-  public function setHHFrameMetadata(
-    string $frame_metadata,
-  )[write_props]: this {
-    $this->frameMetadata_ = $frame_metadata;
-    return $this;
-  }
-
-  public function getHHFrameMetadata()[]: ?string {
+  final public function getHHFrameMetadata()[]: ?string {
     return null;
   }
 

@@ -113,3 +113,13 @@ class CppConverterEcho(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             converter.echo_simple(self.make_nested())  # type: ignore
+
+    def test_cpp_mutation(self) -> None:
+        s = self.make_simple()
+        initial_strField = s.strField
+        cpp_str = converter.try_mutate_simple(s)
+        self.assertEqual(cpp_str, "mutated")
+        if is_auto_migrated():
+            self.assertEqual(s.strField, initial_strField)
+        else:
+            self.assertEqual(s.strField, cpp_str)

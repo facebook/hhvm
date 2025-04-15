@@ -34,12 +34,23 @@ cdef extern from *:
         return hrift;
     }
 
+    void mutate_simple(cpp2::Simple& simple) noexcept {
+        simple.strField_ref() = "mutated";
+    }
+
+    std::string get_strField(std::shared_ptr<cpp2::Simple> simple) noexcept {
+        return *simple->strField();
+    }
+
+
     """
     cdef T echo_thrift[T](T h_r_i_f_t) noexcept
     cdef shared_ptr[cSimple] corrupt_simple(
         shared_ptr[cSimple] h_r_i_f_t,
         const string& bad
     ) noexcept
+    cdef void mutate_simple(cSimple& simple) noexcept
+    cdef string get_strField(shared_ptr[cSimple] simple) noexcept
 
 def echo_simple(strucc):
     cdef shared_ptr[cSimple] c_strucc = converter.Simple_convert_to_cpp(strucc)
@@ -57,3 +68,9 @@ def echo_union(strucc):
 def echo_simple_corrupted(strucc, bad):
     cdef shared_ptr[cSimple] c_strucc = converter.Simple_convert_to_cpp(strucc)
     return converter.Simple_from_cpp(corrupt_simple(c_strucc, bad))
+
+def try_mutate_simple(strucc):
+    # in old thrift-py3, this would change value of strucc.strField to "mutated"
+    cdef shared_ptr[cSimple] c_strucc = converter.Simple_convert_to_cpp(strucc)
+    mutate_simple(deref(c_strucc))
+    return (<bytes>get_strField(c_strucc)).decode()

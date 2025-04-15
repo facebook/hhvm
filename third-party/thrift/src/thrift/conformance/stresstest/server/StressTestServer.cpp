@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/server/TokenBucketConcurrencyController.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 
 DEFINE_int32(port, 5000, "Server port");
@@ -36,21 +37,33 @@ DEFINE_int32(cpu_threads, 0, "Number of CPU threads (0 == number of cores)");
 DEFINE_int32(
     max_requests,
     -1,
-    "Configures max requests, 0 will disable max request limit");
+    "Configures max requests. Special value -1 will skip setting max request limit. Special value 0 will set max requests to maximum value.");
+DEFINE_int32(
+    concurrency_limit,
+    -1,
+    "Configures concurrency limit. Special value -1 will skip setting concurrency limit. Special value 0 will set concurrency limit to maximum value.");
+DEFINE_int32(
+    max_qps,
+    -1,
+    "Configures max qps. Special value -1 will skip setting max qps. Special value 0 will set max qps to maximum value.");
+DEFINE_int32(
+    execution_rate,
+    -1,
+    "Configures execution rate. Special value -1 will skip setting execution rate. Special value 0 will set execution rate to maximum value.");
 DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
+DEFINE_bool(work_stealing_executor, false, "Enable work stealing executor.");
 DEFINE_bool(
-    work_stealing,
+    parallel_concurrency_controller,
     false,
-    "Enable work stealing test. Implies --enable_resource_pools");
-DEFINE_bool(
-    work_stealing_executor_only,
-    false,
-    "Enable work stealing test without request pile or concurrency controller."
-    " Implies --work_stealing and --enable_resource_pools");
+    "Enable ParallelConcurrencyController.");
 DEFINE_bool(
     se_parallel_concurrency_controller,
     false,
-    "Enable SEParallelConcurrencyController. Implies --enable_resource_pools");
+    "Enable SEParallelConcurrencyController.");
+DEFINE_bool(
+    token_bucket_concurrency_controller,
+    false,
+    "Enable TokenBucketConcurrencyController.");
 DEFINE_string(
     certPath,
     "folly/io/async/test/certs/tests-cert.pem",
@@ -85,32 +98,6 @@ namespace apache::thrift::stress {
 using namespace apache::thrift::rocket;
 
 namespace {
-
-bool isResourcePoolsEnabled() {
-  // These flags explicitly or implicitly enable resource pools.
-  return FLAGS_enable_resource_pools || FLAGS_work_stealing ||
-      FLAGS_work_stealing_executor_only ||
-      FLAGS_se_parallel_concurrency_controller;
-}
-
-bool isWorkStealingEnabled() {
-  // These flags explicitly or implicitly enable work stealing executor.
-  return FLAGS_work_stealing || FLAGS_work_stealing_executor_only;
-}
-
-bool isRoundRobinRequestPileEnabled() {
-  return isResourcePoolsEnabled() && !FLAGS_work_stealing_executor_only;
-}
-
-bool isParallelConcurrencyControllerEnabled() {
-  return isResourcePoolsEnabled() && !FLAGS_work_stealing_executor_only &&
-      !FLAGS_se_parallel_concurrency_controller;
-}
-
-bool isSEParallelConcurrencyControllerEnabled() {
-  return isResourcePoolsEnabled() && !FLAGS_work_stealing_executor_only &&
-      FLAGS_se_parallel_concurrency_controller;
-}
 
 uint32_t sanitizeNumThreads(int32_t n) {
   return n <= 0 ? std::thread::hardware_concurrency() : n;
@@ -173,6 +160,8 @@ std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
 
 std::shared_ptr<ThriftServer> createStressTestServer(
     std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler) {
+  auto numCpuWorkerThreads = sanitizeNumThreads(FLAGS_cpu_threads);
+
   if (!handler) {
     handler = createStressTestHandler();
   }
@@ -187,10 +176,10 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   server->setPreferIoUring(FLAGS_io_uring);
   server->setIOThreadPool(
       getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
-  server->setNumCPUWorkerThreads(sanitizeNumThreads(FLAGS_cpu_threads));
+  server->setNumCPUWorkerThreads(numCpuWorkerThreads);
 
-  LOG(INFO) << "Enable Checksum Support: " << FLAGS_enable_checksum;
   if (FLAGS_enable_checksum) {
+    LOG(INFO) << "Checksum support enabled";
     PayloadSerializer::initialize(
         ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>(
             ChecksumPayloadSerializerStrategyOptions{
@@ -207,19 +196,15 @@ std::shared_ptr<ThriftServer> createStressTestServer(
                     }}));
   }
 
-  LOG(INFO) << "Active Request Tracking Disabled: "
-            << FLAGS_disable_active_request_tracking;
   if (FLAGS_disable_active_request_tracking) {
+    LOG(INFO) << "Active request tracking disabled";
     server->disableActiveRequestsTracking();
   }
 
-  if (FLAGS_max_requests > -1) {
-    LOG(INFO) << "Setting max server requests: " << FLAGS_max_requests;
-    server->setMaxRequests(FLAGS_max_requests);
-  }
   server->setSSLPolicy(apache::thrift::SSLPolicy::PERMITTED);
   if (!FLAGS_certPath.empty() && !FLAGS_keyPath.empty() &&
       !FLAGS_caPath.empty()) {
+    LOG(INFO) << "SSL config enabled";
     server->setSSLConfig(getSSLConfig());
   }
 
@@ -227,50 +212,74 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     server->setCallbackAssignFunc(callback_assign_func);
   }
 
-  if (!isResourcePoolsEnabled()) {
-    return server;
-  }
-
-  LOG(INFO) << "Resource pools enabled";
   std::shared_ptr<folly::Executor> executor;
-  auto t = sanitizeNumThreads(FLAGS_cpu_threads);
-
-  if (isWorkStealingEnabled()) {
-    LOG(INFO) << "Work Stealing Executor enabled";
-    executor = std::make_shared<folly::WorkStealingExecutor>(FLAGS_cpu_threads);
-  } else {
-    LOG(INFO) << "CPU Thread Pool Executor enabled";
+  if (FLAGS_work_stealing_executor) {
+    LOG(INFO) << "WorkStealingExecutor enabled";
+    executor =
+        std::make_shared<folly::WorkStealingExecutor>(numCpuWorkerThreads);
+  } else if (
+      FLAGS_parallel_concurrency_controller ||
+      FLAGS_se_parallel_concurrency_controller ||
+      FLAGS_token_bucket_concurrency_controller) {
+    LOG(INFO) << "CPUThreadPoolExecutor enabled";
     executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-        t, folly::CPUThreadPoolExecutor::makeThrottledLifoSemQueue());
+        numCpuWorkerThreads,
+        folly::CPUThreadPoolExecutor::makeThrottledLifoSemQueue());
   }
 
   std::unique_ptr<RequestPileInterface> requestPile;
-  if (isRoundRobinRequestPileEnabled()) {
-    LOG(INFO) << "Round Robin Request Pile enabled";
+  if (FLAGS_parallel_concurrency_controller ||
+      FLAGS_se_parallel_concurrency_controller ||
+      FLAGS_token_bucket_concurrency_controller) {
+    LOG(INFO) << "RoundRobinRequestPile enabled";
     requestPile = std::make_unique<RoundRobinRequestPile>(
         RoundRobinRequestPile::Options{});
   }
 
   std::unique_ptr<ConcurrencyControllerInterface> concurrencyController;
-  if (isParallelConcurrencyControllerEnabled()) {
-    LOG(INFO) << "Parallel Concurrency Controller enabled";
+  if (FLAGS_parallel_concurrency_controller) {
+    LOG(INFO) << "ParallelConcurrencyController enabled";
     concurrencyController = std::make_unique<ParallelConcurrencyController>(
         *requestPile.get(), *executor.get());
-  } else if (isSEParallelConcurrencyControllerEnabled()) {
+  } else if (FLAGS_se_parallel_concurrency_controller) {
     LOG(INFO) << "ParallelConcurrencyController with SerialExecutor enabled";
     concurrencyController = std::make_unique<ParallelConcurrencyController>(
         *requestPile.get(),
         *executor.get(),
         ParallelConcurrencyController::RequestExecutionMode::Serial);
+  } else if (FLAGS_token_bucket_concurrency_controller) {
+    LOG(INFO) << "TokenBucketConcurrencyController enabled";
+    concurrencyController = std::make_unique<TokenBucketConcurrencyController>(
+        *requestPile.get(), *executor.get());
   }
 
-  server->resourcePoolSet().setResourcePool(
-      ResourcePoolHandle::defaultAsync(),
-      std::move(requestPile),
-      executor,
-      std::move(concurrencyController));
-  server->ensureResourcePools();
-  server->requireResourcePools();
+  if (executor != nullptr) {
+    LOG(INFO) << "Resource pools enabled";
+    server->resourcePoolSet().setResourcePool(
+        ResourcePoolHandle::defaultAsync(),
+        std::move(requestPile),
+        executor,
+        std::move(concurrencyController));
+    server->ensureResourcePools();
+    server->requireResourcePools();
+  }
+
+  if (FLAGS_max_requests > -1) {
+    LOG(INFO) << "Setting maxRequests: " << FLAGS_max_requests;
+    server->setMaxRequests(FLAGS_max_requests);
+  }
+  if (FLAGS_max_qps > -1) {
+    LOG(INFO) << "Setting maxQps: " << FLAGS_max_qps;
+    server->setMaxQps(FLAGS_max_qps);
+  }
+  if (FLAGS_concurrency_limit > -1) {
+    LOG(INFO) << "Setting concurrencyLimit: " << FLAGS_concurrency_limit;
+    server->setConcurrencyLimit(FLAGS_concurrency_limit);
+  }
+  if (FLAGS_execution_rate > -1) {
+    LOG(INFO) << "Setting executionRate: " << FLAGS_execution_rate;
+    server->setExecutionRate(FLAGS_execution_rate);
+  }
 
   return server;
 }

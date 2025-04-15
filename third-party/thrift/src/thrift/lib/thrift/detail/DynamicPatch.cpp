@@ -263,6 +263,17 @@ std::string toSafePatchUri(std::string s) {
   return s;
 }
 
+std::string fromSafePatchUri(std::string s) {
+  auto newSize = s.size() - kSafePatchUriSuffix.size();
+  if (s.size() <= kSafePatchUriSuffix.size() ||
+      s.substr(newSize) != kSafePatchUriSuffix) {
+    folly::throw_exception<std::invalid_argument>(
+        fmt::format("Uri {} is not a SafePatch.", s));
+  }
+  s.resize(newSize);
+  return s;
+}
+
 } // namespace detail
 
 /// @cond
@@ -292,7 +303,10 @@ std::string fromPatchUri(std::string s) {
 namespace {
 // Helper function to handle URI transformation for both Patch and SafePatch
 type::Type transformPatchTypeUri(
-    type::Type input, std::function<std::string(std::string)> uriTransformer) {
+    type::Type input,
+    std::function<std::string(std::string)> uriTransformer,
+    bool fromPatchType,
+    bool isUnion) {
   auto& name = input.toThrift().name().value();
   auto handleUri = [&](auto& type) {
     if (auto p = type.uri_ref()) {
@@ -304,13 +318,22 @@ type::Type transformPatchTypeUri(
         apache::thrift::util::enumNameSafe(type.getType())));
   };
 
-  if (auto structType = name.structType_ref()) {
-    return handleUri(*structType);
-  } else if (auto unionType = name.unionType_ref()) {
-    // All Thrift SafePatch/Patch are struct type.
-    auto temp = std::move(*unionType);
-    name.structType_ref() = std::move(temp);
-    return handleUri(*name.structType_ref());
+  if (!isUnion) {
+    if (auto structType = name.structType_ref()) {
+      return handleUri(*structType);
+    } else if (auto unionType = name.unionType_ref();
+               unionType.has_value() && !fromPatchType) {
+      // All Thrift SafePatch/Patch are struct type.
+      auto temp = std::move(*unionType);
+      name.structType_ref() = std::move(temp);
+      return handleUri(*name.structType_ref());
+    }
+  } else {
+    if (auto structType = name.structType_ref()) {
+      auto temp = std::move(*structType);
+      name.unionType_ref() = std::move(temp);
+      return handleUri(*name.unionType_ref());
+    }
   }
 
   folly::throw_exception<std::runtime_error>(fmt::format(
@@ -320,11 +343,19 @@ type::Type transformPatchTypeUri(
 } // namespace
 
 type::Type toSafePatchType(type::Type input) {
-  return transformPatchTypeUri(std::move(input), detail::toSafePatchUri);
+  return transformPatchTypeUri(
+      std::move(input), detail::toSafePatchUri, false, false);
+}
+type::Type fromSafePatchType(type::Type input, bool isUnion) {
+  return transformPatchTypeUri(
+      std::move(input), detail::fromSafePatchUri, true, isUnion);
 }
 
 type::Type toPatchType(type::Type input) {
-  return transformPatchTypeUri(std::move(input), toPatchUri);
+  return transformPatchTypeUri(std::move(input), toPatchUri, false, false);
+}
+type::Type fromPatchType(type::Type input, bool isUnion) {
+  return transformPatchTypeUri(std::move(input), fromPatchUri, true, isUnion);
 }
 
 DynamicListPatch& DynamicPatch::getStoredPatchByTag(type::list_c) {

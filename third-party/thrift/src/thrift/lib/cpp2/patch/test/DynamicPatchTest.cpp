@@ -1075,6 +1075,27 @@ TEST(DynamicPatchTest, InvalidToPatchType) {
   EXPECT_THROW(toPatchType(type::Type::get<type::i32_t>()), std::runtime_error);
 }
 
+TEST(DynamicPatchTest, FromPatchType) {
+  EXPECT_EQ(
+      type::Type::get<type::struct_t<MyStruct>>(),
+      fromPatchType(type::Type::get<type::infer_tag<MyStructPatch>>(), false));
+  EXPECT_EQ(
+      type::Type::get<type::union_t<MyUnion>>(),
+      fromPatchType(type::Type::get<type::infer_tag<MyUnionPatch>>(), true));
+  type::Type type = type::Type::get<type::union_t<MyUnion>>();
+  type.toThrift().name()->unionType_ref()->scopedName_ref() = "scoped.name";
+  EXPECT_THROW(fromPatchType(type, true), std::runtime_error);
+  EXPECT_THROW(
+      fromPatchType(type::Type::get<type::infer_tag<MyStruct>>(), false),
+      std::invalid_argument);
+  // mimic if Patch is mistakenly stored as struct in type.
+  EXPECT_THROW(
+      fromPatchType(type::Type::get<type::infer_tag<MyUnion>>(), false),
+      std::runtime_error);
+  EXPECT_THROW(
+      fromPatchType(type::Type::get<type::i32_t>(), false), std::runtime_error);
+}
+
 TEST(DynamicPatchTest, ToSafePatchType) {
   EXPECT_EQ(
       toSafePatchType(type::Type::get<type::struct_t<MyStruct>>()),
@@ -1094,6 +1115,55 @@ TEST(DynamicPatchTest, ToSafePatchType) {
   EXPECT_THROW(
       toSafePatchType(type::Type::get<type::struct_t<MyStructSafePatch>>()),
       std::runtime_error);
+}
+
+TEST(DynamicPatchTest, FromSafePatchType) {
+  EXPECT_EQ(
+      type::Type::get<type::struct_t<MyStruct>>(),
+      fromSafePatchType(
+          type::Type::get<type::struct_t<MyStructSafePatch>>(), false));
+  EXPECT_EQ(
+      type::Type::get<type::union_t<MyUnion>>(),
+      fromSafePatchType(
+          type::Type::get<type::struct_t<MyUnionSafePatch>>(), true));
+  EXPECT_THROW(
+      fromSafePatchType(type::Type::get<type::i32_t>(), false),
+      std::runtime_error);
+  type::Type unionScopedName = type::Type::get<type::union_t<MyUnion>>();
+  unionScopedName.toThrift().name()->unionType_ref()->scopedName_ref() =
+      "scoped.name";
+  EXPECT_THROW(fromSafePatchType(unionScopedName, true), std::runtime_error);
+  EXPECT_THROW(
+      fromSafePatchType(type::Type::get<type::infer_tag<MyStruct>>(), false),
+      std::invalid_argument);
+  // mimic if SafePatch is mistakenly stored as struct in type.
+  EXPECT_THROW(
+      fromSafePatchType(type::Type::get<type::infer_tag<MyUnion>>(), false),
+      std::runtime_error);
+  EXPECT_THROW(
+      fromSafePatchType(type::Type::get<type::i32_t>(), false),
+      std::runtime_error);
+}
+
+TEST(DynamicPatchTest, PatchTypeConversion) {
+  // SafePatch -> Patch
+  EXPECT_EQ(
+      type::Type::get<type::struct_t<MyStructSafePatch>>(),
+      toSafePatchType(fromPatchType(
+          type::Type::get<type::infer_tag<MyStructPatch>>(), false)));
+  EXPECT_EQ(
+      type::Type::get<type::struct_t<MyUnionSafePatch>>(),
+      toSafePatchType(fromPatchType(
+          type::Type::get<type::infer_tag<MyUnionPatch>>(), true)));
+  // Patch -> SafePatch
+  EXPECT_EQ(
+      type::Type::get<type::infer_tag<MyStructPatch>>(),
+      toPatchType(fromSafePatchType(
+          type::Type::get<type::struct_t<MyStructSafePatch>>(), false)));
+  EXPECT_EQ(
+      type::Type::get<type::infer_tag<MyUnionPatch>>(),
+      toPatchType(fromSafePatchType(
+          type::Type::get<type::struct_t<MyUnionSafePatch>>(), true)));
 }
 
 TEST(DynamicPatchTest, AnyPatch) {

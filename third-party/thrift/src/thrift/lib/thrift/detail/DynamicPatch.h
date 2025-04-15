@@ -1119,8 +1119,14 @@ std::string fromPatchUri(std::string s);
 
 /// Convert a struct/union type to SafePatch type.
 type::Type toSafePatchType(type::Type input);
-/// Convert a struct/union type to Patch type.
+/// Convert SafePatch type to struct/union type.
+type::Type fromSafePatchType(type::Type input, bool isUnion);
+
+/// Convert struct/union type to Patch type.
 /// Currently, it does not support primitive types (e.g., i32 --> I32Patch).
 type::Type toPatchType(type::Type input);
+/// Convert Patch type to struct/union type.
+/// Currently, it does not support primitive types (e.g., I32Patch --> i32).
+type::Type fromPatchType(type::Type input, bool isUnion);
 
 } // namespace apache::thrift::protocol

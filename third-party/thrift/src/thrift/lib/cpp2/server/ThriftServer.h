@@ -1290,6 +1290,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * @param executionRate new setting for execution rate.
    */
   void setExecutionRate(uint32_t executionRate) override {
+    folly::call_once(cancelSetMaxQpsCallbackHandleFlag_, [this]() {
+      setMaxQpsCallbackHandle.cancel();
+    });
     thriftConfig_.setExecutionRate(
         folly::observer::makeStaticObserver(std::optional{executionRate}),
         AttributeSource::OVERRIDE);
@@ -1891,6 +1894,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // Logging only needs to happen once.
   folly::once_flag serviceReliesOnSyncedMaxRequestsFlag_;
 
+  // setMaxQpsCallbackHandle should be cancelled, unsyncing maxQps from resource
+  // pools, when setExecutionRate is explicitly called.
+  folly::once_flag cancelSetMaxQpsCallbackHandleFlag_;
+
   struct IdleServerAction : public folly::HHWheelTimer::Callback {
     IdleServerAction(
         ThriftServer& server,
@@ -2006,6 +2013,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   folly::observer::CallbackHandle setConcurrencyLimitCallbackHandle{};
   folly::observer::CallbackHandle setMaxRequestsCallbackHandle{};
   folly::observer::CallbackHandle setMaxQpsCallbackHandle{};
+  folly::observer::CallbackHandle setExecutionRateCallbackHandle{};
 
  public:
   /**

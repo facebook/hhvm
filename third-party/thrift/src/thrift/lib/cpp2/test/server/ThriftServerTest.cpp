@@ -3877,7 +3877,7 @@ TEST(ThriftServer, GetSetMaxRequests) {
         EXPECT_EQ(maxRequests, getExecutionLimitRequests(server));
 
         // Also test that setting concurrencyLimit unsyncs the resource pool
-        // from maxRequets.
+        // from maxRequests.
         auto concurrencyLimit = target + 1;
         server.setConcurrencyLimit(concurrencyLimit);
         EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
@@ -3903,13 +3903,82 @@ TEST(ThriftServer, GetSetMaxRequests) {
         EXPECT_EQ(maxRequests, getExecutionLimitRequests(server));
 
         // Also test that setting concurrencyLimit unsyncs the resource pool
-        // from maxRequets.
+        // from maxRequests.
         auto concurrencyLimit = target + 1;
         server.setConcurrencyLimit(concurrencyLimit);
         EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
 
         server.setMaxRequests(target);
         EXPECT_NE(maxRequests, getExecutionLimitRequests(server));
+      }
+    }
+  }
+}
+
+TEST(ThriftServer, GetSetMaxQps) {
+  FLAGS_thrift_use_token_bucket_concurrency_controller = true;
+
+  auto getQpsLimit = [](const ThriftServer& server) {
+    return server.resourcePoolSet()
+        .resourcePool(ResourcePoolHandle::defaultAsync())
+        .concurrencyController()
+        .value()
+        .get()
+        .getQpsLimit();
+  };
+
+  for (auto target : std::array<uint32_t, 2>{1000, 0}) {
+    {
+      // Test set before setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestInterface>());
+      server.setMaxQps(target);
+      EXPECT_EQ(server.getMaxQps(), target);
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      EXPECT_EQ(server.getMaxQps(), target);
+      if (server.useResourcePools()) {
+        auto maxQps =
+            target == 0 ? std::numeric_limits<decltype(target)>::max() : target;
+        EXPECT_EQ(maxQps, getQpsLimit(server));
+
+        // Also test that setting executionRate unsyncs the resource pool
+        // from maxQps.
+        auto executionRate = target + 1;
+        server.setExecutionRate(executionRate);
+        EXPECT_EQ(executionRate, getQpsLimit(server));
+
+        server.setMaxQps(target);
+        EXPECT_NE(maxQps, getQpsLimit(server));
+      }
+    }
+    {
+      // Test set after setupThreadManager
+      ThriftServer server;
+      server.setInterface(std::make_shared<TestInterface>());
+      // Make the thrift server simple to create
+      server.setThreadManagerType(
+          apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+      server.setNumCPUWorkerThreads(1);
+      server.setupThreadManager();
+      server.setMaxQps(target);
+      EXPECT_EQ(server.getMaxQps(), target);
+      if (server.useResourcePools()) {
+        auto maxQps =
+            target == 0 ? std::numeric_limits<decltype(target)>::max() : target;
+        EXPECT_EQ(maxQps, getQpsLimit(server));
+
+        // Also test that setting executionRate unsyncs the resource pool
+        // from maxQps.
+        auto executionRate = target + 1;
+        server.setExecutionRate(executionRate);
+        EXPECT_EQ(executionRate, getQpsLimit(server));
+
+        server.setMaxQps(target);
+        EXPECT_NE(maxQps, getQpsLimit(server));
       }
     }
   }

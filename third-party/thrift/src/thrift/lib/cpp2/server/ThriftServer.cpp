@@ -1018,6 +1018,26 @@ void ThriftServer::setupThreadManager() {
                                       decltype(maxRequests)>::max());
                   }
                 });
+    setExecutionRateCallbackHandle =
+        detail::getThriftServerConfig(*this)
+            .getExecutionRate()
+            .getObserver()
+            .addCallback([this](const folly::observer::Snapshot<uint32_t>&
+                                    snapshot) {
+              auto executionRate = *snapshot;
+              if (auto cc =
+                      resourcePoolSet()
+                          .resourcePool(ResourcePoolHandle::defaultAsync())
+                          .concurrencyController()) {
+                cc.value().get().setQpsLimit(
+                    executionRate != 0
+                        ? executionRate
+                        : std::numeric_limits<decltype(executionRate)>::max());
+              }
+            });
+    // ThriftServer's maxQps was historically synced to ConcurrencyController's
+    // qpsLimit. This syncing behavior will be removed, but for now we sync by
+    // default.
     setMaxQpsCallbackHandle =
         detail::getThriftServerConfig(*this)
             .getMaxQps()

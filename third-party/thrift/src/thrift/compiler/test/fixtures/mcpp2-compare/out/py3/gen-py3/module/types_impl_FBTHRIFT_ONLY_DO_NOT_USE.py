@@ -17,3 +17,53 @@ AnnotatedEnum = _fbthrift_python_enums.AnnotatedEnum
 AnnotatedEnum2 = _fbthrift_python_enums.AnnotatedEnum2
 MyEnumB = _fbthrift_python_enums.MyEnumB
 
+
+class __SimpleUnionType(enum.Enum):
+    intValue = 7
+    stringValue = 2
+    EMPTY = 0
+
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+class __ComplexUnionType(enum.Enum):
+    intValue = 1
+    opt_intValue = 201
+    stringValue = 3
+    opt_stringValue = 203
+    intValue2 = 4
+    intValue3 = 6
+    doubelValue = 7
+    boolValue = 8
+    union_list = 9
+    union_set = 10
+    union_map = 11
+    opt_union_map = 211
+    enum_field = 12
+    enum_container = 13
+    a_struct = 14
+    a_set_struct = 15
+    a_union = 16
+    opt_a_union = 216
+    a_union_list = 17
+    a_union_typedef = 18
+    a_union_typedef_list = 19
+    MyBinaryField = 20
+    MyBinaryField2 = 21
+    MyBinaryListField4 = 23
+    ref_field = 24
+    ref_field2 = 25
+    excp_field = 26
+    MyCustomField = 27
+    EMPTY = 0
+
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+class __FloatUnionType(enum.Enum):
+    floatSide = 1
+    doubleSide = 2
+    EMPTY = 0
+
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()

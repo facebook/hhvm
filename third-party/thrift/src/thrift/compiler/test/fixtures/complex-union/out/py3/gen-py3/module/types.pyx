@@ -51,6 +51,14 @@ import builtins as _builtins
 import importlib
 
 import module.thrift_types as _fbthrift_python_types
+from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+    __ComplexUnionType,
+    __ListUnionType,
+    __DataUnionType,
+    __ValUnionType,
+    __VirtualComplexUnionType,
+    __NonCopyableUnionType,
+)
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i64,
@@ -65,7 +73,6 @@ cdef object get_types_reflection():
         "module.types_reflection"
     )
 
-__ComplexUnionType = _fbthrift_python_types.ComplexUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -311,7 +318,6 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexUnion, self)
 
-__ListUnionType = _fbthrift_python_types.ListUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -471,7 +477,6 @@ cdef class ListUnion(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ListUnion, self)
 
-__DataUnionType = _fbthrift_python_types.DataUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -762,7 +767,6 @@ cdef class Val(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Val, self)
 
-__ValUnionType = _fbthrift_python_types.ValUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -922,7 +926,6 @@ cdef class ValUnion(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ValUnion, self)
 
-__VirtualComplexUnionType = _fbthrift_python_types.VirtualComplexUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -1185,7 +1188,6 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.NonCopyableStruct, self)
 
-__NonCopyableUnionType = _fbthrift_python_types.NonCopyableUnion.Type
 
 
 @__cython.auto_pickle(False)

@@ -34,4 +34,11 @@ _fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Na
 {{enum:name}} = _fbthrift_python_enums.{{enum:name}}
 {{/program:enums}}
 
+{{#program:filtered_structs}}
+{{#struct:union?}}
+
+{{> inplace/union_enum_py }}
+
+{{/struct:union?}}
+{{/program:filtered_structs}}
 {{/program:inplace_migrate?}}

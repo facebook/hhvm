@@ -16,3 +16,21 @@ EmptyEnum = _fbthrift_python_enums.EmptyEnum
 City = _fbthrift_python_enums.City
 Company = _fbthrift_python_enums.Company
 
+
+class __union1Type(enum.Enum):
+    i = 1
+    d = 2
+    EMPTY = 0
+
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+class __union2Type(enum.Enum):
+    i = 1
+    d = 2
+    s = 3
+    u = 4
+    EMPTY = 0
+
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()

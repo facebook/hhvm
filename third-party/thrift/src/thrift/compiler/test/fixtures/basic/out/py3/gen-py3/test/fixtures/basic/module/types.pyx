@@ -55,6 +55,10 @@ from test.fixtures.basic.module.thrift_enums import (
     MyEnum,
     HackEnum,
 )
+from test.fixtures.basic.module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+    __MyUnionType,
+    __UnionToBeRenamedType,
+)
 
 from test.fixtures.basic.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__float,
@@ -487,7 +491,6 @@ cdef class MyDataItem(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItem, self)
 
-__MyUnionType = _fbthrift_python_types.MyUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -1063,7 +1066,6 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ReservedKeyword, self)
 
-__UnionToBeRenamedType = _fbthrift_python_types.UnionToBeRenamed.Type
 
 
 @__cython.auto_pickle(False)

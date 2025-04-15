@@ -59,6 +59,11 @@ from module.thrift_enums import (
     AnnotatedEnum2,
     MyEnumB,
 )
+from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+    __SimpleUnionType,
+    __ComplexUnionType,
+    __FloatUnionType,
+)
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Map__string_i64,
@@ -654,7 +659,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
 
-__SimpleUnionType = _fbthrift_python_types.SimpleUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -824,7 +828,6 @@ cdef class SimpleUnion(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleUnion, self)
 
-__ComplexUnionType = _fbthrift_python_types.ComplexUnion.Type
 
 
 @__cython.auto_pickle(False)
@@ -3299,7 +3302,6 @@ cdef class FloatStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.FloatStruct, self)
 
-__FloatUnionType = _fbthrift_python_types.FloatUnion.Type
 
 
 @__cython.auto_pickle(False)

@@ -13,3 +13,9 @@ _fbthrift__module_name__ = "module.types"
 
 
 
+
+class __NadaType(enum.Enum):
+    EMPTY = 0
+
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()

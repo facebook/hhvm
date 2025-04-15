@@ -873,10 +873,10 @@ void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
     Id id;
     decoder(id);
     if (makeStatic) {
-      sd = ue->lookupLitstr(id);
+      sd = ue->lookupLitstrId(id);
       assertx(!sd || sd->isStatic());
     } else {
-      sd = ue->lookupLitstrCopy(id).detach();
+      sd = ue->lookupLitstrIdCopy(id).detach();
     }
     return;
   }
@@ -926,7 +926,7 @@ BlobEncoderHelper<const StringData*>::asStringPiece(BlobDecoder& decoder) {
   if (auto const ue = tl_unitEmitter) {
     Id id;
     decoder(id);
-    auto const sd = ue->lookupLitstr(id);
+    auto const sd = ue->lookupLitstrId(id);
     if (!sd) return { nullptr, size_t{0} };
     return sd->slice();
   }

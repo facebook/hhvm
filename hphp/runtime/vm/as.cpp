@@ -1822,7 +1822,7 @@ void parse_coeffects_closure_parent_scope(AsmState& as) {
  * directive-coeffects_generator_this ';'
  */
 void parse_coeffects_generator_this(AsmState& as) {
-  assertx(as.ue->isASystemLib());
+  assertx(as.ue->isSystemLib());
   as.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::GeneratorThis{}));
   as.in.expectWs(';');
 }
@@ -2336,7 +2336,7 @@ void check_native(AsmState& as) {
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
 
-    if (as.ue->isASystemLib()) as.fe->attrs |= AttrBuiltin;
+    if (as.ue->isSystemLib()) as.fe->attrs |= AttrBuiltin;
   }
 }
 
@@ -2351,7 +2351,7 @@ void parse_function(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
-  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrBuiltin));
+  assertx(IMPLIES(as.ue->isSystemLib(), attrs & AttrBuiltin));
 
   int line0;
   int line1;
@@ -2363,11 +2363,11 @@ void parse_function(AsmState& as) {
     as.error(".function must have a name");
   }
   auto const sname = makeStaticString(name);
-  assertx(IMPLIES(as.ue->isASystemLib(),
+  assertx(IMPLIES(as.ue->isSystemLib(),
     bool(attrs & AttrPersistent) != RO::funcIsRenamable(sname)));
 
   as.fe = as.ue->newFuncEmitter(sname);
-  as.fe->init(line0, line1, attrs, nullptr, as.ue->isASystemLib());
+  as.fe->init(line0, line1, attrs, nullptr, as.ue->isSystemLib());
 
   as.fe->retUserType = userType;
   as.fe->retTypeConstraints = TypeIntersectionConstraint(
@@ -2400,7 +2400,7 @@ void parse_method(AsmState& as) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
-  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrBuiltin));
+  assertx(IMPLIES(as.ue->isSystemLib(), attrs & AttrBuiltin));
 
   int line0;
   int line1;
@@ -2419,7 +2419,7 @@ void parse_method(AsmState& as) {
 
   as.fe = as.ue->newMethodEmitter(sname, as.pce);
   as.pce->addMethod(as.fe);
-  as.fe->init(line0, line1, attrs, nullptr, as.ue->isASystemLib());
+  as.fe->init(line0, line1, attrs, nullptr, as.ue->isSystemLib());
 
   as.fe->retUserType = userType;
   as.fe->retTypeConstraints = TypeIntersectionConstraint(
@@ -2780,7 +2780,7 @@ void parse_class(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
-  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent &&
+  assertx(IMPLIES(as.ue->isSystemLib(), attrs & AttrPersistent &&
                                          attrs & AttrBuiltin));
 
   std::string name;
@@ -2837,7 +2837,7 @@ void parse_class(AsmState& as) {
                attrs,
                makeStaticString(parentName),
                staticEmptyString(),
-               as.ue->isASystemLib());
+               as.ue->isSystemLib());
   for (auto const& iface : ifaces) {
     as.pce->addInterface(makeStaticString(iface));
   }
@@ -2962,7 +2962,7 @@ void parse_alias(AsmState& as, AliasKind kind) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Alias, &userAttrs);
-  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent));
+  assertx(IMPLIES(as.ue->isSystemLib(), attrs & AttrPersistent));
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".alias must have a name");
@@ -3025,7 +3025,7 @@ void parse_constant(AsmState& as) {
 
   Constant constant;
   Attr attrs = parse_attribute_list(as, AttrContext::Constant);
-  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent));
+  assertx(IMPLIES(as.ue->isSystemLib(), attrs & AttrPersistent));
 
   std::string name;
   if (!as.in.readword(name)) {

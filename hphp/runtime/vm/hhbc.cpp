@@ -686,14 +686,14 @@ std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f, Eith
   auto lookupLitstrId = [u](Id id) {
     return u.match(
       [id](const Unit* u) { return u->lookupLitstrId(id); },
-      [id](const UnitEmitter* ue) { return ue->lookupLitstr(id); }
+      [id](const UnitEmitter* ue) { return ue->lookupLitstrId(id); }
     );
   };
 
   auto lookupArrayId = [u](Id id) {
     return u.match(
       [id](const Unit* u) { return u->lookupArrayId(id); },
-      [id](const UnitEmitter* ue) { return ue->lookupArray(id); }
+      [id](const UnitEmitter* ue) { return ue->lookupArrayId(id); }
     );
   };
 

@@ -30,7 +30,7 @@ const StringData* decode_string(PC& pc, StringDecoder u) {
   if (u.isNull()) return nullptr;
   return u.match(
     [id](const Unit* u) { return u->lookupLitstrId(id); },
-    [id](const UnitEmitter* ue) { return ue->lookupLitstr(id); }
+    [id](const UnitEmitter* ue) { return ue->lookupLitstrId(id); }
   );
 }
 

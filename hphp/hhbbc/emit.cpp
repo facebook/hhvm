@@ -1043,7 +1043,7 @@ void emit_init_func(UnitEmitter& ue, FuncEmitter& fe, const php::Func& func) {
     std::get<1>(func.srcInfo.loc),
     func.attrs | (func.sampleDynamicCalls ? AttrDynamicallyCallable : AttrNone),
     func.srcInfo.docComment,
-    ue.isASystemLib()
+    ue.isSystemLib()
   );
 }
 
@@ -1069,7 +1069,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       (cls.sampleDynamicConstruct ? AttrDynamicallyConstructible : AttrNone),
     cls.parentName ? cls.parentName : staticEmptyString(),
     cls.srcInfo.docComment,
-    ue.isASystemLib()
+    ue.isSystemLib()
   );
   pce->setUserAttributes(cls.userAttributes);
 

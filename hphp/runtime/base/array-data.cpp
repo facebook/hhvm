@@ -1096,10 +1096,10 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
       return;
     }
     if (makeStatic) {
-      ad = ue->lookupArray(id-1);
+      ad = ue->lookupArrayId(id-1);
       assertx(ad->isStatic());
     } else {
-      ad = ue->lookupArrayCopy(id-1).detach();
+      ad = ue->lookupArrayIdCopy(id-1).detach();
     }
     return;
   } else if (auto const u = tl_unit; u && !tl_defer) {

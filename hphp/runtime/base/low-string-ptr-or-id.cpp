@@ -91,13 +91,12 @@ const StringData* LowStringPtrOrId::ptr(const Unit* unit) const {
 const StringData* LowStringPtrOrId::ptr(const UnitEmitter& ue) const {
   auto i = id();
   if (i != kInvalidId) {
-    auto str = ue.lookupLitstr(i);
+    auto str = ue.lookupLitstrId(i);
     m_s.store(details::to_low(str), std::memory_order_relaxed);
     return str;
   }
   return reinterpret_cast<const StringData*>(m_s.load(std::memory_order_relaxed));
 }
-
 
 void BlobEncoderHelper<LowStringPtrOrId>::serde(BlobEncoder& encoder,
                                                 const LowStringPtrOrId& s) {

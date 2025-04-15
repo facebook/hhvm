@@ -137,7 +137,7 @@ void fixup_default_values(T& state, FuncEmitter* fe) {
 
     TypedValue dv = make_tv<KindOfUninit>();
     auto const decode_array = [&] {
-      if (auto const arr = state.ue->lookupArray(decode_raw<uint32_t>(capture))) {
+      if (auto const arr = state.ue->lookupArrayId(decode_raw<uint32_t>(capture))) {
         dv.m_type = arr->toPersistentDataType();
         dv.m_data.parr = const_cast<ArrayData*>(arr);
       }

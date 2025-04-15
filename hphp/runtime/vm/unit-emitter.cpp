@@ -89,7 +89,7 @@ UnitEmitter::~UnitEmitter() {
 ///////////////////////////////////////////////////////////////////////////////
 // Litstrs and Arrays.
 
-const StringData* UnitEmitter::lookupLitstr(Id id) const {
+const StringData* UnitEmitter::lookupLitstrId(Id id) const {
   assertx(id >= 0 && id < m_litstrs.size());
   auto& elem = m_litstrs[id];
   auto wrapper = elem.copy();
@@ -109,7 +109,7 @@ const StringData* UnitEmitter::lookupLitstr(Id id) const {
   return str;
 }
 
-const ArrayData* UnitEmitter::lookupArray(Id id) const {
+const ArrayData* UnitEmitter::lookupArrayId(Id id) const {
   assertx(id >= 0 && id < m_arrays.size());
   auto& elem = m_arrays[id];
   auto wrapper = elem.copy();
@@ -181,7 +181,7 @@ const RepoAuthType::Array* UnitEmitter::lookupRATArray(Id id) const {
   return array;
 }
 
-String UnitEmitter::lookupLitstrCopy(Id id) const {
+String UnitEmitter::lookupLitstrIdCopy(Id id) const {
   assertx(id >= 0 && id < m_litstrs.size());
   auto& elem = m_litstrs[id];
   auto wrapper = elem.copy();
@@ -195,7 +195,7 @@ String UnitEmitter::lookupLitstrCopy(Id id) const {
   return String::attach(const_cast<StringData*>(str));
 }
 
-Array UnitEmitter::lookupArrayCopy(Id id) const {
+Array UnitEmitter::lookupArrayIdCopy(Id id) const {
   assertx(id >= 0 && id < m_arrays.size());
   auto& elem = m_arrays[id];
   auto wrapper = elem.copy();
@@ -560,7 +560,7 @@ Id UnitEmitter::getEntryPointId() const {
 
 void UnitEmitter::finish() {
   calculateEntryPointId();
-  assertx(m_fatalUnit || (isASystemLib() == (m_extension != nullptr)));
+  assertx(m_fatalUnit || (isSystemLib() == (m_extension != nullptr)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -603,11 +603,11 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   static const bool kVerifyVerbose =
     kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
 
-  const bool isSystemLib = FileUtil::isSystemName(m_filepath->slice());
+  const bool isSystemLib_ = isSystemLib();
   const bool doVerify = kVerify || boost::ends_with(m_filepath->data(), ".hhas");
 
   // Systemlib is verified during build so we don't need to do it here.
-  if (!isSystemLib && doVerify) {
+  if (!isSystemLib_ && doVerify) {
     // The verifier needs the bytecode available, but we don't want to
     // necessarily force it to load (otherwise it would defeat the
     // point of lazy loading when we're using the verifier). So, load
@@ -641,11 +641,11 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
         std::cerr << folly::format(
           "Verification failed for unit {}. Re-run with "
           "HHVM_VERIFY_VERBOSE{}=1 to see more details.\n",
-          m_filepath->data(), isSystemLib ? "_SYSTEM" : ""
+          m_filepath->data(), isSystemLib_ ? "_SYSTEM" : ""
         );
       }
       if (Cfg::Eval::VerifyOnly) {
-        if (!isSystemLib) {
+        if (!isSystemLib_) {
           std::fflush(stdout);
           _Exit(1);
         }
@@ -658,7 +658,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
         )->create();
       }
     }
-    if (!isSystemLib && Cfg::Eval::VerifyOnly) {
+    if (!isSystemLib_ && Cfg::Eval::VerifyOnly) {
       std::fflush(stdout);
       _Exit(0);
     }
@@ -744,7 +744,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   }
 
   if (Cfg::Eval::DumpHhas > 1 ||
-    (!isASystemLib() && Cfg::Eval::DumpHhas == 1)) {
+    (!isSystemLib_ && Cfg::Eval::DumpHhas == 1)) {
     auto const& hhaspath = Cfg::Eval::DumpHhasToFile;
     if (!hhaspath.empty()) {
       static std::atomic<bool> first_unit{true};
@@ -758,7 +758,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
       std::printf("%s", disassemble(u.get()).c_str());
       std::fflush(stdout);
     }
-    if (!isASystemLib()) {
+    if (!isSystemLib_) {
       _Exit(0);
     }
   }
@@ -780,7 +780,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
 
   MemoryManager::SuppressOOM so{*tl_heap};
 
-  auto is_systemlib = isASystemLib();
+  auto is_systemlib = isSystemLib();
   if (is_systemlib) lazy = false;
 
   // Have SerDe use this unit's string/array table for encoding or decoding.
@@ -1040,7 +1040,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
                 m_litarrayBuffer = nullptr;
                 m_litarrayBufferSize = 0;
               };
-              for (size_t i = 0; i < count; ++i) lookupArray(i);
+              for (size_t i = 0; i < count; ++i) lookupArrayId(i);
             }
           } else {
             sd.lazyCount(

@@ -265,7 +265,7 @@ void populate_block(ParseUnitState& puState,
     CompactVector<LSString> keys;
     keys.reserve(vecLen);
     for (auto i = size_t{0}; i < vecLen; ++i) {
-      keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
+      keys.push_back(ue.lookupLitstrId(decode<int32_t>(pc)));
     }
     return keys;
   };
@@ -288,7 +288,7 @@ void populate_block(ParseUnitState& puState,
     for (int32_t i = 0; i < vecLen - 1; ++i) {
       auto const id = decode<Id>(pc);
       auto const offset = decode<Offset>(pc);
-      ret.emplace_back(ue.lookupLitstr(id),
+      ret.emplace_back(ue.lookupLitstrId(id),
                        findBlock(opPC + offset - fe.bc()));
     }
 
@@ -338,9 +338,9 @@ void populate_block(ParseUnitState& puState,
                          return id;                              \
                        }();
 #define IMM_DA(n)      auto dbl##n = decode<double>(pc);
-#define IMM_SA(n)      auto str##n = ue.lookupLitstr(decode<Id>(pc));
+#define IMM_SA(n)      auto str##n = ue.lookupLitstrId(decode<Id>(pc));
 #define IMM_RATA(n)    auto rat = decodeRAT(ue, pc);
-#define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
+#define IMM_AA(n)      auto arr##n = ue.lookupArrayId(decode<Id>(pc));
 #define IMM_BA(n)      assertx(next == past);     \
                        auto target##n = findBlock(  \
                          opPC + decode<Offset>(pc) - fe.bc());
@@ -1113,7 +1113,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
 }
 
 ParsedUnit parse_unit(const UnitEmitter& ue) {
-  Trace::Bump bumper{Trace::hhbbc_parse, kSystemLibBump, ue.isASystemLib()};
+  Trace::Bump bumper{Trace::hhbbc_parse, kSystemLibBump, ue.isSystemLib()};
   FTRACE(2, "parse_unit {}\n", ue.m_filepath->data());
 
   ParsedUnit ret;

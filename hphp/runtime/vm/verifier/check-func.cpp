@@ -1179,7 +1179,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
           ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
           return false;
         }
-        auto const prop = m_unit->lookupLitstrCopy(getImm(pc, 0).u_SA);
+        auto const prop = m_unit->lookupLitstrIdCopy(getImm(pc, 0).u_SA);
         if (!m_func->pce() || !m_func->pce()->hasProp(prop.get())){
              ferror("{} references non-existent property {}\n",
                     opcodeToName(op), prop);
@@ -1212,7 +1212,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       break;
     }
     case Op::CreateCl: {
-      auto const name = m_unit->lookupLitstrCopy(getImm(pc, 1).u_SA);
+      auto const name = m_unit->lookupLitstrIdCopy(getImm(pc, 1).u_SA);
       auto const preCls = [&] () -> const PreClassEmitter* {
         for (auto const pce : unit()->preclasses()) {
           if (pce->name()->tsame(name.get())) return pce;
@@ -1259,7 +1259,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
                 #name, #name); \
         return false; \
       } \
-      auto const dt = unit()->lookupArrayCopy(id)->toDataType(); \
+      auto const dt = unit()->lookupArrayIdCopy(id)->toDataType(); \
       if (dt != KindOf##name) { \
         ferror("{} references array data that is a {}\n", #name, dt); \
         return false; \
@@ -1463,7 +1463,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
             ferror("Generics passed to {} don't exist\n", opcodeToName(op));
             return false;
           }
-          auto const arr = unit()->lookupArrayCopy(id);
+          auto const arr = unit()->lookupArrayIdCopy(id);
           if (doesTypeStructureContainTUnresolved(arr.get())) {
             ferror("Generics passed to {} contain unresolved generics. "
                    "Call CombineAndResolveTypeStruct to resolve them\n",

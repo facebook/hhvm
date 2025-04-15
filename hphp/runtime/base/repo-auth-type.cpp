@@ -564,7 +564,7 @@ RepoAuthType decodeRAT(const Unit* unit, const unsigned char*& pc) {
 RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
   return decodeRATImpl(
     pc,
-    [&] (Id id) { return ue.lookupLitstr(id); },
+    [&] (Id id) { return ue.lookupLitstrId(id); },
     [&] (Id id) { return ue.lookupRATArray(id); }
   );
 }

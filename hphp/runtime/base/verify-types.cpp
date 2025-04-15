@@ -600,8 +600,8 @@ void compare_resolved_types(const std::string& hhbc_file,
 
           Unit* src = nullptr;
           try {
-            src = hhbc->isASystemLib() ? SystemLib::findPersistentUnit(uname)
-                                       : loadPathSafe(uname, facts);
+            src = hhbc->isSystemLib() ? SystemLib::findPersistentUnit(uname)
+                                      : loadPathSafe(uname, facts);
             if (!src) {
               Logger::FVerbose("Skipping {}, not found", uname->data());
               skipped++;

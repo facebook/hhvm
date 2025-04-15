@@ -87,7 +87,7 @@ inline const std::vector<Module>& UnitEmitter::modules() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
-inline bool UnitEmitter::isASystemLib() const {
+inline bool UnitEmitter::isSystemLib() const {
   return FileUtil::isSystemName(m_filepath->slice());
 }
 
@@ -114,7 +114,7 @@ void UnitEmitterSerdeWrapper::serde(SerDe& sd,
       ue->serde(sd, false);
 
       // Make sure that for systemlib units people pass down extension.
-      assertx(ue->isASystemLib() == (extension != nullptr));
+      assertx(ue->isSystemLib() == (extension != nullptr));
 
       m_ue = std::move(ue);
     }

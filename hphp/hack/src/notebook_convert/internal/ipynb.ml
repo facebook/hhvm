@@ -39,6 +39,29 @@ let cell_contents_of_source_lines (source_lines : string list) : string =
            s)
   |> String.concat ~sep:"\n"
 
+let is_most_likely_hack
+    (cell_bento_metadata : Hh_json.json option)
+    ~(contents : string)
+    ~(cell_type : string) : bool =
+  (* we try not to make hard assumptions about the metadata: assume it's hack *)
+  let bad_or_missing_metadata_value = true in
+  String.equal cell_type "code"
+  && (not (String.is_prefix contents ~prefix:"%%"))
+  &&
+  match cell_bento_metadata with
+  | None -> bad_or_missing_metadata_value
+  | Some cell_bento_metadata -> begin
+    try
+      let obj = Hh_json.get_object_exn cell_bento_metadata in
+      let language =
+        List.Assoc.find_exn obj "language" ~equal:String.equal
+        |> Hh_json.get_string_exn
+      in
+      String.equal language "hack"
+    with
+    | _ -> bad_or_missing_metadata_value
+  end
+
 let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
   let cell_of_json_exn (cell_json : Hh_json.json) : cell =
     let find_exn = List.Assoc.find_exn ~equal:String.equal in
@@ -53,11 +76,16 @@ let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
     let cell_bento_metadata =
       List.Assoc.find obj "metadata" ~equal:String.equal
     in
-    match Hh_json.get_string_exn type_json with
-    | "code" when String.is_prefix contents ~prefix:"%%" ->
-      Non_hack { cell_type = "unknown"; contents; cell_bento_metadata }
-    | "code" -> Hack { contents; cell_bento_metadata }
-    | cell_type -> Non_hack { cell_type; contents; cell_bento_metadata }
+    let cell_type =
+      match type_json with
+      | JSON_String s -> s
+      | _ -> "unknown"
+    in
+    if is_most_likely_hack cell_bento_metadata ~contents ~cell_type then
+      Hack { contents; cell_bento_metadata }
+    else
+      (* Python cells start with `%%`. In future, other cells might, too, so have cell_type be unknown *)
+      Non_hack { cell_type; contents; cell_bento_metadata }
   in
   try
     let find_exn = List.Assoc.find_exn ~equal:String.equal in

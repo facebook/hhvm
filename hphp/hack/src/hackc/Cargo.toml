@@ -32,7 +32,7 @@ ffi = { version = "0.0.0", path = "ffi/ffi" }
 file_provider = { version = "0.0.0", path = "../hackrs/file_provider/cargo/file_provider" }
 hackrs_test_utils = { version = "0.0.0", path = "../hackrs/hackrs_test_utils/cargo/hackrs_test_utils" }
 hash = { version = "0.0.0", path = "../utils/hash" }
-hdrhistogram = "6.3"
+hdrhistogram = "7.5"
 hhbc = { version = "0.0.0", path = "hhbc/cargo/hhbc" }
 hhi = { version = "0.0.0", path = "../hhi/rust" }
 hhvm_config = { version = "0.0.0", path = "hhvm_config/cargo/options" }

@@ -18,6 +18,7 @@
 
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/generate/templates.h>
+#include <thrift/compiler/sema/schematizer.h>
 #include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/parser.h>
 #include <thrift/compiler/whisker/source_location.h>
@@ -65,6 +66,22 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
   auto def = prototype_builder<h_named>::extends(proto.of<t_node>());
   def.property("name", mem_fn(&t_named::name));
   def.property("program", mem_fn(&t_named::program, proto.of<t_program>()));
+
+  def.property("definition_key", [this](const t_named& named) {
+    detail::schematizer s(*named.program()->global_scope(), source_mgr_, {});
+    auto unescaped = s.identify_definition(named);
+    std::string escaped;
+    for (unsigned char chr : unescaped) {
+      fmt::format_to(std::back_inserter(escaped), "\\x{:02x}", chr);
+    }
+    return escaped;
+  });
+  def.property("definition_key_length", [](const t_named&) -> int64_t {
+    // NOTE: this is not the same as `string.len self.definition_key` because
+    // of escape sequences!
+    return detail::schematizer::definition_identifier_length();
+  });
+
   return std::move(def).make();
 }
 

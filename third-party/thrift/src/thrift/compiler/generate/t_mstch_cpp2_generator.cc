@@ -218,14 +218,6 @@ bool has_schema(source_manager& sm, const t_program& program) {
   return program.find(schematizer::name_schema(sm, program));
 }
 
-std::string escape_binary_string(std::string_view str) {
-  std::string ret;
-  for (unsigned char chr : str) {
-    fmt::format_to(std::back_inserter(ret), "\\x{:02x}", chr);
-  }
-  return ret;
-}
-
 class cpp2_generator_context {
  public:
   static cpp2_generator_context create() { return cpp2_generator_context(); }
@@ -318,6 +310,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("cpp_name", [](const t_named& named) {
       return cpp2::get_name(&named);
     });
+
     return std::move(def).make();
   }
 
@@ -907,9 +900,6 @@ class cpp_mstch_service : public mstch_service {
             {"service:has_service_schema",
              &cpp_mstch_service::has_service_schema},
             {"service:reduced_client?", &cpp_mstch_service::reduced_client},
-            {"service:definition_key", &cpp_mstch_service::definition_key},
-            {"service:definition_key_length",
-             &cpp_mstch_service::definition_key_length},
         });
 
     const auto all_functions = mstch_service::get_functions();
@@ -990,14 +980,6 @@ class cpp_mstch_service : public mstch_service {
   }
   mstch::node has_service_schema() {
     return has_schema(sm_, *service_->program());
-  }
-
-  mstch::node definition_key() {
-    schematizer s(*service_->program()->global_scope(), sm_, {});
-    return escape_binary_string(s.identify_definition(*service_));
-  }
-  mstch::node definition_key_length() {
-    return schematizer::definition_identifier_length();
   }
 
  private:

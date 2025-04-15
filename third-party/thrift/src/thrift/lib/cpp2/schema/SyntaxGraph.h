@@ -519,13 +519,6 @@ class FieldNode final : folly::MoveOnly,
    */
   const StructuredNode& parent() const;
 
- private:
-  detail::DefinitionKeyRef parent_;
-  FieldId id_;
-  PresenceQualifier presence_;
-  folly::not_null<const apache::thrift::type::Type*> type_;
-  std::optional<apache::thrift::type::ValueId> customDefaultId_;
-
   FieldNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& parent,
@@ -542,7 +535,12 @@ class FieldNode final : folly::MoveOnly,
         type_(&type),
         customDefaultId_(std::move(customDefaultId)) {}
 
-  friend class detail::Resolver;
+ private:
+  detail::DefinitionKeyRef parent_;
+  FieldId id_;
+  PresenceQualifier presence_;
+  folly::not_null<const apache::thrift::type::Type*> type_;
+  std::optional<apache::thrift::type::ValueId> customDefaultId_;
 };
 
 class StructuredNode : detail::WithDefinition, detail::WithUri {
@@ -577,10 +575,12 @@ class StructNode final : folly::MoveOnly, public StructuredNode {
   std::string toDebugString() const;
   friend std::ostream& operator<<(std::ostream&, const StructNode&);
 
- private:
-  using StructuredNode::StructuredNode;
-
-  friend class detail::Resolver;
+  StructNode(
+      const detail::Resolver& resolver,
+      const apache::thrift::type::DefinitionKey& definitionKey,
+      std::string_view uri,
+      std::vector<FieldNode> fields)
+      : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
 };
 
 class UnionNode final : folly::MoveOnly, public StructuredNode {
@@ -595,10 +595,12 @@ class UnionNode final : folly::MoveOnly, public StructuredNode {
   std::string toDebugString() const;
   friend std::ostream& operator<<(std::ostream&, const UnionNode&);
 
- private:
-  using StructuredNode::StructuredNode;
-
-  friend class detail::Resolver;
+  UnionNode(
+      const detail::Resolver& resolver,
+      const apache::thrift::type::DefinitionKey& definitionKey,
+      std::string_view uri,
+      std::vector<FieldNode> fields)
+      : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
 };
 
 class ExceptionNode final : folly::MoveOnly, public StructuredNode {
@@ -613,10 +615,12 @@ class ExceptionNode final : folly::MoveOnly, public StructuredNode {
   std::string toDebugString() const;
   friend std::ostream& operator<<(std::ostream&, const ExceptionNode&);
 
- private:
-  using StructuredNode::StructuredNode;
-
-  friend class detail::Resolver;
+  ExceptionNode(
+      const detail::Resolver& resolver,
+      const apache::thrift::type::DefinitionKey& definitionKey,
+      std::string_view uri,
+      std::vector<FieldNode> fields)
+      : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
 };
 
 class EnumNode final : folly::MoveOnly,
@@ -660,9 +664,6 @@ class EnumNode final : folly::MoveOnly,
   std::string toDebugString() const;
   friend std::ostream& operator<<(std::ostream&, const EnumNode&);
 
- private:
-  std::vector<Value> values_;
-
   EnumNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
@@ -672,7 +673,8 @@ class EnumNode final : folly::MoveOnly,
         detail::WithUri(uri),
         values_(std::move(values)) {}
 
-  friend class detail::Resolver;
+ private:
+  std::vector<Value> values_;
 };
 
 class TypedefNode final : folly::MoveOnly, detail::WithDefinition {
@@ -693,16 +695,14 @@ class TypedefNode final : folly::MoveOnly, detail::WithDefinition {
   std::string toDebugString() const;
   friend std::ostream& operator<<(std::ostream&, const TypedefNode&);
 
- private:
-  // Heap usage prevents mutual recursion with `TypeRef` and `DefinitionNode`.
-  folly::not_null_unique_ptr<TypeRef> targetType_;
-
   TypedefNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       TypeRef&& targetType);
 
-  friend class detail::Resolver;
+ private:
+  // Heap usage prevents mutual recursion with `TypeRef` and `DefinitionNode`.
+  folly::not_null_unique_ptr<TypeRef> targetType_;
 };
 
 class ConstantNode final : folly::MoveOnly, detail::WithDefinition {
@@ -711,18 +711,16 @@ class ConstantNode final : folly::MoveOnly, detail::WithDefinition {
   const TypeRef& type() const { return *type_; }
   const apache::thrift::protocol::Value& value() const;
 
- private:
-  // Heap usage prevents mutual recursion with `TypeRef` and `Definition`.
-  folly::not_null_unique_ptr<TypeRef> type_;
-  apache::thrift::type::ValueId valueId_;
-
   ConstantNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       TypeRef&& type,
       apache::thrift::type::ValueId valueId);
 
-  friend class detail::Resolver;
+ private:
+  // Heap usage prevents mutual recursion with `TypeRef` and `Definition`.
+  folly::not_null_unique_ptr<TypeRef> type_;
+  apache::thrift::type::ValueId valueId_;
 };
 
 class List final {
@@ -749,13 +747,11 @@ class List final {
 
   static List of(TypeRef elementType);
 
+  explicit List(TypeRef&& elementType);
+
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
   folly::not_null_unique_ptr<TypeRef> elementType_;
-
-  explicit List(TypeRef&& elementType);
-
-  friend class detail::Resolver;
 };
 
 class Set final {
@@ -782,13 +778,11 @@ class Set final {
 
   static Set of(TypeRef elementType);
 
+  explicit Set(TypeRef&& elementType);
+
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
   folly::not_null_unique_ptr<TypeRef> elementType_;
-
-  explicit Set(TypeRef&& elementType);
-
-  friend class detail::Resolver;
 };
 
 class Map final {
@@ -816,14 +810,12 @@ class Map final {
 
   static Map of(TypeRef keyType, TypeRef valueType);
 
+  Map(TypeRef&& keyType, TypeRef&& valueType);
+
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
   folly::not_null_unique_ptr<TypeRef> keyType_;
   folly::not_null_unique_ptr<TypeRef> valueType_;
-
-  Map(TypeRef&& keyType, TypeRef&& valueType);
-
-  friend class detail::Resolver;
 };
 
 class FunctionStream final : folly::MoveOnly {
@@ -833,14 +825,12 @@ class FunctionStream final : folly::MoveOnly {
   const TypeRef& payloadType() const { return *payloadType_; }
   folly::span<const TypeRef> exceptions() const;
 
+  FunctionStream(TypeRef&& payloadType, std::vector<TypeRef>&& exceptions);
+
  private:
   // Heap usage prevents mutual recursion with `DefinitionNode`.
   folly::not_null_unique_ptr<TypeRef> payloadType_;
   std::vector<TypeRef> exceptions_;
-
-  FunctionStream(TypeRef&& payloadType, std::vector<TypeRef>&& exceptions);
-
-  friend class detail::Resolver;
 };
 
 class FunctionSink final : folly::MoveOnly {
@@ -853,20 +843,18 @@ class FunctionSink final : folly::MoveOnly {
   folly::span<const TypeRef> clientExceptions() const;
   folly::span<const TypeRef> serverExceptions() const;
 
- private:
-  // Heap usage prevents mutual recursion with `DefinitionNode`.
-  folly::not_null_unique_ptr<TypeRef> payloadType_;
-  folly::not_null_unique_ptr<TypeRef> finalResponseType_;
-  std::vector<TypeRef> clientExceptions_;
-  std::vector<TypeRef> serverExceptions_;
-
   FunctionSink(
       TypeRef&& payloadType,
       TypeRef&& finalResponseType,
       std::vector<TypeRef>&& clientExceptions,
       std::vector<TypeRef>&& serverExceptions);
 
-  friend class detail::Resolver;
+ private:
+  // Heap usage prevents mutual recursion with `DefinitionNode`.
+  folly::not_null_unique_ptr<TypeRef> payloadType_;
+  folly::not_null_unique_ptr<TypeRef> finalResponseType_;
+  std::vector<TypeRef> clientExceptions_;
+  std::vector<TypeRef> serverExceptions_;
 };
 
 class FunctionResponse final : folly::MoveOnly {
@@ -905,14 +893,8 @@ class FunctionResponse final : folly::MoveOnly {
     return std::get_if<FunctionStream>(&sinkOrStream_);
   }
 
- private:
   using SinkOrStream =
       std::variant<std::monostate, FunctionSink, FunctionStream>;
-
-  std::unique_ptr<TypeRef> type_;
-  std::optional<detail::Lazy<InteractionNode>> interaction_;
-  SinkOrStream sinkOrStream_;
-
   FunctionResponse(
       std::unique_ptr<TypeRef>&& type,
       std::optional<detail::Lazy<InteractionNode>>&& interaction,
@@ -921,7 +903,10 @@ class FunctionResponse final : folly::MoveOnly {
         interaction_(std::move(interaction)),
         sinkOrStream_(std::move(sinkOrStream)) {}
 
-  friend class detail::Resolver;
+ private:
+  std::unique_ptr<TypeRef> type_;
+  std::optional<detail::Lazy<InteractionNode>> interaction_;
+  SinkOrStream sinkOrStream_;
 };
 
 class FunctionParam final : folly::MoveOnly,
@@ -931,10 +916,6 @@ class FunctionParam final : folly::MoveOnly,
   using detail::WithName::name;
   FieldId id() const { return id_; }
   TypeRef type() const;
-
- private:
-  FieldId id_;
-  folly::not_null<const apache::thrift::type::Type*> type_;
 
   FunctionParam(
       const detail::Resolver& resolver,
@@ -946,7 +927,9 @@ class FunctionParam final : folly::MoveOnly,
         id_(id),
         type_(&type) {}
 
-  friend class detail::Resolver;
+ private:
+  FieldId id_;
+  folly::not_null<const apache::thrift::type::Type*> type_;
 };
 
 class FunctionNode final : folly::MoveOnly,
@@ -970,12 +953,6 @@ class FunctionNode final : folly::MoveOnly,
   folly::span<const Param> params() const { return params_; }
   folly::span<const TypeRef> exceptions() const;
 
- private:
-  detail::DefinitionKeyRef parent_;
-  Response response_;
-  std::vector<Param> params_;
-  std::vector<TypeRef> exceptions_;
-
   FunctionNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& parent,
@@ -985,7 +962,11 @@ class FunctionNode final : folly::MoveOnly,
       std::vector<Param>&& params,
       std::vector<TypeRef>&& exceptions);
 
-  friend class detail::Resolver;
+ private:
+  detail::DefinitionKeyRef parent_;
+  Response response_;
+  std::vector<Param> params_;
+  std::vector<TypeRef> exceptions_;
 };
 
 class RpcInterfaceNode : detail::WithDefinition, detail::WithUri {
@@ -1024,9 +1005,6 @@ class ServiceNode final : folly::MoveOnly, public RpcInterfaceNode {
  public:
   const ServiceNode* FOLLY_NULLABLE baseService() const;
 
- private:
-  std::optional<detail::DefinitionKeyRef> baseServiceKey_;
-
   ServiceNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
@@ -1036,21 +1014,25 @@ class ServiceNode final : folly::MoveOnly, public RpcInterfaceNode {
       : RpcInterfaceNode(resolver, definitionKey, uri, std::move(functions)),
         baseServiceKey_(std::move(baseServiceKey)) {}
 
-  friend class detail::Resolver;
+ private:
+  std::optional<detail::DefinitionKeyRef> baseServiceKey_;
 };
 
 class InteractionNode final : folly::MoveOnly, public RpcInterfaceNode {
- private:
-  using RpcInterfaceNode::RpcInterfaceNode;
-
-  friend class detail::Resolver;
+ public:
+  InteractionNode(
+      const detail::Resolver& resolver,
+      const apache::thrift::type::DefinitionKey& definitionKey,
+      std::string_view uri,
+      std::vector<FunctionNode>&& functions)
+      : RpcInterfaceNode(resolver, definitionKey, uri, std::move(functions)) {}
 };
 
 class DefinitionNode final : folly::MoveOnly,
                              detail::WithResolver,
                              detail::WithName,
                              detail::WithAnnotations {
- private:
+ public:
   using Alternative = std::variant<
       StructNode,
       UnionNode,
@@ -1062,7 +1044,6 @@ class DefinitionNode final : folly::MoveOnly,
       InteractionNode>;
   static_assert(std::is_move_constructible_v<Alternative>);
 
- public:
   const ProgramNode& program() const;
   using detail::WithAnnotations::annotations;
   using detail::WithName::name;
@@ -1194,10 +1175,6 @@ class DefinitionNode final : folly::MoveOnly,
   std::string toDebugString() const;
   friend std::ostream& operator<<(std::ostream&, const DefinitionNode&);
 
- private:
-  apache::thrift::type::ProgramId programId_;
-  Alternative definition_;
-
   DefinitionNode(
       const detail::Resolver& resolver,
       apache::thrift::type::ProgramId programId,
@@ -1205,11 +1182,13 @@ class DefinitionNode final : folly::MoveOnly,
       std::string_view name,
       Alternative&& definition);
 
-  friend class detail::Resolver;
+ private:
+  apache::thrift::type::ProgramId programId_;
+  Alternative definition_;
 };
 
 class TypeRef final {
- private:
+ public:
   using Alternative = std::variant<
       Primitive,
       detail::Lazy<StructNode>,
@@ -1222,7 +1201,6 @@ class TypeRef final {
       Map>;
   static_assert(std::is_copy_constructible_v<Alternative>);
 
- public:
   enum class Kind {
     PRIMITIVE = detail::IndexOf<Alternative, Primitive>,
     STRUCT = detail::IndexOf<Alternative, detail::Lazy<StructNode>>,
@@ -1379,12 +1357,10 @@ class TypeRef final {
   static TypeRef of(const Set&);
   static TypeRef of(const Map&);
 
- private:
-  Alternative type_;
-
   explicit TypeRef(Alternative&& type) : type_(std::move(type)) {}
 
-  friend class detail::Resolver;
+ private:
+  Alternative type_;
 };
 // `TypeRef` is a value type and should behave like one.
 static_assert(std::is_copy_constructible_v<TypeRef>);
@@ -1400,13 +1376,11 @@ class Annotation final : folly::MoveOnly {
       folly::F14FastMap<std::string_view, apache::thrift::protocol::Value>;
   const Fields& fields() const { return fields_; }
 
+  Annotation(TypeRef&& type, Fields&& fields);
+
  private:
   folly::not_null_unique_ptr<TypeRef> type_;
   Fields fields_;
-
-  Annotation(TypeRef&& type, Fields&& fields);
-
-  friend class detail::Resolver;
 };
 
 class ProgramNode final : folly::MoveOnly,
@@ -1429,11 +1403,6 @@ class ProgramNode final : folly::MoveOnly,
 
   const SyntaxGraph& syntaxGraph() const;
 
- private:
-  std::string_view path_;
-  std::vector<apache::thrift::type::ProgramId> includes_;
-  Definitions definitions_;
-
   ProgramNode(
       const detail::Resolver& resolver,
       std::string_view path,
@@ -1446,7 +1415,10 @@ class ProgramNode final : folly::MoveOnly,
         includes_(std::move(includes)),
         definitions_(std::move(definitions)) {}
 
-  friend class detail::Resolver;
+ private:
+  std::string_view path_;
+  std::vector<apache::thrift::type::ProgramId> includes_;
+  Definitions definitions_;
 };
 
 class SyntaxGraph final {

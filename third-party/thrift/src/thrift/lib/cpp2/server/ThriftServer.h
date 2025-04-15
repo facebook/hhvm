@@ -1902,6 +1902,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // Logging only needs to happen once.
   folly::once_flag serviceMightRelyOnSyncedMaxQpsFlag_;
 
+  // If the service relies on the synced maxQps, then we need to log. Logging
+  // only needs to happen once.
+  folly::once_flag serviceReliesOnSyncedMaxQpsFlag_;
+
   struct IdleServerAction : public folly::HHWheelTimer::Callback {
     IdleServerAction(
         ThriftServer& server,

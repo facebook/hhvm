@@ -26,8 +26,12 @@ class ConcurrencyControllerInterfaceUnsafeAPI {
       ConcurrencyControllerInterface& concurrencyController)
       : concurrencyController_(concurrencyController) {}
 
-  bool getLimitHasBeenEnforced() const {
-    return concurrencyController_.getLimitHasBeenEnforced();
+  bool getExecutionLimitRequestsHasBeenEnforced() const {
+    return concurrencyController_.getExecutionLimitRequestsHasBeenEnforced();
+  }
+
+  bool getQpsLimitHasBeenEnforced() const {
+    return concurrencyController_.getQpsLimitHasBeenEnforced();
   }
 
  private:

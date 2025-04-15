@@ -2035,7 +2035,7 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
                 .resourcePool(ResourcePoolHandle::defaultAsync())
                 .concurrencyController()) {
       if (ConcurrencyControllerInterfaceUnsafeAPI(concurrencyController->get())
-              .getLimitHasBeenEnforced()) {
+              .getExecutionLimitRequestsHasBeenEnforced()) {
         // Cncurrency limit has been enforced while still synced with
         // maxRequests. This is the kind of case that absolutely must be
         // migrated before completely decoupling maxRequests from
@@ -2073,10 +2073,13 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
 
   // Log services that might break if ConcurrencyController's qpsLimit is
   // unsynced from maxQps and is synced with only concurrencyLimit instead.
-  if (folly::test_once(cancelSetMaxQpsCallbackHandleFlag_) ||
-      folly::test_once(serviceMightRelyOnSyncedMaxQpsFlag_)) {
-    // This is okay. Either maxQps syncing was cancelled, or we already logged
-    // that the service might rely on the syncing.
+  if (resourcePoolSet().empty() ||
+      folly::test_once(cancelSetMaxQpsCallbackHandleFlag_) ||
+      folly::test_once(serviceReliesOnSyncedMaxQpsFlag_)) {
+    // This is okay. If we're not using resource pools, syncing was cancelled
+    // because setExecutionRate was explicitly called, or we've already detected
+    // and logged reliance on maxQps syncing with executionRate, we don't need
+    // to check anything else.
   } else if (
       thriftConfig_.getMaxQps().get() ==
       thriftConfig_.getExecutionRate().get()) {
@@ -2092,16 +2095,32 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
     // maxQps) since ThriftServer will never pass enough requests into the
     // resource pool. After ConcurrencyController's qpsLimit is synced from
     // concurrencyLimit instead, the new default value (uint32_t max) will
-    // continue to be greater than the number of requests that can be passed
-    // into the resource pool.
+    // continue to be greater than the rate of requests that can be passed into
+    // the resource pool.
   } else {
     // This is not okay. When ConcurrencyController's qpsLimit is unsynced from
-    // maxQps and synced to executionRate instead, the service will encounter a
+    // maxQps and synced to executionRate instead, the service might encounter a
     // behavioral change.
     folly::call_once(serviceMightRelyOnSyncedMaxQpsFlag_, [this]() {
       LOG(WARNING) << "Service might rely on synced max qps.";
       THRIFT_SERVER_EVENT(serviceMightRelyOnSyncedMaxQps).log(*this);
     });
+
+    if (auto concurrencyController =
+            resourcePoolSet()
+                .resourcePool(ResourcePoolHandle::defaultAsync())
+                .concurrencyController()) {
+      if (ConcurrencyControllerInterfaceUnsafeAPI(concurrencyController->get())
+              .getQpsLimitHasBeenEnforced()) {
+        // ExecutionRate has been enforced while still synced with maxQps. This
+        // is the kind of case that absolutely must be migrated before
+        // completely decoupling maxQps from qpsLimit.
+        folly::call_once(serviceReliesOnSyncedMaxRequestsFlag_, [this]() {
+          LOG(WARNING) << "Service relies on synced max qps.";
+          THRIFT_SERVER_EVENT(serviceReliesOnSyncedMaxQps).log(*this);
+        });
+      }
+    }
   }
 
   if (auto maxQps = getMaxQps(); maxQps > 0 &&

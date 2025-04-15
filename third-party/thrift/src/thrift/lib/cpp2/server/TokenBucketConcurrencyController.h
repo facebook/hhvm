@@ -58,6 +58,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
     }
 
     if (enableSlowModeOnce()) {
+      limitHasBeenEnforced_.store(true);
       innerExecutor_->add([this]() { slowMode(); });
     }
   }
@@ -224,6 +225,10 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
     }
   }
 
+  virtual bool getQpsLimitHasBeenEnforced() const override {
+    return limitHasBeenEnforced_.load();
+  }
+
   RequestPileInterface& pile_;
   folly::Executor& executor_;
 
@@ -234,6 +239,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
   std::unique_ptr<folly::CPUThreadPoolExecutor> innerExecutor_;
 
   std::atomic<uint64_t> pendingDequeueOps_{0};
+  folly::relaxed_atomic<bool> limitHasBeenEnforced_{false};
 
   ServerRequestLoggingFunction onExpireFunction_;
   ServerRequestLoggingFunction onExecuteFunction_;

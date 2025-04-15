@@ -97,7 +97,7 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase {
   bool executorSupportPriority{true};
   RequestPileInterface& pile_;
 
-  virtual bool getLimitHasBeenEnforced() const override {
+  virtual bool getExecutionLimitRequestsHasBeenEnforced() const override {
     return limitHasBeenEnforced_.load();
   }
 

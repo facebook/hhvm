@@ -424,7 +424,6 @@ let do_glean_symbol_searches
       let () =
         if String.is_empty reponame then failwith "--glean-reponame required"
       in
-      let () = Folly.ensure_folly_init () in
       Some (Glean.initialize ~reponame ~prev_init_time:None |> Option.value_exn)
   in
   List.iter searches ~f:(fun (title, query_text, context, kind_filter) ->
@@ -961,10 +960,11 @@ let () =
   if !Sys.interactive then
     ()
   else
+    let () = Folly.ensure_folly_init () in
     (* On windows, setting 'binary mode' avoids to output CRLF on
        stdout.  The 'text mode' would not hurt the user in general, but
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, root, sharedmem_config) = parse_options () in
-  Unix.handle_unix_error main_hack options root sharedmem_config
+    let (options, root, sharedmem_config) = parse_options () in
+    Unix.handle_unix_error main_hack options root sharedmem_config

@@ -607,6 +607,77 @@ class NumericalConversionsTests(unittest.TestCase):
                 getattr(non_opt_isset, field, False), field_value is not None, field
             )
 
+    def roundtrip(self, x: numerical) -> numerical:
+        return deserialize(numerical, serialize(x))
+
+    def test_permissive_init_int_with_enum(self) -> None:
+        n = numerical(int_val=Kind.LINK)
+
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.int_val), int)
+            self.assertEqual(n.int_val, Kind.LINK.value)
+
+        if is_auto_migrated():
+            # BAD: should be an `int`
+            self.assertIsInstance(n.int_val, Kind)
+            self.assertEqual(n.int_val, Kind.LINK)
+        else:
+            assert_strict(n)
+
+        rt = self.roundtrip(n)
+        assert_strict(rt)
+
+    def test_permissive_init_float_with_enum(self) -> None:
+        n = numerical(float_val=Kind.LINK)
+
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.float_val), float)
+            self.assertEqual(n.float_val, Kind.LINK.value)
+
+        if is_auto_migrated():
+            # BAD: should be an `float`
+            self.assertIsInstance(n.float_val, Kind)
+            self.assertEqual(n.float_val, Kind.LINK)
+        else:
+            assert_strict(n)
+
+        rt = self.roundtrip(n)
+        assert_strict(rt)
+
+    def test_permissive_init_float_with_bool(self) -> None:
+        n = numerical(float_val=True)
+
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.float_val), float)
+            self.assertEqual(n.float_val, float(True))
+
+        if is_auto_migrated():
+            # BAD: should be an `float`
+            self.assertIsInstance(n.float_val, bool)
+            self.assertEqual(n.float_val, True)
+        else:
+            assert_strict(n)
+
+        rt = self.roundtrip(n)
+        assert_strict(rt)
+
+    def test_permissive_init_float_with_int(self) -> None:
+        n = numerical(float_val=888)
+
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.float_val), float)
+            self.assertEqual(n.float_val, 888.0)
+
+        if is_auto_migrated():
+            # BAD: should be an `float`
+            self.assertIsInstance(n.float_val, int)
+            self.assertEqual(n.float_val, 888)
+        else:
+            assert_strict(n)
+
+        rt = self.roundtrip(n)
+        assert_strict(rt)
+
 
 class TestSubclass(OptionalFile):
     pass

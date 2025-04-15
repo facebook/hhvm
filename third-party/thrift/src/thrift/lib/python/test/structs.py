@@ -21,7 +21,7 @@ import copy
 import math
 import types
 import unittest
-from typing import Callable, cast, Type, TypeVar
+from typing import Callable, Type, TypeVar
 from unittest import mock
 
 import testing.thrift_mutable_types as mutable_test_types
@@ -496,6 +496,7 @@ class NumericalConversionsTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.numerical: Type[numerical] = self.test_types.numerical
+        self.Kind: Type[Kind] = self.test_types.Kind
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -548,6 +549,49 @@ class NumericalConversionsTests(unittest.TestCase):
                 # pyre-ignore[6]: for test
                 int_list=[math.pi, math.e],
             )
+
+    def roundtrip(self, x: numerical) -> numerical:
+        return self.serializer.deserialize(self.numerical, self.serializer.serialize(x))
+
+    def test_permissive_init_int_with_enum(self) -> None:
+        n = self.numerical(int_val=self.Kind.LINK)
+        # BAD: should be an `int`
+        self.assertIsInstance(n.int_val, self.Kind)
+        self.assertEqual(n.int_val, self.Kind.LINK)
+
+        rt = self.roundtrip(n)
+        self.assertIs(type(rt.int_val), int)
+        self.assertEqual(rt.int_val, self.Kind.LINK.value)
+
+    def test_permissive_init_float_with_enum(self) -> None:
+        n = self.numerical(float_val=self.Kind.LINK)
+        # BAD: should be an `float`
+        self.assertIsInstance(n.float_val, self.Kind)
+        self.assertEqual(n.float_val, self.Kind.LINK)
+
+        r = self.roundtrip(n)
+        self.assertIs(type(r.float_val), float)
+        self.assertEqual(r.float_val, self.Kind.LINK.value)
+
+    def test_permissive_init_float_with_bool(self) -> None:
+        n = self.numerical(float_val=True)
+        # BAD: should be an `float`
+        self.assertIsInstance(n.float_val, bool)
+        self.assertEqual(n.float_val, True)
+
+        r = self.roundtrip(n)
+        self.assertIs(type(r.float_val), float)
+        self.assertEqual(r.float_val, float(True))
+
+    def test_permissive_init_float_with_int(self) -> None:
+        n = self.numerical(float_val=888)
+        # BAD: should be an `float`
+        self.assertIsInstance(n.float_val, int)
+        self.assertEqual(n.float_val, 888)
+
+        r = self.roundtrip(n)
+        self.assertIs(type(r.float_val), float)
+        self.assertEqual(r.float_val, 888)
 
 
 @parameterized_class(

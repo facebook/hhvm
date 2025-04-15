@@ -180,34 +180,8 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   using Base::data_;
 };
 
-// This constexpr function is only defined in the generated patch.cpp
-// This is used for an additional check to ensure we only instantiated
-// `patch<Id>()` in in the generated patch.cpp.
-template <class>
-constexpr bool only_defined_in_generated_patch_cpp();
-
 template <FieldOrdinal Ord, class Patch>
-void* typeErasedPatchImpl(Patch& patch) {
-  using FieldPatchType = typename Patch::patch_type::underlying_type;
-  if constexpr (folly::to_underlying(Ord) <= size_v<FieldPatchType>) {
-    // Sanity check to ensure `patch<Ordinal>()` returns the correct type.
-    // Otherwise it's a bug in the patch library.
-    using Id = op::get_field_id<FieldPatchType, type::ordinal_tag<Ord>>;
-    static_assert(std::is_same_v<
-                  decltype(patch.template patchImpl<Id>()),
-                  decltype(patch.template patch<Id>())>);
-    return &patch.template patchImpl<Id>();
-  } else {
-    // This code path should never be executed since the caller should already
-    // validate whether the field is patchable.
-    // However, this is needed for explicit instantiation when we can't validate
-    // patchable field size in codegen.
-    folly::throw_exception<std::logic_error>(fmt::format(
-        "Ordinal ({}) exceeds patchable field size ({})",
-        folly::to_underlying(Ord),
-        size_v<FieldPatchType>));
-  }
-}
+void* typeErasedPatchImpl(Patch&);
 
 /// Create a base patch that supports Ensure operator.
 ///
@@ -705,10 +679,6 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
  private:
   template <typename Id>
   decltype(auto) patchImpl() {
-    // since only_defined_in_generated_patch_cpp(...) is only defined in the
-    // generated Patch.cpp, if anyone instantiates this function outside
-    // the generated Patch.cpp, they will get a build failure.
-    static_assert(only_defined_in_generated_patch_cpp<Id>());
     return (maybeEnsure<Id>(), patchAfter<Id>());
   }
 

@@ -658,15 +658,10 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
   not_reached();
 }
 
-std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f) {
+std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f, Either<const Unit*, const UnitEmitter*> u) {
   std::string out;
   PC iStart = it;
   Op op = decode_op(it);
-
-  auto u = f.match(
-    [](const Func* f) -> Either<const Unit*, const UnitEmitter*> { return f->unit(); },
-    [](const FuncEmitter* fe) -> Either<const Unit*, const UnitEmitter*> { return &fe->ue(); }
-  );
 
   auto readRATA = [&] {
     if (auto func = f.left()) {
@@ -851,6 +846,10 @@ OPCODES
     default: assertx(false);
   };
   return out;
+}
+
+std::string instrToString(PC it, const Func* func) {
+  return instrToString(it, func, func->unit());
 }
 
 EXTERNALLY_VISIBLE

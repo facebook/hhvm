@@ -298,7 +298,7 @@ size_t encodedRATSize(const unsigned char* pc);
  *
  * This function also merges any litstrs into the unit as appropriate.
  */
-void encodeRAT(FuncEmitter& fe, RepoAuthType rat);
+void encodeRAT(FuncEmitter& fe, UnitEmitter& ue, RepoAuthType rat);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -550,6 +550,8 @@ public:
 
   const std::vector<DeclDep>& deps() const { return m_deps; }
 
+  const Extension* extension() const { return m_extension; }
+
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 
@@ -617,9 +619,14 @@ private:
 
   static std::atomic<size_t> s_createdUnits;
   static std::atomic<size_t> s_liveUnits;
+
+  /*
+   * Extension this unit is part of. Can be used to get the native func impl
+   */
+  const Extension* m_extension{nullptr};
 };
 
-static_assert(CheckSize<Unit, use_lowptr ? 216 : 224>(), "");
+static_assert(CheckSize<Unit, use_lowptr ? 224 : 232>(), "");
 
 struct UnitExtended : Unit {
   friend struct Unit;
@@ -643,7 +650,7 @@ struct UnitExtended : Unit {
   std::atomic<Unit*> m_nextCachedByHash{nullptr};
 };
 
-static_assert(CheckSize<UnitExtended, use_lowptr ? 272 : 280>(), "");
+static_assert(CheckSize<UnitExtended, use_lowptr ? 280 : 288>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

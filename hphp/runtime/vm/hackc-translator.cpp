@@ -762,12 +762,12 @@ void handleVSA(TranslationState& ts, const Vector<BytesId>& arr) {
 void handleRATA(TranslationState& ts, const hhbc::RepoAuthType& rat) {
   auto str = toStringPiece(rat);
   auto const rat_ = ts.translateRepoAuthType(str);
-  encodeRAT(*ts.fe, rat_);
+  encodeRAT(*ts.fe, *ts.ue, rat_);
 }
 
 void handleKA(TranslationState& ts, const hhbc::MemberKey& mkey) {
   auto const mkey_ = ts.translateMemberKey(mkey);
-  encode_member_key(mkey_, *ts.fe);
+  encode_member_key(mkey_, *ts.fe, *ts.ue);
 }
 
 inline bool operator==(const hhbc::Local& a, const hhbc::Local& b) {
@@ -1219,7 +1219,7 @@ void translateFunction(TranslationState& ts,
   SCOPE_ASSERT_DETAIL("translate function") {return name->data();};
 
   ts.fe = ts.ue->newFuncEmitter(name);
-  ts.fe->init(f.body.span.line_begin, f.body.span.line_end, attrs, nullptr);
+  ts.fe->init(f.body.span.line_begin, f.body.span.line_end, attrs, nullptr, ts.ue->isASystemLib());
   ts.fe->isGenerator = (bool)(f.flags & hhbc::FunctionFlags_GENERATOR);
   ts.fe->isAsync = (bool)(f.flags & hhbc::FunctionFlags_ASYNC);
   ts.fe->isPairGenerator = (bool)(f.flags & hhbc::FunctionFlags_PAIR_GENERATOR);
@@ -1265,7 +1265,7 @@ void translateMethod(TranslationState& ts,
   auto const name = toStaticString(m.name._0);
   ts.fe = ts.ue->newMethodEmitter(name, ts.pce);
   ts.pce->addMethod(ts.fe);
-  ts.fe->init(m.body.span.line_begin, m.body.span.line_end, attrs, nullptr);
+  ts.fe->init(m.body.span.line_begin, m.body.span.line_end, attrs, nullptr, ts.ue->isASystemLib());
   ts.fe->isGenerator = (bool)(m.flags & hhbc::MethodFlags_IS_GENERATOR);
   ts.fe->isAsync = (bool)(m.flags & hhbc::MethodFlags_IS_ASYNC);
   ts.fe->isPairGenerator = (bool)(m.flags & hhbc::MethodFlags_IS_PAIR_GENERATOR);
@@ -1320,7 +1320,8 @@ void translateClass(TranslationState& ts,
                c.span.line_end,
                attrs,
                parentName,
-               staticEmptyString());
+               staticEmptyString(),
+               ts.ue->isASystemLib());
 
   auto const dc = maybe(c.doc_comment);
   if (dc) ts.pce->setDocComment(makeDocComment(dc.value()));

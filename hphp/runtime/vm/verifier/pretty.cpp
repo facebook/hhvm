@@ -31,7 +31,7 @@
 namespace HPHP {
 namespace Verifier {
 
-void pretty_print(const FuncEmitter* fe, std::ostream& out) {
+void pretty_print(const FuncEmitter* fe, const UnitEmitter* ue, std::ostream& out) {
   if (fe->pce() != nullptr) {
     out << "Method";
     Func::print_attrs(out, fe->attrs);
@@ -57,12 +57,12 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
         out << " " << tc.displayName();
       }
     }
-    if (auto userType = param.userType.ptr(fe->ue())) {
+    if (auto userType = param.userType.ptr(*ue)) {
       out << " (" << userType->data() << ")";
     }
     if (param.funcletOff != kInvalidOffset) {
       out << " DV" << " at " << param.funcletOff;
-      if (auto phpCode = param.phpCode.ptr(fe->ue())) {
+      if (auto phpCode = param.phpCode.ptr(*ue)) {
         out << " = " << phpCode->data();
       }
     }
@@ -71,7 +71,7 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
 
   auto tcs = fe->retTypeConstraints;
   out << " Ret: " << tcs.show();
-  auto retUserType = fe->retUserType.ptr(fe->ue());
+  auto retUserType = fe->retUserType.ptr(*ue);
   if (retUserType && !retUserType->empty()) {
     out << " (" << retUserType->data() << ")";
   }
@@ -111,6 +111,7 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
 
 static void pretty_print(
   const FuncEmitter* fe,
+  const UnitEmitter* ue,
   std::ostream& out,
   Offset startOffset,
   Offset stopOffset
@@ -119,23 +120,23 @@ static void pretty_print(
   while (it < &fe->bc()[stopOffset]) {
     if (fe->offsetOf(it) == 0) {
       out.put('\n');
-      pretty_print(fe, out);
+      pretty_print(fe, ue, out);
     }
 
     out << ' '
         << std::setw(4) << (it - fe->bc()) << ": "
-        << instrToString(it, fe)
+        << instrToString(it, fe, ue)
         << std::endl;
     it += instrLen(it);
   }
 }
 
-void printInstr(const FuncEmitter* func, PC pc) {
-  std::cout << "  " << std::setw(4) << (pc - func->bc()) << ":" <<
+void printInstr(const FuncEmitter* fe, const UnitEmitter* ue, PC pc) {
+  std::cout << "  " << std::setw(4) << (pc - fe->bc()) << ":" <<
                (isCF(pc) ? "C":" ") <<
                (isTF(pc) ? "T":" ") <<
                std::setw(3) << instrLen(pc) <<
-               " " << instrToString(pc, func) << std::endl;
+               " " << instrToString(pc, fe, ue) << std::endl;
 }
 
 std::string blockToString(const Block* b, const Graph*, const FuncEmitter* f) {
@@ -155,20 +156,20 @@ std::string blockToString(const Block* b, const Graph*, const FuncEmitter* f) {
   return out.str();
 }
 
-void printBlocks(const FuncEmitter* func, const Graph* g) {
-  pretty_print(func, std::cout);
+void printBlocks(const FuncEmitter* fe, const UnitEmitter* ue, const Graph* g) {
+  pretty_print(fe, ue, std::cout);
   for (LinearBlocks i(g->first_linear, 0); !i.empty(); i.popFront()) {
     const Block* b = i.front();
-    std::cout << blockToString(b, g, func) << std::endl;
+    std::cout << blockToString(b, g, fe) << std::endl;
     for (InstrRange j(b->start, b->end); !j.empty(); ) {
-      printInstr(func, j.popFront());
+      printInstr(fe, ue, j.popFront());
     }
   }
   std::cout << std::endl;
 }
 
-void printGml(const UnitEmitter* unit) {
-  std::string filename = unit->sha1().toString() + ".gml";
+void printGml(const UnitEmitter* ue) {
+  std::string filename = ue->sha1().toString() + ".gml";
   FILE* file = fopen(filename.c_str(), "w");
   if (!file) {
     std::cerr << "Couldn't open GML output file " << filename << std::endl;
@@ -178,9 +179,9 @@ void printGml(const UnitEmitter* unit) {
   fprintf(file, "graph [\n"
                 "  hierarchic 1\n"
                 "  directed 1\n");
-  for (auto& func : unit->fevec()) {
+  for (auto& fe : ue->fevec()) {
     Arena scratch;
-    GraphBuilder builder(scratch, func.get());
+    GraphBuilder builder(scratch, fe.get());
     const Graph* g = builder.build();
     int gid = nextid++;
     fprintf(file, "node [ isGroup 1 id %d ]\n", gid);
@@ -189,7 +190,7 @@ void printGml(const UnitEmitter* unit) {
       const Block* b = j.popFront();
       std::stringstream strbuf;
       pretty_print(
-        func.get(), strbuf, func->offsetOf(b->start), func->offsetOf(b->end)
+        fe.get(), ue, strbuf, fe->offsetOf(b->start), fe->offsetOf(b->end)
       );
       std::string code = strbuf.str();
       for (int i = 0, n = code.size(); i < n; ++i) {

@@ -439,7 +439,10 @@ ArgUnion* getImmPtr(PC opcode, int idx);
 void staticStreamer(const TypedValue* tv, std::string& out);
 std::string staticStreamer(const TypedValue* tv);
 
-std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f);
+std::string instrToString(PC it, const Func* f);
+std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f,
+                          Either<const Unit*, const UnitEmitter*> u);
+
 void staticArrayStreamer(const ArrayData*, std::string&);
 std::string staticArrayStreamer(const ArrayData* ad);
 

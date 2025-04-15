@@ -1325,7 +1325,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
   }
 
 #define IMM_SA     as.fe->emitInt32(create_litstr_id(as))
-#define IMM_RATA   encodeRAT(*as.fe, read_repo_auth_type(as))
+#define IMM_RATA   encodeRAT(*as.fe, *as.ue, read_repo_auth_type(as))
 #define IMM_I64A   as.fe->emitInt64(read_opcode_arg<int64_t>(as))
 #define IMM_DA     as.fe->emitDouble(read_opcode_arg<double>(as))
 #define IMM_LA     as.fe->emitIVA(as.getLocalId(  \
@@ -1402,7 +1402,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
   as.fe->emitInt32(0);                                              \
 } while (0)
 
-#define IMM_KA encode_member_key(read_member_key(as), *as.fe)
+#define IMM_KA encode_member_key(read_member_key(as), *as.fe, *as.ue)
 
 #define NUM_PUSH_NOV 0
 #define NUM_PUSH_ONE(a) 1
@@ -2367,7 +2367,7 @@ void parse_function(AsmState& as) {
     bool(attrs & AttrPersistent) != RO::funcIsRenamable(sname)));
 
   as.fe = as.ue->newFuncEmitter(sname);
-  as.fe->init(line0, line1, attrs, nullptr);
+  as.fe->init(line0, line1, attrs, nullptr, as.ue->isASystemLib());
 
   as.fe->retUserType = userType;
   as.fe->retTypeConstraints = TypeIntersectionConstraint(
@@ -2419,7 +2419,7 @@ void parse_method(AsmState& as) {
 
   as.fe = as.ue->newMethodEmitter(sname, as.pce);
   as.pce->addMethod(as.fe);
-  as.fe->init(line0, line1, attrs, nullptr);
+  as.fe->init(line0, line1, attrs, nullptr, as.ue->isASystemLib());
 
   as.fe->retUserType = userType;
   as.fe->retTypeConstraints = TypeIntersectionConstraint(
@@ -2836,7 +2836,8 @@ void parse_class(AsmState& as) {
                line1,
                attrs,
                makeStaticString(parentName),
-               staticEmptyString());
+               staticEmptyString(),
+               as.ue->isASystemLib());
   for (auto const& iface : ifaces) {
     as.pce->addInterface(makeStaticString(iface));
   }

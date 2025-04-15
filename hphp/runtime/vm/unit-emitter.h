@@ -172,16 +172,6 @@ struct UnitEmitter {
    */
   FuncEmitter* newMethodEmitter(const StringData* name, PreClassEmitter* pce, int64_t sn = -1);
 
-  /*
-   * Create a new function for `fe'.
-   *
-   * This should only be called from fe->create(), and just constructs a new
-   * Func* and adds it to unit.m_funcTable if required.
-   */
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, const StringData* name,
-                Attr attrs, int numParams);
-
-
   /////////////////////////////////////////////////////////////////////////////
   // PreClassEmitters.
 

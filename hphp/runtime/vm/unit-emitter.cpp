@@ -427,7 +427,7 @@ FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name, int64_t sn) {
   if (sn == -1) {
     sn = m_nextFuncSn++;
   }
-  auto fe = std::make_unique<FuncEmitter>(*this, sn, m_fes.size(), name);
+  auto fe = std::make_unique<FuncEmitter>(sn, m_fes.size(), name);
   m_fes.push_back(std::move(fe));
   return m_fes.back().get();
 }
@@ -437,23 +437,8 @@ FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* name,
   if (sn == -1) {
     sn = m_nextFuncSn++;
   }
-  return new FuncEmitter(*this, sn, name, pce);
+  return new FuncEmitter(sn, name, pce);
 }
-
-Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
-                           const StringData* name, Attr attrs,
-                           int numParams) {
-  Func *func = nullptr;
-  if (attrs & AttrIsMethCaller) {
-    auto const pair = Func::getMethCallerNames(name);
-    func = new (Func::allocFuncMem(numParams)) Func(
-      unit, name, attrs, pair.first, pair.second);
-  } else {
-    func = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
-  }
-  return func;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // PreClassEmitters.
@@ -461,7 +446,8 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
 PreClassEmitter* UnitEmitter::newPreClassEmitter(
   const std::string& name
 ) {
-  auto pce = new PreClassEmitter(*this, name);
+  auto n = makeStaticString(name);
+  auto pce = new PreClassEmitter(n);
   m_pceVec.emplace_back(pce);
   return pce;
 }
@@ -636,13 +622,13 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     };
     if (Cfg::Repo::Authoritative) {
       for (auto& fe : m_fes) {
-        auto const token = fe->loadBc();
+        auto const token = fe->loadBc(m_sn);
         if (!token) continue;
         tokens.emplace_back(std::make_pair(fe.get(), *token));
       }
       for (auto& pce : m_pceVec) {
         for (auto& fe : pce->methods()) {
-          auto const token = fe->loadBc();
+          auto const token = fe->loadBc(m_sn);
           if (!token) continue;
           tokens.emplace_back(std::make_pair(fe, *token));
         }
@@ -693,6 +679,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_moduleName = m_moduleName;
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
+  u->m_extension = m_extension;
   for (auto const& pce : m_pceVec) {
     auto const preCls = pce->create(*u);
     u->m_preClasses.emplace_back(PreClassPtr{preCls});

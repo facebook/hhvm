@@ -192,13 +192,13 @@ struct PreClassEmitter {
   using PropMap = IndexedStringMap<Prop, Slot>;
   using ConstMap = IndexedStringMap<Const, Slot>;
 
-  PreClassEmitter(UnitEmitter& ue, const std::string& name);
+  PreClassEmitter(const StringData* name);
   ~PreClassEmitter();
 
   void init(int line1, int line2, Attr attrs,
-            const StringData* parent, const StringData* docComment);
+            const StringData* parent, const StringData* docComment,
+            bool isSystemLib);
 
-  UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
   Attr attrs() const { return m_attrs; }
   void setAttrs(Attr attrs) { m_attrs = attrs; }
@@ -302,7 +302,6 @@ struct PreClassEmitter {
     LowStringPtr, FuncEmitter*, string_data_hash, string_data_same
   >;
 
-  UnitEmitter& m_ue;
   int m_line1;
   int m_line2;
   LowStringPtr m_name;

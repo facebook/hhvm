@@ -50,9 +50,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitter.
 
-FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
-  : m_ue(ue)
-  , m_pce(nullptr)
+FuncEmitter::FuncEmitter(int sn, Id id, const StringData* n)
+  : m_pce(nullptr)
   , m_sn(sn)
   , m_id(id)
   , m_bc()
@@ -74,10 +73,8 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_ehTabSorted(false)
 {}
 
-FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
-                         PreClassEmitter* pce)
-  : m_ue(ue)
-  , m_pce(pce)
+FuncEmitter::FuncEmitter(int sn, const StringData* n, PreClassEmitter* pce)
+  : m_pce(pce)
   , m_sn(sn)
   , m_id(kInvalidId)
   , m_bc()
@@ -189,13 +186,13 @@ void FuncEmitter::recordSourceLocation(const Location::Range& sLoc,
 // Initialization and execution.
 
 void FuncEmitter::init(int l1, int l2, Attr attrs_,
-                       const StringData* docComment_) {
+                       const StringData* docComment_, bool isSystemLib) {
   line1 = l1;
   line2 = l2;
   docComment = docComment_;
   attrs = attrs_;
 
-  assertx(!ue().isASystemLib() || attrs & AttrBuiltin);
+  assertx(IMPLIES(isSystemLib, attrs & AttrBuiltin));
 }
 
 void FuncEmitter::finish() {
@@ -234,10 +231,24 @@ namespace {
   }
 }
 
+static Func* allocFunc(Unit& unit, const StringData* name, Attr attrs,
+                     int numParams) {
+  Func *func = nullptr;
+  if (attrs & AttrIsMethCaller) {
+    auto const pair = Func::getMethCallerNames(name);
+    func = new (Func::allocFuncMem(numParams)) Func(
+      unit, name, attrs, pair.first, pair.second);
+  } else {
+    func = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
+  }
+  return func;
+}
+
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto attrs = this->attrs;
+  assertx(IMPLIES(unit.isSystemLib(), attrs & AttrBuiltin));
 
-  auto persistent = Cfg::Repo::Authoritative || (ue().isASystemLib() && (!RO::funcIsRenamable(name) || preClass));
+  auto persistent = Cfg::Repo::Authoritative || (unit.isSystemLib() && (!RO::funcIsRenamable(name) || preClass));
   assertx(IMPLIES(attrs & AttrPersistent, persistent));
   attrSetter(attrs, persistent, AttrPersistent);
 
@@ -280,7 +291,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }();
 
   assertx(!m_pce == !preClass);
-  auto f = m_ue.newFunc(this, unit, name, attrs, params.size());
+  auto f = allocFunc(unit, name, attrs, params.size());
 
   f->m_isPreFunc = !!preClass;
 
@@ -429,10 +440,18 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }
 
   if (isNative) {
+    auto ext = unit.extension();
+    assertx(ext);
+    auto const info = [&]() {
+      return Native::getNativeFunction(
+        ext->nativeFuncs(),
+        name,
+        m_pce ? m_pce->name() : nullptr,
+        (attrs & AttrStatic)
+      );
+    }();
+
     auto const ex = f->extShared();
-
-    auto const info = getNativeInfo();
-
     Attr dummy = AttrNone;
     auto nativeAttributes = parseNativeAttributes(dummy);
     Native::getFunctionPointers(
@@ -520,16 +539,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 String FuncEmitter::nativeFullname() const {
   return Native::fullName(name, m_pce ? m_pce->name() : nullptr,
                           (attrs & AttrStatic));
-}
-
-Native::NativeFunctionInfo FuncEmitter::getNativeInfo() const {
-  assertx(m_ue.m_extension);
-  return Native::getNativeFunction(
-      m_ue.m_extension->nativeFuncs(),
-      name,
-      m_pce ? m_pce->name() : nullptr,
-      (attrs & AttrStatic)
-    );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -658,12 +667,12 @@ void FuncEmitter::setBcToken(Func::BCPtr::Token token, size_t bclen) {
   m_bc = Func::BCPtr::FromToken(token);
 }
 
-Optional<Func::BCPtr::Token> FuncEmitter::loadBc() {
+Optional<Func::BCPtr::Token> FuncEmitter::loadBc(int64_t unitSn) {
   if (m_bc.isPtr()) return std::nullopt;
   assertx(Cfg::Repo::Authoritative);
   auto const old = m_bc.token();
   auto bc = (unsigned char*)malloc(m_bclen);
-  RepoFile::readRawFromUnit(m_ue.m_sn, old, bc, m_bclen);
+  RepoFile::readRawFromUnit(unitSn, old, bc, m_bclen);
   m_bc = Func::BCPtr::FromPtr(bc);
   return old;
 }

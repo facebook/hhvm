@@ -61,16 +61,15 @@ struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
-  FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
-  FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
-              PreClassEmitter* pce);
+  FuncEmitter(int sn, Id id, const StringData* n);
+  FuncEmitter(int sn, const StringData* n, PreClassEmitter* pce);
   ~FuncEmitter();
 
   /*
    * Just set some fields when we start and stop emitting.
    */
   void init(int l1, int l2, Attr attrs_,
-            const StringData* docComment_);
+            const StringData* docComment_, bool isSystemLib);
   void finish();
 
   /*
@@ -101,7 +100,6 @@ struct FuncEmitter {
   /*
    * Get the associated Unit and PreClass emitters.
    */
-  UnitEmitter& ue() const;
   PreClassEmitter* pce() const;
 
   /*
@@ -192,7 +190,6 @@ public:
    */
   std::pair<int,int> getLocation() const;
 
-  Native::NativeFunctionInfo getNativeInfo() const;
   String nativeFullname() const;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -231,7 +228,7 @@ public:
    */
   void setBc(const unsigned char* bc, size_t bclen);
   void setBcToken(Func::BCPtr::Token token, size_t bclen);
-  Optional<Func::BCPtr::Token> loadBc();
+  Optional<Func::BCPtr::Token> loadBc(int64_t unitSn);
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.
@@ -301,7 +298,6 @@ private:
   /*
    * Metadata.
    */
-  UnitEmitter& m_ue;
   PreClassEmitter* m_pce;
 
   int m_sn;

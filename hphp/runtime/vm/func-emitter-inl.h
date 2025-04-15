@@ -21,10 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline UnitEmitter& FuncEmitter::ue() const {
-  return m_ue;
-}
-
 inline PreClassEmitter* FuncEmitter::pce() const {
   return m_pce;
 }

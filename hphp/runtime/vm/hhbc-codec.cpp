@@ -71,7 +71,7 @@ MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u) {
   not_reached();
 }
 
-void encode_member_key(MemberKey mk, FuncEmitter& fe) {
+void encode_member_key(MemberKey mk, FuncEmitter& fe, UnitEmitter& ue) {
   fe.emitByte(mk.mcode);
 
   switch (mk.mcode) {
@@ -91,7 +91,7 @@ void encode_member_key(MemberKey mk, FuncEmitter& fe) {
       break;
 
     case MET: case MPT: case MQT:
-      fe.emitInt32(fe.ue().mergeLitstr(mk.litstr));
+      fe.emitInt32(ue.mergeLitstr(mk.litstr));
       fe.emitByte(static_cast<uint8_t>(mk.rop));
       break;
 

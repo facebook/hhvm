@@ -430,14 +430,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 #define IMM_IA(n)      fe.emitIVA(data.iter##n);
 #define IMM_DA(n)      fe.emitDouble(data.dbl##n);
 #define IMM_SA(n)      fe.emitInt32(ue.mergeLitstr(data.str##n));
-#define IMM_RATA(n)    encodeRAT(fe, data.rat);
+#define IMM_RATA(n)    encodeRAT(fe, ue, data.rat);
 #define IMM_AA(n)      fe.emitInt32(ue.mergeArray(data.arr##n));
 #define IMM_OA_IMPL(n) fe.emitByte(static_cast<uint8_t>(data.subop##n));
 #define IMM_OA(type)   IMM_OA_IMPL
 #define IMM_BA(n)      targets[numTargets++] = data.target##n; \
                        emit_branch(data.target##n);
 #define IMM_VSA(n)     emit_vsa(data.keys);
-#define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), fe);
+#define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), fe, ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
 #define IMM_ITA(n)     encodeIterArgs(fe, data.ita);
 #define IMM_FCA(n)     encodeFCallArgs(                                 \
@@ -1037,12 +1037,13 @@ void renumber_locals(php::Func& func) {
   }
 }
 
-void emit_init_func(FuncEmitter& fe, const php::Func& func) {
+void emit_init_func(UnitEmitter& ue, FuncEmitter& fe, const php::Func& func) {
   fe.init(
     std::get<0>(func.srcInfo.loc),
     std::get<1>(func.srcInfo.loc),
     func.attrs | (func.sampleDynamicCalls ? AttrDynamicallyCallable : AttrNone),
-    func.srcInfo.docComment
+    func.srcInfo.docComment,
+    ue.isASystemLib()
   );
 }
 
@@ -1051,7 +1052,7 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   FTRACE(2,  "    func {}\n", f.name->data());
   assertx(f.attrs & AttrPersistent);
   renumber_locals(f);
-  emit_init_func(fe, f);
+  emit_init_func(ue, fe, f);
   auto func = php::WideFunc::mut(&f);
   auto const info = emit_bytecode(state, ue, fe, func);
   emit_finish_func(state, fe, func, info);
@@ -1067,7 +1068,8 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
     cls.attrs |
       (cls.sampleDynamicConstruct ? AttrDynamicallyConstructible : AttrNone),
     cls.parentName ? cls.parentName : staticEmptyString(),
-    cls.srcInfo.docComment
+    cls.srcInfo.docComment,
+    ue.isASystemLib()
   );
   pce->setUserAttributes(cls.userAttributes);
 

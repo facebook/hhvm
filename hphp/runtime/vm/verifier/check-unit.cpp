@@ -288,8 +288,8 @@ bool UnitChecker::checkFuncs() {
   bool ok = true;
 
   auto doCheck = [&] (const FuncEmitter* func) {
-    if (func->isNative) ok &= checkNativeFunc(func, m_errmode);
-    ok &= checkFunc(func, m_createCls, m_errmode);
+    if (func->isNative) ok &= checkNativeFunc(func, m_unit, m_errmode);
+    ok &= checkFunc(func, m_unit, m_createCls, m_errmode);
   };
 
   for (auto& func : m_unit->fevec()) doCheck(func.get());

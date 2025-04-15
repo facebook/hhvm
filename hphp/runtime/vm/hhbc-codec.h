@@ -148,7 +148,7 @@ NamedLocal decode_named_local(PC& pc);
  */
 MemberKey decode_member_key(PC& pc, StringDecoder u);
 
-void encode_member_key(MemberKey mk, FuncEmitter& fe);
+void encode_member_key(MemberKey mk, FuncEmitter& fe, UnitEmitter& ue);
 
 //////////////////////////////////////////////////////////////////////
 

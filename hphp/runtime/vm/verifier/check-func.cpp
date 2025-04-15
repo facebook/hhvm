@@ -76,6 +76,7 @@ struct BlockInfo {
 
 struct FuncChecker {
   FuncChecker(const FuncEmitter* func,
+              const UnitEmitter* unit,
               ErrorMode mode,
               StringToStringTMap& createCls);
   ~FuncChecker();
@@ -140,7 +141,7 @@ struct FuncChecker {
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->params.size(); }
-  const UnitEmitter* unit() const { return &m_func->ue(); }
+  const UnitEmitter* unit() const { return m_unit; }
 
  private:
   template<class... Args>
@@ -163,6 +164,7 @@ struct FuncChecker {
   Arena m_arena;
   BlockInfo* m_info; // one per block
   const FuncEmitter* const m_func;
+  const UnitEmitter* const m_unit;
   Graph* m_graph;
   Bits m_instrs;
   ErrorMode m_errmode;
@@ -173,7 +175,7 @@ struct FuncChecker {
 
 const StaticString s_invoke("__invoke");
 
-bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
+bool checkNativeFunc(const FuncEmitter* func, const UnitEmitter* unit, ErrorMode mode) {
   if (!Cfg::Eval::VerifySystemLibHasNativeImpl) {
     return true;
   }
@@ -181,12 +183,12 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
   auto const funcname = func->name;
   auto const pc = func->pce();
   auto const clsname = pc ? pc->name() : nullptr;
-  auto const& info = Native::getNativeFunction(func->ue().m_extension->nativeFuncs(),
+  auto const& info = Native::getNativeFunction(unit->m_extension->nativeFuncs(),
                                                funcname, clsname,
                                                func->attrs & AttrStatic);
 
   if (!info.ptr) {
-    verify_error(&func->ue(), func, mode == kThrow,
+    verify_error(unit, func, mode == kThrow,
       "<<__Native>> function %s%s%s is missing native impl.\n",
       clsname ? clsname->data() : "",
       clsname ? "::" : "",
@@ -196,7 +198,7 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
   }
 
   if (func->isAsync) {
-    verify_error(&func->ue(), func, mode == kThrow,
+    verify_error(unit, func, mode == kThrow,
       "<<__Native>> function %s%s%s is declared async; <<__Native>> functions "
       "can return Awaitable<T>, but can not be declared async.\n",
       clsname ? clsname->data() : "",
@@ -213,7 +215,7 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
     auto const tstr = info.sig.toString(clsname ? clsname->data() : nullptr,
                                         funcname->data());
 
-    verify_error(&func->ue(), func, mode == kThrow,
+    verify_error(unit, func, mode == kThrow,
       "<<__Native>> function %s%s%s does not match C++ function "
       "signature (%s): %s\n",
       clsname ? clsname->data() : "",
@@ -229,15 +231,16 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
 }
 
 bool checkFunc(const FuncEmitter* func,
+               const UnitEmitter* unit,
                StringToStringTMap& createCls,
                ErrorMode mode) {
   if (mode == kVerbose) {
-    pretty_print(func, std::cout);
+    pretty_print(func, unit, std::cout);
     if (!func->pce()) {
       printf("  FuncId %d\n", func->id());
     }
   }
-  FuncChecker v{func, mode, createCls};
+  FuncChecker v{func, unit, mode, createCls};
   return v.checkInfo() &&
          v.checkDef() &&
          v.checkOffsets() &&
@@ -290,9 +293,11 @@ bool mayTakeExnEdges(Op op) {
 }
 
 FuncChecker::FuncChecker(const FuncEmitter* f,
+                         const UnitEmitter* unit,
                          ErrorMode mode,
                          StringToStringTMap& createCls)
 : m_func(f)
+, m_unit(unit)
 , m_graph(0)
 , m_instrs(m_arena, f->bcPos() + 1)
 , m_errmode(mode)
@@ -444,7 +449,7 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
       }
       if ((instrFlags(op) & TF) == 0) {
         error("Last instruction in primary body is not terminal %d:%s\n",
-              offset(pc), instrToString(pc, m_func).c_str());
+              offset(pc), instrToString(pc, m_func, m_unit).c_str());
         ok = false;
       }
     }
@@ -1174,7 +1179,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
           ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
           return false;
         }
-        auto const prop = m_func->ue().lookupLitstrCopy(getImm(pc, 0).u_SA);
+        auto const prop = m_unit->lookupLitstrCopy(getImm(pc, 0).u_SA);
         if (!m_func->pce() || !m_func->pce()->hasProp(prop.get())){
              ferror("{} references non-existent property {}\n",
                     opcodeToName(op), prop);
@@ -1207,7 +1212,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       break;
     }
     case Op::CreateCl: {
-      auto const name = m_func->ue().lookupLitstrCopy(getImm(pc, 1).u_SA);
+      auto const name = m_unit->lookupLitstrCopy(getImm(pc, 1).u_SA);
       auto const preCls = [&] () -> const PreClassEmitter* {
         for (auto const pce : unit()->preclasses()) {
           if (pce->name()->tsame(name.get())) return pce;
@@ -1751,7 +1756,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (m_errmode == kVerbose) {
       std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
                    stateToString(cur) << " " <<
-                   instrToString(pc, m_func) << std::endl;
+                   instrToString(pc, m_func, m_unit) << std::endl;
     }
     auto const op = peek_op(pc);
     if (mayTakeExnEdges(op)) ok &= checkExnEdge(cur, op, b);

@@ -91,6 +91,7 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  *    imply bytecode restrictions.  (access This from static? etc).
  */
 bool checkFunc(const FuncEmitter*,
+               const UnitEmitter*,
                StringToStringTMap& createCls,
                ErrorMode mode = kStderr);
 
@@ -112,6 +113,6 @@ bool checkFunc(const FuncEmitter*,
  * -- Methods take an ObjectData* as their first argument
  * -- Static methods take a const Class* as their first argument
  */
-bool checkNativeFunc(const FuncEmitter*, ErrorMode mode = kStderr);
+bool checkNativeFunc(const FuncEmitter*, const UnitEmitter*, ErrorMode mode = kStderr);
 
 }} // HPHP::Verifier

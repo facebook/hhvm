@@ -66,20 +66,19 @@ PreClassEmitter::Prop::~Prop() {
 //=============================================================================
 // PreClassEmitter.
 
-PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
-                                 const std::string& n)
-  : m_ue(ue)
-  , m_name(makeStaticString(n)) {}
+PreClassEmitter::PreClassEmitter(const StringData* n)
+  : m_name(n) {}
 
 void PreClassEmitter::init(int line1, int line2, Attr attrs,
                            const StringData* parent,
-                           const StringData* docComment) {
+                           const StringData* docComment,
+                           bool isSystemLib) {
   m_line1 = line1;
   m_line2 = line2;
   m_attrs = attrs;
   m_parent = parent;
   m_docComment = docComment;
-  if (ue().isASystemLib()) {
+  if (isSystemLib) {
     m_attrs = m_attrs | AttrBuiltin;
   }
 }
@@ -220,8 +219,9 @@ const StaticString
 
 PreClass* PreClassEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
+  assertx(IMPLIES(unit.isSystemLib(), attrs & AttrBuiltin));
   if (attrs & AttrPersistent &&
-      !Cfg::Repo::Authoritative && !ue().isASystemLib()) {
+      !Cfg::Repo::Authoritative && !unit.isSystemLib()) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
@@ -257,7 +257,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs |= AttrInternalSoft;
   }
 
-  assertx(attrs & AttrPersistent || !ue().isASystemLib());
+  assertx(attrs & AttrPersistent || !unit.isSystemLib());
 
   auto pc = std::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_name,

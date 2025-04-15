@@ -34,7 +34,7 @@ struct Block;
 /**
  * Pretty print the control flow graph to stdout.
  */
-void printBlocks(const FuncEmitter*, const Graph*);
+void printBlocks(const FuncEmitter*, const UnitEmitter*, const Graph*);
 
 /**
  * Print one instr to stdout.  The format is similar to Unit.prettyPrint(),
@@ -60,7 +60,7 @@ void printGml(const UnitEmitter*);
 /**
  * Pretty print FuncEmitter fe in a similar fashion to pretty printing a Func.
  */
-void pretty_print(const FuncEmitter* fe, std::ostream& out);
+void pretty_print(const FuncEmitter* fe, const UnitEmitter* ue, std::ostream& out);
 
 /*
  * Called to indicate a verification error.
@@ -74,4 +74,3 @@ void verify_error(const UnitEmitter*, const FuncEmitter*, bool throws,
   ATTRIBUTE_PRINTF_STRING const char* fmt, ...) ATTRIBUTE_PRINTF(4,5);
 
 }}
-

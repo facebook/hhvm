@@ -569,15 +569,15 @@ RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
   );
 }
 
-void encodeRAT(FuncEmitter& fe, RepoAuthType rat) {
+void encodeRAT(FuncEmitter& fe, UnitEmitter& ue, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
   static_assert(sizeof(T) == sizeof(uint8_t));
 
   fe.emitByte((uint8_t)rat.tag());
   if (auto const a = rat.array()) {
-    fe.emitIVA(fe.ue().mergeRATArray(a));
+    fe.emitIVA(ue.mergeRATArray(a));
   } else if (auto const n = rat.name()) {
-    fe.emitIVA(fe.ue().mergeLitstr(n));
+    fe.emitIVA(ue.mergeLitstr(n));
   }
 }
 

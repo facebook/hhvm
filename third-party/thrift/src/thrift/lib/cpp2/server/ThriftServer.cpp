@@ -2071,6 +2071,39 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
     }
   }
 
+  // Log services that might break if ConcurrencyController's qpsLimit is
+  // unsynced from maxQps and is synced with only concurrencyLimit instead.
+  if (folly::test_once(cancelSetMaxQpsCallbackHandleFlag_) ||
+      folly::test_once(serviceMightRelyOnSyncedMaxQpsFlag_)) {
+    // This is okay. Either maxQps syncing was cancelled, or we already logged
+    // that the service might rely on the syncing.
+  } else if (
+      thriftConfig_.getMaxQps().get() ==
+      thriftConfig_.getExecutionRate().get()) {
+    // This is okay. When ConcurrencyController's qpsLimit is synced with
+    // executionRate instead of maxQps, there will be no difference since the
+    // values are the same.
+  } else if (
+      !isActiveRequestsTrackingDisabled() &&
+      !getMethodsBypassMaxRequestsLimit().contains(method)) {
+    // This is okay. No bypass method is enabled. ThriftServer is strictly
+    // rejecting requests once there are maxQps requests on the server.
+    // ConcurrencyController's will never enforce its qpsLimit (synced from
+    // maxQps) since ThriftServer will never pass enough requests into the
+    // resource pool. After ConcurrencyController's qpsLimit is synced from
+    // concurrencyLimit instead, the new default value (uint32_t max) will
+    // continue to be greater than the number of requests that can be passed
+    // into the resource pool.
+  } else {
+    // This is not okay. When ConcurrencyController's qpsLimit is unsynced from
+    // maxQps and synced to executionRate instead, the service will encounter a
+    // behavioral change.
+    folly::call_once(serviceMightRelyOnSyncedMaxQpsFlag_, [this]() {
+      LOG(WARNING) << "Service might rely on synced max qps.";
+      THRIFT_SERVER_EVENT(serviceMightRelyOnSyncedMaxQps).log(*this);
+    });
+  }
+
   if (auto maxQps = getMaxQps(); maxQps > 0 &&
       FLAGS_thrift_server_enforces_qps_limit &&
       !getMethodsBypassMaxRequestsLimit().contains(method) &&

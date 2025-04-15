@@ -1898,6 +1898,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // pools, when setExecutionRate is explicitly called.
   folly::once_flag cancelSetMaxQpsCallbackHandleFlag_;
 
+  // If the service might rely on the synced maxQps, then we need to log.
+  // Logging only needs to happen once.
+  folly::once_flag serviceMightRelyOnSyncedMaxQpsFlag_;
+
   struct IdleServerAction : public folly::HHWheelTimer::Callback {
     IdleServerAction(
         ThriftServer& server,

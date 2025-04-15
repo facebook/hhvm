@@ -19,7 +19,7 @@ enum PrimitiveEnum: int {
  * Original thrift union:-
  * Primitive
  */
-class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<PrimitiveEnum> {
+class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStrictUnion<PrimitiveEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[

@@ -5251,8 +5251,13 @@ void t_hack_generator::_generate_php_struct_definition(
 
   // Wrapper is not supported on unions.
   if (tstruct->is_union() && !wrapper) {
-    out << ", \\IThriftUnion<" << union_enum_name(struct_hack_name_with_ns)
-        << ">";
+    std::string_view interface;
+    if (strict_unions_) {
+      interface = ", \\IThriftStrictUnion<";
+    } else {
+      interface = ", \\IThriftUnion<";
+    }
+    out << interface << union_enum_name(struct_hack_name_with_ns) << ">";
   }
 
   bool gen_shapes = shapes_ && !tstruct->generated() &&

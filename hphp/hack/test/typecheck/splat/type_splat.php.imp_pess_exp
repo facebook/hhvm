@@ -1,9 +1,9 @@
-File "type_splat.php", line 27, characters 3-13:
+File "type_splat.php", line 36, characters 3-13:
   (function(...Targs): ~void) where Targs as (mixed...)
-File "type_splat.php", line 28, characters 3-18:
+File "type_splat.php", line 37, characters 3-18:
   Targs as (mixed...)
-File "type_splat.php", line 35, characters 3-13:
+File "type_splat.php", line 47, characters 3-13:
   (function(...Targs): ~void) where Targs as (mixed...)
-File "type_splat.php", line 36, characters 3-18:
+File "type_splat.php", line 48, characters 3-18:
   Targs as (mixed...)
 No errors

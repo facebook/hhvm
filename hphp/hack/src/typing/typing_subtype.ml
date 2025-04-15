@@ -3018,6 +3018,22 @@ end = struct
         (env, ty_sub)
     in
     match (deref ty_sub, deref ty_super) with
+    (* (...t) <: t *)
+    | ((_, Ttuple { t_required = []; t_extra = Tsplat ty_sub }), _) ->
+      env
+      |> simplify
+           ~subtype_env
+           ~this_ty:None
+           ~lhs:{ sub_supportdyn; ty_sub }
+           ~rhs:{ super_like; super_supportdyn; ty_super }
+      (* t <: (...t) *)
+    | (_, (_, Ttuple { t_required = []; t_extra = Tsplat ty_super })) ->
+      env
+      |> simplify
+           ~subtype_env
+           ~this_ty:None
+           ~lhs:{ sub_supportdyn; ty_sub }
+           ~rhs:{ super_like; super_supportdyn; ty_super }
     (* First come all the rewrites.
        By "rewrite", we mean stuff like A <: ?B ---> A & nonnull <: B *)
     (* -- Rewrite: x <: Tunion[t] ---> x <: t *)

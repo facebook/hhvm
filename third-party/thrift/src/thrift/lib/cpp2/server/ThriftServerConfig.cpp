@@ -160,6 +160,11 @@ ThriftServerConfig::getConcurrencyLimit() const {
   return concurrencyLimit_;
 }
 
+const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getExecutionRate()
+    const {
+  return executionRate_;
+}
+
 const ServerAttributeDynamic<bool>& ThriftServerConfig::getUseClientTimeout()
     const {
   return useClientTimeout_;
@@ -438,6 +443,12 @@ void ThriftServerConfig::setConcurrencyLimit(
     folly::observer::Observer<std::optional<uint32_t>> concurrencyLimit,
     AttributeSource source) {
   concurrencyLimit_.set(std::move(concurrencyLimit), source);
+}
+
+void ThriftServerConfig::setExecutionRate(
+    folly::observer::Observer<std::optional<uint32_t>> executionRate,
+    AttributeSource source) {
+  executionRate_.set(std::move(executionRate), source);
 }
 
 void ThriftServerConfig::setUseClientTimeout(

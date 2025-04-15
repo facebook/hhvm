@@ -164,6 +164,9 @@ class ServerConfigs {
   virtual uint32_t getConcurrencyLimit() const = 0;
   virtual void setConcurrencyLimit(uint32_t concurrencyLimit) = 0;
 
+  virtual uint32_t getExecutionRate() const = 0;
+  virtual void setExecutionRate(uint32_t executionRate) = 0;
+
   enum class RequestHandlingCapability { NONE, INTERNAL_METHODS_ONLY, ALL };
   /**
    * Determines which requests the server can handle in its current state.

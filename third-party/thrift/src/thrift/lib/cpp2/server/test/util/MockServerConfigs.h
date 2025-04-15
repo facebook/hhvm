@@ -85,6 +85,8 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
   MOCK_METHOD(void, setConcurrencyLimit, (uint32_t), (override));
   MOCK_METHOD(uint32_t, getMaxQps, (), (const, override));
   MOCK_METHOD(void, setMaxQps, (uint32_t), (override));
+  MOCK_METHOD(uint32_t, getExecutionRate, (), (const, override));
+  MOCK_METHOD(void, setExecutionRate, (uint32_t), (override));
   MOCK_METHOD(
       std::shared_ptr<folly::Executor>,
       getThreadManager,

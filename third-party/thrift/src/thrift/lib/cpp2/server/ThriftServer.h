@@ -1272,6 +1272,30 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   /**
+   * Get the maximum requests that may begin being processing in a given
+   * one-second window before additional requests are queued. Only applies when
+   * using TokenBucketConcurrencyController.
+   *
+   * @return current setting
+   */
+  uint32_t getExecutionRate() const override {
+    return thriftConfig_.getExecutionRate().get();
+  }
+
+  /**
+   * Set the maximum requests that may begin being processing in a given
+   * one-second window before additional requests are queued. Only applies when
+   * using TokenBucketConcurrencyController.
+   *
+   * @param executionRate new setting for execution rate.
+   */
+  void setExecutionRate(uint32_t executionRate) override {
+    thriftConfig_.setExecutionRate(
+        folly::observer::makeStaticObserver(std::optional{executionRate}),
+        AttributeSource::OVERRIDE);
+  }
+
+  /**
    * Sets the timeout for joining workers
    * @param timeout new setting for timeout for joining requests.
    */

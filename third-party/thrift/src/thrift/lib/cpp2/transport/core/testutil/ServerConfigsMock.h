@@ -125,6 +125,16 @@ class ServerConfigsMock : public ServerConfigs {
         AttributeSource::OVERRIDE);
   }
 
+  uint32_t getExecutionRate() const override {
+    return thriftServerConfig_.getExecutionRate().get();
+  }
+
+  void setExecutionRate(uint32_t executionRate) override {
+    thriftServerConfig_.setExecutionRate(
+        folly::observer::makeStaticObserver(std::optional{executionRate}),
+        AttributeSource::OVERRIDE);
+  }
+
   uint32_t getListenerTos() const override { return 0; }
 
   std::shared_ptr<concurrency::ThreadManager> getThreadManager_deprecated()

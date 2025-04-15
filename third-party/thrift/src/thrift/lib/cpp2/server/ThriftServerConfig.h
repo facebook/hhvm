@@ -165,6 +165,13 @@ class ThriftServerConfig {
   // using ParallelConcurrencyController.
   const ServerAttributeDynamic<uint32_t>& getConcurrencyLimit() const;
 
+  /**
+   * Get the maximum requests that may begin being processing in a given
+   * one-second window before additional requests are queued. Only applies when
+   * using TokenBucketConcurrencyController.
+   */
+  const ServerAttributeDynamic<uint32_t>& getExecutionRate() const;
+
   const ServerAttributeDynamic<bool>& getUseClientTimeout() const;
 
   const std::optional<bool> getBaselineUseClientTimeout() const;
@@ -447,6 +454,15 @@ class ThriftServerConfig {
   // using ParallelConcurrencyController.
   void setConcurrencyLimit(
       folly::observer::Observer<std::optional<uint32_t>> concurrencyLimit,
+      AttributeSource source = AttributeSource::OVERRIDE);
+
+  /**
+   * Set the maximum requests that can begin being processing in a given
+   * one-second window before additional requests are queued. Only applies when
+   * using TokenBucketConcurrencyController.
+   */
+  void setExecutionRate(
+      folly::observer::Observer<std::optional<uint32_t>> executionRate,
       AttributeSource source = AttributeSource::OVERRIDE);
 
   void setUseClientTimeout(
@@ -769,6 +785,13 @@ class ThriftServerConfig {
   // Max requests that can be actively processed in parallel on when using
   // ParallelConcurrencyController -- 0 is disabled.
   ServerAttributeDynamic<uint32_t> concurrencyLimit_{0};
+
+  /**
+   * Maximum requests that can begin being processing in a given one-second
+   * window before additional requests are queued. Only applies when using
+   * TokenBucketConcurrencyController.
+   */
+  ServerAttributeDynamic<uint32_t> executionRate_{0};
 
   /**
    * The maximum memory usage (in bytes) by each request debug payload.

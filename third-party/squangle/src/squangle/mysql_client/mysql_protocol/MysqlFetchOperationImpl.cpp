@@ -292,22 +292,21 @@ void MysqlFetchOperationImpl::pauseForConsumer() {
 }
 
 void MysqlFetchOperationImpl::resumeImpl() {
-  CHECK_THROW(isPaused(), db::OperationStateException);
-
-  // We should only allow pauses during fetch or between queries.
-  // If we come back as RowsFetched and the stream has completed the query,
-  // `actionable` will change the `active_fetch_action_` and we will
-  // start the Query completion process.
-  // When we pause between queries, the value of `paused_action_` is already
-  // the value of the next states: StartQuery or CompleteOperation.
-  setActiveFetchAction(paused_action_);
-  // Leave timeout to be reset or checked when we hit
-  // `waitForActionable`
-  actionable();
+  if (getActiveFetchAction() == FetchAction::WaitForConsumer) {
+    // We should only allow pauses during fetch or between queries.
+    // If we come back as RowsFetched and the stream has completed the query,
+    // `actionable` will change the `active_fetch_action_` and we will
+    // start the Query completion process.
+    // When we pause between queries, the value of `paused_action_` is already
+    // the value of the next states: StartQuery or CompleteOperation.
+    setActiveFetchAction(paused_action_);
+    // Leave timeout to be reset or checked when we hit
+    // `waitForActionable`
+    actionable();
+  }
 }
 
 void MysqlFetchOperationImpl::resume() {
-  DCHECK(getActiveFetchAction() == FetchAction::WaitForConsumer);
   conn().runInThread(this, &MysqlFetchOperationImpl::resumeImpl);
 }
 

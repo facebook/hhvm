@@ -316,7 +316,9 @@ class FetchOperation : public Operation {
   // Resumes the operation to the action it was before `pause` was called.
   // Should only be called after pause.
   void resume() {
-    impl_->resume();
+    if (impl_) {
+      impl_->resume();
+    }
   }
 
   bool isPaused() const {

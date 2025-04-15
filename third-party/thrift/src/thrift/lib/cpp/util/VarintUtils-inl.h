@@ -137,29 +137,49 @@ size_t readVarintMediumSlowUnrolledX86(T& value, const uint8_t* p) {
 // breaking from it when no more bytes need to be read.
 template <class T>
 size_t readVarintMediumSlowUnrolledAarch64(T& result, const uint8_t* p) {
-  T byte;
   // clang-format off
-  byte = *p++; result  = (byte & 0x7f);       if (UNLIKELY(!(byte & 0x80))) return 1;
-  byte = *p++; result |= (byte & 0x7f) <<  7; if (UNLIKELY(!(byte & 0x80))) return 2;
-  if constexpr (sizeof(T) <= 1) {throwInvalidVarint();} 
-  else {
-    byte = *p++; result |= (byte & 0x7f) << 14; if (UNLIKELY(!(byte & 0x80))) return 3;
-    if constexpr (sizeof(T) <= 2) {throwInvalidVarint();}
-    else {
-      byte = *p++; result |= (byte & 0x7f) << 21; if (UNLIKELY(!(byte & 0x80))) return 4;
-      byte = *p++; result |= (byte & 0x7f) << 28; if (UNLIKELY(!(byte & 0x80))) return 5;
-      if constexpr (sizeof(T) <= 4) {throwInvalidVarint();}
-      else {
+  T byte;
+  byte = *p++; result = (byte & 0x7f);       
+  if (UNLIKELY(!(byte & 0x80))) 
+    return 1;
+  byte = *p++; result |= (byte & 0x7f) <<  7; 
+  if constexpr (sizeof(T) == 1) {
+    if (UNLIKELY((byte & 0x80))) 
+      throwInvalidVarint();
+    return 2;
+  } else {
+    if (UNLIKELY(!(byte & 0x80))) 
+      return 2;
+    byte = *p++; result |= (byte & 0x7f) << 14;
+    if constexpr (sizeof(T) == 2) {
+      if (UNLIKELY((byte & 0x80))) 
+        throwInvalidVarint();
+      return 3;
+    } else {
+      if (UNLIKELY(!(byte & 0x80))) 
+        return 3;
+      byte = *p++; result |= (byte & 0x7f) << 21; 
+      if (UNLIKELY(!(byte & 0x80))) 
+        return 4;
+      byte = *p++; result |= (byte & 0x7f) << 28;
+      if constexpr (sizeof(T) == 4) {
+        if (UNLIKELY((byte & 0x80))) 
+          throwInvalidVarint();
+        return 5;
+      } else {
+        if (UNLIKELY(!(byte & 0x80))) return 5;
         byte = *p++; result |= (byte & 0x7f) << 35; if (UNLIKELY(!(byte & 0x80))) return 6;
         byte = *p++; result |= (byte & 0x7f) << 42; if (UNLIKELY(!(byte & 0x80))) return 7;
         byte = *p++; result |= (byte & 0x7f) << 49; if (UNLIKELY(!(byte & 0x80))) return 8;
         byte = *p++; result |= (byte & 0x7f) << 56; if (UNLIKELY(!(byte & 0x80))) return 9;
-        byte = *p++; result |= (byte & 0x7f) << 63; if (UNLIKELY(!(byte & 0x80))) return 10;
-        // clang-format on
-        throwInvalidVarint();
+        byte = *p; result |= (byte & 0x7f) << 63; 
+        if (UNLIKELY((byte & 0x80))) 
+          throwInvalidVarint();
+        return 10;
       }
     }
   }
+  // clang-format on
 }
 
 template <class T>

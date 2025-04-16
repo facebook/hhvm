@@ -174,7 +174,7 @@ NativeValue& NativeObject::emplace(FieldId id, Args... args) {
 template <typename T>
 ValueType ValueAccess<T>::get_type() const {
   return folly::variant_match(
-      as_value().inner(),
+      value().inner(),
       [](const std::monostate&) { return ValueType::Empty; },
       [](const auto& val) {
         using V = std::remove_cvref_t<decltype(val)>;
@@ -184,89 +184,89 @@ ValueType ValueAccess<T>::get_type() const {
 
 template <typename T>
 ValueAccess<T>::operator NativeValue&() noexcept {
-  return as_value();
+  return value();
 }
 
 template <typename T>
 ValueAccess<T>::operator const NativeValue&() const noexcept {
-  return as_const_value();
+  return value();
 }
 
 template <typename T>
 template <typename Ty>
 bool ValueAccess<T>::is_type() const noexcept {
   return std::holds_alternative<detail::native_value_type_t<Ty>>(
-      as_value().inner());
+      value().inner());
 }
 
 template <typename T>
 template <typename Ty>
 const detail::native_value_type_t<Ty>& ValueAccess<T>::as_type() const {
-  return std::get<detail::native_value_type_t<Ty>>(as_value().inner());
+  return std::get<detail::native_value_type_t<Ty>>(value().inner());
 }
 
 template <typename T>
 template <typename Ty>
 detail::native_value_type_t<Ty>& ValueAccess<T>::as_type() {
-  return std::get<detail::native_value_type_t<Ty>>(as_value().inner());
+  return std::get<detail::native_value_type_t<Ty>>(value().inner());
 }
 
 template <typename T>
 template <typename Ty>
 const detail::native_value_type_t<Ty>* ValueAccess<T>::if_type()
     const noexcept {
-  return std::get_if<detail::native_value_type_t<Ty>>(&as_value().inner());
+  return std::get_if<detail::native_value_type_t<Ty>>(&value().inner());
 }
 
 template <typename T>
 template <typename Ty>
 detail::native_value_type_t<Ty>* ValueAccess<T>::if_type() noexcept {
-  return std::get_if<detail::native_value_type_t<Ty>>(&as_value().inner());
+  return std::get_if<detail::native_value_type_t<Ty>>(&value().inner());
 }
 
 template <typename T>
 bool ValueAccess<T>::operator==(const NativeValue& other) const {
-  return as_value().inner() == other.inner();
+  return value().inner() == other.inner();
 }
 
 template <typename T>
 bool ValueAccess<T>::operator!=(const NativeValue& other) const {
-  return as_value().inner() != other.inner();
+  return value().inner() != other.inner();
 }
 
-#define FB_THRIFT_VALUE_ACCESS_IMPL(TYPE, NAME)                   \
-  template <typename T>                                           \
-  bool ValueAccess<T>::is_##NAME() const {                        \
-    return std::holds_alternative<TYPE>(as_value().inner());      \
-  }                                                               \
-  template <typename T>                                           \
-  const TYPE& ValueAccess<T>::as_##NAME() const {                 \
-    return std::get<TYPE>(as_const_value().inner());              \
-  }                                                               \
-  template <typename T>                                           \
-  TYPE& ValueAccess<T>::as_##NAME() {                             \
-    return std::get<TYPE>(as_value().inner());                    \
-  }                                                               \
-  template <typename T>                                           \
-  const TYPE* ValueAccess<T>::if_##NAME() const {                 \
-    return std::get_if<TYPE>(&as_const_value().inner());          \
-  }                                                               \
-  template <typename T>                                           \
-  TYPE* ValueAccess<T>::if_##NAME() {                             \
-    return std::get_if<TYPE>(&as_value().inner());                \
-  }                                                               \
-  template <typename T>                                           \
-  decltype(auto) ValueAccess<T>::ensure_##NAME() {                \
-    if (!std::holds_alternative<TYPE>(as_value().inner())) {      \
-      return as_value().inner().template emplace<TYPE>();         \
-    }                                                             \
-    return std::get<TYPE>(as_value().inner());                    \
-  }                                                               \
-  template <typename T>                                           \
-  template <typename... Args>                                     \
-  decltype(auto) ValueAccess<T>::emplace_##NAME(Args&&... args) { \
-    return as_value().inner().template emplace<TYPE>(             \
-        std::forward<Args>(args)...);                             \
+#define FB_THRIFT_VALUE_ACCESS_IMPL(TYPE, NAME)           \
+  template <typename T>                                   \
+  bool ValueAccess<T>::is_##NAME() const {                \
+    return std::holds_alternative<TYPE>(value().inner()); \
+  }                                                       \
+  template <typename T>                                   \
+  const TYPE& ValueAccess<T>::as_##NAME() const {         \
+    return std::get<TYPE>(value().inner());               \
+  }                                                       \
+  template <typename T>                                   \
+  TYPE& ValueAccess<T>::as_##NAME() {                     \
+    return std::get<TYPE>(value().inner());               \
+  }                                                       \
+  template <typename T>                                   \
+  const TYPE* ValueAccess<T>::if_##NAME() const {         \
+    return std::get_if<TYPE>(&value().inner());           \
+  }                                                       \
+  template <typename T>                                   \
+  TYPE* ValueAccess<T>::if_##NAME() {                     \
+    return std::get_if<TYPE>(&value().inner());           \
+  }                                                       \
+  template <typename T>                                   \
+  TYPE& ValueAccess<T>::ensure_##NAME() {                 \
+    if (!std::holds_alternative<TYPE>(value().inner())) { \
+      return value().inner().template emplace<TYPE>();    \
+    }                                                     \
+    return std::get<TYPE>(value().inner());               \
+  }                                                       \
+  template <typename T>                                   \
+  template <typename... Args>                             \
+  TYPE& ValueAccess<T>::emplace_##NAME(Args&&... args) {  \
+    return value().inner().template emplace<TYPE>(        \
+        std::forward<Args>(args)...);                     \
   }
 
 FB_THRIFT_VALUE_ACCESS_IMPL(PrimitiveTypes::Bool, bool)

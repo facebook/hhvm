@@ -119,11 +119,14 @@ NativeValue::NativeValue(const NativeSet& set) : kind_(set) {}
 NativeValue::NativeValue(const NativeMap& map) : kind_(map) {}
 NativeValue::NativeValue(const NativeObject& strct) : kind_(strct) {}
 
-const NativeValue::Kind& NativeValue::inner() const {
+const NativeValue::Kind& NativeValue::inner() const noexcept {
+  return kind_;
+}
+NativeValue::Kind& NativeValue::inner() noexcept {
   return kind_;
 }
 
-bool NativeValue::is_empty() const {
+bool NativeValue::is_empty() const noexcept {
   return std::holds_alternative<std::monostate>(kind_);
 }
 
@@ -1197,14 +1200,14 @@ const NativeValue* NativeObject::if_contains(FieldId i) const {
   TYPE* CLASS::if_##NAME() {                                 \
     return std::get_if<TYPE>(&kind_);                        \
   }                                                          \
-  decltype(auto) CLASS::ensure_##NAME() {                    \
+  TYPE& CLASS::ensure_##NAME() {                             \
     if (!std::holds_alternative<TYPE>(kind_)) {              \
       return kind_.emplace<TYPE>();                          \
     }                                                        \
     return std::get<TYPE>(kind_);                            \
   }                                                          \
   template <typename... Args>                                \
-  decltype(auto) CLASS::emplace_##NAME(Args&&... args) {     \
+  TYPE& CLASS::emplace_##NAME(Args&&... args) {              \
     return kind_.emplace<TYPE>(std::forward<Args>(args)...); \
   }
 

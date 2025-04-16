@@ -231,9 +231,9 @@ using MapOf = folly::F14FastMap<Ts...>;
   TYPE& as_##NAME();                                  \
   const TYPE* if_##NAME() const;                      \
   TYPE* if_##NAME();                                  \
-  decltype(auto) ensure_##NAME();                     \
+  TYPE& ensure_##NAME();                              \
   template <typename... Args>                         \
-  decltype(auto) emplace_##NAME(Args&&... args);
+  TYPE& emplace_##NAME(Args&&... args);
 
 // The type T (CRTP) provides the implementation on how to access the underlying
 // wrapper as a `Value`
@@ -282,11 +282,8 @@ class ValueAccess {
   ValueAccess() = default;
 
  private:
-  NativeValue& as_value() noexcept { return static_cast<T&>(*this).as_value(); }
-  const NativeValue& as_value() const noexcept {
-    return static_cast<const T&>(*this).as_value();
-  }
-  const NativeValue& as_const_value() const noexcept {
+  NativeValue& value() noexcept { return static_cast<T&>(*this).as_value(); }
+  const NativeValue& value() const noexcept {
     return static_cast<const T&>(*this).as_value();
   }
 };
@@ -428,8 +425,9 @@ class NativeList {
       // Fallback for list/map/set
       ListOf<ValueHolder>>;
 
-  template <typename T>
-  using Specialized = detail::list_t<std::remove_cv_t<typename T::value_type>>;
+  template <typename T, bool StringToBinary = true>
+  using Specialized =
+      detail::list_t<std::remove_cv_t<typename T::value_type>, StringToBinary>;
 
   const Kind& inner() const;
 
@@ -516,8 +514,9 @@ class NativeSet {
       // Fallback for list/map//set
       SetOf<ValueHolder>>;
 
-  template <typename T>
-  using Specialized = detail::set_t<std::remove_cv_t<typename T::value_type>>;
+  template <typename T, bool StringToBinary = true>
+  using Specialized =
+      detail::set_t<std::remove_cv_t<typename T::value_type>, StringToBinary>;
 
   // Default ops
   NativeSet() = default;
@@ -608,10 +607,11 @@ class NativeMap {
       // Unspecialized as fallback
       MapOf<ValueHolder, ValueHolder>>;
 
-  template <typename T>
+  template <typename T, bool StringToBinary = true>
   using Specialized = detail::map_t<
       std::remove_cv_t<typename T::key_type>,
-      std::remove_cv_t<typename T::mapped_type>>;
+      std::remove_cv_t<typename T::mapped_type>,
+      StringToBinary>;
 
   const Kind& inner() const;
 
@@ -837,8 +837,9 @@ class NativeValue : public ValueAccess<NativeValue> {
       NativeMap,
       NativeObject>;
 
-  const Kind& inner() const;
-  bool is_empty() const;
+  const Kind& inner() const noexcept;
+  Kind& inner() noexcept;
+  bool is_empty() const noexcept;
 
   NativeValue& as_value() noexcept { return *this; }
   const NativeValue& as_value() const noexcept { return *this; }
@@ -969,6 +970,33 @@ std::unique_ptr<folly::IOBuf> serializeObject(const NativeObject& val) {
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   serializeObject<Protocol>(val, queue);
   return queue.move();
+}
+
+// ---- Container helpers ---- //
+
+// Creates a specialized list type with a single element derived
+// from the provided type T, e.g.
+// make_list<int>(...) => ListOf<I32>
+// make_list<std::string>(...) => ListOf<Bytes>
+// make_list<Foo>(...) => ListOf<NativeObject>
+template <typename T, bool StringToBinary = true>
+NativeList make_list(T&& t) {
+  if constexpr (std::is_same_v<T, NativeValue>) {
+    return make_list<std::remove_cvref_t<decltype(t)>, StringToBinary>(
+        std::forward<T>(t));
+  }
+
+  using ListTy = NativeList::Specialized<T, StringToBinary>;
+  using ListElemTy = typename ListTy::value_type;
+
+  if constexpr (detail::is_primitive_v<ListElemTy, StringToBinary>) {
+    return NativeList(ListTy{{std::forward<T>(t)}});
+  } else if constexpr (detail::is_structured_v<ListElemTy, StringToBinary>) {
+    // TODO(sadroeck) - implement this
+    return NativeList(ListTy{NativeObject{}});
+  } else if constexpr (detail::is_container_v<ListElemTy, StringToBinary>) {
+    return NativeList(ListTy{{NativeValue{std::forward<T>(t)}}});
+  }
 }
 
 } // namespace apache::thrift::protocol::experimental

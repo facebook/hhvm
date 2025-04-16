@@ -96,15 +96,6 @@ namespace apache::thrift::protocol::experimental {
 
 // ---- Primitive types ---- //
 
-using Bool = bool;
-using I8 = std::int8_t;
-using I16 = std::int16_t;
-using I32 = std::int32_t;
-using I64 = std::int64_t;
-using Float = float;
-using Double = double;
-using String = std::string;
-
 struct Bytes {
   // TODO(sadroeck) - We could manually refcount & keep IOBuf on the stack
   using Buf = std::unique_ptr<folly::IOBuf>;
@@ -144,6 +135,18 @@ struct Bytes {
                    folly::IOBuf::WRAP_BUFFER, str.data(), str.size()}) ==
         folly::ordering::eq;
   }
+};
+
+struct PrimitiveTypes {
+  using Bool = bool;
+  using I8 = std::int8_t;
+  using I16 = std::int16_t;
+  using I32 = std::int32_t;
+  using I64 = std::int64_t;
+  using Float = float;
+  using Double = double;
+  using String = std::string;
+  using Bytes = Bytes;
 };
 
 namespace detail {
@@ -234,15 +237,15 @@ class ValueAccess {
   bool operator==(const Value& other) const;
   bool operator!=(const Value& other) const;
 
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(Bool, bool)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(I8, byte)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(I16, i16)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(I32, i32)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(I64, i64)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(Float, float)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(Double, double)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(Bytes, bytes)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(String, string)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Bool, bool)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::I8, byte)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::I16, i16)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::I32, i32)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::I64, i64)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Float, float)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Double, double)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Bytes, bytes)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::String, string)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeList, list)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeSet, set)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeMap, map)
@@ -274,19 +277,21 @@ using QuasiValue = std::array<std::uint8_t, 512>;
 using QuasiObject =
     folly::F14FastMap<std::int16_t, std::array<std::uint8_t, 512>>;
 
-using QuasiList = std::variant<ListOf<Bool>, ListOf<QuasiObject>>;
+using QuasiList =
+    std::variant<ListOf<PrimitiveTypes::Bool>, ListOf<QuasiObject>>;
 using QuasiSet = std::variant<SetOf<bool>, SetOf<QuasiObject>>;
-using QuasiMap =
-    std::variant<MapOf<I16, QuasiObject>, MapOf<QuasiObject, QuasiObject>>;
+using QuasiMap = std::variant<
+    MapOf<PrimitiveTypes::I16, QuasiObject>,
+    MapOf<QuasiObject, QuasiObject>>;
 using QuasiValueKind = std::variant<
-    Bool,
-    I8,
-    I16,
-    I32,
-    I64,
-    Float,
-    Double,
-    String,
+    PrimitiveTypes::Bool,
+    PrimitiveTypes::I8,
+    PrimitiveTypes::I16,
+    PrimitiveTypes::I32,
+    PrimitiveTypes::I64,
+    PrimitiveTypes::Float,
+    PrimitiveTypes::Double,
+    PrimitiveTypes::String,
     Bytes,
     QuasiList,
     QuasiSet,
@@ -382,15 +387,16 @@ class NativeList {
   using Kind = std::variant<
       std::monostate,
       // Specialization for Primitive elements
-      ListOf<Bool>, // TODO(sadroeck) - This can be more efficient
-      ListOf<I8>,
-      ListOf<I16>,
-      ListOf<I32>,
-      ListOf<I64>,
-      ListOf<Float>,
-      ListOf<Double>,
-      ListOf<Bytes>,
-      ListOf<String>,
+      ListOf<PrimitiveTypes::Bool>, // TODO(sadroeck) - This can be more
+                                    // efficient
+      ListOf<PrimitiveTypes::I8>,
+      ListOf<PrimitiveTypes::I16>,
+      ListOf<PrimitiveTypes::I32>,
+      ListOf<PrimitiveTypes::I64>,
+      ListOf<PrimitiveTypes::Float>,
+      ListOf<PrimitiveTypes::Double>,
+      ListOf<PrimitiveTypes::Bytes>,
+      ListOf<PrimitiveTypes::String>,
       ListOf<Object>,
       // Fallback for list/map/set
       ListOf<ValueHolder>>;
@@ -417,15 +423,19 @@ class NativeList {
   bool operator==(const NativeList& other) const;
   bool operator!=(const NativeList& other) const;
 
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<Bool>, list_of_bool)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<I8>, list_of_i8)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<I16>, list_of_i16)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<I32>, list_of_i32)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<I64>, list_of_i64)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<Float>, list_of_float)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<Double>, list_of_double)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<Bytes>, list_of_bytes)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<String>, list_of_string)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<PrimitiveTypes::Bool>, list_of_bool)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<PrimitiveTypes::I8>, list_of_i8)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<PrimitiveTypes::I16>, list_of_i16)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<PrimitiveTypes::I32>, list_of_i32)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<PrimitiveTypes::I64>, list_of_i64)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
+      ListOf<PrimitiveTypes::Float>, list_of_float)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
+      ListOf<PrimitiveTypes::Double>, list_of_double)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
+      ListOf<PrimitiveTypes::Bytes>, list_of_bytes)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
+      ListOf<PrimitiveTypes::String>, list_of_string)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<Object>, list_of_object)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<ValueHolder>, list_of_value)
 
@@ -466,15 +476,15 @@ class NativeSet {
   using Kind = std::variant<
       std::monostate,
       // Specialization for Primitive elements
-      SetOf<Bool>,
-      SetOf<I8>,
-      SetOf<I16>,
-      SetOf<I32>,
-      SetOf<I64>,
-      SetOf<Float>,
-      SetOf<Double>,
-      SetOf<Bytes>,
-      SetOf<String>,
+      SetOf<PrimitiveTypes::Bool>,
+      SetOf<PrimitiveTypes::I8>,
+      SetOf<PrimitiveTypes::I16>,
+      SetOf<PrimitiveTypes::I32>,
+      SetOf<PrimitiveTypes::I64>,
+      SetOf<PrimitiveTypes::Float>,
+      SetOf<PrimitiveTypes::Double>,
+      SetOf<PrimitiveTypes::Bytes>,
+      SetOf<PrimitiveTypes::String>,
       SetOf<Object>,
       // Fallback for list/map//set
       SetOf<ValueHolder>>;
@@ -500,15 +510,17 @@ class NativeSet {
   bool operator==(const NativeSet& other) const;
   bool operator!=(const NativeSet& other) const;
 
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Bool>, set_of_bool)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I8>, set_of_i8)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I16>, set_of_i16)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I32>, set_of_i32)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<I64>, set_of_i64)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Float>, set_of_float)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Double>, set_of_double)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Bytes>, set_of_bytes)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<String>, set_of_string)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::Bool>, set_of_bool)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::I8>, set_of_i8)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::I16>, set_of_i16)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::I32>, set_of_i32)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::I64>, set_of_i64)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::Float>, set_of_float)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
+      SetOf<PrimitiveTypes::Double>, set_of_double)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::Bytes>, set_of_bytes)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
+      SetOf<PrimitiveTypes::String>, set_of_string)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Object>, set_of_object)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<ValueHolder>, set_of_value)
 
@@ -556,15 +568,15 @@ class NativeMap {
       std::monostate,
 
       // Specialization of primitive -> Value maps
-      MapOf<Bool, ValueHolder>,
-      MapOf<I8, ValueHolder>,
-      MapOf<I16, ValueHolder>,
-      MapOf<I32, ValueHolder>,
-      MapOf<I64, ValueHolder>,
-      MapOf<Float, ValueHolder>,
-      MapOf<Double, ValueHolder>,
-      MapOf<Bytes, ValueHolder>,
-      MapOf<String, ValueHolder>,
+      MapOf<PrimitiveTypes::Bool, ValueHolder>,
+      MapOf<PrimitiveTypes::I8, ValueHolder>,
+      MapOf<PrimitiveTypes::I16, ValueHolder>,
+      MapOf<PrimitiveTypes::I32, ValueHolder>,
+      MapOf<PrimitiveTypes::I64, ValueHolder>,
+      MapOf<PrimitiveTypes::Float, ValueHolder>,
+      MapOf<PrimitiveTypes::Double, ValueHolder>,
+      MapOf<PrimitiveTypes::Bytes, ValueHolder>,
+      MapOf<PrimitiveTypes::String, ValueHolder>,
 
       // Unspecialized as fallback
       MapOf<ValueHolder, ValueHolder>>;
@@ -626,56 +638,59 @@ namespace detail {
 // - structs will be specialized as `Object`
 
 template <bool StringToBinary>
-struct native_value_type<Bool, StringToBinary> {
-  using type = Bool;
+struct native_value_type<PrimitiveTypes::Bool, StringToBinary> {
+  using type = PrimitiveTypes::Bool;
   using tag = ::apache::thrift::type::bool_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<I8, StringToBinary> {
-  using type = I8;
+struct native_value_type<PrimitiveTypes::I8, StringToBinary> {
+  using type = PrimitiveTypes::I8;
   using tag = ::apache::thrift::type::byte_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<I16, StringToBinary> {
-  using type = I16;
+struct native_value_type<PrimitiveTypes::I16, StringToBinary> {
+  using type = PrimitiveTypes::I16;
   using tag = ::apache::thrift::type::i16_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<I32, StringToBinary> {
-  using type = I32;
+struct native_value_type<PrimitiveTypes::I32, StringToBinary> {
+  using type = PrimitiveTypes::I32;
   using tag = ::apache::thrift::type::i32_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<I64, StringToBinary> {
-  using type = I64;
+struct native_value_type<PrimitiveTypes::I64, StringToBinary> {
+  using type = PrimitiveTypes::I64;
   using tag = ::apache::thrift::type::i64_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<Float, StringToBinary> {
-  using type = Float;
+struct native_value_type<PrimitiveTypes::Float, StringToBinary> {
+  using type = PrimitiveTypes::Float;
   using tag = ::apache::thrift::type::float_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<Double, StringToBinary> {
-  using type = Double;
+struct native_value_type<PrimitiveTypes::Double, StringToBinary> {
+  using type = PrimitiveTypes::Double;
   using tag = ::apache::thrift::type::double_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<Bytes, StringToBinary> {
-  using type = Bytes;
+struct native_value_type<PrimitiveTypes::Bytes, StringToBinary> {
+  using type = PrimitiveTypes::Bytes;
   using tag = ::apache::thrift::type::binary_t;
 };
 
 template <bool StringToBinary>
-struct native_value_type<String, StringToBinary> {
-  using type = std::conditional_t<StringToBinary, Bytes, String>;
+struct native_value_type<PrimitiveTypes::String, StringToBinary> {
+  using type = std::conditional_t<
+      StringToBinary,
+      PrimitiveTypes::Bytes,
+      PrimitiveTypes::String>;
   using tag = ::apache::thrift::type::string_t;
 };
 
@@ -749,15 +764,15 @@ struct native_value_type<std::map<Ts...>, StringToBinary> {
 class Value : public ValueAccess<Value> {
  public:
   using Kind = std::variant<
-      Bool,
-      I8,
-      I16,
-      I32,
-      I64,
-      Float,
-      Double,
-      Bytes,
-      String,
+      PrimitiveTypes::Bool,
+      PrimitiveTypes::I8,
+      PrimitiveTypes::I16,
+      PrimitiveTypes::I32,
+      PrimitiveTypes::I64,
+      PrimitiveTypes::Float,
+      PrimitiveTypes::Double,
+      PrimitiveTypes::Bytes,
+      PrimitiveTypes::String,
       NativeList,
       NativeSet,
       NativeMap,
@@ -777,30 +792,30 @@ class Value : public ValueAccess<Value> {
 
   // Variant ctors
   /* implicit */ Value(Kind&& kind) noexcept;
-  /* implicit */ Value(Bool&& b) noexcept;
-  /* implicit */ Value(I8&& i8) noexcept;
-  /* implicit */ Value(I16&& i16) noexcept;
-  /* implicit */ Value(I32&& i32) noexcept;
-  /* implicit */ Value(I64&& i64) noexcept;
-  /* implicit */ Value(Float&& f) noexcept;
-  /* implicit */ Value(Double&& d) noexcept;
-  /* implicit */ Value(Bytes&& b) noexcept;
-  /* implicit */ Value(String&& s) noexcept;
+  /* implicit */ Value(PrimitiveTypes::Bool&& b) noexcept;
+  /* implicit */ Value(PrimitiveTypes::I8&& i8) noexcept;
+  /* implicit */ Value(PrimitiveTypes::I16&& i16) noexcept;
+  /* implicit */ Value(PrimitiveTypes::I32&& i32) noexcept;
+  /* implicit */ Value(PrimitiveTypes::I64&& i64) noexcept;
+  /* implicit */ Value(PrimitiveTypes::Float&& f) noexcept;
+  /* implicit */ Value(PrimitiveTypes::Double&& d) noexcept;
+  /* implicit */ Value(PrimitiveTypes::Bytes&& b) noexcept;
+  /* implicit */ Value(PrimitiveTypes::String&& s) noexcept;
   /* implicit */ Value(NativeList&& list) noexcept;
   /* implicit */ Value(NativeSet&& set) noexcept;
   /* implicit */ Value(NativeMap&& map) noexcept;
   /* implicit */ Value(Object&& strct) noexcept;
 
   /* implicit */ Value(const Kind& kind);
-  /* implicit */ Value(const Bool& b);
-  /* implicit */ Value(const I8& i8);
-  /* implicit */ Value(const I16& i16);
-  /* implicit */ Value(const I32& i32);
-  /* implicit */ Value(const I64& i64);
-  /* implicit */ Value(const Float& f);
-  /* implicit */ Value(const Double& d);
-  /* implicit */ Value(const Bytes& b);
-  /* implicit */ Value(const String& s);
+  /* implicit */ Value(const PrimitiveTypes::Bool& b);
+  /* implicit */ Value(const PrimitiveTypes::I8& i8);
+  /* implicit */ Value(const PrimitiveTypes::I16& i16);
+  /* implicit */ Value(const PrimitiveTypes::I32& i32);
+  /* implicit */ Value(const PrimitiveTypes::I64& i64);
+  /* implicit */ Value(const PrimitiveTypes::Float& f);
+  /* implicit */ Value(const PrimitiveTypes::Double& d);
+  /* implicit */ Value(const PrimitiveTypes::Bytes& b);
+  /* implicit */ Value(const PrimitiveTypes::String& s);
   /* implicit */ Value(const NativeList& list);
   /* implicit */ Value(const NativeSet& set);
   /* implicit */ Value(const NativeMap& map);

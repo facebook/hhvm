@@ -18,6 +18,15 @@
 
 namespace apache::thrift::protocol::experimental {
 
+using Bool = PrimitiveTypes::Bool;
+using I8 = PrimitiveTypes::I8;
+using I16 = PrimitiveTypes::I16;
+using I32 = PrimitiveTypes::I32;
+using I64 = PrimitiveTypes::I64;
+using Float = PrimitiveTypes::Float;
+using Double = PrimitiveTypes::Double;
+using String = PrimitiveTypes::String;
+
 // ---- ValueHolder ---- //
 
 ValueHolder::ValueHolder(const Value& val) : data_{} {

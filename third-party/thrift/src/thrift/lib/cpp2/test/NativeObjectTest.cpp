@@ -27,9 +27,17 @@ namespace experimental = apache::thrift::protocol::experimental;
 
 using StandardProtocol = apache::thrift::conformance::StandardProtocol;
 using NativeValue = experimental::Value;
+
+using I8 = experimental::PrimitiveTypes::I8;
+using I16 = experimental::PrimitiveTypes::I16;
+using I32 = experimental::PrimitiveTypes::I32;
+using I64 = experimental::PrimitiveTypes::I64;
+using Float = experimental::PrimitiveTypes::Float;
+using Double = experimental::PrimitiveTypes::Double;
+using String = experimental::PrimitiveTypes::String;
 using Object = experimental::Object;
-using Bytes = experimental::Bytes;
-using String = experimental::String;
+using Bytes = experimental::PrimitiveTypes::Bytes;
+using String = experimental::PrimitiveTypes::String;
 using ValueHolder = experimental::ValueHolder;
 
 // ---- Random utils ---- //
@@ -37,37 +45,37 @@ template <typename T>
 T random_val();
 
 template <>
-experimental::Bool random_val<experimental::Bool>() {
+bool random_val<bool>() {
   return folly::Random::randBool(0.5);
 }
 
 template <>
-experimental::I8 random_val<experimental::I8>() {
+I8 random_val<I8>() {
   return folly::Random::rand32();
 }
 
 template <>
-experimental::I16 random_val<experimental::I16>() {
+I16 random_val<I16>() {
   return folly::Random::rand32();
 }
 
 template <>
-experimental::I32 random_val<experimental::I32>() {
+I32 random_val<I32>() {
   return folly::Random::rand32();
 }
 
 template <>
-experimental::I64 random_val<experimental::I64>() {
+I64 random_val<I64>() {
   return folly::Random::rand64();
 }
 
 template <>
-experimental::Float random_val<experimental::Float>() {
+Float random_val<Float>() {
   return folly::Random::randDouble01();
 }
 
 template <>
-experimental::Double random_val<experimental::Double>() {
+Double random_val<Double>() {
   return folly::Random::randDouble01();
 }
 
@@ -151,50 +159,49 @@ void test_value_holder_type() {
 }
 
 TEST(ValueHolderTest, Bool) {
-  test_value_holder_type<experimental::Bool>();
+  test_value_holder_type<bool>();
 }
 
 TEST(ValueHolderTest, Byte) {
-  test_value_holder_type<experimental::I8>();
+  test_value_holder_type<I8>();
 }
 
 TEST(ValueHolderTest, I16) {
-  test_value_holder_type<experimental::I16>();
+  test_value_holder_type<I16>();
 }
 
 TEST(ValueHolderTest, I32) {
-  test_value_holder_type<experimental::I32>();
+  test_value_holder_type<I32>();
 }
 
 TEST(ValueHolderTest, I64) {
-  test_value_holder_type<experimental::I64>();
+  test_value_holder_type<I64>();
 }
 
 TEST(ValueHolderTest, Float) {
-  test_value_holder_type<experimental::Float>();
+  test_value_holder_type<Float>();
 }
 
 TEST(ValueHolderTest, Double) {
-  test_value_holder_type<experimental::Double>();
+  test_value_holder_type<Double>();
 }
 
 TEST(ValueHolderTest, Bytes) {
-  test_value_holder_type<experimental::Bytes>();
+  test_value_holder_type<Bytes>();
 }
 
 TEST(ObjectIterator, object_with_primitive_fields) {
   Object obj;
-  experimental::I32 int_val_1 = random_val<experimental::I32>();
+  I32 int_val_1 = random_val<I32>();
   obj.emplace(1, NativeValue{int_val_1});
-  experimental::I32 int_val_2 = random_val<experimental::I32>();
+  I32 int_val_2 = random_val<I32>();
   obj[2] = NativeValue{int_val_2};
   {
     ASSERT_EQ(obj.size(), 2);
     for (const auto& [field_id, field_val] : obj) {
-      ASSERT_TRUE(field_val.is_type<experimental::I32>());
+      ASSERT_TRUE(field_val.is_type<I32>());
       ASSERT_EQ(
-          field_val.as_type<experimental::I32>(),
-          field_id == 1 ? int_val_1 : int_val_2);
+          field_val.as_type<I32>(), field_id == 1 ? int_val_1 : int_val_2);
     }
   }
 
@@ -202,10 +209,9 @@ TEST(ObjectIterator, object_with_primitive_fields) {
     Object obj2{obj};
     ASSERT_EQ(obj2.size(), 2);
     for (const auto& [field_id, field_val] : obj2) {
-      ASSERT_TRUE(field_val.is_type<experimental::I32>());
+      ASSERT_TRUE(field_val.is_type<I32>());
       ASSERT_EQ(
-          field_val.as_type<experimental::I32>(),
-          field_id == 1 ? int_val_1 : int_val_2);
+          field_val.as_type<I32>(), field_id == 1 ? int_val_1 : int_val_2);
     }
   }
 
@@ -213,10 +219,9 @@ TEST(ObjectIterator, object_with_primitive_fields) {
     Object obj3(std::move(obj));
     ASSERT_EQ(obj3.size(), 2);
     for (const auto& [field_id, field_val] : obj3) {
-      ASSERT_TRUE(field_val.is_type<experimental::I32>());
+      ASSERT_TRUE(field_val.is_type<I32>());
       ASSERT_EQ(
-          field_val.as_type<experimental::I32>(),
-          field_id == 1 ? int_val_1 : int_val_2);
+          field_val.as_type<I32>(), field_id == 1 ? int_val_1 : int_val_2);
     }
   }
 }
@@ -617,20 +622,21 @@ template <typename Key, typename... Values>
 constexpr bool native_map_is_fallback_v<Key, std::tuple<Values...>> =
     (native_map_is_fallback_v<Key, Values> && ...);
 
-using I8 = experimental::I8;
-using I16 = experimental::I16;
-using I32 = experimental::I32;
-using I64 = experimental::I64;
-using Float = experimental::Float;
-using Double = experimental::Double;
-using String = experimental::String;
-using Bytes = experimental::Bytes;
+using PT = experimental::PrimitiveTypes;
+using I8 = PT::I8;
+using I16 = PT::I16;
+using I32 = PT::I32;
+using I64 = PT::I64;
+using Float = PT::Float;
+using Double = PT::Double;
+using String = PT::String;
+using Bytes = PT::Bytes;
 using NativeList = experimental::NativeList;
 using NativeSet = experimental::NativeSet;
 using NativeMap = experimental::NativeMap;
 
-using primitives_t = std::
-    tuple<experimental::Bool, I8, I16, I32, I64, Float, Double, String, Bytes>;
+using primitives_t =
+    std::tuple<PT::Bool, I8, I16, I32, I64, Float, Double, String, Bytes>;
 using non_primitives_t = std::tuple<NativeList, NativeSet, NativeMap>;
 
 static_assert(

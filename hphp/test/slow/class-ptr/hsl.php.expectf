@@ -1,0 +1,38 @@
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\ChildProcessException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\ConnectionAbortedException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\ConnectionRefusedException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\ConnectionResetException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\AlreadyExistsException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\NotFoundException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\IsADirectoryException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\IsNotADirectoryException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\ProcessLookupException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\TimeoutException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\BlockingIOException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\BrokenPipeException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\PermissionException in %s/class-ptr/hsl.php on line 6
+
+Notice: Implicit string to Class conversion for classname HH\Lib\OS\NotFoundException in %s/class-ptr/hsl.php on line 6
+
+Fatal error: Uncaught exception 'HH\Lib\OS\NotFoundException' with message 'ENOENT(2): Errno 2: No such file or directory' in %s/class-ptr/hsl.php:6
+Stack trace:
+#0 (): Closure$HH\Lib\_Private\_OS\get_throw_errno_impl#2()
+#1 (): Closure$HH\Lib\_Private\_OS\get_throw_errno_impl#4()
+#2 (): HH\Lib\_Private\_OS\throw_errno()
+#3 (): HH\Lib\_Private\_OS\wrap_impl()
+#4 %s/class-ptr/hsl.php(6): HH\Lib\OS\mkdtemp()
+#5 (): main()
+#6 {main}

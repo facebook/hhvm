@@ -180,9 +180,6 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   using Base::data_;
 };
 
-template <FieldOrdinal Ord, class Patch>
-void* typeErasedPatchImpl(Patch&);
-
 /// Create a base patch that supports Ensure operator.
 ///
 /// The `Patch` template parameter must be a Thrift struct with the following
@@ -203,9 +200,6 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   // Needed to access patchIfSet(...) for merge(...) method
   template <class>
   friend class FieldPatch;
-
-  template <FieldOrdinal, class P>
-  friend void* typeErasedPatchImpl(P& patch);
 
   struct Applier {
     T& v;
@@ -379,11 +373,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <class Id>
   decltype(auto) patch() {
     static_assert(!std::is_same_v<Id, op::get_ordinal<T, Id>>);
-    using FieldPatchType = typename patch_type::underlying_type;
-    using Ret = op::get_native_type<FieldPatchType, Id>;
-    return *reinterpret_cast<Ret*>(
-        typeErasedPatchImpl<op::get_ordinal_v<FieldPatchType, Id>>(
-            static_cast<Derived&>(*this)));
+    return *op::get<Id>(patchImpl<op::get_field_id<T, Id>>().toThrift());
   }
 
   /// Returns the proper patch object for the given field.
@@ -677,10 +667,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   }
 
  private:
-  template <typename Id>
-  decltype(auto) patchImpl() {
-    return (maybeEnsure<Id>(), patchAfter<Id>());
-  }
+  template <class FieldId>
+  patch_type& patchImpl();
 
   template <typename Id, typename U>
   decltype(auto) getRawPatch(U&& patch) const {

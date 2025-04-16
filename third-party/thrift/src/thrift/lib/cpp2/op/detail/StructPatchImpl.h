@@ -19,28 +19,22 @@
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
 
 namespace apache::thrift::op::detail {
-
-template <FieldOrdinal Ord, class Patch>
-void* typeErasedPatchImpl(Patch& patch) {
-  using FieldPatchType = typename Patch::patch_type::underlying_type;
-  if constexpr (folly::to_underlying(Ord) <= size_v<FieldPatchType>) {
-    // Sanity check to ensure `patch<Ordinal>()` returns the correct type.
-    // Otherwise it's a bug in the patch library.
-    using Id = op::get_field_id<FieldPatchType, type::ordinal_tag<Ord>>;
-    static_assert(std::is_same_v<
-                  decltype(patch.template patchImpl<Id>()),
-                  decltype(patch.template patch<Id>())>);
-    return &patch.template patchImpl<Id>();
+template <class Patch, class Derived>
+template <class FieldId>
+auto BaseEnsurePatch<Patch, Derived>::patchImpl() -> patch_type& {
+  if constexpr (
+      op::get_ordinal_v<typename patch_type::underlying_type, FieldId> !=
+      FieldOrdinal{0}) {
+    maybeEnsure<FieldId>();
+    patchAfter<FieldId>();
+    return *data_.patch();
   } else {
     // This code path should never be executed since the caller should already
     // validate whether the field is patchable.
     // However, this is needed for explicit instantiation when we can't validate
-    // patchable field size in codegen.
-    folly::throw_exception<std::logic_error>(fmt::format(
-        "Ordinal ({}) exceeds patchable field size ({})",
-        folly::to_underlying(Ord),
-        size_v<FieldPatchType>));
+    // whether field is patchable in codegen.
+    folly::throw_exception_fmt_format<std::logic_error>(
+        "Field (id={}) is not patchable", folly::to_underlying(FieldId::value));
   }
 }
-
 } // namespace apache::thrift::op::detail

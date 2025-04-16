@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"maps"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -59,9 +60,7 @@ func WithHeaders(ctx context.Context, headers map[string]string) context.Context
 	if !ok {
 		return context.WithValue(ctx, requestHeadersKey, headers)
 	}
-	for k, v := range headers {
-		headersMap[k] = v
-	}
+	maps.Copy(headersMap, headers)
 	return context.WithValue(ctx, requestHeadersKey, headersMap)
 }
 
@@ -151,7 +150,5 @@ func setResponseHeaders(ctx context.Context, responseHeaders map[string]string) 
 		return
 	}
 
-	for k, v := range responseHeaders {
-		responseHeadersMap[k] = v
-	}
+	maps.Copy(responseHeadersMap, responseHeaders)
 }

@@ -110,9 +110,9 @@ func (c *SerialChannel) Close() error {
 	return c.protocol.Close()
 }
 
-// Call will call the given method with the given thrift struct, and read the response
+// SendRequestResponse will call the given method with the given thrift struct, and read the response
 // into the given response struct. It only allows one outstanding request at once, but is thread-safe.
-func (c *SerialChannel) Call(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error {
+func (c *SerialChannel) SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -129,9 +129,9 @@ func (c *SerialChannel) Call(ctx context.Context, method string, request Writabl
 	return nil
 }
 
-// Oneway will call the given method with the given thrift struct. It returns immediately when the request is sent.
+// SendRequestNoResponse will call the given method with the given thrift struct. It returns immediately when the request is sent.
 // It only allows one outstanding request at once, but is thread-safe.
-func (c *SerialChannel) Oneway(ctx context.Context, method string, request WritableStruct) error {
+func (c *SerialChannel) SendRequestNoResponse(ctx context.Context, method string, request WritableStruct) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 

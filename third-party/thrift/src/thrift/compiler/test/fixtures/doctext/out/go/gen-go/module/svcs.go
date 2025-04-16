@@ -63,7 +63,7 @@ func (c *CClient) F(ctx context.Context) (error) {
     fbthriftReq := &reqCF{
     }
     fbthriftResp := newRespCF()
-    fbthriftErr := c.ch.Call(ctx, "f", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "f", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -77,7 +77,7 @@ func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (stri
         C: c,
     }
     fbthriftResp := newRespCThing()
-    fbthriftErr := c.ch.Call(ctx, "thing", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "thing", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     } else if fbthriftResp.Bang != nil {

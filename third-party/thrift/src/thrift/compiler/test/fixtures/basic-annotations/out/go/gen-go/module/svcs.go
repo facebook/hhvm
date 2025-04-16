@@ -73,7 +73,7 @@ func (c *MyServiceClient) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePing{
     }
     fbthriftResp := newRespMyServicePing()
-    fbthriftErr := c.ch.Call(ctx, "ping", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "ping", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftResp.MyExcept != nil {
@@ -86,7 +86,7 @@ func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
     fbthriftReq := &reqMyServiceGetRandomData{
     }
     fbthriftResp := newRespMyServiceGetRandomData()
-    fbthriftErr := c.ch.Call(ctx, "getRandomData", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "getRandomData", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     }
@@ -98,7 +98,7 @@ func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, erro
         Id: id,
     }
     fbthriftResp := newRespMyServiceHasDataById()
-    fbthriftErr := c.ch.Call(ctx, "hasDataById", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "hasDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return false, fbthriftErr
     }
@@ -110,7 +110,7 @@ func (c *MyServiceClient) GoGetDataById(ctx context.Context, id int64) (string, 
         Id: id,
     }
     fbthriftResp := newRespMyServiceGoGetDataById()
-    fbthriftErr := c.ch.Call(ctx, "getDataById", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     }
@@ -123,7 +123,7 @@ func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string
         Data: data,
     }
     fbthriftResp := newRespMyServicePutDataById()
-    fbthriftErr := c.ch.Call(ctx, "putDataById", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "putDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -135,14 +135,14 @@ func (c *MyServiceClient) LobDataById(ctx context.Context, id int64, data string
         Id: id,
         Data: data,
     }
-    return c.ch.Oneway(ctx, "lobDataById", fbthriftReq)
+    return c.ch.SendRequestNoResponse(ctx, "lobDataById", fbthriftReq)
 }
 
 func (c *MyServiceClient) GoDoNothing(ctx context.Context) (error) {
     fbthriftReq := &reqMyServiceGoDoNothing{
     }
     fbthriftResp := newRespMyServiceGoDoNothing()
-    fbthriftErr := c.ch.Call(ctx, "doNothing", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "doNothing", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -614,7 +614,7 @@ func (c *MyServicePrioParentClient) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePrioParentPing{
     }
     fbthriftResp := newRespMyServicePrioParentPing()
-    fbthriftErr := c.ch.Call(ctx, "ping", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "ping", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -625,7 +625,7 @@ func (c *MyServicePrioParentClient) Pong(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePrioParentPong{
     }
     fbthriftResp := newRespMyServicePrioParentPong()
-    fbthriftErr := c.ch.Call(ctx, "pong", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "pong", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -828,7 +828,7 @@ func (c *MyServicePrioChildClient) Pang(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePrioChildPang{
     }
     fbthriftResp := newRespMyServicePrioChildPang()
-    fbthriftErr := c.ch.Call(ctx, "pang", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "pang", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -943,7 +943,7 @@ func (c *BadServiceClient) Bar(ctx context.Context) (int32, error) {
     fbthriftReq := &reqBadServiceBar{
     }
     fbthriftResp := newRespBadServiceBar()
-    fbthriftErr := c.ch.Call(ctx, "bar", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "bar", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return 0, fbthriftErr
     }
@@ -1090,7 +1090,7 @@ func (c *FooBarBazServiceClient) FooStructured(ctx context.Context) (error) {
     fbthriftReq := &reqFooBarBazServiceFooStructured{
     }
     fbthriftResp := newRespFooBarBazServiceFooStructured()
-    fbthriftErr := c.ch.Call(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -1101,7 +1101,7 @@ func (c *FooBarBazServiceClient) BarNonStructured(ctx context.Context) (error) {
     fbthriftReq := &reqFooBarBazServiceBarNonStructured{
     }
     fbthriftResp := newRespFooBarBazServiceBarNonStructured()
-    fbthriftErr := c.ch.Call(ctx, "bar", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "bar", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -1112,7 +1112,7 @@ func (c *FooBarBazServiceClient) Baz(ctx context.Context) (error) {
     fbthriftReq := &reqFooBarBazServiceBaz{
     }
     fbthriftResp := newRespFooBarBazServiceBaz()
-    fbthriftErr := c.ch.Call(ctx, "baz", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "baz", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }

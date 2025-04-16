@@ -141,7 +141,7 @@ func (p *rocketClient) Flush() error {
 	return nil
 }
 
-func (p *rocketClient) Oneway(ctx context.Context, messageName string, request WritableStruct) error {
+func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName string, request WritableStruct) error {
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (p *rocketClient) Oneway(ctx context.Context, messageName string, request W
 	return p.client.FireAndForget(messageName, p.protoID, headers, dataBytes)
 }
 
-func (p *rocketClient) Call(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {
+func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
 		return err

@@ -31,8 +31,8 @@ import (
 type RequestChannel interface {
 	io.Closer
 
-	Call(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error
-	Oneway(ctx context.Context, method string, request WritableStruct) error
+	SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error
+	SendRequestNoResponse(ctx context.Context, method string, request WritableStruct) error
 }
 
 // DO NOT USE: temporary migration workaround.

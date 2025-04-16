@@ -69,7 +69,7 @@ func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *incl
         I: i,
     }
     fbthriftResp := newRespMyServiceQuery()
-    fbthriftErr := c.ch.Call(ctx, "query", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "query", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -82,7 +82,7 @@ func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i 
         I: i,
     }
     fbthriftResp := newRespMyServiceHasArgDocs()
-    fbthriftErr := c.ch.Call(ctx, "has_arg_docs", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "has_arg_docs", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }

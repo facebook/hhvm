@@ -61,7 +61,7 @@ func (c *FooServiceClient) SimpleRPC(ctx context.Context) (error) {
     fbthriftReq := &reqFooServiceSimpleRPC{
     }
     fbthriftResp := newRespFooServiceSimpleRPC()
-    fbthriftErr := c.ch.Call(ctx, "simple_rpc", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "simple_rpc", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -204,7 +204,7 @@ func (c *FB303ServiceClient) SimpleRPC(ctx context.Context, intParameter int32) 
         IntParameter: intParameter,
     }
     fbthriftResp := newRespFB303ServiceSimpleRPC()
-    fbthriftErr := c.ch.Call(ctx, "simple_rpc", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "simple_rpc", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }
@@ -366,7 +366,7 @@ func (c *MyServiceClient) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePing{
     }
     fbthriftResp := newRespMyServicePing()
-    fbthriftErr := c.ch.Call(ctx, "ping", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "ping", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -377,7 +377,7 @@ func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
     fbthriftReq := &reqMyServiceGetRandomData{
     }
     fbthriftResp := newRespMyServiceGetRandomData()
-    fbthriftErr := c.ch.Call(ctx, "getRandomData", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "getRandomData", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     }
@@ -389,7 +389,7 @@ func (c *MyServiceClient) Sink(ctx context.Context, sink int64) (error) {
         Sink: sink,
     }
     fbthriftResp := newRespMyServiceSink()
-    fbthriftErr := c.ch.Call(ctx, "sink", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "sink", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -402,7 +402,7 @@ func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string
         Data: data,
     }
     fbthriftResp := newRespMyServicePutDataById()
-    fbthriftErr := c.ch.Call(ctx, "putDataById", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "putDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -414,7 +414,7 @@ func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, erro
         Id: id,
     }
     fbthriftResp := newRespMyServiceHasDataById()
-    fbthriftErr := c.ch.Call(ctx, "hasDataById", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "hasDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return false, fbthriftErr
     }
@@ -426,7 +426,7 @@ func (c *MyServiceClient) GetDataById(ctx context.Context, id int64) (string, er
         Id: id,
     }
     fbthriftResp := newRespMyServiceGetDataById()
-    fbthriftErr := c.ch.Call(ctx, "getDataById", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     }
@@ -438,7 +438,7 @@ func (c *MyServiceClient) DeleteDataById(ctx context.Context, id int64) (error) 
         Id: id,
     }
     fbthriftResp := newRespMyServiceDeleteDataById()
-    fbthriftErr := c.ch.Call(ctx, "deleteDataById", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "deleteDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -450,14 +450,14 @@ func (c *MyServiceClient) LobDataById(ctx context.Context, id int64, data string
         Id: id,
         Data: data,
     }
-    return c.ch.Oneway(ctx, "lobDataById", fbthriftReq)
+    return c.ch.SendRequestNoResponse(ctx, "lobDataById", fbthriftReq)
 }
 
 func (c *MyServiceClient) InvalidReturnForHack(ctx context.Context) ([]float32, error) {
     fbthriftReq := &reqMyServiceInvalidReturnForHack{
     }
     fbthriftResp := newRespMyServiceInvalidReturnForHack()
-    fbthriftErr := c.ch.Call(ctx, "invalid_return_for_hack", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "invalid_return_for_hack", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }
@@ -468,7 +468,7 @@ func (c *MyServiceClient) RpcSkippedCodegen(ctx context.Context) (error) {
     fbthriftReq := &reqMyServiceRpcSkippedCodegen{
     }
     fbthriftResp := newRespMyServiceRpcSkippedCodegen()
-    fbthriftErr := c.ch.Call(ctx, "rpc_skipped_codegen", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "rpc_skipped_codegen", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -1090,7 +1090,7 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey0(ctx context.Context, key str
         Key: key,
     }
     fbthriftResp := newRespDbMixedStackArgumentsGetDataByKey0()
-    fbthriftErr := c.ch.Call(ctx, "getDataByKey0", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataByKey0", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }
@@ -1102,7 +1102,7 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey1(ctx context.Context, key str
         Key: key,
     }
     fbthriftResp := newRespDbMixedStackArgumentsGetDataByKey1()
-    fbthriftErr := c.ch.Call(ctx, "getDataByKey1", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataByKey1", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }

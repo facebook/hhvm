@@ -70,7 +70,7 @@ func (c *FinderClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, e
         Plate: plate,
     }
     fbthriftResp := newRespFinderByPlate()
-    fbthriftErr := c.ch.Call(ctx, "byPlate", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "byPlate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }
@@ -82,7 +82,7 @@ func (c *FinderClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, err
         Plate: plate,
     }
     fbthriftResp := newRespFinderAliasByPlate()
-    fbthriftErr := c.ch.Call(ctx, "aliasByPlate", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "aliasByPlate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }
@@ -94,7 +94,7 @@ func (c *FinderClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, e
         Plate: plate,
     }
     fbthriftResp := newRespFinderPreviousPlate()
-    fbthriftErr := c.ch.Call(ctx, "previousPlate", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "previousPlate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     }

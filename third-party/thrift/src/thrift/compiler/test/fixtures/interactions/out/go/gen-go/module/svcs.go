@@ -63,7 +63,7 @@ func (c *MyServiceClient) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqMyServiceFoo{
     }
     fbthriftResp := newRespMyServiceFoo()
-    fbthriftErr := c.ch.Call(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -205,7 +205,7 @@ func (c *FactoriesClient) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqFactoriesFoo{
     }
     fbthriftResp := newRespFactoriesFoo()
-    fbthriftErr := c.ch.Call(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -347,7 +347,7 @@ func (c *PerformClient) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqPerformFoo{
     }
     fbthriftResp := newRespPerformFoo()
-    fbthriftErr := c.ch.Call(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -489,7 +489,7 @@ func (c *InteractWithSharedClient) DoSomeSimilarThings(ctx context.Context) (*sh
     fbthriftReq := &reqInteractWithSharedDoSomeSimilarThings{
     }
     fbthriftResp := newRespInteractWithSharedDoSomeSimilarThings()
-    fbthriftErr := c.ch.Call(ctx, "do_some_similar_things", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "do_some_similar_things", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }

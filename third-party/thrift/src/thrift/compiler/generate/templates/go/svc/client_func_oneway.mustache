@@ -27,5 +27,5 @@ func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
         {{/field:type}}
         {{/function:args}}
     }
-    return c.ch.Oneway({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq)
+    return c.ch.SendRequestNoResponse({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq)
 }

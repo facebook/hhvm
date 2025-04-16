@@ -67,7 +67,7 @@ func (c *RaiserClient) DoBland(ctx context.Context) (error) {
     fbthriftReq := &reqRaiserDoBland{
     }
     fbthriftResp := newRespRaiserDoBland()
-    fbthriftErr := c.ch.Call(ctx, "doBland", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "doBland", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     }
@@ -78,7 +78,7 @@ func (c *RaiserClient) DoRaise(ctx context.Context) (error) {
     fbthriftReq := &reqRaiserDoRaise{
     }
     fbthriftResp := newRespRaiserDoRaise()
-    fbthriftErr := c.ch.Call(ctx, "doRaise", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "doRaise", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftResp.B != nil {
@@ -95,7 +95,7 @@ func (c *RaiserClient) Get200(ctx context.Context) (string, error) {
     fbthriftReq := &reqRaiserGet200{
     }
     fbthriftResp := newRespRaiserGet200()
-    fbthriftErr := c.ch.Call(ctx, "get200", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "get200", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     }
@@ -106,7 +106,7 @@ func (c *RaiserClient) Get500(ctx context.Context) (string, error) {
     fbthriftReq := &reqRaiserGet500{
     }
     fbthriftResp := newRespRaiserGet500()
-    fbthriftErr := c.ch.Call(ctx, "get500", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "get500", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
     } else if fbthriftResp.F != nil {

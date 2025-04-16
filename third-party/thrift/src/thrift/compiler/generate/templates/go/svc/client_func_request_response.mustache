@@ -28,7 +28,7 @@ func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
         {{/function:args}}
     }
     fbthriftResp := newResp{{service:go_name}}{{function:go_name}}()
-    fbthriftErr := c.ch.Call({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftErr
     }{{#function:exceptions?}}{{!

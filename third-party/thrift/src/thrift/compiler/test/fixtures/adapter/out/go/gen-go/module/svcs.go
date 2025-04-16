@@ -64,7 +64,7 @@ func (c *ServiceClient) Func(ctx context.Context, arg1 StringWithAdapter_7208, a
         Arg3: arg3,
     }
     fbthriftResp := newRespServiceFunc()
-    fbthriftErr := c.ch.Call(ctx, "func", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "func", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return 0, fbthriftErr
     }
@@ -210,7 +210,7 @@ func (c *AdapterServiceClient) Count(ctx context.Context) (*CountingStruct, erro
     fbthriftReq := &reqAdapterServiceCount{
     }
     fbthriftResp := newRespAdapterServiceCount()
-    fbthriftErr := c.ch.Call(ctx, "count", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "count", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }
@@ -222,7 +222,7 @@ func (c *AdapterServiceClient) AdaptedTypes(ctx context.Context, arg *HeapAlloca
         Arg: arg,
     }
     fbthriftResp := newRespAdapterServiceAdaptedTypes()
-    fbthriftErr := c.ch.Call(ctx, "adaptedTypes", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "adaptedTypes", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     }

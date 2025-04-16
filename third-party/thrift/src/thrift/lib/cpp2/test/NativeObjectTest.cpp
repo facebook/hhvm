@@ -669,3 +669,78 @@ static_assert(
 static_assert(
     native_map_is_fallback_v<NativeObject, non_primitives_t>,
     "Fallback for Object -> T");
+
+// ---- make_list_of tests ---- //
+
+TEST(NativeObjectTest, make_list_of_bool) {
+  const auto list = experimental::make_list_of(true);
+  ASSERT_TRUE(list.is_list_of_bool());
+  ASSERT_EQ(list.as_list_of_bool()[0], true);
+}
+
+TEST(NativeObjectTest, make_list_of_i8) {
+  const auto list = experimental::make_list_of(int8_t{1});
+  ASSERT_TRUE(list.is_list_of_i8());
+  ASSERT_EQ(list.as_list_of_i8()[0], 1);
+}
+
+TEST(NativeObjectTest, make_list_of_i16) {
+  const auto list = experimental::make_list_of(int16_t{1});
+  ASSERT_TRUE(list.is_list_of_i16());
+  ASSERT_EQ(list.as_list_of_i16()[0], 1);
+}
+
+TEST(NativeObjectTest, make_list_of_i32) {
+  const auto list = experimental::make_list_of(int32_t{1});
+  ASSERT_TRUE(list.is_list_of_i32());
+  ASSERT_EQ(list.as_list_of_i32()[0], 1);
+}
+
+TEST(NativeObjectTest, make_list_of_i64) {
+  const auto list = experimental::make_list_of(int64_t{1});
+  ASSERT_TRUE(list.is_list_of_i64());
+  ASSERT_EQ(list.as_list_of_i64()[0], 1);
+}
+
+TEST(NativeObjectTest, make_list_of_float) {
+  const auto list = experimental::make_list_of(float{1.0});
+  ASSERT_TRUE(list.is_list_of_float());
+  ASSERT_EQ(list.as_list_of_float()[0], 1.0);
+}
+
+TEST(NativeObjectTest, make_list_of_double) {
+  const auto list = experimental::make_list_of(double{1.0});
+  ASSERT_TRUE(list.is_list_of_double());
+  ASSERT_EQ(list.as_list_of_double()[0], 1.0);
+}
+
+TEST(NativeObjectTest, make_list_of_string) {
+  const auto list =
+      experimental::make_list_of<std::string, false>(std::string{"foo"});
+  ASSERT_TRUE(list.is_list_of_string());
+  ASSERT_EQ(list.as_list_of_string()[0], "foo");
+}
+
+TEST(NativeObjectTest, make_list_of_binary) {
+  const auto list = experimental::make_list_of(Bytes::fromStdString("foo"));
+  ASSERT_TRUE(list.is_list_of_bytes());
+  ASSERT_EQ(list.as_list_of_bytes()[0], Bytes::fromStdString("foo"));
+}
+
+TEST(NativeObjectTest, make_list_of_of_lists) {
+  const auto list = experimental::make_list_of(NativeList{});
+  ASSERT_TRUE(list.is_list_of_value());
+  ASSERT_TRUE(list.as_list_of_value()[0].is_list());
+}
+
+TEST(NativeObjectTest, make_list_of_of_sets) {
+  const auto list = experimental::make_list_of(NativeSet{});
+  ASSERT_TRUE(list.is_list_of_value());
+  ASSERT_TRUE(list.as_list_of_value()[0].is_set());
+}
+
+TEST(NativeObjectTest, make_list_of_of_maps) {
+  const auto list = experimental::make_list_of(NativeMap{});
+  ASSERT_TRUE(list.is_list_of_value());
+  ASSERT_TRUE(list.as_list_of_value()[0].is_map());
+}

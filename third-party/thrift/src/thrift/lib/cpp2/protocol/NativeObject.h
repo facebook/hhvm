@@ -1033,26 +1033,36 @@ std::unique_ptr<folly::IOBuf> serializeObject(const NativeObject& val) {
 
 // Creates a specialized list type with a single element derived
 // from the provided type T, e.g.
-// make_list<int>(...) => ListOf<I32>
-// make_list<std::string>(...) => ListOf<Bytes>
-// make_list<Foo>(...) => ListOf<NativeObject>
+// make_list_of<int>(...) => ListOf<I32>
+// make_list_of<std::string>(...) => ListOf<Bytes>
+// make_list_of<NativeSet>(...) => ListOf<ValueHolder>
 template <typename T, bool StringToBinary = true>
-NativeList make_list(T&& t) {
-  if constexpr (std::is_same_v<T, NativeValue>) {
-    return make_list<std::remove_cvref_t<decltype(t)>, StringToBinary>(
-        std::forward<T>(t));
-  }
+NativeList make_list_of(T&& t) {
+  if constexpr (std::is_same_v<NativeValue, std::remove_cvref_t<T>>) {
+    return t.visit([](auto&& v) {
+      using V = std::remove_cvref_t<decltype(v)>;
+      if constexpr (std::is_same_v<V, std::monostate>) {
+        return NativeList{};
+      } else {
+        return make_list<V, StringToBinary>(std::forward<V>(v));
+      }
+    });
+  } else {
+    using ListTy = detail::list_t<std::remove_cvref_t<T>, StringToBinary>;
+    using ListElemTy = typename ListTy::value_type;
 
-  using ListTy = NativeList::Specialized<T, StringToBinary>;
-  using ListElemTy = typename ListTy::value_type;
-
-  if constexpr (detail::is_primitive_v<ListElemTy, StringToBinary>) {
-    return NativeList(ListTy{{std::forward<T>(t)}});
-  } else if constexpr (detail::is_structured_v<ListElemTy, StringToBinary>) {
-    // TODO(sadroeck) - implement this
-    return NativeList(ListTy{NativeObject{}});
-  } else if constexpr (detail::is_container_v<ListElemTy, StringToBinary>) {
-    return NativeList(ListTy{{NativeValue{std::forward<T>(t)}}});
+    if constexpr (detail::is_primitive_v<ListElemTy, StringToBinary>) {
+      if constexpr (
+          StringToBinary && std::is_same_v<T, PrimitiveTypes::String>) {
+        return NativeList{ListTy{Bytes::fromStdString(t)}};
+      } else {
+        return NativeList(ListTy{{std::forward<T>(t)}});
+      }
+    } else if constexpr (std::is_same_v<ListElemTy, ValueHolder>) {
+      return NativeList(ListTy{{std::forward<T>(t)}});
+    } else {
+      static_assert(false, "Unsupported specialization for make_list");
+    }
   }
 }
 

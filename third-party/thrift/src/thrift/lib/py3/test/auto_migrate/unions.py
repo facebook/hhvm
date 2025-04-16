@@ -82,6 +82,15 @@ class UnionTests(unittest.TestCase):
         for itype in iter(Integers.Type):
             self.assertTrue(itype.name in contents)
 
+    def test_union_type_enum_name(self) -> None:
+        type_enum = Integers.Type
+        if is_auto_migrated():
+            self.assertEqual(type_enum.__name__, "Integers")
+        else:
+            self.assertEqual(type_enum.__name__, "__IntegersType")
+
+        self.assertIsInstance(Integers().type, Integers.Type)
+
     def test_union_enum_members(self) -> None:
         members = Integers.Type.__members__
         # Alias can't happen in this enum so these should always equal

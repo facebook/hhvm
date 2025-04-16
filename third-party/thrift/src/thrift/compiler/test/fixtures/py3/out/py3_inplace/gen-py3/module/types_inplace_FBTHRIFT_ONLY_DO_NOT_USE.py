@@ -62,6 +62,9 @@ class __BinaryUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+_BinaryUnion__BinaryUnionType = __BinaryUnionType
+
 __all__.append("__BinaryUnionType")
 
 
@@ -2388,7 +2391,7 @@ class BinaryUnion(thrift.py3.types.Union):
     _FBTHRIFT__FIELD_NAMES = (
         "iobuf_val",
     )
-    Type = _fbthrift_python_types.BinaryUnion.Type
+    Type = __BinaryUnionType
     _fbthrift__inner : _fbthrift_python_types.BinaryUnion
     _fbthrift_inner__type: Type
     _fbthrift_inner__value: _fbthrift_iobuf.IOBuf | None
@@ -2440,7 +2443,9 @@ class BinaryUnion(thrift.py3.types.Union):
 
     @_python__property
     def type(self) -> _fbthrift_python_types.BinaryUnion.Type:
-        return self._fbthrift__inner.type
+        if self._fbthrift_inner__type is None:
+            self._fbthrift_inner__type = self.Type(self._fbthrift__inner.type.value)
+        return self._fbthrift_inner__type
 
     @_python__property
     def value(self) -> _fbthrift_iobuf.IOBuf | None:

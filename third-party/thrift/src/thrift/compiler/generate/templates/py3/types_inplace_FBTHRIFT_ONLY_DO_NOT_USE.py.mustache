@@ -80,6 +80,10 @@ __all__.append("{{enum:name}}")
 
 {{> inplace/union_enum_py }}
 
+
+{{! this is a dumb hack due to dunder class mangling rules}}
+_{{struct:name}}__{{struct:name}}Type = __{{struct:name}}Type
+
 {{#program:inplace_migrate?}}
 __all__.append("__{{struct:name}}Type")
 
@@ -120,7 +124,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
     _fbthrift_allow_inheritance_DO_NOT_USE = True
     {{/struct:allow_inheritance?}}
     {{#struct:union?}}
-    Type = _fbthrift_python_types.{{struct:name}}.Type
+    Type = __{{struct:name}}Type
     {{/struct:union?}}
     _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
     {{#struct:fields_and_mixin_fields}}
@@ -231,7 +235,9 @@ class {{struct:name}}({{> types/python_struct_class }}):
     {{#struct:union?}}
     @_python__property
     def type(self) -> _fbthrift_python_types.{{struct:name}}.Type:
-        return self._fbthrift__inner.type
+        if self._fbthrift_inner__type is None:
+            self._fbthrift_inner__type = self.Type(self._fbthrift__inner.type.value)
+        return self._fbthrift_inner__type
 
     @_python__property
     def value(self) -> {{> inplace/union_value_type }}:

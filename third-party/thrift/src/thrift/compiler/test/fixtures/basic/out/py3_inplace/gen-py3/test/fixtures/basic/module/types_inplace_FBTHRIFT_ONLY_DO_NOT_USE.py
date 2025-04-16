@@ -60,6 +60,9 @@ class __MyUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+_MyUnion__MyUnionType = __MyUnionType
+
 __all__.append("__MyUnionType")
 
 
@@ -69,6 +72,9 @@ class __UnionToBeRenamedType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+_UnionToBeRenamed__UnionToBeRenamedType = __UnionToBeRenamedType
+
 __all__.append("__UnionToBeRenamedType")
 
 
@@ -740,7 +746,7 @@ class MyUnion(thrift.py3.types.Union):
         "myDataItem",
         "floatSet",
     )
-    Type = _fbthrift_python_types.MyUnion.Type
+    Type = __MyUnionType
     _fbthrift__inner : _fbthrift_python_types.MyUnion
     _fbthrift_inner__myStruct : MyStruct | None
     _fbthrift_inner__myDataItem : MyDataItem | None
@@ -828,7 +834,9 @@ class MyUnion(thrift.py3.types.Union):
 
     @_python__property
     def type(self) -> _fbthrift_python_types.MyUnion.Type:
-        return self._fbthrift__inner.type
+        if self._fbthrift_inner__type is None:
+            self._fbthrift_inner__type = self.Type(self._fbthrift__inner.type.value)
+        return self._fbthrift_inner__type
 
     @_python__property
     def value(self) -> MyEnum | MyStruct | MyDataItem | _typing.AbstractSet[float] | None:
@@ -1256,7 +1264,7 @@ class UnionToBeRenamed(thrift.py3.types.Union):
     _FBTHRIFT__FIELD_NAMES = (
         "reserved_field",
     )
-    Type = _fbthrift_python_types.UnionToBeRenamed.Type
+    Type = __UnionToBeRenamedType
     _fbthrift__inner : _fbthrift_python_types.UnionToBeRenamed
     _fbthrift_inner__type: Type
     _fbthrift_inner__value: int | None
@@ -1308,7 +1316,9 @@ class UnionToBeRenamed(thrift.py3.types.Union):
 
     @_python__property
     def type(self) -> _fbthrift_python_types.UnionToBeRenamed.Type:
-        return self._fbthrift__inner.type
+        if self._fbthrift_inner__type is None:
+            self._fbthrift_inner__type = self.Type(self._fbthrift__inner.type.value)
+        return self._fbthrift_inner__type
 
     @_python__property
     def value(self) -> int | None:

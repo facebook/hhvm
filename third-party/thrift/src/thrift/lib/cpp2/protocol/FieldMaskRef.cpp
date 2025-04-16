@@ -15,6 +15,7 @@
  */
 
 #include <map>
+#include <optional>
 #include <set>
 #include <type_traits>
 #include <unordered_set>
@@ -113,6 +114,21 @@ const Mask& getMask(const MapTypeToMask& map, const type::Type& type) {
   return folly::get_ref_default(map, type, field_mask_constants::noneMask());
 }
 
+// Gets the mask of the given identifier if it exists in the map, otherwise,
+// returns nullptr.
+const Mask* getMaskOrNull(const FieldIdToMask& map, FieldId id) {
+  return folly::get_ptr(map, folly::to_underlying(id));
+}
+const Mask* getMaskOrNull(const MapIdToMask& map, detail::MapId id) {
+  return folly::get_ptr(map, folly::to_underlying(id));
+}
+const Mask* getMaskOrNull(const MapStringToMask& map, const std::string& key) {
+  return folly::get_ptr(map, key);
+}
+const Mask* getMaskOrNull(const MapTypeToMask& map, const type::Type& type) {
+  return folly::get_ptr(map, type);
+}
+
 void MaskRef::throwIfNotFieldMask() const {
   if (!isFieldMask()) {
     folly::throw_exception<std::runtime_error>("not a field mask");
@@ -187,6 +203,55 @@ MaskRef MaskRef::get(const type::Type& type) const {
     return MaskRef{
         getMask(mask.excludes_type_ref().value(), type), !is_exclusion};
   }
+}
+
+std::optional<MaskRef> MaskRef::tryGet(FieldId id) const {
+  throwIfNotFieldMask();
+  if (mask.includes_ref()) {
+    const auto* m = getMaskOrNull(mask.includes_ref().value(), id);
+    return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
+  }
+  const auto* m = getMaskOrNull(mask.excludes_ref().value(), id);
+  return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
+}
+
+std::optional<MaskRef> MaskRef::tryGet(detail::MapId id) const {
+  if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
+    return *this;
+  }
+  throwIfNotIntegerMapMask();
+  if (mask.includes_map_ref()) {
+    const auto* m = getMaskOrNull(mask.includes_map_ref().value(), id);
+    return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
+  }
+  const auto* m = getMaskOrNull(mask.excludes_map_ref().value(), id);
+  return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
+}
+
+std::optional<MaskRef> MaskRef::tryGet(const std::string& key) const {
+  if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
+    return *this;
+  }
+  throwIfNotStringMapMask();
+  if (mask.includes_string_map_ref()) {
+    const auto* m = getMaskOrNull(mask.includes_string_map_ref().value(), key);
+    return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
+  }
+  const auto* m = getMaskOrNull(mask.excludes_string_map_ref().value(), key);
+  return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
+}
+
+std::optional<MaskRef> MaskRef::tryGet(const type::Type& type) const {
+  if (isAllMask() || isNoneMask()) { // All types included or excluded.
+    return *this;
+  }
+  throwIfNotTypeMask();
+  if (mask.includes_type_ref()) {
+    const auto* m = getMaskOrNull(mask.includes_type_ref().value(), type);
+    return m ? std::make_optional<MaskRef>(*m, is_exclusion) : std::nullopt;
+  }
+  const auto* m = getMaskOrNull(mask.excludes_type_ref().value(), type);
+  return m ? std::make_optional<MaskRef>(*m, !is_exclusion) : std::nullopt;
 }
 
 // Uses type::identicalType to look up the nested MaskRef for the given type

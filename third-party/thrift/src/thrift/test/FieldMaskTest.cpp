@@ -651,6 +651,7 @@ void testMaskRefGetIncludes(const Mask& mask, const Mask& nested) {
   MaskRef ref{mask, false};
   MaskRef refExclusion{mask, true};
 
+  // MaskRef::get
   EXPECT_TRUE(ref.get(getId<Id>(7)).isNoneMask()); // doesn't exist
   EXPECT_TRUE(refExclusion.get(getId<Id>(7)).isAllMask()); // doesn't exist
   EXPECT_TRUE(ref.get(getId<Id>(8)).isAllMask());
@@ -666,6 +667,26 @@ void testMaskRefGetIncludes(const Mask& mask, const Mask& nested) {
   EXPECT_TRUE(refExclusion.get(getId<Id>(9))
                   .get(getId<Id>(5))
                   .isAllMask()); // doesn't exist
+
+  // MaskRef::tryGet
+  EXPECT_FALSE(ref.tryGet(getId<Id>(7)).has_value()); // doesn't exist
+  EXPECT_FALSE(refExclusion.tryGet(getId<Id>(7)).has_value()); // doesn't exist
+  EXPECT_TRUE(ref.tryGet(getId<Id>(8))->isAllMask());
+  EXPECT_TRUE(refExclusion.tryGet(getId<Id>(8))->isNoneMask());
+  EXPECT_TRUE(literallyEqual(
+      ref.tryGet(getId<Id>(9)).value(), (MaskRef{nested, false})));
+  EXPECT_TRUE(literallyEqual(
+      refExclusion.tryGet(getId<Id>(9)).value(), (MaskRef{nested, true})));
+  // recursive calls to MaskRef::tryGet
+  EXPECT_TRUE(ref.tryGet(getId<Id>(9))->tryGet(getId<Id>(4))->isAllMask());
+  EXPECT_TRUE(
+      refExclusion.tryGet(getId<Id>(9))->tryGet(getId<Id>(4))->isNoneMask());
+  EXPECT_FALSE(ref.tryGet(getId<Id>(9))
+                   ->tryGet(getId<Id>(5))
+                   .has_value()); // doesn't exist
+  EXPECT_FALSE(refExclusion.tryGet(getId<Id>(9))
+                   ->tryGet(getId<Id>(5))
+                   .has_value()); // doesn't exist
 }
 
 TEST(FieldMaskTest, MaskRefGetIncludes) {
@@ -707,6 +728,7 @@ void testMaskRefGetExcludes(const Mask& mask, const Mask& nested) {
   MaskRef ref{mask, false};
   MaskRef refExclusion{mask, true};
 
+  // MaskRef::get
   EXPECT_TRUE(ref.get(getId<Id>(7)).isAllMask()); // doesn't exist
   EXPECT_TRUE(refExclusion.get(getId<Id>(7)).isNoneMask()); // doesn't exist
   EXPECT_TRUE(ref.get(getId<Id>(8)).isNoneMask());
@@ -714,7 +736,7 @@ void testMaskRefGetExcludes(const Mask& mask, const Mask& nested) {
   EXPECT_TRUE(literallyEqual(ref.get(getId<Id>(9)), (MaskRef{nested, true})));
   EXPECT_TRUE(
       literallyEqual(refExclusion.get(getId<Id>(9)), (MaskRef{nested, false})));
-  // recursive calls to MaskRef Get
+  // recursive calls to MaskRef::get
   EXPECT_TRUE(ref.get(getId<Id>(9)).get(getId<Id>(4)).isNoneMask());
   EXPECT_TRUE(refExclusion.get(getId<Id>(9)).get(getId<Id>(4)).isAllMask());
   EXPECT_TRUE(
@@ -722,6 +744,26 @@ void testMaskRefGetExcludes(const Mask& mask, const Mask& nested) {
   EXPECT_TRUE(refExclusion.get(getId<Id>(9))
                   .get(getId<Id>(5))
                   .isNoneMask()); // doesn't exist
+
+  // MaskRef::tryGet
+  EXPECT_FALSE(ref.tryGet(getId<Id>(7)).has_value()); // doesn't exist
+  EXPECT_FALSE(refExclusion.tryGet(getId<Id>(7)).has_value()); // doesn't exist
+  EXPECT_TRUE(ref.tryGet(getId<Id>(8))->isNoneMask());
+  EXPECT_TRUE(refExclusion.tryGet(getId<Id>(8))->isAllMask());
+  EXPECT_TRUE(literallyEqual(
+      ref.tryGet(getId<Id>(9)).value(), (MaskRef{nested, true})));
+  EXPECT_TRUE(literallyEqual(
+      refExclusion.tryGet(getId<Id>(9)).value(), (MaskRef{nested, false})));
+  // recursive calls to MaskRef::tryGet
+  EXPECT_TRUE(ref.tryGet(getId<Id>(9))->tryGet(getId<Id>(4))->isNoneMask());
+  EXPECT_TRUE(
+      refExclusion.tryGet(getId<Id>(9))->tryGet(getId<Id>(4))->isAllMask());
+  EXPECT_FALSE(ref.tryGet(getId<Id>(9))
+                   ->tryGet(getId<Id>(5))
+                   .has_value()); // doesn't exist
+  EXPECT_FALSE(refExclusion.tryGet(getId<Id>(9))
+                   ->tryGet(getId<Id>(5))
+                   .has_value()); // doesn't exist
 }
 
 TEST(FieldMaskTest, MaskRefGetExcludes) {
@@ -4035,6 +4077,30 @@ TEST(FieldMaskTest, emptyMask) {
   EXPECT_THROW(maskRef.get(MapId{42}), std::runtime_error);
   EXPECT_THROW(maskRef.get("42"), std::runtime_error);
   EXPECT_THROW(maskRef.get(type::Type::get<type::i32_t>()), std::runtime_error);
+}
+
+// Demonstration of difference between MaskRef::get and MaskRef::tryGet
+TEST(FieldMaskTest, MaskRefGetAndTryGet) {
+  MaskBuilder<Bar2> mb(noneMask());
+  // field_3 is specied with noneMask.
+  mb.includes<ident::field_3>(noneMask());
+
+  auto mr = MaskRef{mb.toThrift()};
+
+  // field_2 not included.
+  EXPECT_TRUE(mr.get(op::get_field_id_v<Bar2, ident::field_2>).isNoneMask());
+
+  // field_3 not included.
+  EXPECT_TRUE(mr.get(op::get_field_id_v<Bar2, ident::field_3>).isNoneMask());
+
+  // field_2 not included.
+  auto field2 = mr.tryGet(op::get_field_id_v<Bar2, ident::field_2>);
+  EXPECT_FALSE(field2.has_value());
+
+  // field_3 included but specified with noneMask.
+  auto field3 = mr.tryGet(op::get_field_id_v<Bar2, ident::field_3>);
+  EXPECT_TRUE(field3.has_value());
+  EXPECT_TRUE(field3->isNoneMask());
 }
 
 } // namespace apache::thrift::test

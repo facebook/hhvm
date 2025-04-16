@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
@@ -26,8 +28,13 @@ namespace apache::thrift::protocol {
 // from excludes mask, the mask actually represents the complement set.
 class MaskRef {
  public:
+  // TODO(dokwon): Consider requiring is_exclusion to explicitly specified in
+  // the constructor.
+  explicit MaskRef(const Mask& m) : mask(m), is_exclusion(false) {}
+  MaskRef(const Mask& m, bool exclusion) : mask(m), is_exclusion(exclusion) {}
+
   const Mask& mask;
-  bool is_exclusion = false; // Whether the mask comes from excludes mask
+  bool is_exclusion; // Whether the mask comes from excludes mask
 
   // Get nested MaskRef with the given field id. If the id does not exist in the
   // field mask, it returns noneMask or allMask depending on whether the field
@@ -56,6 +63,30 @@ class MaskRef {
   //
   // Throws a runtime exception if the mask is not a type mask.
   MaskRef get(const type::Type& type) const;
+
+  // Get nested MaskRef with the given field id. If the id does not exist in the
+  // field mask, it returns empty optional.
+  //
+  // Throws a runtime exception if the mask is not a field mask.
+  std::optional<MaskRef> tryGet(FieldId id) const;
+
+  // Get nested MaskRef with the given map id. If the id does not exist in the
+  // integer map mask, it returns empty optional.
+  //
+  // Throws a runtime exception if the mask is not an integer map mask.
+  std::optional<MaskRef> tryGet(detail::MapId id) const;
+
+  // Get nested MaskRef with the given string key. If the string key does not
+  // exist in the string map mask, it returns empty optional.
+  //
+  // Throws a runtime exception if the mask is not a string map mask.
+  std::optional<MaskRef> tryGet(const std::string& key) const;
+
+  // Get nested MaskRef for the given type. If the type does not exist in the
+  // type mask, it returns empty optional.
+  //
+  // Throws a runtime exception if the mask is not a type mask.
+  std::optional<MaskRef> tryGet(const type::Type& type) const;
 
   // This API is reserved for internal use only.
   MaskRef getViaIdenticalType_INTERNAL_DO_NOT_USE(const type::Type& type) const;

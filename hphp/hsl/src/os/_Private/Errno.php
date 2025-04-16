@@ -14,7 +14,7 @@ use namespace HH\Lib\{C, OS, Str};
 
 <<__Memoize>>
 function get_throw_errno_impl(): (function(OS\Errno, string): noreturn) {
-  $single_code = keyset[
+  $single_code = vec[
     OS\ChildProcessException::class,
     OS\ConnectionAbortedException::class,
     OS\ConnectionRefusedException::class,
@@ -26,7 +26,7 @@ function get_throw_errno_impl(): (function(OS\Errno, string): noreturn) {
     OS\ProcessLookupException::class,
     OS\TimeoutException::class,
   ];
-  $multiple_codes = keyset[
+  $multiple_codes = vec[
     OS\BlockingIOException::class,
     OS\BrokenPipeException::class,
     OS\PermissionException::class,

@@ -132,8 +132,20 @@ bool NativeValue::is_empty() const noexcept {
 
 // ---- NativeList ---- //
 
-const NativeList::Kind& NativeList::inner() const {
+const NativeList::Kind& NativeList::inner() const noexcept {
   return kind_;
+}
+std::size_t NativeList::size() const noexcept {
+  return folly::variant_match(
+      kind_,
+      [](const std::monostate&) -> std::size_t { return 0; },
+      [](const auto& list) { return list.size(); });
+}
+bool NativeList::empty() const noexcept {
+  return folly::variant_match(
+      kind_,
+      [](const std::monostate&) -> bool { return true; },
+      [](const auto& list) { return list.empty(); });
 }
 bool NativeList::operator==(const NativeList& other) const {
   return kind_ == other.kind_;
@@ -151,6 +163,18 @@ NativeSet::NativeSet(const NativeSet& other) : kind_(other.kind_) {}
 NativeSet::NativeSet(Kind&& kind) : kind_(std::move(kind)) {}
 const NativeSet::Kind& NativeSet::inner() const {
   return kind_;
+}
+std::size_t NativeSet::size() const noexcept {
+  return folly::variant_match(
+      kind_,
+      [](const std::monostate&) -> std::size_t { return 0; },
+      [](const auto& set) { return set.size(); });
+}
+bool NativeSet::empty() const noexcept {
+  return folly::variant_match(
+      kind_,
+      [](const std::monostate&) -> bool { return true; },
+      [](const auto& set) { return set.empty(); });
 }
 bool NativeSet::operator==(const NativeSet& other) const {
   return kind_ == other.kind_;
@@ -171,6 +195,18 @@ bool NativeMap::operator!=(const NativeMap& other) const {
 }
 const NativeMap::Kind& NativeMap::inner() const {
   return kind_;
+}
+std::size_t NativeMap::size() const noexcept {
+  return folly::variant_match(
+      kind_,
+      [](const std::monostate&) -> std::size_t { return 0; },
+      [](const auto& map) { return map.size(); });
+}
+bool NativeMap::empty() const noexcept {
+  return folly::variant_match(
+      kind_,
+      [](const std::monostate&) -> bool { return true; },
+      [](const auto& map) { return map.empty(); });
 }
 NativeMap::NativeMap(Kind&& kind) noexcept : kind_(std::move(kind)) {}
 

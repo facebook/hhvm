@@ -118,6 +118,10 @@ struct Bytes {
   static Bytes fromStdString(const std::string& v) {
     return Bytes{folly::IOBuf::fromString(v)};
   }
+  static Bytes fromStringView(const std::string_view& v) {
+    return Bytes{std::make_unique<folly::IOBuf>(
+        folly::IOBuf::COPY_BUFFER, v.data(), v.size())};
+  }
 
   const std::uint8_t* data() const { return buf_->data(); }
   std::size_t size() const { return buf_->length(); }
@@ -436,7 +440,19 @@ class NativeList {
   using Specialized =
       detail::list_t<std::remove_cv_t<typename T::value_type>, StringToBinary>;
 
-  const Kind& inner() const;
+  const Kind& inner() const noexcept;
+  std::size_t size() const noexcept;
+  bool empty() const noexcept;
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) const {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
 
   // Default ops
   NativeList() = default;
@@ -539,6 +555,18 @@ class NativeSet {
   /* implicit */ NativeSet(SetOf<T>&& s);
 
   const Kind& inner() const;
+  std::size_t size() const noexcept;
+  bool empty() const noexcept;
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) const {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
 
   bool operator==(const NativeSet& other) const;
   bool operator!=(const NativeSet& other) const;
@@ -621,6 +649,18 @@ class NativeMap {
       StringToBinary>;
 
   const Kind& inner() const;
+  std::size_t size() const noexcept;
+  bool empty() const noexcept;
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) const {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
 
   // Default ops
   NativeMap() = default;
@@ -850,6 +890,16 @@ class NativeValue : public ValueAccess<NativeValue> {
 
   NativeValue& as_value() noexcept { return *this; }
   const NativeValue& as_value() const noexcept { return *this; }
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
+
+  template <typename... Fs>
+  decltype(auto) visit(Fs&&... fs) const {
+    return folly::variant_match(kind_, std::forward<Fs>(fs)...);
+  }
 
   // Default ops
   NativeValue() noexcept;

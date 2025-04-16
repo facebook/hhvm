@@ -245,10 +245,10 @@ struct Args_Foo_return<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Foo_return<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Foo.return"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("bar", ::fbthrift::TType::Struct, 1i16);
-        ::fbthrift::Serialize::write(&self.bar, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.bar, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -263,10 +263,10 @@ struct Args_Foo_super<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Foo_super<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Foo.super"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("bar", ::fbthrift::TType::Struct, 1i16);
-        ::fbthrift::Serialize::write(&self.bar, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.bar, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

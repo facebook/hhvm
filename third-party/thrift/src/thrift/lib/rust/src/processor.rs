@@ -433,7 +433,7 @@ where
         rctxt.set_user_exception_header(ae.exn_name(), &ae.exn_value())?;
         let res = serialize!(P, |p| {
             p.write_message_begin(&name, ae.result_type().message_type(), seqid);
-            ae.write(p);
+            ae.rs_thrift_write(p);
             p.write_message_end();
         });
         reply_state.send_reply(res);

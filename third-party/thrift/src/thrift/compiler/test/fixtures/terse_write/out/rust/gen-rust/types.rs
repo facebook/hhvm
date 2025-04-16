@@ -263,7 +263,7 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_i32(self.into())
     }
 }
@@ -273,7 +273,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
@@ -322,7 +322,7 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
         p.write_field_stop();
         p.write_struct_end();
@@ -334,7 +334,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
         #[allow(unused_mut)]
@@ -406,77 +406,77 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("MyUnion");
         match self {
             Self::bool_field(inner) => {
                 p.write_field_begin("bool_field", ::fbthrift::TType::Bool, 1);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::byte_field(inner) => {
                 p.write_field_begin("byte_field", ::fbthrift::TType::Byte, 2);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::short_field(inner) => {
                 p.write_field_begin("short_field", ::fbthrift::TType::I16, 3);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::int_field(inner) => {
                 p.write_field_begin("int_field", ::fbthrift::TType::I32, 4);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::long_field(inner) => {
                 p.write_field_begin("long_field", ::fbthrift::TType::I64, 5);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::float_field(inner) => {
                 p.write_field_begin("float_field", ::fbthrift::TType::Float, 6);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::double_field(inner) => {
                 p.write_field_begin("double_field", ::fbthrift::TType::Double, 7);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::string_field(inner) => {
                 p.write_field_begin("string_field", ::fbthrift::TType::String, 8);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::binary_field(inner) => {
                 p.write_field_begin("binary_field", ::fbthrift::TType::String, 9);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::enum_field(inner) => {
                 p.write_field_begin("enum_field", ::fbthrift::TType::I32, 10);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::list_field(inner) => {
                 p.write_field_begin("list_field", ::fbthrift::TType::List, 11);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::set_field(inner) => {
                 p.write_field_begin("set_field", ::fbthrift::TType::Set, 12);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::map_field(inner) => {
                 p.write_field_begin("map_field", ::fbthrift::TType::Map, 13);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::struct_field(inner) => {
                 p.write_field_begin("struct_field", ::fbthrift::TType::Struct, 14);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
                 p.write_field_end();
             }
             Self::UnknownField(_) => {}
@@ -491,7 +491,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 9),
             ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 1),
@@ -517,59 +517,59 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::Bool, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::bool_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::bool_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::Byte, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::byte_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::byte_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::I16, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::short_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::short_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::I32, 4, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::int_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::int_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::I64, 5, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::long_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::long_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::Float, 6, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::float_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::float_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::Double, 7, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::double_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::double_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::String, 8, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::string_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::string_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::String, 9, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::binary_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::binary_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::I32, 10, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::enum_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::enum_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::List, 11, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::list_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::list_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::Set, 12, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::set_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::set_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::Map, 13, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::map_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::map_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "MyUnion"})?));
                 }
                 (::fbthrift::TType::Struct, 14, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::struct_field(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "MyUnion"})?));
+                    alt = ::std::option::Option::Some(Self::struct_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "MyUnion"})?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
@@ -703,10 +703,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("MyStructWithCustomDefault");
         p.write_field_begin("field1", ::fbthrift::TType::I64, 1);
-        ::fbthrift::Serialize::write(&self.field1, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -718,7 +718,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I64, 1),
         ];
@@ -728,7 +728,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_field1 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "MyStructWithCustomDefault"})?),
+                (::fbthrift::TType::I64, 1) => field_field1 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "MyStructWithCustomDefault"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -840,52 +840,52 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("StructLevelTerseStruct");
         p.write_field_begin("bool_field", ::fbthrift::TType::Bool, 1);
-        ::fbthrift::Serialize::write(&self.bool_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.bool_field, p);
         p.write_field_end();
         p.write_field_begin("byte_field", ::fbthrift::TType::Byte, 2);
-        ::fbthrift::Serialize::write(&self.byte_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.byte_field, p);
         p.write_field_end();
         p.write_field_begin("short_field", ::fbthrift::TType::I16, 3);
-        ::fbthrift::Serialize::write(&self.short_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.short_field, p);
         p.write_field_end();
         p.write_field_begin("int_field", ::fbthrift::TType::I32, 4);
-        ::fbthrift::Serialize::write(&self.int_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.int_field, p);
         p.write_field_end();
         p.write_field_begin("long_field", ::fbthrift::TType::I64, 5);
-        ::fbthrift::Serialize::write(&self.long_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.long_field, p);
         p.write_field_end();
         p.write_field_begin("float_field", ::fbthrift::TType::Float, 6);
-        ::fbthrift::Serialize::write(&self.float_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.float_field, p);
         p.write_field_end();
         p.write_field_begin("double_field", ::fbthrift::TType::Double, 7);
-        ::fbthrift::Serialize::write(&self.double_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.double_field, p);
         p.write_field_end();
         p.write_field_begin("string_field", ::fbthrift::TType::String, 8);
-        ::fbthrift::Serialize::write(&self.string_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.string_field, p);
         p.write_field_end();
         p.write_field_begin("binary_field", ::fbthrift::TType::String, 9);
-        ::fbthrift::Serialize::write(&self.binary_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.binary_field, p);
         p.write_field_end();
         p.write_field_begin("enum_field", ::fbthrift::TType::I32, 10);
-        ::fbthrift::Serialize::write(&self.enum_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.enum_field, p);
         p.write_field_end();
         p.write_field_begin("list_field", ::fbthrift::TType::List, 11);
-        ::fbthrift::Serialize::write(&self.list_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.list_field, p);
         p.write_field_end();
         p.write_field_begin("set_field", ::fbthrift::TType::Set, 12);
-        ::fbthrift::Serialize::write(&self.set_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.set_field, p);
         p.write_field_end();
         p.write_field_begin("map_field", ::fbthrift::TType::Map, 13);
-        ::fbthrift::Serialize::write(&self.map_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.map_field, p);
         p.write_field_end();
         p.write_field_begin("struct_field", ::fbthrift::TType::Struct, 14);
-        ::fbthrift::Serialize::write(&self.struct_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.struct_field, p);
         p.write_field_end();
         p.write_field_begin("union_field", ::fbthrift::TType::Struct, 15);
-        ::fbthrift::Serialize::write(&self.union_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.union_field, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -897,7 +897,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 9),
             ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 1),
@@ -935,21 +935,21 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Byte, 2) => field_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I16, 3) => field_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 4) => field_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I64, 5) => field_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Float, 6) => field_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Double, 7) => field_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 8) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 9) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 10) => field_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::List, 11) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Set, 12) => field_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Map, 13) => field_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 14) => field_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "StructLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 15) => field_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Bool, 1) => field_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Byte, 2) => field_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::I16, 3) => field_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::I32, 4) => field_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::I64, 5) => field_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Float, 6) => field_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Double, 7) => field_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::String, 8) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::String, 9) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::I32, 10) => field_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::List, 11) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Set, 12) => field_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Map, 13) => field_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Struct, 14) => field_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "StructLevelTerseStruct"})?),
+                (::fbthrift::TType::Struct, 15) => field_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "StructLevelTerseStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1142,97 +1142,97 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("FieldLevelTerseStruct");
         p.write_field_begin("terse_bool_field", ::fbthrift::TType::Bool, 1);
-        ::fbthrift::Serialize::write(&self.terse_bool_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_bool_field, p);
         p.write_field_end();
         p.write_field_begin("terse_byte_field", ::fbthrift::TType::Byte, 2);
-        ::fbthrift::Serialize::write(&self.terse_byte_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_byte_field, p);
         p.write_field_end();
         p.write_field_begin("terse_short_field", ::fbthrift::TType::I16, 3);
-        ::fbthrift::Serialize::write(&self.terse_short_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_short_field, p);
         p.write_field_end();
         p.write_field_begin("terse_int_field", ::fbthrift::TType::I32, 4);
-        ::fbthrift::Serialize::write(&self.terse_int_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_int_field, p);
         p.write_field_end();
         p.write_field_begin("terse_long_field", ::fbthrift::TType::I64, 5);
-        ::fbthrift::Serialize::write(&self.terse_long_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_long_field, p);
         p.write_field_end();
         p.write_field_begin("terse_float_field", ::fbthrift::TType::Float, 6);
-        ::fbthrift::Serialize::write(&self.terse_float_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_float_field, p);
         p.write_field_end();
         p.write_field_begin("terse_double_field", ::fbthrift::TType::Double, 7);
-        ::fbthrift::Serialize::write(&self.terse_double_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_double_field, p);
         p.write_field_end();
         p.write_field_begin("terse_string_field", ::fbthrift::TType::String, 8);
-        ::fbthrift::Serialize::write(&self.terse_string_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_string_field, p);
         p.write_field_end();
         p.write_field_begin("terse_binary_field", ::fbthrift::TType::String, 9);
-        ::fbthrift::Serialize::write(&self.terse_binary_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_binary_field, p);
         p.write_field_end();
         p.write_field_begin("terse_enum_field", ::fbthrift::TType::I32, 10);
-        ::fbthrift::Serialize::write(&self.terse_enum_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_enum_field, p);
         p.write_field_end();
         p.write_field_begin("terse_list_field", ::fbthrift::TType::List, 11);
-        ::fbthrift::Serialize::write(&self.terse_list_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_list_field, p);
         p.write_field_end();
         p.write_field_begin("terse_set_field", ::fbthrift::TType::Set, 12);
-        ::fbthrift::Serialize::write(&self.terse_set_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_set_field, p);
         p.write_field_end();
         p.write_field_begin("terse_map_field", ::fbthrift::TType::Map, 13);
-        ::fbthrift::Serialize::write(&self.terse_map_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_map_field, p);
         p.write_field_end();
         p.write_field_begin("terse_struct_field", ::fbthrift::TType::Struct, 14);
-        ::fbthrift::Serialize::write(&self.terse_struct_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_struct_field, p);
         p.write_field_end();
         p.write_field_begin("terse_union_field", ::fbthrift::TType::Struct, 29);
-        ::fbthrift::Serialize::write(&self.terse_union_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.terse_union_field, p);
         p.write_field_end();
         p.write_field_begin("bool_field", ::fbthrift::TType::Bool, 15);
-        ::fbthrift::Serialize::write(&self.bool_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.bool_field, p);
         p.write_field_end();
         p.write_field_begin("byte_field", ::fbthrift::TType::Byte, 16);
-        ::fbthrift::Serialize::write(&self.byte_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.byte_field, p);
         p.write_field_end();
         p.write_field_begin("short_field", ::fbthrift::TType::I16, 17);
-        ::fbthrift::Serialize::write(&self.short_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.short_field, p);
         p.write_field_end();
         p.write_field_begin("int_field", ::fbthrift::TType::I32, 18);
-        ::fbthrift::Serialize::write(&self.int_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.int_field, p);
         p.write_field_end();
         p.write_field_begin("long_field", ::fbthrift::TType::I64, 19);
-        ::fbthrift::Serialize::write(&self.long_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.long_field, p);
         p.write_field_end();
         p.write_field_begin("float_field", ::fbthrift::TType::Float, 20);
-        ::fbthrift::Serialize::write(&self.float_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.float_field, p);
         p.write_field_end();
         p.write_field_begin("double_field", ::fbthrift::TType::Double, 21);
-        ::fbthrift::Serialize::write(&self.double_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.double_field, p);
         p.write_field_end();
         p.write_field_begin("string_field", ::fbthrift::TType::String, 22);
-        ::fbthrift::Serialize::write(&self.string_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.string_field, p);
         p.write_field_end();
         p.write_field_begin("binary_field", ::fbthrift::TType::String, 23);
-        ::fbthrift::Serialize::write(&self.binary_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.binary_field, p);
         p.write_field_end();
         p.write_field_begin("enum_field", ::fbthrift::TType::I32, 24);
-        ::fbthrift::Serialize::write(&self.enum_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.enum_field, p);
         p.write_field_end();
         p.write_field_begin("list_field", ::fbthrift::TType::List, 25);
-        ::fbthrift::Serialize::write(&self.list_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.list_field, p);
         p.write_field_end();
         p.write_field_begin("set_field", ::fbthrift::TType::Set, 26);
-        ::fbthrift::Serialize::write(&self.set_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.set_field, p);
         p.write_field_end();
         p.write_field_begin("map_field", ::fbthrift::TType::Map, 27);
-        ::fbthrift::Serialize::write(&self.map_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.map_field, p);
         p.write_field_end();
         p.write_field_begin("struct_field", ::fbthrift::TType::Struct, 28);
-        ::fbthrift::Serialize::write(&self.struct_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.struct_field, p);
         p.write_field_end();
         p.write_field_begin("union_field", ::fbthrift::TType::Struct, 30);
-        ::fbthrift::Serialize::write(&self.union_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.union_field, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1244,7 +1244,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 23),
             ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 15),
@@ -1312,36 +1312,36 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_terse_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_bool_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Byte, 2) => field_terse_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_byte_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I16, 3) => field_terse_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_short_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 4) => field_terse_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_int_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I64, 5) => field_terse_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_long_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Float, 6) => field_terse_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_float_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Double, 7) => field_terse_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_double_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 8) => field_terse_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_string_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 9) => field_terse_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_binary_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 10) => field_terse_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_enum_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::List, 11) => field_terse_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_list_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Set, 12) => field_terse_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_set_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Map, 13) => field_terse_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_map_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 14) => field_terse_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_struct_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 29) => field_terse_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_union_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Bool, 15) => field_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Byte, 16) => field_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I16, 17) => field_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 18) => field_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I64, 19) => field_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Float, 20) => field_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Double, 21) => field_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 22) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::String, 23) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::I32, 24) => field_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::List, 25) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Set, 26) => field_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Map, 27) => field_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 28) => field_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "FieldLevelTerseStruct"})?),
-                (::fbthrift::TType::Struct, 30) => field_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Bool, 1) => field_terse_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_bool_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Byte, 2) => field_terse_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_byte_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I16, 3) => field_terse_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_short_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I32, 4) => field_terse_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_int_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I64, 5) => field_terse_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_long_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Float, 6) => field_terse_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_float_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Double, 7) => field_terse_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_double_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::String, 8) => field_terse_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_string_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::String, 9) => field_terse_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_binary_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I32, 10) => field_terse_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_enum_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::List, 11) => field_terse_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_list_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Set, 12) => field_terse_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_set_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Map, 13) => field_terse_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_map_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Struct, 14) => field_terse_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_struct_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Struct, 29) => field_terse_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "terse_union_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Bool, 15) => field_bool_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bool_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Byte, 16) => field_byte_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "byte_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I16, 17) => field_short_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "short_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I32, 18) => field_int_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I64, 19) => field_long_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "long_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Float, 20) => field_float_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "float_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Double, 21) => field_double_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "double_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::String, 22) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::String, 23) => field_binary_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "binary_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::I32, 24) => field_enum_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::List, 25) => field_list_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Set, 26) => field_set_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Map, 27) => field_map_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Struct, 28) => field_struct_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "struct_field", strct: "FieldLevelTerseStruct"})?),
+                (::fbthrift::TType::Struct, 30) => field_union_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "union_field", strct: "FieldLevelTerseStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1651,16 +1651,16 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("AdaptedFields");
         p.write_field_begin("field1", ::fbthrift::TType::I32, 1);
-        ::fbthrift::Serialize::write(&self.field1, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
         p.write_field_end();
         p.write_field_begin("field2", ::fbthrift::TType::I32, 2);
-        ::fbthrift::Serialize::write(&self.field2, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
         p.write_field_end();
         p.write_field_begin("field3", ::fbthrift::TType::I32, 3);
-        ::fbthrift::Serialize::write(&self.field3, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field3, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1672,7 +1672,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I32, 1),
             ::fbthrift::Field::new("field2", ::fbthrift::TType::I32, 2),
@@ -1686,9 +1686,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_field1 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedFields"})?),
-                (::fbthrift::TType::I32, 2) => field_field2 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedFields"})?),
-                (::fbthrift::TType::I32, 3) => field_field3 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "field3", strct: "AdaptedFields"})?),
+                (::fbthrift::TType::I32, 1) => field_field1 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedFields"})?),
+                (::fbthrift::TType::I32, 2) => field_field2 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedFields"})?),
+                (::fbthrift::TType::I32, 3) => field_field3 = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field3", strct: "AdaptedFields"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1833,10 +1833,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("TerseException");
         p.write_field_begin("msg", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.msg, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.msg, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1848,7 +1848,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("msg", ::fbthrift::TType::String, 1),
         ];
@@ -1858,7 +1858,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_msg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "msg", strct: "TerseException"})?),
+                (::fbthrift::TType::String, 1) => field_msg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "msg", strct: "TerseException"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1933,21 +1933,21 @@ pub(crate) mod r#impl {
     pub(crate) struct LocalImpl<T>(T);
 
     #[allow(unused)]
-    pub(crate) fn write<T, P>(value: &T, p: &mut P)
+    pub(crate) fn rs_thrift_write<T, P>(value: &T, p: &mut P)
     where
         LocalImpl<T>: ::fbthrift::Serialize<P>,
         P: ::fbthrift::ProtocolWriter,
     {
-        ::fbthrift::Serialize::write(LocalImpl::ref_cast(value), p);
+        ::fbthrift::Serialize::rs_thrift_write(LocalImpl::ref_cast(value), p);
     }
 
     #[allow(unused)]
-    pub(crate) fn read<T, P>(p: &mut P) -> ::anyhow::Result<T>
+    pub(crate) fn rs_thrift_read<T, P>(p: &mut P) -> ::anyhow::Result<T>
     where
         LocalImpl<T>: ::fbthrift::Deserialize<P>,
         P: ::fbthrift::ProtocolReader,
     {
-        let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
+        let value: LocalImpl<T> = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         ::std::result::Result::Ok(value.0)
     }
 }

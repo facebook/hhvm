@@ -166,7 +166,7 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_i32(self.into())
     }
 }
@@ -176,7 +176,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
@@ -227,19 +227,19 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("Color");
         p.write_field_begin("red", ::fbthrift::TType::Double, 1);
-        ::fbthrift::Serialize::write(&self.red, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.red, p);
         p.write_field_end();
         p.write_field_begin("green", ::fbthrift::TType::Double, 2);
-        ::fbthrift::Serialize::write(&self.green, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.green, p);
         p.write_field_end();
         p.write_field_begin("blue", ::fbthrift::TType::Double, 3);
-        ::fbthrift::Serialize::write(&self.blue, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.blue, p);
         p.write_field_end();
         p.write_field_begin("alpha", ::fbthrift::TType::Double, 4);
-        ::fbthrift::Serialize::write(&self.alpha, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.alpha, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -251,7 +251,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("alpha", ::fbthrift::TType::Double, 4),
             ::fbthrift::Field::new("blue", ::fbthrift::TType::Double, 3),
@@ -267,10 +267,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Double, 1) => field_red = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "red", strct: "Color"})?),
-                (::fbthrift::TType::Double, 2) => field_green = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "green", strct: "Color"})?),
-                (::fbthrift::TType::Double, 3) => field_blue = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "blue", strct: "Color"})?),
-                (::fbthrift::TType::Double, 4) => field_alpha = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "alpha", strct: "Color"})?),
+                (::fbthrift::TType::Double, 1) => field_red = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "red", strct: "Color"})?),
+                (::fbthrift::TType::Double, 2) => field_green = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "green", strct: "Color"})?),
+                (::fbthrift::TType::Double, 3) => field_blue = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "blue", strct: "Color"})?),
+                (::fbthrift::TType::Double, 4) => field_alpha = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "alpha", strct: "Color"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -365,29 +365,29 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("Vehicle");
         p.write_field_begin("color", ::fbthrift::TType::Struct, 1);
-        ::fbthrift::Serialize::write(&self.color, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.color, p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.licensePlate {
             p.write_field_begin("licensePlate", ::fbthrift::TType::String, 2);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.description {
             p.write_field_begin("description", ::fbthrift::TType::String, 3);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.name {
             p.write_field_begin("name", ::fbthrift::TType::String, 4);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.hasAC {
             p.write_field_begin("hasAC", ::fbthrift::TType::Bool, 5);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         p.write_field_stop();
@@ -400,7 +400,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("color", ::fbthrift::TType::Struct, 1),
             ::fbthrift::Field::new("description", ::fbthrift::TType::String, 3),
@@ -418,11 +418,11 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_color = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "color", strct: "Vehicle"})?),
-                (::fbthrift::TType::String, 2) => field_licensePlate = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "licensePlate", strct: "Vehicle"})?),
-                (::fbthrift::TType::String, 3) => field_description = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "description", strct: "Vehicle"})?),
-                (::fbthrift::TType::String, 4) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Vehicle"})?),
-                (::fbthrift::TType::Bool, 5) => field_hasAC = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "hasAC", strct: "Vehicle"})?),
+                (::fbthrift::TType::Struct, 1) => field_color = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "color", strct: "Vehicle"})?),
+                (::fbthrift::TType::String, 2) => field_licensePlate = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "licensePlate", strct: "Vehicle"})?),
+                (::fbthrift::TType::String, 3) => field_description = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "description", strct: "Vehicle"})?),
+                (::fbthrift::TType::String, 4) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Vehicle"})?),
+                (::fbthrift::TType::Bool, 5) => field_hasAC = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "hasAC", strct: "Vehicle"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -530,52 +530,52 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("Person");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_begin("name", ::fbthrift::TType::String, 2);
-        ::fbthrift::Serialize::write(&self.name, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.name, p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.age {
             p.write_field_begin("age", ::fbthrift::TType::I16, 3);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.address {
             p.write_field_begin("address", ::fbthrift::TType::String, 4);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.favoriteColor {
             p.write_field_begin("favoriteColor", ::fbthrift::TType::Struct, 5);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.friends {
             p.write_field_begin("friends", ::fbthrift::TType::Set, 6);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.bestFriend {
             p.write_field_begin("bestFriend", ::fbthrift::TType::I64, 7);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.petNames {
             p.write_field_begin("petNames", ::fbthrift::TType::Map, 8);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.afraidOfAnimal {
             p.write_field_begin("afraidOfAnimal", ::fbthrift::TType::I32, 9);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.vehicles {
             p.write_field_begin("vehicles", ::fbthrift::TType::List, 10);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         p.write_field_stop();
@@ -588,7 +588,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("address", ::fbthrift::TType::String, 4),
             ::fbthrift::Field::new("afraidOfAnimal", ::fbthrift::TType::I32, 9),
@@ -616,16 +616,16 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "id", strct: "Person"})?),
-                (::fbthrift::TType::String, 2) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Person"})?),
-                (::fbthrift::TType::I16, 3) => field_age = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "age", strct: "Person"})?),
-                (::fbthrift::TType::String, 4) => field_address = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "address", strct: "Person"})?),
-                (::fbthrift::TType::Struct, 5) => field_favoriteColor = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "favoriteColor", strct: "Person"})?),
-                (::fbthrift::TType::Set, 6) => field_friends = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "friends", strct: "Person"})?),
-                (::fbthrift::TType::I64, 7) => field_bestFriend = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "bestFriend", strct: "Person"})?),
-                (::fbthrift::TType::Map, 8) => field_petNames = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "petNames", strct: "Person"})?),
-                (::fbthrift::TType::I32, 9) => field_afraidOfAnimal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "afraidOfAnimal", strct: "Person"})?),
-                (::fbthrift::TType::List, 10) => field_vehicles = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "vehicles", strct: "Person"})?),
+                (::fbthrift::TType::I64, 1) => field_id = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "id", strct: "Person"})?),
+                (::fbthrift::TType::String, 2) => field_name = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "name", strct: "Person"})?),
+                (::fbthrift::TType::I16, 3) => field_age = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "age", strct: "Person"})?),
+                (::fbthrift::TType::String, 4) => field_address = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "address", strct: "Person"})?),
+                (::fbthrift::TType::Struct, 5) => field_favoriteColor = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "favoriteColor", strct: "Person"})?),
+                (::fbthrift::TType::Set, 6) => field_friends = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "friends", strct: "Person"})?),
+                (::fbthrift::TType::I64, 7) => field_bestFriend = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "bestFriend", strct: "Person"})?),
+                (::fbthrift::TType::Map, 8) => field_petNames = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "petNames", strct: "Person"})?),
+                (::fbthrift::TType::I32, 9) => field_afraidOfAnimal = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "afraidOfAnimal", strct: "Person"})?),
+                (::fbthrift::TType::List, 10) => field_vehicles = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "vehicles", strct: "Person"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -709,21 +709,21 @@ pub(crate) mod r#impl {
     pub(crate) struct LocalImpl<T>(T);
 
     #[allow(unused)]
-    pub(crate) fn write<T, P>(value: &T, p: &mut P)
+    pub(crate) fn rs_thrift_write<T, P>(value: &T, p: &mut P)
     where
         LocalImpl<T>: ::fbthrift::Serialize<P>,
         P: ::fbthrift::ProtocolWriter,
     {
-        ::fbthrift::Serialize::write(LocalImpl::ref_cast(value), p);
+        ::fbthrift::Serialize::rs_thrift_write(LocalImpl::ref_cast(value), p);
     }
 
     #[allow(unused)]
-    pub(crate) fn read<T, P>(p: &mut P) -> ::anyhow::Result<T>
+    pub(crate) fn rs_thrift_read<T, P>(p: &mut P) -> ::anyhow::Result<T>
     where
         LocalImpl<T>: ::fbthrift::Deserialize<P>,
         P: ::fbthrift::ProtocolReader,
     {
-        let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
+        let value: LocalImpl<T> = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         ::std::result::Result::Ok(value.0)
     }
 }

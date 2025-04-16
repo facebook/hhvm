@@ -180,10 +180,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("InitialResponse");
         p.write_field_begin("content", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.content, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.content, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -195,7 +195,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
         ];
@@ -205,7 +205,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_content = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "InitialResponse"})?),
+                (::fbthrift::TType::String, 1) => field_content = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "InitialResponse"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -283,10 +283,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("FinalResponse");
         p.write_field_begin("content", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.content, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.content, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -298,7 +298,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
         ];
@@ -308,7 +308,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_content = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "FinalResponse"})?),
+                (::fbthrift::TType::String, 1) => field_content = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "FinalResponse"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -386,10 +386,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("SinkPayload");
         p.write_field_begin("content", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.content, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.content, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -401,7 +401,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
         ];
@@ -411,7 +411,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_content = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "SinkPayload"})?),
+                (::fbthrift::TType::String, 1) => field_content = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "content", strct: "SinkPayload"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -489,10 +489,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("CompatibleWithKeywordSink");
         p.write_field_begin("sink", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.sink, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.sink, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -504,7 +504,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("sink", ::fbthrift::TType::String, 1),
         ];
@@ -514,7 +514,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_sink = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "sink", strct: "CompatibleWithKeywordSink"})?),
+                (::fbthrift::TType::String, 1) => field_sink = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sink", strct: "CompatibleWithKeywordSink"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -592,10 +592,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("InitialException");
         p.write_field_begin("reason", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.reason, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.reason, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -607,7 +607,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("reason", ::fbthrift::TType::String, 1),
         ];
@@ -617,7 +617,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_reason = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "InitialException"})?),
+                (::fbthrift::TType::String, 1) => field_reason = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "InitialException"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -695,10 +695,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("SinkException1");
         p.write_field_begin("reason", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.reason, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.reason, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -710,7 +710,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("reason", ::fbthrift::TType::String, 1),
         ];
@@ -720,7 +720,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_reason = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "SinkException1"})?),
+                (::fbthrift::TType::String, 1) => field_reason = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "SinkException1"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -798,10 +798,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("SinkException2");
         p.write_field_begin("reason", ::fbthrift::TType::I64, 1);
-        ::fbthrift::Serialize::write(&self.reason, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.reason, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -813,7 +813,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("reason", ::fbthrift::TType::I64, 1),
         ];
@@ -823,7 +823,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_reason = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "SinkException2"})?),
+                (::fbthrift::TType::I64, 1) => field_reason = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reason", strct: "SinkException2"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -880,21 +880,21 @@ pub(crate) mod r#impl {
     pub(crate) struct LocalImpl<T>(T);
 
     #[allow(unused)]
-    pub(crate) fn write<T, P>(value: &T, p: &mut P)
+    pub(crate) fn rs_thrift_write<T, P>(value: &T, p: &mut P)
     where
         LocalImpl<T>: ::fbthrift::Serialize<P>,
         P: ::fbthrift::ProtocolWriter,
     {
-        ::fbthrift::Serialize::write(LocalImpl::ref_cast(value), p);
+        ::fbthrift::Serialize::rs_thrift_write(LocalImpl::ref_cast(value), p);
     }
 
     #[allow(unused)]
-    pub(crate) fn read<T, P>(p: &mut P) -> ::anyhow::Result<T>
+    pub(crate) fn rs_thrift_read<T, P>(p: &mut P) -> ::anyhow::Result<T>
     where
         LocalImpl<T>: ::fbthrift::Deserialize<P>,
         P: ::fbthrift::ProtocolReader,
     {
-        let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
+        let value: LocalImpl<T> = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         ::std::result::Result::Ok(value.0)
     }
 }

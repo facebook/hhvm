@@ -78,14 +78,14 @@ pub mod bad_interaction {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -161,14 +161,14 @@ pub mod my_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::myExcept(inner)) => {
@@ -177,7 +177,7 @@ pub mod my_service {
                         ::fbthrift::TType::Struct,
                         1,
                     );
-                    ::fbthrift::Serialize::write(inner, p);
+                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
@@ -259,14 +259,14 @@ pub mod my_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -349,14 +349,14 @@ pub mod my_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Bool, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -439,14 +439,14 @@ pub mod my_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::String, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -529,14 +529,14 @@ pub mod my_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -619,14 +619,14 @@ pub mod my_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -709,14 +709,14 @@ pub mod my_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -801,14 +801,14 @@ pub mod my_service_prio_parent {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -891,14 +891,14 @@ pub mod my_service_prio_parent {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -983,14 +983,14 @@ pub mod my_service_prio_child {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -1075,14 +1075,14 @@ pub mod bad_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::I32, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -1167,14 +1167,14 @@ pub mod foo_bar_baz_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -1257,14 +1257,14 @@ pub mod foo_bar_baz_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 
@@ -1347,14 +1347,14 @@ pub mod foo_bar_baz_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
 

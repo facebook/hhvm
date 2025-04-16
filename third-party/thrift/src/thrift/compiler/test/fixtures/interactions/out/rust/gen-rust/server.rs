@@ -187,7 +187,7 @@ struct Args_MyInteraction_frobnicate {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_frobnicate {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -212,7 +212,7 @@ struct Args_MyInteraction_ping {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_ping {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -237,7 +237,7 @@ struct Args_MyInteraction_truthify {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_truthify {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -262,7 +262,7 @@ struct Args_MyInteraction_encode {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_encode {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.encode"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -402,7 +402,7 @@ struct Args_MyInteractionFast_frobnicate {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_frobnicate {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -427,7 +427,7 @@ struct Args_MyInteractionFast_ping {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_ping {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -452,7 +452,7 @@ struct Args_MyInteractionFast_truthify {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_truthify {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -477,7 +477,7 @@ struct Args_MyInteractionFast_encode {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_encode {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.encode"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -548,7 +548,7 @@ struct Args_SerialInteraction_frobnicate {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SerialInteraction_frobnicate {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SerialInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -619,7 +619,7 @@ struct Args_BoxedInteraction_getABox {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_BoxedInteraction_getABox {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "BoxedInteraction.getABox"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -693,7 +693,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -754,7 +754,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.ping";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -815,7 +815,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.truthify";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -911,7 +911,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.encode";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -1245,7 +1245,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -1306,7 +1306,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.ping";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -1367,7 +1367,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.truthify";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -1463,7 +1463,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.encode";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_encode = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_encode = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -1797,7 +1797,7 @@ pub mod my_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.SerialInteraction.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -2183,7 +2183,7 @@ struct Args_MyService_foo {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyService_foo {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyService.foo"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -2209,7 +2209,7 @@ struct Args_MyService_interact {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyService_interact {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyService.interact"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("arg", ::fbthrift::TType::I32, 1),
         ];
@@ -2219,7 +2219,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "arg", function: "interact"})?),
+                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingArgError { arg: "arg", function: "interact"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2238,7 +2238,7 @@ struct Args_MyService_interactFast {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyService_interactFast {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyService.interactFast"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -2263,7 +2263,7 @@ struct Args_MyService_serialize {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyService_serialize {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyService.serialize"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -2340,7 +2340,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.foo";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyService_foo = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_MyService_foo = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -2401,7 +2401,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.interact";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyService_interact = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_MyService_interact = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -2466,7 +2466,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.interactFast";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyService_interactFast = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_MyService_interactFast = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -2530,7 +2530,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.serialize";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyService_serialize = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_MyService_serialize = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -2972,7 +2972,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -3033,7 +3033,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.ping";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -3094,7 +3094,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.truthify";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -3190,7 +3190,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.encode";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -3524,7 +3524,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -3585,7 +3585,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.ping";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -3646,7 +3646,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.truthify";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -3742,7 +3742,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.encode";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_encode = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_encode = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -4076,7 +4076,7 @@ pub mod factories {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.SerialInteraction.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -4417,7 +4417,7 @@ struct Args_Factories_foo {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Factories_foo {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Factories.foo"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -4443,7 +4443,7 @@ struct Args_Factories_interact {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Factories_interact {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Factories.interact"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("arg", ::fbthrift::TType::I32, 1),
         ];
@@ -4453,7 +4453,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fa
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "arg", function: "interact"})?),
+                (::fbthrift::TType::I32, 1) => field_arg = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingArgError { arg: "arg", function: "interact"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -4472,7 +4472,7 @@ struct Args_Factories_interactFast {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Factories_interactFast {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Factories.interactFast"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -4497,7 +4497,7 @@ struct Args_Factories_serialize {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Factories_serialize {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Factories.serialize"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -4556,7 +4556,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.foo";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Factories_foo = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_Factories_foo = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -4617,7 +4617,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.interact";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Factories_interact = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_Factories_interact = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -4682,7 +4682,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.interactFast";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Factories_interactFast = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_Factories_interactFast = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -4746,7 +4746,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.serialize";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Factories_serialize = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_Factories_serialize = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -5170,7 +5170,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -5231,7 +5231,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.ping";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -5292,7 +5292,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.truthify";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -5388,7 +5388,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.encode";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -5722,7 +5722,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -5783,7 +5783,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.ping";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -5844,7 +5844,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.truthify";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -5940,7 +5940,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.encode";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteractionFast_encode = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteractionFast_encode = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -6274,7 +6274,7 @@ pub mod perform {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.SerialInteraction.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -6577,7 +6577,7 @@ struct Args_Perform_foo {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Perform_foo {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "Perform.foo"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -6654,7 +6654,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.foo";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_Perform_foo = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_Perform_foo = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -7025,7 +7025,7 @@ pub mod interact_with_shared {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.frobnicate";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -7086,7 +7086,7 @@ pub mod interact_with_shared {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.ping";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -7147,7 +7147,7 @@ pub mod interact_with_shared {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.truthify";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -7243,7 +7243,7 @@ pub mod interact_with_shared {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.encode";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_MyInteraction_encode = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -7577,7 +7577,7 @@ pub mod interact_with_shared {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.init";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_SharedInteraction_init = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_SharedInteraction_init = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -7638,7 +7638,7 @@ pub mod interact_with_shared {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.do_something";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_SharedInteraction_do_something = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_SharedInteraction_do_something = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -7699,7 +7699,7 @@ pub mod interact_with_shared {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.tear_down";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_SharedInteraction_tear_down = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_SharedInteraction_tear_down = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -7995,7 +7995,7 @@ struct Args_InteractWithShared_do_some_similar_things {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_InteractWithShared_do_some_similar_things {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "InteractWithShared.do_some_similar_things"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
         ];
         let _ = p.read_struct_begin(|_| ())?;
@@ -8054,7 +8054,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.do_some_similar_things";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_InteractWithShared_do_some_similar_things = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_InteractWithShared_do_some_similar_things = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -8417,7 +8417,7 @@ pub mod box_service {
             const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"BoxService.BoxedInteraction.getABox";
             let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
             ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-            let _args: self::Args_BoxedInteraction_getABox = ::fbthrift::Deserialize::read(p)?;
+            let _args: self::Args_BoxedInteraction_getABox = ::fbthrift::Deserialize::rs_thrift_read(p)?;
             let bytes_read = ::fbthrift::help::buf_len(&req)?;
             ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
                 protocol: P::PROTOCOL_ID,
@@ -8681,7 +8681,7 @@ struct Args_BoxService_getABoxSession {
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_BoxService_getABoxSession {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "BoxService.getABoxSession"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("req", ::fbthrift::TType::Struct, 1),
         ];
@@ -8691,7 +8691,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Bo
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_req = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingArgError { arg: "req", function: "getABoxSession"})?),
+                (::fbthrift::TType::Struct, 1) => field_req = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingArgError { arg: "req", function: "getABoxSession"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -8744,7 +8744,7 @@ where
         const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"BoxService.getABoxSession";
         let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_BoxService_getABoxSession = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_BoxService_getABoxSession = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,

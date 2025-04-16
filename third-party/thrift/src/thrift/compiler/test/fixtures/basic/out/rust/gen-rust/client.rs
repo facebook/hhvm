@@ -162,7 +162,7 @@ struct Args_FooService_simple_rpc<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_FooService_simple_rpc<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "FooService.simple_rpc"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -464,10 +464,10 @@ struct Args_FB303Service_simple_rpc<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_FB303Service_simple_rpc<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "FB303Service.simple_rpc"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("int_parameter", ::fbthrift::TType::I32, 1i16);
-        ::fbthrift::Serialize::write(&self.int_parameter, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.int_parameter, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1422,7 +1422,7 @@ struct Args_MyService_ping<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_ping<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.ping"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1436,7 +1436,7 @@ struct Args_MyService_getRandomData<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_getRandomData<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.getRandomData"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1451,10 +1451,10 @@ struct Args_MyService_sink<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_sink<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.sink"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("sink", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.sink, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.sink, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1470,13 +1470,13 @@ struct Args_MyService_putDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_putDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.putDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_begin("data", ::fbthrift::TType::String, 2i16);
-        ::fbthrift::Serialize::write(&self.data, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.data, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1491,10 +1491,10 @@ struct Args_MyService_hasDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_hasDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.hasDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1509,10 +1509,10 @@ struct Args_MyService_getDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_getDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.getDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1527,10 +1527,10 @@ struct Args_MyService_deleteDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_deleteDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.deleteDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1546,13 +1546,13 @@ struct Args_MyService_lobDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_lobDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.lobDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_begin("data", ::fbthrift::TType::String, 2i16);
-        ::fbthrift::Serialize::write(&self.data, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.data, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1566,7 +1566,7 @@ struct Args_MyService_invalid_return_for_hack<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_invalid_return_for_hack<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.invalid_return_for_hack"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1580,7 +1580,7 @@ struct Args_MyService_rpc_skipped_codegen<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_rpc_skipped_codegen<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.rpc_skipped_codegen"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -2132,10 +2132,10 @@ struct Args_DbMixedStackArguments_getDataByKey0<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_DbMixedStackArguments_getDataByKey0<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "DbMixedStackArguments.getDataByKey0"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("key", ::fbthrift::TType::String, 1i16);
-        ::fbthrift::Serialize::write(&self.key, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.key, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -2150,10 +2150,10 @@ struct Args_DbMixedStackArguments_getDataByKey1<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_DbMixedStackArguments_getDataByKey1<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "DbMixedStackArguments.getDataByKey1"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("key", ::fbthrift::TType::String, 1i16);
-        ::fbthrift::Serialize::write(&self.key, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.key, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

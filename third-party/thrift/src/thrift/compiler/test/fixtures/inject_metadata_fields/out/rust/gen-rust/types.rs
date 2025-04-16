@@ -98,10 +98,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("Fields");
         p.write_field_begin("injected_field", ::fbthrift::TType::String, 100);
-        ::fbthrift::Serialize::write(&self.injected_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.injected_field, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -113,7 +113,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, 100),
         ];
@@ -123,7 +123,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "Fields"})?),
+                (::fbthrift::TType::String, 100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "Fields"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -201,10 +201,10 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("FieldsInjectedToEmptyStruct");
         p.write_field_begin("injected_field", ::fbthrift::TType::String, -1100);
-        ::fbthrift::Serialize::write(&self.injected_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.injected_field, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -216,7 +216,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
         ];
@@ -226,7 +226,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedToEmptyStruct"})?),
+                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedToEmptyStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -316,13 +316,13 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("FieldsInjectedToStruct");
         p.write_field_begin("string_field", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.string_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.string_field, p);
         p.write_field_end();
         p.write_field_begin("injected_field", ::fbthrift::TType::String, -1100);
-        ::fbthrift::Serialize::write(&self.injected_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.injected_field, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -334,7 +334,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
             ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
@@ -346,8 +346,8 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedToStruct"})?),
-                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedToStruct"})?),
+                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedToStruct"})?),
+                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedToStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -444,22 +444,22 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("FieldsInjectedWithIncludedStruct");
         p.write_field_begin("string_field", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.string_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.string_field, p);
         p.write_field_end();
         p.write_field_begin("injected_field", ::fbthrift::TType::String, -1100);
-        ::fbthrift::Serialize::write(&self.injected_field, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.injected_field, p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.injected_structured_annotation_field {
             p.write_field_begin("injected_structured_annotation_field", ::fbthrift::TType::String, -1101);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.injected_unstructured_annotation_field {
             p.write_field_begin("injected_unstructured_annotation_field", ::fbthrift::TType::String, -1102);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
         }
         p.write_field_stop();
@@ -472,7 +472,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
             ::fbthrift::Field::new("injected_structured_annotation_field", ::fbthrift::TType::String, -1101),
@@ -488,10 +488,10 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedWithIncludedStruct"})?),
-                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedWithIncludedStruct"})?),
-                (::fbthrift::TType::String, -1101) => field_injected_structured_annotation_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_structured_annotation_field", strct: "FieldsInjectedWithIncludedStruct"})?),
-                (::fbthrift::TType::String, -1102) => field_injected_unstructured_annotation_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_unstructured_annotation_field", strct: "FieldsInjectedWithIncludedStruct"})?),
+                (::fbthrift::TType::String, 1) => field_string_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedWithIncludedStruct"})?),
+                (::fbthrift::TType::String, -1100) => field_injected_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedWithIncludedStruct"})?),
+                (::fbthrift::TType::String, -1101) => field_injected_structured_annotation_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_structured_annotation_field", strct: "FieldsInjectedWithIncludedStruct"})?),
+                (::fbthrift::TType::String, -1102) => field_injected_unstructured_annotation_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_unstructured_annotation_field", strct: "FieldsInjectedWithIncludedStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -585,21 +585,21 @@ pub(crate) mod r#impl {
     pub(crate) struct LocalImpl<T>(T);
 
     #[allow(unused)]
-    pub(crate) fn write<T, P>(value: &T, p: &mut P)
+    pub(crate) fn rs_thrift_write<T, P>(value: &T, p: &mut P)
     where
         LocalImpl<T>: ::fbthrift::Serialize<P>,
         P: ::fbthrift::ProtocolWriter,
     {
-        ::fbthrift::Serialize::write(LocalImpl::ref_cast(value), p);
+        ::fbthrift::Serialize::rs_thrift_write(LocalImpl::ref_cast(value), p);
     }
 
     #[allow(unused)]
-    pub(crate) fn read<T, P>(p: &mut P) -> ::anyhow::Result<T>
+    pub(crate) fn rs_thrift_read<T, P>(p: &mut P) -> ::anyhow::Result<T>
     where
         LocalImpl<T>: ::fbthrift::Deserialize<P>,
         P: ::fbthrift::ProtocolReader,
     {
-        let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
+        let value: LocalImpl<T> = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         ::std::result::Result::Ok(value.0)
     }
 }

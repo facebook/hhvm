@@ -540,7 +540,7 @@ struct Args_MyService_ping<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_ping<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.ping"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -554,7 +554,7 @@ struct Args_MyService_getRandomData<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_getRandomData<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.getRandomData"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -569,10 +569,10 @@ struct Args_MyService_hasDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_hasDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.hasDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -587,10 +587,10 @@ struct Args_MyService_getDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_getDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.getDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -606,13 +606,13 @@ struct Args_MyService_putDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_putDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.putDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_begin("data", ::fbthrift::TType::String, 2i16);
-        ::fbthrift::Serialize::write(&self.data, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.data, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -628,13 +628,13 @@ struct Args_MyService_lobDataById<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_lobDataById<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.lobDataById"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("id", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.id, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.id, p);
         p.write_field_end();
         p.write_field_begin("data", ::fbthrift::TType::String, 2i16);
-        ::fbthrift::Serialize::write(&self.data, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.data, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

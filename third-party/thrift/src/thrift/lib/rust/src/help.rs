@@ -161,7 +161,7 @@ where
         // this field should not be used by the server (except for some
         // language implementations).
         p.write_message_begin(name, MessageType::Call, 0);
-        args.write(p);
+        args.rs_thrift_write(p);
         p.write_message_end();
     });
 
@@ -190,7 +190,7 @@ where
 
     let res = match message_type {
         MessageType::Reply => Ok(EXN::read_result(de)?),
-        MessageType::Exception => Err(ApplicationException::read(de)?),
+        MessageType::Exception => Err(ApplicationException::rs_thrift_read(de)?),
         MessageType::Call | MessageType::Oneway | MessageType::InvalidMessageType => {
             bail!("Unwanted message type `{:?}`", message_type)
         }

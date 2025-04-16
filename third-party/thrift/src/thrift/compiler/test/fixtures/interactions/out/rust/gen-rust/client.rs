@@ -332,7 +332,7 @@ where
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
                                     }
                                     ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
@@ -473,7 +473,7 @@ struct Args_MyInteraction_frobnicate<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_frobnicate<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.frobnicate"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -487,7 +487,7 @@ struct Args_MyInteraction_ping<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -501,7 +501,7 @@ struct Args_MyInteraction_truthify<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_truthify<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.truthify"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -515,7 +515,7 @@ struct Args_MyInteraction_encode<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_encode<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.encode"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -946,7 +946,7 @@ where
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::ApplicationException(aexn)))
                                     }
                                     ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
@@ -1087,7 +1087,7 @@ struct Args_MyInteractionFast_frobnicate<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_frobnicate<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1101,7 +1101,7 @@ struct Args_MyInteractionFast_ping<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_ping<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.ping"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1115,7 +1115,7 @@ struct Args_MyInteractionFast_truthify<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_truthify<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.truthify"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1129,7 +1129,7 @@ struct Args_MyInteractionFast_encode<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_encode<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.encode"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1397,7 +1397,7 @@ struct Args_SerialInteraction_frobnicate<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SerialInteraction_frobnicate<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SerialInteraction.frobnicate"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -1605,7 +1605,7 @@ struct Args_BoxedInteraction_getABox<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_BoxedInteraction_getABox<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "BoxedInteraction.getABox"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -2060,7 +2060,7 @@ where
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::SerializeStreamError::ApplicationException(aexn)))
                                     }
                                     ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
@@ -2105,7 +2105,7 @@ struct Args_MyService_foo<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_foo<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.foo"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -2120,10 +2120,10 @@ struct Args_MyService_interact<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_interact<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.interact"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("arg", ::fbthrift::TType::I32, 1i16);
-        ::fbthrift::Serialize::write(&self.arg, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.arg, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -2137,7 +2137,7 @@ struct Args_MyService_interactFast<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_interactFast<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.interactFast"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -2151,7 +2151,7 @@ struct Args_MyService_serialize<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_serialize<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.serialize"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -2762,7 +2762,7 @@ where
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::factories::SerializeStreamError::ApplicationException(aexn)))
                                     }
                                     ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
@@ -2807,7 +2807,7 @@ struct Args_Factories_foo<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Factories_foo<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Factories.foo"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -2822,10 +2822,10 @@ struct Args_Factories_interact<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Factories_interact<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Factories.interact"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("arg", ::fbthrift::TType::I32, 1i16);
-        ::fbthrift::Serialize::write(&self.arg, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.arg, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -2839,7 +2839,7 @@ struct Args_Factories_interactFast<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Factories_interactFast<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Factories.interactFast"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -2853,7 +2853,7 @@ struct Args_Factories_serialize<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Factories_serialize<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Factories.serialize"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -3243,7 +3243,7 @@ struct Args_Perform_foo<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Perform_foo<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Perform.foo"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -3606,7 +3606,7 @@ struct Args_InteractWithShared_do_some_similar_things<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_InteractWithShared_do_some_similar_things<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "InteractWithShared.do_some_similar_things"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -3945,10 +3945,10 @@ struct Args_BoxService_getABoxSession<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_BoxService_getABoxSession<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "BoxService.getABoxSession"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("req", ::fbthrift::TType::Struct, 1i16);
-        ::fbthrift::Serialize::write(&self.req, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

@@ -245,10 +245,10 @@ struct Args_SomeService_bounce_map<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SomeService_bounce_map<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SomeService.bounce_map"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("m", ::fbthrift::TType::Map, 1i16);
-        ::fbthrift::Serialize::write(&self.m, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.m, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -263,10 +263,10 @@ struct Args_SomeService_binary_keyed_map<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SomeService_binary_keyed_map<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SomeService.binary_keyed_map"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("r", ::fbthrift::TType::List, 1i16);
-        ::fbthrift::Serialize::write(&self.r, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.r, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

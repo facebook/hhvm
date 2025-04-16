@@ -189,16 +189,16 @@ struct Args_Service_func<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Service_func<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "Service.func"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("arg1", ::fbthrift::TType::String, 1i16);
-        ::fbthrift::Serialize::write(&<crate::types::adapters::StringWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.arg1, 1), p);
+        ::fbthrift::Serialize::rs_thrift_write(&<crate::types::adapters::StringWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.arg1, 1), p);
         p.write_field_end();
         p.write_field_begin("arg2", ::fbthrift::TType::String, 2i16);
-        ::fbthrift::Serialize::write(&self.arg2, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.arg2, p);
         p.write_field_end();
         p.write_field_begin("arg3", ::fbthrift::TType::Struct, 3i16);
-        ::fbthrift::Serialize::write(&self.arg3, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.arg3, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -577,7 +577,7 @@ struct Args_AdapterService_count<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_AdapterService_count<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "AdapterService.count"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -592,10 +592,10 @@ struct Args_AdapterService_adaptedTypes<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_AdapterService_adaptedTypes<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "AdapterService.adaptedTypes"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("arg", ::fbthrift::TType::Struct, 1i16);
-        ::fbthrift::Serialize::write(&self.arg, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.arg, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

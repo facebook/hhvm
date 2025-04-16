@@ -32,7 +32,7 @@ pub trait Serialize<P>
 where
     P: ProtocolWriter,
 {
-    fn write(&self, p: &mut P);
+    fn rs_thrift_write(&self, p: &mut P);
 }
 
 impl<P, T> Serialize<P> for &T
@@ -40,8 +40,8 @@ where
     P: ProtocolWriter,
     T: ?Sized + Serialize<P>,
 {
-    fn write(&self, p: &mut P) {
-        (**self).write(p);
+    fn rs_thrift_write(&self, p: &mut P) {
+        (**self).rs_thrift_write(p);
     }
 }
 
@@ -51,8 +51,8 @@ where
     T: Serialize<P>,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
-        self.as_ref().write(p)
+    fn rs_thrift_write(&self, p: &mut P) {
+        self.as_ref().rs_thrift_write(p)
     }
 }
 
@@ -61,8 +61,8 @@ where
     P: ProtocolWriter,
     T: Serialize<P>,
 {
-    fn write(&self, p: &mut P) {
-        (**self).write(p);
+    fn rs_thrift_write(&self, p: &mut P) {
+        (**self).rs_thrift_write(p);
     }
 }
 
@@ -71,7 +71,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, _p: &mut P) {}
+    fn rs_thrift_write(&self, _p: &mut P) {}
 }
 
 impl<P> Serialize<P> for bool
@@ -79,7 +79,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_bool(*self)
     }
 }
@@ -89,7 +89,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_byte(*self)
     }
 }
@@ -99,7 +99,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_i16(*self)
     }
 }
@@ -109,7 +109,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_i32(*self)
     }
 }
@@ -119,7 +119,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_i64(*self)
     }
 }
@@ -129,7 +129,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_double(*self)
     }
 }
@@ -139,7 +139,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_float(*self)
     }
 }
@@ -149,7 +149,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_double(self.0)
     }
 }
@@ -159,7 +159,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_float(self.0)
     }
 }
@@ -169,7 +169,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_string(self.as_str())
     }
 }
@@ -179,7 +179,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_string(self)
     }
 }
@@ -189,7 +189,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_binary(self.as_ref())
     }
 }
@@ -199,7 +199,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_binary(self.as_ref())
     }
 }
@@ -209,7 +209,7 @@ where
     P: ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_binary(self)
     }
 }
@@ -220,11 +220,11 @@ where
     T: GetTType + Ord,
     T: Serialize<P>,
 {
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_set_begin(T::TTYPE, self.len());
         for item in self.iter() {
             p.write_set_value_begin();
-            item.write(p);
+            item.rs_thrift_write(p);
         }
         p.write_set_end();
     }
@@ -237,11 +237,11 @@ where
     T: Serialize<P>,
     S: std::hash::BuildHasher,
 {
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_set_begin(T::TTYPE, self.len());
         for item in self.iter() {
             p.write_set_value_begin();
-            item.write(p);
+            item.rs_thrift_write(p);
         }
         p.write_set_end();
     }
@@ -255,13 +255,13 @@ where
     V: GetTType,
     V: Serialize<P>,
 {
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_map_begin(K::TTYPE, V::TTYPE, self.len());
         for (k, v) in self.iter() {
             p.write_map_key_begin();
-            k.write(p);
+            k.rs_thrift_write(p);
             p.write_map_value_begin();
-            v.write(p);
+            v.rs_thrift_write(p);
         }
         p.write_map_end();
     }
@@ -276,13 +276,13 @@ where
     V: Serialize<P>,
     S: std::hash::BuildHasher,
 {
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_map_begin(K::TTYPE, V::TTYPE, self.len());
         for (k, v) in self.iter() {
             p.write_map_key_begin();
-            k.write(p);
+            k.rs_thrift_write(p);
             p.write_map_value_begin();
-            v.write(p);
+            v.rs_thrift_write(p);
         }
         p.write_map_end();
     }
@@ -295,11 +295,11 @@ where
     T: Serialize<P>,
 {
     /// Vec<T> is Thrift List type
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_list_begin(T::TTYPE, self.len());
         for item in self.iter() {
             p.write_list_value_begin();
-            item.write(p);
+            item.rs_thrift_write(p);
         }
         p.write_list_end();
     }
@@ -312,11 +312,11 @@ where
     T: Serialize<P>,
 {
     /// \[T\] is Thrift List type
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_list_begin(T::TTYPE, self.len());
         for item in self.iter() {
             p.write_list_value_begin();
-            item.write(p);
+            item.rs_thrift_write(p);
         }
         p.write_list_end();
     }

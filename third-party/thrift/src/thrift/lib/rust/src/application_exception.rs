@@ -202,7 +202,7 @@ where
     P: ProtocolReader,
 {
     /// Decodes a ApplicationException message from a Protocol stream
-    fn read(iprot: &mut P) -> Result<Self> {
+    fn rs_thrift_read(iprot: &mut P) -> Result<Self> {
         iprot.read_struct_begin(|_| ())?;
 
         let mut message = String::from("");
@@ -238,7 +238,7 @@ where
     P: ProtocolWriter,
 {
     /// Writes an application exception to the Protocol stream
-    fn write(&self, oprot: &mut P) {
+    fn rs_thrift_write(&self, oprot: &mut P) {
         oprot.write_struct_begin(TAPPLICATION_EXCEPTION_ERROR_CODE);
 
         if !self.message.is_empty() {

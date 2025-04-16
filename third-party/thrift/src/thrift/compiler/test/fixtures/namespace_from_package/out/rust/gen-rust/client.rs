@@ -171,10 +171,10 @@ struct Args_TestService_init<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_TestService_init<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "TestService.init"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("int1", ::fbthrift::TType::I64, 1i16);
-        ::fbthrift::Serialize::write(&self.int1, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.int1, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

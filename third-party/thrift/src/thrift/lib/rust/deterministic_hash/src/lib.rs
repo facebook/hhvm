@@ -35,6 +35,6 @@ pub fn deterministic_hash<
     hasher_generator: F,
 ) -> Result<H::Output> {
     let mut protocol_writer = DeterministicProtocolSerializer::new(hasher_generator);
-    data.write(&mut protocol_writer);
+    data.rs_thrift_write(&mut protocol_writer);
     protocol_writer.finish()
 }

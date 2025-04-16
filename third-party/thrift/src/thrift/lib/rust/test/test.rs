@@ -105,9 +105,9 @@ where
         + PartialEq
         + Debug,
 {
-    let bytes = serialize!(CompactProtocol, |w| Serialize::write(&value, w));
+    let bytes = serialize!(CompactProtocol, |w| Serialize::rs_thrift_write(&value, w));
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(bytes));
-    let back = Deserialize::read(&mut deserializer).unwrap();
+    let back = Deserialize::rs_thrift_read(&mut deserializer).unwrap();
     assert_eq!(value, back);
 }
 
@@ -148,9 +148,9 @@ fn test_enum_display() {
 #[test]
 fn test_deserialize_skip_seq() {
     let v2 = TestSkipV2::default();
-    let bytes = serialize!(CompactProtocol, |w| Serialize::write(&v2, w));
+    let bytes = serialize!(CompactProtocol, |w| Serialize::rs_thrift_write(&v2, w));
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(bytes));
-    let v1: TestSkipV1 = Deserialize::read(&mut deserializer).unwrap();
+    let v1: TestSkipV1 = Deserialize::rs_thrift_read(&mut deserializer).unwrap();
     assert_eq!(v1, TestSkipV1::default());
 }
 
@@ -165,11 +165,13 @@ fn test_bytes_shared() {
         b: Bytes::from(&b"data"[..]),
         ..Default::default()
     };
-    let bytes = serialize!(CompactProtocol, |w| Serialize::write(&original, w));
+    let bytes = serialize!(CompactProtocol, |w| Serialize::rs_thrift_write(
+        &original, w
+    ));
     let mut deserializer1 = <CompactProtocol>::deserializer(Cursor::new(bytes.clone()));
-    let shared1: TestBytesShared = Deserialize::read(&mut deserializer1).unwrap();
+    let shared1: TestBytesShared = Deserialize::rs_thrift_read(&mut deserializer1).unwrap();
     let mut deserializer2 = <CompactProtocol>::deserializer(Cursor::new(bytes));
-    let shared2: TestBytesShared = Deserialize::read(&mut deserializer2).unwrap();
+    let shared2: TestBytesShared = Deserialize::rs_thrift_read(&mut deserializer2).unwrap();
     assert_eq!(shared1.b.as_ptr() as usize, shared2.b.as_ptr() as usize);
 }
 
@@ -180,9 +182,9 @@ fn test_nonutf8_string() {
     // format for these two types.
     let data = b"...".to_vec();
     let value = WrapBinary { data };
-    let repr = serialize!(CompactProtocol, |w| Serialize::write(&value, w));
+    let repr = serialize!(CompactProtocol, |w| Serialize::rs_thrift_write(&value, w));
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(repr));
-    let value2 = WrapString::read(&mut deserializer).unwrap();
+    let value2 = WrapString::rs_thrift_read(&mut deserializer).unwrap();
     assert_eq!("...", value2.data);
 
     // Same thing with non-UTF-8 data is not okay. It happens to work in C++
@@ -190,9 +192,9 @@ fn test_nonutf8_string() {
     // other languages which enforce a string encoding.
     let data = b"..\xff".to_vec();
     let value = WrapBinary { data };
-    let repr = serialize!(CompactProtocol, |w| Serialize::write(&value, w));
+    let repr = serialize!(CompactProtocol, |w| Serialize::rs_thrift_write(&value, w));
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(repr));
-    let error = WrapString::read(&mut deserializer).unwrap_err();
+    let error = WrapString::rs_thrift_read(&mut deserializer).unwrap_err();
     let expected = r#"Error while deserializing data field of WrapString
 
 Caused by:

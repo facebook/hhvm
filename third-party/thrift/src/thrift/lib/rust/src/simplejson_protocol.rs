@@ -1163,7 +1163,7 @@ where
         buffer: SizeCounter::new().writer(),
         state: vec![SerializationState::NotInContainer],
     };
-    v.write(&mut sizer);
+    v.rs_thrift_write(&mut sizer);
 
     let sz = sizer.finish();
 
@@ -1172,7 +1172,7 @@ where
         buffer: BytesMut::with_capacity(sz).writer(),
         state: vec![SerializationState::NotInContainer],
     };
-    v.write(&mut buf);
+    v.rs_thrift_write(&mut buf);
 
     // Done
     buf.finish()
@@ -1198,7 +1198,7 @@ where
 {
     let source: DeserializeSource<C> = b.into();
     let mut deser = SimpleJsonProtocolDeserializer::new(source.0);
-    let t = T::read(&mut deser)?;
+    let t = T::rs_thrift_read(&mut deser)?;
     if deser.peek().is_some() {
         bail!(ProtocolError::TrailingData);
     }
@@ -1217,7 +1217,7 @@ enum ValueKind {
 
 impl<B: Buf> Deserialize<SimpleJsonProtocolDeserializer<B>> for serde_json::Value {
     #[inline]
-    fn read(p: &mut SimpleJsonProtocolDeserializer<B>) -> Result<Self> {
+    fn rs_thrift_read(p: &mut SimpleJsonProtocolDeserializer<B>) -> Result<Self> {
         p.read_json_value(DEFAULT_RECURSION_DEPTH)
     }
 }

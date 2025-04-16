@@ -51,8 +51,8 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
-        crate::r#impl::write(&self.0, p)
+    fn rs_thrift_write(&self, p: &mut P) {
+        crate::r#impl::rs_thrift_write(&self.0, p)
     }
 }
 
@@ -61,8 +61,8 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        crate::r#impl::read(p).map(MapType)
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        crate::r#impl::rs_thrift_read(p).map(MapType)
     }
 }
 
@@ -74,8 +74,8 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
-        crate::r#impl::write(&self.0, p)
+    fn rs_thrift_write(&self, p: &mut P) {
+        crate::r#impl::rs_thrift_write(&self.0, p)
     }
 }
 
@@ -84,8 +84,8 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        crate::r#impl::read(p).map(BinType)
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        crate::r#impl::rs_thrift_read(p).map(BinType)
     }
 }
 
@@ -98,8 +98,8 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
-        self.0.write(p)
+    fn rs_thrift_write(&self, p: &mut P) {
+        self.0.rs_thrift_write(p)
     }
 }
 
@@ -108,8 +108,8 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::fbthrift::Deserialize::read(p).map(BytesType)
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::fbthrift::Deserialize::rs_thrift_read(p).map(BytesType)
     }
 }
 
@@ -166,28 +166,28 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
         p.write_field_begin("the_map", ::fbthrift::TType::Map, 1);
-        ::fbthrift::Serialize::write(&self.the_map, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.the_map, p);
         p.write_field_end();
         p.write_field_begin("the_bin", ::fbthrift::TType::String, 2);
-        ::fbthrift::Serialize::write(&self.the_bin, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.the_bin, p);
         p.write_field_end();
         p.write_field_begin("inline_bin", ::fbthrift::TType::String, 3);
-        crate::r#impl::write(&self.inline_bin, p);
+        crate::r#impl::rs_thrift_write(&self.inline_bin, p);
         p.write_field_end();
         p.write_field_begin("the_bytes", ::fbthrift::TType::String, 4);
-        ::fbthrift::Serialize::write(&self.the_bytes, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.the_bytes, p);
         p.write_field_end();
         p.write_field_begin("inline_bytes", ::fbthrift::TType::String, 5);
-        ::fbthrift::Serialize::write(&self.inline_bytes, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.inline_bytes, p);
         p.write_field_end();
         p.write_field_begin("floaty", ::fbthrift::TType::Double, 6);
-        ::fbthrift::Serialize::write(&self.floaty, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.floaty, p);
         p.write_field_end();
         p.write_field_begin("doublefloaty", ::fbthrift::TType::Double, 7);
-        ::fbthrift::Serialize::write(&self.doublefloaty, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.doublefloaty, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -199,7 +199,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("doublefloaty", ::fbthrift::TType::Double, 7),
             ::fbthrift::Field::new("floaty", ::fbthrift::TType::Double, 6),
@@ -221,13 +221,13 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => field_the_map = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_map", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 2) => field_the_bin = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bin", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(::anyhow::Context::context(crate::r#impl::read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bin", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 4) => field_the_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bytes", strct: "MyStruct"})?),
-                (::fbthrift::TType::String, 5) => field_inline_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bytes", strct: "MyStruct"})?),
-                (::fbthrift::TType::Double, 6) => field_floaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "floaty", strct: "MyStruct"})?),
-                (::fbthrift::TType::Double, 7) => field_doublefloaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::read(p), ::fbthrift::errors::DeserializingFieldError { field: "doublefloaty", strct: "MyStruct"})?),
+                (::fbthrift::TType::Map, 1) => field_the_map = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_map", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 2) => field_the_bin = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bin", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bin", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 4) => field_the_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "the_bytes", strct: "MyStruct"})?),
+                (::fbthrift::TType::String, 5) => field_inline_bytes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "inline_bytes", strct: "MyStruct"})?),
+                (::fbthrift::TType::Double, 6) => field_floaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "floaty", strct: "MyStruct"})?),
+                (::fbthrift::TType::Double, 7) => field_doublefloaty = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "doublefloaty", strct: "MyStruct"})?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -311,21 +311,21 @@ pub(crate) mod r#impl {
     pub(crate) struct LocalImpl<T>(T);
 
     #[allow(unused)]
-    pub(crate) fn write<T, P>(value: &T, p: &mut P)
+    pub(crate) fn rs_thrift_write<T, P>(value: &T, p: &mut P)
     where
         LocalImpl<T>: ::fbthrift::Serialize<P>,
         P: ::fbthrift::ProtocolWriter,
     {
-        ::fbthrift::Serialize::write(LocalImpl::ref_cast(value), p);
+        ::fbthrift::Serialize::rs_thrift_write(LocalImpl::ref_cast(value), p);
     }
 
     #[allow(unused)]
-    pub(crate) fn read<T, P>(p: &mut P) -> ::anyhow::Result<T>
+    pub(crate) fn rs_thrift_read<T, P>(p: &mut P) -> ::anyhow::Result<T>
     where
         LocalImpl<T>: ::fbthrift::Deserialize<P>,
         P: ::fbthrift::ProtocolReader,
     {
-        let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
+        let value: LocalImpl<T> = ::fbthrift::Deserialize::rs_thrift_read(p)?;
         ::std::result::Result::Ok(value.0)
     }
 
@@ -334,8 +334,8 @@ pub(crate) mod r#impl {
         P: ::fbthrift::ProtocolWriter,
     {
         #[inline]
-        fn write(&self, p: &mut P) {
-            self.0.as_slice().write(p)
+        fn rs_thrift_write(&self, p: &mut P) {
+            self.0.as_slice().rs_thrift_write(p)
         }
     }
 
@@ -344,7 +344,7 @@ pub(crate) mod r#impl {
         P: ::fbthrift::ProtocolReader,
     {
         #[inline]
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
             p.read_binary()
         }
     }
@@ -366,8 +366,8 @@ pub(crate) mod r#impl {
         P: ::fbthrift::ProtocolWriter,
     {
         #[inline]
-        fn write(&self, p: &mut P) {
-            self.0.as_slice().write(p)
+        fn rs_thrift_write(&self, p: &mut P) {
+            self.0.as_slice().rs_thrift_write(p)
         }
     }
 
@@ -376,7 +376,7 @@ pub(crate) mod r#impl {
         P: ::fbthrift::ProtocolReader,
     {
         #[inline]
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
             p.read_binary()
         }
     }
@@ -398,7 +398,7 @@ pub(crate) mod r#impl {
         P: ::fbthrift::ProtocolWriter,
     {
         #[inline]
-        fn write(&self, p: &mut P) {
+        fn rs_thrift_write(&self, p: &mut P) {
             p.write_map_begin(
                 <::std::primitive::i32 as ::fbthrift::GetTType>::TTYPE,
                 <::std::primitive::i32 as ::fbthrift::GetTType>::TTYPE,
@@ -406,9 +406,9 @@ pub(crate) mod r#impl {
             );
             for (k, v) in &self.0 {
                 p.write_map_key_begin();
-                ::fbthrift::Serialize::write(k, p);
+                ::fbthrift::Serialize::rs_thrift_write(k, p);
                 p.write_map_value_begin();
-                ::fbthrift::Serialize::write(v, p);
+                ::fbthrift::Serialize::rs_thrift_write(v, p);
             }
             p.write_map_end();
         }
@@ -419,7 +419,7 @@ pub(crate) mod r#impl {
         P: ::fbthrift::ProtocolReader,
     {
         #[inline]
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<::std::primitive::i32>() + P::min_size::<::std::primitive::i32>())?;
             let mut map = <crate::types::MapType>::with_capacity(len.unwrap_or(0));
 
@@ -433,9 +433,9 @@ pub(crate) mod r#impl {
                 if !more {
                     break;
                 }
-                let k: ::std::primitive::i32 = ::fbthrift::Deserialize::read(p)?;
+                let k: ::std::primitive::i32 = ::fbthrift::Deserialize::rs_thrift_read(p)?;
                 p.read_map_value_begin()?;
-                let v: ::std::primitive::i32 = ::fbthrift::Deserialize::read(p)?;
+                let v: ::std::primitive::i32 = ::fbthrift::Deserialize::rs_thrift_read(p)?;
                 p.read_map_value_end()?;
                 map.insert(k, v);
 

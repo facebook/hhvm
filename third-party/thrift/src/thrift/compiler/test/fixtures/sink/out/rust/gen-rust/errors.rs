@@ -34,7 +34,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -163,12 +163,12 @@ pub mod sink_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
                 let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
-                ::fbthrift::Serialize::write(&aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(&aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -179,7 +179,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
 
@@ -317,7 +317,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -372,7 +372,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -507,12 +507,12 @@ pub mod sink_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
                 let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
-                ::fbthrift::Serialize::write(&aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(&aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -523,7 +523,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
 
@@ -661,7 +661,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -824,11 +824,11 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?);
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -957,12 +957,12 @@ pub mod sink_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
                 let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
-                ::fbthrift::Serialize::write(&aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(&aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -973,7 +973,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
 
@@ -1112,7 +1112,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1167,7 +1167,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1316,12 +1316,12 @@ pub mod sink_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
                 let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
-                ::fbthrift::Serialize::write(&aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(&aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -1332,7 +1332,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::ex(inner)) => {
@@ -1341,7 +1341,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         1,
                     );
-                    ::fbthrift::Serialize::write(inner, p);
+                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
@@ -1478,7 +1478,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1533,7 +1533,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1662,12 +1662,12 @@ pub mod sink_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
                 let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
-                ::fbthrift::Serialize::write(&aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(&aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -1678,7 +1678,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
 
@@ -1836,11 +1836,11 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::rs_thrift_read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -1895,7 +1895,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -2044,12 +2044,12 @@ pub mod sink_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
                 let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
-                ::fbthrift::Serialize::write(&aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(&aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -2060,7 +2060,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::ex(inner)) => {
@@ -2069,7 +2069,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         1,
                     );
-                    ::fbthrift::Serialize::write(inner, p);
+                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
                 }
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
@@ -2226,11 +2226,11 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((::fbthrift::TType::Struct, 1), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::ex(::fbthrift::Deserialize::rs_thrift_read(p)?)));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -2285,7 +2285,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?);
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -2414,12 +2414,12 @@ pub mod sink_service {
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             if let ::std::result::Result::Err(Self::ThriftError(err)) = res {
                 let aexn = ::fbthrift::ApplicationException::new(::fbthrift::ApplicationExceptionErrorCode::InternalError, format!("ThriftError: {err:?}"));
-                ::fbthrift::Serialize::write(&aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(&aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -2430,7 +2430,7 @@ pub mod sink_service {
                         ::fbthrift::TType::Struct,
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
 
@@ -2568,7 +2568,7 @@ pub mod sink_service {
                     }
                     ((::fbthrift::TType::Struct, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }
                     ((ty, _id), false) => p.skip(ty)?,
                     ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(

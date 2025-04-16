@@ -467,10 +467,10 @@ struct Args_NestedContainers_mapList<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_NestedContainers_mapList<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "NestedContainers.mapList"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("foo", ::fbthrift::TType::Map, 1i16);
-        ::fbthrift::Serialize::write(&self.foo, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.foo, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -485,10 +485,10 @@ struct Args_NestedContainers_mapSet<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_NestedContainers_mapSet<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "NestedContainers.mapSet"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("foo", ::fbthrift::TType::Map, 1i16);
-        ::fbthrift::Serialize::write(&self.foo, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.foo, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -503,10 +503,10 @@ struct Args_NestedContainers_listMap<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_NestedContainers_listMap<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "NestedContainers.listMap"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("foo", ::fbthrift::TType::List, 1i16);
-        ::fbthrift::Serialize::write(&self.foo, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.foo, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -521,10 +521,10 @@ struct Args_NestedContainers_listSet<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_NestedContainers_listSet<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "NestedContainers.listSet"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("foo", ::fbthrift::TType::List, 1i16);
-        ::fbthrift::Serialize::write(&self.foo, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.foo, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -539,10 +539,10 @@ struct Args_NestedContainers_turtles<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_NestedContainers_turtles<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "NestedContainers.turtles"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("foo", ::fbthrift::TType::List, 1i16);
-        ::fbthrift::Serialize::write(&self.foo, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.foo, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

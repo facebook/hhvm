@@ -257,7 +257,7 @@ where
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::c::NumbersStreamError::ApplicationException(aexn)))
                                     }
                                     ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
@@ -351,7 +351,7 @@ struct Args_C_f<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_C_f<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "C.f"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -365,7 +365,7 @@ struct Args_C_numbers<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_C_numbers<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "C.numbers"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_stop();
         p.write_struct_end();
@@ -382,16 +382,16 @@ struct Args_C_thing<'a> {
 impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_C_thing<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "C.thing"))]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("args");
         p.write_field_begin("a", ::fbthrift::TType::I32, 1i16);
-        ::fbthrift::Serialize::write(&self.a, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.a, p);
         p.write_field_end();
         p.write_field_begin("b", ::fbthrift::TType::String, 2i16);
-        ::fbthrift::Serialize::write(&self.b, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.b, p);
         p.write_field_end();
         p.write_field_begin("c", ::fbthrift::TType::Set, 3i16);
-        ::fbthrift::Serialize::write(&self.c, p);
+        ::fbthrift::Serialize::rs_thrift_write(&self.c, p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();

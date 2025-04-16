@@ -345,7 +345,7 @@ where
     #[inline]
     fn write_sequence(&mut self, elem_type: TType, size: usize) {
         assert!(
-            self.container_limit.map_or(true, |lim| size < lim),
+            self.container_limit.is_none_or(|lim| size < lim),
             "container too large {}, lim {:?}",
             size,
             self.container_limit
@@ -409,7 +409,7 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
     #[inline]
     fn write_map_begin(&mut self, key_type: TType, value_type: TType, size: usize) {
         assert!(
-            self.container_limit.map_or(true, |lim| size < lim),
+            self.container_limit.is_none_or(|lim| size < lim),
             "map too large {}, lim {:?}",
             size,
             self.container_limit
@@ -436,7 +436,7 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
 
     #[inline]
     fn write_list_begin(&mut self, elem_type: TType, size: usize) {
-        assert!(self.container_limit.map_or(true, |lim| size < lim));
+        assert!(self.container_limit.is_none_or(|lim| size < lim));
         self.write_field_id(CType::List);
         self.write_sequence(elem_type, size);
     }
@@ -518,7 +518,7 @@ impl<B: BufMutExt> ProtocolWriter for CompactProtocolSerializer<B> {
     fn write_binary(&mut self, value: &[u8]) {
         let size = value.len();
         assert!(
-            self.string_limit.map_or(true, |lim| size < lim),
+            self.string_limit.is_none_or(|lim| size < lim),
             "string too large {}, lim {:?}",
             size,
             self.string_limit
@@ -684,7 +684,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         let size = self.read_varint_u64()? as usize;
 
         ensure_err!(
-            self.container_limit.map_or(true, |lim| size < lim),
+            self.container_limit.is_none_or(|lim| size < lim),
             ProtocolError::InvalidDataLength
         );
 
@@ -729,7 +729,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         };
 
         ensure_err!(
-            self.container_limit.map_or(true, |lim| size < lim),
+            self.container_limit.is_none_or(|lim| size < lim),
             ProtocolError::InvalidDataLength
         );
 
@@ -834,7 +834,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
     fn read_binary<V: CopyFromBuf>(&mut self) -> Result<V> {
         let received_len = self.read_varint_u64()? as usize;
         ensure_err!(
-            self.string_limit.map_or(true, |lim| received_len < lim),
+            self.string_limit.is_none_or(|lim| received_len < lim),
             ProtocolError::InvalidDataLength
         );
         ensure_err!(self.buffer.remaining() >= received_len, ProtocolError::EOF);
@@ -880,7 +880,7 @@ where
         container_limit: None,
         string_limit: None,
     };
-    v.write(&mut sizer);
+    v.rs_thrift_write(&mut sizer);
     sizer.finish()
 }
 
@@ -899,7 +899,7 @@ where
         container_limit: None,
         string_limit: None,
     };
-    v.write(&mut buf);
+    v.rs_thrift_write(&mut buf);
     buf
 }
 
@@ -953,5 +953,5 @@ where
 {
     let source: DeserializeSource<C> = b.into();
     let mut deser = CompactProtocolDeserializer::new(source.0);
-    T::read(&mut deser)
+    T::rs_thrift_read(&mut deser)
 }

@@ -495,7 +495,7 @@ where
     T: Serialize<BinaryProtocolSerializer<SizeCounter>>,
 {
     let mut sizer = BinaryProtocolSerializer::with_buffer(SizeCounter::new());
-    v.write(&mut sizer);
+    v.rs_thrift_write(&mut sizer);
     sizer.finish()
 }
 
@@ -509,7 +509,7 @@ where
 {
     // Now that we have the size, allocate an output buffer and serialize into it
     let mut buf = BinaryProtocolSerializer::with_buffer(buffer);
-    v.write(&mut buf);
+    v.rs_thrift_write(&mut buf);
     buf
 }
 
@@ -563,5 +563,5 @@ where
 {
     let source: DeserializeSource<C> = b.into();
     let mut deser = BinaryProtocolDeserializer::new(source.0);
-    T::read(&mut deser)
+    T::rs_thrift_read(&mut deser)
 }

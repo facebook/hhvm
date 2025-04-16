@@ -228,7 +228,7 @@ fn read_json_value() {
         "struct" : { "" : null , "x" : false }
     } "#;
     let mut de = SimpleJsonProtocolDeserializer::new(json);
-    let actual = serde_json::Value::read(&mut de).unwrap();
+    let actual = serde_json::Value::rs_thrift_read(&mut de).unwrap();
     let expected = json!({
         "void": null,
         "bool": true,
@@ -245,7 +245,7 @@ fn read_json_value() {
 fn fail_to_read_json_value() {
     let json: &[u8] = br#" [null,] "#;
     let mut de = SimpleJsonProtocolDeserializer::new(json);
-    let err = serde_json::Value::read(&mut de).unwrap_err();
+    let err = serde_json::Value::rs_thrift_read(&mut de).unwrap_err();
     assert_eq!("Found trailing comma", err.to_string());
 }
 
@@ -268,7 +268,7 @@ fn test_trailing() {
 fn fail_to_read_object() {
     let json: &[u8] = br#" { "#;
     let mut de = SimpleJsonProtocolDeserializer::new(json);
-    let err = serde_json::Value::read(&mut de).unwrap_err();
+    let err = serde_json::Value::rs_thrift_read(&mut de).unwrap_err();
     assert_eq!(
         "Expected an end of a struct: Expected the following chars: \"}\", not enough bytes remaining",
         format!("{:#}", err),

@@ -32,8 +32,8 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
-        {{program:crate}}::r#impl::write(&self.0, p)
+    fn rs_thrift_write(&self, p: &mut P) {
+        {{program:crate}}::r#impl::rs_thrift_write(&self.0, p)
     }
 }
 
@@ -42,8 +42,8 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        {{program:crate}}::r#impl::read(p).map({{typedef:rust_name}})
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        {{program:crate}}::r#impl::rs_thrift_read(p).map({{typedef:rust_name}})
     }
 }
 
@@ -55,12 +55,12 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     #[inline]
-    fn write(&self, p: &mut P) {
+    fn rs_thrift_write(&self, p: &mut P) {
         {{#typedef:has_adapter?}}{{!
-        }}{{> lib/adapter/qualified}}::to_thrift(&self.0).write(p){{!
+        }}{{> lib/adapter/qualified}}::to_thrift(&self.0).rs_thrift_write(p){{!
         }}{{/typedef:has_adapter?}}{{!
         }}{{^typedef:has_adapter?}}{{!
-        }}self.0.write(p){{!
+        }}self.0.rs_thrift_write(p){{!
         }}{{/typedef:has_adapter?}}
     }
 }
@@ -70,11 +70,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         {{#typedef:has_adapter?}}{{!
         }}{{> lib/adapter/qualified}}::from_thrift({{!
         }}{{/typedef:has_adapter?}}{{!
-        }}::fbthrift::Deserialize::read({{!
+        }}::fbthrift::Deserialize::rs_thrift_read({{!
         }}p){{!
         }}{{#typedef:has_adapter?}}?).map_err(Into::<::anyhow::Error>::into){{/typedef:has_adapter?}}{{!
         }}.map({{typedef:rust_name}})

@@ -110,7 +110,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -121,7 +121,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         {{#function:stream_elem_type}}{{> lib/ttype}}{{/function:stream_elem_type}},
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
                 {{#function:stream_exceptions}}
@@ -131,7 +131,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
                         {{field:key}},
                     );
-                    ::fbthrift::Serialize::write(inner, p);
+                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
                 }{{!
                 }}{{/function:stream_exceptions}}
@@ -275,7 +275,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -286,7 +286,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         {{#function:sink_elem_type}}{{> lib/ttype}}{{/function:sink_elem_type}},
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
                 {{#function:sink_exceptions}}
@@ -296,7 +296,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
                         {{field:key}},
                     );
-                    ::fbthrift::Serialize::write(inner, p);
+                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
                 }{{!
                 }}{{/function:sink_exceptions}}
@@ -334,12 +334,12 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     }
                     (({{#function:sink_elem_type}}{{> lib/ttype}}{{/function:sink_elem_type}}, 0i32), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }{{!
                     }}{{#function:sink_exceptions}}
                     (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                         once = true;
-                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?)));
+                        alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::{{field:rust_name}}(::fbthrift::Deserialize::rs_thrift_read(p)?)));
                     }{{!
                     }}{{/function:sink_exceptions}}
                     ((ty, _id), false) => p.skip(ty)?,
@@ -455,7 +455,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -466,7 +466,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         {{#function:sink_final_response_type}}{{> lib/ttype}}{{/function:sink_final_response_type}},
                         0i16,
                     );
-                    ::fbthrift::Serialize::write(success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
                 {{#function:sink_final_response_exceptions}}
@@ -476,7 +476,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
                         {{field:key}},
                     );
-                    ::fbthrift::Serialize::write(inner, p);
+                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
                 }{{!
                 }}{{/function:sink_final_response_exceptions}}
@@ -611,7 +611,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             P: ::fbthrift::ProtocolWriter,
         {
             if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
+                ::fbthrift::Serialize::rs_thrift_write(aexn, p);
                 return;
             }
             p.write_struct_begin(function_name);
@@ -635,7 +635,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         }}{{/function:sink?}}{{!
                     }}, 0i16);
                     {{^function:sink?}}{{^function:stream?}}
-                    ::fbthrift::Serialize::write({{#function:return_type}}{{!
+                    ::fbthrift::Serialize::rs_thrift_write({{#function:return_type}}{{!
                         }}{{#type:has_adapter?}}{{!
                             }}&{{> lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
                         }}{{/type:has_adapter?}}{{!
@@ -643,10 +643,10 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     }}{{/function:return_type}}, p);
                     {{/function:stream?}}{{/function:sink?}}
                     {{#function:stream?}}{{#function:stream_has_first_response?}}
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     {{/function:stream_has_first_response?}}{{/function:stream?}}
                     {{#function:sink?}}{{#function:sink_has_first_response?}}
-                    ::fbthrift::Serialize::write(_success, p);
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     {{/function:sink_has_first_response?}}{{/function:sink?}}
                     p.write_field_end();
                 }
@@ -657,7 +657,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
                         {{field:key}},
                     );
-                    ::fbthrift::Serialize::write(inner, p);
+                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
                 }{{!
                 }}{{/function:exceptions}}

@@ -34,7 +34,7 @@ pub trait Deserialize<P>: Sized
 where
     P: ProtocolReader,
 {
-    fn read(p: &mut P) -> Result<Self>;
+    fn rs_thrift_read(p: &mut P) -> Result<Self>;
 }
 
 impl<P, T> Deserialize<P> for Box<T>
@@ -43,8 +43,8 @@ where
     T: Deserialize<P>,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
-        T::read(p).map(Box::new)
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        T::rs_thrift_read(p).map(Box::new)
     }
 }
 
@@ -53,8 +53,8 @@ where
     P: ProtocolReader,
     T: Deserialize<P>,
 {
-    fn read(p: &mut P) -> Result<Self> {
-        T::read(p).map(Arc::new)
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
+        T::rs_thrift_read(p).map(Arc::new)
     }
 }
 
@@ -63,7 +63,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(_p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(_p: &mut P) -> Result<Self> {
         Ok(())
     }
 }
@@ -73,7 +73,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_bool()
     }
 }
@@ -83,7 +83,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_byte()
     }
 }
@@ -93,7 +93,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_i16()
     }
 }
@@ -103,7 +103,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_i32()
     }
 }
@@ -113,7 +113,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_i64()
     }
 }
@@ -123,7 +123,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_double()
     }
 }
@@ -133,7 +133,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_float()
     }
 }
@@ -143,7 +143,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_double().map(OrderedFloat)
     }
 }
@@ -153,7 +153,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_float().map(OrderedFloat)
     }
 }
@@ -163,7 +163,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_string()
     }
 }
@@ -173,7 +173,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_binary()
     }
 }
@@ -183,7 +183,7 @@ where
     P: ProtocolReader,
 {
     #[inline]
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         p.read_binary()
     }
 }
@@ -193,7 +193,7 @@ where
     P: ProtocolReader,
     T: Deserialize<P> + Ord,
 {
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         // Unchecked: must not use `len` for preallocation (`with_capacity`)
         let (_elem_ty, len) = p.read_set_begin_unchecked()?;
         let mut bset = BTreeSet::new();
@@ -208,7 +208,7 @@ where
             if !more {
                 break;
             }
-            let item = Deserialize::read(p)?;
+            let item = Deserialize::rs_thrift_read(p)?;
             p.read_set_value_end()?;
             bset.insert(item);
 
@@ -228,7 +228,7 @@ where
     T: Deserialize<P> + GetTType + Hash + Eq,
     S: std::hash::BuildHasher + Default,
 {
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         let (_elem_ty, len) = p.read_set_begin(P::min_size::<T>())?;
         let mut hset = HashSet::with_capacity_and_hasher(len.unwrap_or(0), S::default());
 
@@ -242,7 +242,7 @@ where
             if !more {
                 break;
             }
-            let item = Deserialize::read(p)?;
+            let item = Deserialize::rs_thrift_read(p)?;
             p.read_set_value_end()?;
             hset.insert(item);
 
@@ -262,7 +262,7 @@ where
     K: Deserialize<P> + Ord,
     V: Deserialize<P>,
 {
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         // Unchecked: must not use `len` for preallocation (`with_capacity`)
         let (_key_ty, _val_ty, len) = p.read_map_begin_unchecked()?;
         let mut btree = BTreeMap::new();
@@ -277,9 +277,9 @@ where
             if !more {
                 break;
             }
-            let key = Deserialize::read(p)?;
+            let key = Deserialize::rs_thrift_read(p)?;
             p.read_map_value_begin()?;
-            let val = Deserialize::read(p)?;
+            let val = Deserialize::rs_thrift_read(p)?;
             p.read_map_value_end()?;
             btree.insert(key, val);
 
@@ -300,7 +300,7 @@ where
     V: Deserialize<P> + GetTType,
     S: std::hash::BuildHasher + Default,
 {
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<K>() + P::min_size::<V>())?;
         let mut hmap = HashMap::with_capacity_and_hasher(len.unwrap_or(0), S::default());
 
@@ -314,9 +314,9 @@ where
             if !more {
                 break;
             }
-            let key = Deserialize::read(p)?;
+            let key = Deserialize::rs_thrift_read(p)?;
             p.read_map_value_begin()?;
-            let val = Deserialize::read(p)?;
+            let val = Deserialize::rs_thrift_read(p)?;
             p.read_map_value_end()?;
             hmap.insert(key, val);
 
@@ -336,7 +336,7 @@ where
     T: Deserialize<P> + GetTType,
 {
     /// Vec<T> is Thrift List type
-    fn read(p: &mut P) -> Result<Self> {
+    fn rs_thrift_read(p: &mut P) -> Result<Self> {
         let (_elem_ty, len) = p.read_list_begin(P::min_size::<T>())?;
         let mut list = Vec::with_capacity(len.unwrap_or(0));
 
@@ -350,7 +350,7 @@ where
             if !more {
                 break;
             }
-            let item = Deserialize::read(p)?;
+            let item = Deserialize::rs_thrift_read(p)?;
             p.read_list_value_end()?;
             list.push(item);
 

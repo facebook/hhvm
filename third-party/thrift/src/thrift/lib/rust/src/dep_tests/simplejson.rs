@@ -512,8 +512,8 @@ fn test_multiple_deser() -> Result<()> {
 
     let mut deserializer = SimpleJsonProtocolDeserializer::new(Cursor::new(to_check.as_bytes()));
     // Assert that deserialize builts the exact same struct
-    assert_eq!(b1, Basic::read(&mut deserializer)?);
-    assert_eq!(b2, Basic::read(&mut deserializer)?);
+    assert_eq!(b1, Basic::rs_thrift_read(&mut deserializer)?);
+    assert_eq!(b2, Basic::rs_thrift_read(&mut deserializer)?);
 
     Ok(())
 }
@@ -542,8 +542,8 @@ fn test_not_enough() -> Result<()> {
         &to_check[..to_check.len() - 6],
     ));
     // Assert that deserialize builts the exact same struct
-    assert_eq!(b1, Basic::read(&mut deserializer)?);
-    assert!(Basic::read(&mut deserializer).is_err());
+    assert_eq!(b1, Basic::rs_thrift_read(&mut deserializer)?);
+    assert!(Basic::rs_thrift_read(&mut deserializer).is_err());
 
     Ok(())
 }

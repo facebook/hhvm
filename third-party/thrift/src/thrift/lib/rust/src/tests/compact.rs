@@ -616,14 +616,14 @@ fn test_overallocation() {
     malicious.put_bytes(0, 10);
     let malicious = malicious.freeze();
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(malicious.clone()));
-    let err = <Vec<i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    let err = <Vec<i16> as Deserialize<_>>::rs_thrift_read(&mut deserializer).unwrap_err();
     assert_eq!(
         err.downcast_ref::<ProtocolError>(),
         Some(&ProtocolError::EOF),
     );
 
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(malicious));
-    let err = <HashSet<i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    let err = <HashSet<i16> as Deserialize<_>>::rs_thrift_read(&mut deserializer).unwrap_err();
     assert_eq!(
         err.downcast_ref::<ProtocolError>(),
         Some(&ProtocolError::EOF),
@@ -634,7 +634,8 @@ fn test_overallocation() {
     malicious.put_u8(((CType::Binary as u8) << 4) | (CType::I16 as u8));
     malicious.put_bytes(0, 10);
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(malicious.freeze()));
-    let err = <HashMap<String, i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    let err =
+        <HashMap<String, i16> as Deserialize<_>>::rs_thrift_read(&mut deserializer).unwrap_err();
     assert_eq!(
         err.downcast_ref::<ProtocolError>(),
         Some(&ProtocolError::EOF),

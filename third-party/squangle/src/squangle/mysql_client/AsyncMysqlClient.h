@@ -192,7 +192,8 @@ class AsyncMysqlClient : public MysqlClientBase {
  protected:
   AsyncMysqlClient(
       std::unique_ptr<db::SquangleLoggerBase> db_logger,
-      std::unique_ptr<db::DBCounterBase> db_stats);
+      std::unique_ptr<db::DBCounterBase> db_stats,
+      std::unique_ptr<const MysqlExceptionBuilder> exception_builder = nullptr);
 
   bool runInThread(std::function<void()>&& fn, bool wait = false) override;
 

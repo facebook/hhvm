@@ -41,8 +41,12 @@ std::shared_ptr<AsyncMysqlClient> AsyncMysqlClient::defaultClient() {
 
 AsyncMysqlClient::AsyncMysqlClient(
     std::unique_ptr<db::SquangleLoggerBase> db_logger,
-    std::unique_ptr<db::DBCounterBase> db_stats)
-    : MysqlClientBase(adjustLogger(std::move(db_logger)), std::move(db_stats)),
+    std::unique_ptr<db::DBCounterBase> db_stats,
+    std::unique_ptr<const MysqlExceptionBuilder> exception_builder)
+    : MysqlClientBase(
+          adjustLogger(std::move(db_logger)),
+          std::move(db_stats),
+          std::move(exception_builder)),
       pools_conn_limit_(std::numeric_limits<uint64_t>::max()),
       stats_tracker_(std::make_shared<StatsTracker>()) {
   init();

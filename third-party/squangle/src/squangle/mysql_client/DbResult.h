@@ -89,7 +89,7 @@ class MysqlException : public db::Exception, public OperationResultBase {
 
 // This exception represents a Query error, when it times out or a
 // mysql error happened (invalid query, disconnected during query, etc)
-class QueryException : public MysqlException {
+class QueryException : virtual public MysqlException {
  public:
   QueryException(
       int num_executed_queries,

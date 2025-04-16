@@ -12,6 +12,7 @@
 
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/logger/DBEventLogger.h"
+#include "squangle/mysql_client/MysqlExceptionBuilder.h"
 #include "squangle/mysql_client/Operation.h"
 
 namespace facebook::common::mysql_client {
@@ -81,6 +82,9 @@ class MysqlClientBase {
   db::SquangleLoggerBase* dbLogger() {
     return db_logger_.get();
   }
+  const MysqlExceptionBuilder& exceptionBuilder() {
+    return *exception_builder_;
+  }
 
   // For internal (testing) use only
   std::unique_ptr<db::SquangleLoggerBase> setDBLoggerForTesting(
@@ -109,7 +113,8 @@ class MysqlClientBase {
   explicit MysqlClientBase(
       std::unique_ptr<db::SquangleLoggerBase> db_logger = nullptr,
       std::unique_ptr<db::DBCounterBase> db_stats =
-          std::make_unique<db::SimpleDbCounter>());
+          std::make_unique<db::SimpleDbCounter>(),
+      std::unique_ptr<const MysqlExceptionBuilder> exception_builder = nullptr);
 
   virtual bool runInThread(std::function<void()>&& fn, bool /*wait*/ = false) {
     fn();
@@ -182,6 +187,7 @@ class MysqlClientBase {
   std::unique_ptr<db::SquangleLoggerBase> db_logger_;
   std::unique_ptr<db::DBCounterBase> client_stats_;
   ObserverCallback connection_cb_;
+  std::unique_ptr<const MysqlExceptionBuilder> exception_builder_;
 };
 
 } // namespace facebook::common::mysql_client

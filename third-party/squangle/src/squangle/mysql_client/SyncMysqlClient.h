@@ -22,10 +22,12 @@ class SyncMysqlClient : public MysqlClientBase {
   explicit SyncMysqlClient(
       std::unique_ptr<db::SquangleLoggerBase> db_logger,
       std::unique_ptr<db::DBCounterBase> db_stats =
-          std::make_unique<db::SimpleDbCounter>())
+          std::make_unique<db::SimpleDbCounter>(),
+      std::unique_ptr<const MysqlExceptionBuilder> exception_builder = nullptr)
       : MysqlClientBase(
             adjustLogger(std::move(db_logger)),
-            std::move(db_stats)) {}
+            std::move(db_stats),
+            std::move(exception_builder)) {}
 
   static std::unique_ptr<db::SquangleLoggerBase> adjustLogger(
       std::unique_ptr<db::SquangleLoggerBase> logger) {

@@ -40,8 +40,15 @@ namespace facebook::common::mysql_client {
 
 MysqlClientBase::MysqlClientBase(
     std::unique_ptr<db::SquangleLoggerBase> db_logger,
-    std::unique_ptr<db::DBCounterBase> db_stats)
-    : db_logger_(std::move(db_logger)), client_stats_(std::move(db_stats)) {}
+    std::unique_ptr<db::DBCounterBase> db_stats,
+    std::unique_ptr<const MysqlExceptionBuilder> exception_builder)
+    : db_logger_(std::move(db_logger)),
+      client_stats_(std::move(db_stats)),
+      exception_builder_(std::move(exception_builder)) {
+  if (!exception_builder_) {
+    exception_builder_ = std::make_unique<MysqlExceptionBuilder>();
+  }
+}
 
 void MysqlClientBase::logQuerySuccess(
     const db::QueryLoggingData& logging_data,

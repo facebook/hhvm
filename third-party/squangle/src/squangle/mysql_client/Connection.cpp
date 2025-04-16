@@ -264,13 +264,16 @@ DbQueryResult Connection::internalQuery(
   op->run().wait();
 
   if (!op->ok()) {
-    throw QueryException(
-        op->numQueriesExecuted(),
-        op->result(),
-        op->mysql_errno(),
-        op->mysql_error(),
-        getKey(),
-        op->opElapsed());
+    client()
+        .exceptionBuilder()
+        .buildQueryException(
+            op->numQueriesExecuted(),
+            op->result(),
+            op->mysql_errno(),
+            op->mysql_error(),
+            getKey(),
+            op->opElapsed())
+        .throw_exception();
   }
   DbQueryResult result(
       std::move(op->stealQueryResult()),
@@ -410,13 +413,16 @@ DbMultiQueryResult Connection::internalMultiQuery(
   op->run().wait();
 
   if (!op->ok()) {
-    throw QueryException(
-        op->numQueriesExecuted(),
-        op->result(),
-        op->mysql_errno(),
-        op->mysql_error(),
-        getKey(),
-        op->opElapsed());
+    client()
+        .exceptionBuilder()
+        .buildQueryException(
+            op->numQueriesExecuted(),
+            op->result(),
+            op->mysql_errno(),
+            op->mysql_error(),
+            getKey(),
+            op->opElapsed())
+        .throw_exception();
   }
 
   DbMultiQueryResult result(

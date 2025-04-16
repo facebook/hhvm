@@ -32,7 +32,7 @@ void handleConnectionCompletion(
         op.attemptsMade()));
   } else {
     // failed - build the exception
-    promise.setException(MysqlException(
+    promise.setException(conn->client().exceptionBuilder().buildMysqlException(
         op.result(),
         op.mysql_errno(),
         op.mysql_error(),
@@ -74,7 +74,7 @@ void handleQueryCompletion(
     promise.setValue(
         std::make_pair(std::move(result), op.stealPostQueryCallback()));
   } else {
-    promise.setException(QueryException(
+    promise.setException(conn->client().exceptionBuilder().buildQueryException(
         op.numQueriesExecuted(),
         op.result(),
         op.mysql_errno(),

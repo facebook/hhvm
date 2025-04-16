@@ -17,7 +17,7 @@
 namespace fizz {
 namespace ech {
 
-struct SupportedECHConfig {
+struct NegotiatedECHConfig {
   ECHConfig config;
   uint8_t configId;
   uint16_t maxLen;
@@ -32,7 +32,7 @@ class OuterExtensionsError : public std::runtime_error {
       : std::runtime_error(what) {}
 };
 
-folly::Optional<SupportedECHConfig> selectECHConfig(
+folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
     const std::vector<ECHConfig>& configs,
     std::vector<hpke::KEMId> supportedKEMs,
     std::vector<hpke::AeadId> supportedAeads);
@@ -40,7 +40,7 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
 hpke::SetupResult constructHpkeSetupResult(
     const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
-    const SupportedECHConfig& supportedConfig);
+    const NegotiatedECHConfig& negotiatedECHConfig);
 
 std::unique_ptr<folly::IOBuf> makeClientHelloAad(
     HpkeSymmetricCipherSuite cipherSuite,
@@ -88,7 +88,7 @@ std::vector<Extension> generateAndReplaceOuterExtensions(
     const std::vector<ExtensionType>& outerExtensionTypes);
 
 OuterECHClientHello encryptClientHelloHRR(
-    const SupportedECHConfig& supportedConfig,
+    const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
@@ -96,7 +96,7 @@ OuterECHClientHello encryptClientHelloHRR(
     const std::vector<ExtensionType>& outerExtensionTypes);
 
 OuterECHClientHello encryptClientHello(
-    const SupportedECHConfig& supportedConfig,
+    const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,

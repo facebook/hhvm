@@ -129,7 +129,7 @@ static bool echConfigHasMandatoryExtension(
       });
 }
 
-folly::Optional<SupportedECHConfig> selectECHConfig(
+folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
     const std::vector<ECHConfig>& configs,
     std::vector<hpke::KEMId> supportedKEMs,
     std::vector<hpke::AeadId> supportedAeads) {
@@ -176,10 +176,11 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
           auto associatedCipherKdf =
               hpke::getKDFId(getHashFunction(getCipherSuite(suite.aead_id)));
           if (suite.kdf_id == associatedCipherKdf) {
-            auto supportedConfig = config;
+            auto negotiatedECHConfig = config;
             auto configId = echConfig.key_config.config_id;
             auto maxLen = echConfig.maximum_name_length;
-            return SupportedECHConfig{supportedConfig, configId, maxLen, suite};
+            return NegotiatedECHConfig{
+                negotiatedECHConfig, configId, maxLen, suite};
           }
         }
       }
@@ -213,10 +214,10 @@ static hpke::SetupParam getSetupParam(
 hpke::SetupResult constructHpkeSetupResult(
     const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
-    const SupportedECHConfig& supportedConfig) {
-  folly::io::Cursor cursor(supportedConfig.config.ech_config_content.get());
+    const NegotiatedECHConfig& negotiatedECHConfig) {
+  folly::io::Cursor cursor(negotiatedECHConfig.config.ech_config_content.get());
   auto config = decode<ECHConfigContentDraft>(cursor);
-  auto cipherSuite = supportedConfig.cipherSuite;
+  auto cipherSuite = negotiatedECHConfig.cipherSuite;
   auto hash = getHashFunction(cipherSuite.kdf_id);
 
   // Get shared secret
@@ -227,7 +228,7 @@ hpke::SetupResult constructHpkeSetupResult(
 
   // Get context
   std::unique_ptr<folly::IOBuf> info =
-      makeHpkeContextInfoParam(supportedConfig.config);
+      makeHpkeContextInfoParam(negotiatedECHConfig.config);
 
   return setupWithEncap(
       hpke::Mode::Base,
@@ -570,7 +571,7 @@ void encryptClientHelloImpl(
 } // namespace
 
 OuterECHClientHello encryptClientHelloHRR(
-    const SupportedECHConfig& supportedConfig,
+    const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
@@ -578,8 +579,8 @@ OuterECHClientHello encryptClientHelloHRR(
     const std::vector<ExtensionType>& outerExtensionTypes) {
   // Create ECH extension with blank config ID and enc for HRR
   OuterECHClientHello echExtension;
-  echExtension.cipher_suite = supportedConfig.cipherSuite;
-  echExtension.config_id = supportedConfig.configId;
+  echExtension.cipher_suite = negotiatedECHConfig.cipherSuite;
+  echExtension.config_id = negotiatedECHConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
 
   encryptClientHelloImpl(
@@ -588,14 +589,14 @@ OuterECHClientHello encryptClientHelloHRR(
       clientHelloOuter,
       setupResult,
       greasePsk,
-      supportedConfig.maxLen,
+      negotiatedECHConfig.maxLen,
       outerExtensionTypes);
 
   return echExtension;
 }
 
 OuterECHClientHello encryptClientHello(
-    const SupportedECHConfig& supportedConfig,
+    const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
@@ -603,8 +604,8 @@ OuterECHClientHello encryptClientHello(
     const std::vector<ExtensionType>& outerExtensionTypes) {
   // Create ECH extension
   OuterECHClientHello echExtension;
-  echExtension.cipher_suite = supportedConfig.cipherSuite;
-  echExtension.config_id = supportedConfig.configId;
+  echExtension.cipher_suite = negotiatedECHConfig.cipherSuite;
+  echExtension.config_id = negotiatedECHConfig.configId;
   echExtension.enc = setupResult.enc->clone();
 
   encryptClientHelloImpl(
@@ -613,7 +614,7 @@ OuterECHClientHello encryptClientHello(
       clientHelloOuter,
       setupResult,
       greasePsk,
-      supportedConfig.maxLen,
+      negotiatedECHConfig.maxLen,
       outerExtensionTypes);
 
   return echExtension;

@@ -3043,13 +3043,14 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft15;
-  state_.echState()->supportedConfig.config.ech_config_content =
+  state_.echState()->negotiatedECHConfig.config.version =
+      ech::ECHVersion::Draft15;
+  state_.echState()->negotiatedECHConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
-  state_.echState()->supportedConfig.cipherSuite = {
+  state_.echState()->negotiatedECHConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  state_.echState()->supportedConfig.maxLen = 42;
-  state_.echState()->supportedConfig.configId = 0xFB;
+  state_.echState()->negotiatedECHConfig.maxLen = 42;
+  state_.echState()->negotiatedECHConfig.configId = 0xFB;
 
   auto mockHandshakeContext1 = new MockHandshakeContext();
   auto mockHandshakeContext2 = new MockHandshakeContext();
@@ -3191,8 +3192,9 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
 
   // Set up ECH extension for AAD and ECH
   ech::OuterECHClientHello echExtension;
-  echExtension.cipher_suite = state_.echState()->supportedConfig.cipherSuite;
-  echExtension.config_id = state_.echState()->supportedConfig.configId;
+  echExtension.cipher_suite =
+      state_.echState()->negotiatedECHConfig.cipherSuite;
+  echExtension.config_id = state_.echState()->negotiatedECHConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
 
   // Make dummy payload.
@@ -3314,13 +3316,14 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft15;
-  state_.echState()->supportedConfig.config.ech_config_content =
+  state_.echState()->negotiatedECHConfig.config.version =
+      ech::ECHVersion::Draft15;
+  state_.echState()->negotiatedECHConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
-  state_.echState()->supportedConfig.cipherSuite = {
+  state_.echState()->negotiatedECHConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  state_.echState()->supportedConfig.configId = 0xFB;
-  state_.echState()->supportedConfig.maxLen = 42;
+  state_.echState()->negotiatedECHConfig.configId = 0xFB;
+  state_.echState()->negotiatedECHConfig.maxLen = 42;
 
   auto mockHandshakeContext1 = new MockHandshakeContext();
   auto mockHandshakeContext2 = new MockHandshakeContext();
@@ -3462,8 +3465,9 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
 
   // Set up ECH extension for AAD and ECH
   ech::OuterECHClientHello echExtension;
-  echExtension.cipher_suite = state_.echState()->supportedConfig.cipherSuite;
-  echExtension.config_id = state_.echState()->supportedConfig.configId;
+  echExtension.cipher_suite =
+      state_.echState()->negotiatedECHConfig.cipherSuite;
+  echExtension.config_id = state_.echState()->negotiatedECHConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
 
   // Make dummy payload.
@@ -3599,12 +3603,13 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft15;
-  state_.echState()->supportedConfig.config.ech_config_content =
+  state_.echState()->negotiatedECHConfig.config.version =
+      ech::ECHVersion::Draft15;
+  state_.echState()->negotiatedECHConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
-  state_.echState()->supportedConfig.cipherSuite = {
+  state_.echState()->negotiatedECHConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  state_.echState()->supportedConfig.configId = 0xFB;
+  state_.echState()->negotiatedECHConfig.configId = 0xFB;
 
   auto mockHandshakeContext1 = new MockHandshakeContext();
   auto mockHandshakeContext2 = new MockHandshakeContext();

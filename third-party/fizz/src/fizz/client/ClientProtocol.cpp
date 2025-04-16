@@ -647,7 +647,7 @@ static Optional<EarlyDataParams> getEarlyDataParams(
   return params;
 }
 
-static ech::SupportedECHConfig getSupportedECHConfig(
+static ech::NegotiatedECHConfig getNegotiatedECHConfig(
     const std::vector<ech::ECHConfig>& echConfigs,
     const std::vector<CipherSuite>& supportedCiphers,
     const std::vector<NamedGroup>& supportedGroups) {
@@ -668,21 +668,21 @@ static ech::SupportedECHConfig getSupportedECHConfig(
   }
 
   // Get a supported ECH config.
-  folly::Optional<ech::SupportedECHConfig> supportedConfig =
-      selectECHConfig(echConfigs, supportedKEMs, supportedAeads);
-  if (!supportedConfig.hasValue()) {
+  folly::Optional<ech::NegotiatedECHConfig> negotiatedECHConfig =
+      negotiateECHConfig(echConfigs, supportedKEMs, supportedAeads);
+  if (!negotiatedECHConfig.hasValue()) {
     throw FizzException(
         "ECH requested but we don't support any of the provided configs",
         AlertDescription::internal_error);
   }
 
-  return std::move(supportedConfig.value());
+  return std::move(negotiatedECHConfig.value());
 }
 
 namespace {
 struct ECHParams {
   hpke::SetupResult setupResult;
-  ech::SupportedECHConfig supportedECHConfig;
+  ech::NegotiatedECHConfig negotiatedECHConfig;
   Buf fakeSni;
 };
 } // namespace
@@ -695,10 +695,10 @@ static folly::Optional<ECHParams> setupECH(
   if (!echConfigs.has_value()) {
     return folly::none;
   }
-  auto supportedECHConfig = getSupportedECHConfig(
+  auto negotiatedECHConfig = getNegotiatedECHConfig(
       echConfigs.value(), supportedCiphers, supportedGroups);
 
-  auto configContent = supportedECHConfig.config.ech_config_content->clone();
+  auto configContent = negotiatedECHConfig.config.ech_config_content->clone();
   folly::io::Cursor cursor(configContent.get());
   auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
   auto fakeSni = echConfigContent.public_name->clone();
@@ -706,11 +706,11 @@ static folly::Optional<ECHParams> setupECH(
   auto kex =
       factory.makeKeyExchange(getKexGroup(kemId), KeyExchangeRole::Client);
   auto setupResult =
-      constructHpkeSetupResult(factory, std::move(kex), supportedECHConfig);
+      constructHpkeSetupResult(factory, std::move(kex), negotiatedECHConfig);
 
   return ECHParams{
       std::move(setupResult),
-      std::move(supportedECHConfig),
+      std::move(negotiatedECHConfig),
       std::move(fakeSni)};
 }
 
@@ -742,7 +742,7 @@ static void replaceOrAddExtension(std::vector<Extension>& arr, T extension) {
 static ClientHello constructEncryptedClientHello(
     Event e,
     ClientHello&& chlo,
-    const ech::SupportedECHConfig& supportedConfig,
+    const ech::NegotiatedECHConfig& negotiatedECHConfig,
     hpke::SetupResult& hpkeSetup,
     const Random& outerRandom,
     Buf fakeSni,
@@ -769,12 +769,12 @@ static ClientHello constructEncryptedClientHello(
   chloOuter.random = outerRandom;
 
   // Create the encrypted client hello inner extension.
-  switch (supportedConfig.config.version) {
+  switch (negotiatedECHConfig.config.version) {
     case (ech::ECHVersion::Draft15): {
       ech::OuterECHClientHello clientECHExtension;
       if (e == Event::ClientHello) {
         clientECHExtension = encryptClientHello(
-            supportedConfig,
+            negotiatedECHConfig,
             std::move(chlo),
             chloOuter.clone(),
             hpkeSetup,
@@ -782,7 +782,7 @@ static ClientHello constructEncryptedClientHello(
             outerExtensionTypes);
       } else {
         clientECHExtension = encryptClientHelloHRR(
-            supportedConfig,
+            negotiatedECHConfig,
             std::move(chlo),
             chloOuter.clone(),
             hpkeSetup,
@@ -891,7 +891,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   }
 
   if (echParams.has_value()) {
-    if (echParams.value().supportedECHConfig.config.version ==
+    if (echParams.value().negotiatedECHConfig.config.version ==
         ech::ECHVersion::Draft15) {
       ech::InnerECHClientHello chloIsInnerExt;
       chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
@@ -969,7 +969,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     chlo = constructEncryptedClientHello(
         Event::ClientHello,
         std::move(chlo),
-        echParams->supportedECHConfig,
+        echParams->negotiatedECHConfig,
         echParams->setupResult,
         random,
         echParams->fakeSni->clone(),
@@ -1034,8 +1034,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       newState.echState().emplace();
       newState.echState()->sni = std::move(echSni);
       newState.echState()->encodedECH = std::move(encodedECH);
-      newState.echState()->supportedConfig =
-          std::move(echParams->supportedECHConfig);
+      newState.echState()->negotiatedECHConfig =
+          std::move(echParams->negotiatedECHConfig);
       newState.echState()->hpkeSetup = std::move(echParams->setupResult);
       newState.echState()->random = std::move(*echRandom);
       newState.echState()->greasePsk = std::move(greasePsk);
@@ -1571,7 +1571,7 @@ Actions EventHandler<
   // SNI and random values with the saved inner values. We'll also add the inner
   // ECH extension required.
   if (state.echState().has_value() &&
-      state.echState()->supportedConfig.config.version ==
+      state.echState()->negotiatedECHConfig.config.version ==
           ech::ECHVersion::Draft15) {
     ech::InnerECHClientHello chloIsInnerExt;
     encodedInnerECHExt = encodeExtension(std::move(chloIsInnerExt));
@@ -1685,7 +1685,7 @@ Actions EventHandler<
     chlo = constructEncryptedClientHello(
         Event::HelloRetryRequest,
         std::move(chlo),
-        state.echState()->supportedConfig,
+        state.echState()->negotiatedECHConfig,
         state.echState()->hpkeSetup,
         *state.clientRandom(),
         folly::IOBuf::copyBuffer(*state.sni()),

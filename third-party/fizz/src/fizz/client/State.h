@@ -68,7 +68,7 @@ struct ECHState {
   // Actual SNI sent in ECH. Could be none.
   folly::Optional<std::string> sni;
   // ECH parameters selected for use.
-  ech::SupportedECHConfig supportedConfig;
+  ech::NegotiatedECHConfig negotiatedECHConfig;
   // HPKE context saved for use with HRR, if needed.
   mutable hpke::SetupResult hpkeSetup;
   // ECH random (for HRR, if needed).

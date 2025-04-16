@@ -1171,6 +1171,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   } else {
     // Need to set this up now to check.
     ensureProcessedServiceDescriptionInitialized();
+    runtimeServerActions_.moduleListFinalized = true;
 
     // Check whether there are any wildcard services.
     auto methodMetadata = getDecoratedProcessorFactory().createMethodMetadata();

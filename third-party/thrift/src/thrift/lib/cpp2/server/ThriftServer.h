@@ -316,6 +316,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     bool checkComplete{false};
     bool isProcessorFactoryThriftGenerated{false};
 
+    bool moduleListFinalized{false};
+
     std::string explain() const;
   };
 

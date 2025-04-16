@@ -57,7 +57,7 @@ func (c *{{service:go_name}}Client) Close() error {
 {{#service:functions}}
 {{#function:go_client_supported?}}
 {{#if function:oneway?}}
-{{> svc/client_func_oneway}}
+{{> svc/client_func_request_no_response}}
 {{#else if function:stream?}}
 {{> svc/client_func_stream}}
 {{#else}}

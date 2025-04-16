@@ -660,59 +660,43 @@ auto make_value(Args&&... args) {
 }
 
 template <typename Protocol>
-void read_struct_field(
-    Protocol& prot,
-    TType field_type,
-    NativeObject& strct,
-    NativeObject::FieldId id) {
-  switch (field_type) {
+NativeValue read_value_as(Protocol& prot, TType ttype) {
+  switch (ttype) {
     case T_BOOL: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, Bool>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, Bool>(prot));
     }
     case T_BYTE: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, I8>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, I8>(prot));
     }
     case T_I16: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, I16>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, I16>(prot));
     }
     case T_I32: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, I32>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, I32>(prot));
     }
     case T_I64: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, I64>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, I64>(prot));
     }
     case T_FLOAT: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, Float>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, Float>(prot));
     }
     case T_DOUBLE: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, Double>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, Double>(prot));
     }
     case T_STRING: {
-      strct.emplace(id, make_value(read_primitive_as<Protocol, Bytes>(prot)));
-      return;
+      return make_value(read_primitive_as<Protocol, Bytes>(prot));
     }
     case protocol::T_STRUCT: {
-      strct.emplace(id, make_value(read_struct<Protocol>(prot)));
-      return;
+      return make_value(read_struct<Protocol>(prot));
     }
     case protocol::T_LIST: {
-      strct.emplace(id, make_value(read_list<Protocol>(prot)));
-      return;
+      return make_value(read_list<Protocol>(prot));
     }
     case protocol::T_SET: {
-      strct.emplace(id, make_value(read_set<Protocol>(prot)));
-      return;
+      return make_value(read_set<Protocol>(prot));
     }
     case protocol::T_MAP: {
-      strct.emplace(id, make_value(read_map<Protocol>(prot)));
-      return;
+      return make_value(read_map<Protocol>(prot));
     }
     case T_STOP:
     case T_VOID:
@@ -720,9 +704,18 @@ void read_struct_field(
     case T_UTF8:
     case T_UTF16:
     case T_STREAM:
-      TProtocolException::throwInvalidSkipType(field_type);
+      TProtocolException::throwInvalidSkipType(ttype);
       break;
   }
+}
+
+template <typename Protocol>
+void read_struct_field(
+    Protocol& prot,
+    TType field_type,
+    NativeObject& strct,
+    NativeObject::FieldId id) {
+  strct.emplace(id, read_value_as(prot, field_type));
 }
 
 template <class Protocol>
@@ -760,6 +753,16 @@ NativeObject detail::parseObjectVia(
   } else {
     return read_struct<::apache::thrift::CompactProtocolReader>(prot);
   }
+}
+
+NativeValue detail::parseValueVia(
+    ::apache::thrift::BinaryProtocolReader& prot, protocol::TType ttype) {
+  return read_value_as(prot, ttype);
+}
+
+NativeValue detail::parseValueVia(
+    ::apache::thrift::CompactProtocolReader& prot, protocol::TType ttype) {
+  return read_value_as(prot, ttype);
 }
 
 // ---- Serialization ---- //

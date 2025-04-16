@@ -986,6 +986,10 @@ NativeObject parseObjectVia(
     ::apache::thrift::BinaryProtocolReader& prot, bool string_to_binary);
 NativeObject parseObjectVia(
     ::apache::thrift::CompactProtocolReader& prot, bool string_to_binary);
+NativeValue parseValueVia(
+    ::apache::thrift::BinaryProtocolReader& prot, protocol::TType ttype);
+NativeValue parseValueVia(
+    ::apache::thrift::CompactProtocolReader& prot, protocol::TType ttype);
 std::uint32_t serializeObjectVia(
     ::apache::thrift::BinaryProtocolWriter& prot, const NativeObject& obj);
 std::uint32_t serializeObjectVia(
@@ -1009,6 +1013,20 @@ NativeObject parseObject(folly::IOBuf& buf, bool string_to_binary = true) {
   return parseObject<Protocol>(prot, string_to_binary);
 }
 
+template <class Protocol, typename Tag>
+NativeValue parseValue(const folly::IOBuf& buf) {
+  Protocol prot;
+  prot.setInput(&buf);
+  return detail::parseValueVia(
+      prot, type::toTType(type::detail::getBaseType(Tag{})));
+}
+
+template <class Protocol, typename Tag>
+NativeValue parseValue(Protocol& prot) {
+  return detail::parseValueVia(
+      prot, type::toTType(type::detail::getBaseType(Tag{})));
+}
+
 template <class Protocol>
 std::uint32_t serializeObject(Protocol& prot, const NativeObject& obj) {
   return detail::serializeObjectVia(prot, obj);
@@ -1017,6 +1035,15 @@ std::uint32_t serializeObject(Protocol& prot, const NativeObject& obj) {
 template <class Protocol>
 std::uint32_t serializeValue(Protocol& prot, const NativeValue& val) {
   return detail::serializeValueVia(prot, val);
+}
+
+template <class Protocol>
+std::unique_ptr<folly::IOBuf> serializeValue(const NativeValue& val) {
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  Protocol prot;
+  prot.setOutput(&queue);
+  serializeValue(prot, val);
+  return queue.move();
 }
 
 template <class Protocol>

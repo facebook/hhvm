@@ -17,7 +17,7 @@ attr_parser = { version = "0.0.0", path = "../attr_parser" }
 clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 convert_case = "0.6"
 derive_more = { version = "1.0.0", features = ["full"] }
-indexmap = { version = "2.2.6", features = ["arbitrary", "rayon", "serde"] }
+indexmap = { version = "2.9.0", features = ["arbitrary", "rayon", "serde"] }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 signed_source = { version = "0.0.0", path = "../../utils/rust/signed_source" }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

@@ -17,7 +17,7 @@ decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
 global_state = { version = "0.0.0", path = "../global_state" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
-indexmap = { version = "2.2.6", features = ["arbitrary", "rayon", "serde"] }
+indexmap = { version = "2.9.0", features = ["arbitrary", "rayon", "serde"] }
 instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }

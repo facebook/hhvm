@@ -15,5 +15,5 @@ arena_collections = { version = "0.0.0", path = "../../arena_collections" }
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 eq_modulo_pos_derive = { version = "0.0.0", path = "../eq_modulo_pos_derive" }
 hcons = { version = "0.0.0", path = "../../hcons" }
-indexmap = { version = "2.2.6", features = ["arbitrary", "rayon", "serde"] }
+indexmap = { version = "2.9.0", features = ["arbitrary", "rayon", "serde"] }
 ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

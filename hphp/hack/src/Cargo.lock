@@ -623,7 +623,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "clap 4.5.30",
  "heck 0.4.1",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "log",
  "proc-macro2",
  "quote",
@@ -949,7 +949,7 @@ dependencies = [
  "env",
  "hhbc",
  "hhbc_string_utils",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "itertools",
  "naming_special_names_rust",
  "oxidized",
@@ -1604,7 +1604,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "instruction_sequence",
  "itertools",
  "label_rewriter",
@@ -1660,7 +1660,7 @@ dependencies = [
  "global_state",
  "hhbc",
  "hhbc_string_utils",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "instruction_sequence",
  "naming_special_names_rust",
  "options",
@@ -1701,7 +1701,7 @@ dependencies = [
  "bstr",
  "eq_modulo_pos_derive",
  "hcons",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "ocamlrep_caml_builtins",
 ]
 
@@ -1937,7 +1937,7 @@ dependencies = [
  "decl_enforceability",
  "eq_modulo_pos",
  "hash",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "itertools",
  "oxidized",
  "pos",
@@ -2236,7 +2236,7 @@ name = "hash"
 version = "0.0.0"
 dependencies = [
  "dashmap",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "rustc-hash",
 ]
 
@@ -2277,6 +2277,12 @@ dependencies = [
  "allocator-api2",
  "serde",
 ]
+
+[[package]]
+name = "hashbrown"
+version = "0.15.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 
 [[package]]
 name = "hashlink"
@@ -2663,13 +2669,13 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.2.6"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "168fb715dda47215e360912c096649d23d58bf392ac62f73919e831745e40f26"
+checksum = "cea70ddb795996207ad57735b50c5982d8844f38ba9ee5f1aedcfb708a2aa11e"
 dependencies = [
  "arbitrary",
  "equivalent",
- "hashbrown 0.14.5",
+ "hashbrown 0.15.2",
  "rayon",
  "serde",
 ]
@@ -2707,7 +2713,7 @@ dependencies = [
  "bincode",
  "fnv",
  "hashbrown 0.14.5",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "once_cell",
  "parking_lot",
  "rand",
@@ -2750,7 +2756,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhvm_types_ffi",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "intern",
  "macros",
  "maplit",
@@ -3457,7 +3463,7 @@ version = "0.1.0"
 dependencies = [
  "bstr",
  "bumpalo",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "ocamlrep_derive",
  "rustc-hash",
  "serde",
@@ -3835,7 +3841,7 @@ dependencies = [
  "eq_modulo_pos",
  "hh24_types",
  "im",
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "intern",
  "ocamlrep",
  "oxidized",
@@ -5309,7 +5315,7 @@ version = "0.22.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "583c44c02ad26b0c3f3066fe629275e50627026c51ac2e595cca4c230ce1ce1d"
 dependencies = [
- "indexmap 2.2.6",
+ "indexmap 2.9.0",
  "serde",
  "serde_spanned",
  "toml_datetime",

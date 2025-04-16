@@ -87,6 +87,7 @@ bool ValueHolder::operator!=(const ValueHolder& other) const {
 NativeValue::NativeValue(const NativeValue& other) : kind_(other.kind_) {}
 NativeValue::NativeValue(const NativeValue::Kind& kind) : kind_(kind) {}
 
+NativeValue::NativeValue() noexcept : kind_(std::monostate{}) {}
 NativeValue::NativeValue(NativeValue::Kind&& kind) noexcept
     : kind_(std::move(kind)) {}
 NativeValue::NativeValue(Bool&& b) noexcept : kind_(std::move(b)) {}
@@ -120,6 +121,10 @@ NativeValue::NativeValue(const NativeObject& strct) : kind_(strct) {}
 
 const NativeValue::Kind& NativeValue::inner() const {
   return kind_;
+}
+
+bool NativeValue::is_empty() const {
+  return std::holds_alternative<std::monostate>(kind_);
 }
 
 // ---- NativeList ---- //
@@ -822,7 +827,7 @@ std::uint32_t write(Protocol& prot, const NativeObject& obj) {
   uint32_t serializedSize = 0;
   serializedSize += prot.writeStructBegin("");
   for (const auto& [field_id, field_val] : obj) {
-    auto fieldType = field_val.get_ttype();
+    auto fieldType = value_type_into_ttype(field_val.get_type());
     serializedSize += prot.writeFieldBegin("", fieldType, field_id);
     serializedSize += write(prot, field_val);
     serializedSize += prot.writeFieldEnd();
@@ -832,21 +837,22 @@ std::uint32_t write(Protocol& prot, const NativeObject& obj) {
   return serializedSize;
 }
 
-inline void ensure_same_type(const NativeValue& a, TType b) {
-  if (a.get_ttype() != b) {
+inline void ensure_same_type(const NativeValue& a, ValueType b) {
+  if (a.get_type() != b) {
     TProtocolException::throwInvalidFieldData();
   }
 }
 
 // Default ttype for empty containers := I64
-constexpr TType DEFAULT_CONTAINER_TTYPE = TType::T_I64;
+constexpr ValueType DEFAULT_CONTAINER_VALUE_TYPE = ValueType::I64;
 
 template <typename Protocol>
 std::uint32_t write(Protocol& prot, const ListOf<ValueHolder>& list) {
   uint32_t serializedSize = 0;
-  const TType elementType =
-      list.size() > 0 ? list[0].get_ttype() : DEFAULT_CONTAINER_TTYPE;
-  serializedSize += prot.writeListBegin(elementType, list.size());
+  const ValueType elementType =
+      list.size() > 0 ? list[0].get_type() : DEFAULT_CONTAINER_VALUE_TYPE;
+  serializedSize +=
+      prot.writeListBegin(value_type_into_ttype(elementType), list.size());
   for (const auto& elem : list) {
     ensure_same_type(elem, elementType);
     serializedSize += write(prot, elem);
@@ -875,7 +881,8 @@ std::uint32_t write(Protocol& prot, const NativeList& list) {
       list.inner(),
       [&](const std::monostate&) {
         // Note: Write an empty list with a default tag of I64
-        return prot.writeListBegin(DEFAULT_CONTAINER_TTYPE, 0) +
+        return prot.writeListBegin(
+                   value_type_into_ttype(DEFAULT_CONTAINER_VALUE_TYPE), 0) +
             prot.writeListEnd();
       },
       [&](auto& l) { return write(prot, l); });
@@ -884,9 +891,10 @@ std::uint32_t write(Protocol& prot, const NativeList& list) {
 template <typename Protocol, typename... Args>
 std::uint32_t write(Protocol& prot, const SetOf<ValueHolder, Args...>& set) {
   uint32_t serializedSize = 0;
-  const TType elementType =
-      set.size() > 0 ? set.begin()->get_ttype() : TType::T_I64;
-  serializedSize += prot.writeSetBegin(elementType, set.size());
+  const ValueType elementType =
+      set.size() > 0 ? set.begin()->get_type() : DEFAULT_CONTAINER_VALUE_TYPE;
+  serializedSize +=
+      prot.writeSetBegin(value_type_into_ttype(elementType), set.size());
   for (const auto& elem : set) {
     ensure_same_type(elem, elementType);
     serializedSize += write(prot, elem);
@@ -913,7 +921,8 @@ std::uint32_t write(Protocol& prot, const NativeSet& set) {
       set.inner(),
       [&](const std::monostate&) {
         // Note: Write an empty set with a default ttype
-        return prot.writeSetBegin(DEFAULT_CONTAINER_TTYPE, 0) +
+        return prot.writeSetBegin(
+                   value_type_into_ttype(DEFAULT_CONTAINER_VALUE_TYPE), 0) +
             prot.writeSetEnd();
       },
       [&](const auto& s) { return write(prot, s); });
@@ -924,11 +933,14 @@ std::uint32_t write(Protocol& prot, const MapOf<K, V, Args...>& map) {
   uint32_t serializedSize = 0;
   if constexpr (
       std::is_same_v<K, ValueHolder> && std::is_same_v<V, ValueHolder>) {
-    const TType keyType =
-        map.size() > 0 ? map.begin()->first.get_ttype() : TType::T_I64;
-    const TType valType =
-        map.size() > 0 ? map.begin()->second.get_ttype() : TType::T_I64;
-    serializedSize += prot.writeMapBegin(keyType, valType, map.size());
+    const ValueType keyType = map.size() > 0 ? map.begin()->first.get_type()
+                                             : DEFAULT_CONTAINER_VALUE_TYPE;
+    const ValueType valType = map.size() > 0 ? map.begin()->second.get_type()
+                                             : DEFAULT_CONTAINER_VALUE_TYPE;
+    serializedSize += prot.writeMapBegin(
+        value_type_into_ttype(keyType),
+        value_type_into_ttype(valType),
+        map.size());
     for (const auto& [key, val] : map) {
       ensure_same_type(key, keyType);
       ensure_same_type(val, valType);
@@ -937,10 +949,10 @@ std::uint32_t write(Protocol& prot, const MapOf<K, V, Args...>& map) {
     }
   } else if constexpr (std::is_same_v<V, ValueHolder>) {
     using KeyTag = detail::native_value_type<K, true>::tag;
-    const TType valType =
-        map.size() > 0 ? map.begin()->second.get_ttype() : TType::T_I64;
-    serializedSize +=
-        prot.writeMapBegin(op::typeTagToTType<KeyTag>, valType, map.size());
+    const ValueType valType = map.size() > 0 ? map.begin()->second.get_type()
+                                             : DEFAULT_CONTAINER_VALUE_TYPE;
+    serializedSize += prot.writeMapBegin(
+        op::typeTagToTType<KeyTag>, value_type_into_ttype(valType), map.size());
     for (const auto& [key, val] : map) {
       serializedSize += write(prot, key);
       ensure_same_type(val, valType);
@@ -1223,5 +1235,40 @@ FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Bytes>, set_of_bytes)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<String>, set_of_string)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<NativeObject>, set_of_object)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<ValueHolder>, set_of_value)
+
+// ---- Misc utilities ---- //
+
+TType value_type_into_ttype(ValueType type) {
+  switch (type) {
+    case ValueType::Bool:
+      return TType::T_BOOL;
+    case ValueType::I8:
+      return TType::T_BYTE;
+    case ValueType::I16:
+      return TType::T_I16;
+    case ValueType::I32:
+      return TType::T_I32;
+    case ValueType::I64:
+      return TType::T_I64;
+    case ValueType::Float:
+      return TType::T_FLOAT;
+    case ValueType::Double:
+      return TType::T_DOUBLE;
+    case ValueType::String:
+      return TType::T_STRING;
+    case ValueType::Bytes:
+      return TType::T_STRING;
+    case ValueType::List:
+      return TType::T_LIST;
+    case ValueType::Set:
+      return TType::T_SET;
+    case ValueType::Map:
+      return TType::T_MAP;
+    case ValueType::Struct:
+      return TType::T_STRUCT;
+    case ValueType::Empty:
+      throw std::runtime_error("An Empty value does not have a TType");
+  }
+}
 
 } // namespace apache::thrift::protocol::experimental

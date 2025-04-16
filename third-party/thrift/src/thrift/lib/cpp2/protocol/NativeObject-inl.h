@@ -172,18 +172,13 @@ NativeValue& NativeObject::emplace(FieldId id, Args... args) {
 // ---- ValueAPI ---- //
 
 template <typename T>
-TType ValueAccess<T>::get_ttype() const {
+ValueType ValueAccess<T>::get_type() const {
   return folly::variant_match(
       as_value().inner(),
-      [](const NativeList&) { return T_LIST; },
-      [](const NativeSet&) { return T_SET; },
-      [](const NativeMap&) { return T_MAP; },
-      [](const NativeObject&) { return T_STRUCT; },
-      [](const auto& primitive) {
-        using V = std::remove_cvref_t<decltype(primitive)>;
-        static_assert(detail::is_primitive_v<V>);
-        using Tag = detail::native_value_type<V, true>::tag;
-        return op::typeTagToTType<Tag>;
+      [](const std::monostate&) { return ValueType::Empty; },
+      [](const auto& val) {
+        using V = std::remove_cvref_t<decltype(val)>;
+        return detail::native_value_type_mapping_v<V>;
       });
 }
 

@@ -151,6 +151,31 @@ struct PrimitiveTypes {
   using Bytes = Bytes;
 };
 
+// Enumeration of the possible types of a NativeValue
+// Note: This is the equivalent of the `protocol::Value::getType()` method
+enum class ValueType {
+  Empty,
+  Bool,
+  I8,
+  I16,
+  I32,
+  I64,
+  Float,
+  Double,
+  String,
+  Bytes,
+  List,
+  Set,
+  Map,
+  Struct
+};
+
+// Provides a mapping of the valid states of a non-empty NativeValue instance
+// into their appropriate thrift type.
+// Note: `ValueType::Empty` is not a valid state to (de-)serialize, so this will
+// throw an exception
+TType value_type_into_ttype(ValueType type);
+
 namespace detail {
 
 // ---- Value's type system --- //
@@ -215,7 +240,7 @@ using MapOf = folly::F14FastMap<Ts...>;
 template <typename T>
 class ValueAccess {
  public:
-  TType get_ttype() const;
+  ValueType get_type() const;
 
   // Allow implicit coercion into Value
   operator const NativeValue&() const noexcept;
@@ -759,6 +784,37 @@ struct native_value_type<std::map<Ts...>, StringToBinary> {
       map<::apache::thrift::type::struct_c, ::apache::thrift::type::struct_c>;
 };
 
+// ---- Value mapping for e.g. NativeValue -> TType ---- //
+
+template <typename T>
+struct native_value_type_mapping;
+
+#define FBTHRIFT_VALUE_TYPE_MAPPING(TYPE, NAME)         \
+  template <>                                           \
+  struct native_value_type_mapping<TYPE> {              \
+    constexpr static ValueType value = ValueType::NAME; \
+  };
+
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::Bool, Bool)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::I8, I8)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::I16, I16)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::I32, I32)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::I64, I64)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::Float, Float)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::Double, Double)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::String, String)
+FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::Bytes, Bytes)
+FBTHRIFT_VALUE_TYPE_MAPPING(NativeList, List)
+FBTHRIFT_VALUE_TYPE_MAPPING(NativeSet, Set)
+FBTHRIFT_VALUE_TYPE_MAPPING(NativeMap, Map)
+FBTHRIFT_VALUE_TYPE_MAPPING(NativeObject, Struct)
+
+#undef FBTHRIFT_DEF_PRIMITIVE_TYPE_MAPPING
+
+template <typename T>
+constexpr ValueType native_value_type_mapping_v =
+    native_value_type_mapping<T>::value;
+
 } // namespace detail
 
 // ---- Definition of a Thrift Value ---- //
@@ -766,6 +822,7 @@ struct native_value_type<std::map<Ts...>, StringToBinary> {
 class NativeValue : public ValueAccess<NativeValue> {
  public:
   using Kind = std::variant<
+      std::monostate, // Allows default construction of NativeValue
       PrimitiveTypes::Bool,
       PrimitiveTypes::I8,
       PrimitiveTypes::I16,
@@ -781,11 +838,13 @@ class NativeValue : public ValueAccess<NativeValue> {
       NativeObject>;
 
   const Kind& inner() const;
+  bool is_empty() const;
 
   NativeValue& as_value() noexcept { return *this; }
   const NativeValue& as_value() const noexcept { return *this; }
 
   // Default ops
+  NativeValue() noexcept;
   NativeValue(NativeValue&& obj) noexcept = default;
   NativeValue(const NativeValue&);
   NativeValue& operator=(const NativeValue&) noexcept = default;

@@ -5,5 +5,4 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-val eval : Tast_env.t -> Tast.expr -> string option
+include Handler.S

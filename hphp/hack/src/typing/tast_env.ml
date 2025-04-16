@@ -384,12 +384,20 @@ let gconst_env ctx cst =
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.Tast ctx cst in
   restore_saved_env env cst.cst_annotation
 
+let module_env ctx md =
+  let ctx =
+    Provider_context.map_tcopt ctx ~f:(fun _tcopt -> md.md_annotation.tcopt)
+  in
+  let env = EnvFromDef.module_env ~origin:Decl_counters.Tast ctx md in
+  restore_saved_env env md.md_annotation
+
 let def_env ctx d =
   match d with
   | Fun x -> fun_env ctx x
   | Class x -> class_env ctx x
   | Typedef x -> typedef_env ctx x
   | Constant x -> gconst_env ctx x
+  | Module x -> module_env ctx x
   (* TODO T44306013 *)
   (* The following nodes are included in the TAST, but are not typechecked.
    * However, we need to return an env here so for now create an empty env using
@@ -400,8 +408,7 @@ let def_env ctx d =
   | NamespaceUse _
   | SetNamespaceEnv _
   | SetModule _
-  | FileAttributes _
-  | Module _ ->
+  | FileAttributes _ ->
     empty ctx
 
 let typing_env_as_tast_env env = env

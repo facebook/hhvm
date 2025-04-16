@@ -29,6 +29,7 @@ pub enum DepType {
     Module = 13,
     Declares = 14,
     NotSubtype = 15,
+    File = 16,
 }
 
 impl DepType {
@@ -53,6 +54,7 @@ impl DepType {
             13 => Some(DepType::Module),
             14 => Some(DepType::Declares),
             15 => Some(DepType::NotSubtype),
+            16 => Some(DepType::File),
             _ => None,
         }
     }

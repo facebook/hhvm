@@ -264,7 +264,8 @@ let should_ignore_node node =
     | Typing_deps.Dep.KAllMembers
     | Typing_deps.Dep.KGConstName
     | Typing_deps.Dep.KModule
-    | Typing_deps.Dep.KDeclares ->
+    | Typing_deps.Dep.KDeclares
+    | Typing_deps.Dep.KFile ->
       (* Dependencies that we will most likely never utilize *)
       false
   in

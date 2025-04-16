@@ -68,7 +68,7 @@ let visitor ctx =
           None)
   in
   let handlers =
-    irregular_handlers
+    (Simplihack_record_dependencies.handler :: irregular_handlers)
     @ warning_handlers
     @ List.filter_map
         ~f:Fn.id

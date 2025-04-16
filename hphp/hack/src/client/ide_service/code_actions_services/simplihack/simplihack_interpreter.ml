@@ -32,17 +32,20 @@ module Context = struct
         (** Provides access to class/method definitions *)
     locals: Value.t Local_id.Map.t;
         (** Map of local variables to their values *)
+    dependent_root: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
+        (** The dependent node we will add dependencies to *)
   }
 
-  (** [init provider] creates a new context with the given provider and empty locals map
+  (** [init provider dependent_root] creates a new context with the given provider, dependent_root, and empty locals map
 
       Example:
       {[
-        let ctx = Context.init my_provider
-        (* Creates new context with my_provider and empty locals *)
+        let ctx = Context.init my_provider dependent_root
+        (* Creates new context with my_provider, dependent_root, and empty locals *)
       ]}
   *)
-  let init provider = { provider; locals = Local_id.Map.empty }
+  let init provider dependent_root =
+    { provider; locals = Local_id.Map.empty; dependent_root }
 
   (** [store ~ctx local value] returns a new context with [value] stored at [local] in the locals map
 
@@ -67,15 +70,24 @@ module Context = struct
   *)
   let load ~ctx local = Local_id.Map.find_opt local ctx.locals
 
-  (** [fresh ctx] creates a new context with the same provider but empty locals
+  (** [fresh ctx] creates a new context with the same provider and dependent_root but empty locals
 
       Example:
       {[
         let clean_ctx = Context.fresh old_ctx
-        (* Creates new context with old_ctx's provider but empty locals *)
+        (* Creates new context with old_ctx's provider and dependent_root but empty locals *)
       ]}
   *)
-  let fresh ctx = init ctx.provider
+  let fresh ctx = init ctx.provider ctx.dependent_root
+
+  let add_dep ctx dep =
+    match ctx.dependent_root with
+    | None -> ()
+    | Some root ->
+      let mode = Provider_context.get_deps_mode ctx.provider in
+      Typing_deps.add_idep mode root dep
+
+  let add_file_dep ctx path = add_dep ctx Typing_deps.Dep.(File path)
 
   (** [find_class ~ctx name] looks up a class definition by name using the context's provider
       Returns [None] if the class is not found
@@ -89,23 +101,33 @@ module Context = struct
   *)
   let find_class ~ctx name =
     let open Option.Let_syntax in
+    add_dep ctx Typing_deps.Dep.(Type name);
     let* path = Naming_provider.get_class_path ctx.provider name in
+    add_file_dep ctx path;
     let* class_ =
       Ast_provider.find_class_in_file ~full:true ctx.provider path name
     in
     return @@ Naming.class_ ctx.provider class_
 
-  (** [find_method ~ctx class_ name] finds a method with [name] in [class_]
+  (** [find_static_method ~ctx class_ name] finds a method with [name] in [class_]
       Returns [None] if the method is not found
 
       Example:
       {[
-        match Context.find_method ~ctx class_def "myMethod" with
+        match Context.find_static_method ~ctx class_def "myMethod" with
         | Some method_def -> (* Use method definition *)
         | None -> (* Handle missing method *)
       ]}
+
+      Note: This will only find static methods declared directly on the class
+      and not inherited methods. If we wanted to support inherited methods we
+      would need to use [Folded_class.t] to look up the method.
+
+      For now this is an intentional choice to avoid absorbing too many Hack
+      specific concepts into the SimpliHack DSL.
   *)
-  let find_method ~ctx:_ class_ name =
+  let find_static_method ~ctx class_ name =
+    add_dep ctx Typing_deps.Dep.(SMethod (snd class_.Aast.c_name, name));
     List.find class_.Aast.c_methods ~f:(fun meth ->
         String.equal (snd meth.Aast.m_name) name)
 
@@ -121,7 +143,9 @@ module Context = struct
   *)
   let find_function ~ctx name =
     let open Option.Let_syntax in
+    add_dep ctx Typing_deps.Dep.(Fun name);
     let* path = Naming_provider.get_fun_path ctx.provider name in
+    add_file_dep ctx path;
     let* fun_def =
       Ast_provider.find_fun_in_file ~full:true ctx.provider path name
     in
@@ -196,6 +220,10 @@ end = struct
     | Aast.(Expr (_, _, Assign ((_, _, Lvar (_, lid)), None, e))) ->
       (* Assignment *)
       let ctx = Context.store ~ctx lid (Expr.eval ctx e) in
+      ControlFlow.Next ctx
+    | Aast.(Expr e) ->
+      (* Expression statement *)
+      let _ = Expr.eval ctx e in
       ControlFlow.Next ctx
     | _ -> ControlFlow.Exit (* Other statements exit *)
 
@@ -277,7 +305,7 @@ end = struct
     | Aast.Class_const (cid, (_, name)) ->
       let* class_ = ClassId.eval ctx cid in
       let* Aast.{ m_params = params; m_body = body; _ } =
-        Context.find_method ~ctx class_ name
+        Context.find_static_method ~ctx class_ name
       in
       invoke ctx (params, body) args
     | _ -> None
@@ -303,6 +331,7 @@ end = struct
 end
 
 (* Top-level evaluation function for user attributes *)
-let eval provider (e : Tast.expr) =
-  let ctx = Context.init provider in
+let eval env (e : Tast.expr) =
+  let Decl_env.{ ctx; droot; _ } = Tast_env.get_decl_env env in
+  let ctx = Context.init ctx droot in
   Value.str @@ Expr.eval ctx e

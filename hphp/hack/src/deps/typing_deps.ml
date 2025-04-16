@@ -42,6 +42,7 @@ module Dep = struct
     | GConstName : string -> 'a variant
     | Module : string -> 'a variant
     | Declares : 'a variant
+    | File : Relative_path.t -> dependency variant
 
   let dependency_of_variant : type a. a variant -> dependency variant = function
     | GConst s -> GConst s
@@ -59,6 +60,7 @@ module Dep = struct
     | Extends s -> Extends s
     | NotSubtype s -> NotSubtype s
     | Declares -> Declares
+    | File path -> File path
 
   (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
   type dep_kind =
@@ -77,6 +79,7 @@ module Dep = struct
     | KModule [@value 13]
     | KDeclares [@value 14]
     | KNotSubtype [@value 15]
+    | KFile [@value 16]
   [@@deriving enum]
 
   module Member = struct
@@ -164,6 +167,7 @@ module Dep = struct
     | GConstName _ -> 12
     | Module _ -> 13
     | Declares -> 14
+    | File _ -> 16
 
   let compare_variant (type a) (v1 : a variant) (v2 : a variant) : int =
     match (v1, v2) with
@@ -186,11 +190,12 @@ module Dep = struct
         res
       else
         String.compare m1 m2
+    | (File p1, File p2) -> Relative_path.compare p1 p2
     | (Declares, Declares) -> 0
     | ( _,
         ( GConst _ | Fun _ | Type _ | Extends _ | NotSubtype _ | Const _
         | Constructor _ | Prop _ | SProp _ | Method _ | SMethod _ | AllMembers _
-        | GConstName _ | Module _ | Declares ) ) ->
+        | GConstName _ | Module _ | Declares | File _ ) ) ->
       ordinal_variant v1 - ordinal_variant v2
 
   let dep_kind_of_variant : type a. a variant -> dep_kind = function
@@ -209,6 +214,7 @@ module Dep = struct
     | NotSubtype _ -> KNotSubtype
     | Module _ -> KModule
     | Declares -> KDeclares
+    | File _ -> KFile
 
   let make_member_dep_from_type_dep (type_dep : t) (member : Member.t) : t =
     let (dep_kind, member_name) = Member.to_dep_kind_and_name member in
@@ -244,6 +250,8 @@ module Dep = struct
     | AllMembers name1 ->
       make_member_dep_from_type_dep (make (Type name1)) Member.All
     | Declares -> hash1 (dep_kind_to_enum KDeclares) ""
+    | File path ->
+      hash1 (dep_kind_to_enum KFile) @@ Relative_path.storage_to_string path
 
   let is_class x = x land 1 = 1
 
@@ -267,6 +275,7 @@ module Dep = struct
       Utils.strip_ns s
     | Module m -> m
     | Declares -> "__declares__"
+    | File path -> Relative_path.storage_to_string path
 
   let extract_root_name : type a. ?strip_namespace:bool -> a variant -> string =
    fun ?(strip_namespace = true) variant ->
@@ -290,6 +299,7 @@ module Dep = struct
       else
         s
     | Declares -> "__declares__"
+    | File p -> Relative_path.storage_to_string p
 
   let extract_member_name : type a. a variant -> string option = function
     | GConst _
@@ -301,6 +311,7 @@ module Dep = struct
     | Module _
     | Type _
     | Fun _
+    | File _
     | Declares ->
       None
     | Const (_cls, s)
@@ -328,6 +339,7 @@ module Dep = struct
     | Fun s -> Decl_reference.Function s
     | Module m -> Decl_reference.Module m
     | Declares -> failwith "No Decl_reference.t for Declares Dep.variant"
+    | File _ -> failwith "No Decl_reference.t for File Dep.variant"
 
   let to_debug_string = string_of_int
 
@@ -358,6 +370,7 @@ module Dep = struct
       | NotSubtype _ -> "NotSubtype"
       | Module _ -> "Module"
       | Declares -> "Declares"
+      | File _ -> "File"
     in
     match dep with
     | Declares -> prefix

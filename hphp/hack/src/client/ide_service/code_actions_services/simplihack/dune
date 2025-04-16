@@ -1,5 +1,6 @@
 (library
- (name simplihack_prompt)
+ (name simplihack)
+ (wrapped false)
  (libraries
   annotated_ast
   ast
@@ -11,7 +12,7 @@
   pos
   provider_context
   tast_env
-  tast_provider
+  typing_deps
   typing_skeleton
   utils_core)
  (preprocess

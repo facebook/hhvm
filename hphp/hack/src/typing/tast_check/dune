@@ -8,6 +8,7 @@
   core_kernel
   nast
   remove_dead_unsafe_casts
+  simplihack
   tast_env
   typing_deps
   typing_pessimisation_deps

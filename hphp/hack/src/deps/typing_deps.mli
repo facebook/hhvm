@@ -71,6 +71,11 @@ module Dep : sig
           this module *)
     | Declares : 'a variant
         (** An edge `Method(c, m) -> Declares` means that class c declares m. *)
+    | File : Relative_path.t -> dependency variant
+        (** Represents a dependency on the contents of a file.
+            This is currently used by the SimpliHack interpreter. The interpreter
+            cares about the body of functions/methods and not just their declaration.
+            Files read during evaluation will be dependencies. *)
 
   val dependency_of_variant : 'a variant -> dependency variant
 
@@ -90,6 +95,7 @@ module Dep : sig
     | KModule
     | KDeclares
     | KNotSubtype
+    | KFile
   [@@deriving enum]
 
   val dep_kind_of_variant : 'a variant -> dep_kind

@@ -278,7 +278,7 @@ vector<McrouterOptionMismatch> McrouterOptionsBase::compare(
           McrouterOptionMismatch e;
           e.optionName = name;
           e.lunaValue = it->second;
-          e.errorMsg = "luna value " + it->second +
+          e.errorMsg = "luna value " + subValue +
               " and current mcrouter_options value " + currValue +
               " are different";
           errors.push_back(std::move(e));

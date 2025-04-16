@@ -1998,13 +1998,13 @@ DynamicPatch::~DynamicPatch() = default;
 type::AnyStruct DynamicPatch::toPatch(type::Type type) const {
   type::AnyStruct any;
   any.protocol() = type::StandardProtocol::Compact;
-  any.data() = *protocol::serializeObject<CompactProtocolWriter>(toObject());
-  any.type() = toPatchType(type);
+  any.data() = *encode<CompactProtocolWriter>();
+  any.type() = toPatchType(std::move(type));
   return any;
 }
 
 void DynamicPatch::fromPatch(const type::AnyStruct& any) {
-  auto v = protocol::detail::parseValueFromAny(any);
+  auto v = protocol::parseValueFromAny(any);
   fromObject(std::move(v.as_object()));
 }
 

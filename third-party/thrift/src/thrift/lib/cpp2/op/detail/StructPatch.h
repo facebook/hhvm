@@ -508,7 +508,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     }
   }
 
-  void apply(T& val) const { return customVisit(Applier{val}); }
+  void apply(T& val) const;
 
   /**
    * Returns a Thrift Patch instance corresponding to the (decoded) `SafePatch`.
@@ -770,6 +770,9 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   }
   /// @endcond
 
+  void merge(const StructPatch& patch);
+  void merge(StructPatch&& patch);
+
  private:
   using Base::data_;
 
@@ -844,6 +847,9 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   void assign(U&& val) {
     op::get<Id>(Base::resetAnd().assign().ensure()) = std::forward<U>(val);
   }
+
+  void merge(const UnionPatch& patch);
+  void merge(UnionPatch&& patch);
 };
 
 } // namespace apache::thrift::op::detail

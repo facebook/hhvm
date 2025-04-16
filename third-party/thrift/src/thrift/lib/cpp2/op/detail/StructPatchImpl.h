@@ -37,4 +37,25 @@ auto BaseEnsurePatch<Patch, Derived>::patchImpl() -> patch_type& {
         "Field (id={}) is not patchable", folly::to_underlying(FieldId::value));
   }
 }
+
+template <class Patch, class Derived>
+void BaseEnsurePatch<Patch, Derived>::apply(T& val) const {
+  return customVisit(Applier{val});
+}
+template <class Patch>
+void StructPatch<Patch>::merge(const StructPatch& val) {
+  Base::merge(val);
+}
+template <class Patch>
+void StructPatch<Patch>::merge(StructPatch&& val) {
+  Base::merge(std::move(val));
+}
+template <class Patch>
+void UnionPatch<Patch>::merge(const UnionPatch& val) {
+  Base::merge(val);
+}
+template <class Patch>
+void UnionPatch<Patch>::merge(UnionPatch&& val) {
+  Base::merge(std::move(val));
+}
 } // namespace apache::thrift::op::detail

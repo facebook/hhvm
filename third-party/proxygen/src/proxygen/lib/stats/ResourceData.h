@@ -21,10 +21,13 @@ namespace proxygen {
 struct CpuStats {
   double cpuUsageRatio;
   std::vector<double> cpuCoreUsageRatios;
-  double cpuUtilPercentileConfigured;
-  double cpuRatioUtilPercentile;
-  double cpuSoftIrqUsageRatio;
+  double cpuUtilPercentileConfigured = 0;
+  double cpuRatioUtilPercentile = 0;
+  double cpuSoftIrqUsageRatio = 0;
   std::vector<double> softIrqCpuCoreRatioUtils;
+  // this field is only used to calculate
+  // pro-rate softirq of cgroup
+  double cpuSysUsageRatio = 0;
 };
 
 /**

@@ -127,8 +127,11 @@ struct Bytes {
     return Bytes{std::make_unique<folly::IOBuf>(std::move(buf))};
   }
 
+  bool empty() const { return buf_->empty(); }
   const std::uint8_t* data() const { return buf_->data(); }
   std::size_t size() const { return buf_->length(); }
+  folly::IOBuf& inner() { return *buf_; }
+  const folly::IOBuf& inner() const { return *buf_; }
 
   std::string_view as_string_view() const {
     if (buf_->isChained()) {
@@ -146,6 +149,13 @@ struct Bytes {
   }
 
   bool operator==(const std::string& str) const {
+    return folly::IOBufCompare{}(
+               *buf_,
+               folly::IOBuf{
+                   folly::IOBuf::WRAP_BUFFER, str.data(), str.size()}) ==
+        folly::ordering::eq;
+  }
+  bool operator==(const std::string_view& str) const {
     return folly::IOBufCompare{}(
                *buf_,
                folly::IOBuf{

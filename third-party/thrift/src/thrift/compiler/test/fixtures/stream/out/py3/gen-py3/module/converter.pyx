@@ -6,23 +6,38 @@
 #  @generated
 #
 
+from libcpp.memory cimport make_shared, unique_ptr
+from cython.operator cimport dereference as deref, address
+from libcpp.utility cimport move as cmove
 cimport module.types as _fbthrift_ctypes
+from thrift.py3.serializer cimport (
+    cserialize as __cserialize,
+    cdeserialize as __cdeserialize,
+)
+from thrift.python.protocol cimport Protocol
+cimport folly.iobuf as _folly__iobuf
 
 
 cdef shared_ptr[_fbthrift_cbindings.cFooStreamEx] FooStreamEx_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.FooStreamEx?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cFooStreamEx](deref(
+        (<_fbthrift_ctypes.FooStreamEx?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object FooStreamEx_from_cpp(const shared_ptr[_fbthrift_cbindings.cFooStreamEx]& c_struct):
     return _fbthrift_ctypes.FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cFooEx] FooEx_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.FooEx?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cFooEx](deref(
+        (<_fbthrift_ctypes.FooEx?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object FooEx_from_cpp(const shared_ptr[_fbthrift_cbindings.cFooEx]& c_struct):
     return _fbthrift_ctypes.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cFooEx2] FooEx2_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.FooEx2?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    return make_shared[_fbthrift_cbindings.cFooEx2](deref(
+        (<_fbthrift_ctypes.FooEx2?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
 
 cdef object FooEx2_from_cpp(const shared_ptr[_fbthrift_cbindings.cFooEx2]& c_struct):
     return _fbthrift_ctypes.FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

@@ -6,11 +6,11 @@
 #  @generated
 #
 
-from libcpp.memory cimport make_shared
-from cython.operator cimport dereference as deref
+from libcpp.memory cimport make_shared, unique_ptr
+from cython.operator cimport dereference as deref, address
+from libcpp.utility cimport move as cmove
 from thrift.py3.types cimport const_pointer_cast
 cimport module.thrift_converter as _module_thrift_converter
-from libcpp.utility cimport move as cmove
 
 import module.types as _module_types
 

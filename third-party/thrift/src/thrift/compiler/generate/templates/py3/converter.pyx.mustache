@@ -18,14 +18,14 @@
 
 {{> common/auto_generated_py}}
 
+from libcpp.memory cimport make_shared, unique_ptr
+from cython.operator cimport dereference as deref, address
+from libcpp.utility cimport move as cmove
 {{^program:gen_py3_cython?}}
-from libcpp.memory cimport make_shared
-from cython.operator cimport dereference as deref
 from thrift.py3.types cimport const_pointer_cast
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
     }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{#program:gen_legacy_container_converters?}}
-from libcpp.utility cimport move as cmove
 
 {{#program:inplace_migrate?}}
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
@@ -42,6 +42,12 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as 
 {{/program:gen_py3_cython?}}
 {{#program:gen_py3_cython?}}
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_ctypes
+from thrift.py3.serializer cimport (
+    cserialize as __cserialize,
+    cdeserialize as __cdeserialize,
+)
+from thrift.python.protocol cimport Protocol
+cimport folly.iobuf as _folly__iobuf
 {{/program:gen_py3_cython?}}
 {{#program:inplace_migrate?}}
 {{^program:gen_legacy_container_converters?}}
@@ -67,7 +73,21 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
     )
 {{/program:gen_py3_cython?}}
 {{#program:gen_py3_cython?}}
-    return (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj}}
+    {{^struct:cpp_noncopyable?}}
+    return make_shared[_fbthrift_cbindings.{{> types/c_struct}}](deref(
+        (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj}}
+    ))
+    {{/struct:cpp_noncopyable?}}{{#struct:cpp_noncopyable?}}
+    cdef unique_ptr[_folly__iobuf.cIOBuf] _fbthrift__iobuf = cmove(
+        __cserialize(
+            (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj }}.get(),
+            Protocol.BINARY,
+        )
+    )
+    cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] _fbthrift__out = make_shared[_fbthrift_cbindings.{{> types/c_struct }}]()
+    __cdeserialize(_fbthrift__iobuf.get(), _fbthrift__out.get(), Protocol.BINARY)
+    return cmove(_fbthrift__out)
+    {{/struct:cpp_noncopyable?}}
 
 {{/program:gen_py3_cython?}}
 {{! direct replacement for ._fbthrift_create }}

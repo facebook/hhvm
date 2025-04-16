@@ -17,7 +17,9 @@ from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
 from convertible.cbindings cimport cSimple, cNested, cUnion
+from testing.cbindings cimport cNonCopyable
 cimport convertible.converter as converter
+cimport testing.converter as testing_converter
 
 cdef extern from *:
     """
@@ -34,11 +36,11 @@ cdef extern from *:
         return hrift;
     }
 
-    void mutate_simple(cpp2::Simple& simple) noexcept {
+    void mutate_simple(convertible::Simple& simple) noexcept {
         simple.strField_ref() = "mutated";
     }
 
-    std::string get_strField(std::shared_ptr<cpp2::Simple> simple) noexcept {
+    std::string get_strField(std::shared_ptr<convertible::Simple> simple) noexcept {
         return *simple->strField();
     }
 
@@ -63,6 +65,10 @@ def echo_nested(strucc):
 def echo_union(strucc):
     cdef shared_ptr[cUnion] c_strucc = converter.Union_convert_to_cpp(strucc)
     return converter.Union_from_cpp(echo_thrift(c_strucc))
+
+def echo_noncopyable(strucc):
+    cdef shared_ptr[cNonCopyable] c_strucc = testing_converter.NonCopyable_convert_to_cpp(strucc)
+    return testing_converter.NonCopyable_from_cpp(echo_thrift(c_strucc))
 
 # This tests constructor error (i.e., invalid C++ -> python)
 def echo_simple_corrupted(strucc, bad):

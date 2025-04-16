@@ -25,7 +25,6 @@ using I32 = PrimitiveTypes::I32;
 using I64 = PrimitiveTypes::I64;
 using Float = PrimitiveTypes::Float;
 using Double = PrimitiveTypes::Double;
-using String = PrimitiveTypes::String;
 
 // ---- ValueHolder ---- //
 
@@ -98,7 +97,6 @@ NativeValue::NativeValue(I64&& i) noexcept : kind_(std::move(i)) {}
 NativeValue::NativeValue(Float&& f) noexcept : kind_(std::move(f)) {}
 NativeValue::NativeValue(Double&& d) noexcept : kind_(std::move(d)) {}
 NativeValue::NativeValue(Bytes&& s) noexcept : kind_(std::move(s)) {}
-NativeValue::NativeValue(String&& s) noexcept : kind_(std::move(s)) {}
 NativeValue::NativeValue(NativeList&& list) noexcept : kind_(std::move(list)) {}
 NativeValue::NativeValue(NativeSet&& set) noexcept : kind_(std::move(set)) {}
 NativeValue::NativeValue(NativeMap&& map) noexcept : kind_(std::move(map)) {}
@@ -113,7 +111,6 @@ NativeValue::NativeValue(const I64& i64) : kind_(i64) {}
 NativeValue::NativeValue(const Float& f) : kind_(f) {}
 NativeValue::NativeValue(const Double& d) : kind_(d) {}
 NativeValue::NativeValue(const Bytes& b) : kind_(b) {}
-NativeValue::NativeValue(const String& s) : kind_(s) {}
 NativeValue::NativeValue(const NativeList& list) : kind_(list) {}
 NativeValue::NativeValue(const NativeSet& set) : kind_(set) {}
 NativeValue::NativeValue(const NativeMap& map) : kind_(map) {}
@@ -248,47 +245,43 @@ T read_primitive_as(Protocol& prot) {
     Bytes b;
     prot.readBinary(b.buf_);
     return b;
-  } else if constexpr (std::is_same_v<T, String>) {
-    String s;
-    prot.readString(s);
-    return s;
   } else {
     static_assert(false, "Unhandled primitive type");
   }
 }
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeList read_list(Protocol& prot);
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 ListOf<T> read_list_as(Protocol& prot, std::uint32_t size);
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 ListOf<ValueHolder> read_value_list_as(Protocol& prot, std::uint32_t size);
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeSet read_set(Protocol& prot);
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 SetOf<T> read_set_as(Protocol& prot, std::uint32_t size);
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 SetOf<ValueHolder> read_value_set_as(Protocol& prot, std::uint32_t size);
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeMap read_map(Protocol& prot);
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeMap read_kv_map(
     Protocol& prot, TType keyType, TType valType, std::uint32_t size);
 
-template <typename Protocol, typename Key, bool StringToBinary>
+template <typename Protocol, typename Key>
 NativeMap read_v_map_as(Protocol& prot, TType valType, std::uint32_t size);
 
-template <typename Protocol, typename Key, typename Value, bool StringToBinary>
+template <typename Protocol, typename Key, typename Value>
 detail::map_t<Key, Value> read_map_as(Protocol& prot, std::uint32_t size);
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeObject read_struct(Protocol& prot);
 
 constexpr bool is_primitive(TType type) {
@@ -316,13 +309,13 @@ constexpr bool is_primitive(TType type) {
   }
 }
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 ListOf<T> read_list_as(Protocol& prot, std::uint32_t size) {
   ListOf<T> list{};
   list.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
     if constexpr (std::is_same_v<T, NativeObject>) {
-      list.emplace_back(read_struct<Protocol, StringToBinary>(prot));
+      list.emplace_back(read_struct<Protocol>(prot));
     } else if constexpr (detail::is_primitive_v<T>) {
       list.emplace_back(read_primitive_as<Protocol, T>(prot));
     } else {
@@ -332,17 +325,17 @@ ListOf<T> read_list_as(Protocol& prot, std::uint32_t size) {
   return list;
 }
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 ListOf<ValueHolder> read_value_list_as(Protocol& prot, std::uint32_t size) {
   ListOf<ValueHolder> list;
   list.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
     if constexpr (std::is_same_v<T, NativeList>) {
-      list.emplace_back(NativeValue(read_list<Protocol, StringToBinary>(prot)));
+      list.emplace_back(NativeValue(read_list<Protocol>(prot)));
     } else if constexpr (std::is_same_v<T, NativeSet>) {
-      list.emplace_back(NativeValue(read_set<Protocol, StringToBinary>(prot)));
+      list.emplace_back(NativeValue(read_set<Protocol>(prot)));
     } else if constexpr (std::is_same_v<T, NativeMap>) {
-      list.emplace_back(NativeValue{read_map<Protocol, StringToBinary>(prot)});
+      list.emplace_back(NativeValue{read_map<Protocol>(prot)});
     } else {
       static_assert(false, "Missing value list specialization");
     }
@@ -350,7 +343,7 @@ ListOf<ValueHolder> read_value_list_as(Protocol& prot, std::uint32_t size) {
   return list;
 }
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeList read_list(Protocol& prot) {
   TType elemType{};
   std::uint32_t size{};
@@ -364,48 +357,41 @@ NativeList read_list(Protocol& prot) {
 
   switch (elemType) {
     case TType::T_BOOL: {
-      return read_list_as<Protocol, Bool, StringToBinary>(prot, size);
+      return read_list_as<Protocol, Bool>(prot, size);
     }
     case TType::T_BYTE: {
-      return read_list_as<Protocol, I8, StringToBinary>(prot, size);
+      return read_list_as<Protocol, I8>(prot, size);
     }
     case TType::T_I16: {
-      return read_list_as<Protocol, I16, StringToBinary>(prot, size);
+      return read_list_as<Protocol, I16>(prot, size);
     }
     case TType::T_I32: {
-      return read_list_as<Protocol, I32, StringToBinary>(prot, size);
+      return read_list_as<Protocol, I32>(prot, size);
     }
     case TType::T_I64: {
-      return read_list_as<Protocol, I64, StringToBinary>(prot, size);
+      return read_list_as<Protocol, I64>(prot, size);
     }
     case TType::T_DOUBLE: {
-      return read_list_as<Protocol, Double, StringToBinary>(prot, size);
+      return read_list_as<Protocol, Double>(prot, size);
     }
     case TType::T_FLOAT: {
-      return read_list_as<Protocol, Float, StringToBinary>(prot, size);
+      return read_list_as<Protocol, Float>(prot, size);
     }
     case TType::T_STRING: {
-      if constexpr (StringToBinary) {
-        return read_list_as<Protocol, Bytes, StringToBinary>(prot, size);
-      } else {
-        return read_list_as<Protocol, String, StringToBinary>(prot, size);
-      }
+      return read_list_as<Protocol, Bytes>(prot, size);
     }
     case TType::T_STRUCT: {
-      return read_list_as<Protocol, NativeObject, StringToBinary>(prot, size);
+      return read_list_as<Protocol, NativeObject>(prot, size);
     }
     case TType::T_LIST: {
-      return read_value_list_as<Protocol, NativeList, StringToBinary>(
-          prot, size);
+      return read_value_list_as<Protocol, NativeList>(prot, size);
     }
     case TType::T_SET: {
-      return read_value_list_as<Protocol, NativeSet, StringToBinary>(
-          prot, size);
+      return read_value_list_as<Protocol, NativeSet>(prot, size);
       break;
     }
     case TType::T_MAP: {
-      return read_value_list_as<Protocol, NativeMap, StringToBinary>(
-          prot, size);
+      return read_value_list_as<Protocol, NativeMap>(prot, size);
     }
     case T_STOP:
     case T_VOID:
@@ -418,13 +404,13 @@ NativeList read_list(Protocol& prot) {
   }
 }
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 SetOf<T> read_set_as(Protocol& prot, std::uint32_t size) {
   SetOf<T> set;
   set.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
     if constexpr (std::is_same_v<T, NativeObject>) {
-      set.insert(read_struct<Protocol, StringToBinary>(prot));
+      set.insert(read_struct<Protocol>(prot));
     } else {
       static_assert(detail::is_primitive_v<T>);
       set.insert(read_primitive_as<Protocol, T>(prot));
@@ -433,17 +419,17 @@ SetOf<T> read_set_as(Protocol& prot, std::uint32_t size) {
   return set;
 }
 
-template <typename Protocol, typename T, bool StringToBinary>
+template <typename Protocol, typename T>
 SetOf<ValueHolder> read_value_set_as(Protocol& prot, std::uint32_t size) {
   SetOf<ValueHolder> set;
   set.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
     if constexpr (std::is_same_v<T, NativeList>) {
-      set.insert(NativeValue{read_list<Protocol, StringToBinary>(prot)});
+      set.insert(NativeValue{read_list<Protocol>(prot)});
     } else if constexpr (std::is_same_v<T, NativeSet>) {
-      set.insert(NativeValue{read_set<Protocol, StringToBinary>(prot)});
+      set.insert(NativeValue{read_set<Protocol>(prot)});
     } else if constexpr (std::is_same_v<T, NativeMap>) {
-      set.insert(NativeValue{read_map<Protocol, StringToBinary>(prot)});
+      set.insert(NativeValue{read_map<Protocol>(prot)});
     } else {
       static_assert(false, "Missing value set specialization");
     }
@@ -451,7 +437,7 @@ SetOf<ValueHolder> read_value_set_as(Protocol& prot, std::uint32_t size) {
   return set;
 }
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeSet read_set(Protocol& prot) {
   TType elemType{};
   uint32_t size{};
@@ -465,45 +451,40 @@ NativeSet read_set(Protocol& prot) {
 
   switch (elemType) {
     case TType::T_BOOL: {
-      return read_set_as<Protocol, Bool, StringToBinary>(prot, size);
+      return read_set_as<Protocol, Bool>(prot, size);
     }
     case TType::T_BYTE: {
-      return read_set_as<Protocol, I8, StringToBinary>(prot, size);
+      return read_set_as<Protocol, I8>(prot, size);
     }
     case TType::T_I16: {
-      return read_set_as<Protocol, I16, StringToBinary>(prot, size);
+      return read_set_as<Protocol, I16>(prot, size);
     }
     case TType::T_I32: {
-      return read_set_as<Protocol, I32, StringToBinary>(prot, size);
+      return read_set_as<Protocol, I32>(prot, size);
     }
     case TType::T_I64: {
-      return read_set_as<Protocol, I64, StringToBinary>(prot, size);
+      return read_set_as<Protocol, I64>(prot, size);
     }
     case TType::T_DOUBLE: {
-      return read_set_as<Protocol, Double, StringToBinary>(prot, size);
+      return read_set_as<Protocol, Double>(prot, size);
     }
     case TType::T_FLOAT: {
-      return read_set_as<Protocol, Float, StringToBinary>(prot, size);
+      return read_set_as<Protocol, Float>(prot, size);
     }
     case TType::T_STRING: {
-      if constexpr (StringToBinary) {
-        return read_set_as<Protocol, Bytes, StringToBinary>(prot, size);
-      } else {
-        return read_set_as<Protocol, String, StringToBinary>(prot, size);
-      }
+      return read_set_as<Protocol, Bytes>(prot, size);
     }
     case TType::T_STRUCT: {
-      return read_set_as<Protocol, NativeObject, StringToBinary>(prot, size);
+      return read_set_as<Protocol, NativeObject>(prot, size);
     }
     case TType::T_LIST: {
-      return read_value_set_as<Protocol, NativeList, StringToBinary>(
-          prot, size);
+      return read_value_set_as<Protocol, NativeList>(prot, size);
     }
     case TType::T_SET: {
-      return read_value_set_as<Protocol, NativeSet, StringToBinary>(prot, size);
+      return read_value_set_as<Protocol, NativeSet>(prot, size);
     }
     case TType::T_MAP: {
-      return read_value_set_as<Protocol, NativeMap, StringToBinary>(prot, size);
+      return read_value_set_as<Protocol, NativeMap>(prot, size);
     }
     case T_STOP:
     case T_VOID:
@@ -516,13 +497,13 @@ NativeSet read_set(Protocol& prot) {
   }
 }
 
-template <typename Protocol, typename K, typename V, bool StringToBinary>
+template <typename Protocol, typename K, typename V>
 detail::map_t<K, V> read_map_as(Protocol& prot, std::uint32_t size) {
   detail::map_t<K, V> map{};
   map.reserve(size);
 
-  using MapKeyTy = typename detail::map_t<K, V, StringToBinary>::key_type;
-  using MapValueTy = typename detail::map_t<K, V, StringToBinary>::mapped_type;
+  using MapKeyTy = typename detail::map_t<K, V>::key_type;
+  using MapValueTy = typename detail::map_t<K, V>::mapped_type;
 
   auto readKey = [&]() -> MapKeyTy {
     if constexpr (std::is_same_v<MapKeyTy, detail::native_value_type_t<K>>) {
@@ -533,20 +514,20 @@ detail::map_t<K, V> read_map_as(Protocol& prot, std::uint32_t size) {
       if constexpr (detail::is_primitive_v<K>) {
         return NativeValue{read_primitive_as<Protocol, K>(prot)};
       } else {
-        return NativeValue{read_struct<Protocol, StringToBinary>(prot)};
+        return NativeValue{read_struct<Protocol>(prot)};
       }
     }
   };
 
   auto readValue = [&]() -> MapValueTy {
     if constexpr (std::is_same_v<MapValueTy, NativeObject>) {
-      return read_struct<Protocol, StringToBinary>(prot);
+      return read_struct<Protocol>(prot);
     } else {
       static_assert(std::is_same_v<MapValueTy, ValueHolder>);
       if constexpr (detail::is_primitive_v<V>) {
         return NativeValue{read_primitive_as<Protocol, V>(prot)};
       } else {
-        return NativeValue{read_struct<Protocol, StringToBinary>(prot)};
+        return NativeValue{read_struct<Protocol>(prot)};
       }
     }
   };
@@ -557,49 +538,44 @@ detail::map_t<K, V> read_map_as(Protocol& prot, std::uint32_t size) {
   return map;
 }
 
-template <typename Protocol, typename Key, bool StringToBinary>
+template <typename Protocol, typename Key>
 NativeMap read_v_map_as(Protocol& prot, TType valType, std::uint32_t size) {
   switch (valType) {
     case TType::T_BOOL: {
-      return read_map_as<Protocol, Key, Bool, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, Bool>(prot, size);
     }
     case TType::T_BYTE: {
-      return read_map_as<Protocol, Key, I8, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, I8>(prot, size);
     }
     case TType::T_I16: {
-      return read_map_as<Protocol, Key, I16, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, I16>(prot, size);
     }
     case TType::T_I32: {
-      return read_map_as<Protocol, Key, I32, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, I32>(prot, size);
     }
     case TType::T_I64: {
-      return read_map_as<Protocol, Key, I64, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, I64>(prot, size);
     }
     case TType::T_FLOAT: {
-      return read_map_as<Protocol, Key, Float, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, Float>(prot, size);
     }
     case TType::T_DOUBLE: {
-      return read_map_as<Protocol, Key, Double, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, Double>(prot, size);
     }
     case TType::T_STRING: {
-      if constexpr (StringToBinary) {
-        return read_map_as<Protocol, Key, Bytes, StringToBinary>(prot, size);
-      } else {
-        return read_map_as<Protocol, Key, String, StringToBinary>(prot, size);
-      }
+      return read_map_as<Protocol, Key, Bytes>(prot, size);
     }
     case TType::T_STRUCT: {
-      return read_map_as<Protocol, Key, NativeObject, StringToBinary>(
-          prot, size);
+      return read_map_as<Protocol, Key, NativeObject>(prot, size);
     }
     case TType::T_LIST: {
-      return read_map_as<Protocol, Key, NativeList, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, NativeList>(prot, size);
     }
     case TType::T_SET: {
-      return read_map_as<Protocol, Key, NativeSet, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, NativeSet>(prot, size);
     }
     case TType::T_MAP: {
-      return read_map_as<Protocol, Key, NativeMap, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, NativeMap>(prot, size);
     }
     case T_STOP:
     case T_VOID:
@@ -612,57 +588,45 @@ NativeMap read_v_map_as(Protocol& prot, TType valType, std::uint32_t size) {
   }
 }
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeMap read_kv_map(
     Protocol& prot, TType keyType, TType valType, std::uint32_t size) {
   switch (keyType) {
     case TType::T_BOOL: {
-      return read_v_map_as<Protocol, Bool, StringToBinary>(prot, valType, size);
+      return read_v_map_as<Protocol, Bool>(prot, valType, size);
     }
     case TType::T_BYTE: {
-      return read_v_map_as<Protocol, I8, StringToBinary>(prot, valType, size);
+      return read_v_map_as<Protocol, I8>(prot, valType, size);
     }
     case TType::T_I16: {
-      return read_v_map_as<Protocol, I16, StringToBinary>(prot, valType, size);
+      return read_v_map_as<Protocol, I16>(prot, valType, size);
     }
     case TType::T_I32: {
-      return read_v_map_as<Protocol, I32, StringToBinary>(prot, valType, size);
+      return read_v_map_as<Protocol, I32>(prot, valType, size);
     }
     case TType::T_I64: {
-      return read_v_map_as<Protocol, I64, StringToBinary>(prot, valType, size);
+      return read_v_map_as<Protocol, I64>(prot, valType, size);
     }
     case TType::T_FLOAT: {
-      return read_v_map_as<Protocol, Float, StringToBinary>(
-          prot, valType, size);
+      return read_v_map_as<Protocol, Float>(prot, valType, size);
     }
     case TType::T_DOUBLE: {
-      return read_v_map_as<Protocol, Float, StringToBinary>(
-          prot, valType, size);
+      return read_v_map_as<Protocol, Float>(prot, valType, size);
     }
     case TType::T_STRING: {
-      if constexpr (StringToBinary) {
-        return read_v_map_as<Protocol, Bytes, StringToBinary>(
-            prot, valType, size);
-      } else {
-        return read_v_map_as<Protocol, String, StringToBinary>(
-            prot, valType, size);
-      }
+      return read_v_map_as<Protocol, Bytes>(prot, valType, size);
     }
     case TType::T_STRUCT: {
-      return read_v_map_as<Protocol, NativeObject, StringToBinary>(
-          prot, valType, size);
+      return read_v_map_as<Protocol, NativeObject>(prot, valType, size);
     }
     case TType::T_LIST: {
-      return read_v_map_as<Protocol, NativeList, StringToBinary>(
-          prot, valType, size);
+      return read_v_map_as<Protocol, NativeList>(prot, valType, size);
     }
     case TType::T_SET: {
-      return read_v_map_as<Protocol, NativeSet, StringToBinary>(
-          prot, valType, size);
+      return read_v_map_as<Protocol, NativeSet>(prot, valType, size);
     }
     case TType::T_MAP: {
-      return read_v_map_as<Protocol, NativeMap, StringToBinary>(
-          prot, valType, size);
+      return read_v_map_as<Protocol, NativeMap>(prot, valType, size);
     }
     case T_STOP:
     case T_VOID:
@@ -675,7 +639,7 @@ NativeMap read_kv_map(
   }
 }
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 NativeMap read_map(Protocol& prot) {
   TType keyType{};
   TType valType{};
@@ -688,14 +652,14 @@ NativeMap read_map(Protocol& prot) {
   SCOPE_SUCCESS {
     prot.readMapEnd();
   };
-  return read_kv_map<Protocol, StringToBinary>(prot, keyType, valType, size);
+  return read_kv_map<Protocol>(prot, keyType, valType, size);
 }
 template <typename... Args>
 auto make_value(Args&&... args) {
   return ValueHolder{NativeValue(std::forward<Args>(args)...)};
 }
 
-template <typename Protocol, bool StringToBinary>
+template <typename Protocol>
 void read_struct_field(
     Protocol& prot,
     TType field_type,
@@ -731,29 +695,23 @@ void read_struct_field(
       return;
     }
     case T_STRING: {
-      if constexpr (StringToBinary) {
-        strct.emplace(id, make_value(read_primitive_as<Protocol, Bytes>(prot)));
-      } else {
-        strct.emplace(
-            id, make_value(read_primitive_as<Protocol, String>(prot)));
-      }
+      strct.emplace(id, make_value(read_primitive_as<Protocol, Bytes>(prot)));
       return;
     }
     case protocol::T_STRUCT: {
-      strct.emplace(
-          id, make_value(read_struct<Protocol, StringToBinary>(prot)));
+      strct.emplace(id, make_value(read_struct<Protocol>(prot)));
       return;
     }
     case protocol::T_LIST: {
-      strct.emplace(id, make_value(read_list<Protocol, StringToBinary>(prot)));
+      strct.emplace(id, make_value(read_list<Protocol>(prot)));
       return;
     }
     case protocol::T_SET: {
-      strct.emplace(id, make_value(read_set<Protocol, StringToBinary>(prot)));
+      strct.emplace(id, make_value(read_set<Protocol>(prot)));
       return;
     }
     case protocol::T_MAP: {
-      strct.emplace(id, make_value(read_map<Protocol, StringToBinary>(prot)));
+      strct.emplace(id, make_value(read_map<Protocol>(prot)));
       return;
     }
     case T_STOP:
@@ -767,7 +725,7 @@ void read_struct_field(
   }
 }
 
-template <class Protocol, bool StringToBinary>
+template <class Protocol>
 NativeObject read_struct(Protocol& prot) {
   std::string name;
   int16_t fid{};
@@ -779,7 +737,7 @@ NativeObject read_struct(Protocol& prot) {
     if (ftype == protocol::T_STOP) {
       break;
     }
-    read_struct_field<Protocol, StringToBinary>(prot, ftype, strct, fid);
+    read_struct_field<Protocol>(prot, ftype, strct, fid);
     prot.readFieldEnd();
   }
   prot.readStructEnd();
@@ -789,18 +747,18 @@ NativeObject read_struct(Protocol& prot) {
 NativeObject detail::parseObjectVia(
     ::apache::thrift::BinaryProtocolReader& prot, bool string_to_binary) {
   if (string_to_binary) {
-    return read_struct<::apache::thrift::BinaryProtocolReader, true>(prot);
+    return read_struct<::apache::thrift::BinaryProtocolReader>(prot);
   } else {
-    return read_struct<::apache::thrift::BinaryProtocolReader, false>(prot);
+    return read_struct<::apache::thrift::BinaryProtocolReader>(prot);
   }
 }
 
 NativeObject detail::parseObjectVia(
     ::apache::thrift::CompactProtocolReader& prot, bool string_to_binary) {
   if (string_to_binary) {
-    return read_struct<::apache::thrift::CompactProtocolReader, true>(prot);
+    return read_struct<::apache::thrift::CompactProtocolReader>(prot);
   } else {
-    return read_struct<::apache::thrift::CompactProtocolReader, false>(prot);
+    return read_struct<::apache::thrift::CompactProtocolReader>(prot);
   }
 }
 
@@ -818,7 +776,6 @@ PROTOTYPE_WRITE(I64)
 PROTOTYPE_WRITE(Float)
 PROTOTYPE_WRITE(Double)
 PROTOTYPE_WRITE(Bytes)
-PROTOTYPE_WRITE(String)
 PROTOTYPE_WRITE(NativeObject)
 PROTOTYPE_WRITE(NativeList)
 PROTOTYPE_WRITE(NativeSet)
@@ -853,12 +810,6 @@ template <typename Protocol>
 std::uint32_t write(Protocol& prot, const Bytes& val) {
   return prot.writeBinary(
       folly::ByteRange{val.data(), val.data() + val.size()});
-}
-
-template <typename Protocol>
-std::uint32_t write(Protocol& prot, const String& val) {
-  return prot.writeBinary(
-      folly::StringPiece{val.data(), val.data() + val.size()});
 }
 
 template <typename Protocol>
@@ -903,8 +854,8 @@ std::uint32_t write(Protocol& prot, const ListOf<ValueHolder>& list) {
 template <typename Protocol, typename... Args>
 std::uint32_t write(Protocol& prot, const ListOf<Args...>& list) {
   using ListElemTy = typename std::remove_cvref_t<decltype(list)>::value_type;
-  constexpr TType value_ttag = op::typeTagToTType<
-      typename detail::native_value_type<ListElemTy, true>::tag>;
+  constexpr TType value_ttag =
+      op::typeTagToTType<typename detail::native_value_type<ListElemTy>::tag>;
   uint32_t serializedSize = 0;
   serializedSize += prot.writeListBegin(value_ttag, list.size());
   for (const auto& elem : list) {
@@ -945,7 +896,7 @@ std::uint32_t write(Protocol& prot, const SetOf<ValueHolder, Args...>& set) {
 template <typename Protocol, typename T, typename... Args>
 std::uint32_t write(Protocol& prot, const SetOf<T, Args...>& set) {
   uint32_t serializedSize = 0;
-  using Tag = detail::native_value_type<T, true>::tag;
+  using Tag = detail::native_value_type<T>::tag;
   serializedSize += prot.writeSetBegin(op::typeTagToTType<Tag>, set.size());
   for (const auto& elem : set) {
     serializedSize += write(prot, elem);
@@ -987,7 +938,7 @@ std::uint32_t write(Protocol& prot, const MapOf<K, V, Args...>& map) {
       serializedSize += write(prot, val);
     }
   } else if constexpr (std::is_same_v<V, ValueHolder>) {
-    using KeyTag = detail::native_value_type<K, true>::tag;
+    using KeyTag = detail::native_value_type<K>::tag;
     const ValueType valType = map.size() > 0 ? map.begin()->second.get_type()
                                              : DEFAULT_CONTAINER_VALUE_TYPE;
     serializedSize += prot.writeMapBegin(
@@ -998,8 +949,8 @@ std::uint32_t write(Protocol& prot, const MapOf<K, V, Args...>& map) {
       serializedSize += write(prot, val);
     }
   } else {
-    using KeyTag = detail::native_value_type<K, true>::tag;
-    using ValueTag = detail::native_value_type<V, true>::tag;
+    using KeyTag = detail::native_value_type<K>::tag;
+    using ValueTag = detail::native_value_type<V>::tag;
     static_assert(
         !std::is_same_v<K, ValueHolder> && !std::is_same_v<V, ValueHolder>);
     serializedSize += prot.writeMapBegin(
@@ -1060,7 +1011,6 @@ struct ValueHasher {
   size_t operator()(const Float& f) const;
   size_t operator()(const Double& d) const;
   size_t operator()(const Bytes& s) const;
-  size_t operator()(const String& s) const;
   size_t operator()(const NativeObject& o) const;
   size_t operator()(const NativeList& l) const;
   size_t operator()(const NativeSet& s) const;
@@ -1105,9 +1055,6 @@ size_t ValueHasher::operator()(const Double& d) const {
 }
 size_t ValueHasher::operator()(const Bytes& s) const {
   return folly::IOBufHash{}(s.buf_);
-}
-size_t ValueHasher::operator()(const String& s) const {
-  return std::hash<std::string>{}(s);
 }
 
 size_t ValueHasher::operator()(const NativeObject& o) const {
@@ -1279,7 +1226,6 @@ FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<I64>, list_of_i64)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Float>, list_of_float)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Double>, list_of_double)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Bytes>, list_of_bytes)
-FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<String>, list_of_string)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<NativeObject>, list_of_object)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<ValueHolder>, list_of_value)
 
@@ -1293,7 +1239,6 @@ FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<I64>, set_of_i64)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Float>, set_of_float)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Double>, set_of_double)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Bytes>, set_of_bytes)
-FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<String>, set_of_string)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<NativeObject>, set_of_object)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<ValueHolder>, set_of_value)
 

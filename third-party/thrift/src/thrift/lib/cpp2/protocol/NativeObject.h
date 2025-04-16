@@ -104,25 +104,22 @@ struct Bytes {
   Buf buf_;
 
   Bytes() noexcept = default;
-  ~Bytes() noexcept = default;
   explicit Bytes(Buf buf) noexcept : buf_(std::move(buf)) {}
+  explicit Bytes(const std::string& s) : buf_(folly::IOBuf::fromString(s)) {}
+  explicit Bytes(std::string_view v)
+      : buf_(std::make_unique<folly::IOBuf>(
+            folly::IOBuf::COPY_BUFFER, v.data(), v.size())) {}
+
   Bytes(const Bytes& other) noexcept
       : buf_(std::make_unique<folly::IOBuf>(*other.buf_)) {}
   Bytes(Bytes&& other) noexcept = default;
+  ~Bytes() noexcept = default;
   Bytes& operator=(const Bytes& other) noexcept {
     buf_ = std::make_unique<folly::IOBuf>(*other.buf_);
     return *this;
   }
   Bytes& operator=(Bytes&& other) noexcept = default;
-  explicit Bytes(const std::string& s) : buf_(folly::IOBuf::fromString(s)) {}
 
-  static Bytes fromStdString(const std::string& v) {
-    return Bytes{folly::IOBuf::fromString(v)};
-  }
-  static Bytes fromStringView(const std::string_view& v) {
-    return Bytes{std::make_unique<folly::IOBuf>(
-        folly::IOBuf::COPY_BUFFER, v.data(), v.size())};
-  }
   static Bytes fromIOBuf(const folly::IOBuf& buf) {
     return Bytes{std::make_unique<folly::IOBuf>(buf)};
   }
@@ -155,6 +152,13 @@ struct Bytes {
                    folly::IOBuf::WRAP_BUFFER, str.data(), str.size()}) ==
         folly::ordering::eq;
   }
+  bool operator==(const char* str) const {
+    return folly::IOBufCompare{}(
+               *buf_,
+               folly::IOBuf{
+                   folly::IOBuf::WRAP_BUFFER, str, std::strlen(str)}) ==
+        folly::ordering::eq;
+  }
 };
 
 struct PrimitiveTypes {
@@ -165,7 +169,6 @@ struct PrimitiveTypes {
   using I64 = std::int64_t;
   using Float = float;
   using Double = double;
-  using String = std::string;
   using Bytes = Bytes;
 };
 
@@ -199,34 +202,33 @@ namespace detail {
 // ---- Value's type system --- //
 // NOTE: This contains the base case only
 
-template <typename T, bool StringToBinary>
+template <typename T>
 struct native_value_type {
   using type = T;
   using tag = ::apache::thrift::type::infer_tag<T>;
 };
 
-template <typename T, bool StringToBinary = true>
-using native_value_type_t =
-    typename detail::native_value_type<T, StringToBinary>::type;
+template <typename T>
+using native_value_type_t = typename detail::native_value_type<T>::type;
 
-template <typename T, bool StringToBinary = true>
+template <typename T>
 constexpr bool is_primitive_v = ::apache::thrift::type::is_a_v<
-    typename native_value_type<T, StringToBinary>::tag,
+    typename native_value_type<T>::tag,
     ::apache::thrift::type::primitive_c>;
 
-template <typename T, bool StringToBinary = true>
+template <typename T>
 constexpr bool is_structured_v = ::apache::thrift::type::is_a_v<
-    typename native_value_type<T, StringToBinary>::tag,
+    typename native_value_type<T>::tag,
     ::apache::thrift::type::struct_c>;
 
-template <typename T, bool StringToBinary = true>
+template <typename T>
 constexpr bool is_container_v = ::apache::thrift::type::is_a_v<
-    typename native_value_type<T, StringToBinary>::tag,
+    typename native_value_type<T>::tag,
     ::apache::thrift::type::container_c>;
 
-template <typename T, bool StringToBinary = true>
-constexpr bool is_native_object_type_v = is_primitive_v<T, StringToBinary> ||
-    is_container_v<T, StringToBinary> || is_structured_v<T, StringToBinary>;
+template <typename T>
+constexpr bool is_native_object_type_v =
+    is_primitive_v<T> || is_container_v<T> || is_structured_v<T>;
 
 } // namespace detail
 
@@ -289,8 +291,7 @@ class ValueAccess {
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::I64, i64)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Float, float)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Double, double)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Bytes, bytes)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::String, string)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Bytes, binary)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeList, list)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeSet, set)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeMap, map)
@@ -333,7 +334,6 @@ using QuasiValueKind = std::variant<
     PrimitiveTypes::I64,
     PrimitiveTypes::Float,
     PrimitiveTypes::Double,
-    PrimitiveTypes::String,
     Bytes,
     QuasiList,
     QuasiSet,
@@ -422,11 +422,11 @@ namespace detail {
 // Provides a mapping of native c++ element types into their appropriate
 // ListOf<T> specialization, e.g.
 // - list_t<std::int8_t> = ListOf<I8>
-// - list_t<std::string> = ListOf<String>
-template <typename T, bool StringToBinary = true>
+// - list_t<std::string> = ListOf<Bytes>
+template <typename T>
 using list_t = ListOf<std::conditional_t<
-    is_primitive_v<T, StringToBinary>,
-    typename native_value_type<T, StringToBinary>::type,
+    is_primitive_v<T>,
+    typename native_value_type<T>::type,
     std::conditional_t<is_structured_v<T>, NativeObject, ValueHolder>>>;
 
 } // namespace detail
@@ -445,14 +445,12 @@ class NativeList {
       ListOf<PrimitiveTypes::Float>,
       ListOf<PrimitiveTypes::Double>,
       ListOf<PrimitiveTypes::Bytes>,
-      ListOf<PrimitiveTypes::String>,
       ListOf<NativeObject>,
       // Fallback for list/map/set
       ListOf<ValueHolder>>;
 
-  template <typename T, bool StringToBinary = true>
-  using Specialized =
-      detail::list_t<std::remove_cv_t<typename T::value_type>, StringToBinary>;
+  template <typename T>
+  using Specialized = detail::list_t<std::remove_cv_t<typename T::value_type>>;
 
   const Kind& inner() const noexcept;
   std::size_t size() const noexcept;
@@ -496,8 +494,6 @@ class NativeList {
       ListOf<PrimitiveTypes::Double>, list_of_double)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
       ListOf<PrimitiveTypes::Bytes>, list_of_bytes)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
-      ListOf<PrimitiveTypes::String>, list_of_string)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<NativeObject>, list_of_object)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<ValueHolder>, list_of_value)
 
@@ -525,10 +521,10 @@ class NativeList {
 
 namespace detail {
 
-template <typename T, bool StringToBinary = true>
+template <typename T>
 using set_t = std::conditional_t<
     is_primitive_v<T> || is_structured_v<T>,
-    SetOf<typename native_value_type<T, StringToBinary>::type>,
+    SetOf<typename native_value_type<T>::type>,
     SetOf<ValueHolder>>;
 
 }
@@ -546,14 +542,12 @@ class NativeSet {
       SetOf<PrimitiveTypes::Float>,
       SetOf<PrimitiveTypes::Double>,
       SetOf<PrimitiveTypes::Bytes>,
-      SetOf<PrimitiveTypes::String>,
       SetOf<NativeObject>,
       // Fallback for list/map//set
       SetOf<ValueHolder>>;
 
-  template <typename T, bool StringToBinary = true>
-  using Specialized =
-      detail::set_t<std::remove_cv_t<typename T::value_type>, StringToBinary>;
+  template <typename T>
+  using Specialized = detail::set_t<std::remove_cv_t<typename T::value_type>>;
 
   // Default ops
   NativeSet() = default;
@@ -594,8 +588,6 @@ class NativeSet {
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
       SetOf<PrimitiveTypes::Double>, set_of_double)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::Bytes>, set_of_bytes)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
-      SetOf<PrimitiveTypes::String>, set_of_string)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<NativeObject>, set_of_object)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<ValueHolder>, set_of_value)
 
@@ -625,13 +617,13 @@ class NativeSet {
 
 namespace detail {
 
-template <typename K, typename V, bool StringToBinary = true>
+template <typename K, typename V>
 using map_with_primitive_key_t =
-    MapOf<typename native_value_type<K, StringToBinary>::type, ValueHolder>;
+    MapOf<typename native_value_type<K>::type, ValueHolder>;
 
-template <typename K, typename V, bool StringToBinary = true>
+template <typename K, typename V>
 using map_t = std::conditional_t<
-    is_primitive_v<K, StringToBinary>,
+    is_primitive_v<K>,
     map_with_primitive_key_t<K, V>,
     MapOf<ValueHolder, ValueHolder>>;
 
@@ -651,16 +643,14 @@ class NativeMap {
       MapOf<PrimitiveTypes::Float, ValueHolder>,
       MapOf<PrimitiveTypes::Double, ValueHolder>,
       MapOf<PrimitiveTypes::Bytes, ValueHolder>,
-      MapOf<PrimitiveTypes::String, ValueHolder>,
 
       // Unspecialized as fallback
       MapOf<ValueHolder, ValueHolder>>;
 
-  template <typename T, bool StringToBinary = true>
+  template <typename T>
   using Specialized = detail::map_t<
       std::remove_cv_t<typename T::key_type>,
-      std::remove_cv_t<typename T::mapped_type>,
-      StringToBinary>;
+      std::remove_cv_t<typename T::mapped_type>>;
 
   const Kind& inner() const;
   std::size_t size() const noexcept;
@@ -725,121 +715,118 @@ namespace detail {
 // - maps will be specialized as `NativeMap`
 // - structs will be specialized as `Object`
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::Bool, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::Bool> {
   using type = PrimitiveTypes::Bool;
   using tag = ::apache::thrift::type::bool_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::I8, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::I8> {
   using type = PrimitiveTypes::I8;
   using tag = ::apache::thrift::type::byte_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::I16, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::I16> {
   using type = PrimitiveTypes::I16;
   using tag = ::apache::thrift::type::i16_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::I32, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::I32> {
   using type = PrimitiveTypes::I32;
   using tag = ::apache::thrift::type::i32_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::I64, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::I64> {
   using type = PrimitiveTypes::I64;
   using tag = ::apache::thrift::type::i64_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::Float, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::Float> {
   using type = PrimitiveTypes::Float;
   using tag = ::apache::thrift::type::float_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::Double, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::Double> {
   using type = PrimitiveTypes::Double;
   using tag = ::apache::thrift::type::double_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::Bytes, StringToBinary> {
+template <>
+struct native_value_type<PrimitiveTypes::Bytes> {
   using type = PrimitiveTypes::Bytes;
   using tag = ::apache::thrift::type::binary_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<PrimitiveTypes::String, StringToBinary> {
-  using type = std::conditional_t<
-      StringToBinary,
-      PrimitiveTypes::Bytes,
-      PrimitiveTypes::String>;
+template <>
+struct native_value_type<std::string> {
+  using type = PrimitiveTypes::Bytes;
   using tag = ::apache::thrift::type::string_t;
 };
 
-template <bool StringToBinary>
-struct native_value_type<NativeObject, StringToBinary> {
+template <>
+struct native_value_type<NativeObject> {
   using type = NativeObject;
   using tag = ::apache::thrift::type::struct_t<NativeObject>;
 };
 
-template <bool StringToBinary>
-struct native_value_type<ValueHolder, StringToBinary> {
+template <>
+struct native_value_type<ValueHolder> {
   using type = ValueHolder;
   using tag = ::apache::thrift::type::struct_c;
 };
 
-template <bool StringToBinary>
-struct native_value_type<NativeList, StringToBinary> {
+template <>
+struct native_value_type<NativeList> {
   using type = NativeList;
   using tag = ::apache::thrift::type::list<::apache::thrift::type::struct_c>;
 };
 
-template <typename... Ts, bool StringToBinary>
-struct native_value_type<ListOf<Ts...>, StringToBinary> {
+template <typename... Ts>
+struct native_value_type<ListOf<Ts...>> {
   using type = NativeList;
   using tag = ::apache::thrift::type::list<::apache::thrift::type::struct_c>;
 };
 
-template <bool StringToBinary>
-struct native_value_type<NativeSet, StringToBinary> {
+template <>
+struct native_value_type<NativeSet> {
   using type = NativeSet;
   using tag = ::apache::thrift::type::set<::apache::thrift::type::struct_c>;
 };
 
-template <typename... Ts, bool StringToBinary>
-struct native_value_type<std::set<Ts...>, StringToBinary> {
+template <typename... Ts>
+struct native_value_type<std::set<Ts...>> {
   using type = NativeSet;
   using tag = ::apache::thrift::type::set<::apache::thrift::type::struct_c>;
 };
 
-template <typename... Ts, bool StringToBinary>
-struct native_value_type<SetOf<Ts...>, StringToBinary> {
+template <typename... Ts>
+struct native_value_type<SetOf<Ts...>> {
   using type = NativeSet;
   using tag = ::apache::thrift::type::set<::apache::thrift::type::struct_c>;
 };
 
-template <bool StringToBinary>
-struct native_value_type<NativeMap, StringToBinary> {
+template <>
+struct native_value_type<NativeMap> {
   using type = NativeMap;
   using tag = ::apache::thrift::type::
       map<::apache::thrift::type::struct_c, ::apache::thrift::type::struct_c>;
 };
 
-template <typename... Ts, bool StringToBinary>
-struct native_value_type<MapOf<Ts...>, StringToBinary> {
+template <typename... Ts>
+struct native_value_type<MapOf<Ts...>> {
   using type = NativeMap;
   using tag = ::apache::thrift::type::
       map<::apache::thrift::type::struct_c, ::apache::thrift::type::struct_c>;
 };
 
-template <typename... Ts, bool StringToBinary>
-struct native_value_type<std::map<Ts...>, StringToBinary> {
+template <typename... Ts>
+struct native_value_type<std::map<Ts...>> {
   using type = NativeMap;
   using tag = ::apache::thrift::type::
       map<::apache::thrift::type::struct_c, ::apache::thrift::type::struct_c>;
@@ -863,7 +850,6 @@ FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::I32, I32)
 FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::I64, I64)
 FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::Float, Float)
 FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::Double, Double)
-FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::String, String)
 FBTHRIFT_VALUE_TYPE_MAPPING(PrimitiveTypes::Bytes, Bytes)
 FBTHRIFT_VALUE_TYPE_MAPPING(NativeList, List)
 FBTHRIFT_VALUE_TYPE_MAPPING(NativeSet, Set)
@@ -892,7 +878,6 @@ class NativeValue : public ValueAccess<NativeValue> {
       PrimitiveTypes::Float,
       PrimitiveTypes::Double,
       PrimitiveTypes::Bytes,
-      PrimitiveTypes::String,
       NativeList,
       NativeSet,
       NativeMap,
@@ -933,7 +918,6 @@ class NativeValue : public ValueAccess<NativeValue> {
   /* implicit */ NativeValue(PrimitiveTypes::Float&& f) noexcept;
   /* implicit */ NativeValue(PrimitiveTypes::Double&& d) noexcept;
   /* implicit */ NativeValue(PrimitiveTypes::Bytes&& b) noexcept;
-  /* implicit */ NativeValue(PrimitiveTypes::String&& s) noexcept;
   /* implicit */ NativeValue(NativeList&& list) noexcept;
   /* implicit */ NativeValue(NativeSet&& set) noexcept;
   /* implicit */ NativeValue(NativeMap&& map) noexcept;
@@ -948,7 +932,6 @@ class NativeValue : public ValueAccess<NativeValue> {
   /* implicit */ NativeValue(const PrimitiveTypes::Float& f);
   /* implicit */ NativeValue(const PrimitiveTypes::Double& d);
   /* implicit */ NativeValue(const PrimitiveTypes::Bytes& b);
-  /* implicit */ NativeValue(const PrimitiveTypes::String& s);
   /* implicit */ NativeValue(const NativeList& list);
   /* implicit */ NativeValue(const NativeSet& set);
   /* implicit */ NativeValue(const NativeMap& map);
@@ -972,23 +955,20 @@ namespace detail {
 // ------- Type traits to verify the ListOf type system ------- //
 
 template <typename T>
-constexpr bool is_list_v = ::apache::thrift::type::is_a_v<
-    typename native_value_type<T, true>::tag,
-    ::apache::thrift::type::list_c>;
+constexpr bool is_list_v = ::apache::thrift::type::
+    is_a_v<typename native_value_type<T>::tag, ::apache::thrift::type::list_c>;
 
 // ------- Type traits to verify the SetOf type system ------- //
 
 template <typename T>
-constexpr bool is_set_v = ::apache::thrift::type::is_a_v<
-    typename native_value_type<T, true>::tag,
-    ::apache::thrift::type::set_c>;
+constexpr bool is_set_v = ::apache::thrift::type::
+    is_a_v<typename native_value_type<T>::tag, ::apache::thrift::type::set_c>;
 
 // ------- Type traits to verify the MapOf type system ------- //
 
 template <typename T>
-constexpr bool is_map_v = ::apache::thrift::type::is_a_v<
-    typename native_value_type<T, true>::tag,
-    ::apache::thrift::type::map_c>;
+constexpr bool is_map_v = ::apache::thrift::type::
+    is_a_v<typename native_value_type<T>::tag, ::apache::thrift::type::map_c>;
 
 // ---- Parsing functions ---- //
 
@@ -1058,7 +1038,7 @@ NativeValue asValueStruct(T&& value) {
 // make_list_of<int>(...) => ListOf<I32>
 // make_list_of<std::string>(...) => ListOf<Bytes>
 // make_list_of<NativeSet>(...) => ListOf<ValueHolder>
-template <typename T, bool StringToBinary = true>
+template <typename T>
 NativeList make_list_of(T&& t) {
   if constexpr (std::is_same_v<NativeValue, std::remove_cvref_t<T>>) {
     return t.visit([](auto&& v) {
@@ -1066,22 +1046,25 @@ NativeList make_list_of(T&& t) {
       if constexpr (std::is_same_v<V, std::monostate>) {
         return NativeList{};
       } else {
-        return make_list<V, StringToBinary>(std::forward<V>(v));
+        return make_list<V>(std::forward<V>(v));
       }
     });
   } else {
-    using ListTy = detail::list_t<std::remove_cvref_t<T>, StringToBinary>;
+    using V = std::remove_cvref_t<T>;
+    using ListTy = detail::list_t<V>;
     using ListElemTy = typename ListTy::value_type;
 
-    if constexpr (detail::is_primitive_v<ListElemTy, StringToBinary>) {
+    if constexpr (std::is_same_v<ListElemTy, ValueHolder>) {
+      static_assert(detail::is_container_v<V>);
+      return NativeList{ListOf<ValueHolder>{NativeValue{std::forward<T>(t)}}};
+    } else if constexpr (detail::is_primitive_v<ListElemTy>) {
       if constexpr (
-          StringToBinary && std::is_same_v<T, PrimitiveTypes::String>) {
-        return NativeList{ListTy{Bytes::fromStdString(t)}};
+          std::is_same_v<V, std::string> ||
+          std::is_same_v<V, std::string_view>) {
+        return NativeList{ListTy{Bytes{std::forward<T>(t)}}};
       } else {
-        return NativeList(ListTy{{std::forward<T>(t)}});
+        return NativeList{ListTy{std::forward<T>(t)}};
       }
-    } else if constexpr (std::is_same_v<ListElemTy, ValueHolder>) {
-      return NativeList(ListTy{{std::forward<T>(t)}});
     } else {
       static_assert(false, "Unsupported specialization for make_list");
     }

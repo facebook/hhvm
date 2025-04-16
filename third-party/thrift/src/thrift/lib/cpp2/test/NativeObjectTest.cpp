@@ -34,10 +34,8 @@ using I32 = experimental::PrimitiveTypes::I32;
 using I64 = experimental::PrimitiveTypes::I64;
 using Float = experimental::PrimitiveTypes::Float;
 using Double = experimental::PrimitiveTypes::Double;
-using String = experimental::PrimitiveTypes::String;
 using NativeObject = experimental::NativeObject;
 using Bytes = experimental::PrimitiveTypes::Bytes;
-using String = experimental::PrimitiveTypes::String;
 using ValueHolder = experimental::ValueHolder;
 
 // ---- Random utils ---- //
@@ -89,7 +87,7 @@ std::string random_val<std::string>() {
 
 template <>
 Bytes random_val<Bytes>() {
-  return Bytes::fromStdString(random_val<std::string>());
+  return Bytes{random_val<std::string>()};
 }
 
 template <>
@@ -313,7 +311,7 @@ void assertListType() {
   if constexpr (std::is_same_v<ResultListTy, experimental::ListOf<Bytes>>) {
     ASSERT_EQ(list_val.size(), objList.size());
     for (size_t i = 0; i < list_val.size(); ++i) {
-      ASSERT_EQ(Bytes::fromStdString(list_val[i]), objList[i]);
+      ASSERT_EQ(Bytes{list_val[i]}, objList[i]);
     }
   } else {
     ASSERT_EQ(objList, list_val);
@@ -420,14 +418,7 @@ experimental::detail::map_t<Key, Value> into_map(
     const std::map<Key, Value>& map) {
   experimental::detail::map_t<Key, Value> newMap;
   for (const auto& [key, val] : map) {
-    if constexpr (std::is_same_v<Key, std::string>) {
-      static_assert(std::is_same_v<
-                    typename experimental::detail::map_t<Key, Value>::key_type,
-                    Bytes>);
-      newMap.emplace(Bytes::fromStdString(key), val);
-    } else {
-      newMap.emplace(key, val);
-    }
+    newMap.emplace(key, val);
   }
   return newMap;
 }
@@ -494,7 +485,7 @@ void assertSetType() {
       NativeObject strct{};
       ASSERT_TRUE(objSet.contains(strct));
     } else if constexpr (std::is_same_v<ResultElemTy, Bytes>) {
-      ASSERT_TRUE(objSet.contains(Bytes::fromStdString(item)));
+      ASSERT_TRUE(objSet.contains(Bytes{item}));
     } else {
       ASSERT_TRUE(objSet.contains(item));
     }
@@ -549,7 +540,7 @@ void assertMapType() {
   for (const auto& [key, value] : map_value) {
     if constexpr (std::is_same_v<experimental::ValueHolder, ResultValueTy>) {
       if constexpr (std::is_same_v<MapKeyTy, std::string>) {
-        Bytes objKey = Bytes::fromStdString(key);
+        Bytes objKey = Bytes{key};
         const auto it = resultMap.find(objKey);
         ASSERT_NE(it, resultMap.end());
         const experimental::ValueHolder& inner_val = it->second;
@@ -598,10 +589,9 @@ template <
     typename ResultKey,
     typename ResultValue,
     typename Key,
-    typename Value,
-    bool StringToBinary = true>
+    typename Value>
 constexpr bool native_map_type_is_v = std::is_same_v<
-    experimental::detail::map_t<Key, Value, StringToBinary>,
+    experimental::detail::map_t<Key, Value>,
     experimental::MapOf<ResultKey, ResultValue>>;
 
 template <
@@ -629,14 +619,13 @@ using I32 = PT::I32;
 using I64 = PT::I64;
 using Float = PT::Float;
 using Double = PT::Double;
-using String = PT::String;
 using Bytes = PT::Bytes;
 using NativeList = experimental::NativeList;
 using NativeSet = experimental::NativeSet;
 using NativeMap = experimental::NativeMap;
 
 using primitives_t =
-    std::tuple<PT::Bool, I8, I16, I32, I64, Float, Double, String, Bytes>;
+    std::tuple<PT::Bool, I8, I16, I32, I64, Float, Double, Bytes>;
 using non_primitives_t = std::tuple<NativeList, NativeSet, NativeMap>;
 
 static_assert(
@@ -661,7 +650,7 @@ static_assert(
     native_map_type_is_v<Bytes, ValueHolder, Bytes, non_primitives_t>,
     "Specialization of Bytes -> ValueHolder");
 static_assert(
-    native_map_type_is_v<Bytes, ValueHolder, String, non_primitives_t>,
+    native_map_type_is_v<Bytes, ValueHolder, std::string, non_primitives_t>,
     "Specialization of String -> ValueHolder (Converts to Bytes)");
 static_assert(
     native_map_is_fallback_v<NativeObject, primitives_t>,
@@ -714,17 +703,16 @@ TEST(NativeObjectTest, make_list_of_double) {
   ASSERT_EQ(list.as_list_of_double()[0], 1.0);
 }
 
-TEST(NativeObjectTest, make_list_of_string) {
-  const auto list =
-      experimental::make_list_of<std::string, false>(std::string{"foo"});
-  ASSERT_TRUE(list.is_list_of_string());
-  ASSERT_EQ(list.as_list_of_string()[0], "foo");
+TEST(NativeObjectTest, make_list_string) {
+  const auto list = experimental::make_list_of(std::string{"foo"});
+  ASSERT_TRUE(list.is_list_of_bytes());
+  ASSERT_EQ(list.as_list_of_bytes()[0].as_string_view(), "foo");
 }
 
 TEST(NativeObjectTest, make_list_of_binary) {
-  const auto list = experimental::make_list_of(Bytes::fromStdString("foo"));
+  const auto list = experimental::make_list_of(Bytes{std::string_view{"foo"}});
   ASSERT_TRUE(list.is_list_of_bytes());
-  ASSERT_EQ(list.as_list_of_bytes()[0], Bytes::fromStdString("foo"));
+  ASSERT_EQ(list.as_list_of_bytes()[0], Bytes{std::string_view{"foo"}});
 }
 
 TEST(NativeObjectTest, make_list_of_of_lists) {
@@ -815,8 +803,8 @@ TEST(NativeObjectAsValueStructTest, string) {
   t.field_1().emplace("hello");
   const auto val = experimental::asValueStruct<apache::thrift::type::string_t>(
       t.field_1().value());
-  ASSERT_TRUE(val.is_bytes());
-  ASSERT_EQ(val.as_bytes(), "hello");
+  ASSERT_TRUE(val.is_binary());
+  ASSERT_EQ(val.as_binary(), "hello");
 }
 
 TEST(NativeObjectAsValueStructTest, binary) {
@@ -824,8 +812,8 @@ TEST(NativeObjectAsValueStructTest, binary) {
   t.field_1().emplace("hello");
   const auto val = experimental::asValueStruct<apache::thrift::type::binary_t>(
       t.field_1().value());
-  ASSERT_TRUE(val.is_bytes());
-  ASSERT_EQ(val.as_bytes().as_string_view(), "hello");
+  ASSERT_TRUE(val.is_binary());
+  ASSERT_EQ(val.as_binary().as_string_view(), "hello");
 }
 
 TEST(NativeObjectAsValueStructTest, list_of_i16) {

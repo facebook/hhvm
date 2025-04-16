@@ -617,12 +617,7 @@ class NumericalConversionsTests(unittest.TestCase):
             self.assertIs(type(n.int_val), int)
             self.assertEqual(n.int_val, Kind.LINK.value)
 
-        if is_auto_migrated():
-            # BAD: should be an `int`
-            self.assertIsInstance(n.int_val, Kind)
-            self.assertEqual(n.int_val, Kind.LINK)
-        else:
-            assert_strict(n)
+        assert_strict(n)
 
         rt = self.roundtrip(n)
         assert_strict(rt)

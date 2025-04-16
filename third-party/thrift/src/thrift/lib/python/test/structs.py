@@ -555,13 +555,14 @@ class NumericalConversionsTests(unittest.TestCase):
 
     def test_permissive_init_int_with_enum(self) -> None:
         n = self.numerical(int_val=self.Kind.LINK)
-        # BAD: should be an `int`
-        self.assertIsInstance(n.int_val, self.Kind)
-        self.assertEqual(n.int_val, self.Kind.LINK)
 
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.int_val), int)
+            self.assertEqual(n.int_val, self.Kind.LINK.value)
+
+        assert_strict(n)
         rt = self.roundtrip(n)
-        self.assertIs(type(rt.int_val), int)
-        self.assertEqual(rt.int_val, self.Kind.LINK.value)
+        assert_strict(rt)
 
     def test_permissive_init_float_with_enum(self) -> None:
         n = self.numerical(float_val=self.Kind.LINK)

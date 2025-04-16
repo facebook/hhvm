@@ -186,8 +186,14 @@ cdef class IntegerTypeInfo(TypeInfoBase):
 
     # validate and convert to format serializer may understand
     cpdef to_internal_data(self, object value):
-        if not isinstance(value, pint):
-            raise TypeError(f"value {value} is not a <class 'int'>, is actually of type {type(value)}")
+        cdef type value_type = type(value)
+        if value_type is not pint:
+            if not issubclass(value_type, pint):
+                raise TypeError(
+                    f"value {value} is not a <class 'int'>, is actually of type {value_type}"
+                )
+            # convert IntEnum and other int-extending types
+            value = int(value)
         cdef int64_t cvalue = value
         if cvalue > self.max_value or cvalue < self.min_value:
             raise OverflowError()

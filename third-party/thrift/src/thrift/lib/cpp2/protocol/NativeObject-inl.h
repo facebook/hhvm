@@ -283,4 +283,116 @@ FB_THRIFT_VALUE_ACCESS_IMPL(NativeSet, set)
 FB_THRIFT_VALUE_ACCESS_IMPL(NativeMap, map)
 FB_THRIFT_VALUE_ACCESS_IMPL(NativeObject, object)
 
+// ---- ValueHelper ---- //
+
+template <typename TT>
+struct ValueHelper<TT> {
+  template <typename T>
+  static NativeValue into(T&& value) {
+    if constexpr (std::is_same_v<TT, type::bool_t>) {
+      return NativeValue(PrimitiveTypes::Bool{value});
+    } else if constexpr (std::is_same_v<TT, type::byte_t>) {
+      return NativeValue(PrimitiveTypes::I8{value});
+    } else if constexpr (std::is_same_v<TT, type::i16_t>) {
+      return NativeValue(PrimitiveTypes::I16{value});
+    } else if constexpr (std::is_same_v<TT, type::i32_t>) {
+      return NativeValue(PrimitiveTypes::I32{value});
+    } else if constexpr (std::is_same_v<TT, type::i64_t>) {
+      return NativeValue(PrimitiveTypes::I64{value});
+    } else if constexpr (type::base_type_v<TT> == type::BaseType::Enum) {
+      return NativeValue(static_cast<int32_t>(value));
+    } else if constexpr (std::is_same_v<TT, type::float_t>) {
+      return NativeValue(PrimitiveTypes::Float{value});
+    } else if constexpr (std::is_same_v<TT, type::double_t>) {
+      return NativeValue(PrimitiveTypes::Double{value});
+    } else if constexpr (
+        std::is_same_v<TT, type::string_t> ||
+        std::is_same_v<TT, type::binary_t>) {
+      return NativeValue(PrimitiveTypes::Bytes{std::forward<T>(value)});
+    } else {
+      static_assert(folly::always_false<T>, "Unknown Type Tag.");
+    }
+  }
+};
+
+template <>
+struct ValueHelper<type::binary_t> {
+  static NativeValue into(folly::IOBuf value) {
+    return NativeValue{PrimitiveTypes::Bytes::fromIOBuf(std::move(value))};
+  }
+  static NativeValue into(std::string_view value) {
+    return NativeValue{PrimitiveTypes::Bytes::fromIOBuf(
+        folly::IOBuf{folly::IOBuf::COPY_BUFFER, value.data(), value.size()})};
+  }
+  static NativeValue into(folly::ByteRange value) {
+    return NativeValue{PrimitiveTypes::Bytes::fromIOBuf(
+        folly::IOBuf{folly::IOBuf::COPY_BUFFER, value.data(), value.size()})};
+  }
+};
+
+template <typename V>
+struct ValueHelper<type::list<V>> {
+  template <typename T>
+  static NativeValue into(T&& value) {
+    using InputListElem = typename std::remove_cvref_t<T>::value_type;
+    using ResultList = typename detail::list_t<InputListElem>;
+    ResultList native_list{};
+    native_list.reserve(value.size());
+    for (auto&& elem : value) {
+      if constexpr (::apache::thrift::type::
+                        is_a_v<V, ::apache::thrift::type::primitive_c>) {
+        native_list.emplace_back(elem);
+      } else if constexpr (std::is_same_v<
+                               ValueHolder,
+                               typename ResultList::value_type>) {
+        native_list.emplace_back(ValueHelper<V>::into(elem));
+      } else if constexpr (std::is_same_v<
+                               NativeObject,
+                               typename ResultList::value_type>) {
+        static_assert(
+            false,
+            "::asValueStruct does not support NativeObject conversion (yet)");
+      } else {
+        static_assert(
+            false, "Missing NativeList specialization for ValueHelper");
+      }
+    }
+    return NativeList{std::move(native_list)};
+  }
+};
+
+template <typename V>
+struct ValueHelper<type::set<V>> {
+  template <typename T>
+  static NativeValue into(T&& value) {
+    using InputSetElem = typename std::remove_cvref_t<T>::value_type;
+    using ResultSet = typename detail::set_t<InputSetElem>;
+    ResultSet native_set{};
+    native_set.reserve(value.size());
+    for (auto&& elem : value) {
+      if constexpr (::apache::thrift::type::
+                        is_a_v<V, ::apache::thrift::type::primitive_c>) {
+        native_set.emplace(elem);
+      } else if constexpr (std::is_same_v<
+                               ValueHolder,
+                               typename ResultSet::value_type>) {
+        native_set.emplace(ValueHelper<V>::into(elem));
+      } else if constexpr (std::is_same_v<
+                               NativeObject,
+                               typename ResultSet::value_type>) {
+        static_assert(
+            false,
+            "::asValueStruct does not support NativeObject conversion (yet)");
+      } else {
+        static_assert(
+            false, "Missing NativeSet specialization for ValueHelper");
+      }
+    }
+    return NativeSet{std::move(native_set)};
+  }
+};
+
+template <typename T, typename Tag>
+struct ValueHelper<type::cpp_type<T, Tag>> : ValueHelper<Tag> {};
+
 } // namespace apache::thrift::protocol::experimental

@@ -744,3 +744,142 @@ TEST(NativeObjectTest, make_list_of_of_maps) {
   ASSERT_TRUE(list.is_list_of_value());
   ASSERT_TRUE(list.as_list_of_value()[0].is_map());
 }
+
+// ---- asValueStruct testcases ---- //
+
+TEST(NativeObjectAsValueStructTest, bool) {
+  testset::struct_bool t;
+  t.field_1().emplace(true);
+  const auto val = experimental::asValueStruct<apache::thrift::type::bool_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_bool());
+  ASSERT_EQ(val.as_bool(), true);
+}
+
+TEST(NativeObjectAsValueStructTest, byte) {
+  testset::struct_byte t;
+  t.field_1().emplace(42);
+  const auto val = experimental::asValueStruct<apache::thrift::type::byte_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_byte());
+  ASSERT_EQ(val.as_byte(), 42);
+}
+
+TEST(NativeObjectAsValueStructTest, i16) {
+  testset::struct_i16 t;
+  t.field_1().emplace(42);
+  const auto val = experimental::asValueStruct<apache::thrift::type::i16_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_i16());
+  ASSERT_EQ(val.as_i16(), 42);
+}
+
+TEST(NativeObjectAsValueStructTest, i32) {
+  testset::struct_i32 t;
+  t.field_1().emplace(42);
+  const auto val = experimental::asValueStruct<apache::thrift::type::i32_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_i32());
+  ASSERT_EQ(val.as_i32(), 42);
+}
+
+TEST(NativeObjectAsValueStructTest, i64) {
+  testset::struct_i64 t;
+  t.field_1().emplace(42);
+  const auto val = experimental::asValueStruct<apache::thrift::type::i64_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_i64());
+  ASSERT_EQ(val.as_i64(), 42);
+}
+
+TEST(NativeObjectAsValueStructTest, float) {
+  testset::struct_float t;
+  t.field_1().emplace(3.1415f);
+  const auto val = experimental::asValueStruct<apache::thrift::type::float_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_float());
+  ASSERT_EQ(val.as_float(), 3.1415f);
+}
+
+TEST(NativeObjectAsValueStructTest, double) {
+  testset::struct_double t;
+  t.field_1().emplace(3.141592653589793);
+  const auto val = experimental::asValueStruct<apache::thrift::type::double_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_double());
+  ASSERT_EQ(val.as_double(), 3.141592653589793);
+}
+
+TEST(NativeObjectAsValueStructTest, string) {
+  testset::struct_string t;
+  t.field_1().emplace("hello");
+  const auto val = experimental::asValueStruct<apache::thrift::type::string_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_bytes());
+  ASSERT_EQ(val.as_bytes(), "hello");
+}
+
+TEST(NativeObjectAsValueStructTest, binary) {
+  testset::struct_binary t;
+  t.field_1().emplace("hello");
+  const auto val = experimental::asValueStruct<apache::thrift::type::binary_t>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_bytes());
+  ASSERT_EQ(val.as_bytes().as_string_view(), "hello");
+}
+
+TEST(NativeObjectAsValueStructTest, list_of_i16) {
+  testset::struct_list_i16 t;
+  std::vector<std::int16_t> list_val = {1, 2, 4, 16};
+  t.field_1().emplace(list_val);
+  const auto val = experimental::asValueStruct<
+      apache::thrift::type::list<apache::thrift::type::i16_t>>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_list());
+  ASSERT_TRUE(val.as_list().is_list_of_i16());
+  ASSERT_EQ(val.as_list().as_list_of_i16(), list_val);
+}
+
+TEST(NativeObjectAsValueStructTest, list_of_bytes) {
+  testset::struct_list_binary t;
+  std::vector<std::string> list_val = {"hello", "world", "!"};
+  t.field_1().emplace(list_val);
+  const auto val = experimental::asValueStruct<
+      apache::thrift::type::list<apache::thrift::type::binary_t>>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_list());
+  ASSERT_TRUE(val.as_list().is_list_of_bytes());
+  experimental::ListOf<experimental::PrimitiveTypes::Bytes> list_of_bytes{
+      list_val.begin(), list_val.end()};
+  ASSERT_EQ(val.as_list().as_list_of_bytes(), list_of_bytes);
+}
+
+TEST(NativeObjectAsValueStructTest, set_of_i16) {
+  testset::struct_set_i16 t;
+  std::set<std::int16_t> set_val = {1, 2, 4, 16};
+  t.field_1().emplace(set_val);
+  const auto val = experimental::asValueStruct<
+      apache::thrift::type::set<apache::thrift::type::i16_t>>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_set());
+  ASSERT_TRUE(val.as_set().is_set_of_i16());
+  experimental::SetOf<experimental::PrimitiveTypes::I16> set_of_i16{
+      set_val.begin(), set_val.end()};
+  ASSERT_EQ(val.as_set().as_set_of_i16(), set_of_i16);
+}
+
+TEST(NativeObjectAsValueStructTest, set_of_bytes) {
+  testset::struct_set_binary t;
+  std::set<std::string> set_val = {"hello", "world", "!"};
+  t.field_1().emplace(set_val);
+  const auto val = experimental::asValueStruct<
+      apache::thrift::type::set<apache::thrift::type::binary_t>>(
+      t.field_1().value());
+  ASSERT_TRUE(val.is_set());
+  ASSERT_TRUE(val.as_set().is_set_of_bytes());
+  experimental::SetOf<experimental::PrimitiveTypes::Bytes> set_of_bytes{};
+  for (auto&& elem : set_val) {
+    set_of_bytes.emplace(elem);
+  }
+  ASSERT_EQ(val.as_set().as_set_of_bytes(), set_of_bytes);
+}

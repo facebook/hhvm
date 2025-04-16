@@ -114,6 +114,7 @@ struct Bytes {
     return *this;
   }
   Bytes& operator=(Bytes&& other) noexcept = default;
+  explicit Bytes(const std::string& s) : buf_(folly::IOBuf::fromString(s)) {}
 
   static Bytes fromStdString(const std::string& v) {
     return Bytes{folly::IOBuf::fromString(v)};
@@ -122,9 +123,22 @@ struct Bytes {
     return Bytes{std::make_unique<folly::IOBuf>(
         folly::IOBuf::COPY_BUFFER, v.data(), v.size())};
   }
+  static Bytes fromIOBuf(const folly::IOBuf& buf) {
+    return Bytes{std::make_unique<folly::IOBuf>(buf)};
+  }
+  static Bytes fromIOBuf(folly::IOBuf&& buf) {
+    return Bytes{std::make_unique<folly::IOBuf>(std::move(buf))};
+  }
 
   const std::uint8_t* data() const { return buf_->data(); }
   std::size_t size() const { return buf_->length(); }
+
+  std::string_view as_string_view() const {
+    if (buf_->isChained()) {
+      throw std::runtime_error("Non-contiguous buffer");
+    }
+    return std::string_view{reinterpret_cast<const char*>(data()), size()};
+  }
 
   bool operator==(const Bytes& other) const {
     return folly::IOBufCompare{}(*buf_, *other.buf_) == folly::ordering::eq;
@@ -1027,6 +1041,14 @@ std::unique_ptr<folly::IOBuf> serializeObject(const NativeObject& val) {
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   serializeObject<Protocol>(val, queue);
   return queue.move();
+}
+
+template <typename TT, typename Tag = void>
+struct ValueHelper;
+
+template <typename TT, typename T = type::native_type<TT>>
+NativeValue asValueStruct(T&& value) {
+  return ValueHelper<TT>::into(std::forward<T>(value));
 }
 
 // ---- Container helpers ---- //

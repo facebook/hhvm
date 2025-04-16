@@ -1840,7 +1840,7 @@ bool Debugger::tryResolveBreakpointInUnit(const DebuggerRequestInfo* /*ri*/, int
   // reachable in code anymore.
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
 
-  std::string functionName = "";
+  std::string functionName;
   const HPHP::Func* function = nullptr;
   if (m_debuggerOptions.notifyOnBpCalibration &&
       !bpMgr->warningSentForBp(bpId)) {

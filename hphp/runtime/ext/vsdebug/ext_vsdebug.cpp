@@ -227,7 +227,7 @@ void VSDebugExtension::threadShutdown() {
 }
 
 std::string& VSDebugExtension::getUnixSocketPath() {
-  static std::string s_unixSocketPath = "";
+  static std::string s_unixSocketPath;
   return s_unixSocketPath;
 }
 
@@ -239,8 +239,8 @@ std::string VSDebugExtension::getDomainSocketGroup() {
 static VSDebugExtension s_vsdebug_extension;
 
 // Linkage for configuration options.
-std::string VSDebugExtension::s_logFilePath {""};
-std::string VSDebugExtension::s_domainSocketGroup {""};
+std::string VSDebugExtension::s_logFilePath;
+std::string VSDebugExtension::s_domainSocketGroup;
 int VSDebugExtension::s_attachListenPort {-1};
 bool VSDebugExtension::s_launchMode {false};
 Debugger* VSDebugExtension::s_debugger {nullptr};

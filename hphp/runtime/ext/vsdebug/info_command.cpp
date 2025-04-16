@@ -102,7 +102,7 @@ bool InfoCommand::executeImpl(
       tryAddFunctionInfo(funcName, sb);
     }
   } else {
-    std::string subSymbol = "";
+    std::string subSymbol;
     size_t pos = std::string::npos;
     if (requestedObject.size() >= 2) {
       pos = requestedObject.find("::");

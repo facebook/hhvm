@@ -1995,7 +1995,7 @@ DynamicPatch::DynamicPatch(DynamicPatch&&) noexcept = default;
 DynamicPatch& DynamicPatch::operator=(DynamicPatch&& other) noexcept = default;
 DynamicPatch::~DynamicPatch() = default;
 
-type::AnyStruct DynamicPatch::toAny(detail::Badge, type::Type type) const {
+type::AnyStruct DynamicPatch::toPatch(type::Type type) const {
   type::AnyStruct any;
   any.protocol() = type::StandardProtocol::Compact;
   any.data() = *protocol::serializeObject<CompactProtocolWriter>(toObject());
@@ -2003,7 +2003,7 @@ type::AnyStruct DynamicPatch::toAny(detail::Badge, type::Type type) const {
   return any;
 }
 
-void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
+void DynamicPatch::fromPatch(const type::AnyStruct& any) {
   auto v = protocol::detail::parseValueFromAny(any);
   fromObject(std::move(v.as_object()));
 }

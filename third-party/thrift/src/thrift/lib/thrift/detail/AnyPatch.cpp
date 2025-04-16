@@ -55,7 +55,7 @@ auto TypeToPatchMapAdapter::fromThrift(StandardType&& vec) -> AdaptedType {
   for (auto& typeToPatchStruct : vec) {
     throwIfInvalidOrUnsupportedAny(*typeToPatchStruct.patch());
     DynamicPatch patch;
-    patch.fromAny(badge, *typeToPatchStruct.patch());
+    patch.fromPatch(*typeToPatchStruct.patch());
     auto it = map.emplace(typeToPatchStruct.type().value(), std::move(patch));
     if (!it.second) {
       throwDuplicatedType(typeToPatchStruct.type().value());
@@ -70,7 +70,7 @@ auto TypeToPatchMapAdapter::toThrift(const AdaptedType& map) -> StandardType {
   for (const auto& [type, patch] : map) {
     auto& obj = vec.emplace_back();
     obj.type() = type;
-    obj.patch() = patch.toAny(badge, type);
+    obj.patch() = patch.toPatch(type);
   }
   return vec;
 }
@@ -100,13 +100,13 @@ bool TypeToPatchMapAdapter::addDynamicPatchToMap(
     AdaptedType& map, const TypeToPatchInternalDoNotUse& typeToPatchStruct) {
   throwIfInvalidOrUnsupportedAny(*typeToPatchStruct.patch());
   DynamicPatch patch;
-  patch.fromAny(badge, *typeToPatchStruct.patch());
+  patch.fromPatch(*typeToPatchStruct.patch());
   return map.emplace(typeToPatchStruct.type().value(), std::move(patch)).second;
 }
 
 type::AnyStruct TypeToPatchMapAdapter::toAny(
     const protocol::DynamicPatch& patch, const type::Type& type) {
-  return patch.toAny(badge, type);
+  return patch.toPatch(type);
 }
 
 template <class Patch>
@@ -170,7 +170,7 @@ template <class Patch>
 void AnyPatch<Patch>::patchIfTypeIsImpl(
     type::Type type, type::AnyStruct any, bool after) {
   DynamicPatch patch;
-  patch.fromAny(badge, any);
+  patch.fromPatch(any);
   if (after) {
     data_.patchIfTypeIsAfter()[type].merge(patch);
   } else {

@@ -800,10 +800,13 @@ class DynamicPatch {
   /// advised to use visitPatch or customVisit to introspect the patch directly.
   ExtractedMasksFromPatch extractMaskFromPatch() const;
 
-  /// @cond
-  void fromAny(detail::Badge, const type::AnyStruct& any);
-  type::AnyStruct toAny(detail::Badge, type::Type type) const;
+  /// Convert Patch stored in Thrift Any to DynamicPatch.
+  void fromPatch(const type::AnyStruct& any);
+  /// Stores DynamicPatch as Patch in Thrift Any with the provided type
+  /// using CompactProtocol.
+  type::AnyStruct toPatch(type::Type type) const;
 
+  /// @cond
   template <typename Protocol>
   std::uint32_t encode(Protocol& prot) const;
   template <typename Protocol>

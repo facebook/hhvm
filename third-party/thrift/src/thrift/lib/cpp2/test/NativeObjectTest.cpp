@@ -26,7 +26,7 @@ namespace conformance = apache::thrift::conformance;
 namespace experimental = apache::thrift::protocol::experimental;
 
 using StandardProtocol = apache::thrift::conformance::StandardProtocol;
-using NativeValue = experimental::Value;
+using NativeValue = experimental::NativeValue;
 
 using I8 = experimental::PrimitiveTypes::I8;
 using I16 = experimental::PrimitiveTypes::I16;
@@ -35,7 +35,7 @@ using I64 = experimental::PrimitiveTypes::I64;
 using Float = experimental::PrimitiveTypes::Float;
 using Double = experimental::PrimitiveTypes::Double;
 using String = experimental::PrimitiveTypes::String;
-using Object = experimental::Object;
+using NativeObject = experimental::NativeObject;
 using Bytes = experimental::PrimitiveTypes::Bytes;
 using String = experimental::PrimitiveTypes::String;
 using ValueHolder = experimental::ValueHolder;
@@ -191,7 +191,7 @@ TEST(ValueHolderTest, Bytes) {
 }
 
 TEST(ObjectIterator, object_with_primitive_fields) {
-  Object obj;
+  NativeObject obj;
   I32 int_val_1 = random_val<I32>();
   obj.emplace(1, NativeValue{int_val_1});
   I32 int_val_2 = random_val<I32>();
@@ -206,7 +206,7 @@ TEST(ObjectIterator, object_with_primitive_fields) {
   }
 
   {
-    Object obj2{obj};
+    NativeObject obj2{obj};
     ASSERT_EQ(obj2.size(), 2);
     for (const auto& [field_id, field_val] : obj2) {
       ASSERT_TRUE(field_val.is_type<I32>());
@@ -216,7 +216,7 @@ TEST(ObjectIterator, object_with_primitive_fields) {
   }
 
   {
-    Object obj3(std::move(obj));
+    NativeObject obj3(std::move(obj));
     ASSERT_EQ(obj3.size(), 2);
     for (const auto& [field_id, field_val] : obj3) {
       ASSERT_TRUE(field_val.is_type<I32>());
@@ -239,13 +239,13 @@ std::unique_ptr<folly::IOBuf> serialize(T& s) {
 }
 
 template <StandardProtocol Protocol>
-Object deserialize(folly::IOBuf& buf) {
+NativeObject deserialize(folly::IOBuf& buf) {
   return experimental::parseObject<
       conformance::detail::protocol_reader_t<Protocol>>(buf);
 }
 
 template <StandardProtocol Protocol, typename T>
-Object testSerDe(const T& t) {
+NativeObject testSerDe(const T& t) {
   auto buf = serialize<Protocol>(t);
   return deserialize<Protocol>(*buf);
 }
@@ -373,7 +373,7 @@ void assertValueListType() {
 
     using ResultingContainerTy = std::conditional_t<
         isStructTy,
-        experimental::ListOf<Object>,
+        experimental::ListOf<NativeObject>,
         experimental::detail::list_t<ListElemTy>>;
 
     ASSERT_TRUE(innerList.is_type<ResultingContainerTy>());
@@ -451,7 +451,7 @@ void assertSetType() {
 
   using ResultSetTy = std::conditional_t<
       apache::thrift::is_thrift_class_v<SetElemTy>,
-      experimental::SetOf<Object>,
+      experimental::SetOf<NativeObject>,
       experimental::detail::set_t<SetElemTy>>;
 
   using ResultElemTy = typename ResultSetTy::value_type;
@@ -490,8 +490,8 @@ void assertSetType() {
       } else {
         ASSERT_TRUE(false);
       }
-    } else if constexpr (std::is_same_v<ResultElemTy, Object>) {
-      Object strct{};
+    } else if constexpr (std::is_same_v<ResultElemTy, NativeObject>) {
+      NativeObject strct{};
       ASSERT_TRUE(objSet.contains(strct));
     } else if constexpr (std::is_same_v<ResultElemTy, Bytes>) {
       ASSERT_TRUE(objSet.contains(Bytes::fromStdString(item)));
@@ -664,8 +664,8 @@ static_assert(
     native_map_type_is_v<Bytes, ValueHolder, String, non_primitives_t>,
     "Specialization of String -> ValueHolder (Converts to Bytes)");
 static_assert(
-    native_map_is_fallback_v<Object, primitives_t>,
+    native_map_is_fallback_v<NativeObject, primitives_t>,
     "Fallback for Object -> PrimitiveValue");
 static_assert(
-    native_map_is_fallback_v<Object, non_primitives_t>,
+    native_map_is_fallback_v<NativeObject, non_primitives_t>,
     "Fallback for Object -> T");

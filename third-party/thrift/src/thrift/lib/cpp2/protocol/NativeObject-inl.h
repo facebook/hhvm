@@ -164,7 +164,7 @@ NativeMap::Specialized<T>* NativeMap::if_type() noexcept {
 // ---- Object ---- //
 
 template <typename... Args>
-Value& Object::emplace(FieldId id, Args... args) {
+NativeValue& NativeObject::emplace(FieldId id, Args... args) {
   auto it = fields.emplace(id, std::forward<Args...>(args)...).first;
   return it->second;
 }
@@ -178,7 +178,7 @@ TType ValueAccess<T>::get_ttype() const {
       [](const NativeList&) { return T_LIST; },
       [](const NativeSet&) { return T_SET; },
       [](const NativeMap&) { return T_MAP; },
-      [](const Object&) { return T_STRUCT; },
+      [](const NativeObject&) { return T_STRUCT; },
       [](const auto& primitive) {
         using V = std::remove_cvref_t<decltype(primitive)>;
         static_assert(detail::is_primitive_v<V>);
@@ -188,12 +188,12 @@ TType ValueAccess<T>::get_ttype() const {
 }
 
 template <typename T>
-ValueAccess<T>::operator Value&() noexcept {
+ValueAccess<T>::operator NativeValue&() noexcept {
   return as_value();
 }
 
 template <typename T>
-ValueAccess<T>::operator const Value&() const noexcept {
+ValueAccess<T>::operator const NativeValue&() const noexcept {
   return as_const_value();
 }
 
@@ -230,12 +230,12 @@ detail::native_value_type_t<Ty>* ValueAccess<T>::if_type() noexcept {
 }
 
 template <typename T>
-bool ValueAccess<T>::operator==(const Value& other) const {
+bool ValueAccess<T>::operator==(const NativeValue& other) const {
   return as_value().inner() == other.inner();
 }
 
 template <typename T>
-bool ValueAccess<T>::operator!=(const Value& other) const {
+bool ValueAccess<T>::operator!=(const NativeValue& other) const {
   return as_value().inner() != other.inner();
 }
 
@@ -286,6 +286,6 @@ FB_THRIFT_VALUE_ACCESS_IMPL(PrimitiveTypes::String, string)
 FB_THRIFT_VALUE_ACCESS_IMPL(NativeList, list)
 FB_THRIFT_VALUE_ACCESS_IMPL(NativeSet, set)
 FB_THRIFT_VALUE_ACCESS_IMPL(NativeMap, map)
-FB_THRIFT_VALUE_ACCESS_IMPL(Object, object)
+FB_THRIFT_VALUE_ACCESS_IMPL(NativeObject, object)
 
 } // namespace apache::thrift::protocol::experimental

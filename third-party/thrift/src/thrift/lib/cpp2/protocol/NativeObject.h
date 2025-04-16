@@ -30,8 +30,8 @@
 #include <thrift/lib/cpp2/type/Type.h>
 
 namespace apache::thrift::protocol::experimental {
-class Object;
-class Value;
+class NativeObject;
+class NativeValue;
 struct Bytes;
 class ValueHolder;
 class NativeList;
@@ -39,8 +39,8 @@ class NativeSet;
 class NativeMap;
 
 namespace detail {
-size_t hash_value(const Value& v);
-size_t hash_value(const Object& o);
+size_t hash_value(const NativeValue& v);
+size_t hash_value(const NativeObject& o);
 size_t hash_value(const Bytes& s);
 size_t hash_value(const ValueHolder& v);
 } // namespace detail
@@ -50,27 +50,29 @@ size_t hash_value(const ValueHolder& v);
 // ---- std::hash specialization for container types ---- //
 
 template <>
-struct ::std::hash<apache::thrift::protocol::experimental::Value> {
+struct ::std::hash<apache::thrift::protocol::experimental::NativeValue> {
   std::size_t operator()(
-      const apache::thrift::protocol::experimental::Value& s) const noexcept {
+      const apache::thrift::protocol::experimental::NativeValue& s)
+      const noexcept {
     return apache::thrift::protocol::experimental::detail::hash_value(s);
   }
 };
 
 template <>
 struct ::std::hash<
-    std::unique_ptr<apache::thrift::protocol::experimental::Value>> {
-  std::size_t operator()(
-      const std::unique_ptr<apache::thrift::protocol::experimental::Value>& s)
-      const noexcept {
+    std::unique_ptr<apache::thrift::protocol::experimental::NativeValue>> {
+  std::size_t operator()(const std::unique_ptr<
+                         apache::thrift::protocol::experimental::NativeValue>&
+                             s) const noexcept {
     return apache::thrift::protocol::experimental::detail::hash_value(*s);
   }
 };
 
 template <>
-struct std::hash<apache::thrift::protocol::experimental::Object> {
+struct std::hash<apache::thrift::protocol::experimental::NativeObject> {
   std::size_t operator()(
-      const apache::thrift::protocol::experimental::Object& s) const noexcept {
+      const apache::thrift::protocol::experimental::NativeObject& s)
+      const noexcept {
     return apache::thrift::protocol::experimental::detail::hash_value(s);
   }
 };
@@ -216,8 +218,8 @@ class ValueAccess {
   TType get_ttype() const;
 
   // Allow implicit coercion into Value
-  operator const Value&() const noexcept;
-  operator Value&() noexcept;
+  operator const NativeValue&() const noexcept;
+  operator NativeValue&() noexcept;
 
   template <typename Ty>
   bool is_type() const noexcept;
@@ -234,8 +236,8 @@ class ValueAccess {
   template <typename Ty>
   detail::native_value_type_t<Ty>* if_type() noexcept;
 
-  bool operator==(const Value& other) const;
-  bool operator!=(const Value& other) const;
+  bool operator==(const NativeValue& other) const;
+  bool operator!=(const NativeValue& other) const;
 
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::Bool, bool)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(PrimitiveTypes::I8, byte)
@@ -249,17 +251,17 @@ class ValueAccess {
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeList, list)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeSet, set)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeMap, map)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(Object, object)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(NativeObject, object)
 
  protected:
   ValueAccess() = default;
 
  private:
-  Value& as_value() noexcept { return static_cast<T&>(*this).as_value(); }
-  const Value& as_value() const noexcept {
+  NativeValue& as_value() noexcept { return static_cast<T&>(*this).as_value(); }
+  const NativeValue& as_value() const noexcept {
     return static_cast<const T&>(*this).as_value();
   }
-  const Value& as_const_value() const noexcept {
+  const NativeValue& as_const_value() const noexcept {
     return static_cast<const T&>(*this).as_value();
   }
 };
@@ -307,10 +309,10 @@ class alignas(ALIGN_OF_VALUE) ValueHolder : public ValueAccess<ValueHolder> {
  public:
   ValueHolder() noexcept = default;
 
-  /* implicit */ ValueHolder(const Value&);
+  /* implicit */ ValueHolder(const NativeValue&);
   ValueHolder(const ValueHolder&);
 
-  /* implicit */ ValueHolder(Value&&) noexcept;
+  /* implicit */ ValueHolder(NativeValue&&) noexcept;
   ValueHolder(ValueHolder&&) noexcept;
 
   ValueHolder& operator=(const ValueHolder&);
@@ -318,8 +320,8 @@ class alignas(ALIGN_OF_VALUE) ValueHolder : public ValueAccess<ValueHolder> {
 
   ~ValueHolder();
 
-  Value& as_value() noexcept;
-  const Value& as_value() const noexcept;
+  NativeValue& as_value() noexcept;
+  const NativeValue& as_value() const noexcept;
 
   bool operator==(const ValueHolder& other) const;
   bool operator!=(const ValueHolder& other) const;
@@ -331,29 +333,29 @@ class alignas(ALIGN_OF_VALUE) ValueHolder : public ValueAccess<ValueHolder> {
 template <typename... Ts>
 using FieldMapOf = folly::F14FastMap<Ts...>;
 
-class Object {
+class NativeObject {
  public:
   using FieldId = std::int16_t;
   using Fields = FieldMapOf<FieldId, ValueHolder>;
 
-  Object() noexcept = default;
-  Object(Object&&) noexcept = default;
-  ~Object() = default;
-  Object& operator=(const Object&) = default;
-  Object& operator=(Object&&) noexcept = default;
-  Object(const Object&) = default;
+  NativeObject() noexcept = default;
+  NativeObject(NativeObject&&) noexcept = default;
+  ~NativeObject() = default;
+  NativeObject& operator=(const NativeObject&) = default;
+  NativeObject& operator=(NativeObject&&) noexcept = default;
+  NativeObject(const NativeObject&) = default;
 
-  bool operator==(const Object& other) const = default;
+  bool operator==(const NativeObject& other) const = default;
 
-  Value& operator[](FieldId i);
-  Value& at(FieldId i);
-  const Value& at(FieldId i) const;
+  NativeValue& operator[](FieldId i);
+  NativeValue& at(FieldId i);
+  const NativeValue& at(FieldId i) const;
   bool contains(FieldId i) const;
   std::size_t erase(FieldId i);
-  Value* if_contains(FieldId i);
-  const Value* if_contains(FieldId i) const;
+  NativeValue* if_contains(FieldId i);
+  const NativeValue* if_contains(FieldId i) const;
   template <typename... Args>
-  Value& emplace(FieldId id, Args... args);
+  NativeValue& emplace(FieldId id, Args... args);
 
   [[nodiscard]] Fields::iterator begin();
   [[nodiscard]] Fields::const_iterator begin() const;
@@ -378,7 +380,7 @@ template <typename T, bool StringToBinary = true>
 using list_t = ListOf<std::conditional_t<
     is_primitive_v<T, StringToBinary>,
     typename native_value_type<T, StringToBinary>::type,
-    std::conditional_t<is_structured_v<T>, Object, ValueHolder>>>;
+    std::conditional_t<is_structured_v<T>, NativeObject, ValueHolder>>>;
 
 } // namespace detail
 
@@ -397,7 +399,7 @@ class NativeList {
       ListOf<PrimitiveTypes::Double>,
       ListOf<PrimitiveTypes::Bytes>,
       ListOf<PrimitiveTypes::String>,
-      ListOf<Object>,
+      ListOf<NativeObject>,
       // Fallback for list/map/set
       ListOf<ValueHolder>>;
 
@@ -436,7 +438,7 @@ class NativeList {
       ListOf<PrimitiveTypes::Bytes>, list_of_bytes)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
       ListOf<PrimitiveTypes::String>, list_of_string)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<Object>, list_of_object)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<NativeObject>, list_of_object)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(ListOf<ValueHolder>, list_of_value)
 
   template <typename T>
@@ -485,7 +487,7 @@ class NativeSet {
       SetOf<PrimitiveTypes::Double>,
       SetOf<PrimitiveTypes::Bytes>,
       SetOf<PrimitiveTypes::String>,
-      SetOf<Object>,
+      SetOf<NativeObject>,
       // Fallback for list/map//set
       SetOf<ValueHolder>>;
 
@@ -521,7 +523,7 @@ class NativeSet {
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<PrimitiveTypes::Bytes>, set_of_bytes)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(
       SetOf<PrimitiveTypes::String>, set_of_string)
-  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<Object>, set_of_object)
+  FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<NativeObject>, set_of_object)
   FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD(SetOf<ValueHolder>, set_of_value)
 
   template <typename T>
@@ -695,9 +697,9 @@ struct native_value_type<PrimitiveTypes::String, StringToBinary> {
 };
 
 template <bool StringToBinary>
-struct native_value_type<Object, StringToBinary> {
-  using type = Object;
-  using tag = ::apache::thrift::type::struct_t<Object>;
+struct native_value_type<NativeObject, StringToBinary> {
+  using type = NativeObject;
+  using tag = ::apache::thrift::type::struct_t<NativeObject>;
 };
 
 template <bool StringToBinary>
@@ -761,7 +763,7 @@ struct native_value_type<std::map<Ts...>, StringToBinary> {
 
 // ---- Definition of a Thrift Value ---- //
 
-class Value : public ValueAccess<Value> {
+class NativeValue : public ValueAccess<NativeValue> {
  public:
   using Kind = std::variant<
       PrimitiveTypes::Bool,
@@ -776,60 +778,60 @@ class Value : public ValueAccess<Value> {
       NativeList,
       NativeSet,
       NativeMap,
-      Object>;
+      NativeObject>;
 
   const Kind& inner() const;
 
-  Value& as_value() noexcept { return *this; }
-  const Value& as_value() const noexcept { return *this; }
+  NativeValue& as_value() noexcept { return *this; }
+  const NativeValue& as_value() const noexcept { return *this; }
 
   // Default ops
-  Value(Value&& obj) noexcept = default;
-  Value(const Value&);
-  Value& operator=(const Value&) noexcept = default;
-  Value& operator=(Value&&) noexcept = default;
-  ~Value() noexcept = default;
+  NativeValue(NativeValue&& obj) noexcept = default;
+  NativeValue(const NativeValue&);
+  NativeValue& operator=(const NativeValue&) noexcept = default;
+  NativeValue& operator=(NativeValue&&) noexcept = default;
+  ~NativeValue() noexcept = default;
 
   // Variant ctors
-  /* implicit */ Value(Kind&& kind) noexcept;
-  /* implicit */ Value(PrimitiveTypes::Bool&& b) noexcept;
-  /* implicit */ Value(PrimitiveTypes::I8&& i8) noexcept;
-  /* implicit */ Value(PrimitiveTypes::I16&& i16) noexcept;
-  /* implicit */ Value(PrimitiveTypes::I32&& i32) noexcept;
-  /* implicit */ Value(PrimitiveTypes::I64&& i64) noexcept;
-  /* implicit */ Value(PrimitiveTypes::Float&& f) noexcept;
-  /* implicit */ Value(PrimitiveTypes::Double&& d) noexcept;
-  /* implicit */ Value(PrimitiveTypes::Bytes&& b) noexcept;
-  /* implicit */ Value(PrimitiveTypes::String&& s) noexcept;
-  /* implicit */ Value(NativeList&& list) noexcept;
-  /* implicit */ Value(NativeSet&& set) noexcept;
-  /* implicit */ Value(NativeMap&& map) noexcept;
-  /* implicit */ Value(Object&& strct) noexcept;
+  /* implicit */ NativeValue(Kind&& kind) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::Bool&& b) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::I8&& i8) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::I16&& i16) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::I32&& i32) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::I64&& i64) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::Float&& f) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::Double&& d) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::Bytes&& b) noexcept;
+  /* implicit */ NativeValue(PrimitiveTypes::String&& s) noexcept;
+  /* implicit */ NativeValue(NativeList&& list) noexcept;
+  /* implicit */ NativeValue(NativeSet&& set) noexcept;
+  /* implicit */ NativeValue(NativeMap&& map) noexcept;
+  /* implicit */ NativeValue(NativeObject&& strct) noexcept;
 
-  /* implicit */ Value(const Kind& kind);
-  /* implicit */ Value(const PrimitiveTypes::Bool& b);
-  /* implicit */ Value(const PrimitiveTypes::I8& i8);
-  /* implicit */ Value(const PrimitiveTypes::I16& i16);
-  /* implicit */ Value(const PrimitiveTypes::I32& i32);
-  /* implicit */ Value(const PrimitiveTypes::I64& i64);
-  /* implicit */ Value(const PrimitiveTypes::Float& f);
-  /* implicit */ Value(const PrimitiveTypes::Double& d);
-  /* implicit */ Value(const PrimitiveTypes::Bytes& b);
-  /* implicit */ Value(const PrimitiveTypes::String& s);
-  /* implicit */ Value(const NativeList& list);
-  /* implicit */ Value(const NativeSet& set);
-  /* implicit */ Value(const NativeMap& map);
-  /* implicit */ Value(const Object& strct);
+  /* implicit */ NativeValue(const Kind& kind);
+  /* implicit */ NativeValue(const PrimitiveTypes::Bool& b);
+  /* implicit */ NativeValue(const PrimitiveTypes::I8& i8);
+  /* implicit */ NativeValue(const PrimitiveTypes::I16& i16);
+  /* implicit */ NativeValue(const PrimitiveTypes::I32& i32);
+  /* implicit */ NativeValue(const PrimitiveTypes::I64& i64);
+  /* implicit */ NativeValue(const PrimitiveTypes::Float& f);
+  /* implicit */ NativeValue(const PrimitiveTypes::Double& d);
+  /* implicit */ NativeValue(const PrimitiveTypes::Bytes& b);
+  /* implicit */ NativeValue(const PrimitiveTypes::String& s);
+  /* implicit */ NativeValue(const NativeList& list);
+  /* implicit */ NativeValue(const NativeSet& set);
+  /* implicit */ NativeValue(const NativeMap& map);
+  /* implicit */ NativeValue(const NativeObject& strct);
 
  private:
   Kind kind_;
 }; // namespace apache::thrift::protocol::experimental
 
 static_assert(
-    sizeof(Value) == SIZE_OF_VALUE,
+    sizeof(NativeValue) == SIZE_OF_VALUE,
     "The size of Value must match the size of ValueHolder");
 static_assert(
-    alignof(Value) == alignof(ValueHolder),
+    alignof(NativeValue) == alignof(ValueHolder),
     "The alignment of Value must match the alignment of ValueHolder");
 
 #undef FBTHRIFT_DEF_MAIN_TYPE_ACCESS_FWD
@@ -859,52 +861,52 @@ constexpr bool is_map_v = ::apache::thrift::type::is_a_v<
 
 // ---- Parsing functions ---- //
 
-Object parseObjectVia(
+NativeObject parseObjectVia(
     ::apache::thrift::BinaryProtocolReader& prot, bool string_to_binary);
-Object parseObjectVia(
+NativeObject parseObjectVia(
     ::apache::thrift::CompactProtocolReader& prot, bool string_to_binary);
 std::uint32_t serializeObjectVia(
-    ::apache::thrift::BinaryProtocolWriter& prot, const Object& obj);
+    ::apache::thrift::BinaryProtocolWriter& prot, const NativeObject& obj);
 std::uint32_t serializeObjectVia(
-    ::apache::thrift::CompactProtocolWriter& prot, const Object& obj);
+    ::apache::thrift::CompactProtocolWriter& prot, const NativeObject& obj);
 std::uint32_t serializeValueVia(
-    ::apache::thrift::BinaryProtocolWriter& prot, const Value& value);
+    ::apache::thrift::BinaryProtocolWriter& prot, const NativeValue& value);
 std::uint32_t serializeValueVia(
-    ::apache::thrift::CompactProtocolWriter& prot, const Value& value);
+    ::apache::thrift::CompactProtocolWriter& prot, const NativeValue& value);
 
 } // namespace detail
 
 template <class Protocol>
-Object parseObject(Protocol& prot, bool string_to_binary = true) {
+NativeObject parseObject(Protocol& prot, bool string_to_binary = true) {
   return detail::parseObjectVia(prot, string_to_binary);
 }
 
 template <class Protocol>
-Object parseObject(folly::IOBuf& buf, bool string_to_binary = true) {
+NativeObject parseObject(folly::IOBuf& buf, bool string_to_binary = true) {
   Protocol prot{};
   prot.setInput(&buf);
   return parseObject<Protocol>(prot, string_to_binary);
 }
 
 template <class Protocol>
-std::uint32_t serializeObject(Protocol& prot, const Object& obj) {
+std::uint32_t serializeObject(Protocol& prot, const NativeObject& obj) {
   return detail::serializeObjectVia(prot, obj);
 }
 
 template <class Protocol>
-std::uint32_t serializeValue(Protocol& prot, const Value& val) {
+std::uint32_t serializeValue(Protocol& prot, const NativeValue& val) {
   return detail::serializeValueVia(prot, val);
 }
 
 template <class Protocol>
-void serializeObject(const Object& val, folly::IOBufQueue& queue) {
+void serializeObject(const NativeObject& val, folly::IOBufQueue& queue) {
   Protocol prot{};
   prot.setOutput(&queue);
   serializeObject(prot, val);
 }
 
 template <class Protocol>
-std::unique_ptr<folly::IOBuf> serializeObject(const Object& val) {
+std::unique_ptr<folly::IOBuf> serializeObject(const NativeObject& val) {
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   serializeObject<Protocol>(val, queue);
   return queue.move();

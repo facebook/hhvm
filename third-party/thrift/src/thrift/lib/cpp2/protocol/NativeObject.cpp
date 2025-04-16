@@ -29,16 +29,16 @@ using String = PrimitiveTypes::String;
 
 // ---- ValueHolder ---- //
 
-ValueHolder::ValueHolder(const Value& val) : data_{} {
-  static_cast<Value&>(*this) = val;
+ValueHolder::ValueHolder(const NativeValue& val) : data_{} {
+  static_cast<NativeValue&>(*this) = val;
 }
 
 ValueHolder::ValueHolder(const ValueHolder& val) : data_{} {
-  static_cast<Value&>(*this) = static_cast<const Value&>(val);
+  static_cast<NativeValue&>(*this) = static_cast<const NativeValue&>(val);
 }
 
-ValueHolder::ValueHolder(Value&& val) noexcept : data_{} {
-  static_cast<Value&>(*this) = std::move(val);
+ValueHolder::ValueHolder(NativeValue&& val) noexcept : data_{} {
+  static_cast<NativeValue&>(*this) = std::move(val);
 }
 
 ValueHolder::ValueHolder(ValueHolder&& val) noexcept
@@ -46,16 +46,16 @@ ValueHolder::ValueHolder(ValueHolder&& val) noexcept
   val.data_ = {};
 }
 
-Value& ValueHolder::as_value() noexcept {
-  return reinterpret_cast<Value&>(data_);
+NativeValue& ValueHolder::as_value() noexcept {
+  return reinterpret_cast<NativeValue&>(data_);
 }
 
-const Value& ValueHolder::as_value() const noexcept {
-  return reinterpret_cast<const Value&>(data_);
+const NativeValue& ValueHolder::as_value() const noexcept {
+  return reinterpret_cast<const NativeValue&>(data_);
 }
 
 ValueHolder& ValueHolder::operator=(const ValueHolder& val) {
-  static_cast<Value&>(*this) = static_cast<const Value&>(val);
+  static_cast<NativeValue&>(*this) = static_cast<const NativeValue&>(val);
   return *this;
 }
 
@@ -69,12 +69,13 @@ ValueHolder::~ValueHolder() {
   // TODO(sadroeck) - Invalidate data_ by putting sentinal value as last byte ?
   // Note: this should always be the std::variant index
   if (data_ != decltype(data_){}) {
-    static_cast<Value&>(*this).~Value();
+    static_cast<NativeValue&>(*this).~NativeValue();
   }
 }
 
 bool ValueHolder::operator==(const ValueHolder& other) const {
-  return static_cast<const Value&>(*this) == static_cast<const Value&>(other);
+  return static_cast<const NativeValue&>(*this) ==
+      static_cast<const NativeValue&>(other);
 }
 
 bool ValueHolder::operator!=(const ValueHolder& other) const {
@@ -83,39 +84,41 @@ bool ValueHolder::operator!=(const ValueHolder& other) const {
 
 // ---- Value ---- //
 
-Value::Value(const Value& other) : kind_(other.kind_) {}
-Value::Value(const Value::Kind& kind) : kind_(kind) {}
+NativeValue::NativeValue(const NativeValue& other) : kind_(other.kind_) {}
+NativeValue::NativeValue(const NativeValue::Kind& kind) : kind_(kind) {}
 
-Value::Value(Value::Kind&& kind) noexcept : kind_(std::move(kind)) {}
-Value::Value(Bool&& b) noexcept : kind_(std::move(b)) {}
-Value::Value(I8&& i) noexcept : kind_(std::move(i)) {}
-Value::Value(I16&& i) noexcept : kind_(std::move(i)) {}
-Value::Value(I32&& i) noexcept : kind_(std::move(i)) {}
-Value::Value(I64&& i) noexcept : kind_(std::move(i)) {}
-Value::Value(Float&& f) noexcept : kind_(std::move(f)) {}
-Value::Value(Double&& d) noexcept : kind_(std::move(d)) {}
-Value::Value(Bytes&& s) noexcept : kind_(std::move(s)) {}
-Value::Value(String&& s) noexcept : kind_(std::move(s)) {}
-Value::Value(NativeList&& list) noexcept : kind_(std::move(list)) {}
-Value::Value(NativeSet&& set) noexcept : kind_(std::move(set)) {}
-Value::Value(NativeMap&& map) noexcept : kind_(std::move(map)) {}
-Value::Value(Object&& strct) noexcept : kind_(std::move(strct)) {}
+NativeValue::NativeValue(NativeValue::Kind&& kind) noexcept
+    : kind_(std::move(kind)) {}
+NativeValue::NativeValue(Bool&& b) noexcept : kind_(std::move(b)) {}
+NativeValue::NativeValue(I8&& i) noexcept : kind_(std::move(i)) {}
+NativeValue::NativeValue(I16&& i) noexcept : kind_(std::move(i)) {}
+NativeValue::NativeValue(I32&& i) noexcept : kind_(std::move(i)) {}
+NativeValue::NativeValue(I64&& i) noexcept : kind_(std::move(i)) {}
+NativeValue::NativeValue(Float&& f) noexcept : kind_(std::move(f)) {}
+NativeValue::NativeValue(Double&& d) noexcept : kind_(std::move(d)) {}
+NativeValue::NativeValue(Bytes&& s) noexcept : kind_(std::move(s)) {}
+NativeValue::NativeValue(String&& s) noexcept : kind_(std::move(s)) {}
+NativeValue::NativeValue(NativeList&& list) noexcept : kind_(std::move(list)) {}
+NativeValue::NativeValue(NativeSet&& set) noexcept : kind_(std::move(set)) {}
+NativeValue::NativeValue(NativeMap&& map) noexcept : kind_(std::move(map)) {}
+NativeValue::NativeValue(NativeObject&& strct) noexcept
+    : kind_(std::move(strct)) {}
 
-Value::Value(const Bool& b) : kind_(b) {}
-Value::Value(const I8& i8) : kind_(i8) {}
-Value::Value(const I16& i16) : kind_(i16) {}
-Value::Value(const I32& i32) : kind_(i32) {}
-Value::Value(const I64& i64) : kind_(i64) {}
-Value::Value(const Float& f) : kind_(f) {}
-Value::Value(const Double& d) : kind_(d) {}
-Value::Value(const Bytes& b) : kind_(b) {}
-Value::Value(const String& s) : kind_(s) {}
-Value::Value(const NativeList& list) : kind_(list) {}
-Value::Value(const NativeSet& set) : kind_(set) {}
-Value::Value(const NativeMap& map) : kind_(map) {}
-Value::Value(const Object& strct) : kind_(strct) {}
+NativeValue::NativeValue(const Bool& b) : kind_(b) {}
+NativeValue::NativeValue(const I8& i8) : kind_(i8) {}
+NativeValue::NativeValue(const I16& i16) : kind_(i16) {}
+NativeValue::NativeValue(const I32& i32) : kind_(i32) {}
+NativeValue::NativeValue(const I64& i64) : kind_(i64) {}
+NativeValue::NativeValue(const Float& f) : kind_(f) {}
+NativeValue::NativeValue(const Double& d) : kind_(d) {}
+NativeValue::NativeValue(const Bytes& b) : kind_(b) {}
+NativeValue::NativeValue(const String& s) : kind_(s) {}
+NativeValue::NativeValue(const NativeList& list) : kind_(list) {}
+NativeValue::NativeValue(const NativeSet& set) : kind_(set) {}
+NativeValue::NativeValue(const NativeMap& map) : kind_(map) {}
+NativeValue::NativeValue(const NativeObject& strct) : kind_(strct) {}
 
-const Value::Kind& Value::inner() const {
+const NativeValue::Kind& NativeValue::inner() const {
   return kind_;
 }
 
@@ -242,7 +245,7 @@ template <typename Protocol, typename Key, typename Value, bool StringToBinary>
 detail::map_t<Key, Value> read_map_as(Protocol& prot, std::uint32_t size);
 
 template <typename Protocol, bool StringToBinary>
-Object read_struct(Protocol& prot);
+NativeObject read_struct(Protocol& prot);
 
 constexpr bool is_primitive(TType type) {
   switch (type) {
@@ -274,7 +277,7 @@ ListOf<T> read_list_as(Protocol& prot, std::uint32_t size) {
   ListOf<T> list{};
   list.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
-    if constexpr (std::is_same_v<T, Object>) {
+    if constexpr (std::is_same_v<T, NativeObject>) {
       list.emplace_back(read_struct<Protocol, StringToBinary>(prot));
     } else if constexpr (detail::is_primitive_v<T>) {
       list.emplace_back(read_primitive_as<Protocol, T>(prot));
@@ -291,11 +294,11 @@ ListOf<ValueHolder> read_value_list_as(Protocol& prot, std::uint32_t size) {
   list.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
     if constexpr (std::is_same_v<T, NativeList>) {
-      list.emplace_back(Value(read_list<Protocol, StringToBinary>(prot)));
+      list.emplace_back(NativeValue(read_list<Protocol, StringToBinary>(prot)));
     } else if constexpr (std::is_same_v<T, NativeSet>) {
-      list.emplace_back(Value(read_set<Protocol, StringToBinary>(prot)));
+      list.emplace_back(NativeValue(read_set<Protocol, StringToBinary>(prot)));
     } else if constexpr (std::is_same_v<T, NativeMap>) {
-      list.emplace_back(Value{read_map<Protocol, StringToBinary>(prot)});
+      list.emplace_back(NativeValue{read_map<Protocol, StringToBinary>(prot)});
     } else {
       static_assert(false, "Missing value list specialization");
     }
@@ -345,7 +348,7 @@ NativeList read_list(Protocol& prot) {
       }
     }
     case TType::T_STRUCT: {
-      return read_list_as<Protocol, Object, StringToBinary>(prot, size);
+      return read_list_as<Protocol, NativeObject, StringToBinary>(prot, size);
     }
     case TType::T_LIST: {
       return read_value_list_as<Protocol, NativeList, StringToBinary>(
@@ -376,7 +379,7 @@ SetOf<T> read_set_as(Protocol& prot, std::uint32_t size) {
   SetOf<T> set;
   set.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
-    if constexpr (std::is_same_v<T, Object>) {
+    if constexpr (std::is_same_v<T, NativeObject>) {
       set.insert(read_struct<Protocol, StringToBinary>(prot));
     } else {
       static_assert(detail::is_primitive_v<T>);
@@ -392,11 +395,11 @@ SetOf<ValueHolder> read_value_set_as(Protocol& prot, std::uint32_t size) {
   set.reserve(size);
   for (std::uint32_t i = 0; i < size; ++i) {
     if constexpr (std::is_same_v<T, NativeList>) {
-      set.insert(Value{read_list<Protocol, StringToBinary>(prot)});
+      set.insert(NativeValue{read_list<Protocol, StringToBinary>(prot)});
     } else if constexpr (std::is_same_v<T, NativeSet>) {
-      set.insert(Value{read_set<Protocol, StringToBinary>(prot)});
+      set.insert(NativeValue{read_set<Protocol, StringToBinary>(prot)});
     } else if constexpr (std::is_same_v<T, NativeMap>) {
-      set.insert(Value{read_map<Protocol, StringToBinary>(prot)});
+      set.insert(NativeValue{read_map<Protocol, StringToBinary>(prot)});
     } else {
       static_assert(false, "Missing value set specialization");
     }
@@ -446,7 +449,7 @@ NativeSet read_set(Protocol& prot) {
       }
     }
     case TType::T_STRUCT: {
-      return read_set_as<Protocol, Object, StringToBinary>(prot, size);
+      return read_set_as<Protocol, NativeObject, StringToBinary>(prot, size);
     }
     case TType::T_LIST: {
       return read_value_set_as<Protocol, NativeList, StringToBinary>(
@@ -484,22 +487,22 @@ detail::map_t<K, V> read_map_as(Protocol& prot, std::uint32_t size) {
     } else {
       static_assert(std::is_same_v<MapKeyTy, ValueHolder>);
       if constexpr (detail::is_primitive_v<K>) {
-        return Value{read_primitive_as<Protocol, K>(prot)};
+        return NativeValue{read_primitive_as<Protocol, K>(prot)};
       } else {
-        return Value{read_struct<Protocol, StringToBinary>(prot)};
+        return NativeValue{read_struct<Protocol, StringToBinary>(prot)};
       }
     }
   };
 
   auto readValue = [&]() -> MapValueTy {
-    if constexpr (std::is_same_v<MapValueTy, Object>) {
+    if constexpr (std::is_same_v<MapValueTy, NativeObject>) {
       return read_struct<Protocol, StringToBinary>(prot);
     } else {
       static_assert(std::is_same_v<MapValueTy, ValueHolder>);
       if constexpr (detail::is_primitive_v<V>) {
-        return Value{read_primitive_as<Protocol, V>(prot)};
+        return NativeValue{read_primitive_as<Protocol, V>(prot)};
       } else {
-        return Value{read_struct<Protocol, StringToBinary>(prot)};
+        return NativeValue{read_struct<Protocol, StringToBinary>(prot)};
       }
     }
   };
@@ -542,7 +545,8 @@ NativeMap read_v_map_as(Protocol& prot, TType valType, std::uint32_t size) {
       }
     }
     case TType::T_STRUCT: {
-      return read_map_as<Protocol, Key, Object, StringToBinary>(prot, size);
+      return read_map_as<Protocol, Key, NativeObject, StringToBinary>(
+          prot, size);
     }
     case TType::T_LIST: {
       return read_map_as<Protocol, Key, NativeList, StringToBinary>(prot, size);
@@ -601,7 +605,7 @@ NativeMap read_kv_map(
       }
     }
     case TType::T_STRUCT: {
-      return read_v_map_as<Protocol, Object, StringToBinary>(
+      return read_v_map_as<Protocol, NativeObject, StringToBinary>(
           prot, valType, size);
     }
     case TType::T_LIST: {
@@ -644,12 +648,15 @@ NativeMap read_map(Protocol& prot) {
 }
 template <typename... Args>
 auto make_value(Args&&... args) {
-  return ValueHolder{Value(std::forward<Args>(args)...)};
+  return ValueHolder{NativeValue(std::forward<Args>(args)...)};
 }
 
 template <typename Protocol, bool StringToBinary>
 void read_struct_field(
-    Protocol& prot, TType field_type, Object& strct, Object::FieldId id) {
+    Protocol& prot,
+    TType field_type,
+    NativeObject& strct,
+    NativeObject::FieldId id) {
   switch (field_type) {
     case T_BOOL: {
       strct.emplace(id, make_value(read_primitive_as<Protocol, Bool>(prot)));
@@ -717,11 +724,11 @@ void read_struct_field(
 }
 
 template <class Protocol, bool StringToBinary>
-Object read_struct(Protocol& prot) {
+NativeObject read_struct(Protocol& prot) {
   std::string name;
   int16_t fid{};
   TType ftype{};
-  Object strct{};
+  NativeObject strct{};
   prot.readStructBegin(name);
   while (true) {
     prot.readFieldBegin(name, ftype, fid);
@@ -735,7 +742,7 @@ Object read_struct(Protocol& prot) {
   return strct;
 }
 
-Object detail::parseObjectVia(
+NativeObject detail::parseObjectVia(
     ::apache::thrift::BinaryProtocolReader& prot, bool string_to_binary) {
   if (string_to_binary) {
     return read_struct<::apache::thrift::BinaryProtocolReader, true>(prot);
@@ -744,7 +751,7 @@ Object detail::parseObjectVia(
   }
 }
 
-Object detail::parseObjectVia(
+NativeObject detail::parseObjectVia(
     ::apache::thrift::CompactProtocolReader& prot, bool string_to_binary) {
   if (string_to_binary) {
     return read_struct<::apache::thrift::CompactProtocolReader, true>(prot);
@@ -768,7 +775,7 @@ PROTOTYPE_WRITE(Float)
 PROTOTYPE_WRITE(Double)
 PROTOTYPE_WRITE(Bytes)
 PROTOTYPE_WRITE(String)
-PROTOTYPE_WRITE(Object)
+PROTOTYPE_WRITE(NativeObject)
 PROTOTYPE_WRITE(NativeList)
 PROTOTYPE_WRITE(NativeSet)
 PROTOTYPE_WRITE(NativeMap)
@@ -811,7 +818,7 @@ std::uint32_t write(Protocol& prot, const String& val) {
 }
 
 template <typename Protocol>
-std::uint32_t write(Protocol& prot, const Object& obj) {
+std::uint32_t write(Protocol& prot, const NativeObject& obj) {
   uint32_t serializedSize = 0;
   serializedSize += prot.writeStructBegin("");
   for (const auto& [field_id, field_val] : obj) {
@@ -825,7 +832,7 @@ std::uint32_t write(Protocol& prot, const Object& obj) {
   return serializedSize;
 }
 
-inline void ensure_same_type(const Value& a, TType b) {
+inline void ensure_same_type(const NativeValue& a, TType b) {
   if (a.get_ttype() != b) {
     TProtocolException::throwInvalidFieldData();
   }
@@ -961,27 +968,27 @@ std::uint32_t write(Protocol& prot, const NativeMap& map) {
 }
 
 template <typename Protocol>
-std::uint32_t write(Protocol& prot, const Value& value) {
+std::uint32_t write(Protocol& prot, const NativeValue& value) {
   return folly::variant_match(
       value.inner(), [&](const auto& v) { return write(prot, v); });
 }
 
 std::uint32_t detail::serializeObjectVia(
-    ::apache::thrift::BinaryProtocolWriter& prot, const Object& obj) {
+    ::apache::thrift::BinaryProtocolWriter& prot, const NativeObject& obj) {
   return write(prot, obj);
 }
 
 std::uint32_t detail::serializeObjectVia(
-    ::apache::thrift::CompactProtocolWriter& prot, const Object& obj) {
+    ::apache::thrift::CompactProtocolWriter& prot, const NativeObject& obj) {
   return write(prot, obj);
 }
 
 std::uint32_t detail::serializeValueVia(
-    ::apache::thrift::BinaryProtocolWriter& prot, const Value& value) {
+    ::apache::thrift::BinaryProtocolWriter& prot, const NativeValue& value) {
   return write(prot, value);
 }
 std::uint32_t detail::serializeValueVia(
-    ::apache::thrift::CompactProtocolWriter& prot, const Value& value) {
+    ::apache::thrift::CompactProtocolWriter& prot, const NativeValue& value) {
   return write(prot, value);
 }
 
@@ -992,7 +999,7 @@ const std::size_t SET_HASH_SEED = 0xFD << 24;
 const std::size_t MAP_HASH_SEED = 0xFC << 24;
 
 struct ValueHasher {
-  size_t operator()(const Value& v) const;
+  size_t operator()(const NativeValue& v) const;
   size_t operator()(const ValueHolder& v) const;
   size_t operator()(const Bool& b) const;
   size_t operator()(const I8& i) const;
@@ -1003,7 +1010,7 @@ struct ValueHasher {
   size_t operator()(const Double& d) const;
   size_t operator()(const Bytes& s) const;
   size_t operator()(const String& s) const;
-  size_t operator()(const Object& o) const;
+  size_t operator()(const NativeObject& o) const;
   size_t operator()(const NativeList& l) const;
   size_t operator()(const NativeSet& s) const;
   size_t operator()(const NativeMap& m) const;
@@ -1018,7 +1025,7 @@ struct ValueHasher {
   size_t operator()(const MapOf<Key, Value>& map) const;
 };
 
-size_t ValueHasher::operator()(const Value& v) const {
+size_t ValueHasher::operator()(const NativeValue& v) const {
   return v.inner().index() + folly::variant_match(v.inner(), ValueHasher{});
 }
 size_t ValueHasher::operator()(const ValueHolder& v) const {
@@ -1052,7 +1059,7 @@ size_t ValueHasher::operator()(const String& s) const {
   return std::hash<std::string>{}(s);
 }
 
-size_t ValueHasher::operator()(const Object& o) const {
+size_t ValueHasher::operator()(const NativeObject& o) const {
   return folly::hash::commutative_hash_combine_range_generic(
       OBJECT_HASH_SEED, ValueHasher{}, o.begin(), o.end());
   return 0;
@@ -1104,11 +1111,11 @@ size_t hash_value(const T& t) {
   return ValueHasher{}(t);
 }
 
-size_t detail::hash_value(const Value& v) {
+size_t detail::hash_value(const NativeValue& v) {
   return ValueHasher{}(v);
 }
 
-size_t detail::hash_value(const Object& o) {
+size_t detail::hash_value(const NativeObject& o) {
   return ValueHasher{}(o);
 }
 
@@ -1122,42 +1129,42 @@ size_t detail::hash_value(const ValueHolder& v) {
 
 // ---- Object ---- //
 
-Object::Fields::iterator Object::begin() {
+NativeObject::Fields::iterator NativeObject::begin() {
   return fields.begin();
 }
 
-Object::Fields::iterator Object::end() {
+NativeObject::Fields::iterator NativeObject::end() {
   return fields.end();
 }
 
-Object::Fields::const_iterator Object::begin() const {
+NativeObject::Fields::const_iterator NativeObject::begin() const {
   return fields.begin();
 }
 
-Object::Fields::const_iterator Object::end() const {
+NativeObject::Fields::const_iterator NativeObject::end() const {
   return fields.end();
 }
 
-Value& Object::operator[](FieldId i) {
+NativeValue& NativeObject::operator[](FieldId i) {
   return fields[i];
 }
-Value& Object::at(FieldId i) {
+NativeValue& NativeObject::at(FieldId i) {
   return fields.at(i).as_value();
 }
-const Value& Object::at(FieldId i) const {
+const NativeValue& NativeObject::at(FieldId i) const {
   return fields.at(i).as_value();
 }
-bool Object::contains(FieldId i) const {
+bool NativeObject::contains(FieldId i) const {
   return fields.find(i) != fields.end();
 }
-std::size_t Object::erase(FieldId i) {
+std::size_t NativeObject::erase(FieldId i) {
   return fields.erase(i);
 }
-Value* Object::if_contains(FieldId i) {
+NativeValue* NativeObject::if_contains(FieldId i) {
   auto* ptr = folly::get_ptr(fields, i);
   return ptr ? &ptr->as_value() : nullptr;
 }
-const Value* Object::if_contains(FieldId i) const {
+const NativeValue* NativeObject::if_contains(FieldId i) const {
   const auto* ptr = folly::get_ptr(fields, i);
   return ptr ? &ptr->as_value() : nullptr;
 }
@@ -1200,7 +1207,7 @@ FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Float>, list_of_float)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Double>, list_of_double)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Bytes>, list_of_bytes)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<String>, list_of_string)
-FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<Object>, list_of_object)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<NativeObject>, list_of_object)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeList, ListOf<ValueHolder>, list_of_value)
 
 // ---- NativeSet API ---- //
@@ -1214,7 +1221,7 @@ FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Float>, set_of_float)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Double>, set_of_double)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Bytes>, set_of_bytes)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<String>, set_of_string)
-FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<Object>, set_of_object)
+FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<NativeObject>, set_of_object)
 FBTHRIFT_DEF_MAIN_TYPE_ACCESS(NativeSet, SetOf<ValueHolder>, set_of_value)
 
 } // namespace apache::thrift::protocol::experimental

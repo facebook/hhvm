@@ -1163,25 +1163,47 @@ NativeObject::Fields::const_iterator NativeObject::end() const {
 NativeValue& NativeObject::operator[](FieldId i) {
   return fields[i];
 }
+NativeValue& NativeObject::operator[](::apache::thrift::FieldId i) {
+  return fields[static_cast<FieldId>(i)];
+}
 NativeValue& NativeObject::at(FieldId i) {
   return fields.at(i).as_value();
+}
+NativeValue& NativeObject::at(::apache::thrift::FieldId i) {
+  return at(static_cast<FieldId>(i));
 }
 const NativeValue& NativeObject::at(FieldId i) const {
   return fields.at(i).as_value();
 }
+const NativeValue& NativeObject::at(::apache::thrift::FieldId i) const {
+  return at(static_cast<FieldId>(i));
+}
 bool NativeObject::contains(FieldId i) const {
   return fields.find(i) != fields.end();
 }
+bool NativeObject::contains(::apache::thrift::FieldId i) const {
+  return contains(static_cast<FieldId>(i));
+}
 std::size_t NativeObject::erase(FieldId i) {
   return fields.erase(i);
+}
+std::size_t NativeObject::erase(::apache::thrift::FieldId i) {
+  return erase(static_cast<FieldId>(i));
 }
 NativeValue* NativeObject::if_contains(FieldId i) {
   auto* ptr = folly::get_ptr(fields, i);
   return ptr ? &ptr->as_value() : nullptr;
 }
+NativeValue* NativeObject::if_contains(::apache::thrift::FieldId i) {
+  return if_contains(static_cast<FieldId>(i));
+}
 const NativeValue* NativeObject::if_contains(FieldId i) const {
   const auto* ptr = folly::get_ptr(fields, i);
   return ptr ? &ptr->as_value() : nullptr;
+}
+const NativeValue* NativeObject::if_contains(
+    ::apache::thrift::FieldId i) const {
+  return if_contains(static_cast<FieldId>(i));
 }
 
 #define FBTHRIFT_DEF_MAIN_TYPE_ACCESS(CLASS, TYPE, NAME)     \

@@ -370,12 +370,19 @@ class NativeObject {
   bool operator==(const NativeObject& other) const = default;
 
   NativeValue& operator[](FieldId i);
+  NativeValue& operator[](apache::thrift::FieldId i);
   NativeValue& at(FieldId i);
+  NativeValue& at(apache::thrift::FieldId i);
   const NativeValue& at(FieldId i) const;
+  const NativeValue& at(apache::thrift::FieldId i) const;
   bool contains(FieldId i) const;
+  bool contains(apache::thrift::FieldId i) const;
   std::size_t erase(FieldId i);
+  std::size_t erase(apache::thrift::FieldId i);
   NativeValue* if_contains(FieldId i);
+  NativeValue* if_contains(apache::thrift::FieldId i);
   const NativeValue* if_contains(FieldId i) const;
+  const NativeValue* if_contains(apache::thrift::FieldId i) const;
   template <typename... Args>
   NativeValue& emplace(FieldId id, Args... args);
 

@@ -3058,6 +3058,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         headers_ = std::move(*requestPayload->metadata.otherMetadata());
       }
       clientId_ = metadata.clientId().to_optional();
+      tenantId_ = metadata.tenantId().to_optional();
+      rpcPriority_ = metadata.priority().to_optional();
+
       serviceTraceMeta_ = metadata.serviceTraceMeta().to_optional();
       auto req = stub.getRequest();
       DCHECK(
@@ -3102,6 +3105,12 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     const auto& clientId() const { return clientId_; }
     auto& clientId() { return clientId_; }
 
+    const auto& tenantId() const { return tenantId_; }
+    auto& tenantId() { return tenantId_; }
+
+    const auto& rpcPriority() const { return rpcPriority_; }
+    auto& rpcPriority() { return rpcPriority_; }
+
     const auto& serviceTraceMeta() const { return serviceTraceMeta_; }
     auto& serviceTraceMeta() { return serviceTraceMeta_; }
 
@@ -3113,6 +3122,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     folly::IOBuf payload_;
     transport::THeader::StringToStringMap headers_;
     std::optional<std::string> clientId_;
+    std::optional<std::string> tenantId_;
+    std::optional<RpcPriority> rpcPriority_;
     std::optional<std::string> serviceTraceMeta_;
     folly::SocketAddress peerAddress_;
     folly::SocketAddress localAddress_;

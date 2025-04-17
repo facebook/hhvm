@@ -431,8 +431,10 @@ TEST_F(RequestInstrumentationTest, simpleRocketRequestTest) {
       });
 
   for (size_t i = 0; i < reqNum; i++) {
-    client->semifuture_sendStreamingRequest();
-    client->semifuture_sendRequest();
+    apache::thrift::RpcOptions options;
+    options.setPriority(concurrency::PRIORITY::HIGH);
+    client->semifuture_sendStreamingRequest(options);
+    client->semifuture_sendRequest(options);
   }
   handler()->waitForRequests(2 * reqNum);
 
@@ -446,6 +448,7 @@ TEST_F(RequestInstrumentationTest, simpleRocketRequestTest) {
 
   for (auto& reqSnapshot : getRequestSnapshots(2 * reqNum)) {
     auto methodName = reqSnapshot.getMethodName();
+    EXPECT_EQ(reqSnapshot.rpcPriority(), RpcPriority::HIGH);
     EXPECT_NE(reqSnapshot.getRootRequestContextId(), 0);
     EXPECT_TRUE(
         methodName == "sendRequest" || methodName == "sendStreamingRequest");

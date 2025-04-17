@@ -18,6 +18,11 @@
 
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
 
+// Creating a StructPatchImpl.h file that contains the definition of some
+// template functions in StructPatch/UnionPatch which will be included and
+// instantiated in the generated `.cpp` patch files. End-users should not
+// include this file manually, so that those template functions won't be
+// instantiated in users' `.cpp` files to save build-time.
 namespace apache::thrift::op::detail {
 template <class Patch, class Derived>
 template <class FieldId>

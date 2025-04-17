@@ -1722,7 +1722,7 @@ let trait_most_concrete_parent trait env =
          ~init:NotFound)
 
 let check_arity ?(did_unpack = false) env pos pos_def ft (arity : int) =
-  let exp_min = Typing_defs.arity_min ft in
+  let exp_min = Typing_defs.arity_required ft in
   if arity < exp_min then
     Typing_error_utils.add_typing_error
       ~env
@@ -1753,8 +1753,8 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
   match (get_ft_variadic lambda_ft, get_ft_variadic expected_ft) with
   | (false, false) ->
     (* what's the fewest arguments this type can take *)
-    let expected_min = Typing_defs.arity_min expected_ft in
-    let actual_min = Typing_defs.arity_min lambda_ft in
+    let expected_min = Typing_defs.arity_required expected_ft in
+    let actual_min = Typing_defs.arity_required lambda_ft in
     (* what's the most arguments this type can take (assuming no variadics) *)
     let expected_max = List.length expected_ft.ft_params in
     let actual_max = List.length lambda_ft.ft_params in

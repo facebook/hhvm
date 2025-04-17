@@ -480,8 +480,12 @@ let this = Local_id.make_scoped "$this"
  * codebase. *)
 let make_tany () = Tany TanySentinel.value
 
-let arity_min ft : int =
-  let a = List.count ~f:(fun fp -> not (get_fp_is_optional fp)) ft.ft_params in
+let arity_required ft : int =
+  let a =
+    List.count
+      ~f:(fun fp -> (not (get_fp_is_optional fp)) && not (get_fp_splat fp))
+      ft.ft_params
+  in
   if get_ft_variadic ft then
     a - 1
   else

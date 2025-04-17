@@ -297,7 +297,10 @@ val this : Local_id.t
 
 val make_tany : unit -> 'a ty_
 
-val arity_min : 'a fun_type -> int
+(* Number of required parameters. Does not include optional, variadic, or
+ * type-splat parameters
+ *)
+val arity_required : 'a fun_type -> int
 
 val get_param_mode : Ast_defs.param_kind -> param_mode
 

@@ -1775,8 +1775,11 @@ end = struct
                         }))
       else
         Ok ()
-    and arity_min_err =
-      if (not splat_super) && not (arity_min ft_sub <= arity_min ft_super) then
+    and arity_required_err =
+      if
+        (not splat_super)
+        && not (arity_required ft_sub <= arity_required ft_super)
+      then
         Error
           (Option.map
              subtype_env.Subtype_env.on_error
@@ -1786,8 +1789,8 @@ end = struct
                    apply_reasons ~on_error
                    @@ Secondary.Fun_too_many_args
                         {
-                          expected = arity_min ft_super;
-                          actual = arity_min ft_sub;
+                          expected = arity_required ft_super;
+                          actual = arity_required ft_sub;
                           pos = p_sub;
                           decl_pos = p_super;
                         }))
@@ -1863,7 +1866,7 @@ end = struct
           readonly_ret_err;
           package_err;
           return_disposable_err;
-          arity_min_err;
+          arity_required_err;
           variadic_err;
         ]
     in

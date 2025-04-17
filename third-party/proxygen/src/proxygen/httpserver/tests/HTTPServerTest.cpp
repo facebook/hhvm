@@ -378,7 +378,7 @@ class TestHandlerFactory : public RequestHandlerFactory {
     }
 
     void onEOM() noexcept override {
-      std::string certHeader("");
+      std::string certHeader;
       auto txn = CHECK_NOTNULL(downstream_->getTransaction());
       auto& transport = txn->getTransport();
       if (auto cert =

@@ -17,7 +17,7 @@
 #include "mcrouter/ProxyDestination.h"
 #include "mcrouter/ProxyDestinationMap.h"
 #include "mcrouter/config.h"
-#include "mcrouter/lib/WeightedCh3HashFunc.h"
+#include "mcrouter/lib/WeightedCh3RvHashFunc.h"
 #include "mcrouter/lib/fbi/cpp/ParsingUtil.h"
 #include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/lib/network/AccessPoint.h"

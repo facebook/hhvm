@@ -15,6 +15,7 @@
 #include "mcrouter/lib/RendezvousHashFunc.h"
 #include "mcrouter/lib/SelectionRouteFactory.h"
 #include "mcrouter/lib/WeightedCh3HashFunc.h"
+#include "mcrouter/lib/WeightedCh3RvHashFunc.h"
 #include "mcrouter/lib/WeightedRendezvousHashFunc.h"
 #include "mcrouter/lib/config/RouteHandleFactory.h"
 #include "mcrouter/lib/routes/NullRoute.h"
@@ -106,7 +107,7 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
     const folly::dynamic& json,
     std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>> rh,
     size_t threadId,
-    ProxyBase& /*proxy*/) {
+    ProxyBase& proxy) {
   std::string salt;
   folly::StringPiece funcType = Ch3HashFunc::type();
   auto bucketize = false;
@@ -160,6 +161,14 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
   } else if (funcType == WeightedCh3HashFunc::type()) {
     WeightedCh3HashFunc func{json, n};
     return createHashRoute<RouterInfo, WeightedCh3HashFunc>(
+        std::move(rh),
+        std::move(salt),
+        std::move(func),
+        bucketize,
+        clientFanout);
+  } else if (funcType == WeightedCh3RvHashFunc::type()) {
+    WeightedCh3RvHashFunc func{json, n, proxy.router().rtVarsDataWeak().lock()};
+    return createHashRoute<RouterInfo, WeightedCh3RvHashFunc>(
         std::move(rh),
         std::move(salt),
         std::move(func),

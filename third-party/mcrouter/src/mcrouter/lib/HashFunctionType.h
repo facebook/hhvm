@@ -21,4 +21,5 @@ enum class HashFunctionType : uint8_t {
   WeightedCh3 = 5,
   // unused = 6,
   WeightedRendezvous = 7,
+  WeightedCh3Rv = 8,
 };

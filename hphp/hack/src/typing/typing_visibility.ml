@@ -338,39 +338,6 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
         | _ -> is_protected_visible env x self_id))
     | Vinternal m -> is_internal_visible env m
 
-let is_visible_for_top_level
-    ~in_signature
-    ~ignore_package_errors
-    env
-    is_internal
-    target_module
-    target_package
-    pos
-    decl_pos =
-  let module_error =
-    if is_internal then
-      check_internal_access ~in_signature env target_module pos decl_pos
-    else
-      None
-  in
-  let package_error =
-    if Env.package_v2 env then
-      check_package_v2_access
-        ~ignore_package_errors
-        env
-        pos
-        decl_pos
-        target_package
-    else
-      check_package_v1_access env pos decl_pos target_module
-  in
-  match (module_error, package_error) with
-  | (Some e1, Some e2) -> [e1; e2]
-  | (Some e, _)
-  | (_, Some e) ->
-    [e]
-  | _ -> []
-
 let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
     match cid with
@@ -402,15 +369,29 @@ let check_top_level_access
     is_internal
     target_module
     target_package =
-  is_visible_for_top_level
-    ~in_signature
-    ~ignore_package_errors
-    env
-    is_internal
-    target_module
-    target_package
-    use_pos
-    def_pos
+  let module_error =
+    if is_internal then
+      check_internal_access ~in_signature env target_module use_pos def_pos
+    else
+      None
+  in
+  let package_error =
+    if Env.package_v2 env then
+      check_package_v2_access
+        ~ignore_package_errors
+        env
+        use_pos
+        def_pos
+        target_package
+    else
+      check_package_v1_access env use_pos def_pos target_module
+  in
+  match (module_error, package_error) with
+  | (Some e1, Some e2) -> [e1; e2]
+  | (Some e, _)
+  | (_, Some e) ->
+    [e]
+  | _ -> []
 
 let check_expression_tree_vis ~use_pos ~def_pos env vis =
   let open Typing_error in

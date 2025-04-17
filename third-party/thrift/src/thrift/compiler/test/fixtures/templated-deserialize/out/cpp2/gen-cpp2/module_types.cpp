@@ -200,13 +200,13 @@ containerStruct::containerStruct() :
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-    __fbthrift_field_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    __fbthrift_field_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
     __fbthrift_field_fieldI(true),
-    __fbthrift_field_fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(12) } },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(9),
   static_cast<::std::int32_t>(13) } } }),
@@ -311,8 +311,8 @@ void containerStruct::__fbthrift_clear() {
   this->__fbthrift_field_fieldA = bool();
   this->__fbthrift_field_fieldB.clear();
   this->__fbthrift_field_fieldC.clear();
-  this->__fbthrift_field_fieldD = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_fieldE = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldD = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_fieldF.clear();
   this->__fbthrift_field_fieldG.clear();
   this->__fbthrift_field_fieldH.clear();

@@ -88,10 +88,10 @@ SerializedStruct::SerializedStruct(apache::thrift::FragileConstructor, ::std::st
 
 void SerializedStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_s = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_s = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_i = ::std::int32_t();
-  this->__fbthrift_field_os = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_rs = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_os = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_rs = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -357,9 +357,9 @@ SerializedError::SerializedError(apache::thrift::FragileConstructor, ::std::stri
 
 void SerializedError::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_msg = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_os = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_rs = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_msg = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_os = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_rs = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -482,10 +482,10 @@ MarshalStruct::MarshalStruct(apache::thrift::FragileConstructor, ::std::string s
 
 void MarshalStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_s = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_s = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_i = ::std::int32_t();
-  this->__fbthrift_field_os = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_rs = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_os = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_rs = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -751,9 +751,9 @@ MarshalError::MarshalError(apache::thrift::FragileConstructor, ::std::string msg
 
 void MarshalError::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_msg = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_os = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_rs = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_msg = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_os = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_rs = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

@@ -392,10 +392,10 @@ MyStruct& MyStruct::operator=(const MyStruct& other) {
 MyStruct::MyStruct() :
     __fbthrift_field_MyBoolField(),
     __fbthrift_field_MyIntField(static_cast<::std::int64_t>(12)),
-    __fbthrift_field_MyStringField(apache::thrift::StringTraits<std::string>::fromStringLiteral("test")),
-    __fbthrift_field_MyMapEnumAndInt(std::initializer_list<::std::map<::some::valid::ns::MyEnumA, ::std::string>::value_type>{ {  ::some::valid::ns::MyEnumA::fieldA, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldA") },
-  {  ::some::valid::ns::MyEnumA::fieldC, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldC") },
-  { static_cast< ::some::valid::ns::MyEnumA>(9), apache::thrift::StringTraits<std::string>::fromStringLiteral("nothing") } }) {
+    __fbthrift_field_MyStringField(apache::thrift::StringTraits<::std::string>::fromStringLiteral("test")),
+    __fbthrift_field_MyMapEnumAndInt(std::initializer_list<::std::map<::some::valid::ns::MyEnumA, ::std::string>::value_type>{ {  ::some::valid::ns::MyEnumA::fieldA, apache::thrift::StringTraits<::std::string>::fromStringLiteral("fieldA") },
+  {  ::some::valid::ns::MyEnumA::fieldC, apache::thrift::StringTraits<::std::string>::fromStringLiteral("fieldC") },
+  { static_cast< ::some::valid::ns::MyEnumA>(9), apache::thrift::StringTraits<::std::string>::fromStringLiteral("nothing") } }) {
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
 }
@@ -468,11 +468,11 @@ void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyBoolField = bool();
   this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyStringField2 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyBinaryField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyBinaryField2 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyBinaryField3 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyStringField2 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyBinaryField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyBinaryField2 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyBinaryField3 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_MyBinaryListField4.clear();
   this->__fbthrift_field_MyMapEnumAndInt.clear();
   ::apache::thrift::adapt_detail::clear<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
@@ -1326,8 +1326,8 @@ void AnException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_code = ::std::int32_t();
   this->__fbthrift_field_req_code = ::std::int32_t();
-  this->__fbthrift_field_message2 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_req_message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_message2 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_req_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_exception_list.clear();
   this->__fbthrift_field_exception_set.clear();
   this->__fbthrift_field_exception_map.clear();
@@ -1599,7 +1599,7 @@ void AnotherException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_code = ::std::int32_t();
   this->__fbthrift_field_req_code = ::std::int32_t();
-  this->__fbthrift_field_message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -1708,9 +1708,9 @@ containerStruct::containerStruct() :
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-    fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-    req_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-    opt_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
+    req_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
+    opt_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
     fieldF(std::initializer_list<::std::vector<::std::int32_t>>{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(5),
@@ -1722,11 +1722,11 @@ containerStruct::containerStruct() :
   static_cast<::std::int32_t>(10),
   static_cast<::std::int32_t>(12) } }),
     fieldI(true),
-    fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(12) } },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("subfieldB"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(9),
   static_cast<::std::int32_t>(13) } } }),
@@ -1843,10 +1843,10 @@ void containerStruct::__fbthrift_clear() {
   this->fieldC.clear();
   this->req_fieldC.clear();
   this->opt_fieldC.clear();
-  this->fieldD = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->fieldE = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->req_fieldE = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->opt_fieldE = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->fieldD = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->req_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->opt_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->fieldF.clear();
   this->fieldG.clear();
   this->fieldH.clear();
@@ -2591,9 +2591,9 @@ AnnotatedStruct::AnnotatedStruct() :
     req_ref_type_const(std::make_shared<::some::valid::ns::containerStruct>()),
     req_ref_type_unique(std::make_unique<::std::vector<::std::string>>()),
     base_type(),
-    iobuf_type_val(apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("value")),
-    iobuf_ptr_val(apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("value2")),
-    struct_struct(::apache::thrift::detail::make_structured_constant<::some::valid::ns::containerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(false))) {
+    iobuf_type_val(apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("value")),
+    iobuf_ptr_val(apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("value2")),
+    struct_struct(::apache::thrift::detail::make_structured_constant<::some::valid::ns::containerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(false))) {
 }
 
 
@@ -2686,8 +2686,8 @@ void AnnotatedStruct::__fbthrift_clear() {
   this->set_type.clear();
   this->map_type.clear();
   this->map_struct_type.clear();
-  this->iobuf_type = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
-  this->iobuf_ptr = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  this->iobuf_type = apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("");
+  this->iobuf_ptr = apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("");
   this->list_i32_template.clear();
   this->list_string_template.clear();
   this->set_template.clear();
@@ -2696,8 +2696,8 @@ void AnnotatedStruct::__fbthrift_clear() {
   this->typedef_deque_template.clear();
   this->typedef_set_template.clear();
   this->typedef_map_template.clear();
-  this->iobuf_type_val = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
-  this->iobuf_ptr_val = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  this->iobuf_type_val = apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("");
+  this->iobuf_ptr_val = apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("");
   ::apache::thrift::clear(this->struct_struct);
   __isset = {};
 }

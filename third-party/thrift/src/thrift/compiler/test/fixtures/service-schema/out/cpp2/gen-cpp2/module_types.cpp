@@ -94,7 +94,7 @@ CustomException::CustomException(apache::thrift::FragileConstructor, ::std::stri
 
 void CustomException::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_result = ::cpp2::Result();
   __isset = {};
 }

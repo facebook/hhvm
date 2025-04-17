@@ -89,7 +89,7 @@ MyStructNestedAnnotation::MyStructNestedAnnotation(apache::thrift::FragileConstr
 
 void MyStructNestedAnnotation::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -449,11 +449,11 @@ YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorV
 void YourStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_majorVer = ::std::int64_t();
-  this->__fbthrift_field_abstract = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_annotation_with_quote = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_class_ = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_annotation_with_trailing_comma = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_empty_annotations = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_abstract = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_annotation_with_quote = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_class_ = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_annotation_with_trailing_comma = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_empty_annotations = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_my_enum = ::cpp2::YourEnum();
   this->__fbthrift_field_cpp_type_annotation.clear();
   __isset = {};
@@ -599,7 +599,7 @@ SecretStruct::SecretStruct(apache::thrift::FragileConstructor, ::std::int64_t id
 void SecretStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_id = ::std::int64_t();
-  this->__fbthrift_field_password = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_password = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

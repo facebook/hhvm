@@ -72,7 +72,7 @@ InitialResponse::InitialResponse(apache::thrift::FragileConstructor, ::std::stri
 
 void InitialResponse::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_content = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_content = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -169,7 +169,7 @@ FinalResponse::FinalResponse(apache::thrift::FragileConstructor, ::std::string c
 
 void FinalResponse::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_content = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_content = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -266,7 +266,7 @@ SinkPayload::SinkPayload(apache::thrift::FragileConstructor, ::std::string conte
 
 void SinkPayload::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_content = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_content = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -363,7 +363,7 @@ CompatibleWithKeywordSink::CompatibleWithKeywordSink(apache::thrift::FragileCons
 
 void CompatibleWithKeywordSink::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_sink = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_sink = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -460,7 +460,7 @@ InitialException::InitialException(apache::thrift::FragileConstructor, ::std::st
 
 void InitialException::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_reason = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_reason = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -557,7 +557,7 @@ SinkException1::SinkException1(apache::thrift::FragileConstructor, ::std::string
 
 void SinkException1::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_reason = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_reason = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

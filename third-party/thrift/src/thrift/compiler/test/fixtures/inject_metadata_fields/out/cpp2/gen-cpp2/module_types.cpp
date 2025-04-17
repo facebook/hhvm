@@ -72,7 +72,7 @@ Fields::Fields(apache::thrift::FragileConstructor, ::std::string injected_field_
 
 void Fields::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -169,7 +169,7 @@ FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct(apache::thrift::Fragile
 
 void FieldsInjectedToEmptyStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -270,8 +270,8 @@ FieldsInjectedToStruct::FieldsInjectedToStruct(apache::thrift::FragileConstructo
 
 void FieldsInjectedToStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -379,8 +379,8 @@ FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct(apache::thrif
 
 void FieldsInjectedWithIncludedStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_injected_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_injected_structured_annotation_field.reset();
   this->__fbthrift_field_injected_unstructured_annotation_field.reset();
   __isset = {};

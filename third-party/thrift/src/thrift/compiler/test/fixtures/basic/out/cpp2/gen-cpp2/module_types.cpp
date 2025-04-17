@@ -148,13 +148,13 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_myEnum = ::test::fixtures::basic::MyEnum();
   this->__fbthrift_field_oneway = bool();
   this->__fbthrift_field_readonly = bool();
   this->__fbthrift_field_idempotent = bool();
   this->__fbthrift_field_floatSet.clear();
-  this->__fbthrift_field_no_hack_codegen_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_no_hack_codegen_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -724,7 +724,7 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::int64_t MyIn
 void MyException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   ::apache::thrift::clear(this->__fbthrift_field_myStruct);
   ::apache::thrift::clear(this->__fbthrift_field_myUnion);
   __isset = {};
@@ -885,7 +885,7 @@ MyExceptionWithMessage::MyExceptionWithMessage(apache::thrift::FragileConstructo
 void MyExceptionWithMessage::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   ::apache::thrift::clear(this->__fbthrift_field_myStruct);
   ::apache::thrift::clear(this->__fbthrift_field_myUnion);
   __isset = {};

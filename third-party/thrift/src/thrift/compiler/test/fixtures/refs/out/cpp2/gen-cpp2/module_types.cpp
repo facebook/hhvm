@@ -2458,9 +2458,9 @@ StructWithString& StructWithString::operator=(const StructWithString& other) {
 }
 
 StructWithString::StructWithString() :
-    __fbthrift_field_def_unique_string_ref(std::make_unique<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-    __fbthrift_field_def_shared_string_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-    __fbthrift_field_def_shared_string_const_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
+    __fbthrift_field_def_unique_string_ref(std::make_unique<::std::string>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("..."))),
+    __fbthrift_field_def_shared_string_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("..."))),
+    __fbthrift_field_def_shared_string_const_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("..."))),
     __fbthrift_field_unique_string_ref(std::make_unique<::std::string>()),
     __fbthrift_field_shared_string_ref(std::make_shared<::std::string>()) {
 }

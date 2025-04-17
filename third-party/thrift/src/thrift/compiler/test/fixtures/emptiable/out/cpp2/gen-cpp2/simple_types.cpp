@@ -227,8 +227,8 @@ void EmptiableStruct::__fbthrift_clear() {
   this->__fbthrift_field_long_field = ::std::int64_t();
   this->__fbthrift_field_float_field = float();
   this->__fbthrift_field_double_field = double();
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_enum_field = ::apache::thrift::test::MyEnum();
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
@@ -564,8 +564,8 @@ void EmptiableTerseStruct::__fbthrift_clear() {
   this->__fbthrift_field_long_field = ::std::int64_t();
   this->__fbthrift_field_float_field = float();
   this->__fbthrift_field_double_field = double();
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_enum_field = ::apache::thrift::test::MyEnum();
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
@@ -580,8 +580,8 @@ void EmptiableTerseStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_long_field = ::std::int64_t();
   this->__fbthrift_field_float_field = float();
   this->__fbthrift_field_double_field = double();
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_enum_field = ::apache::thrift::test::MyEnum();
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
@@ -776,8 +776,8 @@ void NotEmptiableStruct::__fbthrift_clear() {
   this->__fbthrift_field_long_field = ::std::int64_t();
   this->__fbthrift_field_float_field = float();
   this->__fbthrift_field_double_field = double();
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_enum_field = ::apache::thrift::test::MyEnum();
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();

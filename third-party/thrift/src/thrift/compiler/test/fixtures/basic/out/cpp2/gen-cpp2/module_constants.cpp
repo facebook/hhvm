@@ -28,18 +28,18 @@ namespace module_constants {
 }
 
 ::std::set<::std::string> const& ASet() {
-  static folly::Indestructible<::std::set<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("bar"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("baz") } };
+  static folly::Indestructible<::std::set<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("baz") } };
   return *instance;
 }
 
 ::std::map<::std::string, ::std::vector<::std::int32_t>> const& AMap() {
-  static folly::Indestructible<::std::map<::std::string, ::std::vector<::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+  static folly::Indestructible<::std::map<::std::string, ::std::vector<::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) } },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("bar"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(10),
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(10),
   static_cast<::std::int32_t>(32),
   static_cast<::std::int32_t>(54) } } } };
   return *instance;

@@ -72,7 +72,7 @@ CustomException::CustomException(apache::thrift::FragileConstructor, ::std::stri
 
 void CustomException::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -169,7 +169,7 @@ ShouldBeBoxed::ShouldBeBoxed(apache::thrift::FragileConstructor, ::std::string s
 
 void ShouldBeBoxed::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_sessionId = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_sessionId = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

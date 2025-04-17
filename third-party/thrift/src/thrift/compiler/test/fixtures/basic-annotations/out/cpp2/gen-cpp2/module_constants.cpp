@@ -14,7 +14,7 @@ namespace cpp2 {
 namespace module_constants {
 
 ::cpp2::YourStruct const& myStruct() {
-  static folly::Indestructible<::cpp2::YourStruct> const instance{ ::StaticCast::fromThrift(::cpp2::detail::YourStruct(::apache::thrift::detail::make_structured_constant<::cpp2::detail::YourStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::majorVer>(static_cast<::std::int64_t>(42)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::abstract>(apache::thrift::StringTraits<std::string>::fromStringLiteral("abstract")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::my_enum>( ::cpp2::YourEnum::REALM)))) };
+  static folly::Indestructible<::cpp2::YourStruct> const instance{ ::StaticCast::fromThrift(::cpp2::detail::YourStruct(::apache::thrift::detail::make_structured_constant<::cpp2::detail::YourStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::majorVer>(static_cast<::std::int64_t>(42)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::abstract>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("abstract")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::my_enum>( ::cpp2::YourEnum::REALM)))) };
   return *instance;
 }
 

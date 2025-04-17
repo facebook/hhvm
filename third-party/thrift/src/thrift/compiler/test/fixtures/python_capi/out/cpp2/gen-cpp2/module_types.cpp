@@ -142,7 +142,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t inty__arg,
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_inty = ::std::int64_t();
-  this->__fbthrift_field_stringy = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_stringy = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   ::apache::thrift::clear(this->__fbthrift_field_myItemy);
   this->__fbthrift_field_myEnumy = ::test::fixtures::python_capi::MyEnum();
   this->__fbthrift_field_boulet = bool();
@@ -321,7 +321,7 @@ MyDataItem::MyDataItem(apache::thrift::FragileConstructor, ::std::string s__arg)
 
 void MyDataItem::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_s = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_s = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -503,7 +503,7 @@ DoubledPair::DoubledPair(apache::thrift::FragileConstructor, ::std::string s__ar
 
 void DoubledPair::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_s = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_s = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_x = ::std::int32_t();
   __isset = {};
 }
@@ -635,7 +635,7 @@ StringPair::StringPair(apache::thrift::FragileConstructor, ::std::string normal_
 
 void StringPair::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_normal = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_normal = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   ::apache::thrift::adapt_detail::clear<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
   __isset = {};
 }
@@ -912,8 +912,8 @@ void PrimitiveStruct::__fbthrift_clear() {
   this->__fbthrift_field_dubby.reset();
   this->__fbthrift_field_stringy.reset();
   this->__fbthrift_field_bytey.reset();
-  this->__fbthrift_field_buffy = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
-  this->__fbthrift_field_pointbuffy = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  this->__fbthrift_field_buffy = apache::thrift::StringTraits<::test::fixtures::python_capi::IOBuf>::fromStringLiteral("");
+  this->__fbthrift_field_pointbuffy = apache::thrift::StringTraits<::test::fixtures::python_capi::IOBufPtr>::fromStringLiteral("");
   ::apache::thrift::clear(this->__fbthrift_field_patched_struct);
   this->__fbthrift_field_fbstring = apache::thrift::StringTraits<folly::fbstring>::fromStringLiteral("");
   this->__fbthrift_field_managed_string_view = apache::thrift::StringTraits<::apache::thrift::ManagedStringViewWithConversions>::fromStringLiteral("");

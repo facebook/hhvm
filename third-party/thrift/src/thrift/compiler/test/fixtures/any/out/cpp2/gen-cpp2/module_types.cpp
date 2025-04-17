@@ -108,7 +108,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::string myString__a
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_myString = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_myString = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -339,7 +339,7 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::string myStr
 
 void MyException::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_myString = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_myString = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

@@ -33,15 +33,15 @@ namespace module_constants {
 }
 
 ::std::vector<::std::string> const& WORD_LIST() {
-  static folly::Indestructible<::std::vector<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("the"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("quick"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("brown"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("fox"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("jumps"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("over"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("the"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("lazy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("dog") } };
+  static folly::Indestructible<::std::vector<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<::std::string>::fromStringLiteral("the"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("quick"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("brown"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("fox"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("jumps"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("over"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("the"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("lazy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("dog") } };
   return *instance;
 }
 
@@ -62,7 +62,7 @@ namespace module_constants {
 }
 
 ::std::map<::std::string, ::py3::simple::SimpleStruct> const& A_CONST_MAP() {
-  static folly::Indestructible<::std::map<::std::string, ::py3::simple::SimpleStruct>> const instance{ std::initializer_list<::std::map<::std::string, ::py3::simple::SimpleStruct>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("simple"), ::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(false), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(50)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(61)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(72)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(83)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(99.9))) } } };
+  static folly::Indestructible<::std::map<::std::string, ::py3::simple::SimpleStruct>> const instance{ std::initializer_list<::std::map<::std::string, ::py3::simple::SimpleStruct>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("simple"), ::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(false), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(50)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(61)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(72)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(83)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(99.9))) } } };
   return *instance;
 }
 

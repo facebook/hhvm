@@ -14,12 +14,12 @@ namespace facebook::ns::qwerty {
 namespace enums_constants {
 
 ::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB> const& MapStringEnum() {
-  static folly::Indestructible<::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB>> const instance{ std::initializer_list<::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("0"),  ::facebook::ns::qwerty::AnEnumB::FIELDB } } };
+  static folly::Indestructible<::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB>> const instance{ std::initializer_list<::std::map<::std::string, ::facebook::ns::qwerty::AnEnumB>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("0"),  ::facebook::ns::qwerty::AnEnumB::FIELDB } } };
   return *instance;
 }
 
 ::std::map<::facebook::ns::qwerty::AnEnumC, ::std::string> const& MapEnumString() {
-  static folly::Indestructible<::std::map<::facebook::ns::qwerty::AnEnumC, ::std::string>> const instance{ std::initializer_list<::std::map<::facebook::ns::qwerty::AnEnumC, ::std::string>::value_type>{ {  ::facebook::ns::qwerty::AnEnumC::FIELDC, apache::thrift::StringTraits<std::string>::fromStringLiteral("unknown") } } };
+  static folly::Indestructible<::std::map<::facebook::ns::qwerty::AnEnumC, ::std::string>> const instance{ std::initializer_list<::std::map<::facebook::ns::qwerty::AnEnumC, ::std::string>::value_type>{ {  ::facebook::ns::qwerty::AnEnumC::FIELDC, apache::thrift::StringTraits<::std::string>::fromStringLiteral("unknown") } } };
   return *instance;
 }
 

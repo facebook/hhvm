@@ -72,7 +72,7 @@ EchoRequest::EchoRequest(apache::thrift::FragileConstructor, ::std::string text_
 
 void EchoRequest::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_text = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_text = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -169,7 +169,7 @@ EchoResponse::EchoResponse(apache::thrift::FragileConstructor, ::std::string tex
 
 void EchoResponse::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_text = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_text = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

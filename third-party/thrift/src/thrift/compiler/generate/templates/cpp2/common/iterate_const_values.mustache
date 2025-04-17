@@ -21,7 +21,7 @@ Base Types:
 }}{{^value:container?}}{{!
   }}{{^type:struct?}}{{!
     }}{{#value:string?}}{{!
-      }}apache::thrift::StringTraits<{{> types/indirected_string_type}}>::fromStringLiteral({{> common/const_value}}){{!
+      }}apache::thrift::StringTraits<{{type:cpp_standard_type}}>::fromStringLiteral({{> common/const_value}}){{!
     }}{{/value:string?}}{{!
     }}{{^value:string?}}{{> common/const_value}}{{/value:string?}}{{!
   }}{{/type:struct?}}{{!

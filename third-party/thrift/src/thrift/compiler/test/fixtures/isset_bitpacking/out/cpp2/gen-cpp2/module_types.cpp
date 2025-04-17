@@ -89,7 +89,7 @@ void Default::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field1 = ::std::int32_t();
   this->__fbthrift_field_field2 = ::std::int32_t();
-  this->__fbthrift_field_field3 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field3 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_field4 = double();
   __isset = {};
 }
@@ -257,7 +257,7 @@ void NonAtomic::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field1 = ::std::int32_t();
   this->__fbthrift_field_field2 = ::std::int32_t();
-  this->__fbthrift_field_field3 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field3 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_field4 = double();
   __isset = {};
 }
@@ -425,7 +425,7 @@ void Atomic::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field1 = ::std::int32_t();
   this->__fbthrift_field_field2 = ::std::int32_t();
-  this->__fbthrift_field_field3 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field3 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_field4 = double();
   __isset = {};
 }
@@ -593,7 +593,7 @@ void AtomicFoo::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field1 = ::std::int32_t();
   this->__fbthrift_field_field2 = ::std::int32_t();
-  this->__fbthrift_field_field3 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field3 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_field4 = double();
   __isset = {};
 }

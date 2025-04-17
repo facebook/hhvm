@@ -34,14 +34,14 @@ namespace module_constants {
 }
 
 ::std::map<::std::int32_t, ::std::string> const& aMap() {
-  static folly::Indestructible<::std::map<::std::int32_t, ::std::string>> const instance{ std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{ { static_cast<::std::int32_t>(1), apache::thrift::StringTraits<std::string>::fromStringLiteral("foo") },
-  { static_cast<::std::int32_t>(2), apache::thrift::StringTraits<std::string>::fromStringLiteral("bar") } } };
+  static folly::Indestructible<::std::map<::std::int32_t, ::std::string>> const instance{ std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{ { static_cast<::std::int32_t>(1), apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo") },
+  { static_cast<::std::int32_t>(2), apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar") } } };
   return *instance;
 }
 
 ::std::set<::std::string> const& aSet() {
-  static folly::Indestructible<::std::set<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("bar") } };
+  static folly::Indestructible<::std::set<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar") } };
   return *instance;
 }
 
@@ -60,11 +60,11 @@ namespace module_constants {
 }
 
 ::std::vector<::std::map<::std::string, ::std::int32_t>> const& states() {
-  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>>{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400) } },
-  std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("Albany"), static_cast<::std::int32_t>(98400) } } } };
+  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>>{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400) } },
+  std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("Albany"), static_cast<::std::int32_t>(98400) } } } };
   return *instance;
 }
 

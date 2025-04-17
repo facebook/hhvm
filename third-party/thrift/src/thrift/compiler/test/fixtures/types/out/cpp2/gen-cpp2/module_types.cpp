@@ -202,7 +202,7 @@ decorated_struct::decorated_struct(apache::thrift::FragileConstructor, ::std::st
 
 void decorated_struct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -1044,7 +1044,7 @@ ComplexString::ComplexString(apache::thrift::FragileConstructor, ::std::string a
 
 void ComplexString::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_a = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_a = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_b.clear();
   __isset = {};
 }
@@ -1130,8 +1130,8 @@ std::string_view ComplexNestedWithDefault::__fbthrift_get_class_name() {
 ComplexNestedWithDefault::ComplexNestedWithDefault(const ComplexNestedWithDefault&) = default;
 ComplexNestedWithDefault& ComplexNestedWithDefault::operator=(const ComplexNestedWithDefault&) = default;
 ComplexNestedWithDefault::ComplexNestedWithDefault() :
-    __fbthrift_field_z(apache::thrift::StringTraits<std::string>::fromStringLiteral("4")),
-    __fbthrift_field_n(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(3) } }))) {
+    __fbthrift_field_z(apache::thrift::StringTraits<::std::string>::fromStringLiteral("4")),
+    __fbthrift_field_n(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(3) } }))) {
 }
 
 
@@ -1161,7 +1161,7 @@ ComplexNestedWithDefault::ComplexNestedWithDefault(apache::thrift::FragileConstr
 
 void ComplexNestedWithDefault::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_z = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_z = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   ::apache::thrift::clear(this->__fbthrift_field_n);
   __isset = {};
 }
@@ -1583,7 +1583,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_majorVer = ::std::int64_t();
   __isset = {};
 }
@@ -1878,7 +1878,7 @@ AnnotatedTypes::AnnotatedTypes(apache::thrift::FragileConstructor, ::apache::thr
 
 void AnnotatedTypes::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::apache::thrift::fixtures::types::TBinary_8623>::fromStringLiteral("");
   this->__fbthrift_field_list_field.clear();
   __isset = {};
 }
@@ -3636,7 +3636,7 @@ void AllocatorAware::__fbthrift_clear() {
   this->__fbthrift_field_aa_list.clear();
   this->__fbthrift_field_aa_set.clear();
   this->__fbthrift_field_aa_map.clear();
-  this->__fbthrift_field_aa_string = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_aa_string = apache::thrift::StringTraits<::apache::thrift::fixtures::types::string_5252>::fromStringLiteral("");
   this->__fbthrift_field_not_a_container = ::std::int32_t();
   this->__fbthrift_field_aa_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>(this->get_allocator());
   this->__fbthrift_field_aa_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>(this->get_allocator());

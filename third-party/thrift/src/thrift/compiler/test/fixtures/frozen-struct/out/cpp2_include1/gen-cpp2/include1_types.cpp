@@ -78,7 +78,7 @@ IncludedA::IncludedA(apache::thrift::FragileConstructor, ::std::int32_t i32Field
 void IncludedA::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_i32Field = ::std::int32_t();
-  this->__fbthrift_field_strField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_strField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

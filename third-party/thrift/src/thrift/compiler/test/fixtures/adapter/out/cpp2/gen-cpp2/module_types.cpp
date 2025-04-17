@@ -115,7 +115,7 @@ MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string sig
 
 void MyAnnotation::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_signature = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_signature = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_color = ::facebook::thrift::test::Color();
   __isset = {};
 }
@@ -1556,7 +1556,7 @@ Config::Config(apache::thrift::FragileConstructor, ::std::string path__arg) :
 
 void Config::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_path = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_path = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -1889,7 +1889,7 @@ void AdaptTestStruct::__fbthrift_clear() {
   ::apache::thrift::adapt_detail::clear<::apache::thrift::test::CustomProtocolAdapter, 2>(__fbthrift_field_custom, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::test::AdaptTestMsAdapter, 3>(__fbthrift_field_timeout, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::test::AdapterWithContext, 4>(__fbthrift_field_data, *this);
-  this->__fbthrift_field_meta = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_meta = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   ::apache::thrift::adapt_detail::clear<::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>, 6>(__fbthrift_field_indirectionString, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::test::AdapterWithContext, 7>(__fbthrift_field_string_data, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::test::TemplatedTestAdapter, 8>(__fbthrift_field_double_wrapped_bool, *this);
@@ -2044,7 +2044,7 @@ AdaptTemplatedTestStruct::AdaptTemplatedTestStruct() :
     __fbthrift_field_adaptedIntegerDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 14>(::std::int32_t(static_cast<::std::int32_t>(3)), *this)),
     __fbthrift_field_adaptedLongDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 15>(::std::int64_t(static_cast<::std::int64_t>(4)), *this)),
     __fbthrift_field_adaptedDoubleDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 16>(double(static_cast<double>(5)), *this)),
-    __fbthrift_field_adaptedStringDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 17>(::std::string(apache::thrift::StringTraits<std::string>::fromStringLiteral("6")), *this)),
+    __fbthrift_field_adaptedStringDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 17>(::std::string(apache::thrift::StringTraits<::std::string>::fromStringLiteral("6")), *this)),
     __fbthrift_field_adaptedEnum(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18>(::facebook::thrift::test::ThriftAdaptedEnum( ::facebook::thrift::test::AdaptedEnum::One), *this)),
     __fbthrift_field_adaptedListDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 19>(::std::vector<::std::int64_t>(std::initializer_list<::std::int64_t>{ static_cast<::std::int64_t>(1) }), *this)),
     __fbthrift_field_adaptedSetDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 20>(::std::set<::std::int64_t>(std::initializer_list<::std::int64_t>{ static_cast<::std::int64_t>(1) }), *this)),
@@ -4127,7 +4127,7 @@ Person::Person(apache::thrift::FragileConstructor, ::std::string name__arg) :
 
 void Person::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -4228,7 +4228,7 @@ Person2::Person2(apache::thrift::FragileConstructor, ::std::string name__arg) :
 
 void Person2::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

@@ -164,9 +164,9 @@ TrivialTypesStruct::TrivialTypesStruct(apache::thrift::FragileConstructor, ::std
 void TrivialTypesStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_fieldA = ::std::int32_t();
-  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_fieldC = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_fieldD = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldC = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldD = apache::thrift::StringTraits<::test::fixtures::tablebased::IOBufPtr>::fromStringLiteral("");
   this->__fbthrift_field_fieldE = ::test::fixtures::tablebased::ExampleEnum();
   __isset = {};
 }

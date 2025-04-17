@@ -71,8 +71,8 @@ StructWithDefaultStruct::StructWithDefaultStruct() :
     __fbthrift_field_long_field(static_cast<::std::int64_t>(1)),
     __fbthrift_field_float_field(static_cast<float>(1)),
     __fbthrift_field_double_field(static_cast<double>(1)),
-    __fbthrift_field_string_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
-    __fbthrift_field_binary_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
+    __fbthrift_field_string_field(apache::thrift::StringTraits<::std::string>::fromStringLiteral("1")),
+    __fbthrift_field_binary_field(apache::thrift::StringTraits<::std::string>::fromStringLiteral("1")),
     __fbthrift_field_enum_field( ::apache::thrift::test::MyEnum::ME1),
     __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
     __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
@@ -157,8 +157,8 @@ void StructWithDefaultStruct::__fbthrift_clear() {
   this->__fbthrift_field_long_field = static_cast<::std::int64_t>(1);
   this->__fbthrift_field_float_field = static_cast<float>(1);
   this->__fbthrift_field_double_field = static_cast<double>(1);
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("1");
-  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<std::string>::fromStringLiteral("1");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("1");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("1");
   this->__fbthrift_field_enum_field =  ::apache::thrift::test::MyEnum::ME1;
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();

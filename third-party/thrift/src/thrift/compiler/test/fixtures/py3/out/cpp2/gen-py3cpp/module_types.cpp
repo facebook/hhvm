@@ -241,7 +241,7 @@ OptionalRefStruct::OptionalRefStruct(apache::thrift::FragileConstructor, ::py3::
 
 void OptionalRefStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_optional_blob = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  this->__fbthrift_field_optional_blob = apache::thrift::StringTraits<::py3::simple::IOBufPtr>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -330,7 +330,7 @@ SimpleStruct::SimpleStruct() :
     __fbthrift_field_smaller_real(),
     __fbthrift_field_hidden_field(),
     __fbthrift_field_opt_default_int(static_cast<::std::int32_t>(2)),
-    __fbthrift_field_opt_default_str(apache::thrift::StringTraits<std::string>::fromStringLiteral("2")),
+    __fbthrift_field_opt_default_str(apache::thrift::StringTraits<::std::string>::fromStringLiteral("2")),
     __fbthrift_field_opt_default_enum( ::py3::simple::AnEnum::THREE) {
 }
 
@@ -411,7 +411,7 @@ void SimpleStruct::__fbthrift_clear() {
   this->__fbthrift_field_something.clear();
   this->__fbthrift_field_hidden_field = ::std::int16_t();
   this->__fbthrift_field_opt_default_int = ::std::int32_t();
-  this->__fbthrift_field_opt_default_str = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_opt_default_str = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_opt_default_enum = ::py3::simple::AnEnum();
   __isset = {};
 }
@@ -1041,12 +1041,12 @@ void ComplexStruct::__fbthrift_clear() {
   ::apache::thrift::clear(this->__fbthrift_field_structOne);
   ::apache::thrift::clear(this->__fbthrift_field_structTwo);
   this->__fbthrift_field_an_integer = ::std::int32_t();
-  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_an_enum = ::py3::simple::AnEnum();
-  this->__fbthrift_field_some_bytes = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_from = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_cdef = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_bytes_with_cpp_type = apache::thrift::StringTraits<foo::Bar>::fromStringLiteral("");
+  this->__fbthrift_field_some_bytes = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_from = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_cdef = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_bytes_with_cpp_type = apache::thrift::StringTraits<::py3::simple::foo_bar>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -1657,8 +1657,8 @@ void CustomTypedefFields::__fbthrift_clear() {
   this->__fbthrift_field_bool_field = ::py3::simple::CustomBool();
   this->__fbthrift_field_integer_field = ::py3::simple::CustomInteger();
   this->__fbthrift_field_double_field = ::py3::simple::CustomDouble();
-  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::MyType>::fromStringLiteral("");
-  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::MyType>::fromStringLiteral("");
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::py3::simple::CustomString>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::py3::simple::CustomBinary>::fromStringLiteral("");
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
   this->__fbthrift_field_map_field.clear();

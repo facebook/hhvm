@@ -1153,7 +1153,6 @@ class cpp_mstch_type : public mstch_type {
             {"type:cpp_standard_type", &cpp_mstch_type::cpp_standard_type},
             {"type:cpp_adapter", &cpp_mstch_type::cpp_adapter},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
-            {"type:resolved_cpp_type", &cpp_mstch_type::resolved_cpp_type},
             {"type:cpp_template", &cpp_mstch_type::cpp_template},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
             {"type:qualified_namespace", &cpp_mstch_type::qualified_namespace},
@@ -1246,7 +1245,6 @@ class cpp_mstch_type : public mstch_type {
     }
     return {};
   }
-  mstch::node resolved_cpp_type() { return cpp2::get_type(resolved_type_); }
   mstch::node is_string_or_binary() {
     return resolved_type_->is_string_or_binary();
   }

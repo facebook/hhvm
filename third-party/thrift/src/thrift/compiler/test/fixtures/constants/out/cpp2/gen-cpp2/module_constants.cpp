@@ -17,11 +17,11 @@ namespace module_constants {
 
 
 ::std::vector<::std::map<::std::string, ::std::int32_t>> const& states() {
-  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>>{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400) } },
-  std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("Albany"), static_cast<::std::int32_t>(98400) } } } };
+  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>>{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400) } },
+  std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("Albany"), static_cast<::std::int32_t>(98400) } } } };
   return *instance;
 }
 
@@ -35,7 +35,7 @@ namespace module_constants {
 
 
 ::cpp2::MyMapIdentifier const& mymap() {
-  static folly::Indestructible<::cpp2::MyMapIdentifier> const instance{ std::initializer_list<::cpp2::MyMapIdentifier::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("keys"), apache::thrift::StringTraits<std::string>::fromStringLiteral("values") } } };
+  static folly::Indestructible<::cpp2::MyMapIdentifier> const instance{ std::initializer_list<::cpp2::MyMapIdentifier::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("keys"), apache::thrift::StringTraits<::std::string>::fromStringLiteral("values") } } };
   return *instance;
 }
 
@@ -46,12 +46,12 @@ namespace module_constants {
 }
 
 ::cpp2::Internship const& instagram() {
-  static folly::Indestructible<::cpp2::Internship> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Software Engineer")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>( ::cpp2::Company::INSTAGRAM), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1200)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::school>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Monters University"))) };
+  static folly::Indestructible<::cpp2::Internship> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("Software Engineer")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>( ::cpp2::Company::INSTAGRAM), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1200)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::school>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("Monters University"))) };
   return *instance;
 }
 
 ::cpp2::Internship const& partial_const() {
-  static folly::Indestructible<::cpp2::Internship> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(8)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Some Job"))) };
+  static folly::Indestructible<::cpp2::Internship> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(8)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("Some Job"))) };
   return *instance;
 }
 
@@ -63,7 +63,7 @@ namespace module_constants {
 
 ::std::vector<::cpp2::Internship> const& internList() {
   static folly::Indestructible<::std::vector<::cpp2::Internship>> const instance{ std::initializer_list<::cpp2::Internship>{ ::cpp2::module_constants::instagram(),
-  ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Sales Intern")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>( ::cpp2::Company::FACEBOOK), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1000))) } };
+  ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("Sales Intern")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>( ::cpp2::Company::FACEBOOK), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1000))) } };
   return *instance;
 }
 
@@ -78,45 +78,45 @@ namespace module_constants {
 }
 
 ::cpp2::struct1 const& pod_1() {
-  static folly::Indestructible<::cpp2::struct1> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"))) };
+  static folly::Indestructible<::cpp2::struct1> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo"))) };
   return *instance;
 }
 
 ::cpp2::struct1 const& pod_s_1() {
-  static folly::Indestructible<::cpp2::struct1> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("foo"))) };
+  static folly::Indestructible<::cpp2::struct1> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("foo"))) };
   return *instance;
 }
 
 ::cpp2::struct2 const& pod_2() {
-  static folly::Indestructible<::cpp2::struct2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(98)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("gaz")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("bar")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(11),
+  static folly::Indestructible<::cpp2::struct2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(98)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("gaz")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(11),
   static_cast<::std::int32_t>(22),
   static_cast<::std::int32_t>(33) })) };
   return *instance;
 }
 
 ::cpp2::struct2 const& pod_trailing_commas() {
-  static folly::Indestructible<::cpp2::struct2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(98)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("gaz")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("bar")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(11),
+  static folly::Indestructible<::cpp2::struct2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(98)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("gaz")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(11),
   static_cast<::std::int32_t>(22),
   static_cast<::std::int32_t>(33) })) };
   return *instance;
 }
 
 ::cpp2::struct2 const& pod_s_2() {
-  static folly::Indestructible<::cpp2::struct2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(98)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("gaz")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("bar")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(11),
+  static folly::Indestructible<::cpp2::struct2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(98)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("gaz")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("bar")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(11),
   static_cast<::std::int32_t>(22),
   static_cast<::std::int32_t>(33) })) };
   return *instance;
 }
 
 ::cpp2::struct3 const& pod_3() {
-  static folly::Indestructible<::cpp2::struct3> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct3>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("abc")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<::std::int32_t>(456)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(888)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("gaz")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+  static folly::Indestructible<::cpp2::struct3> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct3>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("abc")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<::std::int32_t>(456)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(888)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("gaz")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3) })))) };
   return *instance;
 }
 
 ::cpp2::struct3 const& pod_s_3() {
-  static folly::Indestructible<::cpp2::struct3> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct3>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("abc")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<::std::int32_t>(456)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(888)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("gaz")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+  static folly::Indestructible<::cpp2::struct3> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::struct3>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("abc")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<::std::int32_t>(456)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(888)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::c>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("gaz")))), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::d>(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3) })))) };
   return *instance;
@@ -153,7 +153,7 @@ namespace module_constants {
 }
 
 ::cpp2::union2 const& u_2_3() {
-  static folly::Indestructible<::cpp2::union2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::union2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::s>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(8)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<std::string>::fromStringLiteral("abacabb"))))) };
+  static folly::Indestructible<::cpp2::union2> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::union2>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::s>(::apache::thrift::detail::make_structured_constant<::cpp2::struct1>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(8)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("abacabb"))))) };
   return *instance;
 }
 
@@ -178,45 +178,45 @@ namespace module_constants {
 
 
 ::std::map<::std::string, ::std::int32_t> const& char2ascii() {
-  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("'"), static_cast<::std::int32_t>(39) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("\""), static_cast<::std::int32_t>(34) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("\\"), static_cast<::std::int32_t>(92) },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(97) } } };
+  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{ std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("'"), static_cast<::std::int32_t>(39) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("\""), static_cast<::std::int32_t>(34) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("\\"), static_cast<::std::int32_t>(92) },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(97) } } };
   return *instance;
 }
 
 ::std::vector<::std::string> const& escaped_strings() {
-  static folly::Indestructible<::std::vector<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("\001"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\037"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral(" "),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("'"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\""),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\n"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\r"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\011"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("a"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\253"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("j"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\246"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("ayyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\253yyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("jyyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\246yyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzza"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\253"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzzj"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\246"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzzayyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\253yyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzzjyyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\246yyy") } };
+  static folly::Indestructible<::std::vector<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<::std::string>::fromStringLiteral("\001"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\037"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral(" "),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("'"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\""),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\n"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\r"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\011"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("a"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\302\253"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("j"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\302\246"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("ayyy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\302\253yyy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("jyyy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("\302\246yyy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzza"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzz\302\253"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzzj"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzz\302\246"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzzayyy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzz\302\253yyy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzzjyyy"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("zzz\302\246yyy") } };
   return *instance;
 }
 
 ::std::vector<::std::string> const& unicode_list() {
-  static folly::Indestructible<::std::vector<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("Bulgaria"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("Benin"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("Saint Barth\303\251lemy") } };
+  static folly::Indestructible<::std::vector<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<::std::string>::fromStringLiteral("Bulgaria"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("Benin"),
+  apache::thrift::StringTraits<::std::string>::fromStringLiteral("Saint Barth\303\251lemy") } };
   return *instance;
 }
 
@@ -269,9 +269,9 @@ namespace module_constants {
 }
 
 ::std::map<::std::string, ::std::string> const& unicode_map() {
-  static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{ std::initializer_list<::std::map<::std::string, ::std::string>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("BG"), apache::thrift::StringTraits<std::string>::fromStringLiteral("Bulgaria") },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("BH"), apache::thrift::StringTraits<std::string>::fromStringLiteral("Bahrain") },
-  { apache::thrift::StringTraits<std::string>::fromStringLiteral("B\303\211"), apache::thrift::StringTraits<std::string>::fromStringLiteral("Saint Barth\303\251lemy") } } };
+  static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{ std::initializer_list<::std::map<::std::string, ::std::string>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("BG"), apache::thrift::StringTraits<::std::string>::fromStringLiteral("Bulgaria") },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("BH"), apache::thrift::StringTraits<::std::string>::fromStringLiteral("Bahrain") },
+  { apache::thrift::StringTraits<::std::string>::fromStringLiteral("B\303\211"), apache::thrift::StringTraits<::std::string>::fromStringLiteral("Saint Barth\303\251lemy") } } };
   return *instance;
 }
 

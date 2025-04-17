@@ -310,7 +310,7 @@ Bang::Bang(apache::thrift::FragileConstructor, ::std::string message__arg) :
 
 void Bang::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

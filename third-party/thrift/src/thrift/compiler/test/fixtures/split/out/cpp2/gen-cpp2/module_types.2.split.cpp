@@ -102,7 +102,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_myEnum = ::cpp2::MyEnum();
   this->__fbthrift_field_oneway = bool();
   this->__fbthrift_field_readonly = bool();

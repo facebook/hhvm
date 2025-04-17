@@ -625,8 +625,8 @@ TWrapped::TWrapped(apache::thrift::FragileConstructor, ::std::string fieldA__arg
 
 void TWrapped::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_fieldA = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldA = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

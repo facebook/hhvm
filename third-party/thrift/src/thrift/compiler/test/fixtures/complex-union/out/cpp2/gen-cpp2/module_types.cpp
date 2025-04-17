@@ -521,7 +521,7 @@ Val::Val(apache::thrift::FragileConstructor, ::std::string strVal__arg, ::std::i
 
 void Val::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_strVal = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_strVal = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_intVal = ::std::int32_t();
   this->__fbthrift_field_typedefValue.clear();
   __isset = {};

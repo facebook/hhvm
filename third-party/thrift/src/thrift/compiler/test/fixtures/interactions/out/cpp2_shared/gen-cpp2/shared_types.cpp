@@ -77,7 +77,7 @@ DoSomethingResult::DoSomethingResult(apache::thrift::FragileConstructor, ::std::
 
 void DoSomethingResult::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_s_res = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_s_res = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_i_res = ::std::int32_t();
   __isset = {};
 }

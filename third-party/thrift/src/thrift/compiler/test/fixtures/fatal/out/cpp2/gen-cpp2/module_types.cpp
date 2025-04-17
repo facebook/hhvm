@@ -602,7 +602,7 @@ structA::structA(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::st
 void structA::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_a = ::std::int32_t();
-  this->__fbthrift_field_b = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_b = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -1098,7 +1098,7 @@ structC::structC(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::st
 void structC::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_a = ::std::int32_t();
-  this->__fbthrift_field_b = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_b = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_c = double();
   this->__fbthrift_field_d = bool();
   this->__fbthrift_field_e = ::test_cpp2::cpp_reflection::enum1();
@@ -1577,7 +1577,7 @@ struct1::struct1(apache::thrift::FragileConstructor, ::std::int32_t field0__arg,
 void struct1::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field0 = ::std::int32_t();
-  this->__fbthrift_field_field1 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field1 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_field2 = ::test_cpp2::cpp_reflection::enum1();
   this->__fbthrift_field_field3 = ::test_cpp2::cpp_reflection::enum2();
   ::apache::thrift::clear(this->__fbthrift_field_field4);
@@ -1774,7 +1774,7 @@ struct2::struct2(apache::thrift::FragileConstructor, ::std::int32_t fieldA__arg,
 void struct2::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_fieldA = ::std::int32_t();
-  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_fieldC = ::test_cpp2::cpp_reflection::enum1();
   this->__fbthrift_field_fieldD = ::test_cpp2::cpp_reflection::enum2();
   ::apache::thrift::clear(this->__fbthrift_field_fieldE);
@@ -2022,7 +2022,7 @@ struct3::struct3(apache::thrift::FragileConstructor, ::std::int32_t fieldA__arg,
 void struct3::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_fieldA = ::std::int32_t();
-  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldB = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_fieldC = ::test_cpp2::cpp_reflection::enum1();
   this->__fbthrift_field_fieldD = ::test_cpp2::cpp_reflection::enum2();
   ::apache::thrift::clear(this->__fbthrift_field_fieldE);
@@ -2359,7 +2359,7 @@ struct4::struct4(apache::thrift::FragileConstructor, ::std::int32_t field0__arg,
 void struct4::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field0 = ::std::int32_t();
-  this->__fbthrift_field_field1 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field1 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_field2 = ::test_cpp2::cpp_reflection::enum1();
   if (this->__fbthrift_field_field3) ::apache::thrift::clear(*this->__fbthrift_field_field3);
   __isset = {};
@@ -2511,7 +2511,7 @@ struct5::struct5(apache::thrift::FragileConstructor, ::std::int32_t field0__arg,
 void struct5::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field0 = ::std::int32_t();
-  this->__fbthrift_field_field1 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_field1 = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_field2 = ::test_cpp2::cpp_reflection::enum1();
   ::apache::thrift::clear(this->__fbthrift_field_field3);
   ::apache::thrift::clear(this->__fbthrift_field_field4);
@@ -2669,7 +2669,7 @@ struct_binary::struct_binary(apache::thrift::FragileConstructor, ::std::string b
 
 void struct_binary::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_bi = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_bi = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   __isset = {};
 }
 

@@ -79,32 +79,6 @@ std::size_t read_all(
 std::size_t read_all(const ::apache::thrift::protocol::Object& obj);
 std::size_t read_all(const ::apache::thrift::protocol::detail::Value& val);
 
-// ----- Access a sparse subset of data within a thrift hierarchy ---- //
-
-enum class SparseAccess {
-  // Reads every other property
-  Half,
-  // Reads a random property at every level.
-  // Note: Always reads the first field for a struct
-  SingleRandom,
-};
-
-std::size_t read_some(
-    SparseAccess access,
-    const std::vector<::apache::thrift::protocol::detail::Value>& l);
-std::size_t read_some(
-    SparseAccess access,
-    const folly::F14FastSet<::apache::thrift::protocol::detail::Value>& s);
-std::size_t read_some(
-    SparseAccess access,
-    const folly::F14FastMap<
-        ::apache::thrift::protocol::detail::Value,
-        ::apache::thrift::protocol::detail::Value>& m);
-std::size_t read_some(
-    SparseAccess access, const ::apache::thrift::protocol::Object& obj);
-std::size_t read_some(
-    SparseAccess access, const ::apache::thrift::protocol::detail::Value& val);
-
 // ----- Benchmark operations ----- //
 
 inline folly::IOBufQueue& get_queue() {
@@ -146,18 +120,6 @@ inline void read_all(const TestingObject& input) {
   folly::doNotOptimizeAway(val);
 }
 
-template <typename ProtocolWriter, typename ProtocolReader>
-inline void read_half(const TestingObject& input) {
-  const auto val = read_some(SparseAccess::Half, input.obj);
-  folly::doNotOptimizeAway(val);
-}
-
-template <typename ProtocolWriter, typename ProtocolReader>
-inline void read_first(const TestingObject& input) {
-  const auto val = read_some(SparseAccess::SingleRandom, input.obj);
-  folly::doNotOptimizeAway(val);
-}
-
 } // namespace apache::thrift::test::utils
 
 #ifndef FBTHRIFT_DO_NOTHING_HANDLER
@@ -173,9 +135,7 @@ inline void read_first(const TestingObject& input) {
   HANDLER(PROT_NAME, decode, WRITER, READER, T)             \
   HANDLER(PROT_NAME, encode, WRITER, READER, T)             \
   HANDLER(PROT_NAME, roundtrip, WRITER, READER, T)          \
-  HANDLER(PROT_NAME, read_all, WRITER, READER, T)           \
-  HANDLER(PROT_NAME, read_half, WRITER, READER, T)          \
-  HANDLER(PROT_NAME, read_first, WRITER, READER, T)
+  HANDLER(PROT_NAME, read_all, WRITER, READER, T)
 #endif
 
 // Define a list of protocols to benchmark for each struct
@@ -227,9 +187,7 @@ inline void read_first(const TestingObject& input) {
   HANDLER(decode)                                   \
   HANDLER(encode)                                   \
   HANDLER(roundtrip)                                \
-  HANDLER(read_all)                                 \
-  HANDLER(read_half)                                \
-  HANDLER(read_first)
+  HANDLER(read_all)
 
 #define FBTHRIFT_FOR_EACH_UNIQUE_PROTOCOL(HANDLER)            \
   HANDLER(Binary, BinaryProtocolWriter, BinaryProtocolReader) \

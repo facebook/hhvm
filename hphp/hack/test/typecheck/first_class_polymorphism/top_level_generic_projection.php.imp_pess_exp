@@ -4,12 +4,6 @@ ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
 Invalid return type (Typing[4110])
   File "top_level_generic_projection.php", line 21, characters 37-47:
   Expected `ImplementsI`
-  File "top_level_generic_projection.php", line 15, characters 56-59:
-  But got `TIn::TBase`
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Invalid return type (Typing[4110])
-  File "top_level_generic_projection.php", line 21, characters 37-47:
-  Expected `ImplementsI`
   File "top_level_generic_projection.php", line 17, characters 16-19:
   But got `TIn::TBase`
 ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:

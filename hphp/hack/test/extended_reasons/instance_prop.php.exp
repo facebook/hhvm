@@ -32,23 +32,13 @@ File instance_prop.php, line 4, character 10 - line 4, character 13:
 
 Here's why:
 
+I checked the subtype constraint in [Main] because it was implied by transitivity.
 
-  Step 1 of 1                                 (here is where the error occurred) 
+  [Main] Step 1 of 1                          (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
-The subtype comes from this type variable
-
-File instance_prop.php, line 8, character 8 - line 8, character 14:
-
- 5 | }
- 6 | 
- 7 | function bar(C $c): int {
- 8 |   $x = »$c->foo«;
- 9 |   return $x;
-10 | }
-
-which I solved to this hint
+The subtype comes from this hint
 
 File instance_prop.php, line 4, character 10 - line 4, character 13:
 
@@ -58,58 +48,6 @@ File instance_prop.php, line 4, character 10 - line 4, character 13:
  6 | 
  7 | function bar(C $c): int {
 
-and flows into this expression
-
-File instance_prop.php, line 8, character 8 - line 8, character 14:
-
- 5 | }
- 6 | 
- 7 | function bar(C $c): int {
- 8 |   $x = »$c->foo«;
- 9 |   return $x;
-10 | }
-
-as the type of the property
-
-which itself flows into this expression
-
-File instance_prop.php, line 8, character 3 - line 8, character 4:
-
- 5 | }
- 6 | 
- 7 | function bar(C $c): int {
- 8 |   »$x« = $c->foo;
- 9 |   return $x;
-10 | }
-
-via an assignment
-
-which itself flows into this expression
-
-File instance_prop.php, line 9, character 10 - line 9, character 11:
-
- 5 | }
- 6 | 
- 7 | function bar(C $c): int {
- 8 |   $x = $c->foo;
- 9 |   return »$x«;
-10 | }
-
-as the type of the local variable
-
-which itself flows into this expression
-
-File instance_prop.php, line 9, character 3 - line 9, character 12:
-
- 5 | }
- 6 | 
- 7 | function bar(C $c): int {
- 8 |   $x = $c->foo;
- 9 |   »return $x;«
-10 | }
-
-because it is used in a return position
-
 The supertype comes from this hint
 
 File instance_prop.php, line 7, character 21 - line 7, character 23:
@@ -118,6 +56,33 @@ File instance_prop.php, line 7, character 21 - line 7, character 23:
  6 | 
  7 | function bar(C $c): »int« {
  8 |   $x = $c->foo;
+ 9 |   return $x;
+10 | }
+
+I found the subtype for [Main] is when I checked the subtype constraint in [Lower].
+
+  [Lower] Step 1 of 1                                                           
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File instance_prop.php, line 4, character 10 - line 4, character 13:
+
+ 3 | class C {
+ 4 |   public »bool« $foo = true;
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+
+The supertype comes from this type variable
+
+File instance_prop.php, line 8, character 8 - line 8, character 14:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+ 8 |   $x = »$c->foo«;
  9 |   return $x;
 10 | }
 

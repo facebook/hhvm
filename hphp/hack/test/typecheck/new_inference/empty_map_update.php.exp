@@ -8,5 +8,5 @@ Invalid assignment (Typing[4110])
     via this generic `Tv`
   File "collections/interfaces.hhi", line 845, characters 26-27:
     via this generic `Tv`
-  File "empty_map_update.php", line 7, characters 3-45:
-  But got `Map<string, int>` because of this statement
+  File "empty_map_update.php", line 4, characters 32-46:
+  But got `Map<string, int>`

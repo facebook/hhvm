@@ -6,8 +6,6 @@ Invalid return type (Typing[4110])
     via this generic `T`
   File "expr_tree.php", line 95, characters 38-41:
   But got `?(_ | _)`
-  File "expr_tree.php", line 72, characters 47-52:
-    via this generic `TInfer`
   File "expr_tree.php", line 37, characters 44-49:
     via this generic `TInfer`
 ERROR: File "shape_idx_wrong.php", line 11, characters 37-39:
@@ -26,8 +24,6 @@ Invalid return type (Typing[4110])
     via this generic `T`
   File "expr_tree.php", line 95, characters 38-41:
   But got `?(_ | _ | ExampleString)`
-  File "expr_tree.php", line 72, characters 47-52:
-    via this generic `TInfer`
   File "expr_tree.php", line 37, characters 44-49:
     via this generic `TInfer`
 ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
@@ -66,7 +62,5 @@ Invalid return type (Typing[4110])
     via this generic `T`
   File "expr_tree.php", line 410, characters 31-31:
   But got `mixed` because the field `y` may be set to any type in this shape
-  File "expr_tree.php", line 72, characters 47-52:
-    via this generic `TInfer`
   File "expr_tree.php", line 37, characters 44-49:
     via this generic `TInfer`

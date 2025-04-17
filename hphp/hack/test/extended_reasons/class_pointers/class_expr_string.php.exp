@@ -32,18 +32,6 @@ File class_expr_string.php, line 5, character 7 - line 5, character 7:
  8 | function test(): int {
  9 |   $gc = generic_string(C::class);
 
-  via this generic T
-
-File class_expr_string.php, line 6, character 45 - line 6, character 45:
-
- 3 | <<file:__EnableUnstableFeatures('class_type')>>
- 4 | 
- 5 | class C {}
- 6 | function generic_string<T as string>(T $t): »T« { return $t; }
- 7 | 
- 8 | function test(): int {
- 9 |   $gc = generic_string(C::class);
-
 Here's why:
 
 
@@ -132,31 +120,6 @@ File class_expr_string.php, line 8, character 18 - line 8, character 20:
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this generic parameter T of generic_string
-
-File class_expr_string.php, line 9, character 9 - line 9, character 22:
-
- 6 | function generic_string<T as string>(T $t): T { return $t; }
- 7 | 
- 8 | function test(): int {
- 9 |   $gc = »generic_string«(C::class);
-10 |   return $gc;
-11 | }
-
-and flows into this hint
-
-File class_expr_string.php, line 6, character 45 - line 6, character 45:
-
- 3 | <<file:__EnableUnstableFeatures('class_type')>>
- 4 | 
- 5 | class C {}
- 6 | function generic_string<T as string>(T $t): »T« { return $t; }
- 7 | 
- 8 | function test(): int {
- 9 |   $gc = generic_string(C::class);
-
-as the instantiation of the generic T
-
-which I solved to this generic parameter T of generic_string
 
 File class_expr_string.php, line 9, character 9 - line 9, character 22:
 

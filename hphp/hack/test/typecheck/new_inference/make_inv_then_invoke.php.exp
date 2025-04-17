@@ -2,8 +2,6 @@ ERROR: File "make_inv_then_invoke.php", line 25, characters 10-11:
 Invalid return type (Typing[4110])
   File "make_inv_then_invoke.php", line 19, characters 14-14:
   Expected `C`
-  File "make_inv_then_invoke.php", line 12, characters 33-33:
-    via this generic `T`
   File "make_inv_then_invoke.php", line 19, characters 25-25:
   But got `B`
   File "make_inv_then_invoke.php", line 19, characters 25-25:

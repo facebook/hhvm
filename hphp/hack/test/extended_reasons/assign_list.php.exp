@@ -36,43 +36,191 @@ File assign_list.php, line 8, character 24 - line 8, character 28:
 
 Here's why:
 
+I checked the subtype constraint in [Main] because it was implied by transitivity.
 
-  Step 1 of 2                                                                   
+  [Main] Step 1 of 2                                                            
 
 I started by checking this subtype relationship.
 
-The subtype comes from this function or method declaration
+The subtype comes from this hint
 
-File assign_list.php, line 6, character 10 - line 6, character 12:
+File assign_list.php, line 8, character 16 - line 8, character 34:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1(»(string,Super,bool)« $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+and flows into this expression
+
+File assign_list.php, line 8, character 36 - line 8, character 39:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) »$xyz«): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File assign_list.php, line 9, character 22 - line 9, character 25:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = »$xyz«;
+10 |   foo($y);
+11 | }
+
+as the type of the local variable
+
+The supertype comes from this destructure expression
+
+File assign_list.php, line 9, character 3 - line 9, character 18:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   »list($_, $y, $_)« = $xyz;
+10 |   foo($y);
+11 | }
+
+
+  [Main] Step 2 of 2                          (here is where the error occurred) 
+
+These are tuple types so next I checked 2nd elements.
+
+The subtype comes from this hint
+
+File assign_list.php, line 8, character 24 - line 8, character 28:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,»Super«,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+which is defined here
+
+File assign_list.php, line 3, character 7 - line 3, character 11:
+
+ 1 | <?hh
+ 2 | 
+ 3 | class »Super« {}
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+
+The supertype comes from this hint
+
+File assign_list.php, line 6, character 14 - line 6, character 16:
 
  1 | <?hh
  2 | 
  3 | class Super {}
  4 | class Sub extends Super {}
  5 | 
- 6 | function »foo«(Sub $_): void {}
+ 6 | function foo(»Sub« $_): void {}
  7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
 
-The supertype comes from this expression
+which is defined here
 
-File assign_list.php, line 10, character 3 - line 10, character 9:
+File assign_list.php, line 4, character 7 - line 4, character 9:
 
+ 1 | <?hh
+ 2 | 
+ 3 | class Super {}
+ 4 | class »Sub« extends Super {}
+ 5 | 
  6 | function foo(Sub $_): void {}
  7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
-10 |   »foo($y)«;
+
+I found the subtype for [Main] is when I checked the subtype constraint in [Lower].
+
+  [Lower] Step 1 of 2                                                           
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File assign_list.php, line 8, character 16 - line 8, character 34:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1(»(string,Super,bool)« $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+and flows into this expression
+
+File assign_list.php, line 8, character 36 - line 8, character 39:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) »$xyz«): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File assign_list.php, line 9, character 22 - line 9, character 25:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = »$xyz«;
+10 |   foo($y);
+11 | }
+
+as the type of the local variable
+
+The supertype comes from this destructure expression
+
+File assign_list.php, line 9, character 3 - line 9, character 18:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,Super,bool) $xyz): void {
+ 9 |   »list($_, $y, $_)« = $xyz;
+10 |   foo($y);
 11 | }
 
 
-  Step 2 of 2                                 (here is where the error occurred) 
+  [Lower] Step 2 of 2                                                           
 
-These are function types so next I checked the 1st function parameters.
-Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
+These are tuple types so next I checked 2nd elements.
 
 The subtype comes from this hint
+
+File assign_list.php, line 8, character 24 - line 8, character 28:
+
+ 6 | function foo(Sub $_): void {}
+ 7 | 
+ 8 | function bar_1((string,»Super«,bool) $xyz): void {
+ 9 |   list($_, $y, $_) = $xyz;
+10 |   foo($y);
+11 | }
+
+(its definition was given in [Main / Step 2])
+
+The supertype comes from this hint
 
 File assign_list.php, line 8, character 16 - line 8, character 34:
 
@@ -121,83 +269,4 @@ File assign_list.php, line 9, character 12 - line 9, character 13:
 11 | }
 
 via an assignment
-
-which I solved to this hint
-
-File assign_list.php, line 8, character 24 - line 8, character 28:
-
- 6 | function foo(Sub $_): void {}
- 7 | 
- 8 | function bar_1((string,»Super«,bool) $xyz): void {
- 9 |   list($_, $y, $_) = $xyz;
-10 |   foo($y);
-11 | }
-
-which is defined here
-
-File assign_list.php, line 3, character 7 - line 3, character 11:
-
- 1 | <?hh
- 2 | 
- 3 | class »Super« {}
- 4 | class Sub extends Super {}
- 5 | 
- 6 | function foo(Sub $_): void {}
- 7 | 
- 8 | function bar_1((string,Super,bool) $xyz): void {
- 9 |   list($_, $y, $_) = $xyz;
-
-which itself flows into this expression
-
-File assign_list.php, line 9, character 12 - line 9, character 13:
-
- 6 | function foo(Sub $_): void {}
- 7 | 
- 8 | function bar_1((string,Super,bool) $xyz): void {
- 9 |   list($_, »$y«, $_) = $xyz;
-10 |   foo($y);
-11 | }
-
-via an assignment
-
-which itself flows into this expression
-
-File assign_list.php, line 10, character 7 - line 10, character 8:
-
- 6 | function foo(Sub $_): void {}
- 7 | 
- 8 | function bar_1((string,Super,bool) $xyz): void {
- 9 |   list($_, $y, $_) = $xyz;
-10 |   foo(»$y«);
-11 | }
-
-as the type of the local variable
-
-The supertype comes from this hint
-
-File assign_list.php, line 6, character 14 - line 6, character 16:
-
- 1 | <?hh
- 2 | 
- 3 | class Super {}
- 4 | class Sub extends Super {}
- 5 | 
- 6 | function foo(»Sub« $_): void {}
- 7 | 
- 8 | function bar_1((string,Super,bool) $xyz): void {
- 9 |   list($_, $y, $_) = $xyz;
-
-which is defined here
-
-File assign_list.php, line 4, character 7 - line 4, character 9:
-
- 1 | <?hh
- 2 | 
- 3 | class Super {}
- 4 | class »Sub« extends Super {}
- 5 | 
- 6 | function foo(Sub $_): void {}
- 7 | 
- 8 | function bar_1((string,Super,bool) $xyz): void {
- 9 |   list($_, $y, $_) = $xyz;
 

@@ -313,10 +313,6 @@ let get_type env reason_in tvid_in =
            as the prefix for any flow through typing.
            We don't record the flow when we are pointing at another tyvar on the
            heap since we would end up with a chain of flows representing unification *)
-        let ty =
-          map_reason ty ~f:(fun solution ->
-              Typing_reason.(solved tvid_in ~solution ~in_:reason_in))
-        in
         let env = shorten_paths () in
         (env, ty)
     end

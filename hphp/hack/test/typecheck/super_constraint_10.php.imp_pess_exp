@@ -24,8 +24,6 @@ Invalid return type (Typing[4110])
   Expected `Tk1`
   File "super_constraint_10.php", line 16, characters 14-16:
   This type argument to `ConstMap` must match exactly (it is invariant)
-  File "super_constraint_10.php", line 11, characters 10-12:
-    via this generic `Tk1`
   File "super_constraint_10.php", line 15, characters 79-86:
   But got `arraykey`
 ERROR: File "super_constraint_10.php", line 20, characters 12-18:
@@ -34,8 +32,6 @@ Invalid return type (Typing[4110])
   Expected `Tk1`
   File "super_constraint_10.php", line 16, characters 14-16:
   This type argument to `ConstMap` must match exactly (it is invariant)
-  File "super_constraint_10.php", line 11, characters 10-12:
-    via this generic `Tk1`
   File "super_constraint_10.php", line 18, characters 10-12:
   But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey`
   File "super_constraint_10.php", line 18, characters 10-12:

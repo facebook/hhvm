@@ -87,55 +87,13 @@ File workplace_non_exact.php, line 9, character 11 - line 9, character 12:
 
 Here's why:
 
+I checked the subtype constraint in [Main] because it was implied by transitivity.
 
-  Step 1 of 2                                                                   
+  [Main] Step 1 of 1                          (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
-The subtype comes from this function or method declaration
-
-File workplace_non_exact.php, line 4, character 19 - line 4, character 19:
-
- 1 | <?hh
- 2 | 
- 3 | abstract class C1 {
- 4 |   public function »f«(this $_): void {
- 5 |   }
- 6 | }
-
-The supertype comes from this expression
-
-File workplace_non_exact.php, line 12, character 5 - line 12, character 27:
-
-  8 | abstract class Test {
-  9 |   private C1 $c1;
- 10 | 
- 11 |   public function fInstance(): void {
- 12 |     »$this->c1->f($this->c1)«;
- 13 |     $c1 = $this->c1;
- 14 |     $c1->f($c1);
- 15 |   }
-
-
-  Step 2 of 2                                 (here is where the error occurred) 
-
-These are function types so next I checked the 1st function parameters.
-Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
-
-The subtype comes from this type variable
-
-File workplace_non_exact.php, line 12, character 18 - line 12, character 26:
-
-  8 | abstract class Test {
-  9 |   private C1 $c1;
- 10 | 
- 11 |   public function fInstance(): void {
- 12 |     $this->c1->f(»$this->c1«);
- 13 |     $c1 = $this->c1;
- 14 |     $c1->f($c1);
- 15 |   }
-
-which I solved to this hint
+The subtype comes from this hint
 
 File workplace_non_exact.php, line 9, character 11 - line 9, character 12:
 
@@ -159,7 +117,39 @@ File workplace_non_exact.php, line 3, character 16 - line 3, character 17:
  5 |   }
  6 | }
 
-and flows into this expression
+The supertype comes from this hint
+
+File workplace_non_exact.php, line 4, character 21 - line 4, character 24:
+
+ 1 | <?hh
+ 2 | 
+ 3 | abstract class C1 {
+ 4 |   public function f(»this« $_): void {
+ 5 |   }
+ 6 | }
+
+I found the subtype for [Main] is when I checked the subtype constraint in [Lower].
+
+  [Lower] Step 1 of 1                                                           
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File workplace_non_exact.php, line 9, character 11 - line 9, character 12:
+
+ 8 | abstract class Test {
+ 9 |   private »C1« $c1;
+10 | 
+11 |   public function fInstance(): void {
+12 |     $this->c1->f($this->c1);
+13 |     $c1 = $this->c1;
+14 |     $c1->f($c1);
+15 |   }
+
+(its definition was given in [Main / Step 1])
+
+The supertype comes from this type variable
 
 File workplace_non_exact.php, line 12, character 18 - line 12, character 26:
 
@@ -171,17 +161,4 @@ File workplace_non_exact.php, line 12, character 18 - line 12, character 26:
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
  15 |   }
-
-as the type of the property
-
-The supertype comes from this hint
-
-File workplace_non_exact.php, line 4, character 21 - line 4, character 24:
-
- 1 | <?hh
- 2 | 
- 3 | abstract class C1 {
- 4 |   public function f(»this« $_): void {
- 5 |   }
- 6 | }
 

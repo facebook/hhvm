@@ -10,5 +10,3 @@ Invalid return type (Typing[4110])
     resulting from accessing the type constant 'T'
   File "tconst_on_generics4.php", line 27, characters 12-20:
     on an object of exactly the class StringBox
-  File "tconst_on_generics4.php", line 21, characters 54-55:
-    via this generic `T2`

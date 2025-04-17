@@ -6,9 +6,5 @@ No instance method `hell` in `MyClass` (Typing[4053])
   This is why I think it is an object of type MyClass
   File "lambda_bad_predicate.php", line 32, characters 45-51:
   This type argument to `IPredicate` only allows supertypes (it is contravariant)
-  File "lambda_bad_predicate.php", line 21, characters 47-48:
-    via this generic `Tv`
-  File "lambda_bad_predicate.php", line 5, characters 31-31:
-    via this generic `T`
   File "lambda_bad_predicate.php", line 26, characters 7-13:
   Declaration of `MyClass` is here

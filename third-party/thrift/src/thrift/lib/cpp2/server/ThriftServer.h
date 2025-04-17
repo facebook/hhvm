@@ -2748,6 +2748,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    */
   void setup();
 
+ private:
+  void setupThreadManagerImpl();
+
+ public:
   /**
    * Create and start the default thread manager unless it already exists.
    */

@@ -652,7 +652,7 @@ void ThriftServer::setup() {
     // was called directly by the service code)
     runtimeResourcePoolsChecks();
 
-    setupThreadManager();
+    setupThreadManagerImpl();
 
     // Routing handlers may install custom Resource Pools to handle their
     // requests, so they must be added after Resource Pool enablement status is
@@ -837,6 +837,11 @@ bool ThriftServer::serverRanWithDCHECK() {
 }
 
 void ThriftServer::setupThreadManager() {
+  THRIFT_SERVER_EVENT(setupThreadManager).log(*this);
+  setupThreadManagerImpl();
+}
+
+void ThriftServer::setupThreadManagerImpl() {
   if (!setupThreadManagerCalled_) {
     setupThreadManagerCalled_ = true;
 

@@ -528,21 +528,21 @@ class FieldNode final : folly::MoveOnly,
       FieldId id,
       PresenceQualifier presence,
       std::string_view name,
-      const apache::thrift::type::Type& type,
+      folly::not_null_unique_ptr<TypeRef> type,
       std::optional<apache::thrift::type::ValueId> customDefaultId)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         parent_(parent),
         id_(id),
         presence_(presence),
-        type_(&type),
+        type_(std::move(type)),
         customDefaultId_(std::move(customDefaultId)) {}
 
  private:
   detail::DefinitionKeyRef parent_;
   FieldId id_;
   PresenceQualifier presence_;
-  folly::not_null<const apache::thrift::type::Type*> type_;
+  folly::not_null_unique_ptr<TypeRef> type_;
   std::optional<apache::thrift::type::ValueId> customDefaultId_;
 };
 
@@ -924,15 +924,15 @@ class FunctionParam final : folly::MoveOnly,
       const detail::Resolver& resolver,
       FieldId id,
       std::string_view name,
-      const apache::thrift::type::Type& type)
+      folly::not_null_unique_ptr<TypeRef> type)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         id_(id),
-        type_(&type) {}
+        type_(std::move(type)) {}
 
  private:
   FieldId id_;
-  folly::not_null<const apache::thrift::type::Type*> type_;
+  folly::not_null_unique_ptr<TypeRef> type_;
 };
 
 class FunctionNode final : folly::MoveOnly,

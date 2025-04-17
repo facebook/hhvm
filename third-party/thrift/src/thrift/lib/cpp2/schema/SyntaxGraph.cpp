@@ -246,7 +246,7 @@ const DefinitionNode& lookUpDefinition(
 } // namespace detail
 
 TypeRef FieldNode::type() const {
-  return resolver().typeOf(*type_);
+  return *type_;
 }
 
 const protocol::Value* FOLLY_NULLABLE FieldNode::customDefault() const {
@@ -455,7 +455,7 @@ folly::span<const TypeRef> FunctionSink::serverExceptions() const {
 }
 
 TypeRef FunctionParam::type() const {
-  return resolver().typeOf(*type_);
+  return *type_;
 }
 
 FunctionNode::FunctionNode(
@@ -964,7 +964,7 @@ FieldNode Resolver::createField(
       *field.id(),
       presenceOf(*field.qualifier()),
       *field.name(),
-      *field.type(),
+      folly::copy_to_unique_ptr(typeOf(*field.type())),
       valueIdOf(*field.customDefault()));
 }
 
@@ -1067,7 +1067,10 @@ FunctionNode Resolver::createFunction(
   std::vector<FunctionNode::Param> params;
   for (const type::Field& param : *function.paramlist()->fields()) {
     params.emplace_back(
-        FunctionNode::Param(*this, *param.id(), *param.name(), *param.type()));
+        *this,
+        *param.id(),
+        *param.name(),
+        folly::copy_to_unique_ptr(typeOf(*param.type())));
   }
 
   return FunctionNode(

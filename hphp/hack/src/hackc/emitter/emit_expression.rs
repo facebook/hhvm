@@ -219,7 +219,7 @@ mod inout_locals {
         let name = e.local_name(local);
         aliases
             .get(name.as_str())
-            .map_or(true, |alias| alias.has_single_ref())
+            .is_none_or(|alias| alias.has_single_ref())
     }
 
     pub(super) fn collect_written_variables<'ast>(
@@ -1427,7 +1427,7 @@ fn non_numeric(s: &[u8]) -> bool {
         Ok(match s.matches('.').count() {
             0 => i as f64,
             1 => {
-                let pow = s.split('.').last().unwrap().len();
+                let pow = s.split('.').next_back().unwrap().len();
                 (i as f64) / f64::from(radix).powi(pow as i32)
             }
             _ => return Err(()),
@@ -1973,7 +1973,7 @@ pub fn has_non_tparam_generics(env: &Env<'_>, hints: &[ast::Hint]) -> bool {
     hints.iter().any(|hint| {
         hint.1
             .as_happly()
-            .map_or(true, |(id, _)| !erased_tparams.contains(&id.1.as_str()))
+            .is_none_or(|(id, _)| !erased_tparams.contains(&id.1.as_str()))
     })
 }
 
@@ -1983,7 +1983,7 @@ fn has_non_tparam_generics_targs(env: &Env<'_>, targs: &[ast::Targ]) -> bool {
         (targ.1)
             .1
             .as_happly()
-            .map_or(true, |(id, _)| !erased_tparams.contains(&id.1.as_str()))
+            .is_none_or(|(id, _)| !erased_tparams.contains(&id.1.as_str()))
     })
 }
 
@@ -3671,17 +3671,16 @@ fn emit_new<'a, 'd>(
                 .get_class_tparams()
                 .iter()
                 .all(|tp| tp.reified.is_erased()),
-            Some(ast_defs::Id(_, n)) if string_utils::is_parent(n) => {
-                env.scope
-                    .get_class()
-                    .map_or(true, |cls| match cls.get_extends() {
-                        [h, ..] => {
-                            h.1.as_happly()
-                                .map_or(true, |(_, l)| !has_non_tparam_generics(env, l))
-                        }
-                        _ => true,
-                    })
-            }
+            Some(ast_defs::Id(_, n)) if string_utils::is_parent(n) => env
+                .scope
+                .get_class()
+                .is_none_or(|cls| match cls.get_extends() {
+                    [h, ..] => {
+                        h.1.as_happly()
+                            .is_none_or(|(_, l)| !has_non_tparam_generics(env, l))
+                    }
+                    _ => true,
+                }),
             _ => true,
         },
         _ => true,
@@ -5315,7 +5314,7 @@ fn is_trivial(env: &Env<'_>, is_base: bool, expr: &ast::Expr) -> bool {
         Expr_::ArrayGet(_) if !is_base => false,
         Expr_::ArrayGet(x) => {
             is_trivial(env, is_base, &x.0)
-                && (x.1).as_ref().map_or(true, |e| is_trivial(env, is_base, e))
+                && (x.1).as_ref().is_none_or(|e| is_trivial(env, is_base, e))
         }
         _ => false,
     }

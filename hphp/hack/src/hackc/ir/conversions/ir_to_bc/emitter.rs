@@ -187,7 +187,7 @@ pub(crate) struct InstrEmitter<'b> {
 
 fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bool> {
     let mut buf: Vec<bool> = Vec::with_capacity(total_len);
-    if !indexes.map_or(true, |indexes| indexes.is_empty()) {
+    if !indexes.is_none_or(|indexes| indexes.is_empty()) {
         buf.resize(total_len, false);
         if let Some(indexes) = indexes {
             for &idx in indexes.iter() {
@@ -1123,7 +1123,7 @@ fn member_op_may_mutate_stack_base(member_op: &instr::MemberOp) -> bool {
             member_op
                 .final_op
                 .key()
-                .map_or(true, |k| k.is_element_access())
+                .is_none_or(|k| k.is_element_access())
         },
         |dim| dim.key.is_element_access(),
     );

@@ -408,7 +408,7 @@ fn member_op_mutates_stack_base(op: &instr::MemberOp) -> bool {
     };
 
     let base_key_is_element_access = op.intermediate_ops.first().map_or_else(
-        || op.final_op.key().map_or(true, |k| k.is_element_access()),
+        || op.final_op.key().is_none_or(|k| k.is_element_access()),
         |dim| dim.key.is_element_access(),
     );
 

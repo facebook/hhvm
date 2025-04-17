@@ -712,7 +712,7 @@ impl MemberOp {
         };
 
         let base_key_is_element_access = self.intermediate_ops.first().map_or_else(
-            || self.final_op.key().map_or(true, |k| k.is_element_access()),
+            || self.final_op.key().is_none_or(|k| k.is_element_access()),
             |dim| dim.key.is_element_access(),
         );
 

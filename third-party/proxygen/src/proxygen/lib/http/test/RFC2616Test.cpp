@@ -42,7 +42,7 @@ TEST(QvalueTest, Basic) {
   }
 
   {
-    string test("");
+    string test;
     // The spec says a blank one is ok but empty headers are disallowed in SPDY?
     EXPECT_FALSE(RFC2616::parseQvalues(test, output));
     EXPECT_EQ(output.size(), 0);

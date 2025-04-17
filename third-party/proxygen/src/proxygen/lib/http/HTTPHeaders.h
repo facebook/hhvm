@@ -529,7 +529,7 @@ bool HTTPHeaders::forEachValueOfHeader(HTTPHeaderCode code, LAMBDA func) const {
 template <typename T>
 std::string HTTPHeaders::combine(const T& header,
                                  const std::string& separator) const {
-  std::string combined = "";
+  std::string combined;
   forEachValueOfHeader(header, [&](const std::string& value) -> bool {
     if (combined.empty()) {
       combined.append(value);

@@ -215,8 +215,6 @@ libmcroutercore_a_SOURCES = \
   RouterRegistry-impl.h \
   RoutingPrefix.cpp \
   RoutingPrefix.h \
-  RuntimeVarsData.cpp \
-  RuntimeVarsData.h \
   ServiceInfo.cpp \
   ServiceInfo-inl.h \
   ServiceInfo.h \

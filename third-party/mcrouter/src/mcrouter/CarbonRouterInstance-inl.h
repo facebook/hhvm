@@ -27,11 +27,11 @@
 #include "mcrouter/Proxy.h"
 #include "mcrouter/ProxyConfig.h"
 #include "mcrouter/ProxyConfigBuilder.h"
-#include "mcrouter/RuntimeVarsData.h"
 #include "mcrouter/ServiceInfo.h"
 #include "mcrouter/TargetHooks.h"
 #include "mcrouter/ThreadUtil.h"
 #include "mcrouter/lib/AuxiliaryCPUThreadPool.h"
+#include "mcrouter/lib/RuntimeVarsData.h"
 #include "mcrouter/routes/McRouteHandleProvider.h"
 #include "mcrouter/stats.h"
 

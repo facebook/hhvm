@@ -52,6 +52,8 @@ libmcrouter_a_SOURCES = \
   RendezvousHashHelper.h \
   Reply.h \
   RouteHandleTraverser.h \
+  RuntimeVarsData.cpp \
+  RuntimeVarsData.h \
   SelectionRouteFactory.h \
   StatsReply.cpp \
   StatsReply.h \

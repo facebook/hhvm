@@ -24,8 +24,6 @@ import thrift.test.thrift_python.enum_test.thrift_enums as enum_test_enums
 
 import thrift.test.thrift_python.included.thrift_abstract_types
 
-from folly import iobuf
-
 from parameterized import parameterized
 from thrift.python.abstract_types import AbstractGeneratedError
 
@@ -39,35 +37,53 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
     TestStructAdaptedTypes as TestStructAdaptedTypesAbstract,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesAbstract,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesAbstract,
-    TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract,
     TestStructCopy as TestStructCopyAbstract,
     TestStructEmpty as TestStructEmptyAbstract,
     TestStructEmptyAlias as TestStructEmptyAliasAbstract,
     TestStructNested_0 as TestStructNested_0Abstract,
     TestStructNested_1 as TestStructNested_1Abstract,
     TestStructNested_2 as TestStructNested_2Abstract,
-    TestStructWithDefaultValues as TestStructWithDefaultValuesAbstract,
     TestStructWithExceptionField as TestStructWithExceptionFieldAbstract,
     TestStructWithInvariantField as TestStructWithInvariantFieldAbstract,
+    TestStructWithNestedContainers as TestStructWithNestedContainersAbstract,
     TestStructWithTypedefField as TestStructWithTypedefFieldAbstract,
     TestStructWithUnionField as TestStructWithUnionFieldAbstract,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
+    TestExceptionCopy as TestExceptionCopyMutable,
     TestStruct as TestStructMutable,
+    TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
+    TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
+    TestStructCopy as TestStructCopyMutable,
+    TestStructNested_0 as TestStructNested_0Mutable,
+    TestStructNested_1 as TestStructNested_1Mutable,
+    TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
     TestStructWithInvariantField as TestStructWithInvariantFieldMutable,
+    TestStructWithNestedContainers as TestStructWithNestedContainersMutable,
+    TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
+    TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesImmutable,
+    TestExceptionCopy as TestExceptionCopyImmutable,
     TestStruct as TestStructImmutable,
+    TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
+    TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
+    TestStructCopy as TestStructCopyImmutable,
+    TestStructNested_0 as TestStructNested_0Immutable,
+    TestStructNested_1 as TestStructNested_1Immutable,
+    TestStructWithExceptionField as TestStructWithExceptionFieldImmutable,
     TestStructWithInvariantField as TestStructWithInvariantFieldImmutable,
+    TestStructWithNestedContainers as TestStructWithNestedContainersImmutable,
+    TestStructWithTypedefField as TestStructWithTypedefFieldImmutable,
+    TestStructWithUnionField as TestStructWithUnionFieldImmutable,
 )
 
 from thrift.test.thrift_python.union_test.thrift_abstract_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
     TestUnion as TestUnionAbstract,
-    TestUnionAmbiguousTypeFieldName as TestUnionAmbiguousTypeFieldNameAbstract,
     # TODO: Uncomment when adapted types work correctly.
     # TestUnionAdaptedTypes as TestUnionAdaptedTypesAbstract,
 )
@@ -286,411 +302,6 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
                 TestStructAdaptedTypesAbstract.unqualified_adapted_string_to_i32,
                 int,
             ),
-            (
-                "TestStructWithDefaultValuesAbstract.unqualified_integer",
-                TestStructWithDefaultValuesAbstract.unqualified_integer,
-                int,
-            ),
-            (
-                "TestStructWithDefaultValuesAbstract.optional_integer",
-                TestStructWithDefaultValuesAbstract.optional_integer,
-                typing.Optional[int],
-            ),
-            (
-                "TestStructWithDefaultValuesAbstract.unqualified_string",
-                TestStructWithDefaultValuesAbstract.unqualified_struct,
-                TestStructAbstract,
-            ),
-            (
-                "TestStructWithDefaultValuesAbstract.optional_struct",
-                TestStructWithDefaultValuesAbstract.optional_struct,
-                typing.Optional[TestStructAbstract],
-            ),
-            (
-                "TestStructWithDefaultValuesAbstract.unqualified_struct_intrinsic_default",
-                TestStructWithDefaultValuesAbstract.unqualified_struct_intrinsic_default,
-                TestStructAbstract,
-            ),
-            (
-                "TestStructWithDefaultValuesAbstract.optional_struct_intrinsic_default",
-                TestStructWithDefaultValuesAbstract.optional_struct_intrinsic_default,
-                typing.Optional[TestStructAbstract],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_bool",
-                TestStructAllThriftPrimitiveTypesAbstract.unqualified_bool,
-                bool,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.optional_bool",
-                TestStructAllThriftPrimitiveTypesAbstract.optional_bool,
-                typing.Optional[bool],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_byte",
-                TestStructAllThriftPrimitiveTypesAbstract.unqualified_byte,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.optional_byte",
-                TestStructAllThriftPrimitiveTypesAbstract.optional_byte,
-                typing.Optional[int],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_i16",
-                TestStructAllThriftPrimitiveTypesAbstract.unqualified_i16,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.optional_i16",
-                TestStructAllThriftPrimitiveTypesAbstract.optional_i16,
-                typing.Optional[int],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_i32",
-                TestStructAllThriftPrimitiveTypesAbstract.unqualified_i32,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.optional_i32",
-                TestStructAllThriftPrimitiveTypesAbstract.optional_i32,
-                typing.Optional[int],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_i64",
-                TestStructAllThriftPrimitiveTypesAbstract.unqualified_i64,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.optional_i64",
-                TestStructAllThriftPrimitiveTypesAbstract.optional_i64,
-                typing.Optional[int],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_float",
-                TestStructAllThriftPrimitiveTypesAbstract.unqualified_float,
-                float,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.optional_float",
-                TestStructAllThriftPrimitiveTypesAbstract.optional_float,
-                typing.Optional[float],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_double",
-                TestStructAllThriftPrimitiveTypesAbstract.unqualified_double,
-                float,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesAbstract.optional_double",
-                TestStructAllThriftPrimitiveTypesAbstract.optional_double,
-                typing.Optional[float],
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_bool",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_bool,
-                bool,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_byte",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_byte,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i16",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i16,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i32",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i32,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i64",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i64,
-                int,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_float",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_float,
-                float,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_double",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_double,
-                float,
-            ),
-            (
-                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_string",
-                TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_string,
-                str,
-            ),
-            (
-                "TestStructAllThriftContainerTypesAbstract.unqualified_list_i32",
-                TestStructAllThriftContainerTypesAbstract.unqualified_list_i32,
-                typing.Sequence[int],
-            ),
-            (
-                "TestStructAllThriftContainerTypesAbstract.optional_list_i32",
-                TestStructAllThriftContainerTypesAbstract.optional_list_i32,
-                typing.Optional[typing.Sequence[int]],
-            ),
-            (
-                "TestStructAllThriftContainerTypesAbstract.unqualified_set_string",
-                TestStructAllThriftContainerTypesAbstract.unqualified_set_string,
-                typing.AbstractSet[str],
-            ),
-            (
-                "TestStructAllThriftContainerTypesAbstract.optional_set_string",
-                TestStructAllThriftContainerTypesAbstract.optional_set_string,
-                typing.Optional[typing.AbstractSet[str]],
-            ),
-            (
-                "TestStructAllThriftContainerTypesAbstract.unqualified_map_string_i32",
-                TestStructAllThriftContainerTypesAbstract.unqualified_map_string_i32,
-                typing.Mapping[str, int],
-            ),
-            (
-                "TestStructAllThriftContainerTypesAbstract.optional_map_string_i32",
-                TestStructAllThriftContainerTypesAbstract.optional_map_string_i32,
-                typing.Optional[typing.Mapping[str, int]],
-            ),
-            (
-                "TestStructWithTypedefFieldAbstract.empty_struct",
-                TestStructWithTypedefFieldAbstract.empty_struct,
-                TestStructEmptyAbstract,
-            ),
-            (
-                "TestStructWithTypedefFieldAbstract.empty_struct_alias",
-                TestStructWithTypedefFieldAbstract.empty_struct_alias,
-                TestStructEmptyAbstract,
-            ),
-            (
-                "TestStructNested_0Abstract.nested_1",
-                TestStructNested_0Abstract.nested_1,
-                TestStructNested_1Abstract,
-            ),
-            (
-                "TestStructNested_1Abstract.nested_2",
-                TestStructNested_1Abstract.nested_2,
-                TestStructNested_2Abstract,
-            ),
-            (
-                "TestStructWithUnionFieldAbstract.union_field",
-                TestStructWithUnionFieldAbstract.union_field,
-                thrift.test.thrift_python.struct_test.thrift_abstract_types.TestUnion,
-            ),
-            (
-                "TestStructWithUnionFieldAbstract.union_field_from_included",
-                TestStructWithUnionFieldAbstract.union_field_from_included,
-                thrift.test.thrift_python.included.thrift_abstract_types.TestUnion,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_bool",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_bool,
-                bool,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_bool",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_bool,
-                typing.Optional[bool],
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_byte",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_byte,
-                int,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_byte",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_byte,
-                typing.Optional[int],
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i16",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i16,
-                int,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_i16",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_i16,
-                typing.Optional[int],
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i32",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i32,
-                int,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_i32",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_i32,
-                typing.Optional[int],
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i64",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i64,
-                int,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_i64",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_i64,
-                typing.Optional[int],
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_float",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_float,
-                float,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_float",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_float,
-                typing.Optional[float],
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_double",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_double,
-                float,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_double",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_double,
-                typing.Optional[float],
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_string",
-                TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_string,
-                str,
-            ),
-            (
-                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_string",
-                TestExceptionAllThriftPrimitiveTypesAbstract.optional_string,
-                typing.Optional[str],
-            ),
-            (
-                "TestStructWithExceptionFieldAbstract.i32_field",
-                TestStructWithExceptionFieldAbstract.i32_field,
-                int,
-            ),
-            (
-                "TestStructWithExceptionFieldAbstract.exception_field",
-                TestStructWithExceptionFieldAbstract.exception_field,
-                TestExceptionAllThriftPrimitiveTypesAbstract,
-            ),
-            (
-                "TestStructCopyAbstract.unqualified_i32",
-                TestStructCopyAbstract.unqualified_i32,
-                int,
-            ),
-            (
-                "TestStructCopyAbstract.optional_i32",
-                TestStructCopyAbstract.optional_i32,
-                typing.Optional[int],
-            ),
-            (
-                "TestStructCopyAbstract.unqualified_string",
-                TestStructCopyAbstract.unqualified_string,
-                str,
-            ),
-            (
-                "TestStructCopyAbstract.optional_string",
-                TestStructCopyAbstract.optional_string,
-                typing.Optional[str],
-            ),
-            (
-                "TestStructCopyAbstract.unqualified_list_i32",
-                TestStructCopyAbstract.unqualified_list_i32,
-                typing.Sequence[int],
-            ),
-            (
-                "TestStructCopyAbstract.unqualified_set_string",
-                TestStructCopyAbstract.unqualified_set_string,
-                typing.AbstractSet[str],
-            ),
-            (
-                "TestStructCopyAbstract.unqualified_map_string_i32",
-                TestStructCopyAbstract.unqualified_map_string_i32,
-                typing.Mapping[str, int],
-            ),
-            (
-                "TestStructCopyAbstract.recursive_struct",
-                TestStructCopyAbstract.recursive_struct,
-                typing.Optional[TestStructCopyAbstract],
-            ),
-            (
-                "TestStructCopyAbstract.unqualified_binary",
-                TestStructCopyAbstract.unqualified_binary,
-                iobuf.IOBuf,
-            ),
-            (
-                "TestExceptionCopyAbstract.unqualified_i32",
-                TestExceptionCopyAbstract.unqualified_i32,
-                int,
-            ),
-            (
-                "TestExceptionCopyAbstract.optional_i32",
-                TestExceptionCopyAbstract.optional_i32,
-                typing.Optional[int],
-            ),
-            (
-                "TestExceptionCopyAbstract.unqualified_string",
-                TestExceptionCopyAbstract.unqualified_string,
-                str,
-            ),
-            (
-                "TestExceptionCopyAbstract.optional_string",
-                TestExceptionCopyAbstract.optional_string,
-                typing.Optional[str],
-            ),
-            (
-                "TestExceptionCopyAbstract.unqualified_list_i32",
-                TestExceptionCopyAbstract.unqualified_list_i32,
-                typing.Sequence[int],
-            ),
-            (
-                "TestExceptionCopyAbstract.optional_list_i32",
-                TestExceptionCopyAbstract.optional_list_i32,
-                typing.Optional[typing.Sequence[int]],
-            ),
-            (
-                "TestExceptionCopyAbstract.unqualified_set_string",
-                TestExceptionCopyAbstract.unqualified_set_string,
-                typing.AbstractSet[str],
-            ),
-            (
-                "TestExceptionCopyAbstract.optional_set_string",
-                TestExceptionCopyAbstract.optional_set_string,
-                typing.Optional[typing.AbstractSet[str]],
-            ),
-            (
-                "TestExceptionCopyAbstract.unqualified_map_string_i32",
-                TestExceptionCopyAbstract.unqualified_map_string_i32,
-                typing.Mapping[str, int],
-            ),
-            (
-                "TestExceptionCopyAbstract.recursive_exception",
-                TestExceptionCopyAbstract.recursive_exception,
-                typing.Optional[TestExceptionCopyAbstract],
-            ),
-            (
-                "TestUnionAbstract.string_field",
-                TestUnionAbstract.string_field,
-                str,
-            ),
-            (
-                "TestUnionAbstract.int_field",
-                TestUnionAbstract.int_field,
-                int,
-            ),
-            (
-                "TestUnionAbstract.struct_field",
-                TestUnionAbstract.struct_field,
-                thrift.test.thrift_python.union_test.thrift_abstract_types.TestStruct,
-            ),
-            (
-                "TestUnionAmbiguousTypeFieldNameAbstract.Type",
-                TestUnionAmbiguousTypeFieldNameAbstract.Type_,
-                int,
-            ),
         ]
     )
     def test_property_type_hints(
@@ -701,6 +312,10 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         # pyre-ignore[2]: Ignore types for tests.
         expected_type,
     ) -> None:
+        """
+        This test will go away when test_struct_with_adapted_types_property_types
+        implements the test for TestStructAdaptedTypes
+        """
         # GIVEN
         expected = expected_type
 
@@ -929,4 +544,822 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         self.assertEqual(
             enum_test_enums.PositiveNumber.THREE,
             enum_test_abstract_types.PositiveNumber.THREE,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestStructAllThriftPrimitiveTypesImmutable(),
+            ),
+            (
+                "mutable",
+                TestStructAllThriftPrimitiveTypesMutable(),
+            ),
+        ]
+    )
+    def test_all_thrift_primitive_property_types_test(
+        self,
+        test_case: str,
+        test_struct_all_thrift_primitive_types_abstract: TestStructAllThriftPrimitiveTypesAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignoress will flag these as unused.
+        # pyre-ignore[9]: unqualified_bool_incorrect_type has type `incorrect_type`;
+        #  used as `bool`.
+        unqualified_bool_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_bool
+        )
+        unqualified_bool: bool = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_bool
+        )
+        # pyre-ignore[9]: optional_bool_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[bool]`.
+        optional_bool_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_bool
+        )
+        optional_bool: typing.Optional[bool] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_bool
+        )
+
+        # pyre-ignore[9]: unqualified_byte_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_byte_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_byte
+        )
+        unqualified_byte: int = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_byte
+        )
+
+        # pyre-ignore[9]: optional_byte_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[int]`.
+        optional_byte_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_byte
+        )
+        optional_byte: typing.Optional[int] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_byte
+        )
+
+        # pyre-ignore[9]: unqualified_i16_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_i16_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_i16
+        )
+        unqualified_i16: int = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_i16
+        )
+
+        # pyre-ignore[9]: optional_i16_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[int]`.
+        optional_i16_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_i16
+        )
+        optional_i16: typing.Optional[int] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_i16
+        )
+
+        # pyre-ignore[9]: unqualified_i32_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_i32
+        )
+        unqualified_i32: int = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_i32
+        )
+
+        # pyre-ignore[9]: optional_i32_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[int]`.
+        optional_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_i32
+        )
+        optional_i32: typing.Optional[int] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_i32
+        )
+
+        # pyre-ignore[9]: unqualified_i64_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_i64_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_i64
+        )
+        unqualified_i64: int = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_i64
+        )
+
+        # pyre-ignore[9]: optional_i64_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[int]`.
+        optional_i64_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_i64
+        )
+        optional_i64: typing.Optional[int] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_i64
+        )
+
+        # pyre-ignore[9]: unqualified_float_incorrect_type has type `incorrect_type`;
+        #  used as `float`.
+        unqualified_float_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_float
+        )
+        unqualified_float: float = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_float
+        )
+
+        # pyre-ignore[9]: optional_float_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[float]`.
+        optional_float_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_float
+        )
+        optional_float: typing.Optional[float] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_float
+        )
+
+        # pyre-ignore[9]: unqualified_double_incorrect_type has type `incorrect_type`;
+        #  used as `float`.
+        unqualified_double_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_double
+        )
+        unqualified_double: float = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_double
+        )
+
+        # pyre-ignore[9]: optional_double_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[float]`.
+        optional_double_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_double
+        )
+        optional_double: typing.Optional[float] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_double
+        )
+
+        # pyre-ignore[9]: unqualified_string_incorrect_type has type `incorrect_type`;
+        #  used as `str`.
+        unqualified_string_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_string
+        )
+        unqualified_string: str = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.unqualified_string
+        )
+
+        # pyre-ignore[9]: optional_string_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[str]`.
+        optional_string_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_string
+        )
+        optional_string: typing.Optional[str] = (  # noqa F841
+            test_struct_all_thrift_primitive_types_abstract.optional_string
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestStructAllThriftContainerTypesImmutable(),
+            ),
+            (
+                "mutable",
+                TestStructAllThriftContainerTypesMutable(),
+            ),
+        ]
+    )
+    def test_struct_all_thrift_container_property_types_test(
+        self,
+        test_case: str,
+        test_struct_all_thrift_container_types_abstract: TestStructAllThriftContainerTypesAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignoress will flag these as unused.
+        # pyre-ignore[9]: unqualified_list_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Sequence[int]`.
+        unqualified_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.unqualified_list_i32
+        )
+        unqualified_list_i32: typing.Sequence[int] = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.unqualified_list_i32
+        )
+        # pyre-ignore[9]: optional_list_i32_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[Sequence[int]]`.
+        optional_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.optional_list_i32
+        )
+        optional_list_i32: typing.Optional[typing.Sequence[int]] = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.optional_list_i32
+        )
+
+        # pyre-ignore[9]: unqualified_set_string_incorrect_type has type
+        #  `incorrect_type`; used as `AbstractSet[str]`.
+        unqualified_set_string_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.unqualified_set_string
+        )
+        unqualified_set_string: typing.AbstractSet[str] = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.unqualified_set_string
+        )
+
+        # pyre-ignore[9]: optional_set_string_incorrect_type has type
+        #  `incorrect_type`; used as `Optional[AbstractSet[str]]`.
+        optional_set_string_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.optional_set_string
+        )
+        optional_set_string: typing.Optional[typing.AbstractSet[str]] = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.optional_set_string
+        )
+
+        # pyre-ignore[9]: unqualified_map_string_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Mapping[str, int]`.
+        unqualified_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.unqualified_map_string_i32
+        )
+        unqualified_map_string_i32: typing.Mapping[str, int] = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.unqualified_map_string_i32
+        )
+
+        # pyre-ignore[9]: optional_map_string_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Optional[Mapping[str, int]]`.
+        optional_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.optional_map_string_i32
+        )
+        optional_map_string_i32: typing.Optional[typing.Mapping[str, int]] = (  # noqa F841
+            test_struct_all_thrift_container_types_abstract.optional_map_string_i32
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestStructWithTypedefFieldImmutable(),
+            ),
+            (
+                "mutable",
+                TestStructWithTypedefFieldMutable(),
+            ),
+        ]
+    )
+    def test_struct_with_typedef_field_property_types_test(
+        self,
+        test_case: str,
+        test_struct_with_typedef_field_abstract: TestStructWithTypedefFieldAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignores will flag these as unused.
+        # pyre-ignore[9]: empty_struct_incorrect_type has type `incorrect_type`; used
+        #  as `TestStructEmptyAbstract`.
+        empty_struct_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_typedef_field_abstract.empty_struct
+        )
+        empty_struct: TestStructEmptyAbstract = (  # noqa F841
+            test_struct_with_typedef_field_abstract.empty_struct
+        )
+
+        # pyre-ignore[9]: empty_struct_alias_incorrect_type has type
+        #  `incorrect_type`; used as `TestStructEmptyAbstract`.
+        empty_struct_alias_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_typedef_field_abstract.empty_struct_alias
+        )
+        empty_struct_alias: TestStructEmptyAbstract = (  # noqa F841
+            test_struct_with_typedef_field_abstract.empty_struct_alias
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestStructNested_0Immutable(),
+                TestStructNested_1Immutable(),
+                TestStructCopyImmutable(),
+                TestExceptionCopyImmutable(),
+            ),
+            (
+                "mutable",
+                TestStructNested_0Mutable(),
+                TestStructNested_1Mutable(),
+                TestStructCopyMutable(),
+                TestExceptionCopyMutable(),
+            ),
+        ]
+    )
+    def test_nested_and_recursive_property_types(
+        self,
+        test_case: str,
+        test_struct_nested_0_abstract: TestStructNested_0Abstract,
+        test_struct_nested_1_abstract: TestStructNested_1Abstract,
+        test_struct_copy_abstract: TestStructCopyAbstract,
+        test_exception_copy_abstract: TestExceptionCopyAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignores will flag these as unused.
+        # pyre-ignore[9]: nested_0_incorrect_type has type `incorrect_type`; used as
+        #  `TestStructNested_1Abstract`.
+        nested_0_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_nested_0_abstract.nested_1
+        )
+        nested_0: TestStructNested_1Abstract = (  # noqa F841
+            test_struct_nested_0_abstract.nested_1
+        )
+
+        # pyre-ignore[9]: nested_1_incorrect_type has type `incorrect_type`; used as
+        #  `TestStructNested_2Abstract`.
+        nested_1_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_nested_1_abstract.nested_2
+        )
+        nested_1: TestStructNested_2Abstract = (  # noqa F841
+            test_struct_nested_1_abstract.nested_2
+        )
+
+        # pyre-ignore[9]: recursive_struct_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[TestStructCopyAbstract]`.
+        recursive_struct_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_copy_abstract.recursive_struct
+        )
+        recursive_struct: typing.Optional[TestStructCopyAbstract] = (  # noqa F841
+            test_struct_copy_abstract.recursive_struct
+        )
+
+        # pyre-ignore[9]: recursive_exception_incorrect_type has type
+        #  `incorrect_type`; used as `Optional[TestExceptionCopyAbstract]`.
+        recursive_exception_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_copy_abstract.recursive_exception
+        )
+        recursive_exception: typing.Optional[TestExceptionCopyAbstract] = (  # noqa F841
+            test_exception_copy_abstract.recursive_exception
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestStructWithNestedContainersImmutable(),
+            ),
+            (
+                "mutable",
+                TestStructWithNestedContainersMutable(),
+            ),
+        ]
+    )
+    def test_struct_with_nested_containers_property_types_test(
+        self,
+        test_case: str,
+        test_struct_with_nested_containers_abstract: TestStructWithNestedContainersAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignores will flag these as unused.
+        # pyre-ignore[9]: list_list_i32_incorrect_type has type `incorrect_type`;
+        #  used as `Sequence[Sequence[int]]`.
+        list_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_list_i32
+        )
+        list_list_i32: typing.Sequence[typing.Sequence[int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_list_i32
+        )
+
+        # pyre-ignore[9]: list_set_i32_incorrect_type has type `incorrect_type`; used
+        #  as `Sequence[AbstractSet[int]]`.
+        list_set_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_set_i32
+        )
+        list_set_i32: typing.Sequence[typing.AbstractSet[int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_set_i32
+        )
+
+        # pyre-ignore[9]: list_map_string_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Sequence[Mapping[str, int]]`.
+        list_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_map_string_i32
+        )
+        list_map_string_i32: typing.Sequence[typing.Mapping[str, int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_map_string_i32
+        )
+
+        # pyre-ignore[9]: list_map_string_list_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Sequence[Mapping[str, Sequence[int]]]`.
+        list_map_string_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_map_string_list_i32
+        )
+        list_map_string_list_i32: typing.Sequence[  # noqa F841
+            typing.Mapping[str, typing.Sequence[int]]
+        ] = test_struct_with_nested_containers_abstract.list_map_string_list_i32
+
+        # pyre-ignore[9]: list_map_string_set_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Sequence[Mapping[str, AbstractSet[int]]]`.
+        list_map_string_set_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.list_map_string_set_i32
+        )
+        list_map_string_set_i32: typing.Sequence[  # noqa F841
+            typing.Mapping[str, typing.AbstractSet[int]]
+        ] = test_struct_with_nested_containers_abstract.list_map_string_set_i32
+
+        # pyre-ignore[9]: set_list_i32_incorrect_type has type `incorrect_type`; used
+        #  as `AbstractSet[Sequence[int]]`.
+        set_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_list_i32
+        )
+        set_list_i32: typing.AbstractSet[typing.Sequence[int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_list_i32
+        )
+
+        # pyre-ignore[9]: set_set_i32_incorrect_type has type `incorrect_type`; used
+        #  as `AbstractSet[AbstractSet[int]]`.
+        set_set_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_set_i32
+        )
+        set_set_i32: typing.AbstractSet[typing.AbstractSet[int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_set_i32
+        )
+
+        # pyre-ignore[9]: set_map_string_i32_incorrect_type has type
+        #  `incorrect_type`; used as `AbstractSet[Mapping[str, int]]`.
+        set_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_map_string_i32
+        )
+        set_map_string_i32: typing.AbstractSet[typing.Mapping[str, int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_map_string_i32
+        )
+
+        # pyre-ignore[9]: set_map_string_list_i32_incorrect_type has type
+        #  `incorrect_type`; used as `AbstractSet[Mapping[str, Sequence[int]]]`.
+        set_map_string_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_map_string_list_i32
+        )
+        set_map_string_list_i32: typing.AbstractSet[  # noqa F841
+            typing.Mapping[str, typing.Sequence[int]]
+        ] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_map_string_list_i32
+        )
+
+        # pyre-ignore[9]: set_map_string_set_i32_incorrect_type has type
+        #  `incorrect_type`; used as `AbstractSet[Mapping[str, AbstractSet[int]]]`.
+        set_map_string_set_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_map_string_set_i32
+        )
+        set_map_string_set_i32: typing.AbstractSet[  # noqa F841
+            typing.Mapping[str, typing.AbstractSet[int]]
+        ] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.set_map_string_set_i32
+        )
+
+        # pyre-ignore[9]: map_i32_list_i32_incorrect_type has type `incorrect_type`;
+        #  used as `Mapping[int, Sequence[int]]`.
+        map_i32_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_list_i32
+        )
+        map_i32_list_i32: typing.Mapping[int, typing.Sequence[int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_list_i32
+        )
+
+        # pyre-ignore[9]: map_i32_set_i32_incorrect_type has type `incorrect_type`;
+        #  used as `Mapping[int, AbstractSet[int]]`.
+        map_i32_set_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_set_i32
+        )
+        map_i32_set_i32: typing.Mapping[int, typing.AbstractSet[int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_set_i32
+        )
+
+        # pyre-ignore[9]: map_i32_map_string_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Mapping[int, Mapping[str, int]]`.
+        map_i32_map_string_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_map_string_i32
+        )
+        map_i32_map_string_i32: typing.Mapping[int, typing.Mapping[str, int]] = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_map_string_i32
+        )
+
+        # pyre-ignore[9]: map_i32_map_string_list_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Mapping[int, Mapping[str, Sequence[int]]]`.
+        map_i32_map_string_list_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_map_string_list_i32
+        )
+        map_i32_map_string_list_i32: typing.Mapping[  # noqa F841
+            int, typing.Mapping[str, typing.Sequence[int]]
+        ] = test_struct_with_nested_containers_abstract.map_i32_map_string_list_i32
+
+        # pyre-ignore[9]: map_i32_map_string_set_i32_incorrect_type has type
+        #  `incorrect_type`; used as `Mapping[int, Mapping[str, AbstractSet[int]]]`.
+        map_i32_map_string_set_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.map_i32_map_string_set_i32
+        )
+        map_i32_map_string_set_i32: typing.Mapping[  # noqa F841
+            int, typing.Mapping[str, typing.AbstractSet[int]]
+        ] = test_struct_with_nested_containers_abstract.map_i32_map_string_set_i32
+
+        # pyre-ignore[9]: many_nested_incorrect_type has type `incorrect_type`; used
+        #  as `Sequence[Sequence[Mapping[int, Sequence[Mapping[str,
+        #  Sequence[AbstractSet[int]]]]]]]`.
+        many_nested_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_nested_containers_abstract.many_nested
+        )
+        many_nested: typing.Sequence[  # noqa F841
+            typing.Sequence[
+                typing.Mapping[
+                    int,
+                    typing.Sequence[
+                        typing.Mapping[str, typing.Sequence[typing.AbstractSet[int]]]
+                    ],
+                ]
+            ]
+        ] = test_struct_with_nested_containers_abstract.many_nested
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestExceptionAllThriftPrimitiveTypesImmutable(),
+            ),
+            (
+                "mutable",
+                TestExceptionAllThriftPrimitiveTypesMutable(),
+            ),
+        ]
+    )
+    def test_exception_all_thrift_primitive_property_types_test(
+        self,
+        test_case: str,
+        test_exception_all_thrift_primitive_types_abstract: TestExceptionAllThriftPrimitiveTypesAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # If type-checks don't detect a type mismatch, then the CI check for
+        # unused ignores will flag these as unused.
+        # pyre-ignore[9]: unqualified_bool_incorrect_type has type `incorrect_type`;
+        #  used as `bool`.
+        unqualified_bool_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_bool
+        )
+        unqualified_bool: bool = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_bool
+        )
+        # pyre-ignore[9]: optional_bool_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[bool]`.
+        optional_bool_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_bool
+        )
+        optional_bool: typing.Optional[bool] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_bool
+        )
+
+        # pyre-ignore[9]: unqualified_byte_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_byte_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_byte
+        )
+        unqualified_byte: int = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_byte
+        )
+
+        # pyre-ignore[9]: optional_byte_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[int]`.
+        optional_byte_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_byte
+        )
+        optional_byte: typing.Optional[int] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_byte
+        )
+
+        # pyre-ignore[9]: unqualified_i16_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_i16_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_i16
+        )
+        unqualified_i16: int = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_i16
+        )
+
+        # pyre-ignore[9]: optional_i16_incorrect_type has type `incorrect_type`; used
+        #  as `Optional[int]`.
+        optional_i16_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_i16
+        )
+        optional_i16: typing.Optional[int] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_i16
+        )
+
+        # pyre-ignore[9]: unqualified_i32_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_i32
+        )
+        unqualified_i32: int = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_i32
+        )
+
+        # pyre-ignore[9]: optional_i32_incorrect_type has type `incorrect_type`; used
+        #  as `Optional[int]`.
+        optional_i32_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_i32
+        )
+        optional_i32: typing.Optional[int] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_i32
+        )
+
+        # pyre-ignore[9]: unqualified_i64_incorrect_type has type `incorrect_type`;
+        #  used as `int`.
+        unqualified_i64_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_i64
+        )
+        unqualified_i64: int = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_i64
+        )
+
+        # pyre-ignore[9]: optional_i64_incorrect_type has type `incorrect_type`; used
+        #  as `Optional[int]`.
+        optional_i64_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_i64
+        )
+        optional_i64: typing.Optional[int] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_i64
+        )
+
+        # pyre-ignore[9]: unqualified_float_incorrect_type has type `incorrect_type`;
+        #  used as `float`.
+        unqualified_float_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_float
+        )
+        unqualified_float: float = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_float
+        )
+
+        # pyre-ignore[9]: optional_float_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[float]`.
+        optional_float_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_float
+        )
+        optional_float: typing.Optional[float] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_float
+        )
+        # pyre-ignore[9]: unqualified_double_incorrect_type has type
+        #  `incorrect_type`; used as `float`.
+        unqualified_double_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_double
+        )
+        unqualified_double: float = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_double
+        )
+
+        # pyre-ignore[9]: optional_double_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[float]`.
+        optional_double_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_double
+        )
+        optional_double: typing.Optional[float] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_double
+        )
+
+        # pyre-ignore[9]: unqualified_string_incorrect_type has type
+        #  `incorrect_type`; used as `str`.
+        unqualified_string_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_string
+        )
+        unqualified_string: str = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.unqualified_string
+        )
+
+        # pyre-ignore[9]: optional_string_incorrect_type has type `incorrect_type`;
+        #  used as `Optional[str]`.
+        optional_string_incorrect_type: incorrect_type = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_string
+        )
+        optional_string: typing.Optional[str] = (  # noqa F841
+            test_exception_all_thrift_primitive_types_abstract.optional_string
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestStructWithExceptionFieldImmutable(),
+                TestStructWithUnionFieldImmutable(),
+            ),
+            (
+                "mutable",
+                TestStructWithExceptionFieldMutable(),
+                TestStructWithUnionFieldMutable(),
+            ),
+        ]
+    )
+    def test_struct_with_union_field_property_types_test(
+        self,
+        test_case: str,
+        test_struct_with_exception_field_abstract: TestStructWithExceptionFieldAbstract,
+        test_struct_with_union_field_abstract: TestStructWithUnionFieldAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # pyre-ignore[9]: exception_field_incorrect_type has type `incorrect_type`; used
+        #  as `TestExceptionAllThriftPrimitiveTypesAbstract`.
+        exception_field_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_exception_field_abstract.exception_field
+        )
+        exception_field: TestExceptionAllThriftPrimitiveTypesAbstract = (  # noqa F841
+            test_struct_with_exception_field_abstract.exception_field
+        )
+
+        # pyre-ignore[9]: union_field_incorrect_type has type `incorrect_type`; used as
+        #  `TestUnion`.
+        union_field_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_union_field_abstract.union_field
+        )
+        union_field: thrift.test.thrift_python.struct_test.thrift_abstract_types.TestUnion = (  # noqa F841
+            test_struct_with_union_field_abstract.union_field
+        )
+
+        # pyre-ignore[9]: union_field_from_included_incorrect_type has type
+        #  `incorrect_type`; used as `TestUnion`.
+        union_field_from_included_incorrect_type: incorrect_type = (  # noqa F841
+            test_struct_with_union_field_abstract.union_field_from_included
+        )
+        union_field_from_included: thrift.test.thrift_python.included.thrift_abstract_types.TestUnion = (  # noqa F841
+            test_struct_with_union_field_abstract.union_field_from_included
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "immutable",
+                TestUnionImmutable(string_field="test"),
+                TestUnionImmutable(int_field=42),
+                TestUnionImmutable(
+                    struct_field=thrift.test.thrift_python.union_test.thrift_types.TestStruct()
+                ),
+            ),
+            (
+                "mutable",
+                TestUnionMutable(string_field="test"),
+                TestUnionMutable(int_field=42),
+                TestUnionMutable(
+                    struct_field=thrift.test.thrift_python.union_test.thrift_mutable_types.TestStruct()
+                ),
+            ),
+        ]
+    )
+    def test_union_fields(
+        self,
+        test_name: str,
+        string_union: TestUnionAbstract,
+        int_union: TestUnionAbstract,
+        struct_union: TestUnionAbstract,
+    ) -> None:
+        # GIVEN
+        class incorrect_type:
+            pass
+
+        # Test string field
+        self.assertEqual(
+            string_union.fbthrift_current_field,
+            TestUnionAbstract.FbThriftUnionFieldEnum.string_field,
+        )
+        # pyre-ignore[9]: string_field_incorrect_type has type `incorrect_type`; used as
+        #  `str`.
+        string_field_incorrect_type: incorrect_type = (  # noqa F841
+            string_union.string_field
+        )
+        string_field: str = (  # noqa F841
+            string_union.string_field
+        )
+
+        # Test int field
+        self.assertEqual(
+            int_union.fbthrift_current_field,
+            TestUnionAbstract.FbThriftUnionFieldEnum.int_field,
+        )
+        # pyre-ignore[9]: int_field_incorrect_type has type `incorrect_type`; used as `int`.
+        int_field_incorrect_type: incorrect_type = (  # noqa F841
+            int_union.int_field
+        )
+        int_field: int = (  # noqa F841
+            int_union.int_field
+        )
+
+        # Test struct field
+        self.assertEqual(
+            struct_union.fbthrift_current_field,
+            TestUnionAbstract.FbThriftUnionFieldEnum.struct_field,
+        )
+        # pyre-ignore[9]: struct_field_incorrect_type has type `incorrect_type`; used as
+        #  `TestStruct`.
+        struct_field_incorrect_type: incorrect_type = (  # noqa F841
+            struct_union.struct_field
+        )
+        struct_field: thrift.test.thrift_python.union_test.thrift_abstract_types.TestStruct = (  # noqa F841
+            struct_union.struct_field
         )

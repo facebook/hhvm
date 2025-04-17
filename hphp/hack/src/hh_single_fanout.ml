@@ -212,14 +212,30 @@ let compute_fanout_and_resolve_deps
   let { Fanout.changed; to_recheck; to_recheck_if_errors } =
     compute_fanout ctx old_and_new_defs
   in
+  let dependent_on_files =
+    Relative_path.Set.fold
+      files_with_changes
+      ~init:(Typing_deps.DepSet.make ())
+      ~f:(fun file depset ->
+        let file_dep = Typing_deps.Dep.File file in
+        let file_dependents =
+          Typing_deps.get_ideps (Provider_context.get_deps_mode ctx) file_dep
+        in
+
+        Typing_deps.(DepSet.union depset file_dependents))
+  in
   if options.debug then (
     Printf.printf "Hashes of changed:%s\n" (Typing_deps.DepSet.show changed);
     Printf.printf "Hashes to recheck:%s\n" (Typing_deps.DepSet.show to_recheck);
     Printf.printf
       "Hashes to recheck if errors:%s\n"
       (Typing_deps.DepSet.show to_recheck_if_errors);
-    ()
+    ();
+    Printf.printf
+      "Hashes of dependent on changed file contents:%s\n"
+      (Typing_deps.DepSet.show dependent_on_files)
   );
+  let to_recheck = Typing_deps.DepSet.union to_recheck dependent_on_files in
   let to_recheck_symbols = get_symbols_for_deps to_recheck dep_to_symbol_map in
   let to_recheck_if_errors_symbols =
     get_symbols_for_deps to_recheck_if_errors dep_to_symbol_map

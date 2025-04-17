@@ -576,7 +576,12 @@ let get_files_to_recheck
     ~bucket_size
     genv.workers
     old_dirty_names;
-  let files_to_recheck = ServerIncremental.resolve_files ctx env fanout in
+  let reparsed =
+    Relative_path.Map.keys defs_per_dirty_file |> Relative_path.set_of_list
+  in
+  let files_to_recheck =
+    ServerIncremental.resolve_files ~reparsed ctx env fanout
+  in
   log_fanout_information fanout.Fanout.to_recheck files_to_recheck;
   files_to_recheck
 

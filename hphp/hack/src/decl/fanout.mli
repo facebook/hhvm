@@ -38,3 +38,5 @@ val add_fanout_of :
 
 (** Cardinal of deps to recheck. Ignore deps to recheck if they had errors *)
 val cardinal : t -> int
+
+val add_fanout_of_file : Typing_deps_mode.t -> Relative_path.t -> t -> t

@@ -50,3 +50,15 @@ let add_fanout_of mode dep { changed; to_recheck; to_recheck_if_errors } =
 
 let cardinal { changed = _; to_recheck; to_recheck_if_errors = _ } =
   DepSet.cardinal to_recheck
+
+let add_fanout_of_file mode file { changed; to_recheck; to_recheck_if_errors } =
+  let file_dep = Dep.(File file) in
+  let recheck = Typing_deps.get_ideps mode file_dep in
+  if DepSet.is_empty recheck then
+    { changed; to_recheck; to_recheck_if_errors }
+  else
+    {
+      changed = DepSet.add changed (Dep.make file_dep);
+      to_recheck = DepSet.union to_recheck recheck;
+      to_recheck_if_errors;
+    }

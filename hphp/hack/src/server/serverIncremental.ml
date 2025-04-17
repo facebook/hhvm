@@ -87,9 +87,22 @@ let add_files_with_stale_errors ctx ~reparsed errors files_acc =
       else
         acc)
 
-let resolve_files ctx env (fanout : Fanout.t) : Relative_path.Set.t =
+let resolve_files ctx ~reparsed env (fanout : Fanout.t) : Relative_path.Set.t =
   Server_progress.with_message "resolving files" @@ fun () ->
   let { Fanout.changed = _; to_recheck; to_recheck_if_errors } = fanout in
+  let dependent_on_files =
+    Relative_path.Set.fold
+      reparsed
+      ~init:(Typing_deps.DepSet.make ())
+      ~f:(fun file depset ->
+        let file_dep = Typing_deps.Dep.File file in
+        let file_dependents =
+          Typing_deps.get_ideps (Provider_context.get_deps_mode ctx) file_dep
+        in
+
+        Typing_deps.(DepSet.union depset file_dependents))
+  in
+  let to_recheck = Typing_deps.DepSet.union dependent_on_files to_recheck in
   let files_to_recheck = Naming_provider.get_files ctx to_recheck in
   let files_with_errors_to_recheck =
     let files_with_errors = Errors.get_failed_files env.ServerEnv.errorl in
@@ -114,7 +127,7 @@ let resolve_files ctx env (fanout : Fanout.t) : Relative_path.Set.t =
   files
 
 let get_files_to_recheck ctx env fanout ~reparsed ~errors =
-  resolve_files ctx env fanout
+  resolve_files ~reparsed ctx env fanout
   (* We want to also recheck files that have typing errors referring to files that were
    * reparsed, since positions in those errors can be now stale. *)
   |> add_files_with_stale_errors ctx ~reparsed errors

@@ -33,7 +33,11 @@ val add_files_with_stale_errors :
   Relative_path.Set.t
 
 val resolve_files :
-  Provider_context.t -> ServerEnv.env -> Fanout.t -> Relative_path.Set.t
+  Provider_context.t ->
+  reparsed:Relative_path.Set.t ->
+  ServerEnv.env ->
+  Fanout.t ->
+  Relative_path.Set.t
 
 val get_files_to_recheck :
   Provider_context.t ->

@@ -289,6 +289,12 @@ inline const IRExtraData* IRInstruction::rawExtra() const {
   return m_extra;
 }
 
+inline void IRInstruction:: updateStackOffsetsExtra(int32_t delta) {
+  if (m_extra) {
+    jit::updateStackOffsetsExtra(m_op, m_extra, delta);
+  }
+}
+
 inline void IRInstruction::setExtra(IRExtraData* data) {
   assertx(!m_extra);
   m_extra = data;

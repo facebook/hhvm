@@ -283,6 +283,10 @@ struct ResolveTypeStructData : IRExtraData {
     );
   }
 
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
+  }
+
   const Class* cls;
   bool suppress;
   IRSPRelOffset offset;
@@ -829,6 +833,12 @@ struct DefFPData : IRExtraData {
     return offset ? std::hash<int32_t>()(offset->offset) : 0;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    if (offset) {
+      offset->offset += delta;
+    }
+  }
+
   // Frame position on the stack, if it lives there and the position is known.
   Optional<IRSPRelOffset> offset;
 };
@@ -864,6 +874,11 @@ struct DefStackData : IRExtraData {
     );
   }
 
+  void updateStackOffsets(int32_t delta) {
+    irSPOff.offset -= delta;
+    bcSPOff.offset -= delta;
+  }
+
   SBInvOffset irSPOff;  // offset from stack base to vmsp()
   SBInvOffset bcSPOff;  // offset from stack base to top of the stack
 };
@@ -882,6 +897,11 @@ struct SBInvOffsetData : IRExtraData {
   size_t hash() const { return std::hash<int32_t>()(offset.offset); }
 
   size_t stableHash() const { return std::hash<int32_t>()(offset.offset); }
+
+
+  void updateStackOffsets(int32_t delta) {
+    offset.offset -= delta;
+  }
 
   SBInvOffset offset;
 };
@@ -902,6 +922,10 @@ struct IRSPRelOffsetData : IRExtraData {
   size_t stableHash() const { return std::hash<int32_t>()(offset.offset); }
 
   IRSPRelOffset offset;
+
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -946,6 +970,10 @@ struct LdBindAddrData : IRExtraData {
 
   bool equals(const LdBindAddrData& o) const {
     return sk == o.sk && bcSPOff == o.bcSPOff;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    bcSPOff.offset -= delta;
   }
 
   SrcKey sk;
@@ -993,6 +1021,10 @@ struct LdSSwitchData : IRExtraData {
       if (cases[i].str != o.cases[i].str) return false;
     }
     return true;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    bcSPOff.offset -= delta;
   }
 
   int64_t     numCases;
@@ -1060,6 +1092,10 @@ struct LdSwitchData : IRExtraData {
     return true;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    spOffBCFromStackBase.offset -= delta;
+  }
+
   int32_t cases;       // number of cases
   SrcKey* targets;     // srckeys for all targets
   SBInvOffset spOffBCFromStackBase;
@@ -1121,6 +1157,11 @@ struct ReqBindJmpData : IRExtraData {
       popFrame == o.popFrame;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    invSPOff.offset -= delta;
+    irSPOff.offset += delta;
+  }
+
   SrcKey target;
   SBInvOffset invSPOff;
   IRSPRelOffset irSPOff;
@@ -1176,6 +1217,10 @@ struct CallBuiltinData : IRExtraData {
   bool equals(const CallBuiltinData& o) const {
     return spOffset == o.spOffset &&
       callee == o.callee;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    spOffset.offset += delta;
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
@@ -1257,6 +1302,9 @@ struct CallData : IRExtraData {
            formingRegion == o.formingRegion;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    spOffset.offset += delta;
+  }
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   uint32_t numArgs;
@@ -1312,6 +1360,10 @@ struct CallFuncEntryData : IRExtraData {
 
   bool asyncEagerReturn() const {
     return arFlags & (1 << ActRec::AsyncEagerRet);
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    spOffset.offset += delta;
   }
 
   SrcKey target;
@@ -1375,6 +1427,10 @@ struct RetCtrlData : IRExtraData {
   bool equals(const RetCtrlData& o) const {
     return offset == o.offset && suspendingResumed == o.suspendingResumed &&
            aux.u_raw == o.aux.u_raw;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
   }
 
   // Adjustment we need to make to the stack pointer (for cross-tracelet ABI
@@ -1585,6 +1641,10 @@ struct InterpOneData : IRExtraData {
     return false;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    spOffset.offset += delta;
+  }
+
   // Offset of the BC stack top relative to the current IR stack pointer.
   IRSPRelOffset spOffset;
 
@@ -1740,6 +1800,10 @@ struct NewStructData : IRExtraData {
     return true;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
+  }
+
   IRSPRelOffset offset;
   uint32_t numKeys;
   StringData** keys;
@@ -1801,6 +1865,10 @@ struct NewBespokeStructData : IRExtraData {
       if (slots[i] != o.slots[i]) return false;
     }
     return true;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
   }
 
   ArrayLayout layout;
@@ -1876,6 +1944,10 @@ struct InitVanillaVecLoopData : IRExtraData {
     return offset == o.offset && size == o.size;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
+  }
+
   IRSPRelOffset offset;
   uint32_t size;
 };
@@ -1949,6 +2021,10 @@ struct NewKeysetArrayData : IRExtraData {
 
   bool equals(const NewKeysetArrayData& o) const {
     return offset == o.offset && size == o.size;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
   }
 
   IRSPRelOffset offset;
@@ -2342,6 +2418,10 @@ struct ContEnterData : IRExtraData {
            isAsync && o.isAsync;
   }
 
+  void updateStackOffsets(int32_t delta) {
+    spOffset.offset += delta;
+  }
+
   IRSPRelOffset spOffset;
   Offset callBCOffset;
   bool isAsync;
@@ -2408,6 +2488,10 @@ struct StackRange : IRExtraData {
 
   bool equals(const StackRange& o) const {
     return start == o.start && count == o.count;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    start.offset += delta;
   }
 
   IRSPRelOffset start;
@@ -2496,6 +2580,12 @@ struct BeginInliningData : IRExtraData {
       spOffset == o.spOffset && func == o.func && depth == o.depth &&
       returnSk == o.returnSk && sbOffset == o.sbOffset &&
       returnSPOff == o.returnSPOff && cost == o.cost;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    spOffset.offset += delta;
+    sbOffset.offset += delta;
+    returnSPOff.offset -= delta;
   }
 
   IRSPRelOffset spOffset;  // offset from SP to the bottom of callee's ActRec
@@ -2681,6 +2771,13 @@ struct EndCatchData : IRExtraData {
   bool equals(const EndCatchData& o) const {
     return offset == o.offset && mode == o.mode && stublogue == o.stublogue
       && teardown == o.teardown && vmspOffset == o.vmspOffset;
+  }
+
+  void updateStackOffsets(int32_t delta) {
+    offset.offset += delta;
+    if (vmspOffset) {
+      vmspOffset->offset += delta;
+    }
   }
 
   IRSPRelOffset offset;
@@ -3280,7 +3377,7 @@ size_t stableHashExtra(Opcode opc, const IRExtraData* data);
 bool equalsExtra(Opcode opc, const IRExtraData* a, const IRExtraData* b);
 IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a);
 std::string showExtra(Opcode opc, const IRExtraData* data);
-
+void updateStackOffsetsExtra(Opcode opc, IRExtraData* data, int32_t delta);
 //////////////////////////////////////////////////////////////////////
 
 }

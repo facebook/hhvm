@@ -368,6 +368,11 @@ struct IRInstruction {
   const IRExtraData* rawExtra() const;
 
   /*
+   * Adjust IRExtraData's stack offsets by delta.
+   */
+  void updateStackOffsetsExtra(int32_t delta);
+
+  /*
    * Set the ExtraData for this instruction.
    *
    * The lifetime of the ExtraData must outlast this IRInstruction (and any of

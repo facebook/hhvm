@@ -83,10 +83,11 @@ size_t SinkProfileData::stableHash() const {
 
 namespace {
 
-FOLLY_CREATE_MEMBER_INVOKER(invoke_hash,       hash);
-FOLLY_CREATE_MEMBER_INVOKER(invoke_stableHash, stableHash);
-FOLLY_CREATE_MEMBER_INVOKER(invoke_equals,     equals);
-FOLLY_CREATE_MEMBER_INVOKER(invoke_clone,      clone);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_hash,               hash);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_stableHash,         stableHash);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_equals,             equals);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_clone,              clone);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_updateStackOffsets, updateStackOffsets);
 
 /*
  * dispatchExtra translates from runtime values for the Opcode enum
@@ -189,11 +190,20 @@ T* cloneExtraImpl(T* t, Arena& arena) {
 template<class T>
 std::string showExtraImpl(const T* extra) { return extra->show(); }
 
+
+template<class T>
+void updateStackOffsetsExtraImpl(T* extra, int32_t delta) {
+  if constexpr (std::is_invocable_v<invoke_updateStackOffsets, T&, int32_t>) {
+    extra->updateStackOffsets(delta);
+  }
+}
+
 MAKE_DISPATCHER(HashDispatcher, size_t, hashExtraImpl);
 MAKE_DISPATCHER(StableHashDispatcher, size_t, stableHashExtraImpl);
 MAKE_DISPATCHER(EqualsDispatcher, bool, equalsExtraImpl);
 MAKE_DISPATCHER(CloneDispatcher, IRExtraData*, cloneExtraImpl);
 MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
+MAKE_DISPATCHER(UpdateStackOffsetsDispatcher, void, updateStackOffsetsExtraImpl);
 
 }
 
@@ -225,6 +235,12 @@ IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a) {
 std::string showExtra(Opcode opc, const IRExtraData* data) {
   return dispatchExtra<std::string,ShowDispatcher>(
     opc, const_cast<IRExtraData*>(data)
+  );
+}
+
+void updateStackOffsetsExtra(Opcode opc, IRExtraData* data, int32_t delta) {
+  dispatchExtra<void, UpdateStackOffsetsDispatcher>(
+    opc, data, delta
   );
 }
 

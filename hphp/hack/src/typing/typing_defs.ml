@@ -480,6 +480,9 @@ let this = Local_id.make_scoped "$this"
  * codebase. *)
 let make_tany () = Tany TanySentinel.value
 
+(* Number of required parameters. Does not include optional, variadic, or
+ * type-splat parameters
+ *)
 let arity_required ft : int =
   let a =
     List.count

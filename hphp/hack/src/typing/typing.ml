@@ -1721,7 +1721,9 @@ let trait_most_concrete_parent trait env =
            end
          ~init:NotFound)
 
-let check_arity ?(did_unpack = false) env pos pos_def ft (arity : int) =
+let check_arity
+    ?(did_unpack = false) ~is_variadic_or_splat env pos pos_def ft (arity : int)
+    =
   let exp_min = Typing_defs.arity_required ft in
   if arity < exp_min then
     Typing_error_utils.add_typing_error
@@ -1730,10 +1732,7 @@ let check_arity ?(did_unpack = false) env pos pos_def ft (arity : int) =
         primary
         @@ Primary.Typing_too_few_args
              { expected = exp_min; actual = arity; pos; decl_pos = pos_def });
-  if get_ft_variadic ft then
-    ()
-  else
-    (* No variadics *)
+  if not is_variadic_or_splat then
     let exp_max = List.length ft.ft_params in
     let arity =
       if did_unpack then
@@ -1786,17 +1785,20 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
     (* Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos *)
   | (_, _) -> true
 
-(* The variadic capture argument is an array listing the passed
- * variable arguments for the purposes of the function body; callsites
- * should not unify with it *)
-let variadic_param env ft =
-  if get_ft_variadic ft then
-    (* The variadic parameter is always the last positionally so we
-       can determine its index by counting the non-variadic params *)
-    let nparams = List.length ft.ft_params - 1 in
-    (env, Option.map ~f:(fun p -> (nparams, p)) @@ List.last ft.ft_params)
-  else
-    (env, None)
+(* The last parameter of a function can be
+ *    variadic (written t...), meaning any number of t's
+ * or
+ *    splat (written ...t), meaning further parameters corresponding to the elements of tuple type t
+ *)
+let get_variadic_or_splat_param ft :
+    'a fun_params
+    * [ `Splat of 'a fun_param | `Variadic of 'a fun_param ] option =
+  match List.last ft.ft_params with
+  | Some fp when get_fp_splat fp ->
+    (List.drop_last_exn ft.ft_params, Some (`Splat fp))
+  | Some fp when get_ft_variadic ft ->
+    (List.drop_last_exn ft.ft_params, Some (`Variadic fp))
+  | _ -> (ft.ft_params, None)
 
 let param_modes
     ?(is_variadic = false) ({ fp_pos; _ } as fp) (_, pos, _) param_kind ~env =
@@ -1821,7 +1823,8 @@ let param_modes
   Option.iter err_opt ~f:(fun err ->
       Typing_error_utils.add_typing_error ~env @@ Typing_error.primary err)
 
-let split_remaining_params_required_optional ft remaining_params =
+let split_remaining_params_required_optional
+    non_variadic_or_splat_params remaining_params =
   (* Same example as above
    *
    * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
@@ -1832,18 +1835,14 @@ let split_remaining_params_required_optional ft remaining_params =
    * `remaining_params` will contain [string, float] and there has been 1 parameter consumed. The min_arity
    * of this function is 2, so there is 1 required parameter remaining and 1 optional parameter.
    *)
-  let original_params =
-    if get_ft_variadic ft then
-      List.drop_last_exn ft.ft_params
-    else
-      ft.ft_params
-  in
   let min_arity =
     List.count
       ~f:(fun fp -> not (Typing_defs.get_fp_is_optional fp))
-      original_params
+      non_variadic_or_splat_params
   in
-  let consumed = List.length original_params - List.length remaining_params in
+  let consumed =
+    List.length non_variadic_or_splat_params - List.length remaining_params
+  in
   let required_remaining = Int.max (min_arity - consumed) 0 in
   let (required_params, optional_params) =
     List.split_n remaining_params required_remaining
@@ -1851,7 +1850,7 @@ let split_remaining_params_required_optional ft remaining_params =
   (consumed, required_params, optional_params)
 
 let generate_splat_type_vars
-    env p required_params optional_params variadic_param =
+    env p required_params optional_params variadic_or_splat_param =
   let (env, d_required) =
     List.map_env env required_params ~f:(fun env _ -> Env.fresh_type env p)
   in
@@ -1859,9 +1858,9 @@ let generate_splat_type_vars
     List.map_env env optional_params ~f:(fun env _ -> Env.fresh_type env p)
   in
   let (env, d_variadic) =
-    match variadic_param with
-    | None -> (env, None)
-    | Some _ ->
+    if Option.is_none variadic_or_splat_param then
+      (env, None)
+    else
       let (env, ty) = Env.fresh_type env p in
       (env, Some ty)
   in
@@ -6791,7 +6790,9 @@ end = struct
            *)
           let pos_def = Reason.to_pos r2 in
           let (env, ft) = Typing_exts.retype_magic_func env ft el in
-          let (env, var_param) = variadic_param env ft in
+          let (non_variadic_or_splat_params, variadic_or_splat_param) =
+            get_variadic_or_splat_param ft
+          in
           (* Force subtype with expected result *)
           let env = check_expected_ty "Call result" env ft.ft_ret expected in
           let env = Env.set_tyvar_variance env ft.ft_ret in
@@ -6818,27 +6819,6 @@ end = struct
               in
               set_params_variance env param.fp_type
             | None -> env
-          in
-          let non_variadic_ft_params =
-            if get_ft_variadic ft then
-              List.drop_last_exn ft.ft_params
-            else
-              ft.ft_params
-          in
-          let el =
-            match List.last non_variadic_ft_params with
-            | Some fp when get_fp_splat fp ->
-              let n = List.length non_variadic_ft_params in
-              let non_splat_args = List.take el (n - 1) in
-              let splat_args = List.drop el (n - 1) in
-              non_splat_args
-              @ [
-                  Anormal
-                    ( (),
-                      expr_pos,
-                      Tuple (List.map splat_args ~f:Aast_utils.arg_to_expr) );
-                ]
-            | _ -> el
           in
           (* Simply checking argument expressions from left-to-right produces poor
            * results from inference, with too many programs rejected because unknown
@@ -6879,9 +6859,13 @@ end = struct
             match paraml with
             | (idx, param) :: paraml -> (idx, (false, Some param, paraml))
             | [] ->
-              (match var_param with
-              | Some (idx, param) -> (idx, (true, Some param, paraml))
-              | None -> (-1, (true, None, paraml)))
+              (match variadic_or_splat_param with
+              | Some (`Variadic param) ->
+                ( List.length non_variadic_or_splat_params,
+                  (true, Some param, paraml) )
+              | Some (`Splat _)
+              | None ->
+                (-1, (true, None, paraml)))
           in
           let check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic =
             let (param_kind, e) =
@@ -7057,7 +7041,7 @@ end = struct
                     (List.rev acc)
                     (List.mapi
                        ~f:(fun idx param -> (idx, param))
-                       non_variadic_ft_params)
+                       non_variadic_or_splat_params)
                     used_dynamic_acc
                     []
                 | (_, _, Some (te, ty)) :: reversed_res ->
@@ -7120,9 +7104,9 @@ end = struct
           let args_with_result =
             List.mapi el ~f:(fun idx e -> (idx, e, None))
           in
-          let (env, tel, argtys, used_dynamic_info1, paraml) =
+          let (env, tel, argtys, used_dynamic_info1, remaining_params) =
             let params =
-              List.mapi non_variadic_ft_params ~f:(fun idx param ->
+              List.mapi non_variadic_or_splat_params ~f:(fun idx param ->
                   (idx, param))
             in
             check_args 0 env args_with_result params None []
@@ -7131,147 +7115,241 @@ end = struct
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
           let (env, typed_unpack_element, arity, did_unpack, used_dynamic_info2)
               =
-            match unpacked_element with
-            | None -> (env, None, List.length el, false, None)
-            | Some e ->
-              (* Now that we're considering an splat (Some e) we need to construct a type that
-               * represents the remainder of the function's parameters. `paraml` represents those
-               * remaining parameters, and the variadic parameter is stored in `var_param`. For example, given
-               *
-               * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
-               * function g((string, float, bool) $t): void {
-               *   f(3, ...$t);
-               * }
-               *
-               * the constraint type we want is splat([#1], [opt#2], #3).
-               *)
-              let (consumed, required_params, optional_params) =
-                split_remaining_params_required_optional ft paraml
+            match variadic_or_splat_param with
+            | Some (`Splat splat_param) ->
+              (* For the special case that the last parameter of the function is a type-splat, e.g.
+                   function foo(t1 $x1, ..., tm $xm, `...`t $x) { _ }
+                 we have either
+                 (1) A call with a expression-splat (unpacked element)
+                   foo($y1, ... $yn, `...`$y)
+                 Supposing that $yi have types ui, and $y has type u, we just need to assert
+                      (u1, ..., un, `...`u) <: (t1, ..., tm, `...`t)
+                 and let type-splat subtyping take its course.
+                 (2) OR a call without an expression-splat
+                   foo($y1, ..., $yn)
+                  Supposing that $yi have types yi, we just need to assert
+                    (u1, ..., un) <: (t1, ..., tm, `...`t)
+              *)
+              let consumed =
+                List.length non_variadic_or_splat_params
+                - List.length remaining_params
               in
-              let (_, p1, _) = e in
-              let (env, (d_required, d_optional, d_variadic)) =
-                generate_splat_type_vars
-                  env
-                  p1
-                  required_params
-                  optional_params
-                  var_param
+              let remaining_actual_tys =
+                List.drop (List.map argtys ~f:snd) consumed
               in
-              let destructure_ty =
-                ConstraintType
-                  (mk_constraint_type
-                     ( Reason.unpack_param (p1, pos_def, consumed),
-                       Tdestructure
-                         {
-                           d_required;
-                           d_optional;
-                           d_variadic;
-                           d_kind = SplatUnpack;
-                         } ))
-              in
-              let (env, te, ty) =
-                expr ~expected:None ~ctxt:Context.default env e
-              in
-              (* Populate the type variables from the expression in the splat *)
-              let (env, ty_err_opt) =
-                Type.sub_type_i
-                  p1
-                  Reason.URparam
-                  env
-                  (LoclType ty)
-                  destructure_ty
-                  Typing_error.Callback.unify_error
-              in
-              let (env, te, used_dynamic_info) =
-                match ty_err_opt with
-                | Some _ ->
-                  (* Our type cannot be destructured, add a hole with `nothing`
-                     as expected type *)
-                  let ty_expect =
-                    MakeType.nothing
-                    @@ Reason.solve_fail (Pos_or_decl.of_raw_pos expr_pos)
-                  in
-                  (env, mk_hole te ~ty_have:ty ~ty_expect, None)
+              let (env, actual_ty, opt_te, p1) =
+                match unpacked_element with
                 | None ->
-                  (* We have a type that can be destructured so continue and use
-                     the type variables for the remaining parameters *)
-                  let (env, err_opts, used_dynamic_info) =
-                    List.fold2_exn
-                      ~init:(env, [], None)
-                      d_required
-                      required_params
-                      ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
-                        let (env, err_opt, used_dynamic_info) =
-                          check_argument_type_against_parameter
-                            ~dynamic_func
-                            env
-                            param
-                            Ast_defs.Pnormal
-                            (e, elt)
-                            ~is_variadic:false
-                        in
-                        ( env,
-                          err_opt :: errs,
-                          combine_dynamic_info
-                            used_dynamic_acc
-                            used_dynamic_info ))
-                  in
-                  let (env, err_opts, used_dynamic_info) =
-                    List.fold2_exn
-                      ~init:(env, err_opts, used_dynamic_info)
-                      d_optional
-                      optional_params
-                      ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
-                        let (env, err_opt, used_dynamic_info) =
-                          check_argument_type_against_parameter
-                            ~dynamic_func
-                            env
-                            param
-                            Ast_defs.Pnormal
-                            (e, elt)
-                            ~is_variadic:false
-                        in
-                        ( env,
-                          err_opt :: errs,
-                          combine_dynamic_info
-                            used_dynamic_acc
-                            used_dynamic_info ))
-                  in
-                  let (env, var_err_opt, var_used_dynamic_info) =
-                    Option.map2 d_variadic var_param ~f:(fun v (_idx, vp) ->
-                        check_argument_type_against_parameter
-                          ~dynamic_func
-                          env
-                          vp
-                          Ast_defs.Pnormal
-                          (e, v)
-                          ~is_variadic:true)
-                    |> Option.value ~default:(env, None, None)
-                  in
-                  let subtyping_errs = (List.rev err_opts, var_err_opt) in
-                  let te =
-                    match (List.filter_map ~f:Fn.id err_opts, var_err_opt) with
-                    | ([], None) -> te
-                    | _ ->
-                      let (_, pos, _) = te in
-                      hole_on_ty_mismatch
-                        te
-                        ~ty_mismatch_opt:
-                          (Some (ty, pack_errs pos ty subtyping_errs))
+                  ( env,
+                    MakeType.tuple
+                      (Reason.witness expr_pos)
+                      remaining_actual_tys,
+                    None,
+                    expr_pos )
+                | Some e ->
+                  let (_, p1, _) = e in
+                  let (env, te, unpacked_element_ty) =
+                    expr ~expected:None ~ctxt:Context.default env e
                   in
                   ( env,
-                    te,
-                    combine_dynamic_info used_dynamic_info var_used_dynamic_info
-                  )
+                    mk
+                      ( Reason.witness p1,
+                        Ttuple
+                          {
+                            t_required = remaining_actual_tys;
+                            t_extra = Tsplat unpacked_element_ty;
+                          } ),
+                    Some te,
+                    p1 )
               in
-              Option.iter
-                ~f:(Typing_error_utils.add_typing_error ~env)
-                ty_err_opt;
+              let expected_ty =
+                mk
+                  ( Reason.unpack_param (Pos.none, pos_def, consumed),
+                    Ttuple
+                      {
+                        t_required =
+                          List.map remaining_params ~f:(fun (_, fp) ->
+                              fp.fp_type);
+                        t_extra = Tsplat splat_param.fp_type;
+                      } )
+              in
+              let (env, _ty_err_opt, used_dynamic_info) =
+                check_argument_type_against_parameter_type
+                  ~dynamic_func
+                  ~ignore_readonly:false
+                  env
+                  splat_param.fp_pos
+                  expected_ty
+                  p1
+                  actual_ty
+              in
               ( env,
-                Some te,
-                List.length el + List.length d_required,
-                Option.is_some d_variadic,
+                opt_te,
+                List.length el + List.length remaining_params,
+                true,
                 used_dynamic_info )
+            | None
+            | Some (`Variadic _) ->
+              (match unpacked_element with
+              | None -> (env, None, List.length el, false, None)
+              | Some e ->
+                let (consumed, required_params, optional_params) =
+                  split_remaining_params_required_optional
+                    non_variadic_or_splat_params
+                    remaining_params
+                in
+                let (env, te, unpacked_element_ty) =
+                  expr ~expected:None ~ctxt:Context.default env e
+                in
+                (* Now that we're considering an splat (Some e) we need to construct a type that
+                 * represents the remainder of the function's parameters. `paraml` represents those
+                 * remaining parameters, and the variadic parameter is stored in `var_param`. For example, given
+                 *
+                 * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
+                 * function g((string, float, bool) $t): void {
+                 *   f(3, ...$t);
+                 * }
+                 *
+                 * the constraint type we want is splat([#1], [opt#2], #3).
+                 *)
+                let (_, p1, _) = e in
+                let (env, (d_required, d_optional, d_variadic)) =
+                  generate_splat_type_vars
+                    env
+                    p1
+                    required_params
+                    optional_params
+                    variadic_or_splat_param
+                in
+                let destructure_ty =
+                  ConstraintType
+                    (mk_constraint_type
+                       ( Reason.unpack_param (p1, pos_def, consumed),
+                         Tdestructure
+                           {
+                             d_required;
+                             d_optional;
+                             d_variadic;
+                             d_kind = SplatUnpack;
+                           } ))
+                in
+                (* Populate the type variables from the expression in the splat *)
+                let (env, ty_err_opt) =
+                  Type.sub_type_i
+                    p1
+                    Reason.URparam
+                    env
+                    (LoclType unpacked_element_ty)
+                    destructure_ty
+                    Typing_error.Callback.unify_error
+                in
+                let (env, te, used_dynamic_info) =
+                  match ty_err_opt with
+                  | Some _ ->
+                    (* Our type cannot be destructured, add a hole with `nothing`
+                       as expected type *)
+                    let ty_expect =
+                      MakeType.nothing
+                      @@ Reason.solve_fail (Pos_or_decl.of_raw_pos expr_pos)
+                    in
+                    ( env,
+                      mk_hole te ~ty_have:unpacked_element_ty ~ty_expect,
+                      None )
+                  | None ->
+                    (* We have a type that can be destructured so continue and use
+                       the type variables for the remaining parameters *)
+                    let (env, err_opts, used_dynamic_info) =
+                      List.fold2_exn
+                        ~init:(env, [], None)
+                        d_required
+                        required_params
+                        ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param)
+                           ->
+                          let (env, err_opt, used_dynamic_info) =
+                            check_argument_type_against_parameter
+                              ~dynamic_func
+                              env
+                              param
+                              Ast_defs.Pnormal
+                              (e, elt)
+                              ~is_variadic:false
+                          in
+                          ( env,
+                            err_opt :: errs,
+                            combine_dynamic_info
+                              used_dynamic_acc
+                              used_dynamic_info ))
+                    in
+                    let (env, err_opts, used_dynamic_info) =
+                      List.fold2_exn
+                        ~init:(env, err_opts, used_dynamic_info)
+                        d_optional
+                        optional_params
+                        ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param)
+                           ->
+                          let (env, err_opt, used_dynamic_info) =
+                            check_argument_type_against_parameter
+                              ~dynamic_func
+                              env
+                              param
+                              Ast_defs.Pnormal
+                              (e, elt)
+                              ~is_variadic:false
+                          in
+                          ( env,
+                            err_opt :: errs,
+                            combine_dynamic_info
+                              used_dynamic_acc
+                              used_dynamic_info ))
+                    in
+                    let (env, var_err_opt, var_used_dynamic_info) =
+                      Option.map2
+                        d_variadic
+                        (match variadic_or_splat_param with
+                        | Some (`Variadic p) -> Some p
+                        | _ -> None)
+                        ~f:(fun v vp ->
+                          check_argument_type_against_parameter
+                            ~dynamic_func
+                            env
+                            vp
+                            Ast_defs.Pnormal
+                            (e, v)
+                            ~is_variadic:true)
+                      |> Option.value ~default:(env, None, None)
+                    in
+                    let subtyping_errs = (List.rev err_opts, var_err_opt) in
+                    let te =
+                      match
+                        (List.filter_map ~f:Fn.id err_opts, var_err_opt)
+                      with
+                      | ([], None) -> te
+                      | _ ->
+                        let (_, pos, _) = te in
+                        hole_on_ty_mismatch
+                          te
+                          ~ty_mismatch_opt:
+                            (Some
+                               ( unpacked_element_ty,
+                                 pack_errs
+                                   pos
+                                   unpacked_element_ty
+                                   subtyping_errs ))
+                    in
+                    ( env,
+                      te,
+                      combine_dynamic_info
+                        used_dynamic_info
+                        var_used_dynamic_info )
+                in
+                Option.iter
+                  ~f:(Typing_error_utils.add_typing_error ~env)
+                  ty_err_opt;
+                ( env,
+                  Some te,
+                  List.length el + List.length d_required,
+                  Option.is_some d_variadic,
+                  used_dynamic_info ))
           in
           let used_dynamic_info =
             combine_dynamic_info used_dynamic_info1 used_dynamic_info2
@@ -7305,10 +7383,19 @@ end = struct
            * unpacked array consumes 1 or many parameters, it is nonsensical to say
            * that not enough args were passed in (so we don't do the min check).
            *)
-          let () = check_arity ~did_unpack env expr_pos pos_def ft arity in
+          let () =
+            check_arity
+              ~did_unpack
+              ~is_variadic_or_splat:(Option.is_some variadic_or_splat_param)
+              env
+              expr_pos
+              pos_def
+              ft
+              arity
+          in
           (* Variadic params cannot be inout so we can stop early *)
           let env =
-            wfold_left2 inout_write_back env non_variadic_ft_params el
+            wfold_left2 inout_write_back env non_variadic_or_splat_params el
           in
           let ret =
             match (dynamic_func, used_dynamic_info) with

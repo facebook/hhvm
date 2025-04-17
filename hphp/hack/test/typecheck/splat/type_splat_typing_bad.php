@@ -6,7 +6,7 @@ function applySplatFun<T as (mixed...)>(
   (function(int, ...T): void) $f,
   ... T $tup,
 ): void {
-  //($f)(2, ...$tup);
+  ($f)(2, ...$tup);
 }
 
 function none(int $i): void {

@@ -35,7 +35,7 @@ function apply_tuple_poly<Targs as (mixed...)>(
   // Check pretty-printing
   hh_show($f);
   hh_show($params);
-  //($f)(...$params);
+  ($f)(...$params);
 }
 
 // This expects multiple params, but packed as a vec/tuple a la variadics
@@ -46,7 +46,7 @@ function apply_params_poly<Targs as (mixed...)>(
 ): void {
   hh_show($f);
   hh_show($params);
-  //($f)(...$params);
+  ($f)(...$params);
 }
 
 <<__EntryPoint>>

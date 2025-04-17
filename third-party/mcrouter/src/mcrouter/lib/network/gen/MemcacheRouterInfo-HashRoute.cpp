@@ -24,7 +24,8 @@ template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
 createHashRoute<facebook::memcache::MemcacheRouterInfo>(
     const folly::dynamic& json,
     std::vector<facebook::memcache::MemcacheRouterInfo::RouteHandlePtr> rh,
-    size_t threadId);
+    size_t threadId,
+    ProxyBase& proxy);
 
 } // namespace mcrouter
 } // namespace memcache

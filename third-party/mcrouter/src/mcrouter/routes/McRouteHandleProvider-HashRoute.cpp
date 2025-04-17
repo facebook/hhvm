@@ -16,7 +16,8 @@ namespace mcrouter {
 template MemcacheRouterInfo::RouteHandlePtr createHashRoute<MemcacheRouterInfo>(
     const folly::dynamic& json,
     std::vector<MemcacheRouterInfo::RouteHandlePtr> rh,
-    size_t threadId);
+    size_t threadId,
+    ProxyBase& proxy);
 
 } // namespace mcrouter
 } // namespace memcache

@@ -101,11 +101,6 @@ RouteHandleFactory<carbon::test::CarbonTestRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
 extern template carbon::test::CarbonTestRouterInfo::RouteHandlePtr
-makeHashRoute<carbon::test::CarbonTestRouterInfo>(
-RouteHandleFactory<carbon::test::CarbonTestRouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-extern template carbon::test::CarbonTestRouterInfo::RouteHandlePtr
 makeHostIdRoute<carbon::test::CarbonTestRouterInfo>(
 RouteHandleFactory<carbon::test::CarbonTestRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -155,6 +150,12 @@ makeRandomRoute<carbon::test::CarbonTestRouterInfo>(
 RouteHandleFactory<carbon::test::CarbonTestRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
+template carbon::test::CarbonTestRouterInfo::RouteHandlePtr
+makeHashRoute<carbon::test::CarbonTestRouterInfo>(
+RouteHandleFactory<carbon::test::CarbonTestRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
+
 extern template class ExtraRouteHandleProviderIf<carbon::test::CarbonTestRouterInfo>;
 
 } // namespace mcrouter
@@ -178,11 +179,6 @@ CarbonTestRouterInfo::buildRouteMap() {
       {"BlackholeRoute", &makeBlackholeRoute<CarbonTestRouterInfo>},
       {"DevNullRoute", &makeDevNullRoute<CarbonTestRouterInfo>},
       {"ErrorRoute", &makeErrorRoute<CarbonTestRouterInfo>},
-      {"HashRoute",
-       [](RouteHandleFactory<RouteHandleIf>& factory,
-          const folly::dynamic& json) {
-         return makeHashRoute<CarbonTestRouterInfo>(factory, json);
-       }},
       {"HostIdRoute", &makeHostIdRoute<CarbonTestRouterInfo>},
       {"LatencyInjectionRoute",
        &makeLatencyInjectionRoute<CarbonTestRouterInfo>},
@@ -202,8 +198,11 @@ CarbonTestRouterInfo::buildRouteMap() {
 
 /* static */ CarbonTestRouterInfo::RouteHandleFactoryMapWithProxy
 CarbonTestRouterInfo::buildRouteMapWithProxy() {
-  return RouteHandleFactoryMapWithProxy();
-}
+  RouteHandleFactoryMapWithProxy map {
+      {"HashRoute", &makeHashRoute<CarbonTestRouterInfo>},
+  };
+  return map;
+  }
 
 /* static */ CarbonTestRouterInfo::RouteHandleFactoryMapForWrapper
 CarbonTestRouterInfo::buildRouteMapForWrapper() {

@@ -104,11 +104,6 @@ RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory
 const folly::dynamic& json);
 
 extern template hellogoodbye::HelloGoodbyeRouterInfo::RouteHandlePtr
-makeHashRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
-RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-extern template hellogoodbye::HelloGoodbyeRouterInfo::RouteHandlePtr
 makeHostIdRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
 RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -158,6 +153,12 @@ makeRandomRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
 RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
+template hellogoodbye::HelloGoodbyeRouterInfo::RouteHandlePtr
+makeHashRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
+RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
+
 extern template class ExtraRouteHandleProviderIf<hellogoodbye::HelloGoodbyeRouterInfo>;
 
 } // namespace mcrouter
@@ -180,11 +181,6 @@ HelloGoodbyeRouterInfo::buildRouteMap() {
       {"BlackholeRoute", &makeBlackholeRoute<HelloGoodbyeRouterInfo>},
       {"DevNullRoute", &makeDevNullRoute<HelloGoodbyeRouterInfo>},
       {"ErrorRoute", &makeErrorRoute<HelloGoodbyeRouterInfo>},
-      {"HashRoute",
-       [](RouteHandleFactory<RouteHandleIf>& factory,
-          const folly::dynamic& json) {
-         return makeHashRoute<HelloGoodbyeRouterInfo>(factory, json);
-       }},
       {"HostIdRoute", &makeHostIdRoute<HelloGoodbyeRouterInfo>},
       {"LatencyInjectionRoute",
        &makeLatencyInjectionRoute<HelloGoodbyeRouterInfo>},
@@ -206,8 +202,11 @@ HelloGoodbyeRouterInfo::buildRouteMap() {
 
 /* static */ HelloGoodbyeRouterInfo::RouteHandleFactoryMapWithProxy
 HelloGoodbyeRouterInfo::buildRouteMapWithProxy() {
-  return RouteHandleFactoryMapWithProxy();
-}
+  RouteHandleFactoryMapWithProxy map {
+      {"HashRoute", &makeHashRoute<HelloGoodbyeRouterInfo>},
+  };
+  return map;
+  }
 
 /* static */ HelloGoodbyeRouterInfo::RouteHandleFactoryMapForWrapper
 HelloGoodbyeRouterInfo::buildRouteMapForWrapper() {

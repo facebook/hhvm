@@ -101,11 +101,6 @@ RouteHandleFactory<carbon::test::CarbonThriftTestRouterInfo::RouteHandleIf>& fac
 const folly::dynamic& json);
 
 extern template carbon::test::CarbonThriftTestRouterInfo::RouteHandlePtr
-makeHashRoute<carbon::test::CarbonThriftTestRouterInfo>(
-RouteHandleFactory<carbon::test::CarbonThriftTestRouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-extern template carbon::test::CarbonThriftTestRouterInfo::RouteHandlePtr
 makeHostIdRoute<carbon::test::CarbonThriftTestRouterInfo>(
 RouteHandleFactory<carbon::test::CarbonThriftTestRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -155,6 +150,12 @@ makeRandomRoute<carbon::test::CarbonThriftTestRouterInfo>(
 RouteHandleFactory<carbon::test::CarbonThriftTestRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
+template carbon::test::CarbonThriftTestRouterInfo::RouteHandlePtr
+makeHashRoute<carbon::test::CarbonThriftTestRouterInfo>(
+RouteHandleFactory<carbon::test::CarbonThriftTestRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
+
 extern template class ExtraRouteHandleProviderIf<carbon::test::CarbonThriftTestRouterInfo>;
 
 } // namespace mcrouter
@@ -178,11 +179,6 @@ CarbonThriftTestRouterInfo::buildRouteMap() {
       {"BlackholeRoute", &makeBlackholeRoute<CarbonThriftTestRouterInfo>},
       {"DevNullRoute", &makeDevNullRoute<CarbonThriftTestRouterInfo>},
       {"ErrorRoute", &makeErrorRoute<CarbonThriftTestRouterInfo>},
-      {"HashRoute",
-       [](RouteHandleFactory<RouteHandleIf>& factory,
-          const folly::dynamic& json) {
-         return makeHashRoute<CarbonThriftTestRouterInfo>(factory, json);
-       }},
       {"HostIdRoute", &makeHostIdRoute<CarbonThriftTestRouterInfo>},
       {"LatencyInjectionRoute",
        &makeLatencyInjectionRoute<CarbonThriftTestRouterInfo>},
@@ -202,8 +198,11 @@ CarbonThriftTestRouterInfo::buildRouteMap() {
 
 /* static */ CarbonThriftTestRouterInfo::RouteHandleFactoryMapWithProxy
 CarbonThriftTestRouterInfo::buildRouteMapWithProxy() {
-  return RouteHandleFactoryMapWithProxy();
-}
+  RouteHandleFactoryMapWithProxy map {
+      {"HashRoute", &makeHashRoute<CarbonThriftTestRouterInfo>},
+  };
+  return map;
+  }
 
 /* static */ CarbonThriftTestRouterInfo::RouteHandleFactoryMapForWrapper
 CarbonThriftTestRouterInfo::buildRouteMapForWrapper() {

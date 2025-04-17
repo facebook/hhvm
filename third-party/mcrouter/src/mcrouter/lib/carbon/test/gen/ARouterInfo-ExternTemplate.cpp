@@ -91,11 +91,6 @@ RouteHandleFactory<carbon::test::A::ARouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
 template carbon::test::A::ARouterInfo::RouteHandlePtr
-makeHashRoute<carbon::test::A::ARouterInfo>(
-RouteHandleFactory<carbon::test::A::ARouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-template carbon::test::A::ARouterInfo::RouteHandlePtr
 makeHostIdRoute<carbon::test::A::ARouterInfo>(
 RouteHandleFactory<carbon::test::A::ARouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -144,6 +139,12 @@ template carbon::test::A::ARouterInfo::RouteHandlePtr
 makeRandomRoute<carbon::test::A::ARouterInfo>(
 RouteHandleFactory<carbon::test::A::ARouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
+
+template carbon::test::A::ARouterInfo::RouteHandlePtr
+makeHashRoute<carbon::test::A::ARouterInfo>(
+RouteHandleFactory<carbon::test::A::ARouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
 
 template class ExtraRouteHandleProviderIf<carbon::test::A::ARouterInfo>;
 

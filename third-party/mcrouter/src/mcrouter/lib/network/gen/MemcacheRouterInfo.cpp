@@ -101,11 +101,6 @@ RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& facto
 const folly::dynamic& json);
 
 extern template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
-makeHashRoute<facebook::memcache::MemcacheRouterInfo>(
-RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-extern template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
 makeHostIdRoute<facebook::memcache::MemcacheRouterInfo>(
 RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -155,6 +150,12 @@ makeRandomRoute<facebook::memcache::MemcacheRouterInfo>(
 RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
+template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
+makeHashRoute<facebook::memcache::MemcacheRouterInfo>(
+RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
+
 extern template class ExtraRouteHandleProviderIf<facebook::memcache::MemcacheRouterInfo>;
 
 } // namespace mcrouter
@@ -178,11 +179,6 @@ MemcacheRouterInfo::buildRouteMap() {
       {"BlackholeRoute", &makeBlackholeRoute<MemcacheRouterInfo>},
       {"DevNullRoute", &makeDevNullRoute<MemcacheRouterInfo>},
       {"ErrorRoute", &makeErrorRoute<MemcacheRouterInfo>},
-      {"HashRoute",
-       [](RouteHandleFactory<RouteHandleIf>& factory,
-          const folly::dynamic& json) {
-         return makeHashRoute<MemcacheRouterInfo>(factory, json);
-       }},
       {"HostIdRoute", &makeHostIdRoute<MemcacheRouterInfo>},
       {"LatencyInjectionRoute",
        &makeLatencyInjectionRoute<MemcacheRouterInfo>},
@@ -202,8 +198,11 @@ MemcacheRouterInfo::buildRouteMap() {
 
 /* static */ MemcacheRouterInfo::RouteHandleFactoryMapWithProxy
 MemcacheRouterInfo::buildRouteMapWithProxy() {
-  return RouteHandleFactoryMapWithProxy();
-}
+  RouteHandleFactoryMapWithProxy map {
+      {"HashRoute", &makeHashRoute<MemcacheRouterInfo>},
+  };
+  return map;
+  }
 
 /* static */ MemcacheRouterInfo::RouteHandleFactoryMapForWrapper
 MemcacheRouterInfo::buildRouteMapForWrapper() {

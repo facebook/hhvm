@@ -91,11 +91,6 @@ RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory
 const folly::dynamic& json);
 
 template hellogoodbye::HelloGoodbyeRouterInfo::RouteHandlePtr
-makeHashRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
-RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-template hellogoodbye::HelloGoodbyeRouterInfo::RouteHandlePtr
 makeHostIdRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
 RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -144,6 +139,12 @@ template hellogoodbye::HelloGoodbyeRouterInfo::RouteHandlePtr
 makeRandomRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
 RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
+
+template hellogoodbye::HelloGoodbyeRouterInfo::RouteHandlePtr
+makeHashRoute<hellogoodbye::HelloGoodbyeRouterInfo>(
+RouteHandleFactory<hellogoodbye::HelloGoodbyeRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
 
 template class ExtraRouteHandleProviderIf<hellogoodbye::HelloGoodbyeRouterInfo>;
 

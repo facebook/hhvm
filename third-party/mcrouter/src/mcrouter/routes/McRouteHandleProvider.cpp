@@ -266,10 +266,6 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
       {"ErrorRoute", &makeErrorRoute<MemcacheRouterInfo>},
       {"FailoverWithExptimeRoute",
        &makeFailoverWithExptimeRoute<MemcacheRouterInfo>},
-      {"HashRoute",
-       [](McRouteHandleFactory& factory, const folly::dynamic& json) {
-         return makeHashRoute<McrouterRouterInfo>(factory, json);
-       }},
       {"HashStopAllowListRoute",
        &makeHashStopAllowListRoute<MemcacheRouterInfo>},
       {"HostIdRoute", &makeHostIdRoute<MemcacheRouterInfo>},
@@ -315,6 +311,7 @@ typename McRouteHandleProvider<
     MemcacheRouterInfo>::RouteHandleFactoryMapWithProxy
 McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMapWithProxy() {
   RouteHandleFactoryMapWithProxy map{
+      {"HashRoute", &makeHashRoute<MemcacheRouterInfo>},
       {"SRRoute", &makeSRRoute},
   };
   return map;

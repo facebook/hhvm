@@ -51,7 +51,8 @@ extern template MemcacheRouterInfo::RouteHandlePtr
 createHashRoute<MemcacheRouterInfo>(
     const folly::dynamic& json,
     std::vector<MemcacheRouterInfo::RouteHandlePtr> rh,
-    size_t threadId);
+    size_t threadId,
+    ProxyBase& proxy);
 
 extern template MemcacheRouterInfo::RouteHandlePtr
 makeAllFastestRoute<MemcacheRouterInfo>(
@@ -702,7 +703,10 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
     jhashWithWeights["name"] = poolJson.name;
 
     auto route = createHashRoute<RouterInfo>(
-        jhashWithWeights, std::move(destinations), factory.getThreadId());
+        jhashWithWeights,
+        std::move(destinations),
+        factory.getThreadId(),
+        proxy_);
     auto poolRoute = route;
 
     bool distributionRouteEnabled = false;

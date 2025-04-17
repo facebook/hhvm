@@ -101,11 +101,6 @@ RouteHandleFactory<carbon::test::B::BRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
 extern template carbon::test::B::BRouterInfo::RouteHandlePtr
-makeHashRoute<carbon::test::B::BRouterInfo>(
-RouteHandleFactory<carbon::test::B::BRouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-extern template carbon::test::B::BRouterInfo::RouteHandlePtr
 makeHostIdRoute<carbon::test::B::BRouterInfo>(
 RouteHandleFactory<carbon::test::B::BRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -155,6 +150,12 @@ makeRandomRoute<carbon::test::B::BRouterInfo>(
 RouteHandleFactory<carbon::test::B::BRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
+template carbon::test::B::BRouterInfo::RouteHandlePtr
+makeHashRoute<carbon::test::B::BRouterInfo>(
+RouteHandleFactory<carbon::test::B::BRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
+
 extern template class ExtraRouteHandleProviderIf<carbon::test::B::BRouterInfo>;
 
 } // namespace mcrouter
@@ -179,11 +180,6 @@ BRouterInfo::buildRouteMap() {
       {"BlackholeRoute", &makeBlackholeRoute<BRouterInfo>},
       {"DevNullRoute", &makeDevNullRoute<BRouterInfo>},
       {"ErrorRoute", &makeErrorRoute<BRouterInfo>},
-      {"HashRoute",
-       [](RouteHandleFactory<RouteHandleIf>& factory,
-          const folly::dynamic& json) {
-         return makeHashRoute<BRouterInfo>(factory, json);
-       }},
       {"HostIdRoute", &makeHostIdRoute<BRouterInfo>},
       {"LatencyInjectionRoute",
        &makeLatencyInjectionRoute<BRouterInfo>},
@@ -203,8 +199,11 @@ BRouterInfo::buildRouteMap() {
 
 /* static */ BRouterInfo::RouteHandleFactoryMapWithProxy
 BRouterInfo::buildRouteMapWithProxy() {
-  return RouteHandleFactoryMapWithProxy();
-}
+  RouteHandleFactoryMapWithProxy map {
+      {"HashRoute", &makeHashRoute<BRouterInfo>},
+  };
+  return map;
+  }
 
 /* static */ BRouterInfo::RouteHandleFactoryMapForWrapper
 BRouterInfo::buildRouteMapForWrapper() {

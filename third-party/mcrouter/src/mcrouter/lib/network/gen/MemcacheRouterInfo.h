@@ -211,7 +211,8 @@ template <class RouterInfo>
 std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
     const folly::dynamic& json,
     std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>> rh,
-    size_t threadId);
+    size_t threadId,
+    ProxyBase& proxy);
 
 template <class RouterInfo>
 typename RouterInfo::RouteHandlePtr makeAllFastestRoute(
@@ -236,7 +237,8 @@ extern template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
 createHashRoute<facebook::memcache::MemcacheRouterInfo>(
     const folly::dynamic& json,
     std::vector<facebook::memcache::MemcacheRouterInfo::RouteHandlePtr> rh,
-    size_t threadId);
+    size_t threadId,
+    ProxyBase& proxy);
 
 extern template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
 makeAllFastestRoute<facebook::memcache::MemcacheRouterInfo>(

@@ -91,11 +91,6 @@ RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& facto
 const folly::dynamic& json);
 
 template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
-makeHashRoute<facebook::memcache::MemcacheRouterInfo>(
-RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
-const folly::dynamic& json);
-
-template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
 makeHostIdRoute<facebook::memcache::MemcacheRouterInfo>(
 RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
@@ -144,6 +139,12 @@ template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
 makeRandomRoute<facebook::memcache::MemcacheRouterInfo>(
 RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
+
+template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
+makeHashRoute<facebook::memcache::MemcacheRouterInfo>(
+RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json,
+ProxyBase& proxy);
 
 template class ExtraRouteHandleProviderIf<facebook::memcache::MemcacheRouterInfo>;
 

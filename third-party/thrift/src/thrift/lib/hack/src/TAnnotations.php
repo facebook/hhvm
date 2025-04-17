@@ -67,6 +67,6 @@ interface IThriftExceptionMetadata {
 }
 
 <<Oncalls('thrift')>> // @oss-disable
-interface IThriftStructMetadata {
+interface IThriftStructMetadata extends IThriftStruct {
   public static function getStructMetadata()[]: \tmeta_ThriftStruct;
 }

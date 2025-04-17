@@ -837,6 +837,7 @@ bool ThriftServer::serverRanWithDCHECK() {
 }
 
 void ThriftServer::setupThreadManager() {
+  runtimeServerActions_.setupThreadManagerCalledByUser = true;
   THRIFT_SERVER_EVENT(setupThreadManager).log(*this);
   setupThreadManagerImpl();
 }

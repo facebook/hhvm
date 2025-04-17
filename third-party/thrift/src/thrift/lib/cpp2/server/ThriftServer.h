@@ -318,6 +318,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
     bool moduleListFinalized{false};
 
+    bool setupThreadManagerCalledByUser{false};
+
     std::string explain() const;
   };
 

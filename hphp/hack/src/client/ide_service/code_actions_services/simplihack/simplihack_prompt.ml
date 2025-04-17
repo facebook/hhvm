@@ -24,9 +24,14 @@ let find ctx tast =
         attribute_name
         Naming_special_names.UserAttributes.uaSimpliHack
     then
-      List.fold ~init:acc ua.Aast.ua_params ~f:(fun acc e ->
-          let param_pos = snd3 e in
-          { param_pos; edit_span; derive_prompt = derive_prompt env e } :: acc)
+      match ua.Aast.ua_params with
+      | [arg] ->
+        let param_pos = Pos.btw (fst ua.Aast.ua_name) (snd3 arg) in
+        { param_pos; edit_span; derive_prompt = derive_prompt env arg } :: acc
+      | [arg1; arg2] ->
+        let param_pos = Pos.btw (fst ua.Aast.ua_name) (snd3 arg2) in
+        { param_pos; edit_span; derive_prompt = derive_prompt env arg1 } :: acc
+      | _ -> acc
     else
       acc
   in

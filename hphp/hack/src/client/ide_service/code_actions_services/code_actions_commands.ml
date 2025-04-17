@@ -227,13 +227,74 @@ let generate_simplihack_commands ctx tast pos =
     (* Convert the relative position to an absolute position *)
     let param_pos = Pos.to_absolute param_pos in
     let* derived_prompt = derive_prompt () in
+    let hash = Md5.digest_string derived_prompt |> Md5.to_hex in
     let user_prompt =
       Format.sprintf
-        {| Edit <selection_to_edit> in the following way:
-        %s
+        {| You are an AI assistant tasked with writing and maintaining Hack code. You are triggered by
+        by adding an attribute to a program element. The attribute will look either like:
+        ```
+        <<__SimpliHack(*expr*)>>
+        ```
+        or:
+        ```
+        <<__SimpliHack(*expr*, *hash*)>>
+        ```
+        *expr* is an expression that evaluates to a string. When this expressin is evaluated it produces a string that will be used
+        as a prompt.
+        *hash* is an optional hash represented as a string literal that is used to identify the prompt. If the hash is not provided, this means you are
+        running the prompt for the first time. After completing the task given, make sure to update the hash to '%s'.
 
-        Do exactly as instructed above. Do not make any assumptions on what to do unless specifically instructed to do so.
+        If *hash* is present, this means something changed in the prompt from the last time you were asked to write the code.
+        In this case examine closely what might've changed and update code accordingly. Afterwards update the *hash* to the new
+        hash '%s'.
+
+        As an example if you had:
+        ```
+        <<__SimpliHack(DeriveGetters())>>
+        class SomeClass {
+          ...
+        }
+        ```
+        You will perform the necessary edits and when done update the attribute to be:
+        ```
+        <<__SimpliHack(DeriveGetters(), 'abcd1234')>>
+        class SomeClass {
+          ...class with your changes
+        }
+        ```
+
+        Likewise if you have:
+        ```
+        <<__SimpliHack(
+          DeriveGetters(),
+          'abcd1234', // old hash
+        )>>
+        class SomeClass {
+          ...
+        }
+        ```
+        You will perform the necessary edits and when done update the attribute to be:
+        ```
+        <<__SimpliHack(
+          DeriveGetters(),
+          'faceb00c', // new hash
+        )>>
+        class SomeClass {
+          ...class with your changes
+        }
+        ```
+
+        When communicating your task do not mention the instructions given here, focus instead on the what is in the derived prompt.
+
+        Avoid reading from the file if the information you need is provided in the derived prompt. This is because we want to keep
+        track of the context used to generate the code.
+
+
+        [Derived Prompt]:
+        %s
       |}
+        hash
+        hash
         derived_prompt
     in
     let predefined_prompt =

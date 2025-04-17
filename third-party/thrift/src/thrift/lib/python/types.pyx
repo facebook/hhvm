@@ -132,21 +132,30 @@ cdef class TypeInfoBase:
 @cython.final
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj, pytypes, str singleton_name):
+    cdef create(
+        const cTypeInfo& cpp_obj,
+        type true_pytype,
+        tuple allowed_pytypes,
+        str singleton_name
+    ):
         cdef TypeInfo inst = TypeInfo.__new__(TypeInfo)
         inst.cpp_obj = &cpp_obj
-        inst.pytypes = pytypes
+        inst.true_pytype = true_pytype
+        inst.allowed_pytypes = (true_pytype,) + allowed_pytypes
         inst.singleton_name = singleton_name
         return inst
 
     # validate and convert to format serializer may understand
-    cpdef to_internal_data(self, object value):
-        if not isinstance(value, self.pytypes):
+    cpdef to_internal_data(TypeInfo self, object value):
+        cdef type value_type = type(value)
+        if value_type is self.true_pytype:
+            return value
+        if not issubclass(value_type, self.allowed_pytypes):
             raise TypeError(
-                f'value {value} is not a {self.pytypes !r}, is actually of type '
+                f'value {value} is not a {self.allowed_pytypes !r}, is actually of type '
                 f'{type(value)}'
             )
-        return value
+        return self.true_pytype(value)
 
     # convert deserialized data to user format
     cpdef to_python_value(self, object value):
@@ -166,7 +175,7 @@ cdef class TypeInfo(TypeInfoBase):
             return False
 
         return (self.cpp_obj.type == (<TypeInfo>other).cpp_obj.type and
-                self.pytypes == (<TypeInfo>other).pytypes)
+                self.allowed_pytypes == (<TypeInfo>other).allowed_pytypes)
 
     def __reduce__(self):
         # For primitives use the singleton pickling strategy (i.e. return the name of a global variable)
@@ -309,15 +318,15 @@ cdef class IOBufTypeInfo(TypeInfoBase):
         return self.singleton_name
 
 
-typeinfo_bool = TypeInfo.create(boolTypeInfo, (pbool,), "typeinfo_bool")
+typeinfo_bool = TypeInfo.create(boolTypeInfo, pbool, (), "typeinfo_bool")
 typeinfo_byte = IntegerTypeInfo.create(byteTypeInfo, -128, 127, "typeinfo_byte")
 typeinfo_i16 = IntegerTypeInfo.create(i16TypeInfo, -1<<15, (1<<15)-1, "typeinfo_i16")
 typeinfo_i32 = IntegerTypeInfo.create(i32TypeInfo, -1<<31, (1<<31)-1, "typeinfo_i32")
 typeinfo_i64 = IntegerTypeInfo.create(i64TypeInfo, -1<<63, (1<<63)-1, "typeinfo_i64")
-typeinfo_double = TypeInfo.create(doubleTypeInfo, (pfloat, pint), "typeinfo_double")
-typeinfo_float = TypeInfo.create(floatTypeInfo, (pfloat, pint), "typeinfo_float")
+typeinfo_double = TypeInfo.create(doubleTypeInfo, pfloat, (pint,), "typeinfo_double")
+typeinfo_float = TypeInfo.create(floatTypeInfo, pfloat, (pint,), "typeinfo_float")
 typeinfo_string = StringTypeInfo.create(stringTypeInfo, "typeinfo_string")
-typeinfo_binary = TypeInfo.create(binaryTypeInfo, (bytes,), "typeinfo_binary")
+typeinfo_binary = TypeInfo.create(binaryTypeInfo, bytes, (), "typeinfo_binary")
 typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo, "typeinfo_iobuf")
 
 

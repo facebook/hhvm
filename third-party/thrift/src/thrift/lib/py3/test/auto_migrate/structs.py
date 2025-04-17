@@ -629,12 +629,7 @@ class NumericalConversionsTests(unittest.TestCase):
             self.assertIs(type(n.float_val), float)
             self.assertEqual(n.float_val, Kind.LINK.value)
 
-        if is_auto_migrated():
-            # BAD: should be an `float`
-            self.assertIsInstance(n.float_val, Kind)
-            self.assertEqual(n.float_val, Kind.LINK)
-        else:
-            assert_strict(n)
+        assert_strict(n)
 
         rt = self.roundtrip(n)
         assert_strict(rt)
@@ -646,12 +641,7 @@ class NumericalConversionsTests(unittest.TestCase):
             self.assertIs(type(n.float_val), float)
             self.assertEqual(n.float_val, float(True))
 
-        if is_auto_migrated():
-            # BAD: should be an `float`
-            self.assertIsInstance(n.float_val, bool)
-            self.assertEqual(n.float_val, True)
-        else:
-            assert_strict(n)
+        assert_strict(n)
 
         rt = self.roundtrip(n)
         assert_strict(rt)
@@ -663,12 +653,7 @@ class NumericalConversionsTests(unittest.TestCase):
             self.assertIs(type(n.float_val), float)
             self.assertEqual(n.float_val, 888.0)
 
-        if is_auto_migrated():
-            # BAD: should be an `float`
-            self.assertIsInstance(n.float_val, int)
-            self.assertEqual(n.float_val, 888)
-        else:
-            assert_strict(n)
+        assert_strict(n)
 
         rt = self.roundtrip(n)
         assert_strict(rt)

@@ -566,33 +566,36 @@ class NumericalConversionsTests(unittest.TestCase):
 
     def test_permissive_init_float_with_enum(self) -> None:
         n = self.numerical(float_val=self.Kind.LINK)
-        # BAD: should be an `float`
-        self.assertIsInstance(n.float_val, self.Kind)
-        self.assertEqual(n.float_val, self.Kind.LINK)
 
-        r = self.roundtrip(n)
-        self.assertIs(type(r.float_val), float)
-        self.assertEqual(r.float_val, self.Kind.LINK.value)
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.float_val), float)
+            self.assertEqual(n.float_val, self.Kind.LINK.value)
+
+        assert_strict(n)
+        rt = self.roundtrip(n)
+        assert_strict(rt)
 
     def test_permissive_init_float_with_bool(self) -> None:
         n = self.numerical(float_val=True)
-        # BAD: should be an `float`
-        self.assertIsInstance(n.float_val, bool)
-        self.assertEqual(n.float_val, True)
 
-        r = self.roundtrip(n)
-        self.assertIs(type(r.float_val), float)
-        self.assertEqual(r.float_val, float(True))
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.float_val), float)
+            self.assertEqual(n.float_val, float(True))
+
+        assert_strict(n)
+        rt = self.roundtrip(n)
+        assert_strict(rt)
 
     def test_permissive_init_float_with_int(self) -> None:
         n = self.numerical(float_val=888)
-        # BAD: should be an `float`
-        self.assertIsInstance(n.float_val, int)
-        self.assertEqual(n.float_val, 888)
 
-        r = self.roundtrip(n)
-        self.assertIs(type(r.float_val), float)
-        self.assertEqual(r.float_val, 888)
+        def assert_strict(n: numerical) -> None:
+            self.assertIs(type(n.float_val), float)
+            self.assertEqual(n.float_val, 888.0)
+
+        assert_strict(n)
+        rt = self.roundtrip(n)
+        assert_strict(rt)
 
 
 @parameterized_class(

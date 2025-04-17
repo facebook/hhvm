@@ -111,10 +111,16 @@ cdef class TypeInfoBase:
 
 cdef class TypeInfo(TypeInfoBase):
     cdef const cTypeInfo* cpp_obj
-    cdef tuple pytypes
+    cdef type true_pytype
+    cdef tuple allowed_pytypes
     cdef str singleton_name
     @staticmethod
-    cdef create(const cTypeInfo& cpp_obj, pytypes, str singleton_name)
+    cdef create(
+        const cTypeInfo& cpp_obj,
+        type true_pytype,
+        tuple allowed_pytypes,
+        str singleton_name
+    )
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)

@@ -77,7 +77,8 @@ typename std::
         HashFunc func,
         bool bucketized = false,
         bool clientFanout = false) {
-  if (folly::IsOneOf<HashFunc, WeightedCh3HashFunc>::value) {
+  if (folly::IsOneOf<HashFunc, WeightedCh3HashFunc, WeightedCh3RvHashFunc>::
+          value) {
     if (bucketized) {
       return createSelectionRoute<
           RouterInfo,

@@ -593,6 +593,22 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
     }
   }
 
+  if (auto* jEnableTrafficRv = json.get_ptr("weights_rv")) {
+    folly::dynamic jHashRoute =
+        folly::dynamic::object("hash_func", WeightedCh3RvHashFunc::type())(
+            "weights_rv", jEnableTrafficRv->asString());
+    if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
+      if (parseBool(*jNeedBucketization, "bucketize")) {
+        jHashRoute["bucketize"] = true;
+      }
+    }
+    route = createHashRoute<RouterInfo>(
+        std::move(jHashRoute),
+        {route, makeNullRoute(factory, folly::dynamic::object())},
+        factory.getThreadId(),
+        proxy_);
+  }
+
   route = bucketize(std::move(route), json);
 
   if (needAsynclog) {

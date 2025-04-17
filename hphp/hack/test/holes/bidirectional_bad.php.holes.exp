@@ -98,8 +98,9 @@
                                  targs = [((nothing), ([12:11-15], Hwildcard)); ((nothing), ([12:11-15], Hwildcard))];
                                  args =
                                  [(Anormal
-                                     ((~AnyArray<arraykey, mixed>), [12:16-18],
-                                      (Hole (((~AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (~AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
+                                     ((~<expr#5> as AnyArray<arraykey, mixed>), [12:16-18],
+                                      (Hole (((~AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (~<expr#5> as AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>),
+                                         Typing))))
                                    ];
                                  unpacked_arg = None }))
                             ],

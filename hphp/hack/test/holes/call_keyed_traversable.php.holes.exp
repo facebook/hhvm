@@ -82,8 +82,8 @@
                       targs = [];
                       args =
                       [(Anormal
-                          ((KeyedTraversable<string, int>), [14:5-8],
-                           (Hole (((KeyedTraversable<string, int>), [14:5-8], (Lvar ([14:5-8], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
+                          ((<expr#2> as KeyedTraversable<string, int>), [14:5-8],
+                           (Hole (((KeyedTraversable<string, int>), [14:5-8], (Lvar ([14:5-8], $o1))), (<expr#2> as KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
                         ];
                       unpacked_arg = None }))));
              ([16:3-10],
@@ -94,8 +94,8 @@
                        targs = [];
                        args =
                        [(Anormal
-                           ((KeyedTraversable<int, string>), [16:5-8],
-                            (Hole (((KeyedTraversable<int, string>), [16:5-8], (Lvar ([16:5-8], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
+                           ((<expr#3> as KeyedTraversable<int, string>), [16:5-8],
+                            (Hole (((KeyedTraversable<int, string>), [16:5-8], (Lvar ([16:5-8], $o2))), (<expr#3> as KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
                          ];
                        unpacked_arg = None }))));
              ([18:3-37],
@@ -114,8 +114,8 @@
                        targs = [];
                        args =
                        [(Anormal
-                           ((KeyedTraversable<string, int>), [21:11-14],
-                            (Hole (((KeyedTraversable<string, int>), [21:11-14], (Lvar ([21:11-14], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
+                           ((<expr#2> as KeyedTraversable<string, int>), [21:11-14],
+                            (Hole (((KeyedTraversable<string, int>), [21:11-14], (Lvar ([21:11-14], $o1))), (<expr#2> as KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
                          ];
                        unpacked_arg = None }))));
              ([23:3-16],
@@ -129,8 +129,8 @@
                        targs = [];
                        args =
                        [(Anormal
-                           ((KeyedTraversable<int, string>), [23:11-14],
-                            (Hole (((KeyedTraversable<int, string>), [23:11-14], (Lvar ([23:11-14], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
+                           ((<expr#3> as KeyedTraversable<int, string>), [23:11-14],
+                            (Hole (((KeyedTraversable<int, string>), [23:11-14], (Lvar ([23:11-14], $o2))), (<expr#3> as KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
                          ];
                        unpacked_arg = None }))))
              ]

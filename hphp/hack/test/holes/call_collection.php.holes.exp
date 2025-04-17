@@ -71,7 +71,10 @@
                  (Call
                     { func = (((function(Collection<int> $l): void)), [13:3-4], (Id ([13:3-4], "\\l"))); 
                       targs = [];
-                      args = [(Anormal ((Collection<string>), [13:5-7], (Hole (((Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (Collection<string>), (Collection<int>), Typing))))];
+                      args =
+                      [(Anormal
+                          ((<expr#2> as Collection<string>), [13:5-7], (Hole (((Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (<expr#2> as Collection<string>), (Collection<int>), Typing))))
+                        ];
                       unpacked_arg = None }))));
              ([15:3-31],
               (Expr
@@ -86,7 +89,11 @@
                        (((function(Collection<int> $l): void)), [18:3-10],
                         (Obj_get (((exact TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, Is_method)));
                        targs = [];
-                       args = [(Anormal ((Collection<string>), [18:11-13], (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (Collection<string>), (Collection<int>), Typing))))];
+                       args =
+                       [(Anormal
+                           ((<expr#2> as Collection<string>), [18:11-13],
+                            (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (<expr#2> as Collection<string>), (Collection<int>), Typing))))
+                         ];
                        unpacked_arg = None }))))
              ]
            };

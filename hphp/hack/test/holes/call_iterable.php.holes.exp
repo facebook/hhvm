@@ -70,7 +70,9 @@
                 ((void), [13:3-8],
                  (Call
                     { func = (((function(Iterable<int> $m): void)), [13:3-4], (Id ([13:3-4], "\\m"))); 
-                      targs = []; args = [(Anormal ((Iterable<float>), [13:5-7], (Hole (((Iterable<float>), [13:5-7], (Lvar ([13:5-7], $m))), (Iterable<float>), (Iterable<int>), Typing))))];
+                      targs = [];
+                      args =
+                      [(Anormal ((<expr#2> as Iterable<float>), [13:5-7], (Hole (((Iterable<float>), [13:5-7], (Lvar ([13:5-7], $m))), (<expr#2> as Iterable<float>), (Iterable<int>), Typing))))];
                       unpacked_arg = None }))));
              ([15:3-29],
               (Expr
@@ -84,7 +86,10 @@
                      { func =
                        (((function(Iterable<int> $m): void)), [18:3-10],
                         (Obj_get (((exact TestIterable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Iterable<int> $m): void)), [18:9-10], (Id ([18:9-10], "m"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Anormal ((Iterable<float>), [18:11-13], (Hole (((Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (Iterable<float>), (Iterable<int>), Typing))))];
+                       targs = [];
+                       args =
+                       [(Anormal ((<expr#2> as Iterable<float>), [18:11-13], (Hole (((Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (<expr#2> as Iterable<float>), (Iterable<int>), Typing))))
+                         ];
                        unpacked_arg = None }))))
              ]
            };

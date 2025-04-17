@@ -78,14 +78,18 @@
                 ((void), [14:3-9],
                  (Call
                     { func = (((function(Pair<int, int> $b): void)), [14:3-4], (Id ([14:3-4], "\\b"))); 
-                      targs = []; args = [(Anormal ((Pair<bool, int>), [14:5-8], (Hole (((Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))];
+                      targs = [];
+                      args =
+                      [(Anormal ((<expr#2> as Pair<bool, int>), [14:5-8], (Hole (((Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (<expr#2> as Pair<bool, int>), (Pair<int, int>), Typing))))];
                       unpacked_arg = None }))));
              ([16:3-10],
               (Expr
                  ((void), [16:3-9],
                   (Call
                      { func = (((function(Pair<int, int> $b): void)), [16:3-4], (Id ([16:3-4], "\\b"))); 
-                       targs = []; args = [(Anormal ((Pair<int, bool>), [16:5-8], (Hole (((Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))];
+                       targs = [];
+                       args =
+                       [(Anormal ((<expr#3> as Pair<int, bool>), [16:5-8], (Hole (((Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (<expr#3> as Pair<int, bool>), (Pair<int, int>), Typing))))];
                        unpacked_arg = None }))));
              ([18:3-25],
               (Expr
@@ -99,7 +103,11 @@
                      { func =
                        (((function(Pair<int, int> $b): void)), [21:3-10],
                         (Obj_get (((exact TestPair), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(Pair<int, int> $b): void)), [21:9-10], (Id ([21:9-10], "b"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Anormal ((Pair<bool, int>), [21:11-14], (Hole (((Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))];
+                       targs = [];
+                       args =
+                       [(Anormal
+                           ((<expr#2> as Pair<bool, int>), [21:11-14], (Hole (((Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (<expr#2> as Pair<bool, int>), (Pair<int, int>), Typing))))
+                         ];
                        unpacked_arg = None }))));
              ([23:3-16],
               (Expr
@@ -108,7 +116,11 @@
                      { func =
                        (((function(Pair<int, int> $b): void)), [23:3-10],
                         (Obj_get (((exact TestPair), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(Pair<int, int> $b): void)), [23:9-10], (Id ([23:9-10], "b"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Anormal ((Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))];
+                       targs = [];
+                       args =
+                       [(Anormal
+                           ((<expr#3> as Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (<expr#3> as Pair<int, bool>), (Pair<int, int>), Typing))))
+                         ];
                        unpacked_arg = None }))))
              ]
            };

@@ -70,7 +70,9 @@
                 ((void), [13:3-8],
                  (Call
                     { func = (((function(ImmVector<int> $k): void)), [13:3-4], (Id ([13:3-4], "\\k"))); 
-                      targs = []; args = [(Anormal ((ImmVector<float>), [13:5-7], (Hole (((ImmVector<float>), [13:5-7], (Lvar ([13:5-7], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))];
+                      targs = [];
+                      args =
+                      [(Anormal ((<expr#2> as ImmVector<float>), [13:5-7], (Hole (((ImmVector<float>), [13:5-7], (Lvar ([13:5-7], $k))), (<expr#2> as ImmVector<float>), (ImmVector<int>), Typing))))];
                       unpacked_arg = None }))));
              ([15:3-30],
               (Expr
@@ -85,7 +87,10 @@
                        (((function(ImmVector<int> $k): void)), [18:3-10],
                         (Obj_get (((exact TestImmVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(ImmVector<int> $k): void)), [18:9-10], (Id ([18:9-10], "k"))), OG_nullthrows, Is_method)));
                        targs = [];
-                       args = [(Anormal ((ImmVector<float>), [18:11-13], (Hole (((ImmVector<float>), [18:11-13], (Lvar ([18:11-13], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))];
+                       args =
+                       [(Anormal
+                           ((<expr#2> as ImmVector<float>), [18:11-13], (Hole (((ImmVector<float>), [18:11-13], (Lvar ([18:11-13], $k))), (<expr#2> as ImmVector<float>), (ImmVector<int>), Typing))))
+                         ];
                        unpacked_arg = None }))))
              ]
            };

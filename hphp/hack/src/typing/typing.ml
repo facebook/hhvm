@@ -1868,7 +1868,7 @@ let generate_splat_type_vars
   (env, (d_required, d_optional, d_variadic))
 
 let check_argument_type_against_parameter_type_helper
-    ~dynamic_func env pos param arg_ty =
+    ~dynamic_func ~ignore_readonly env pos param_ty arg_ty =
   Typing_log.(
     log_with_level env "typing" ~level:2 (fun () ->
         log_types
@@ -1882,10 +1882,8 @@ let check_argument_type_against_parameter_type_helper
                 | None -> "None"
                 | Some Supportdyn_function -> "sd"
                 | Some Like_function -> "~"),
-                [
-                  Log_type ("param_ty", param.fp_type);
-                  Log_type ("arg_ty", arg_ty);
-                ] );
+                [Log_type ("param_ty", param_ty); Log_type ("arg_ty", arg_ty)]
+              );
           ]));
   let param_ty =
     match dynamic_func with
@@ -1894,15 +1892,14 @@ let check_argument_type_against_parameter_type_helper
          in this case we are semantically just using the &dynamic part of the type to call them.
          For like functions, they have to check both sides. *)
       match dyn_func_kind with
-      | Supportdyn_function ->
-        MakeType.locl_like (get_reason param.fp_type) param.fp_type
-      | Like_function -> param.fp_type
+      | Supportdyn_function -> MakeType.locl_like (get_reason param_ty) param_ty
+      | Like_function -> param_ty
     end
-    | None -> param.fp_type
+    | None -> param_ty
   in
   Typing_coercion.coerce_type
     ~coerce:None
-    ~ignore_readonly:(Typing_defs.get_fp_ignore_readonly_error param)
+    ~ignore_readonly
     pos
     Reason.URparam
     env
@@ -1923,6 +1920,96 @@ let check_argument_type_against_parameter_type_helper
  * attempt ~t <: T to get T:=~t rather than ~t <: ~T to get T := t.
  *)
 let check_argument_type_against_parameter_type
+    ?(is_single_argument = false)
+    ~dynamic_func
+    ~ignore_readonly
+    env
+    param_pos
+    param_ty
+    arg_pos
+    arg_ty =
+  let (env, opt_e, used_dynamic) =
+    if Option.is_none dynamic_func then
+      let (env, opt_e) =
+        check_argument_type_against_parameter_type_helper
+          ~dynamic_func:None
+          ~ignore_readonly
+          env
+          arg_pos
+          param_ty
+          arg_ty
+      in
+      (env, opt_e, false)
+    else
+      let check_dynamic_only =
+        (not is_single_argument)
+        && (not (TUtils.is_dynamic env param_ty))
+        && Option.is_some
+             (snd
+                (Typing_dynamic_utils.try_strip_dynamic
+                   ~accept_intersections:true
+                   env
+                   arg_ty))
+        && Option.is_none
+             (snd (Typing_dynamic_utils.try_strip_dynamic env param_ty))
+      in
+      if check_dynamic_only then
+        (* Only try dynamically *)
+        let (env, opt_e) =
+          check_argument_type_against_parameter_type_helper
+            ~dynamic_func
+            ~ignore_readonly
+            env
+            arg_pos
+            param_ty
+            arg_ty
+        in
+        (env, opt_e, true)
+      else
+        let (env, opt_e, used_dynamic_info) =
+          (* First try statically *)
+          let (env1, e1opt) =
+            check_argument_type_against_parameter_type_helper
+              ~dynamic_func:None
+              ~ignore_readonly
+              env
+              arg_pos
+              param_ty
+              arg_ty
+          in
+          match e1opt with
+          | None -> (env1, None, false)
+          | Some e1 ->
+            let (env2, e2opt) =
+              check_argument_type_against_parameter_type_helper
+                ~dynamic_func
+                ~ignore_readonly
+                env
+                arg_pos
+                param_ty
+                arg_ty
+            in
+            (match e2opt with
+            (* We used dynamic calling to get a successful check *)
+            | None -> (env2, None, true)
+            (* We failed on both, pick the one with fewest errors! (preferring static on a tie) *)
+            | Some e2 ->
+              if Typing_error.count e1 <= Typing_error.count e2 then
+                (env1, Some e1, false)
+              else
+                (env2, Some e2, true))
+        in
+        (env, opt_e, used_dynamic_info)
+  in
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) opt_e;
+  ( env,
+    mk_ty_mismatch_opt arg_ty param_ty opt_e,
+    if used_dynamic then
+      Some (param_pos, arg_ty)
+    else
+      None )
+
+let check_argument_type_against_parameter
     ?(is_single_argument = false)
     ~dynamic_func
     env
@@ -1947,82 +2034,16 @@ let check_argument_type_against_parameter_type
     | Ast_defs.Pnormal -> pos
     | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
   in
-  let (env, opt_e, used_dynamic) =
-    if Option.is_none dynamic_func then
-      let (env, opt_e) =
-        check_argument_type_against_parameter_type_helper
-          ~dynamic_func:None
-          env
-          pos
-          param
-          dep_ty
-      in
-      (env, opt_e, false)
-    else
-      let check_dynamic_only =
-        (not is_single_argument)
-        && (not (TUtils.is_dynamic env param.fp_type))
-        && Option.is_some
-             (snd
-                (Typing_dynamic_utils.try_strip_dynamic
-                   ~accept_intersections:true
-                   env
-                   dep_ty))
-        && Option.is_none
-             (snd (Typing_dynamic_utils.try_strip_dynamic env param.fp_type))
-      in
-      if check_dynamic_only then
-        (* Only try dynamically *)
-        let (env, opt_e) =
-          check_argument_type_against_parameter_type_helper
-            ~dynamic_func
-            env
-            pos
-            param
-            dep_ty
-        in
-        (env, opt_e, true)
-      else
-        let (env, opt_e, used_dynamic_info) =
-          (* First try statically *)
-          let (env1, e1opt) =
-            check_argument_type_against_parameter_type_helper
-              ~dynamic_func:None
-              env
-              pos
-              param
-              dep_ty
-          in
-          match e1opt with
-          | None -> (env1, None, false)
-          | Some e1 ->
-            let (env2, e2opt) =
-              check_argument_type_against_parameter_type_helper
-                ~dynamic_func
-                env
-                pos
-                param
-                dep_ty
-            in
-            (match e2opt with
-            (* We used dynamic calling to get a successful check *)
-            | None -> (env2, None, true)
-            (* We failed on both, pick the one with fewest errors! (preferring static on a tie) *)
-            | Some e2 ->
-              if Typing_error.count e1 <= Typing_error.count e2 then
-                (env1, Some e1, false)
-              else
-                (env2, Some e2, true))
-        in
-        (env, opt_e, used_dynamic_info)
-  in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) opt_e;
-  ( env,
-    mk_ty_mismatch_opt arg_ty param.fp_type opt_e,
-    if used_dynamic then
-      Some (param.fp_pos, arg_ty)
-    else
-      None )
+  let ignore_readonly = Typing_defs.get_fp_ignore_readonly_error param in
+  check_argument_type_against_parameter_type
+    ~is_single_argument
+    ~dynamic_func
+    ~ignore_readonly
+    env
+    param.fp_pos
+    param.fp_type
+    pos
+    dep_ty
 
 let bad_call env p ty =
   if not (TUtils.is_tyvar_error env ty) then
@@ -6931,7 +6952,7 @@ end = struct
                 (ty, pos, e)
               in
               let (env, ty_mismatch_opt, used_dynamic_info) =
-                check_argument_type_against_parameter_type
+                check_argument_type_against_parameter
                   ~is_single_argument
                   ~dynamic_func
                   env
@@ -7181,7 +7202,7 @@ end = struct
                       required_params
                       ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
                         let (env, err_opt, used_dynamic_info) =
-                          check_argument_type_against_parameter_type
+                          check_argument_type_against_parameter
                             ~dynamic_func
                             env
                             param
@@ -7202,7 +7223,7 @@ end = struct
                       optional_params
                       ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
                         let (env, err_opt, used_dynamic_info) =
-                          check_argument_type_against_parameter_type
+                          check_argument_type_against_parameter
                             ~dynamic_func
                             env
                             param
@@ -7218,7 +7239,7 @@ end = struct
                   in
                   let (env, var_err_opt, var_used_dynamic_info) =
                     Option.map2 d_variadic var_param ~f:(fun v (_idx, vp) ->
-                        check_argument_type_against_parameter_type
+                        check_argument_type_against_parameter
                           ~dynamic_func
                           env
                           vp

@@ -70,7 +70,8 @@
                 ((void), [13:3-8],
                  (Call
                     { func = (((function(ImmSet<int> $j): void)), [13:3-4], (Id ([13:3-4], "\\j"))); 
-                      targs = []; args = [(Anormal ((ImmSet<string>), [13:5-7], (Hole (((ImmSet<string>), [13:5-7], (Lvar ([13:5-7], $j))), (ImmSet<string>), (ImmSet<int>), Typing))))];
+                      targs = [];
+                      args = [(Anormal ((<expr#2> as ImmSet<string>), [13:5-7], (Hole (((ImmSet<string>), [13:5-7], (Lvar ([13:5-7], $j))), (<expr#2> as ImmSet<string>), (ImmSet<int>), Typing))))];
                       unpacked_arg = None }))));
              ([15:3-27],
               (Expr
@@ -84,7 +85,9 @@
                      { func =
                        (((function(ImmSet<int> $j): void)), [18:3-10],
                         (Obj_get (((exact TestImmSet), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(ImmSet<int> $j): void)), [18:9-10], (Id ([18:9-10], "j"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Anormal ((ImmSet<string>), [18:11-13], (Hole (((ImmSet<string>), [18:11-13], (Lvar ([18:11-13], $j))), (ImmSet<string>), (ImmSet<int>), Typing))))];
+                       targs = [];
+                       args =
+                       [(Anormal ((<expr#2> as ImmSet<string>), [18:11-13], (Hole (((ImmSet<string>), [18:11-13], (Lvar ([18:11-13], $j))), (<expr#2> as ImmSet<string>), (ImmSet<int>), Typing))))];
                        unpacked_arg = None }))))
              ]
            };

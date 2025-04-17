@@ -203,6 +203,8 @@ final class ThriftLazyAny implements JsonSerializable {
         return ($this->getStringToSerializer())($protocol_union->getx_custom());
       case apache_thrift_type_rep_ProtocolUnionEnum::id:
         return ($this->getIdToSerializer())($protocol_union->getx_id());
+      case apache_thrift_type_rep_ProtocolUnionEnum::compressed:
+        invariant_violation("ProtocolUnion.compressed is not supported yet.");
       case apache_thrift_type_rep_ProtocolUnionEnum::_EMPTY_:
         invariant_violation("No protocol provided for Lazy serialization");
     }

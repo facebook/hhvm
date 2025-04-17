@@ -84,11 +84,12 @@ bool interceptorIsDisabled(
     if (folly::variant_match(
             disabledName,
             [&](const DisabledQualifiedName& disabledQualifiedName) {
-              return disabledQualifiedName.moduleName == name.moduleName &&
-                  disabledQualifiedName.interceptorName == name.interceptorName;
+              return disabledQualifiedName.moduleName == name.getModuleName() &&
+                  disabledQualifiedName.interceptorName ==
+                  name.getInterceptorName();
             },
             [&](const DisabledModuleName& disabledModuleName) {
-              return disabledModuleName.moduleName == name.moduleName;
+              return disabledModuleName.moduleName == name.getModuleName();
             })) {
       return true;
     }

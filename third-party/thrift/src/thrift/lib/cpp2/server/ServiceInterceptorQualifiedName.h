@@ -17,7 +17,7 @@
 #pragma once
 
 #include <string>
-#include <fmt/format.h>
+#include <string_view>
 
 namespace apache::thrift {
 
@@ -27,15 +27,37 @@ namespace apache::thrift {
  * module that installed the interceptor, and Interceptor Name is the result
  * of calling the getName() method on the interceptor.
  */
-struct ServiceInterceptorQualifiedName {
-  std::string moduleName;
-  std::string interceptorName;
+class ServiceInterceptorQualifiedName {
+ public:
+  /**
+   * This is called by the ThriftServer when installing Service interceptors,
+   * since that is the earliest point when the fully qualfied name can be known.
+   * This method will fatal if moduleName or interceptorName are empty or
+   * contain restricted characters '.' and ','. This method is only expected
+   * to be called once - calling it more than that will also be a fatal error.
+   */
+  void setName(std::string moduleName, std::string interceptorName);
 
-  std::string toString() const {
-    return fmt::format("{}.{}", moduleName, interceptorName);
-  }
+  /**
+   * Get the fully qualified name of the intercepor i.e
+   * {moduleName}.{interceptorName}
+   */
+  std::string_view get() const;
 
-  bool isValid() const { return !moduleName.empty(); }
+  /**
+   * Get the module name, i.e the first part of the fully qualified name
+   */
+  std::string_view getModuleName() const;
+
+  /**
+   * Get the interceptor name, i.e the second part of the fully qualified name
+   */
+  std::string_view getInterceptorName() const;
+
+ private:
+  std::string_view moduleName_;
+  std::string_view interceptorName_;
+  std::string qualifiedName_;
 };
 
 } // namespace apache::thrift

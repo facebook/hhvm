@@ -52,8 +52,6 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   virtual void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept {}
 
   const ServiceInterceptorQualifiedName& getQualifiedName() const final {
-    CHECK(qualifiedName_.isValid())
-        << "Broken Invariant: ServiceInterceptor::getQualifiedName() was called before ServiceInterceptor::setModuleName()";
     return qualifiedName_;
   }
 
@@ -108,15 +106,7 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
 
   void setModuleName(const std::string& moduleName) final {
-    CHECK(!qualifiedName_.isValid())
-        << "Broken Invariant: ServiceInterceptor::setModuleName() was called more than once";
-    auto interceptorName = getName();
-    CHECK(!interceptorName.empty()) << "Interceptor name cannot be empty";
-    CHECK(interceptorName.find_first_of(".,") == std::string::npos)
-        << "Interceptor name cannot contain '.' or ',' - got: "
-        << interceptorName;
-    qualifiedName_.moduleName = moduleName;
-    qualifiedName_.interceptorName = std::move(interceptorName);
+    qualifiedName_.setName(moduleName, getName());
   }
 
   bool isDisabled() const { return control_.isDisabled(); }

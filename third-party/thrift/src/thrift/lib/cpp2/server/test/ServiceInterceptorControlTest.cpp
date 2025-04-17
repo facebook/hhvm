@@ -28,8 +28,9 @@ namespace {
 
 struct TestControl {
   explicit TestControl(std::string moduleName, std::string interceptorName)
-      : name{.moduleName = std::move(moduleName), .interceptorName = std::move(interceptorName)},
-        controller{name} {}
+      : name{}, controller{name} {
+    name.setName(std::move(moduleName), std::move(interceptorName));
+  }
 
   ServiceInterceptorQualifiedName name;
   ServiceInterceptorControl controller;
@@ -50,12 +51,12 @@ class ServiceInterceptorControlTest : public Test {
 
   void expectDisabled(const TestControl& testController) {
     EXPECT_TRUE(testController.controller.isDisabled()) << fmt::format(
-        "{} is not disabled, but should be", testController.name.toString());
+        "{} is not disabled, but should be", testController.name.get());
   }
 
   void expectNotDisabled(const TestControl& testController) {
     EXPECT_FALSE(testController.controller.isDisabled()) << fmt::format(
-        "{} is disabled, but should not be", testController.name.toString());
+        "{} is disabled, but should not be", testController.name.get());
   }
 
   TestControllers testControllers;

@@ -1023,14 +1023,12 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onConnection threw exceptions:\n[{}] {}\n",
-        serviceInterceptors[exceptions[0].first]->getQualifiedName().toString(),
+        serviceInterceptors[exceptions[0].first]->getQualifiedName().get(),
         folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptors[exceptions[i].first]
-              ->getQualifiedName()
-              .toString(),
+          serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
     return connection.close(folly::make_exception_wrapper<RocketException>(

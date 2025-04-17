@@ -2591,7 +2591,7 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
       std::vector<std::shared_ptr<ServiceInterceptorBase>> result;
       for (auto& interceptor : serviceInterceptors) {
         interceptor->setModuleName(moduleSpec.name);
-        auto qualifiedNameStr = interceptor->getQualifiedName().toString();
+        auto qualifiedNameStr = interceptor->getQualifiedName().get();
         if (seenNames_.find(qualifiedNameStr) != seenNames_.end()) {
           throw std::logic_error(fmt::format(
               "Duplicate ServiceInterceptor: {}", qualifiedNameStr));
@@ -2627,7 +2627,7 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
    private:
     std::vector<std::vector<std::shared_ptr<ServiceInterceptorBase>>>
         interceptorsByModule_;
-    std::unordered_set<std::string> seenNames_;
+    std::unordered_set<std::string_view> seenNames_;
   };
 #else
   class ServiceInterceptorsCollector {

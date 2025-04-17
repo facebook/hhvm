@@ -84,6 +84,12 @@ class DefinitionKeyEqual : public std::equal_to<type::DefinitionKey> {
 
 } // namespace
 
+WithName::WithName(std::string_view name) : name_(name) {
+  FOLLY_SAFE_DCHECK(
+      name_.data()[name_.size()] == '\0',
+      "name must be backed by a null-terminated string!");
+}
+
 class Resolver final {
  private:
   friend class ::apache::thrift::schema::SyntaxGraph;

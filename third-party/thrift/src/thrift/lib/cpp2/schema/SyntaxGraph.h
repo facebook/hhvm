@@ -387,10 +387,13 @@ class Lazy {
  */
 class WithName {
  protected:
-  explicit WithName(std::string_view name) : name_(name) {}
+  // Requirement: `name` is backed by a null-terminated string (e.g. static
+  // string or std::string)
+  explicit WithName(std::string_view name);
 
   /**
    * The scoped name of this graph node.
+   * Can be assumed to be null-terminated
    */
   std::string_view name() const { return name_; }
 

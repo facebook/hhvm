@@ -173,6 +173,7 @@ TEST_F(ServiceSchemaTest, Struct) {
   EXPECT_EQ(&testStruct->program(), program.unwrap());
   EXPECT_EQ(testStruct->kind(), DefinitionNode::Kind::STRUCT);
   EXPECT_EQ(testStruct->name(), "TestStruct");
+  EXPECT_STREQ(testStruct->name().data(), "TestStruct");
   const StructNode& s = testStruct->asStruct();
   EXPECT_EQ(&s.definition(), testStruct.unwrap());
   EXPECT_EQ(s.uri(), "");
@@ -184,6 +185,7 @@ TEST_F(ServiceSchemaTest, Struct) {
       s.fields()[0].presence(), FieldNode::PresenceQualifier::UNQUALIFIED);
   EXPECT_EQ(s.fields()[0].type().asPrimitive(), Primitive::I32);
   EXPECT_EQ(s.fields()[0].name(), "field1");
+  EXPECT_STREQ(s.fields()[0].name().data(), "field1");
   EXPECT_EQ(s.fields()[0].customDefault()->as_i32(), 10);
 
   EXPECT_EQ(s.fields()[1].id(), FieldId{2});
@@ -192,6 +194,7 @@ TEST_F(ServiceSchemaTest, Struct) {
       &s.fields()[1].type().asEnum(),
       &program->definitionsByName().at("TestEnum")->asEnum());
   EXPECT_EQ(s.fields()[1].name(), "field2");
+  EXPECT_STREQ(s.fields()[1].name().data(), "field2");
   EXPECT_EQ(s.fields()[1].customDefault(), nullptr);
 }
 
@@ -204,6 +207,7 @@ TEST_F(ServiceSchemaTest, Union) {
   EXPECT_EQ(&testUnion->program(), program.unwrap());
   EXPECT_EQ(testUnion->kind(), DefinitionNode::Kind::UNION);
   EXPECT_EQ(testUnion->name(), "TestUnion");
+  EXPECT_STREQ(testUnion->name().data(), "TestUnion");
   const UnionNode& u = testUnion->asUnion();
 
   EXPECT_EQ(u.fields().size(), 2);

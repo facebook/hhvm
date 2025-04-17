@@ -18,13 +18,13 @@
 #include <folly/Range.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 
-#include "mcrouter/CallbackPool.h"
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/CarbonRouterInstanceBase.h"
 #include "mcrouter/ConfigApi.h"
 #include "mcrouter/FileObserver.h"
 #include "mcrouter/Proxy.h"
 #include "mcrouter/ProxyConfigBuilder.h"
+#include "mcrouter/lib/CallbackPool.h"
 
 namespace facebook {
 namespace memcache {

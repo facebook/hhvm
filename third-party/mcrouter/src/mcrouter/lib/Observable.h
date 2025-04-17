@@ -11,7 +11,7 @@
 
 #include <folly/SharedMutex.h>
 
-#include "mcrouter/CallbackPool.h"
+#include "mcrouter/lib/CallbackPool.h"
 
 namespace facebook {
 namespace memcache {

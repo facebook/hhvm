@@ -19,8 +19,7 @@ mcrouter_test_SOURCES = \
   options_test.cpp \
   pool_factory_test.cpp \
   ProxyRequestContextTest.cpp \
-  route_test.cpp \
-  runtime_vars_data_test.cpp
+  route_test.cpp
 
 mcrouter_test_CPPFLAGS = \
 	-I$(top_srcdir)/.. \

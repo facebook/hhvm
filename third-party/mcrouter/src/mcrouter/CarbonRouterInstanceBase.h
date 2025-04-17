@@ -22,9 +22,9 @@
 #include "mcrouter/ConfigApi.h"
 #include "mcrouter/ExternalStatsHandler.h"
 #include "mcrouter/LeaseTokenMap.h"
-#include "mcrouter/Observable.h"
 #include "mcrouter/PoolStats.h"
 #include "mcrouter/TkoTracker.h"
+#include "mcrouter/lib/Observable.h"
 #include "mcrouter/lib/network/Transport.h"
 #include "mcrouter/options.h"
 

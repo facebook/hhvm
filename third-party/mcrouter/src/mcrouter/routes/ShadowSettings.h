@@ -19,7 +19,7 @@
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 
-#include "mcrouter/Observable.h"
+#include "mcrouter/lib/Observable.h"
 #include "mcrouter/lib/network/MessageHelpers.h"
 
 // forward declarations

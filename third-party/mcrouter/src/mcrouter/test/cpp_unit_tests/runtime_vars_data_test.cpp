@@ -11,8 +11,8 @@
 
 #include <folly/json/json.h>
 
-#include "mcrouter/Observable.h"
 #include "mcrouter/RuntimeVarsData.h"
+#include "mcrouter/lib/Observable.h"
 
 using namespace facebook::memcache::mcrouter;
 

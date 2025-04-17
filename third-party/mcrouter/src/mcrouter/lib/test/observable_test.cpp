@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include "mcrouter/Observable.h"
+#include "mcrouter/lib/Observable.h"
 
 using facebook::memcache::mcrouter::CallbackPool;
 using facebook::memcache::mcrouter::Observable;

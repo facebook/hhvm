@@ -15,8 +15,8 @@
 #include <thread>
 #include <unordered_map>
 
-#include "mcrouter/CallbackPool.h"
 #include "mcrouter/ConfigApiIf.h"
+#include "mcrouter/lib/CallbackPool.h"
 
 namespace folly {
 struct dynamic;

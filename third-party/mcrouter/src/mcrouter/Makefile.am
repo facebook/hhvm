@@ -25,8 +25,6 @@ libmcroutercore_a_SOURCES = \
   AsyncWriter.cpp \
   AsyncWriter.h \
   AsyncWriterEntry.h \
-  CallbackPool-inl.h \
-  CallbackPool.h \
   CarbonRouterClient.cpp \
   CarbonRouterClient-inl.h \
   CarbonRouterClient.h \
@@ -73,8 +71,6 @@ libmcroutercore_a_SOURCES = \
   lib/invalidation/McInvalidationKvPairs.cpp \
   lib/invalidation/McInvalidationDefs.h \
   lib/network/McThriftContext.h \
-  Observable-inl.h \
-  Observable.h \
   options-template.h \
   options.cpp \
   options.h \

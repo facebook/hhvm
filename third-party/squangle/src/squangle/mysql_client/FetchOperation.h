@@ -250,8 +250,6 @@ class FetchOperation : public Operation {
  public:
   using RespAttrs = AttributeMap;
 
-  void mustSucceed() override;
-
   // Number of queries that succeed to execute
   int numQueriesExecuted() const {
     return impl_->numQueriesExecuted();

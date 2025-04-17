@@ -316,8 +316,6 @@ class ConnectOperation : public Operation {
     }
   }
 
-  void mustSucceed() override;
-
   bool isActive() const {
     return impl()->isActive();
   }

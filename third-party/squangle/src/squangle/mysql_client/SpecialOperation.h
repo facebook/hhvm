@@ -53,8 +53,6 @@ class SpecialOperation : public Operation {
     impl_->setOperation(*this);
   }
 
-  void mustSucceed() override;
-
   virtual InternalConnection::Status runSpecialOperation() = 0;
   friend SpecialOperationImpl;
 

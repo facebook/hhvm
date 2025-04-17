@@ -119,7 +119,7 @@ query, and hold the result when it completes.  In the above example,
 we create a connection operation (`connect_op`), run it (which is a
 non-blocking call), and wait for it to complete (which is a blocking
 call). Specifically, *no function on any method of any class blocks,
-except for wait() and mustSucceed()*.
+except for wait().
 
 In addition to being able to start a MySQL query or connection "in the
 background" like the connect above, you can specify a callback, as

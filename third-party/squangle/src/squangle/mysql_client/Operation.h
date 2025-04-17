@@ -492,10 +492,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
  public:
   virtual ~Operation() = default;
 
-  // Wait for an operation to complete.  Throw a
-  // RequiredOperationFailedException if it fails. Mainly for testing.
-  virtual void mustSucceed() = 0;
-
   virtual db::OperationType getOperationType() const = 0;
 
   // Did the operation succeed?

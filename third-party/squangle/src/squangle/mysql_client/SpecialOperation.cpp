@@ -20,12 +20,4 @@ InternalConnection::Status SpecialOperationImpl::runSpecialOperation() {
   return getOp().runSpecialOperation();
 }
 
-void SpecialOperation::mustSucceed() {
-  run();
-  wait();
-  if (!ok()) {
-    throw db::RequiredOperationFailedException(getErrorMsg() + mysql_error());
-  }
-}
-
 } // namespace facebook::common::mysql_client

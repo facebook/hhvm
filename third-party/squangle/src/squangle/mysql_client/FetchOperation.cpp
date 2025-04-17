@@ -174,14 +174,6 @@ FetchOperation& FetchOperationImpl::getOp() const {
   return *(FetchOperation*)op_;
 }
 
-void FetchOperation::mustSucceed() {
-  run().wait();
-  if (!ok()) {
-    throw db::RequiredOperationFailedException(
-        "Query failed: " + mysql_error());
-  }
-}
-
 folly::StringPiece FetchOperationImpl::toString(FetchAction action) {
   switch (action) {
     case FetchAction::StartQuery:

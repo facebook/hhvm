@@ -6,18 +6,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#ifndef COMMON_DB_EXCEPTION_UTIL_H
-#define COMMON_DB_EXCEPTION_UTIL_H
+#pragma once
 
 #include <folly/CPortability.h>
-
-#include <exception>
 #include <stdexcept>
 
-#include "squangle/base/Base.h"
-
-namespace facebook {
-namespace db {
+namespace facebook::db {
 
 class FOLLY_EXPORT Exception : public std::runtime_error {
  public:
@@ -34,11 +28,4 @@ class FOLLY_EXPORT InvalidConnectionException : public Exception {
   using Exception::Exception;
 };
 
-class FOLLY_EXPORT RequiredOperationFailedException : public Exception {
- public:
-  using Exception::Exception;
-};
-} // namespace db
-} // namespace facebook
-
-#endif
+} // namespace facebook::db

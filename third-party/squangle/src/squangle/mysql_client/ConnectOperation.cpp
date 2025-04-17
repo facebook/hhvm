@@ -183,14 +183,6 @@ ConnectionHolder* ConnectOperationImpl::mysqlConnection() const {
   return folly::join(" ", parts);
 }
 
-void ConnectOperation::mustSucceed() {
-  run().wait();
-  if (!ok()) {
-    throw db::RequiredOperationFailedException(
-        "Connect failed: " + mysql_error());
-  }
-}
-
 /*static*/
 std::shared_ptr<ConnectOperation> ConnectOperation::create(
     std::unique_ptr<ConnectOperationImpl> impl) {

@@ -1,5 +1,6 @@
 Code actions available:
 ------------------------------------------
+Fix Hack error inline - Run AI Code Action by clicking on this position in the file (CodeActionKind: "")
 Generate Code for SimpliHack (CodeActionKind: "") SELECTED
 
 JSON for selected code action:

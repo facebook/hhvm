@@ -419,6 +419,17 @@ module Primary = struct
     [@@deriving show]
   end
 
+  module SimpliHack = struct
+    type t =
+      | Run_prompt of { pos: Pos.t }
+      | Rerun_prompt of {
+          pos: Pos.t;
+          prompt_digest: string;
+          expected_digest: string;
+        }
+    [@@deriving show]
+  end
+
   type implements_info = {
     pos: Pos_or_decl.t;
     instantiation: string list;
@@ -439,6 +450,7 @@ module Primary = struct
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     | CaseType of CaseType.t
+    | SimpliHack of SimpliHack.t
     (* Primary only *)
     | Unresolved_tyvar of Pos.t
     | Unify_error of {
@@ -1435,6 +1447,8 @@ module rec Error : sig
 
   val casetype : Primary.CaseType.t -> t
 
+  val simplihack : Primary.SimpliHack.t -> t
+
   val apply_reasons : Secondary.t -> on_error:Reasons_callback.t -> t
 
   val apply : t -> on_error:Callback.t -> t
@@ -1494,6 +1508,8 @@ end = struct
   let xhp err = primary @@ Primary.Xhp err
 
   let casetype err = primary @@ Primary.CaseType err
+
+  let simplihack err = primary @@ Primary.SimpliHack err
 
   let apply_reasons t ~on_error = Apply_reasons (on_error, t)
 

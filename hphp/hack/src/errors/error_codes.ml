@@ -782,6 +782,7 @@ module Typing = struct
     | CallNeedsConcrete [@value 4490]
     | AbstractAccessViaStatic [@value 4491]
     | UninstantiableClassViaStatic [@value 4492]
+    | SimpliHackRunPrompt [@value 4493]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

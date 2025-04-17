@@ -1598,6 +1598,32 @@ end = struct
       | Invalid_recursive { pos; name } -> invalid_recursive pos name
   end
 
+  module Eval_simplihack = struct
+    let run_prompt pos =
+      let claim =
+        lazy (pos, "Run AI Code Action by clicking on this position in the file")
+      in
+      create ~code:Error_code.SimpliHackRunPrompt ~claim ()
+
+    let rerun_prompt pos prompt_digest expected_digest =
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "The prompt has changed (digest: %s, expected: %s). Please re-run the AI Code Action."
+              prompt_digest
+              expected_digest )
+      in
+      create ~code:Error_code.SimpliHackRunPrompt ~claim ()
+
+    let to_error t ~env:_ =
+      let open Typing_error.Primary.SimpliHack in
+      match t with
+      | Run_prompt { pos } -> run_prompt pos
+      | Rerun_prompt { pos; prompt_digest; expected_digest } ->
+        rerun_prompt pos prompt_digest expected_digest
+  end
+
   let unify_error pos msg_opt reasons_opt =
     let claim = lazy (pos, Option.value ~default:"Typing error" msg_opt) in
     create ~code:Error_code.UnifyError ~claim ?reasons:reasons_opt ()
@@ -4745,6 +4771,7 @@ end = struct
     | Wellformedness err -> Eval_wellformedness.to_error err ~env
     | Xhp err -> Eval_xhp.to_error err ~env
     | CaseType err -> Eval_casetype.to_error err ~env
+    | SimpliHack err -> Eval_simplihack.to_error err ~env
     | Unify_error { pos; msg_opt; reasons_opt } ->
       unify_error pos msg_opt reasons_opt
     | Generic_unify { pos; msg } -> generic_unify pos msg

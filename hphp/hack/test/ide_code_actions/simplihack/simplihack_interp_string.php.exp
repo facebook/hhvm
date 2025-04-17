@@ -1,5 +1,6 @@
 Code actions available:
 ------------------------------------------
+Fix Hack error inline - The prompt has changed (digest: 3e18064780e25ab90a198b6cadcf41dc, expected: additional parameter). Please re-run the AI Code Action. (CodeActionKind: "")
 Generate Code for SimpliHack (CodeActionKind: "") SELECTED
 
 JSON for selected code action:

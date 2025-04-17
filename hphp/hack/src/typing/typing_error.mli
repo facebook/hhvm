@@ -395,6 +395,17 @@ module Primary : sig
     [@@deriving show]
   end
 
+  module SimpliHack : sig
+    type t =
+      | Run_prompt of { pos: Pos.t }
+      | Rerun_prompt of {
+          pos: Pos.t;
+          prompt_digest: string;
+          expected_digest: string;
+        }
+    [@@deriving show]
+  end
+
   type implements_info = {
     pos: Pos_or_decl.t;
     instantiation: string list;
@@ -415,6 +426,7 @@ module Primary : sig
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     | CaseType of CaseType.t
+    | SimpliHack of SimpliHack.t
     (* == Primary only ====================================================== *)
     | Unresolved_tyvar of Pos.t
     | Unify_error of {
@@ -2023,6 +2035,9 @@ val xhp : Primary.Xhp.t -> t
 
 (** Lift a `Primary.CaseType.t` error to a `Typing_error.t` *)
 val casetype : Primary.CaseType.t -> t
+
+(** Lift a `Primary.SimpliHack.t` error to a `Typing_error.t` *)
+val simplihack : Primary.SimpliHack.t -> t
 
 (** Apply a the `Reasons_callback.t` to the supplied `Secondary.t` error, using
     the reasons and error code associated with that error *)

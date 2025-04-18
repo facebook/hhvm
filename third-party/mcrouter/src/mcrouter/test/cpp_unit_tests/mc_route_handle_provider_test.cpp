@@ -168,7 +168,7 @@ TEST(McRouteHandleProvider, sr_route) {
   auto rh = setup.getRoute(kSimpleSRRoute);
   EXPECT_TRUE(rh != nullptr);
   EXPECT_EQ(
-      "srroute|service=twmemcache.shadow.bucketization-test|timeout=1000|keep_routing_prefix=false|salt=|asynclog_name=|set_routing_key=true|client_id=|write_checksum=false|all_checksum=false|jump_threads=false",
+      "srroute|service=twmemcache.shadow.bucketization-test|timeout=1000|connect_timeout=1000|keep_routing_prefix=false|salt=|asynclog_name=|set_routing_key=true|client_id=|write_checksum=false|all_checksum=false|jump_threads=false",
       rh->routeName());
 }
 

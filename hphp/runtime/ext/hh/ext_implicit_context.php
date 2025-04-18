@@ -75,7 +75,7 @@ final class ImplicitContextData {}
  * Returns the implicit context keyed by $key or null if such doesn't exist
  */
 <<__Native>>
-function get_implicit_context(string $key)[leak_safe]: mixed;
+function get_implicit_context<T>(class<T> $key)[leak_safe]: ?T::T;
 
 <<__Native>>
 function get_whole_implicit_context()[zoned]: ImplicitContextData;
@@ -87,14 +87,14 @@ function get_whole_implicit_context()[zoned]: ImplicitContextData;
  * Does not affect the state of the IC
  */
 <<__Native>>
-function has_key(string $key)[leak_safe]: bool;
+function has_key<T>(class<T> $key)[leak_safe]: bool;
 
 /**
  * Creates implicit context $context keyed by $key.
  */
 <<__Native>>
-function create_implicit_context(
-  string $key,
+function create_implicit_context<T>(
+  class<T> $key,
   mixed $context,
   bool $memo_sensitive,
 )[leak_safe]: ImplicitContextData;
@@ -127,7 +127,7 @@ abstract class ImplicitContext {
   )[this::CRun, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       ImplicitContext\_Private\create_implicit_context(
-        nameof static,
+        static::class,
         $context,
         static::IS_MEMO_SENSITIVE,
       ),
@@ -148,7 +148,7 @@ abstract class ImplicitContext {
   )[this::CRun, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       ImplicitContext\_Private\create_implicit_context(
-        nameof static,
+        static::class,
         $context,
         static::IS_MEMO_SENSITIVE,
       ),
@@ -161,11 +161,11 @@ abstract class ImplicitContext {
   }
 
   protected static function exists()[this::CRun]: bool {
-    return ImplicitContext\_Private\has_key(nameof static);
+    return ImplicitContext\_Private\has_key(static::class);
   }
 
   protected static function get()[this::CRun]: ?this::T {
-    return ImplicitContext\_Private\get_implicit_context(nameof static);
+    return ImplicitContext\_Private\get_implicit_context(static::class);
   }
 }
 

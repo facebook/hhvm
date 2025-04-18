@@ -72,26 +72,36 @@ struct ImplicitContextLoader :
   SystemLib::ClassLoader<"HH\\ImplicitContext\\_Private\\ImplicitContextData"> {};
 
 // converts key + memokey into a memokey int by leveraging side map
-int64_t memoKeyForInsert(StringData* key, const Variant& serializedValue) {
+int64_t memoKeyForInsert(const Class* key, const Variant& serializedValue) {
   StringBuffer sb;
   auto const prev = *ImplicitContext::activeCtx;
   auto prev_ctx = Native::data<ImplicitContext>(prev);
-  using Elem = std::pair<const StringData*, TypedValue>;
+  using Elem = std::pair<const Class*, TypedValue>;
   req::vector<Elem> vec;
 
   auto& existing_m_map = prev_ctx->m_map;
   for (auto const& p : existing_m_map) {
-    if (p.second.second.m_type != KindOfUninit && !p.first->same(key)) {
+    if (p.second.second.m_type != KindOfUninit && p.first != key) {
       vec.push_back(std::make_pair(p.first, p.second.second));
     }
   }
   vec.push_back(std::make_pair(key, *serializedValue.asTypedValue()));
-  std::sort(vec.begin(), vec.end(), [](const Elem& e1, const Elem& e2) {
-                                return e1.first->compare(e2.first) < 0;
-                              });
+  std::sort(
+    vec.begin(),
+    vec.end(),
+    [](const Elem& e1, const Elem& e2) {
+      return (uintptr_t)e1.first < (uintptr_t)e2.first;
+    }
+  );
 
   for (auto const& e : vec) {
-    serialize_memoize_string_data(sb, e.first);
+#ifdef USE_LOWPTR
+    uint32_t cls = (uint32_t)(uintptr_t)e.first;
+    assertx(cls == (uintptr_t)e.first);
+#else
+    auto const cls = (uintptr_t)e.first;
+#endif
+    sb.append(reinterpret_cast<const char*>(&cls), sizeof(cls));
     serialize_memoize_tv(sb, 0, e.second);
   }
   auto target_memo_key = sb.detach();
@@ -124,35 +134,35 @@ Object createICWithParams(int64_t memoKey, auto&& map, ObjectData* agnosticIC) {
  * Inherits values from prev_agnostic_obj
 */
 Object create_memo_agnostic_IC(ObjectData* prev_agnostic_obj,
-                               TypedValue data, 
-                               StringData* key) {
+                               TypedValue data,
+                               const Class* key) {
   auto prev_agnostic_ctx = Native::data<ImplicitContext>(prev_agnostic_obj);
   assertx(prev_agnostic_ctx->m_memoKey == kAgnosticMemoKey);
   auto updated_map = prev_agnostic_ctx->m_map;
   tvIncRefGen(data);
-  updated_map.insert_or_assign(String{key}.detach(), 
-                               std::make_pair(data, make_tv<KindOfUninit>()));
+  updated_map.insert_or_assign(
+    key, std::make_pair(data, make_tv<KindOfUninit>()));
   return createICWithParams(kAgnosticMemoKey, std::move(updated_map), nullptr /* self */);
 }
 
 /*
  * create_implicit_context_impl - creates a pair of linked ICs
  * params
- * TypedValue data => ctx baggage for agnostic, ctx data for sensitive
- * StringData* key => key for memosensitive IC, null for agnostic
- * Variant memokey => memokey for memosensitive IC, empty for agnostic
- * int64_t memo_key_int => 0 for memo agnostic, >0 for memo sensitive
+ * data: ctx baggage for agnostic, ctx data for sensitive
+ * serializedValue: serialized data for memo-sensitive IC, uninit for agnostic
+ * key: class used for this IC
+ * memo_key_int: 0 for memo agnostic, >0 for memo sensitive
 */
 Object create_implicit_context_impl(TypedValue data, Variant serializedValue,
-                                    StringData* key, int64_t memo_key_int) {
+                                    const Class* key, int64_t memo_key_int) {
   assertx(data.m_type != KindOfUninit);
   assertx(*ImplicitContext::activeCtx);
   auto const prev = *ImplicitContext::activeCtx;
   auto prev_ctx = Native::data<ImplicitContext>(prev);
 
   /*
-   * Memo sensitive IC creation necessarily returns the 
-   * default IC pointer, while memo agnostic IC creation can 
+   * Memo sensitive IC creation necessarily returns the
+   * default IC pointer, while memo agnostic IC creation can
    * return default OR agnostic IC, depending the existing state.
    * Prev IC's memokey being kAgnosticMemoKey implies Agnostic state
    *  +----------------+----------------+----------------+
@@ -174,7 +184,7 @@ Object create_implicit_context_impl(TypedValue data, Variant serializedValue,
 
   bool memo_agnostic_ic_requested = !serializedValue.isInitialized();
   bool is_prev_agnostic = prev_ctx->m_memoKey == kAgnosticMemoKey;
-  
+
   if (is_prev_agnostic && memo_agnostic_ic_requested) {
     return create_memo_agnostic_IC(prev, data, key);
   }
@@ -186,10 +196,34 @@ Object create_implicit_context_impl(TypedValue data, Variant serializedValue,
                            : prev_ctx->m_memoAgnosticIC;
   auto updated_map = prev_ctx->m_map;
   tvIncRefGen(data);
-  updated_map.insert_or_assign(String{key}.detach(), 
-                                   std::make_pair(data, serializedValue.detach()));
+  updated_map.insert_or_assign(
+    key, std::make_pair(data, serializedValue.detach()));
   auto new_ic_memokey = memo_agnostic_ic_requested ? prev_ctx->m_memoKey : memo_key_int;
   return createICWithParams(new_ic_memokey, std::move(updated_map), memo_agnostic_obj);
+}
+
+const Class* resolveClass(TypedValue cls) {
+  auto const stringToClass = [](const StringData* str) {
+    if (auto const cls = Class::load(str)) return cls;
+
+    // This is possible only if the private helpers are used directly.
+    SystemLib::throwInvalidOperationExceptionObject(
+      folly::sformat("Class {} does not exist", str->data())
+    );
+  };
+
+  switch (cls.m_type) {
+    case KindOfClass:
+      return cls.m_data.pclass;
+    case KindOfLazyClass:
+      return stringToClass(cls.m_data.plazyclass.name());
+    case KindOfPersistentString:
+    case KindOfString:
+      return stringToClass(cls.m_data.pstr);
+    default:
+      // Cannot survive class<T> type check.
+      not_reached();
+  }
 }
 
 } // namespace
@@ -199,7 +233,7 @@ Object initEmptyContext() {
   auto context = Native::data<ImplicitContext>(obj.get());
   /*
    * Special case: emptyCtx uses kAgnosticMemoKey
-   * because if context is attemped to be accessed 
+   * because if context is attemped to be accessed
    * before any set occurs, the behavior should be inaccessible
    */
   context->m_memoKey = kAgnosticMemoKey;
@@ -207,13 +241,11 @@ Object initEmptyContext() {
   return obj;
 };
 
-bool HHVM_FUNCTION(has_key, StringArg keyArg) {
+bool HHVM_FUNCTION(has_key, TypedValue key) {
   assertx(*ImplicitContext::activeCtx);
-  auto key = keyArg.get();
-  if (key->size() == 0) { return false; }
   auto const obj = *ImplicitContext::activeCtx;
   auto const context = Native::data<ImplicitContext>(obj);
-  return context->m_map.find(key) != context->m_map.end();
+  return context->m_map.find(resolveClass(key)) != context->m_map.end();
 }
 
 String HHVM_FUNCTION(get_state_unsafe) {
@@ -227,12 +259,12 @@ String HHVM_FUNCTION(get_state_unsafe) {
   return String{s_ICStateValue.get()};
 }
 
-TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
+TypedValue HHVM_FUNCTION(get_implicit_context, TypedValue key) {
   assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
   auto const context = Native::data<ImplicitContext>(obj);
 
-  auto const it = context->m_map.find(key.get());
+  auto const it = context->m_map.find(resolveClass(key));
   if (it == context->m_map.end()) {
     throw_implicit_context_exception("Implicit context is set to inaccessible");
   }
@@ -268,30 +300,21 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
     if (p.second.second.m_type == KindOfUninit) {
       ret.append(s_ICAgnostic);
     }
-    auto const key = String(p.first->data());
-    auto const value = p.second.second;
-    ret.append(key);
-    ret.append(value);
+    ret.append(make_tv<KindOfClass>(const_cast<Class*>(p.first)));
+    ret.append(p.second.second);
   }
   return ret.toArray();
 }
 
-Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
+Object HHVM_FUNCTION(create_implicit_context, TypedValue keyArg,
                                               TypedValue data,
                                               bool memoSensitive) {
-  auto const key = keyarg.get();
-  /*
-   * Reserve the underscore prefix for the time being in case we want to
-   * emit keys from the compiler. This would allow us to avoid having
-   * conflicts with other key generation mechanisms.
-  */
-  if (key->size() == 0 || key->data()[0] == '_') {
-    throw_implicit_context_exception(
-      "Implicit context keys cannot be empty or start with _");
-  }
   assertx(*ImplicitContext::activeCtx);
-  
-  if (!memoSensitive) return create_implicit_context_impl(data, Variant{}, key, kAgnosticMemoKey);
+  auto const key = resolveClass(keyArg);
+
+  if (!memoSensitive) {
+    return create_implicit_context_impl(data, Variant{}, key, kAgnosticMemoKey);
+  }
 
   auto serializedValue = Variant::attach(HHVM_FN(serialize_memoize_param)(data));
   auto memo_key_int = memoKeyForInsert(key, serializedValue);

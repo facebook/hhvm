@@ -16,6 +16,30 @@
 
 namespace cpp2 apache.thrift.test
 
+struct SubSubStruct {
+  1: i64 subsubfield_1;
+  2: i64 subsubfield_2;
+  3: double subsubfield_3;
+  4: double subsubfield_4;
+  5: i32 subsubfield_5;
+  6: i32 subsubfield_6;
+  7: bool subsubfield_7;
+}
+
+struct SubStruct {
+  1: SubSubStruct subfield_1;
+  2: SubSubStruct subfield_2;
+  3: SubSubStruct subfield_3;
+  4: SubSubStruct subfield_4;
+  5: SubSubStruct subfield_5;
+}
+
+struct MyNestedStruct {
+  1: SubStruct field_1;
+  2: SubStruct field_2;
+  3: SubStruct field_3;
+}
+
 struct MyStruct {
   1: string field_1;
   2: string field_2;

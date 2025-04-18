@@ -204,8 +204,6 @@ ErrorCode HTTP2Codec::parseFrame(folly::io::Cursor& cursor) {
       return parseAllData(cursor);
     case http2::FrameType::HEADERS:
       return parseHeaders(cursor);
-    case http2::FrameType::PRIORITY:
-      return parsePriority(cursor);
     case http2::FrameType::RST_STREAM:
       return parseRstStream(cursor);
     case http2::FrameType::SETTINGS:
@@ -751,26 +749,6 @@ void HTTP2Codec::onHeadersComplete(HTTPHeaderSize decodedSize,
 
 void HTTP2Codec::onDecodeError(HPACK::DecodeError decodeError) {
   decodeInfo_.decodeError = decodeError;
-}
-
-ErrorCode HTTP2Codec::parsePriority(Cursor& cursor) {
-  /* While we parse RFC 7540 priority frames for now, this information is
-   * discarded and we do not notify the application about it.
-   * Parsing/serializing for 7540 priorities will be removed soon.
-   */
-  VLOG(4) << "parsing PRIORITY frame for stream=" << curHeader_.stream
-          << " length=" << curHeader_.length;
-  http2::PriorityUpdate pri;
-  auto err = http2::parsePriority(cursor, curHeader_, pri);
-  RETURN_IF_ERROR(err);
-  if (curHeader_.stream == pri.streamDependency) {
-    streamError(
-        folly::to<string>("Circular dependency for txn=", curHeader_.stream),
-        ErrorCode::PROTOCOL_ERROR,
-        false);
-    return ErrorCode::NO_ERROR;
-  }
-  return ErrorCode::NO_ERROR;
 }
 
 ErrorCode HTTP2Codec::parseRFC9218Priority(Cursor& cursor) {

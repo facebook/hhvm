@@ -182,15 +182,12 @@ ErrorCode parseExHeaders(folly::io::Cursor& cursor,
  *
  * @param cursor The cursor to pull data from.
  * @param header The frame header for the frame being parsed.
+ * @param priStream The stream to be prioritized.
  * @param outPriority On success, filled with the priority information
  *                    from this frame.
  * @return NO_ERROR for successful parse. The connection error code to
  *         return in a GOAWAY frame if failure.
  */
-ErrorCode parsePriority(folly::io::Cursor& cursor,
-                        const FrameHeader& header,
-                        PriorityUpdate& outPriority) noexcept;
-
 ErrorCode parseRFC9218Priority(folly::io::Cursor& cursor,
                                const FrameHeader& header,
                                uint32_t& priStream,

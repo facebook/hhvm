@@ -279,21 +279,6 @@ TEST_F(HTTP2FramerTest, GoawayDoubleRead) {
   ASSERT_EQ(ErrorCode::PROTOCOL_ERROR, ret2);
 }
 
-TEST_F(HTTP2FramerTest, Priority) {
-  writePriority(queue_, 102, {0, false, 30});
-
-  FrameHeader header;
-  PriorityUpdate priority;
-  parse(&parsePriority, header, priority);
-
-  ASSERT_EQ(FrameType::PRIORITY, header.type);
-  ASSERT_EQ(102, header.stream);
-  ASSERT_EQ(0, header.flags);
-  ASSERT_EQ(0, priority.streamDependency);
-  ASSERT_FALSE(priority.exclusive);
-  ASSERT_EQ(30, priority.weight);
-}
-
 TEST_F(HTTP2FramerTest, BasicRFC9218Priority) {
   auto pri = httpPriorityToString(HTTPPriority{7, true});
   writeRFC9218Priority(queue_, 1, pri);

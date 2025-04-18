@@ -438,20 +438,6 @@ ErrorCode parseExHeaders(Cursor& cursor,
   return skipPadding(cursor, padding, kStrictPadding);
 }
 
-ErrorCode parsePriority(Cursor& cursor,
-                        const FrameHeader& header,
-                        PriorityUpdate& outPriority) noexcept {
-  DCHECK_LE(header.length, cursor.totalLength());
-  if (header.length != kFramePrioritySize) {
-    return ErrorCode::FRAME_SIZE_ERROR;
-  }
-  if (header.stream == 0) {
-    return ErrorCode::PROTOCOL_ERROR;
-  }
-  outPriority = parsePriorityCommon(cursor);
-  return ErrorCode::NO_ERROR;
-}
-
 ErrorCode parseRFC9218Priority(Cursor& cursor,
                                const FrameHeader& header,
                                uint32_t& priStream,

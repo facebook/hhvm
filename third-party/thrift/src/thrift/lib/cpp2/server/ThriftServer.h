@@ -321,6 +321,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     bool setupThreadManagerCalledByUser{false};
     bool runtimeResourcePoolsChecksCalledByUser{false};
 
+    std::vector<std::pair<std::string, std::string>> toStringPairs() const;
     std::string explain() const;
   };
 

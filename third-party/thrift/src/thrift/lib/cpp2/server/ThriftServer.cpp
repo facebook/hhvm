@@ -2555,6 +2555,36 @@ ThriftServer::InjectedFailure ThriftServer::CumulativeFailureInjection::test()
   return InjectedFailure::NONE;
 }
 
+std::vector<std::pair<std::string, std::string>>
+ThriftServer::RuntimeServerActions::toStringPairs() const {
+  std::vector<std::pair<std::string, std::string>> result;
+
+  // clang-format off
+  result.emplace_back("userSuppliedThreadManager",          userSuppliedThreadManager ? "true" : "false");
+  result.emplace_back("userSuppliedResourcePools",          userSuppliedResourcePools ? "true" : "false");
+  result.emplace_back("interactionInService",               interactionInService ? "true" : "false");
+  result.emplace_back("wildcardMethods",                    wildcardMethods ? "true" : "false");
+  result.emplace_back("noServiceRequestInfo",               noServiceRequestInfo ? "true" : "false");
+  result.emplace_back("activeRequestTrackingDisabled",      activeRequestTrackingDisabled ? "true" : "false");
+  result.emplace_back("setPreprocess",                      setPreprocess ? "true" : "false");
+  result.emplace_back("setIsOverloaded",                    setIsOverloaded ? "true" : "false");
+  result.emplace_back("resourcePoolFlagSet",                resourcePoolFlagSet ? "true" : "false");
+  result.emplace_back("codelEnabled",                       codelEnabled ? "true" : "false");
+  result.emplace_back("setupThreadManagerBeforeHandler",    setupThreadManagerBeforeHandler ? "true" : "false");
+  result.emplace_back("resourcePoolEnablementLocked",       resourcePoolEnablementLocked ? "true" : "false");
+  result.emplace_back("resourcePoolRuntimeRequested",       resourcePoolRuntimeRequested ? "true" : "false");
+  result.emplace_back("resourcePoolRuntimeDisabled",        resourcePoolRuntimeDisabled ? "true" : "false");
+  result.emplace_back("resourcePoolEnabled",                resourcePoolEnabled ? "true" : "false");
+  result.emplace_back("resourcePoolEnabledGflag",           resourcePoolEnabledGflag ? "true" : "false");
+  result.emplace_back("resourcePoolDisabledGflag",          resourcePoolDisabledGflag ? "true" : "false");
+  result.emplace_back("checkComplete",                      checkComplete ? "true" : "false");
+  result.emplace_back("isProcessorFactoryThriftGenerated",  isProcessorFactoryThriftGenerated ? "true" : "false");
+  result.emplace_back("executorToThreadManagerUnexpectedFunctionName", executorToThreadManagerUnexpectedFunctionName);
+  // clang-format on
+
+  return result;
+}
+
 std::string ThriftServer::RuntimeServerActions::explain() const {
   std::string result;
   result = std::string(userSuppliedThreadManager ? "setThreadManager, " : "") +

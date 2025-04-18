@@ -319,6 +319,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     bool moduleListFinalized{false};
 
     bool setupThreadManagerCalledByUser{false};
+    bool runtimeResourcePoolsChecksCalledByUser{false};
 
     std::string explain() const;
   };
@@ -547,6 +548,11 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * checks.
    */
   bool runtimeResourcePoolsChecks();
+
+ private:
+  bool runtimeResourcePoolsChecksImpl();
+
+ public:
   /**
    * Ensure that this Thrift Server has ResourcePools set up. If there is
    * already a non-empty ResourcePoolSet, nothing will be done. Otherwise, the

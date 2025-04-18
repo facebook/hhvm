@@ -650,7 +650,7 @@ void ThriftServer::setup() {
 
     // This may be the second time this is called (if setupThreadManager
     // was called directly by the service code)
-    runtimeResourcePoolsChecks();
+    runtimeResourcePoolsChecksImpl();
 
     setupThreadManagerImpl();
 
@@ -848,7 +848,7 @@ void ThriftServer::setupThreadManagerImpl() {
 
     // Try the runtime checks - if it is too early to complete them we will
     // retry on setup()
-    runtimeResourcePoolsChecks();
+    runtimeResourcePoolsChecksImpl();
 
     // Past this point no modification to the enablement of
     // ResourcePool should be made in the same server
@@ -1143,6 +1143,12 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
 
 // Return true if the runtime checks pass and using resource pools is an option.
 bool ThriftServer::runtimeResourcePoolsChecks() {
+  runtimeServerActions_.runtimeResourcePoolsChecksCalledByUser = true;
+  THRIFT_SERVER_EVENT(runtimeResourcePoolsChecks).log(*this);
+  return runtimeResourcePoolsChecksImpl();
+}
+
+bool ThriftServer::runtimeResourcePoolsChecksImpl() {
   runtimeServerActions_.resourcePoolEnabledGflag =
       FLAGS_thrift_experimental_use_resource_pools;
   runtimeServerActions_.resourcePoolDisabledGflag =

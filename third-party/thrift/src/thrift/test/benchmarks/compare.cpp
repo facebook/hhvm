@@ -33,7 +33,7 @@ void init() {
   for (int i = 0; i < N; ++i) {
     constexpr size_t size = op::size_v<MyStruct>;
     op::for_each_ordinal<MyStruct>([&]<class Ord>(Ord) {
-      if (folly::to_underlying(Ord::value) + 1 == size) {
+      if (folly::to_underlying(Ord::value) == size) {
         // Make the last field different
         op::get<Ord>(structs[i]) = std::string(100, '0') + char(rng() % 10);
         op::get<Ord>(unions[i]) = std::string(100, '0') + char(rng() % 10);

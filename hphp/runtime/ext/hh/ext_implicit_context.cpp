@@ -297,11 +297,12 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
 
   VecInit ret{context->m_map.size() * 2}; // key and value
   for (auto const& p : context->m_map) {
+    ret.append(make_tv<KindOfClass>(const_cast<Class*>(p.first)));
     if (p.second.second.m_type == KindOfUninit) {
       ret.append(s_ICAgnostic);
+    } else {
+      ret.append(p.second.second);
     }
-    ret.append(make_tv<KindOfClass>(const_cast<Class*>(p.first)));
-    ret.append(p.second.second);
   }
   return ret.toArray();
 }

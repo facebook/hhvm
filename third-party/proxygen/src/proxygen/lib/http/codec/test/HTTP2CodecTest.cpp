@@ -349,13 +349,10 @@ TEST_F(HTTP2CodecTest, ExHeadersWithPriority) {
   auto req = getGetRequest();
   // Test empty path
   req.setURL("");
-  auto pri = HTTPMessage::HTTP2Priority(0, false, 7);
-  req.setHTTP2Priority(pri);
   upstreamCodec_.generateExHeader(
       output_, 3, req, HTTPCodec::ExAttributes(1, true));
 
   parse();
-  EXPECT_EQ(callbacks_.msg->getHTTP2Priority(), pri);
   EXPECT_EQ(callbacks_.streamErrors, 0);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
@@ -1910,64 +1907,11 @@ TEST_F(HTTP2CodecTest, BadRFC9218Priority) {
   EXPECT_EQ(callbacks_.incremental, 1);
 }
 
-TEST_F(HTTP2CodecTest, BadHeaderPriority) {
-  HTTPMessage req = getGetRequest();
-  req.setHTTP2Priority(HTTPMessage::HTTP2Priority(0, false, 7));
-  auto id = upstreamCodec_.createStream();
-  upstreamCodec_.generateHeader(output_, id, req, true /* eom */);
-
-  // hack ingress with cirular dep
-  EXPECT_TRUE(parse([&](IOBuf* ingress) {
-    folly::io::RWPrivateCursor c(ingress);
-    c.skip(http2::kFrameHeaderSize);
-    c.writeBE<uint32_t>(1);
-  }));
-
-  EXPECT_EQ(callbacks_.streamErrors, 1);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-}
-
 TEST_F(HTTP2CodecTest, CircularHeaderPriority) {
   HTTPMessage req = getGetRequest();
   req.setHTTP2Priority(HTTPMessage::HTTP2Priority(1, false, 7));
   auto id = upstreamCodec_.createStream();
   upstreamCodec_.generateHeader(output_, id, req, true /* eom */);
-}
-
-TEST_F(HTTP2CodecTest, DuplicateBadHeaderPriority) {
-  // Sent an initial header with a circular dependency
-  HTTPMessage req = getGetRequest();
-  req.setHTTP2Priority(HTTPMessage::HTTP2Priority(0, false, 7));
-  auto id = upstreamCodec_.createStream();
-  upstreamCodec_.generateHeader(output_, id, req, true /* eom */);
-
-  // Hack ingress with circular dependency.
-  EXPECT_TRUE(parse([&](IOBuf* ingress) {
-    folly::io::RWPrivateCursor c(ingress);
-    c.skip(http2::kFrameHeaderSize);
-    c.writeBE<uint32_t>(1);
-  }));
-
-  EXPECT_EQ(callbacks_.streamErrors, 1);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-
-  // On the same stream, send another request, interpreted as trailers with
-  // a pseudo header which is illegal
-  HTTPMessage nextRequest = getGetRequest();
-  upstreamCodec_.generateHeader(output_, id, nextRequest, true /* eom */);
-  parse();
-  EXPECT_EQ(callbacks_.streamErrors, 2);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-
-  callbacks_.reset();
-
-  // Now send a legit request
-  auto id2 = upstreamCodec_.createStream();
-  upstreamCodec_.generateHeader(output_, id2, nextRequest, true /* eom */);
-  parse();
-  callbacks_.expectMessage(true, 1, "/");
-  EXPECT_EQ(callbacks_.streamErrors, 0);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
 class DummyQueue : public HTTPCodec::PriorityQueue {
@@ -2140,7 +2084,6 @@ TEST_F(HTTP2CodecTest, Normal1024Continuation) {
   string bigval(8691, '!');
   bigval.append(8691, '@');
   req.getHeaders().add("x-headr", bigval);
-  req.setHTTP2Priority(HTTPMessage::HTTP2Priority(0, false, 7));
   auto id = upstreamCodec_.createStream();
   upstreamCodec_.generateHeader(output_, id, req);
 

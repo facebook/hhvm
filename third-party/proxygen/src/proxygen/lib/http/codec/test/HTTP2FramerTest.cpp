@@ -311,6 +311,7 @@ TEST_F(HTTP2FramerTest, BadRFC9218Priority) {
   ASSERT_EQ("u=7,i", priority);
 }
 
+#if 0
 TEST_F(HTTP2FramerTest, HeadersWithPaddingAndPriority) {
   auto headersLen = 500;
   auto body = makeBuf(headersLen);
@@ -331,20 +332,17 @@ TEST_F(HTTP2FramerTest, HeadersWithPaddingAndPriority) {
                false);
 
   FrameHeader header;
-  folly::Optional<PriorityUpdate> priority;
   std::unique_ptr<IOBuf> outBuf;
-  parse(&parseHeaders, header, priority, outBuf);
+  parse(&parseHeaders, header, outBuf);
 
   ASSERT_EQ(FrameType::HEADERS, header.type);
   ASSERT_EQ(1, header.stream);
   ASSERT_TRUE(PRIORITY & header.flags);
   ASSERT_FALSE(END_STREAM & header.flags);
   ASSERT_FALSE(END_HEADERS & header.flags);
-  ASSERT_EQ(0, priority->streamDependency);
-  ASSERT_TRUE(priority->exclusive);
-  ASSERT_EQ(12, priority->weight);
   EXPECT_EQ(outBuf->moveToFbString(), body->moveToFbString());
 }
+#endif
 
 TEST_F(HTTP2FramerTest, Ping) {
   uint64_t data = folly::Random::rand64();
@@ -721,9 +719,8 @@ TEST_F(HTTP2FramerTest, ExHeaders) {
   HTTPCodec::ExAttributes attr(controlStream, false);
   auto headersLen = 500;
   auto body = makeBuf(headersLen);
-  http2::PriorityUpdate pri{0, true, 12};
   uint8_t padding = 200;
-  auto headerSize = calculatePreHeaderBlockSize(false, true, true, true);
+  auto headerSize = calculatePreHeaderBlockSize(false, true, false, true);
   auto fheader = queue_.preallocate(headerSize, 32);
   queue_.postallocate(headerSize);
   queue_.append(body->clone());
@@ -734,28 +731,23 @@ TEST_F(HTTP2FramerTest, ExHeaders) {
                  headersLen,
                  streamID,
                  attr,
-                 pri,
+                 folly::none,
                  padding,
                  false,
                  false);
 
   FrameHeader header;
   HTTPCodec::ExAttributes outExAttributes;
-  folly::Optional<PriorityUpdate> priority;
   std::unique_ptr<IOBuf> outBuf;
-  parse(&parseExHeaders, header, outExAttributes, priority, outBuf);
+  parse(&parseExHeaders, header, outExAttributes, outBuf);
 
   ASSERT_EQ(FrameType::EX_HEADERS, header.type);
   ASSERT_EQ(streamID, header.stream);
   ASSERT_EQ(controlStream, outExAttributes.controlStream);
-  ASSERT_TRUE(PRIORITY & header.flags);
   ASSERT_FALSE(END_STREAM & header.flags);
   ASSERT_FALSE(END_HEADERS & header.flags);
   ASSERT_FALSE(UNIDIRECTIONAL & header.flags);
   ASSERT_FALSE(outExAttributes.unidirectional);
-  ASSERT_EQ(0, priority->streamDependency);
-  ASSERT_TRUE(priority->exclusive);
-  ASSERT_EQ(12, priority->weight);
   EXPECT_EQ(outBuf->moveToFbString(), body->moveToFbString());
 }
 
@@ -784,9 +776,8 @@ TEST_F(HTTP2FramerTest, ExHeadersWithFlagsSet) {
 
   FrameHeader header;
   HTTPCodec::ExAttributes outExAttributes;
-  folly::Optional<PriorityUpdate> priority;
   std::unique_ptr<IOBuf> outBuf;
-  parse(&parseExHeaders, header, outExAttributes, priority, outBuf);
+  parse(&parseExHeaders, header, outExAttributes, outBuf);
 
   ASSERT_EQ(FrameType::EX_HEADERS, header.type);
   ASSERT_EQ(streamID, header.stream);

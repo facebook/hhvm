@@ -1682,8 +1682,6 @@ TEST_F(HTTP2DownstreamSessionTest, ExheaderFromServer) {
 
   // Create a dummy request and a dummy response messages
   auto pub = getGetRequest("/sub/fyi");
-  // set up the priority for fun
-  pub.setHTTP2Priority(std::make_tuple(0, false, 7));
 
   InSequence handlerSequence;
   auto cHandler = addSimpleStrictHandler();
@@ -3592,9 +3590,6 @@ TEST_F(HTTP2DownstreamSessionTest, ServerPush) {
     pushTxn->sendHeaders(req);
     EXPECT_EQ(httpSession_->getNumOutgoingStreams(), outgoingStreams);
     // Generate a push response
-    auto pri = handler->txn_->getPriority();
-    res.setHTTP2Priority(
-        std::make_tuple(pri.streamDependency, pri.exclusive, pri.weight));
     pushTxn->sendHeaders(res);
     EXPECT_EQ(httpSession_->getNumOutgoingStreams(), outgoingStreams + 1);
     pushTxn->sendBody(makeBuf(200));
@@ -3765,120 +3760,7 @@ TEST_F(HTTP2DownstreamSessionTest, ServerPushAfterWriteTimeout) {
   EXPECT_EQ(httpSession_->getNumOutgoingStreams(), 0);
 }
 
-TEST_F(HTTP2DownstreamSessionTest, TestPriorityWeightsTinyRatio) {
-  // Create a transaction with egress and a ratio small enough that
-  // ratio*4096 < 1.
-  //
-  //     root
-  //     /  \                                                 level 1
-  //   256   1 (no egress)
-  //        / \                                               level 2
-  //      256  1  <-- has ratio (1/257)^2
-  InSequence enforceOrder;
-  auto req1 = getGetRequest();
-  auto req2 = getGetRequest();
-  req1.setHTTP2Priority(HTTPMessage::HTTP2Priority{0, false, 255});
-  req2.setHTTP2Priority(HTTPMessage::HTTP2Priority{0, false, 0});
-
-  sendRequest(req1);
-  auto id2 = sendRequest(req2);
-  req1.setHTTP2Priority(HTTPMessage::HTTP2Priority{id2, false, 255});
-  req2.setHTTP2Priority(HTTPMessage::HTTP2Priority{id2, false, 0});
-  sendRequest(req1);
-  sendRequest(req2);
-
-  auto handler1 = addSimpleStrictHandler();
-  handler1->expectHeaders();
-  handler1->expectEOM([&] { handler1->sendReplyWithBody(200, 4 * 1024); });
-  auto handler2 = addSimpleStrictHandler();
-  handler2->expectHeaders();
-  handler2->expectEOM();
-  auto handler3 = addSimpleStrictHandler();
-  handler3->expectHeaders();
-  handler3->expectEOM([&] { handler3->sendReplyWithBody(200, 15); });
-  auto handler4 = addSimpleStrictHandler();
-  handler4->expectHeaders();
-  handler4->expectEOM([&] { handler4->sendReplyWithBody(200, 1); });
-
-  handler1->expectDetachTransaction();
-  handler3->expectDetachTransaction();
-  handler4->expectDetachTransaction(
-      [&handler2] { handler2->txn_->sendAbort(); });
-  handler2->expectDetachTransaction();
-  flushRequestsAndLoop();
-  httpSession_->closeWhenIdle();
-  expectDetachSession();
-  eventBase_.loop();
-  httpSession_->timeoutExpired();
-}
-
-TEST_F(HTTP2DownstreamSessionTest, TestPriorityDependentTransactions) {
-  // Create a dependent transaction to test the priority blocked by dependency.
-  // ratio*4096 < 1.
-  //
-  //     root
-  //      \                                                 level 1
-  //      16
-  //       \                                                level 2
-  //       16
-  InSequence enforceOrder;
-  auto req1 = getGetRequest();
-  req1.setHTTP2Priority(HTTPMessage::HTTP2Priority{0, false, 15});
-  auto id1 = sendRequest(req1);
-
-  auto req2 = getGetRequest();
-  req2.setHTTP2Priority(HTTPMessage::HTTP2Priority{id1, false, 15});
-  sendRequest(req2);
-
-  auto handler1 = addSimpleStrictHandler();
-  handler1->expectHeaders();
-  handler1->expectEOM([&] { handler1->sendReplyWithBody(200, 1024); });
-  auto handler2 = addSimpleStrictHandler();
-  handler2->expectHeaders();
-  handler2->expectEOM([&] { handler2->sendReplyWithBody(200, 1024); });
-
-  handler1->expectDetachTransaction();
-  handler2->expectDetachTransaction([&] { handler2->txn_->sendAbort(); });
-  flushRequestsAndLoop();
-  httpSession_->closeWhenIdle();
-  expectDetachSession();
-  eventBase_.loop();
-  httpSession_->timeoutExpired();
-}
-
-TEST_F(HTTP2DownstreamSessionTest, TestDisablePriorities) {
-  // turn off HTTP2 priorities
-  httpSession_->setHTTP2PrioritiesEnabled(false);
-
-  InSequence enforceOrder;
-  HTTPMessage req1 = getGetRequest();
-  req1.setHTTP2Priority(HTTPMessage::HTTP2Priority{0, false, 0});
-  sendRequest(req1);
-
-  HTTPMessage req2 = getGetRequest();
-  req2.setHTTP2Priority(HTTPMessage::HTTP2Priority{0, false, 255});
-  sendRequest(req2);
-
-  auto handler1 = addSimpleStrictHandler();
-  handler1->expectHeaders();
-  handler1->expectEOM([&] { handler1->sendReplyWithBody(200, 4 * 1024); });
-
-  auto handler2 = addSimpleStrictHandler();
-  handler2->expectHeaders();
-  handler2->expectEOM([&] { handler2->sendReplyWithBody(200, 4 * 1024); });
-
-  // expecting handler 1 to finish first irrespective of
-  // request 2 having higher weight
-  handler1->expectDetachTransaction();
-  handler2->expectDetachTransaction();
-
-  flushRequestsAndLoop();
-  httpSession_->closeWhenIdle();
-  expectDetachSession();
-  eventBase_.loop();
-  httpSession_->timeoutExpired();
-}
-
+#if 0
 TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
   // Send two requests that are not stream f/c blocked but are conn f/c blocked
   // Send a third request with higher priority, ensure it is not blocked by
@@ -3944,6 +3826,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
   this->eventBase_.loop();
   httpSession_->timeoutExpired();
 }
+#endif
 
 TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
   httpSession_->setRateLimitParams(

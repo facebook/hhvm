@@ -235,12 +235,10 @@ class HTTP2Codec
   ErrorCode parseWindowUpdate(folly::io::Cursor& cursor);
   ErrorCode parseCertificateRequest(folly::io::Cursor& cursor);
   ErrorCode parseCertificate(folly::io::Cursor& cursor);
-  ErrorCode parseHeadersImpl(
-      folly::io::Cursor& cursor,
-      std::unique_ptr<folly::IOBuf> headerBuf,
-      const folly::Optional<http2::PriorityUpdate>& priority,
-      const folly::Optional<uint32_t>& promisedStream,
-      const folly::Optional<ExAttributes>& exAttributes);
+  ErrorCode parseHeadersImpl(folly::io::Cursor& cursor,
+                             std::unique_ptr<folly::IOBuf> headerBuf,
+                             const folly::Optional<uint32_t>& promisedStream,
+                             const folly::Optional<ExAttributes>& exAttributes);
 
   struct DeferredParseError {
     ErrorCode errorCode{ErrorCode::NO_ERROR};
@@ -273,13 +271,10 @@ class HTTP2Codec
   };
 
   folly::Expected<std::unique_ptr<HTTPMessage>, DeferredParseError>
-  parseHeadersDecodeFrames(
-      const folly::Optional<http2::PriorityUpdate>& priority,
-      const folly::Optional<ExAttributes>& exAttributes);
+  parseHeadersDecodeFrames(const folly::Optional<ExAttributes>& exAttributes);
   void deliverDeferredParseError(const DeferredParseError& parseError);
 
-  folly::Optional<ErrorCode> parseHeadersCheckConcurrentStreams(
-      const folly::Optional<http2::PriorityUpdate>& priority);
+  folly::Optional<ErrorCode> parseHeadersCheckConcurrentStreams();
 
   ErrorCode handleEndStream();
   ErrorCode checkNewStream(uint32_t stream, bool trailersAllowed);

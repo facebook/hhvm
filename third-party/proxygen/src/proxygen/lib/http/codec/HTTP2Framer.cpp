@@ -220,13 +220,8 @@ ErrorCode parseErrorCode(Cursor& cursor, ErrorCode& outCode) {
   return ErrorCode::NO_ERROR;
 }
 
-PriorityUpdate parsePriorityCommon(Cursor& cursor) {
-  PriorityUpdate priority;
-  uint32_t streamAndExclusive = cursor.readBE<uint32_t>();
-  priority.weight = cursor.readBE<uint8_t>();
-  priority.exclusive = ~kUint31Mask & streamAndExclusive;
-  priority.streamDependency = kUint31Mask & streamAndExclusive;
-  return priority;
+void skipPriority(Cursor& cursor) {
+  cursor.skip(kFramePrioritySize);
 }
 
 /**
@@ -374,7 +369,6 @@ ErrorCode parseDataEnd(Cursor& cursor,
 
 ErrorCode parseHeaders(Cursor& cursor,
                        const FrameHeader& header,
-                       folly::Optional<PriorityUpdate>& outPriority,
                        std::unique_ptr<IOBuf>& outBuf) noexcept {
   DCHECK_LE(header.length, cursor.totalLength());
   if (header.stream == 0) {
@@ -388,10 +382,8 @@ ErrorCode parseHeaders(Cursor& cursor,
     if (lefttoparse < kFramePrioritySize) {
       return ErrorCode::FRAME_SIZE_ERROR;
     }
-    outPriority = parsePriorityCommon(cursor);
+    skipPriority(cursor);
     lefttoparse -= kFramePrioritySize;
-  } else {
-    outPriority = folly::none;
   }
   cursor.clone(outBuf, lefttoparse);
   return skipPadding(cursor, padding, kStrictPadding);
@@ -400,7 +392,6 @@ ErrorCode parseHeaders(Cursor& cursor,
 ErrorCode parseExHeaders(Cursor& cursor,
                          const FrameHeader& header,
                          HTTPCodec::ExAttributes& outExAttributes,
-                         folly::Optional<PriorityUpdate>& outPriority,
                          std::unique_ptr<IOBuf>& outBuf) noexcept {
   DCHECK_LE(header.length, cursor.totalLength());
   if (header.stream == 0) {
@@ -417,10 +408,8 @@ ErrorCode parseExHeaders(Cursor& cursor,
     if (lefttoparse < kFramePrioritySize) {
       return ErrorCode::FRAME_SIZE_ERROR;
     }
-    outPriority = parsePriorityCommon(cursor);
+    skipPriority(cursor);
     lefttoparse -= kFramePrioritySize;
-  } else {
-    outPriority = folly::none;
   }
   outExAttributes.unidirectional = header.flags & UNIDIRECTIONAL;
 

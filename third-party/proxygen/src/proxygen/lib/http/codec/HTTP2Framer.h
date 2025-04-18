@@ -158,21 +158,17 @@ ErrorCode parseDataEnd(folly::io::Cursor& cursor,
  *
  * @param cursor The cursor to pull data from.
  * @param header The frame header for the frame being parsed.
- * @param outPriority If PRIORITY flag is set, this will be filled with
- *                    the priority information from this frame.
  * @param outBuf The buf to fill with header data.
  * @return NO_ERROR for successful parse. The connection error code to
  *         return in a GOAWAY frame if failure.
  */
 ErrorCode parseHeaders(folly::io::Cursor& cursor,
                        const FrameHeader& header,
-                       folly::Optional<PriorityUpdate>& outPriority,
                        std::unique_ptr<folly::IOBuf>& outBuf) noexcept;
 
 ErrorCode parseExHeaders(folly::io::Cursor& cursor,
                          const FrameHeader& header,
                          HTTPCodec::ExAttributes& outExAttributes,
-                         folly::Optional<PriorityUpdate>& outPriority,
                          std::unique_ptr<folly::IOBuf>& outBuf) noexcept;
 
 /**

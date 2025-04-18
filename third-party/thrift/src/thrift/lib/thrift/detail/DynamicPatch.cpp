@@ -470,13 +470,13 @@ void DynamicMapPatch::fromObject(detail::Badge, Object obj) {
 
   if (auto patchPrior = get_ptr(obj, op::PatchOp::PatchPrior)) {
     for (auto& [k, v] : patchPrior->as_map()) {
-      patchPrior_[k].fromObject(std::move(v.as_object()));
+      patchPrior_[k] = DynamicPatch::fromObject(std::move(v.as_object()));
     }
   }
 
   if (auto patchAfter = get_ptr(obj, op::PatchOp::PatchAfter)) {
     for (auto& [k, v] : patchAfter->as_map()) {
-      patchAfter_[k].fromObject(std::move(v.as_object()));
+      patchAfter_[k] = DynamicPatch::fromObject(std::move(v.as_object()));
     }
   }
 
@@ -613,7 +613,7 @@ void DynamicStructurePatch<IsUnion>::ensureAndAssignFieldsFromObject(
     ensure_[fieldId] = emptyValue(field.getType());
     Object patch;
     patch[static_cast<FieldId>(op::PatchOp::Assign)] = std::move(field);
-    patchAfter_[fieldId].fromObject(std::move(patch));
+    patchAfter_[fieldId] = DynamicPatch::fromObject(std::move(patch));
   }
 }
 
@@ -672,7 +672,7 @@ void DynamicStructurePatch<IsUnion>::ensureStruct(FieldId id, Value v) {
     ensure_[id] = emptyValue(v.getType());
     Object patch;
     patch[static_cast<FieldId>(op::PatchOp::Assign)] = std::move(v);
-    patchAfter_[id].fromObject(patch);
+    patchAfter_[id] = DynamicPatch::fromObject(patch);
     return;
   }
 
@@ -754,13 +754,15 @@ void DynamicStructurePatch<IsUnion>::fromObject(detail::Badge, Object obj) {
 
   if (auto patchPrior = get_ptr(obj, op::PatchOp::PatchPrior)) {
     for (auto& [k, v] : patchPrior->as_object()) {
-      patchPrior_[static_cast<FieldId>(k)].fromObject(std::move(v.as_object()));
+      patchPrior_[static_cast<FieldId>(k)] =
+          DynamicPatch::fromObject(std::move(v.as_object()));
     }
   }
 
   if (auto patchAfter = get_ptr(obj, op::PatchOp::PatchAfter)) {
     for (auto& [k, v] : patchAfter->as_object()) {
-      patchAfter_[static_cast<FieldId>(k)].fromObject(std::move(v.as_object()));
+      patchAfter_[static_cast<FieldId>(k)] =
+          DynamicPatch::fromObject(std::move(v.as_object()));
     }
   }
 }
@@ -1714,13 +1716,12 @@ template void DynamicPatch::merge(DynamicPatch&&);
 template void DynamicPatch::merge(const DynamicPatch&);
 template void DynamicPatch::merge(const DynamicPatch&&);
 
-void DynamicPatch::fromObject(Object obj) {
+DynamicPatch DynamicPatch::fromObject(Object obj) {
   if (auto p = get_ptr(obj, op::PatchOp::EnsureStruct)) {
     if (p->getType() == Value::Type::objectValue) {
       DynamicStructPatch patch;
       patch.fromObject(badge, std::move(obj));
-      *patch_ = std::move(patch);
-      return;
+      return DynamicPatch{std::move(patch)};
     }
     if (p->getType() != Value::Type::mapValue) {
       folly::throw_exception<std::runtime_error>(
@@ -1728,15 +1729,13 @@ void DynamicPatch::fromObject(Object obj) {
     }
     DynamicMapPatch patch;
     patch.fromObject(badge, std::move(obj));
-    *patch_ = std::move(patch);
-    return;
+    return DynamicPatch{std::move(patch)};
   }
 
   if (get_ptr(obj, op::PatchOp::EnsureUnion)) {
     DynamicUnionPatch patch;
     patch.fromObject(badge, std::move(obj));
-    *patch_ = std::move(patch);
-    return;
+    return DynamicPatch{std::move(patch)};
   }
 
   // If the `remove` operation is a list, it must be struct patch.
@@ -1744,17 +1743,15 @@ void DynamicPatch::fromObject(Object obj) {
     if (remove->is_list()) {
       DynamicStructPatch patch;
       patch.fromObject(badge, std::move(obj));
-      *patch_ = std::move(patch);
-      return;
+      return DynamicPatch{std::move(patch)};
     }
   }
 
   if (get_ptr(obj, op::PatchOp::PatchIfTypeIsPrior) ||
       get_ptr(obj, op::PatchOp::PatchIfTypeIsAfter) ||
       get_ptr(obj, op::PatchOp::EnsureAny)) {
-    *patch_ =
-        detail::createPatchFromObject<op::AnyPatch>(badge, std::move(obj));
-    return;
+    return DynamicPatch{
+        detail::createPatchFromObject<op::AnyPatch>(badge, std::move(obj))};
   }
 
   // If patch contains the following operations, the patch type must be the same
@@ -1770,14 +1767,13 @@ void DynamicPatch::fromObject(Object obj) {
            op::PatchOp::Put,
        }) {
     if (auto ptr = get_ptr(obj, op)) {
-      *this = createPatchFromObjectAsValueType(*ptr, std::move(obj));
-      return;
+      return createPatchFromObjectAsValueType(*ptr, std::move(obj));
     }
   }
 
   DynamicUnknownPatch patch;
   patch.fromObject(badge, std::move(obj));
-  *patch_ = std::move(patch);
+  return DynamicPatch{std::move(patch)};
 }
 
 auto DynamicUnknownPatch::validateAndGetCategory() const -> Category {
@@ -1879,11 +1875,10 @@ void DynamicUnknownPatch::patchIfSet(FieldId id, const DynamicPatch& p) {
   }
 
   // TODO: optimize this
-  DynamicPatch prior, after;
-  prior.fromObject(
-      get(op::PatchOp::PatchPrior).ensure_object()[id].ensure_object());
-  after.fromObject(
-      get(op::PatchOp::PatchAfter).ensure_object()[id].ensure_object());
+  DynamicPatch prior{DynamicPatch::fromObject(
+      get(op::PatchOp::PatchPrior).ensure_object()[id].ensure_object())};
+  DynamicPatch after{DynamicPatch::fromObject(
+      get(op::PatchOp::PatchAfter).ensure_object()[id].ensure_object())};
   prior.merge(after);
   prior.merge(p);
   get(op::PatchOp::PatchAfter).ensure_object().erase(id);
@@ -2003,9 +1998,9 @@ type::AnyStruct DynamicPatch::toPatch(type::Type type) const {
   return any;
 }
 
-void DynamicPatch::fromPatch(const type::AnyStruct& any) {
+DynamicPatch DynamicPatch::fromPatch(const type::AnyStruct& any) {
   auto v = protocol::parseValueFromAny(any);
-  fromObject(std::move(v.as_object()));
+  return DynamicPatch::fromObject(std::move(v.as_object()));
 }
 
 template <typename Protocol>
@@ -2023,7 +2018,7 @@ std::uint32_t DynamicPatch::encode(Protocol& prot) const {
 template <typename Protocol>
 void DynamicPatch::decode(Protocol& prot) {
   // TODO(dokwon): Provide direct decode to DynamicPatch.
-  fromObject(protocol::parseObject(prot));
+  *this = fromObject(protocol::parseObject(prot));
 }
 
 template <typename Protocol>
@@ -2164,7 +2159,8 @@ class MinSafePatchVersionVisitor {
 };
 } // namespace
 
-void DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
+DynamicPatch DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
+  DynamicPatch patch;
   DynamicSafePatch safePatch;
   // TODO: Add SafePatch check based on Uri
   if (any.protocol() == type::StandardProtocol::Binary) {
@@ -2179,7 +2175,8 @@ void DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
     throw std::runtime_error(
         fmt::format("Unsupported patch version: {}", safePatch.version()));
   }
-  decode<apache::thrift::CompactProtocolReader>(*safePatch.data());
+  patch.decode<apache::thrift::CompactProtocolReader>(*safePatch.data());
+  return patch;
 }
 type::AnyStruct DynamicPatch::toSafePatch(type::Type type) const {
   auto safePatchType = toSafePatchType(std::move(type));

@@ -162,8 +162,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
     if (data_.assign()) {
       dynPatch_.reset();
     } else {
-      dynPatch_.emplace();
-      dynPatch_->fromObject(std::move(v));
+      dynPatch_ = protocol::DynamicPatch::fromObject(std::move(v));
       Base::reset();
     }
   }

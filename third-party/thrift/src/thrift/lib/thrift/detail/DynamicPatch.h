@@ -758,7 +758,7 @@ class DynamicPatch {
   void applyToDataFieldInsideAny(type::AnyStruct&) const;
 
   /// Converts SafePatch stored in Thrift Any to DynamicPatch.
-  void fromSafePatch(const type::AnyStruct& any);
+  [[nodiscard]] static DynamicPatch fromSafePatch(const type::AnyStruct& any);
   /// Stores DynamicPatch as SafePatch in Thrift Any with the provided type
   /// using CompactProtocol.
   type::AnyStruct toSafePatch(type::Type type) const;
@@ -770,7 +770,7 @@ class DynamicPatch {
   detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
 
   /// Convert Patch stored in Protocol Object to DynamicPatch.
-  void fromObject(Object);
+  [[nodiscard]] static DynamicPatch fromObject(Object);
 
   /// Retrieves the stored patch by the specified tag. Can be used to assert the
   /// type of DynamicUnknownPatch. Throws if the patch cannot be retrieved with
@@ -801,7 +801,7 @@ class DynamicPatch {
   ExtractedMasksFromPatch extractMaskFromPatch() const;
 
   /// Convert Patch stored in Thrift Any to DynamicPatch.
-  void fromPatch(const type::AnyStruct& any);
+  [[nodiscard]] static DynamicPatch fromPatch(const type::AnyStruct& any);
   /// Stores DynamicPatch as Patch in Thrift Any with the provided type
   /// using CompactProtocol.
   type::AnyStruct toPatch(type::Type type) const;
@@ -981,10 +981,10 @@ void DynamicUnknownPatch::customVisitImpl(Self&& self, Visitor&& v) {
   for (auto op : {op::PatchOp::PatchPrior, op::PatchOp::PatchAfter}) {
     if (auto subPatch = self.get_ptr(op)) {
       for (auto& [fieldId, fieldPatch] : subPatch->as_object()) {
-        DynamicPatch patch;
-        patch.fromObject(folly::forward_like<Self>(fieldPatch.as_object()));
         std::forward<Visitor>(v).patchIfSet(
-            static_cast<FieldId>(fieldId), std::move(patch));
+            static_cast<FieldId>(fieldId),
+            DynamicPatch::fromObject(
+                folly::forward_like<Self>(fieldPatch.as_object())));
       }
     }
   }

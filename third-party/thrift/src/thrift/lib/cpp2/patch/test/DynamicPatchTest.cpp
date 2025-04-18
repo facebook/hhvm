@@ -801,16 +801,14 @@ TEST(DynamicPatch, Map) {
 
 TEST(DynamicPatch, TestEmptyPatch) {
   Object obj;
-  DynamicPatch patch;
-  patch.fromObject(obj);
+  DynamicPatch patch = DynamicPatch::fromObject(obj);
   EXPECT_TRUE(patch.isPatchTypeAmbiguous());
 }
 
 TEST(DynamicPatch, TestClearPatch) {
   Object obj;
   obj[static_cast<FieldId>(op::PatchOp::Clear)].emplace_bool(true);
-  DynamicPatch patch;
-  patch.fromObject(obj);
+  DynamicPatch patch = DynamicPatch::fromObject(obj);
   EXPECT_TRUE(patch.isPatchTypeAmbiguous());
 }
 
@@ -819,13 +817,11 @@ void testDynamicUnknownPatch(const auto& t) {
   auto v = asValueStruct<Tag>(t);
   Object obj;
   obj[static_cast<FieldId>(op::PatchOp::Assign)] = v;
-  DynamicPatch assignPatch;
-  assignPatch.fromObject(obj);
+  DynamicPatch assignPatch = DynamicPatch::fromObject(obj);
   EXPECT_TRUE(assignPatch.holds_alternative<PatchType>(badge));
 
   obj = {};
-  DynamicPatch emptyPatch;
-  emptyPatch.fromObject(obj);
+  DynamicPatch emptyPatch = DynamicPatch::fromObject(obj);
   emptyPatch.apply(v);
   EXPECT_EQ(v, asValueStruct<Tag>(t));
   EXPECT_TRUE(emptyPatch.isPatchTypeAmbiguous());
@@ -846,8 +842,7 @@ void testDynamicUnknownPatch(const auto& t) {
   };
 
   obj[static_cast<FieldId>(op::PatchOp::Clear)].emplace_bool(true);
-  DynamicPatch clearPatch;
-  clearPatch.fromObject(obj);
+  DynamicPatch clearPatch = DynamicPatch::fromObject(obj);
   clearPatch.apply(v);
   checkClearPatch();
   EXPECT_TRUE(clearPatch.isPatchTypeAmbiguous());
@@ -880,8 +875,7 @@ TEST(DynamicPatch, Unknown) {
 TEST(DynamicPatch, FromAnyPatch) {
   op::AnyPatch anyPatch;
   anyPatch.assign(type::AnyData::toAny<type::union_t<MyUnion>>({}).toThrift());
-  DynamicPatch dynPatch;
-  dynPatch.fromObject(anyPatch.toObject());
+  DynamicPatch dynPatch = DynamicPatch::fromObject(anyPatch.toObject());
   EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
 
   // Assert it is an AnyPatch.
@@ -903,30 +897,26 @@ TEST(DynamicPatch, FromSetOrMapPatch) {
   obj[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
       asValueStruct<type::i32_t>(1)};
   {
-    DynamicPatch patch;
-    patch.fromObject(obj);
+    DynamicPatch patch = DynamicPatch::fromObject(obj);
     EXPECT_TRUE(patch.isPatchTypeAmbiguous());
   }
   {
     obj[static_cast<FieldId>(op::PatchOp::Add)].emplace_set() = {
         asValueStruct<type::i32_t>(1)};
-    DynamicPatch patch;
-    patch.fromObject(obj);
+    DynamicPatch patch = DynamicPatch::fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicSetPatch>(badge));
   }
   {
     obj.erase(static_cast<FieldId>(op::PatchOp::Add));
     obj[static_cast<FieldId>(op::PatchOp::Put)].emplace_set() = {
         asValueStruct<type::i32_t>(1)};
-    DynamicPatch patch;
-    patch.fromObject(obj);
+    DynamicPatch patch = DynamicPatch::fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicSetPatch>(badge));
   }
   {
     obj[static_cast<FieldId>(op::PatchOp::Put)].emplace_map() = {
         {asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(2)}};
-    DynamicPatch patch;
-    patch.fromObject(obj);
+    DynamicPatch patch = DynamicPatch::fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicMapPatch>(badge));
   }
 }
@@ -942,8 +932,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
       .emplace_object()[FieldId{2}] =
       asValueStruct<type::infer_tag<op::I32Patch>>(fieldPatch);
   {
-    DynamicPatch patch;
-    patch.fromObject(obj);
+    DynamicPatch patch = DynamicPatch::fromObject(obj);
     EXPECT_TRUE(patch.isPatchTypeAmbiguous());
 
     MyUnion u;
@@ -960,8 +949,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
     obj[static_cast<FieldId>(op::PatchOp::EnsureUnion)]
         .emplace_object()[FieldId{2}]
         .emplace_i32(1);
-    DynamicPatch patch;
-    patch.fromObject(obj);
+    DynamicPatch patch = DynamicPatch::fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicUnionPatch>(badge));
   }
   {
@@ -969,8 +957,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
     obj[static_cast<FieldId>(op::PatchOp::EnsureStruct)]
         .emplace_object()[FieldId{1}]
         .emplace_i32(1);
-    DynamicPatch patch;
-    patch.fromObject(obj);
+    DynamicPatch patch = DynamicPatch::fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicStructPatch>(badge));
   }
 }
@@ -1386,8 +1373,7 @@ TEST(DynamicPatch, InvalidGetStoredPatchByTag) {
   {
     MyUnionPatch patch;
     patch.patchIfSet<ident::s>() = "hello world";
-    DynamicPatch dynPatch;
-    dynPatch.fromObject(patch.toObject());
+    DynamicPatch dynPatch = DynamicPatch::fromObject(patch.toObject());
     EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
     EXPECT_THROW(
         dynPatch.getStoredPatchByTag<type::map_c>(), std::runtime_error);
@@ -1397,8 +1383,7 @@ TEST(DynamicPatch, InvalidGetStoredPatchByTag) {
   {
     DynamicMapPatch patch;
     patch.removeMulti({asValueStruct<type::i32_t>(42)});
-    DynamicPatch dynPatch;
-    dynPatch.fromObject(patch.toObject());
+    DynamicPatch dynPatch = DynamicPatch::fromObject(patch.toObject());
     EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
     EXPECT_THROW(
         dynPatch.getStoredPatchByTag<type::struct_c>(), std::runtime_error);
@@ -1419,8 +1404,7 @@ TEST(DynamicPatch, DynamicSafePatch) {
   type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
   // round trip
-  DynamicPatch dynPatch;
-  dynPatch.fromSafePatch(safePatchAny);
+  DynamicPatch dynPatch = DynamicPatch::fromSafePatch(safePatchAny);
   EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
   type::AnyStruct rSafePatchAny =
       dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
@@ -1442,8 +1426,8 @@ TEST(DynamicPatch, DynamicSafePatchInvalid) {
   // store SafePatch in Thrift Any
   type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
-  DynamicPatch dynPatch;
-  EXPECT_THROW(dynPatch.fromSafePatch(safePatchAny), std::runtime_error);
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
 }
 
 TEST(DynamicPatch, DynamicSafePatchV2) {
@@ -1480,8 +1464,7 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
     // Round trip
-    DynamicPatch dynPatch;
-    dynPatch.fromSafePatch(safePatchAny);
+    DynamicPatch dynPatch = DynamicPatch::fromSafePatch(safePatchAny);
     type::AnyStruct rSafePatchAny =
         dynPatch.toSafePatch(type::Type::get<type::struct_t<MyStruct>>());
     MyStructSafePatch rSafePatch =
@@ -1497,8 +1480,7 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
     // Round trip
-    DynamicPatch dynPatch;
-    dynPatch.fromSafePatch(safePatchAny);
+    DynamicPatch dynPatch = DynamicPatch::fromSafePatch(safePatchAny);
     type::AnyStruct rSafePatchAny =
         dynPatch.toSafePatch(type::Type::get<type::struct_t<MyStruct>>());
     MyStructSafePatch rSafePatch =
@@ -1514,8 +1496,7 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
     // round trip
-    DynamicPatch dynPatch;
-    dynPatch.fromSafePatch(safePatchAny);
+    DynamicPatch dynPatch = DynamicPatch::fromSafePatch(safePatchAny);
     EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
     type::AnyStruct rSafePatchAny =
         dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
@@ -1535,8 +1516,7 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
     // Round trip
-    DynamicPatch dynPatch;
-    dynPatch.fromSafePatch(safePatchAny);
+    DynamicPatch dynPatch = DynamicPatch::fromSafePatch(safePatchAny);
     type::AnyStruct rSafePatchAny =
         dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
     MyUnionSafePatch rSafePatch = type::AnyData{std::move(rSafePatchAny)}
@@ -1560,8 +1540,7 @@ TEST(DynamicPatch, applyToDataFieldInsideAny) {
   type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
   // apply patch
-  DynamicPatch dynPatch;
-  dynPatch.fromSafePatch(safePatchAny);
+  DynamicPatch dynPatch = DynamicPatch::fromSafePatch(safePatchAny);
   dynPatch.applyToDataFieldInsideAny(objAny);
 
   EXPECT_EQ(

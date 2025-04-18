@@ -50,8 +50,8 @@ void ConformanceHandler::patch(
       *protocol::serializeValue<CompactProtocolWriter>(value),
       static_cast<type::BaseType>(value.getType()));
 
-  protocol::DynamicPatch patch;
-  patch.fromObject(patchValue.as_object());
+  protocol::DynamicPatch patch{
+      protocol::DynamicPatch::fromObject(patchValue.as_object())};
   patch.apply(rvalue);
 
   res.result() = AnyRegistry::generated().store(

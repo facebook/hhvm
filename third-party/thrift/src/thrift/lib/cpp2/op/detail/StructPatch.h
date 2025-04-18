@@ -24,7 +24,6 @@
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/op/detail/PatchTraits.h>
-#include <thrift/lib/cpp2/patch/detail/FieldPatchCustomVisit.h>
 #include <thrift/lib/cpp2/type/Field.h>
 #include <thrift/lib/cpp2/type/Id.h>
 
@@ -163,17 +162,12 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
 
   template <typename Visitor>
   void customVisit(Visitor&& v) const {
-    if (patch::detail::enableFieldPatchCustomVisitShortCircuit()) {
-      // Don't visit the field if it is empty.
-      for_each_field_id<Patch>([&](auto id) {
-        if (auto& p = *get(id); !p.empty()) {
-          v.template patchIfSet<decltype(id)>(p);
-        }
-      });
-    } else {
-      for_each_field_id<Patch>(
-          [&](auto id) { v.template patchIfSet<decltype(id)>(*get(id)); });
-    }
+    // Don't visit the field if it is empty.
+    for_each_field_id<Patch>([&](auto id) {
+      if (auto& p = *get(id); !p.empty()) {
+        v.template patchIfSet<decltype(id)>(p);
+      }
+    });
   }
 
  private:

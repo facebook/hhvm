@@ -2231,6 +2231,18 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         ModulesSpecification::Info{std::move(module), std::move(name)});
   }
 
+  bool hasModule(const std::string_view name) const noexcept {
+    CHECK(processedServiceDescription_)
+        << "Server must be set up before calling this method";
+    for (const auto& moduleInfo :
+         processedServiceDescription_->modules.modules) {
+      if (moduleInfo.name == name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
  private:
   /**
    * Collects service handlers of the current service of a specific type.

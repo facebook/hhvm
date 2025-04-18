@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <assert.h>
-#include <limits.h>
 #include <initializer_list>
 #include <memory>
 #include <optional>
@@ -28,10 +26,10 @@
 #include <folly/Portability.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
-#include <folly/synchronization/AtomicUtil.h>
 #include <thrift/lib/cpp2/BoxedValuePtr.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/detail/Isset.h>
 
 namespace apache::thrift {
 namespace detail {
@@ -50,190 +48,6 @@ struct move_to_unique_ptr_fn;
 struct assign_from_unique_ptr_fn;
 struct union_value_unsafe_fn;
 struct is_non_optional_field_set_manually_or_by_serializer_fn;
-
-// IntWrapper is a wrapper of integer that's always copy/move assignable
-// even if integer is atomic
-template <typename T>
-struct IntWrapper {
-  IntWrapper() = default;
-  explicit IntWrapper(T t) : value(t) {}
-
-  T value{0};
-};
-
-// If the integer is atomic, operations use only relaxed memory-order since the
-// requirement is only to protect the integer against torn reads and writes and
-// not to protect any other objects.
-template <typename U>
-struct IntWrapper<std::atomic<U>> {
-  IntWrapper() = default;
-
-  IntWrapper(const IntWrapper& other) noexcept
-      : value(other.value.load(std::memory_order_relaxed)) {}
-  IntWrapper(IntWrapper&& other) noexcept
-      : value(other.value.load(std::memory_order_relaxed)) {}
-
-  IntWrapper& operator=(const IntWrapper& other) noexcept {
-    value.store(
-        other.value.load(std::memory_order_relaxed), std::memory_order_relaxed);
-    return *this;
-  }
-
-  IntWrapper& operator=(IntWrapper&& other) noexcept {
-    value.store(
-        other.value.load(std::memory_order_relaxed), std::memory_order_relaxed);
-    return *this;
-  }
-
-  std::atomic<U> value{0};
-};
-
-template <typename T>
-class BitSet {
- public:
-  BitSet() = default;
-
-  explicit BitSet(T value) : int_(value) {}
-
-  BitSet(const BitSet&) = default;
-  BitSet& operator=(const BitSet& other) = default;
-
-  class reference {
-   public:
-    reference(BitSet& bitSet, const uint8_t bit) : bitSet_(bitSet), bit_(bit) {}
-
-    reference& operator=(bool flag) {
-      if (flag) {
-        bitSet_.set(bit_);
-      } else {
-        bitSet_.reset(bit_);
-      }
-      return *this;
-    }
-
-    operator bool() const { return bitSet_.get(bit_); }
-
-    reference& operator=(reference& other) { return *this = bool(other); }
-
-   private:
-    BitSet& bitSet_;
-    const uint8_t bit_;
-  };
-
-  bool operator[](const uint8_t bit) const {
-    assert(bit < NUM_BITS);
-    return get(bit);
-  }
-
-  reference operator[](const uint8_t bit) {
-    assert(bit < NUM_BITS);
-    return reference(*this, bit);
-  }
-
-  T& value() { return int_.value; }
-
-  const T& value() const { return int_.value; }
-
- private:
-  template <class U>
-  static bool get(U u, std::size_t bit) {
-    return u & (U(1) << bit);
-  }
-
-  template <class U>
-  static void set(U& u, std::size_t bit) {
-    u |= (U(1) << bit);
-  }
-
-  template <class U>
-  static void reset(U& u, std::size_t bit) {
-    u &= ~(U(1) << bit);
-  }
-
-  // If the integer is atomic, operations use only relaxed memory-order since
-  // the requirement is only to protect the integer against torn reads and
-  // writes and not to protect any other objects.
-  template <class U>
-  static bool get(const std::atomic<U>& u, std::size_t bit) {
-    return u.load(std::memory_order_relaxed) & (U(1) << bit);
-  }
-
-  template <class U>
-  static void set(std::atomic<U>& u, std::size_t bit) {
-    folly::atomic_fetch_set(u, bit, std::memory_order_relaxed);
-  }
-
-  template <class U>
-  static void reset(std::atomic<U>& u, std::size_t bit) {
-    folly::atomic_fetch_reset(u, bit, std::memory_order_relaxed);
-  }
-
-  bool get(std::size_t bit) const { return get(int_.value, bit); }
-  void set(std::size_t bit) { set(int_.value, bit); }
-  void reset(std::size_t bit) { reset(int_.value, bit); }
-
-  IntWrapper<T> int_;
-
-  static constexpr int NUM_BITS = sizeof(T) * CHAR_BIT;
-};
-
-template <bool kIsConst>
-class BitRef {
-  template <bool B>
-  friend class BitRef;
-
- public:
-  using Isset = std::conditional_t<kIsConst, const uint8_t, uint8_t>;
-  using AtomicIsset = std::
-      conditional_t<kIsConst, const std::atomic<uint8_t>, std::atomic<uint8_t>>;
-
-  FOLLY_ERASE BitRef(Isset& isset, uint8_t bit_index)
-      : value_(isset), bit_index_(bit_index) {}
-
-  FOLLY_ERASE BitRef(AtomicIsset& isset, uint8_t bit_index)
-      : value_(isset), bit_index_(bit_index), is_atomic_(true) {}
-
-  template <bool B>
-  explicit BitRef(const BitRef<B>& other)
-      : value_(
-            other.is_atomic_ ? IssetBitSet(other.value_.atomic.value())
-                             : IssetBitSet(other.value_.non_atomic.value())),
-        bit_index_(other.bit_index_),
-        is_atomic_(other.is_atomic_) {}
-
-#if FOLLY_MOBILE
-  // We have this attribute to prevent binary size regression
-  // TODO: Remove special attribute for MOBILE
-  FOLLY_ERASE
-#endif
-  void operator=(bool flag) {
-    if (is_atomic_) {
-      value_.atomic[bit_index_] = flag;
-    } else {
-      value_.non_atomic[bit_index_] = flag;
-    }
-  }
-
-  explicit operator bool() const {
-    if (is_atomic_) {
-      return value_.atomic[bit_index_];
-    } else {
-      return value_.non_atomic[bit_index_];
-    }
-  }
-
- private:
-  union IssetBitSet {
-    explicit IssetBitSet(Isset& isset) : non_atomic(isset) {}
-    explicit IssetBitSet(AtomicIsset& isset) : atomic(isset) {}
-    apache::thrift::detail::BitSet<Isset&> non_atomic;
-    apache::thrift::detail::BitSet<AtomicIsset&> atomic;
-  } value_;
-
-  const uint8_t bit_index_;
-  const bool is_atomic_ = false;
-};
-
 template <typename value_type, typename return_type = value_type>
 using EnableIfConst =
     std::enable_if_t<std::is_const_v<value_type>, return_type>;

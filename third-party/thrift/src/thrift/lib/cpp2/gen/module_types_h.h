@@ -178,65 +178,6 @@ constexpr bool operator>=(const T& lhs, const T& rhs) {
   return !(lhs < rhs);
 }
 
-enum class IssetBitsetOption {
-  Unpacked,
-  Packed,
-  PackedWithAtomic,
-};
-
-template <
-    size_t NumBits,
-    IssetBitsetOption kOption = IssetBitsetOption::Unpacked>
-class isset_bitset {
- private:
-  using IntType = std::conditional_t<
-      kOption == IssetBitsetOption::PackedWithAtomic,
-      std::atomic<uint8_t>,
-      uint8_t>;
-
- public:
-  bool get(size_t field_index) const {
-    check(field_index);
-    return array_isset[field_index / kBits][field_index % kBits];
-  }
-
-  void set(size_t field_index, bool isset_flag) {
-    check(field_index);
-    array_isset[field_index / kBits][field_index % kBits] = isset_flag;
-  }
-
-  const IntType& at(size_t field_index) const {
-    check(field_index);
-    return array_isset[field_index / kBits].value();
-  }
-
-  IntType& at(size_t field_index) {
-    check(field_index);
-    return array_isset[field_index / kBits].value();
-  }
-
-  uint8_t bit(size_t field_index) const {
-    check(field_index);
-    return field_index % kBits;
-  }
-
-  static constexpr ptrdiff_t get_offset() {
-    return offsetof(isset_bitset, array_isset);
-  }
-
- private:
-  static void check(size_t field_index) {
-    DCHECK(field_index / kBits < NumBits);
-  }
-
-  static constexpr size_t kBits =
-      kOption == IssetBitsetOption::Unpacked ? 1 : 8;
-  std::array<
-      apache::thrift::detail::BitSet<IntType>,
-      (NumBits + kBits - 1) / kBits>
-      array_isset;
-};
-
 namespace st {
 
 #if !FOLLY_MOBILE

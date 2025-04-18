@@ -17,7 +17,7 @@
 #include <bitset>
 #include <boost/mp11.hpp>
 #include <gtest/gtest.h>
-#include <thrift/lib/cpp2/gen/module_types_h.h>
+#include <thrift/lib/cpp2/detail/Isset.h>
 
 using apache::thrift::detail::isset_bitset;
 using apache::thrift::detail::IssetBitsetOption;

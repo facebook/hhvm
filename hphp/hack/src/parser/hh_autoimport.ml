@@ -71,8 +71,6 @@ let types =
 let funcs =
   [
     "asio_get_current_context_depth";
-    "asio_get_current_context_idx";
-    "asio_get_running_in_context";
     "asio_get_running";
     "class_meth";
     "darray";

@@ -820,10 +820,6 @@ void ThriftRocketServerHandler::handlePreprocessResult(
             kTenantQuotaExceededErrorCode,
             aqe.getMessage());
       },
-      [&](AppTenantBlocklistedException& atb) {
-        handleQuotaExceededException(
-            std::move(request), kTenantBlocklistedErrorCode, atb.getMessage());
-      },
       [](std::monostate&) { folly::assume_unreachable(); });
 }
 

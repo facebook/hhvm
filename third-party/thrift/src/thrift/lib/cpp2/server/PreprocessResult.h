@@ -16,22 +16,18 @@
 
 #pragma once
 
-#include <variant>
-
 namespace apache::thrift {
 
 struct AppClientException;
 struct AppServerException;
 struct AppOverloadedException;
 struct AppQuotaExceededException;
-struct AppTenantBlocklistedException;
 
 using PreprocessResult = std::variant<
     std::monostate, // Allow request through
     AppClientException,
     AppServerException,
     AppOverloadedException,
-    AppQuotaExceededException,
-    AppTenantBlocklistedException>;
+    AppQuotaExceededException>;
 
 } // namespace apache::thrift

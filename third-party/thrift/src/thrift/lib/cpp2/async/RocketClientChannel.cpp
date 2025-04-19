@@ -203,10 +203,6 @@ folly::Try<FirstResponsePayload> decodeResponseError(
       exCode = kTenantQuotaExceededErrorCode;
       exType = TApplicationException::LOADSHEDDING;
       break;
-    case ResponseRpcErrorCode::TENANT_BLOCKLISTED:
-      exCode = kTenantBlocklistedErrorCode;
-      exType = TApplicationException::TENANT_BLOCKLISTED;
-      break;
     case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED:
       exCode = kInteractionLoadsheddedErrorCode;
       exType = TApplicationException::LOADSHEDDING;

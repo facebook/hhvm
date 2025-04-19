@@ -296,8 +296,6 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
                         ResponseRpcErrorCode::UNIMPLEMENTED_METHOD},
                        {kTenantQuotaExceededErrorCode,
                         ResponseRpcErrorCode::TENANT_QUOTA_EXCEEDED},
-                       {kTenantBlocklistedErrorCode,
-                        ResponseRpcErrorCode::TENANT_BLOCKLISTED},
                        {kInteractionLoadsheddedErrorCode,
                         ResponseRpcErrorCode::INTERACTION_LOADSHEDDED},
                        {kInteractionLoadsheddedOverloadErrorCode,

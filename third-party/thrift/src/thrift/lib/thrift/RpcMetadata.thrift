@@ -483,9 +483,7 @@ enum ResponseRpcErrorCode {
   // ...
   // ResponseRpcErrorCategory::LOADSHEDDING
   TENANT_QUOTA_EXCEEDED = 17,
-  // Tenant blocklisted
-  // ResponseRpcErrorCategory::TENANT_BLOCKLISTED
-  TENANT_BLOCKLISTED = 18,
+  // 18 : DEPRECATED
   // Interaction request rejected because interaction is already load-shedded
   // ResponseRpcErrorCategory::LOADSHEDDING
   INTERACTION_LOADSHEDDED = 19,

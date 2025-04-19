@@ -14,29 +14,40 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/whisker/detail/string.h>
 #include <thrift/shared/detail/string.h>
 
-namespace whisker::detail {
-
-bool is_newline(char c) {
-  return c == '\r' || c == '\n' || c == '\f';
-}
-
-bool is_whitespace(char c) {
-  return c == ' ' || c == '\t' || c == '\v' || is_newline(c);
-}
-
-bool is_letter(char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}
-
-bool is_digit(char c) {
-  return c >= '0' && c <= '9';
-}
+namespace apache::thrift::detail {
 
 std::string escape(std::string_view str) {
-  return apache::thrift::detail::escape(str);
+  std::string result;
+  for (const char ch : str) {
+    switch (ch) {
+      case '\\':
+        result += "\\\\";
+        break;
+      case '\n':
+        result += "\\n";
+        break;
+      case '\r':
+        result += "\\r";
+        break;
+      case '\t':
+        result += "\\t";
+        break;
+      case '\v':
+        result += "\\v";
+        break;
+      case '\f':
+        result += "\\f";
+        break;
+      case '\'':
+        result += "\\'";
+        break;
+      default:
+        result += ch;
+    }
+  }
+  return result;
 }
 
-} // namespace whisker::detail
+} // namespace apache::thrift::detail

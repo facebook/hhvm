@@ -104,6 +104,7 @@ target_link_libraries(
   compiler_base
   fmt::fmt
   Boost::boost
+  shared
   ${FBTHRIFT_COMPILER_LINK_CXXFS}
 )
 
@@ -159,7 +160,6 @@ add_library(
   whisker
   STATIC
 
-  whisker/detail/string.cc
   whisker/ast.cc
   whisker/dsl.cc
   whisker/eval_context.cc
@@ -171,7 +171,6 @@ add_library(
   whisker/render.cc
   whisker/standard_library.cc
   whisker/token.cc
-  whisker/tree_printer.cc
 )
 target_link_libraries(
   whisker

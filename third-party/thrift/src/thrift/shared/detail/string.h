@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/whisker/detail/string.h>
-#include <thrift/shared/detail/string.h>
+#pragma once
 
-namespace whisker::detail {
+#include <string>
+#include <string_view>
 
-bool is_newline(char c) {
-  return c == '\r' || c == '\n' || c == '\f';
-}
+namespace apache::thrift::detail {
+/**
+ * Escapes special characters in the input string view for displaying.
+ * This includes new lines and other whitespace characters.
+ */
+std::string escape(std::string_view str);
 
-bool is_whitespace(char c) {
-  return c == ' ' || c == '\t' || c == '\v' || is_newline(c);
-}
-
-bool is_letter(char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}
-
-bool is_digit(char c) {
-  return c >= '0' && c <= '9';
-}
-
-std::string escape(std::string_view str) {
-  return apache::thrift::detail::escape(str);
-}
-
-} // namespace whisker::detail
+} // namespace apache::thrift::detail

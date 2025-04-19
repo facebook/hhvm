@@ -2110,9 +2110,32 @@ TEST_F(RenderTest, macros_missing) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Macro with path 'some/other/path' was not found or failed to parse",
+          "Macro with path 'some/other/path' was not found",
           path_to_file,
           1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, macros_parse_error) {
+  auto result = render(
+      "{{> some/file/path}}",
+      w::map(),
+      sources({
+          {"some/file/path", "{{#INVALID_CODE"},
+      }));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "expected `}}` to open section-block but found EOF",
+              "some/file/path",
+              1),
+          diagnostic(
+              diagnostic_level::error,
+              "Macro with path 'some/file/path' failed to parse",
+              path_to_file,
+              1)));
   EXPECT_FALSE(result.has_value());
 }
 
@@ -2280,9 +2303,33 @@ TEST_F(RenderTest, imports_missing) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Module with path 'some/other/path' was not found or failed to parse",
+          "Module with path 'some/other/path' was not found",
           path_to_file,
           1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, imports_parse_error) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\"}}\n"
+      "The answer is {{lib.answer}}\n",
+      w::map(),
+      sources({
+          {"some/file/path", "{{#INVALID_CODE"},
+      }));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "expected `}}` to open section-block but found EOF",
+              "some/file/path",
+              1),
+          diagnostic(
+              diagnostic_level::error,
+              "Module with path 'some/file/path' failed to parse",
+              path_to_file,
+              1)));
   EXPECT_FALSE(result.has_value());
 }
 

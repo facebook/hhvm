@@ -107,11 +107,14 @@ class RenderTest : public testing::Test {
         : src_manager_(src_manager) {}
 
    private:
-    const ast::root* resolve_import(
+    resolve_import_result resolve_import(
         std::string_view path,
         source_location,
         diagnostics_engine& diags) override {
       if (auto cached = cached_asts_.find(path); cached != cached_asts_.end()) {
+        if (!cached->second.has_value()) {
+          return unexpected(parsing_error());
+        }
         return &cached->second.value();
       }
 
@@ -123,6 +126,9 @@ class RenderTest : public testing::Test {
       auto [result, inserted] =
           cached_asts_.insert({std::string(path), std::move(ast)});
       assert(inserted);
+      if (!result->second.has_value()) {
+        return unexpected(parsing_error());
+      }
       return &result->second.value();
     }
 

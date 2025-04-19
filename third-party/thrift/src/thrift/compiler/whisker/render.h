@@ -18,6 +18,7 @@
 
 #include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/object.h>
 #include <thrift/compiler/whisker/source_location.h>
 
@@ -31,14 +32,14 @@ namespace whisker {
  *
  * Macros are also resolved using this class:
  *   {{> path/to/macro }}.
- *
- * This class allows macros to be lazily loaded and parsed only when they are
- * used.
  */
 class source_resolver {
  public:
   virtual ~source_resolver() noexcept = default;
 
+  struct parsing_error {};
+  using resolve_import_result =
+      whisker::expected<const ast::root*, parsing_error>;
   /**
    * Resolves a Whisker source that is the target of an import statement:
    *   {{#import "path/to/file" as foo}}
@@ -50,15 +51,17 @@ class source_resolver {
    * underlying file, the same object (pointer) should be returned. This is used
    * by the renderer for caching.
    *
-   * If the path is not known, or if parsing fails, then this function returns
-   * nullptr. Errors or warnings should be attached to the provided
-   * diagnostics_engine.
+   * If the path is not known then this function returns nullptr.
+   *
+   * If parsing fails, then parsing_error is returned. Any error or warning
+   * messages should be attached to the provided diagnostics_engine.
    */
-  virtual const ast::root* resolve_import(
+  virtual resolve_import_result resolve_import(
       std::string_view path,
       source_location include_from,
       diagnostics_engine&) = 0;
 
+  using resolve_macro_result = resolve_import_result;
   /**
    * Given a lookup path (corresponding to ast::macro_lookup), this function
    * tries to resolve it to a parsed AST node.
@@ -69,7 +72,7 @@ class source_resolver {
    * The default implementation delegates to resolve_import(...) with the
    * provided path joined using "/" as a delimiter.
    */
-  virtual const ast::root* resolve_macro(
+  virtual resolve_macro_result resolve_macro(
       const std::vector<std::string>& path,
       source_location include_from,
       diagnostics_engine&);

@@ -769,18 +769,31 @@ class module_importer {
           import_statement.path.text);
     }
 
-    const ast::root* module = resolver->resolve_import(
-        import_statement.path.text,
-        import_statement.loc.begin,
-        vm_.diags().engine());
-    if (module == nullptr) {
-      vm_.diags().report_fatal_error(
-          import_statement.loc.begin,
-          "Module with path '{}' was not found or failed to parse",
-          import_statement.path.text);
-    }
+    const source_resolver::resolve_import_result imported_module =
+        resolver->resolve_import(
+            import_statement.path.text,
+            import_statement.loc.begin,
+            vm_.diags().engine());
 
-    if (auto cached = cached_export_maps_.find(module);
+    const ast::root& module = whisker::visit(
+        imported_module,
+        [&](const ast::root* resolved) -> const ast::root& {
+          if (resolved == nullptr) {
+            vm_.diags().report_fatal_error(
+                import_statement.loc.begin,
+                "Module with path '{}' was not found",
+                import_statement.path.text);
+          }
+          return *resolved;
+        },
+        [&](const source_resolver::parsing_error&) -> const ast::root& {
+          vm_.diags().report_fatal_error(
+              import_statement.loc.begin,
+              "Module with path '{}' failed to parse",
+              import_statement.path.text);
+        });
+
+    if (auto cached = cached_export_maps_.find(&module);
         cached != cached_export_maps_.end()) {
       return cached->second;
     }
@@ -792,16 +805,16 @@ class module_importer {
         import_statement.loc.begin);
 
     map::raw exports;
-    for (const ast::header& header : module->header_elements) {
+    for (const ast::header& header : module.header_elements) {
       detail::variant_match(
           header, [&](const auto& node) { visit(exports, node); });
     }
-    for (const ast::body& body : module->body_elements) {
+    for (const ast::body& body : module.body_elements) {
       detail::variant_match(
           body, [&](const auto& node) { visit(exports, node); });
     }
     auto [cached, inserted] = cached_export_maps_.emplace(
-        module, whisker::make::map(std::move(exports)));
+        &module, whisker::make::map(std::move(exports)));
     assert(inserted);
     return cached->second;
   }
@@ -1366,14 +1379,26 @@ class render_engine {
     }
 
     // Kept alive by the source_resolver implementation
-    const ast::root* resolved_macro =
+    source_resolver::resolve_macro_result resolved_macro_module =
         resolver->resolve_macro(path, macro.loc.begin, vm_.diags().engine());
-    if (resolved_macro == nullptr) {
-      vm_.diags().report_fatal_error(
-          macro.loc.begin,
-          "Macro with path '{}' was not found or failed to parse",
-          macro.path_string());
-    }
+
+    const ast::root& resolved_macro = whisker::visit(
+        resolved_macro_module,
+        [&](const ast::root* resolved) -> const ast::root& {
+          if (resolved == nullptr) {
+            vm_.diags().report_fatal_error(
+                macro.loc.begin,
+                "Macro with path '{}' was not found",
+                macro.path_string());
+          }
+          return *resolved;
+        },
+        [&](const source_resolver::parsing_error&) -> const ast::root& {
+          vm_.diags().report_fatal_error(
+              macro.loc.begin,
+              "Macro with path '{}' failed to parse",
+              macro.path_string());
+        });
 
     // Macros are "inlined" into their invocation site. In other words, they
     // execute within the scope where they are invoked.
@@ -1381,8 +1406,8 @@ class render_engine {
         eval_ctx(), frame::for_macro{}, macro.loc.begin);
     auto indent_guard =
         out_.make_indent_guard(macro.standalone_indentation_within_line);
-    visit(resolved_macro->header_elements);
-    visit(resolved_macro->body_elements);
+    visit(resolved_macro.header_elements);
+    visit(resolved_macro.body_elements);
   }
 
   outputter out_;
@@ -1393,7 +1418,7 @@ class render_engine {
 
 } // namespace
 
-const ast::root* source_resolver::resolve_macro(
+source_resolver::resolve_macro_result source_resolver::resolve_macro(
     const std::vector<std::string>& path,
     source_location include_from,
     diagnostics_engine& diags) {

@@ -162,6 +162,7 @@ add_library(
 
   whisker/ast.cc
   whisker/dsl.cc
+  whisker/detail/string.cc
   whisker/eval_context.cc
   whisker/lexer.cc
   whisker/mstch_compat.cc
@@ -231,6 +232,7 @@ install(
     compiler_lib
     compiler
     whisker
+    shared
   EXPORT fbthrift-exports
   RUNTIME DESTINATION ${BIN_INSTALL_DIR}
   LIBRARY DESTINATION ${LIB_INSTALL_DIR}

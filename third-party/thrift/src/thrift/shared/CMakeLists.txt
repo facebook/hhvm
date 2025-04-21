@@ -22,6 +22,6 @@ add_library(
 )
 
 target_link_libraries(
-  compiler_base
+  shared
   fmt::fmt
 )

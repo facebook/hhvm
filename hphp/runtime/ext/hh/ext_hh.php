@@ -8,12 +8,18 @@ namespace HH {
   * <<__Memoize>> functions
   */
 interface IMemoizeParam {
-  abstract const ctx CMemoParam = [defaults];
    /**
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
   public function getInstanceKey(): string;
+}
+
+/**
+ * Pure version of IMemoizeParam.
+ */
+interface IPureMemoizeParam extends IMemoizeParam {
+  public function getInstanceKey()[]: string;
 }
 
 /*

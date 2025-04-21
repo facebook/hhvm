@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(121) {
+vec(122) {
   string(11) "ArrayAccess"
   string(15) "ConstCollection"
   string(16) "ConstIndexAccess"
@@ -26,6 +26,7 @@ vec(121) {
   string(20) "HH\FunctionAttribute"
   string(19) "HH\GenericEnumClass"
   string(16) "HH\IMemoizeParam"
+  string(20) "HH\IPureMemoizeParam"
   string(28) "HH\InstancePropertyAttribute"
   string(11) "HH\Iterable"
   string(11) "HH\Iterator"

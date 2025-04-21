@@ -18,6 +18,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
+#include <thrift/lib/cpp2/schema/detail/Merge.h>
 
 // These deps pull in the corresponding schemas when enabled.
 #include <thrift/annotation/gen-cpp2/thrift_types.h>
@@ -28,6 +29,8 @@
 #include <thrift/test/gen-cpp2/schema_handlers.h>
 
 using namespace apache::thrift;
+using namespace apache::thrift::schema;
+using namespace apache::thrift::schema::detail;
 
 TEST(SchemaTest, not_linked) {
   auto schemaPtr = SchemaRegistry::get().getMergedSchema();
@@ -90,7 +93,7 @@ TEST(SchemaTest, linked) {
 }
 
 TEST(SchemaTest, static_schema) {
-  auto static_schema = SchemaRegistry::mergeSchemas(
+  auto static_schema = schema::detail::mergeSchemas(
       facebook::thrift::test::schema::schema_constants::
           _fbthrift_schema_542ebcbee39d65d1_includes());
   const type::Program* static_program = nullptr;

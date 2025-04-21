@@ -21,30 +21,20 @@
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
 #include <unordered_set>
-#include <folly/synchronization/RelaxedAtomic.h>
-#include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 
-namespace apache::thrift {
+namespace apache::thrift::schema::detail {
 
-class SchemaRegistry {
- public:
-  // Access the global registry.
-  static SchemaRegistry& get();
+// Helpers for working with schemas.
+type::Schema mergeSchemas(folly::Range<const std::string_view*> schemas);
+type::Schema mergeSchemas(std::vector<type::Schema>&& schemas);
 
-  using Ptr = std::shared_ptr<type::Schema>;
+void mergeInto(
+    type::Schema& dst,
+    type::Schema&& src,
+    std::unordered_set<type::ProgramId>& includedPrograms,
+    bool allowDuplicateDefinitionKeys);
+std::optional<type::Schema> readSchema(std::string_view data);
 
-  // Access all data registered
-  Ptr getMergedSchema();
-
-  explicit SchemaRegistry(BaseSchemaRegistry& base) : base_(base) {}
-
- private:
-  BaseSchemaRegistry& base_;
-  Ptr mergedSchema_;
-  folly::relaxed_atomic<bool> mergedSchemaAccessed_{false};
-  std::unordered_set<type::ProgramId> includedPrograms_;
-};
-
-} // namespace apache::thrift
+} // namespace apache::thrift::schema::detail
 
 #endif

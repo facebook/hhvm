@@ -25,6 +25,7 @@
 #include <folly/container/F14Set.h>
 
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
+#include <thrift/lib/cpp2/schema/detail/Merge.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 
 namespace apache::thrift {
@@ -416,7 +417,7 @@ MultiplexAsyncProcessorFactory::getServiceSchema() {
     }
   }
   schema::DefinitionsSchema result;
-  result.schema = SchemaRegistry::mergeSchemas(std::move(allSchemas));
+  result.schema = schema::detail::mergeSchemas(std::move(allSchemas));
   result.definitions.insert(
       result.definitions.end(),
       std::make_move_iterator(allKeys.begin()),

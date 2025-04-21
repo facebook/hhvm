@@ -17,7 +17,6 @@
 #pragma once
 
 #if __has_include(<thrift/lib/thrift/gen-cpp2/schema_types.h>)
-#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 #define THRIFT_SCHEMA_AVAILABLE
 

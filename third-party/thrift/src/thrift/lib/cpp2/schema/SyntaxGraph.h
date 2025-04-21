@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/async/SchemaV1.h>
+#include <thrift/lib/cpp2/schema/SchemaV1.h>
 
 #include <folly/CppAttributes.h>
 #include <folly/Overload.h>

@@ -1949,7 +1949,7 @@ Type return_type_from_constraints(
   // Return type of native functions is calculated differently.
   if (f.isNative) return native_function_return_type(&f);
 
-  if ((f.attrs & AttrBuiltin) || f.isMemoizeWrapper) return TInitCell;
+  if (f.isMemoizeWrapper) return TInitCell;
 
   if (f.isGenerator) {
     if (f.isAsync) {

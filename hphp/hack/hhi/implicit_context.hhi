@@ -35,6 +35,41 @@ namespace HH {
 
   } // namespace ImplicitContext
 
+  abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
+    final protected static async function runWithAsync<Tout>(
+      this::TData $context,
+      (function ()[_]: Awaitable<Tout>) $f,
+    )[this::CRun, ctx $f]: Awaitable<Tout>;
+
+    final protected static function runWith<Tout>(
+      this::TData $context,
+      (function ()[_]: Tout) $f,
+    )[this::CRun, ctx $f]: Tout;
+  }
+
+  abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
+    abstract const type TData as IPureMemoizeParam;
+
+    final protected static async function runWithAsync<Tout>(
+      this::TData $context,
+      (function ()[_]: Awaitable<Tout>) $f,
+    )[this::CRun, ctx $f]: Awaitable<Tout>;
+
+    final protected static function runWith<Tout>(
+      this::TData $context,
+      (function ()[_]: Tout) $f,
+    )[this::CRun, ctx $f]: Tout;
+  }
+
+  <<__Sealed(MemoAgnosticImplicitContext::class, MemoSensitiveImplicitContext::class)>>
+  abstract class ImplicitContextBase {
+    abstract const type TData as nonnull;
+    abstract const ctx CRun as [leak_safe];
+
+    protected static function exists()[this::CRun]: bool;
+    protected static function get()[this::CRun]: ?this::TData;
+  }
+
   abstract class ImplicitContext {
     abstract const type T as nonnull;
     abstract const bool IS_MEMO_SENSITIVE;

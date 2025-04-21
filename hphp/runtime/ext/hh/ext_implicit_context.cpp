@@ -322,6 +322,24 @@ Object HHVM_FUNCTION(create_implicit_context, TypedValue keyArg,
   return create_implicit_context_impl(data, serializedValue, key, memo_key_int);
 }
 
+ObjectRet HHVM_FUNCTION(create_memo_agnostic, TypedValue key,
+                                              TypedValue context) {
+  assertx(*ImplicitContext::activeCtx);
+  return create_implicit_context_impl(
+    context, Variant{}, resolveClass(key), kAgnosticMemoKey);
+}
+
+ObjectRet HHVM_FUNCTION(create_memo_sensitive, TypedValue keyArg,
+                                               ObjectArg context,
+                                               StringArg contextKey) {
+  assertx(*ImplicitContext::activeCtx);
+  auto const key = resolveClass(keyArg);
+  auto memoKey = memoKeyForInsert(key, VarNR{contextKey.get()});
+  return create_implicit_context_impl(
+    make_tv<KindOfObject>(context.get()), VarNR{contextKey.get()}, key, memoKey
+  );
+}
+
 namespace {
 
 Variant coeffects_call_helper(const Variant& function, const char* name,
@@ -365,6 +383,10 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(get_whole_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_implicit_context,
                   HHVM_FN(create_implicit_context));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_memo_agnostic,
+                  HHVM_FN(create_memo_agnostic));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_memo_sensitive,
+                  HHVM_FN(create_memo_sensitive));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\has_key,

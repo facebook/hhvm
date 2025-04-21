@@ -908,12 +908,22 @@ struct CompactReader {
     }
 
     Variant readField(const FieldSpec& spec, TType type, bool& hasTypeWrapper) {
-      const auto thriftValue = readFieldInternal(spec, type, hasTypeWrapper);
-      hasTypeWrapper = hasTypeWrapper || spec.isTypeWrapped;
       if (UNLIKELY(spec.adapter != nullptr)) {
-        return transformToHackType(thriftValue, *spec.adapter);
+        return readFieldHack(spec, type, hasTypeWrapper);
       }
+      return readFieldThrift(spec, type, hasTypeWrapper);
+    }
+    
+    Variant readFieldThrift(const FieldSpec& spec, TType type, bool& hasTypeWrapper) {
+      auto thriftValue = readFieldInternal(spec, type, hasTypeWrapper);
+      hasTypeWrapper = hasTypeWrapper || spec.isTypeWrapped;
       return thriftValue;
+    }
+    
+    Variant readFieldHack(const FieldSpec& spec, TType type, bool& hasTypeWrapper) {
+      auto thriftValue = readFieldInternal(spec, type, hasTypeWrapper);
+      hasTypeWrapper = hasTypeWrapper || spec.isTypeWrapped;
+      return transformToHackType(std::move(thriftValue), *spec.adapter);
     }
 
     Variant readFieldInternal(

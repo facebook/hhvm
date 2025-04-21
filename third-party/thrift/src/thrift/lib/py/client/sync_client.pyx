@@ -14,11 +14,9 @@
 
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
-cimport folly.iobuf
-
 from copy import copy
 from cython.operator cimport dereference as deref
-from folly.iobuf cimport IOBuf
+from folly.iobuf cimport IOBuf, from_unique_ptr
 from libcpp.memory cimport make_unique
 from libcpp.string cimport string
 from libcpp.utility cimport move as cmove
@@ -93,7 +91,7 @@ cdef class SyncClient:
                 cmove(c_rpc_options),
             )
             if resp.buf.hasValue():
-                response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))
+                response_iobuf = from_unique_ptr(cmove(resp.buf.value()))
                 response = response_cls()
                 deserialize(protocol_factory, b"".join(response_iobuf), response)
                 for p in resp.headers:

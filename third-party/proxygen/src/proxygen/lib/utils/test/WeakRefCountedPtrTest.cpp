@@ -13,7 +13,7 @@
 
 using namespace testing;
 
-namespace proxygen { namespace test {
+namespace proxygen::test {
 
 class TestClass : public EnableWeakRefCountedPtr<TestClass> {
  public:
@@ -602,4 +602,4 @@ TEST(WeakRefCountedPtrTest, CopyConstructDestroySrcDestroyTarget) {
   EXPECT_EQ(nullptr, kaPtr2.get());
 }
 
-}} // namespace proxygen::test
+} // namespace proxygen::test

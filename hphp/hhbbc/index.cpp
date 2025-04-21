@@ -61,7 +61,6 @@
 #include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -15588,100 +15587,42 @@ private:
     }
   }
 
-  static Type initial_return_type(const LocalIndex& index, const php::Func& f) {
+  static Type initial_return_type(const LocalIndex& index,
+                                  const php::Func& f) {
     Trace::Bump _{
       Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(f.unit)
     };
-
-    auto const ty = [&] {
-      // Return type of native functions is calculated differently.
-      if (f.isNative) return native_function_return_type(&f);
-
-      if ((f.attrs & AttrBuiltin) || f.isMemoizeWrapper) return TInitCell;
-
-      if (f.isGenerator) {
-        if (f.isAsync) {
-          // Async generators always return AsyncGenerator object.
-          return objExact(res::Class::get(s_AsyncGenerator.get()));
-        }
-        // Non-async generators always return Generator object.
-        return objExact(res::Class::get(s_Generator.get()));
-      }
-
-      auto const make_type = [&] (const TypeConstraint& tc) {
-        auto lookup = type_from_constraint(
-          tc,
-          TInitCell,
-          [&] (SString name) -> Optional<res::Class> {
-            if (auto const ci = folly::get_default(index.classInfos, name)) {
-              auto const c = res::Class::get(*ci);
-              assertx(c.isComplete());
-              return c;
-            }
-            return std::nullopt;
-          },
-          [&] () -> Optional<Type> {
-            if (!f.cls) return std::nullopt;
-            auto const& cls = [&] () -> const php::Class& {
-              if (!f.cls->closureContextCls) return *f.cls;
-              auto const c =
-                folly::get_default(index.classes, f.cls->closureContextCls);
-              always_assert_flog(
-                c,
-                "When processing return-type for {}, "
-                "tried to access missing class {}",
-                func_fullname(f),
-                f.cls->closureContextCls
-              );
-              return *c;
-            }();
-            if (cls.attrs & AttrTrait) return std::nullopt;
-            auto const c = res::Class::get(cls.name);
+    auto ty = return_type_from_constraints(
+        f,
+        [&] (SString name) -> Optional<res::Class> {
+          if (auto const ci = folly::get_default(index.classInfos, name)) {
+            auto const c = res::Class::get(*ci);
             assertx(c.isComplete());
-            return subCls(c, true);
+            return c;
           }
-        );
-        if (lookup.coerceClassToString == TriBool::Yes) {
-          lookup.upper = promote_classish(std::move(lookup.upper));
-        } else if (lookup.coerceClassToString == TriBool::Maybe) {
-          lookup.upper |= TSStr;
-        }
-        return unctx(std::move(lookup.upper));
-      };
-
-      auto const process = [&] (const TypeIntersectionConstraint& tcs) {
-        auto ret = TInitCell;
-        for (auto const& tc : tcs.range()) {
-          ret = intersection_of(std::move(ret), make_type(tc));
-        }
-        return ret;
-      };
-
-      auto ret = process(f.retTypeConstraints);
-      if (f.hasInOutArgs && !ret.is(BBottom)) {
-        std::vector<Type> types;
-        types.reserve(f.params.size() + 1);
-        types.emplace_back(std::move(ret));
-        for (auto const& p : f.params) {
-          if (!p.inout) continue;
-          auto t = process(p.typeConstraints);
-          if (t.is(BBottom)) return TBottom;
-          types.emplace_back(std::move(t));
-        }
-        std::reverse(begin(types)+1, end(types));
-        ret = vec(std::move(types));
+          return std::nullopt;
+        },
+        [&] () -> Optional<Type> {
+        if (!f.cls) return std::nullopt;
+        auto const& cls = [&] () -> const php::Class& {
+          if (!f.cls->closureContextCls) return *f.cls;
+          auto const c = folly::get_default(index.classes, f.cls->closureContextCls);
+          always_assert_flog(
+            c,
+            "When processing return-type for {}, "
+            "tried to access missing class {}",
+            func_fullname(f),
+            f.cls->closureContextCls
+          );
+          return *c;
+        }();
+        if (cls.attrs & AttrTrait) return std::nullopt;
+        auto const c = res::Class::get(cls.name);
+        assertx(c.isComplete());
+        return subCls(c, true);
       }
-
-      if (f.isAsync) {
-        // Async functions always return WaitH<T>, where T is the type
-        // returned internally.
-        return wait_handle(std::move(ret));
-      }
-      return ret;
-    }();
-
-    FTRACE(3, "Initial return type for {}: {}\n",
-           func_fullname(f), show(ty));
+    );
+    FTRACE(3, "Initial return type for {}: {}\n", func_fullname(f), show(ty));
     return ty;
   }
 

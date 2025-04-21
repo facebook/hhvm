@@ -518,6 +518,19 @@ Optional<Type> parentClsExact(const IIndex&, const Context&);
  */
 res::Class builtin_class(const IIndex&, SString);
 
+
+/*
+ * Compute an initial return type based on the function and the
+ * return type-constraints. The Resolve std::function is used to resolve
+ * the classname for objects and Self is used to lookup the class in case
+ * of the "this" type hint.
+ */
+Type return_type_from_constraints(
+  const php::Func& f,
+  const std::function<Optional<res::Class>(SString)>& resolve,
+  const std::function<Optional<Type>()>& self
+);
+
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -38,6 +38,7 @@
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
+#include "hphp/hhbbc/type-builtins.h"
 
 #include "hphp/runtime/vm/reified-generics.h"
 
@@ -1938,6 +1939,66 @@ res::Class builtin_class(const IIndex& index, SString name) {
     name
   );
   return *rcls;
+}
+
+Type return_type_from_constraints(
+  const php::Func& f,
+  const std::function<Optional<res::Class>(SString)>& resolve,
+  const std::function<Optional<Type>()>& self
+) {
+  // Return type of native functions is calculated differently.
+  if (f.isNative) return native_function_return_type(&f);
+
+  if ((f.attrs & AttrBuiltin) || f.isMemoizeWrapper) return TInitCell;
+
+  if (f.isGenerator) {
+    if (f.isAsync) {
+      // Async generators always return AsyncGenerator object.
+      return objExact(res::Class::get(s_AsyncGenerator.get()));
+    }
+    // Non-async generators always return Generator object.
+    return objExact(res::Class::get(s_Generator.get()));
+  }
+
+  auto const make_type = [&] (const TypeConstraint& tc) {
+    auto lookup = type_from_constraint(tc, TInitCell, resolve, self);
+    if (lookup.coerceClassToString == TriBool::Yes) {
+      lookup.upper = promote_classish(std::move(lookup.upper));
+    } else if (lookup.coerceClassToString == TriBool::Maybe) {
+      lookup.upper |= TSStr;
+    }
+    return unctx(std::move(lookup.upper));
+  };
+
+  auto const process = [&] (const TypeIntersectionConstraint& tcs) {
+    auto ret = TInitCell;
+    for (auto const& tc : tcs.range()) {
+      ret = intersection_of(std::move(ret), make_type(tc));
+    }
+    return ret;
+  };
+
+  auto ret = process(f.retTypeConstraints);
+  if (f.hasInOutArgs && !ret.is(BBottom)) {
+    std::vector<Type> types;
+    types.reserve(f.params.size() + 1);
+    types.emplace_back(std::move(ret));
+    for (auto const& p : f.params) {
+      if (!p.inout) continue;
+      auto t = process(p.typeConstraints);
+      if (t.is(BBottom)) return TBottom;
+      types.emplace_back(std::move(t));
+    }
+    std::reverse(begin(types)+1, end(types));
+    ret = vec(std::move(types));
+  }
+
+  if (f.isAsync) {
+    // Async functions always return WaitH<T>, where T is the type
+    // returned internally.
+    return wait_handle(std::move(ret));
+  }
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////

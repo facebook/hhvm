@@ -78,6 +78,8 @@ const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
 const StaticString s_Closure("Closure");
 const StaticString s_this(annotTypeName(AnnotType::This));
+const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
+const StaticString s_Generator("Generator");
 
 bool poppable(Op op) {
   switch (op) {
@@ -5573,8 +5575,32 @@ void in(ISS& env, const bc::CreateCont& /*op*/) {
   push(env, TInitNull);
 }
 
-void in(ISS& env, const bc::ContEnter&) { popC(env); push(env, TInitCell); }
-void in(ISS& env, const bc::ContRaise&) { popC(env); push(env, TInitCell); }
+namespace {
+void contEnterImpl(ISS& env) {
+  popC(env);
+  auto const cls = env.ctx.func->cls;
+  assertx(
+    cls && (
+      cls->name->tsame(s_AsyncGenerator.get()) ||
+      cls->name->tsame(s_Generator.get())
+    )
+  );
+  push(
+    env,
+    cls->name == s_AsyncGenerator.get()
+      ? wait_handle(TInitCell)
+      : TInitNull
+  );
+}
+}
+
+void in(ISS& env, const bc::ContEnter&) {
+  contEnterImpl(env);
+}
+
+void in(ISS& env, const bc::ContRaise&) {
+  contEnterImpl(env);
+}
 
 void in(ISS& env, const bc::Yield&) {
   popC(env);

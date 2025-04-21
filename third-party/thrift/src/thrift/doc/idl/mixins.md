@@ -18,8 +18,10 @@ Basically if you add `mixin` qualifier to thrift field, you will have the abilit
 struct Mixin1 { 1: i32 field1; }
 struct Mixin2 { 1: i32 field2; }
 struct Foo {
-  1: Mixin1 m1 (cpp.mixin);
-  2: Mixin2 m2 (cpp.mixin);
+  @thrift.Mixin
+  1: Mixin1 m1;
+  @thrift.Mixin
+  2: Mixin2 m2;
   3: i32 field3;
 }
 ```
@@ -58,10 +60,16 @@ We do not have timeline to support this in other languages. However, if you have
 
 ## FAQ
 
-> Q: Is nested mixin struct supported?A: Yes. If mixin field itself contains mixin field, all nested fields will be exposed to the top level.
+> Q: Is nested mixin struct supported?
 
-> Q: Can mixin field have optional qualifier?A: No.
+A: Yes. If mixin field itself contains mixin field, all nested fields will be exposed to the top level.
 
-> Q: What if we have duplicated field name in 2 mixin fields?A: There will be build error with diagnostic message.
+> Q: Can mixin field have optional qualifier?
+
+A: No.
+
+> Q: What if we have duplicated field name in 2 mixin fields?
+
+A: There will be build error with diagnostic message.
 
 Design doc: [here](https://fb.quip.com/Q0QmAQPtJadN).

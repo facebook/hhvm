@@ -71,20 +71,13 @@ TEST_F(MstchCompatTest, basic) {
   EXPECT_EQ(
       to_string(converted),
       "mstch::array (size=5)\n"
-      "`-[0]\n"
-      "  |-i64(1)\n"
-      "`-[1]\n"
-      "  |-'hello world'\n"
-      "`-[2]\n"
-      "  |-i64(3)\n"
-      "`-[3]\n"
-      "  |-true\n"
-      "`-[4]\n"
-      "  |-mstch::map (size=1)\n"
-      "  | `-'key'\n"
-      "  |   |-mstch::array (size=1)\n"
-      "  |   | `-[0]\n"
-      "  |   |   |-'nested'\n");
+      "`-[0] i64(1)\n"
+      "`-[1] 'hello world'\n"
+      "`-[2] i64(3)\n"
+      "`-[3] true\n"
+      "`-[4] mstch::map (size=1)\n"
+      "  `-'key' → mstch::array (size=1)\n"
+      "    `-[0] 'nested'\n");
 
   // Value equality
   EXPECT_EQ(from_mstch(arr), from_mstch(arr));
@@ -99,16 +92,11 @@ TEST_F(MstchCompatTest, map_lookups) {
   EXPECT_EQ(
       to_string(converted),
       "mstch::map (size=2)\n"
-      "`-'key'\n"
-      "  |-mstch::map (size=3)\n"
-      "  | `-'bool'\n"
-      "  |   |-true\n"
-      "  | `-'float'\n"
-      "  |   |-f64(2)\n"
-      "  | `-'nested'\n"
-      "  |   |-i64(1)\n"
-      "`-'key2'\n"
-      "  |-null\n");
+      "`-'key' → mstch::map (size=3)\n"
+      "  `-'bool' → true\n"
+      "  `-'float' → f64(2)\n"
+      "  `-'nested' → i64(1)\n"
+      "`-'key2' → null\n");
 
   auto ctx = eval_context::with_root_scope(diags(), converted);
   EXPECT_EQ(**ctx.lookup_object({}), converted);
@@ -136,30 +124,28 @@ TEST_F(MstchCompatTest, array_iteration) {
   EXPECT_EQ(
       to_string(converted),
       "mstch::map (size=2)\n"
-      "`-'key'\n"
-      "  |-mstch::array (size=5)\n"
-      "  | `-[0]\n"
-      "  |   |-'nested'\n"
-      "  | `-[1]\n"
-      "  |   |-i64(1)\n"
-      "  | `-[2]\n"
-      "  |   |-true\n"
-      "  | `-[3]\n"
-      "  |   |-null\n"
-      "  | `-[4]\n"
-      "  |   |-f64(2)\n"
-      "`-'outer'\n"
-      "  |-mstch::array (size=1)\n"
-      "  | `-[0]\n"
-      "  |   |-mstch::map (size=1)\n"
-      "  |   | `-'inner'\n"
-      "  |   |   |-mstch::array (size=3)\n"
-      "  |   |   | `-[0]\n"
-      "  |   |   |   |-i64(1)\n"
-      "  |   |   | `-[1]\n"
-      "  |   |   |   |-i64(2)\n"
-      "  |   |   | `-[2]\n"
-      "  |   |   |   |-i64(3)\n");
+      "`-'key' → mstch::array (size=5)\n"
+      "  `-[0] 'nested'\n"
+      "  `-[1] i64(1)\n"
+      "  `-[2] true\n"
+      "  `-[3] null\n"
+      "  `-[4] f64(2)\n"
+      "`-'outer' → mstch::array (size=1)\n"
+      "  `-[0] mstch::map (size=1)\n"
+      "    `-'inner' → mstch::array (size=3)\n"
+      "      `-[0] i64(1)\n"
+      "      `-[1] i64(2)\n"
+      "      `-[2] i64(3)\n");
+
+  {
+    object_print_options print_opts;
+    print_opts.max_depth = 1;
+    EXPECT_EQ(
+        to_string(converted, print_opts),
+        "mstch::map (size=2)\n"
+        "`-'key' → ...\n"
+        "`-'outer' → ...\n");
+  }
 
   {
     object_print_options print_opts;
@@ -167,22 +153,14 @@ TEST_F(MstchCompatTest, array_iteration) {
     EXPECT_EQ(
         to_string(converted, print_opts),
         "mstch::map (size=2)\n"
-        "`-'key'\n"
-        "  |-mstch::array (size=5)\n"
-        "  | `-[0]\n"
-        "  |   |-'nested'\n"
-        "  | `-[1]\n"
-        "  |   |-i64(1)\n"
-        "  | `-[2]\n"
-        "  |   |-true\n"
-        "  | `-[3]\n"
-        "  |   |-null\n"
-        "  | `-[4]\n"
-        "  |   |-f64(2)\n"
-        "`-'outer'\n"
-        "  |-mstch::array (size=1)\n"
-        "  | `-[0]\n"
-        "  |   |-...\n");
+        "`-'key' → mstch::array (size=5)\n"
+        "  `-[0] 'nested'\n"
+        "  `-[1] i64(1)\n"
+        "  `-[2] true\n"
+        "  `-[3] null\n"
+        "  `-[4] f64(2)\n"
+        "`-'outer' → mstch::array (size=1)\n"
+        "  `-[0] ...\n");
   }
 
   {

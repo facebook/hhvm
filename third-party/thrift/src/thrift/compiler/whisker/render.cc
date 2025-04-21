@@ -502,7 +502,7 @@ class virtual_machine {
             for (std::size_t i = 0; i < err.searched_scopes().size(); ++i) {
               const std::string_view maybe_newline = i == 0 ? "" : "\n";
               object_print_options print_opts;
-              print_opts.max_depth = 1;
+              print_opts.max_depth = 3;
               fmt::format_to(
                   out,
                   "{}#{} {}",

@@ -240,9 +240,9 @@ void map::default_print_to(
   for (const std::string& key : property_names) {
     auto cached = lookup_property(key);
     assert(cached.has_value());
-    auto element_scope = scope.open_transparent_property();
-    element_scope.println("'{}'", key);
-    whisker::print_to(*cached, element_scope.open_node(), options);
+    auto element_scope = scope.open_property();
+    element_scope.print("'{}' → ", key);
+    whisker::print_to(*cached, element_scope, options);
   }
 }
 
@@ -309,9 +309,9 @@ void array::default_print_to(
   const auto sz = size();
   scope.println("{} (size={})", name, sz);
   for (std::size_t i = 0; i < sz; ++i) {
-    auto element_scope = scope.open_transparent_property();
-    element_scope.println("[{}]", i);
-    whisker::print_to(at(i), element_scope.open_node(), options);
+    auto element_scope = scope.open_property();
+    element_scope.print("[{}] ", i);
+    whisker::print_to(at(i), element_scope, options);
   }
 }
 

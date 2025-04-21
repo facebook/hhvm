@@ -21,6 +21,7 @@
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include <fmt/core.h>
 
@@ -130,9 +131,17 @@ class scope {
   }
 
   template <typename... T>
+  void print(fmt::format_string<T...> msg, T&&... args) {
+    if (!std::exchange(used_, true)) {
+      *out_ << *nesting_context_;
+    }
+    *out_ << fmt::format(msg, std::forward<T>(args)...);
+  }
+
+  template <typename... T>
   void println(fmt::format_string<T...> msg, T&&... args) {
-    *out_ << *nesting_context_ << fmt::format(msg, std::forward<T>(args)...)
-          << '\n';
+    print(msg, std::forward<T>(args)...);
+    *out_ << '\n';
   }
 
   static scope make_root(std::ostream& out) {
@@ -153,6 +162,7 @@ class scope {
   std::ostream* out_;
   std::shared_ptr<const nesting_context> nesting_context_;
   unsigned semantic_depth_;
+  bool used_{false};
 
   friend std::ostream& operator<<(
       std::ostream& out, const nesting_context& self);

@@ -16,7 +16,9 @@
  *
  */
 
-final class ThriftPolicyEnforcer extends PolicyEnforcer {
+final class ThriftPolicyEnforcer
+  extends PolicyEnforcer
+  implements IPolicyEnforcerAtThrift {
   const PolicyEnforcerAssetClass ASSET_CLASS =
     PolicyEnforcerAssetClass::THRIFT_CLIENT;
   const classname<TrustedAPIEnforcerModule> TAE_MODULE =

@@ -1,0 +1,26 @@
+ERROR: File "with_refinement.php", line 23, characters 18-40:
+Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])
+ERROR: File "with_refinement.php", line 12, characters 23-23:
+Invalid constraint (Typing[4322])
+  File "with_refinement.php", line 11, characters 5-15:
+  This type constant has the `__Reifiable` attribute
+  File "with_refinement.php", line 12, characters 28-50:
+  It cannot contain type refinement
+ERROR: File "with_refinement.php", line 15, characters 7-13:
+Invalid reified hint (Typing[4305])
+  File "with_refinement.php", line 12, characters 28-50:
+  This is type refinement, it cannot be used as a reified type argument
+  File "with_refinement.php", line 26, characters 18-18:
+  `T` is reified
+ERROR: File "with_refinement.php", line 23, characters 14-14:
+Invalid type (Typing[4322])
+  File "with_refinement.php", line 11, characters 5-15:
+  This type constant has the `__Reifiable` attribute
+  File "with_refinement.php", line 23, characters 18-40:
+  It cannot contain type refinement
+ERROR: File "with_refinement.php", line 30, characters 5-27:
+Invalid reified hint (Typing[4305])
+  File "with_refinement.php", line 30, characters 5-27:
+  This is type refinement, it cannot be used as a reified type argument
+  File "with_refinement.php", line 26, characters 18-18:
+  `T` is reified

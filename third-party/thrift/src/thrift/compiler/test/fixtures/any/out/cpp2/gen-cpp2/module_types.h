@@ -153,12 +153,6 @@ class MyStruct final  {
 
   /** Glean { "field": "myString" } */
   template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> myString_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "myString" } */
-  template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> myString_ref() & {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
@@ -173,12 +167,6 @@ class MyStruct final  {
   template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> myString() const& {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "myString" } */
-  template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> myString() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "myString" } */
@@ -566,12 +554,6 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "myString" } */
   template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> myString_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "myString" } */
-  template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> myString_ref() & {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
@@ -586,12 +568,6 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> myString() const& {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "myString" } */
-  template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> myString() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "myString" } */

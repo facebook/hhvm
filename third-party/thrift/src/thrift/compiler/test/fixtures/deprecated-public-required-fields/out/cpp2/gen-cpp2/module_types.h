@@ -134,12 +134,6 @@ class Foo final  {
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::required_field_ref<const fbthrift_T&&> field_ref() const&& {
-    return ::apache::thrift::required_field_ref<const fbthrift_T&&>{static_cast<const fbthrift_T&&>(this->field)};
-  }
-
-  /** Glean { "field": "field" } */
-  template <typename..., typename fbthrift_T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<fbthrift_T&> field_ref() & {
     return ::apache::thrift::required_field_ref<fbthrift_T&>{this->field};
   }

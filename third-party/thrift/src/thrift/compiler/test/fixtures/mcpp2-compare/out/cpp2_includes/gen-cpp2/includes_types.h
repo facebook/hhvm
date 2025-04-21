@@ -198,12 +198,6 @@ class AStruct final  {
 
   /** Glean { "field": "FieldA" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> FieldA_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_FieldA), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "FieldA" } */
-  template <typename..., typename fbthrift_T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> FieldA_ref() & {
     return {this->__fbthrift_field_FieldA, __isset.at(0), __isset.bit(0)};
   }
@@ -218,12 +212,6 @@ class AStruct final  {
   template <typename..., typename fbthrift_T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> FieldA() const& {
     return {this->__fbthrift_field_FieldA, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "FieldA" } */
-  template <typename..., typename fbthrift_T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> FieldA() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_FieldA), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "FieldA" } */

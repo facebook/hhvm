@@ -190,13 +190,6 @@ class InterceptedFields final  {
 
   /** Glean { "field": "access_field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
-  FOLLY_NOINLINE ::apache::thrift::field_ref<const fbthrift_T&&> access_field_ref() const&& {
-    my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 1>{*this});
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_access_field), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "access_field" } */
-  template <typename..., typename fbthrift_T = ::std::int32_t>
   FOLLY_NOINLINE ::apache::thrift::field_ref<fbthrift_T&> access_field_ref() & {
     my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 1>{*this});
     return {this->__fbthrift_field_access_field, __isset.at(0), __isset.bit(0)};
@@ -214,13 +207,6 @@ class InterceptedFields final  {
   FOLLY_NOINLINE ::apache::thrift::field_ref<const fbthrift_T&> access_field() const& {
     my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 1>{*this});
     return {this->__fbthrift_field_access_field, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "access_field" } */
-  template <typename..., typename fbthrift_T = ::std::int32_t>
-  FOLLY_NOINLINE ::apache::thrift::field_ref<const fbthrift_T&&> access_field() const&& {
-    my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 1>{*this});
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_access_field), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "access_field" } */
@@ -466,13 +452,6 @@ class InterceptedFields final  {
 
   /** Glean { "field": "access_optional_boxed_field" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const fbthrift_T&&> access_optional_boxed_field_ref() const&& {
-    my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_optional_boxed_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 6>{*this});
-    return ::apache::thrift::optional_boxed_field_ref<const fbthrift_T&&>{static_cast<const fbthrift_T&&>(this->__fbthrift_field_access_optional_boxed_field)};
-  }
-
-  /** Glean { "field": "access_optional_boxed_field" } */
-  template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<fbthrift_T&> access_optional_boxed_field_ref() & {
     my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_optional_boxed_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 6>{*this});
     return ::apache::thrift::optional_boxed_field_ref<fbthrift_T&>{this->__fbthrift_field_access_optional_boxed_field};
@@ -490,13 +469,6 @@ class InterceptedFields final  {
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const fbthrift_T&> access_optional_boxed_field() const& {
     my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_optional_boxed_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 6>{*this});
     return ::apache::thrift::optional_boxed_field_ref<const fbthrift_T&>{this->__fbthrift_field_access_optional_boxed_field};
-  }
-
-  /** Glean { "field": "access_optional_boxed_field" } */
-  template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const fbthrift_T&&> access_optional_boxed_field() const&& {
-    my::FieldInterceptor::interceptThriftFieldAccess(this->__fbthrift_field_access_optional_boxed_field, ::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, 6>{*this});
-    return ::apache::thrift::optional_boxed_field_ref<const fbthrift_T&&>{static_cast<const fbthrift_T&&>(this->__fbthrift_field_access_optional_boxed_field)};
   }
 
   /** Glean { "field": "access_optional_boxed_field" } */

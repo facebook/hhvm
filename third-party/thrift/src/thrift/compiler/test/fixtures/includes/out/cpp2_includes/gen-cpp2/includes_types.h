@@ -151,12 +151,6 @@ class Included final  {
 
   /** Glean { "field": "MyIntField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> MyIntField_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_MyIntField), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "MyIntField" } */
-  template <typename..., typename fbthrift_T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> MyIntField_ref() & {
     return {this->__fbthrift_field_MyIntField, __isset.at(0), __isset.bit(0)};
   }
@@ -171,12 +165,6 @@ class Included final  {
   template <typename..., typename fbthrift_T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> MyIntField() const& {
     return {this->__fbthrift_field_MyIntField, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "MyIntField" } */
-  template <typename..., typename fbthrift_T = ::std::int64_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> MyIntField() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_MyIntField), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "MyIntField" } */
@@ -199,12 +187,6 @@ class Included final  {
 
   /** Glean { "field": "MyTransitiveField" } */
   template <typename..., typename fbthrift_T = ::cpp2::Foo>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> MyTransitiveField_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_MyTransitiveField), __isset.at(1), __isset.bit(1)};
-  }
-
-  /** Glean { "field": "MyTransitiveField" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> MyTransitiveField_ref() & {
     return {this->__fbthrift_field_MyTransitiveField, __isset.at(1), __isset.bit(1)};
   }
@@ -219,12 +201,6 @@ class Included final  {
   template <typename..., typename fbthrift_T = ::cpp2::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> MyTransitiveField() const& {
     return {this->__fbthrift_field_MyTransitiveField, __isset.at(1), __isset.bit(1)};
-  }
-
-  /** Glean { "field": "MyTransitiveField" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Foo>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> MyTransitiveField() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_MyTransitiveField), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "MyTransitiveField" } */

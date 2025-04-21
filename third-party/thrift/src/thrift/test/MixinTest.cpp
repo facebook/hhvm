@@ -109,5 +109,5 @@ TEST(Mixin, Type) {
                 apache::thrift::field_ref<std::string&&>>);
   static_assert(std::is_same_v<
                 decltype(std::move(std::as_const(foo)).field1()),
-                apache::thrift::field_ref<const std::string&&>>);
+                apache::thrift::field_ref<const std::string&>>);
 }

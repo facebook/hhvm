@@ -207,12 +207,6 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> name_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "name" } */
-  template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> name_ref() & {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
@@ -227,12 +221,6 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> name() const& {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "name" } */
-  template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> name() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "name" } */
@@ -255,12 +243,6 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "result" } */
   template <typename..., typename fbthrift_T = ::cpp2::Result>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> result_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
-  }
-
-  /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> result_ref() & {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
@@ -275,12 +257,6 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   template <typename..., typename fbthrift_T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> result() const& {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
-  }
-
-  /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> result() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */

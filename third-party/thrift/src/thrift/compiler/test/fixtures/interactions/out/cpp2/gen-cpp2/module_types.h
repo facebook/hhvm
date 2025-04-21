@@ -150,12 +150,6 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> message_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "message" } */
-  template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> message_ref() & {
     return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
   }
@@ -170,12 +164,6 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> message() const& {
     return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "message" } */
-  template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> message() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "message" } */
@@ -329,12 +317,6 @@ class ShouldBeBoxed final  {
 
   /** Glean { "field": "sessionId" } */
   template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> sessionId_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_sessionId), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "sessionId" } */
-  template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> sessionId_ref() & {
     return {this->__fbthrift_field_sessionId, __isset.at(0), __isset.bit(0)};
   }
@@ -349,12 +331,6 @@ class ShouldBeBoxed final  {
   template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> sessionId() const& {
     return {this->__fbthrift_field_sessionId, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "sessionId" } */
-  template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> sessionId() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_sessionId), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "sessionId" } */

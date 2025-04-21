@@ -146,12 +146,6 @@ class IncludedB final  {
 
   /** Glean { "field": "i32Field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> i32Field_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_i32Field), __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "i32Field" } */
-  template <typename..., typename fbthrift_T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> i32Field_ref() & {
     return {this->__fbthrift_field_i32Field, __isset.at(0), __isset.bit(0)};
   }
@@ -166,12 +160,6 @@ class IncludedB final  {
   template <typename..., typename fbthrift_T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> i32Field() const& {
     return {this->__fbthrift_field_i32Field, __isset.at(0), __isset.bit(0)};
-  }
-
-  /** Glean { "field": "i32Field" } */
-  template <typename..., typename fbthrift_T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> i32Field() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_i32Field), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "i32Field" } */
@@ -194,12 +182,6 @@ class IncludedB final  {
 
   /** Glean { "field": "strField" } */
   template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> strField_ref() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_strField), __isset.at(1), __isset.bit(1)};
-  }
-
-  /** Glean { "field": "strField" } */
-  template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> strField_ref() & {
     return {this->__fbthrift_field_strField, __isset.at(1), __isset.bit(1)};
   }
@@ -214,12 +196,6 @@ class IncludedB final  {
   template <typename..., typename fbthrift_T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> strField() const& {
     return {this->__fbthrift_field_strField, __isset.at(1), __isset.bit(1)};
-  }
-
-  /** Glean { "field": "strField" } */
-  template <typename..., typename fbthrift_T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> strField() const&& {
-    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_strField), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "strField" } */

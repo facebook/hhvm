@@ -29,13 +29,6 @@
 
   {{> common/field_docblock}}
   template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<const fbthrift_T&&> {{field:cpp_name}}_ref() const&& {
-{{> module_types_h/field_interceptor}}
-    return {{^field:has_isset?}}{{field:field_ref_type}}<const fbthrift_T&&>{{/field:has_isset?}}{static_cast<const fbthrift_T&&>(this->{{> common/field_value}}){{> module_types_h/field_ref_args}}};
-  }
-
-  {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
   {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&> {{field:cpp_name}}_ref() & {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<fbthrift_T&>{{/field:has_isset?}}{this->{{> common/field_value}}{{> module_types_h/field_ref_args}}};
@@ -57,13 +50,6 @@
   {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<const fbthrift_T&> {{field:cpp_name}}() const& {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<const fbthrift_T&>{{/field:has_isset?}}{this->{{> common/field_value}}{{> module_types_h/field_ref_args}}};
-  }
-
-  {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<const fbthrift_T&&> {{field:cpp_name}}() const&& {
-{{> module_types_h/field_interceptor}}
-    return {{^field:has_isset?}}{{field:field_ref_type}}<const fbthrift_T&&>{{/field:has_isset?}}{static_cast<const fbthrift_T&&>(this->{{> common/field_value}}){{> module_types_h/field_ref_args}}};
   }
 
   {{> common/field_docblock}}

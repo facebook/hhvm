@@ -468,7 +468,7 @@ TEST(OptionalsTest, AddRef) {
                 optional_field_ref<int64_t&&>>);
   static_assert(std::is_same_v<
                 decltype(std::move(std::as_const(obj)).int64Opt()),
-                optional_field_ref<const int64_t&&>>);
+                optional_field_ref<const int64_t&>>);
   obj.int64Opt() = 42;
   EXPECT_EQ(obj.int64Opt(), 42);
   auto value = std::map<int64_t, int64_t>{{1, 2}};

@@ -22,9 +22,7 @@
 DEFINE_uint32(chunk_size, 1024, "Number of bytes per chunk");
 DEFINE_uint32(batch_size, 16, "Flow control batch size");
 
-namespace facebook {
-namespace thrift {
-namespace benchmarks {
+namespace facebook::thrift::benchmarks {
 
 using apache::thrift::HandlerCallback;
 using apache::thrift::HandlerCallbackBase;
@@ -112,6 +110,4 @@ class BenchmarkHandler
   Chunk2 chunk_;
 };
 
-} // namespace benchmarks
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::benchmarks

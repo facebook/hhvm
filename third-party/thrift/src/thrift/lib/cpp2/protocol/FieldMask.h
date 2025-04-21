@@ -129,7 +129,6 @@ Mask operator-(const Mask&, const Mask&); // subtract
 //   mask.includes<id1, id2>(anotherMask);
 //   mask.excludes({"fieldname"}, anotherMask);
 //   mask.toThrift();  // --> reference to the underlying FieldMask.
-
 template <typename T>
 struct MaskBuilder : type::detail::Wrap<Mask> {
  private:
@@ -168,6 +167,12 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     data_ = data_ | detail::path<Tag, Id...>(mask);
     return *this;
   }
+  MaskBuilder& includes(
+      const std::vector<folly::StringPiece>& fieldNames,
+      const Mask& mask = allMask()) {
+    data_ = data_ | detail::path<Tag>(fieldNames, 0, mask);
+    return *this;
+  }
 
   template <typename... Id>
   MaskBuilder& includes_map_element(int64_t key, const Mask& mask = allMask()) {
@@ -184,19 +189,17 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     return includes<Id...>(map);
   }
 
-  MaskBuilder& includes(
-      const std::vector<folly::StringPiece>& fieldNames,
-      const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<Tag>(fieldNames, 0, mask);
-    return *this;
+  template <typename... Id>
+  MaskBuilder& includes_type(type::Type type, const Mask& mask = allMask()) {
+    Mask typeMap;
+    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    return includes<Id...>(typeMap);
   }
 
   template <typename... Id, typename TypeTag>
   MaskBuilder& includes_type(TypeTag, const Mask& mask = allMask()) {
     detail::errorIfNotCompatible<TypeTag>(mask);
-    Mask typeMap;
-    typeMap.includes_type_ref().emplace()[type::Type(TypeTag{})] = mask;
-    return includes<Id...>(typeMap);
+    return includes_type<Id...>(type::Type(TypeTag{}), mask);
   }
 
   // Excludes the field specified by the list of Ids/field names with
@@ -206,6 +209,12 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   template <typename... Id>
   MaskBuilder& excludes(const Mask& mask = allMask()) {
     data_ = data_ - detail::path<Tag, Id...>(mask);
+    return *this;
+  }
+  MaskBuilder& excludes(
+      const std::vector<folly::StringPiece>& fieldNames,
+      const Mask& mask = allMask()) {
+    data_ = data_ - detail::path<Tag>(fieldNames, 0, mask);
     return *this;
   }
 
@@ -224,11 +233,17 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     return excludes<Id...>(map);
   }
 
-  MaskBuilder& excludes(
-      const std::vector<folly::StringPiece>& fieldNames,
-      const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<Tag>(fieldNames, 0, mask);
-    return *this;
+  template <typename... Id>
+  MaskBuilder& excludes_type(type::Type type, const Mask& mask = allMask()) {
+    Mask typeMap;
+    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    return excludes<Id...>(typeMap);
+  }
+
+  template <typename... Id, typename TypeTag>
+  MaskBuilder& excludes_type(TypeTag, const Mask& mask = allMask()) {
+    detail::errorIfNotCompatible<TypeTag>(mask);
+    return excludes_type<Id...>(type::Type(TypeTag{}), mask);
   }
 
   // reset_and_includes calls reset_to_none() and includes().

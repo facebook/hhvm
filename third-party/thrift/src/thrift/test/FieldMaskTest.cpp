@@ -3252,6 +3252,7 @@ TEST(FieldMaskTest, MaskBuilderUnion) {
     EXPECT_EQ(builder.toThrift(), expected);
   }
 }
+
 TEST(FieldMaskTest, MaskBuilderAny) {
   MaskBuilder<Foo> fooMask(noneMask());
   fooMask.includes<ident::field1>();
@@ -3275,6 +3276,30 @@ TEST(FieldMaskTest, MaskBuilderAny) {
   b.reset_to_none().includes_type<ident::rawAny>(
       type::infer_tag<StructWithAny>{}, simpleExpected);
   EXPECT_EQ(b.toThrift(), nestedExpected);
+
+  b.reset_to_none().includes_type<ident::rawAny>(
+      type::Type::get<type::infer_tag<Foo>>(), fooMask.toThrift());
+  EXPECT_EQ(b.toThrift(), simpleExpected);
+
+  b.reset_to_none().includes_type<ident::rawAny>(
+      type::Type::get<type::infer_tag<StructWithAny>>(), simpleExpected);
+  EXPECT_EQ(b.toThrift(), nestedExpected);
+
+  b.reset_to_all().excludes_type<ident::rawAny>(
+      type::infer_tag<Foo>{}, fooMask.toThrift());
+  EXPECT_EQ(b.invert().toThrift(), simpleExpected);
+
+  b.reset_to_all().excludes_type<ident::rawAny>(
+      type::infer_tag<StructWithAny>{}, simpleExpected);
+  EXPECT_EQ(b.invert().toThrift(), nestedExpected);
+
+  b.reset_to_all().excludes_type<ident::rawAny>(
+      type::Type::get<type::infer_tag<Foo>>(), fooMask.toThrift());
+  EXPECT_EQ(b.invert().toThrift(), simpleExpected);
+
+  b.reset_to_all().excludes_type<ident::rawAny>(
+      type::Type::get<type::infer_tag<StructWithAny>>(), simpleExpected);
+  EXPECT_EQ(b.invert().toThrift(), nestedExpected);
 }
 
 TEST(FieldMaskTest, MaskBuilderAdaptedAny) {

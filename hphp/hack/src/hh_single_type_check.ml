@@ -2330,7 +2330,7 @@ let handle_mode
       Printf.printf "%s" (Hh_json.json_to_string json)
   | RunSimpliHack ->
     let (errors, tasts) = compute_tasts ctx files_info files_contents in
-    print_errors_if_present (Errors.merge parse_errors errors);
+    print_error_list error_format errors max_errors;
     Relative_path.Map.iter tasts ~f:(fun fn tast ->
         let prompts = Simplihack_prompt.find ctx tast in
         Printf.printf "%s\n" @@ Relative_path.to_absolute fn;

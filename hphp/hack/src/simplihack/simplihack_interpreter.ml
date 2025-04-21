@@ -78,7 +78,7 @@ module Context = struct
         (* Creates new context with old_ctx's provider and dependent_root but empty locals *)
       ]}
   *)
-  let fresh ctx = init ctx.provider ctx.dependent_root
+  let fresh ctx = { ctx with locals = Local_id.Map.empty }
 
   let add_dep ctx dep =
     match ctx.dependent_root with
@@ -296,13 +296,20 @@ end = struct
       (args : (_, _) Aast.argument list) =
     let open Option.Let_syntax in
     let (_, _, func) = func in
-    match func with
-    | Aast.Id (_, name) ->
+    match (func, args) with
+    | (Aast.Id (_, id), [Aast.Anormal arg])
+      when String.equal id Naming_special_names.SimpliHack.file ->
+      let* path = Value.str @@ Expr.eval ctx arg in
+      let path = Relative_path.from_root ~suffix:path in
+      Context.add_file_dep ctx path;
+      let* contents = File_provider.get_contents path in
+      return @@ Value.Str contents
+    | (Aast.Id (_, name), args) ->
       let* Aast.{ fd_fun = { f_params = params; f_body = body; _ }; _ } =
         Context.find_function ~ctx name
       in
       invoke ctx (params, body) args
-    | Aast.Class_const (cid, (_, name)) ->
+    | (Aast.Class_const (cid, (_, name)), args) ->
       let* class_ = ClassId.eval ctx cid in
       let* Aast.{ m_params = params; m_body = body; _ } =
         Context.find_static_method ~ctx class_ name

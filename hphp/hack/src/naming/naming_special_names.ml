@@ -1422,3 +1422,9 @@ module ExpressionTrees = struct
 
   let dollardollarTmpVar = "$0dollardollar"
 end
+
+module SimpliHack = struct
+  let prefix = "\\HH\\SimpliHack\\"
+
+  let file = prefix ^ "file"
+end

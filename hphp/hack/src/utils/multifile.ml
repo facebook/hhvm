@@ -83,7 +83,10 @@ let file_to_file_list file =
   let content = Sys_utils.cat abs_fn in
   if Str.string_match delim content 0 then
     let files = split_multifile_content content in
-    List.map files ~f:(fun (sub_fn, c) -> (full_path abs_fn sub_fn, c))
+    List.map files ~f:(fun (sub_fn, c) ->
+        match String.chop_prefix sub_fn ~prefix:"~root/" with
+        | None -> (full_path abs_fn sub_fn, c)
+        | Some suffix -> (Relative_path.from_root ~suffix, c))
   else if String.is_prefix content ~prefix:"// @directory " then (
     let contentl = Str.split (Str.regexp "\n") content in
     let first_line = List.hd_exn contentl in

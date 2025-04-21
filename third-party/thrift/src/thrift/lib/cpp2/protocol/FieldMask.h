@@ -246,27 +246,6 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     return excludes_type<Id...>(type::Type(TypeTag{}), mask);
   }
 
-  // reset_and_includes calls reset_to_none() and includes().
-  // reset_and_excludes calls reset_to_all() and excludes().
-  MaskBuilder& reset_and_includes(
-      std::vector<folly::StringPiece> fieldNames,
-      const Mask& mask = allMask()) {
-    return reset_to_none().includes(fieldNames, mask);
-  }
-  MaskBuilder& reset_and_excludes(
-      std::vector<folly::StringPiece> fieldNames,
-      const Mask& mask = allMask()) {
-    return reset_to_all().excludes(fieldNames, mask);
-  }
-  template <typename... Id>
-  MaskBuilder& reset_and_includes(const Mask& mask = allMask()) {
-    return reset_to_none().template includes<Id...>(mask);
-  }
-  template <typename... Id>
-  MaskBuilder& reset_and_excludes(const Mask& mask = allMask()) {
-    return reset_to_all().template excludes<Id...>(mask);
-  }
-
   // Mask APIs
   void ensure(T& obj) const { protocol::ensure(data_, obj); }
   void clear(T& obj) const { protocol::clear(data_, obj); }

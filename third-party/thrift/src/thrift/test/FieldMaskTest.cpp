@@ -1184,7 +1184,7 @@ TEST(FieldMaskTest, FilterSimple) {
     filtered = testFilter(m.toThrift(), src);
     EXPECT_EQ(filtered.field_3_ref().value().field_1_ref().value(), 1);
 
-    m.reset_and_includes<ident::field_3, ident::field_2>();
+    m.reset_to_none().includes<ident::field_3, ident::field_2>();
     filtered = testFilter(m.toThrift(), src);
     // No sub field filtered, so field_3 should be null
     EXPECT_FALSE(filtered.field_3_ref().has_value());
@@ -1389,7 +1389,7 @@ TEST(FieldMaskTest, FilterUnion) {
   // Filter failed, union-ref should remain empty
   EXPECT_EQ(dst.getType(), RecursiveUnion::Type::__EMPTY__);
 
-  m.reset_and_includes<ident::recurse, ident::foo, ident::field1>();
+  m.reset_to_none().includes<ident::recurse, ident::foo, ident::field1>();
   dst = m.filter(parent);
   EXPECT_EQ(*dst.recurse_ref().value().foo_ref().value().field1(), 1);
   EXPECT_EQ(
@@ -3220,7 +3220,7 @@ TEST(FieldMaskTest, MaskBuilderUnion) {
     builder.includes<ident::foo>();
     EXPECT_EQ(builder.toThrift(), expected);
 
-    builder.reset_and_includes({"foo"});
+    builder.reset_to_none().includes({"foo"});
     EXPECT_EQ(builder.toThrift(), expected);
   }
   {
@@ -3235,7 +3235,7 @@ TEST(FieldMaskTest, MaskBuilderUnion) {
     builder.includes<ident::foo>(nested);
     EXPECT_EQ(builder.toThrift(), expected);
 
-    builder.reset_and_includes({"foo"}, nested);
+    builder.reset_to_none().includes({"foo"}, nested);
     EXPECT_EQ(builder.toThrift(), expected);
   }
   {
@@ -3248,7 +3248,7 @@ TEST(FieldMaskTest, MaskBuilderUnion) {
     builder.includes<ident::recurse, ident::foo>();
     EXPECT_EQ(builder.toThrift(), expected);
 
-    builder.reset_and_includes({"recurse", "foo"});
+    builder.reset_to_none().includes({"recurse", "foo"});
     EXPECT_EQ(builder.toThrift(), expected);
   }
 }
@@ -3677,49 +3677,13 @@ TEST(FieldMaskTest, MaskBuilderReset) {
     builder.includes<ident::field_3>().reset_to_all();
     EXPECT_EQ(builder.toThrift(), allMask());
   }
-
-  // reset and includes
-  {
-    MaskBuilder<Bar2> expected(noneMask());
-    expected.includes<ident::field_4>();
-    {
-      MaskBuilder<Bar2> builder;
-      builder.reset_and_includes<ident::field_4>();
-      EXPECT_EQ(builder.toThrift(), expected.toThrift());
-    }
-    {
-      MaskBuilder<Bar2> builder;
-      builder.reset_to_all()
-          .includes({"field_3"})
-          .reset_and_includes({"field_4"});
-      EXPECT_EQ(builder.toThrift(), expected.toThrift());
-    }
-  }
-
-  // reset and excludes
-  {
-    MaskBuilder<Bar2> expected(allMask());
-    expected.excludes<ident::field_3, ident::field_1>();
-    {
-      MaskBuilder<Bar2> builder;
-      builder.reset_and_excludes<ident::field_3, ident::field_1>();
-      EXPECT_EQ(builder.toThrift(), expected.toThrift());
-    }
-    {
-      MaskBuilder<Bar2> builder;
-      builder.reset_to_none()
-          .includes({"field_3"})
-          .reset_and_excludes({"field_3", "field_1"});
-      EXPECT_EQ(builder.toThrift(), expected.toThrift());
-    }
-  }
 }
 
 TEST(FieldMaskTest, MaskBuilderMaskAPIs) {
   Bar2 src, dst;
 
-  MaskBuilder<Bar2> builder;
-  builder.reset_and_includes({"field_3", "field_1"}).includes({"field_4"});
+  MaskBuilder<Bar2> builder(noneMask());
+  builder.includes({"field_3", "field_1"}).includes({"field_4"});
   // test invert
   Mask expectedMask = reverseMask(builder.toThrift());
   EXPECT_EQ(builder.invert().toThrift(), expectedMask);

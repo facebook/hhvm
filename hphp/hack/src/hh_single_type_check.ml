@@ -36,6 +36,7 @@ let standard_deviation mean samples =
 type mode =
   | Cst_search
   | Dump_symbol_info
+  | RunSimpliHack
   | Glean_index of string
   | Glean_sym_hash
   | Dump_inheritance
@@ -371,6 +372,12 @@ let parse_options () =
       ( "--dump-symbol-info",
         Arg.Unit (set_mode Dump_symbol_info),
         " Dump all symbol information" );
+      ( "--run-simplihack",
+        Arg.Unit
+          (fun () ->
+            skip_tast_checks := true;
+            set_mode RunSimpliHack ()),
+        " Run SimpliHack on the file and print the prompts that are produced" );
       ( "--glean-index",
         Arg.String (fun output_dir -> set_mode (Glean_index output_dir) ()),
         " Run indexer and output json in provided dir" );
@@ -2321,6 +2328,26 @@ let handle_mode
       in
       let json = Count_imprecise_types.json_of_results results in
       Printf.printf "%s" (Hh_json.json_to_string json)
+  | RunSimpliHack ->
+    let (errors, tasts) = compute_tasts ctx files_info files_contents in
+    print_errors_if_present (Errors.merge parse_errors errors);
+    Relative_path.Map.iter tasts ~f:(fun fn tast ->
+        let prompts = Simplihack_prompt.find ctx tast in
+        Printf.printf "%s\n" @@ Relative_path.to_absolute fn;
+        List.iter prompts ~f:(fun prompt ->
+            let msg =
+              match prompt.Simplihack_prompt.derive_prompt () with
+              | Some p -> p
+              | None -> "<no prompt derived>"
+            in
+            let result =
+              Format.asprintf
+                "%a %s"
+                Pos.pp
+                prompt.Simplihack_prompt.param_pos
+                msg
+            in
+            Printf.printf "  %s\n" result))
   | Map_reduce_mode ->
     let (errors, tasts) = compute_tasts_by_name ctx files_info files_contents in
     print_errors_if_present (Errors.merge parse_errors errors);

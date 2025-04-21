@@ -459,29 +459,6 @@ template <typename Variant, typename T>
 inline constexpr std::size_t IndexOf = IndexOfImpl<Variant, T>::value;
 
 /**
- * A storage type that either:
- *   - owns an object of `T` or,
- *   - keeps a non-owning reference to `T`.
- */
-template <typename T>
-struct MaybeManaged {
- public:
-  explicit MaybeManaged(T&& object) : storage_(std::move(object)) {}
-  explicit MaybeManaged(const T& ref) : storage_(std::addressof(ref)) {}
-
-  const T& operator*() const {
-    return folly::variant_match(
-        storage_,
-        [](const T& object) -> const T& { return object; },
-        [](const T* ref) -> const T& { return *ref; });
-  }
-  const T* operator->() const { return std::addressof(**this); }
-
- private:
-  std::variant<T, const T*> storage_;
-};
-
-/**
  * In most cases, using SyntaxGraph completely abstracts away DefinitionKeys.
  * This is because SyntaxGraph only creates one DefinitionNode per key. So
  * comparing two nodes by their address is equivalent to comparing their keys.
@@ -1404,8 +1381,6 @@ class ProgramNode final : folly::MoveOnly,
       F14FastMap<std::string_view, folly::not_null<const DefinitionNode*>>;
   DefinitionsByName definitionsByName() const;
 
-  const SyntaxGraph& syntaxGraph() const;
-
   ProgramNode(
       const detail::Resolver& resolver,
       std::string_view path,
@@ -1475,13 +1450,10 @@ class SyntaxGraph final {
   ProgramNode::IncludesList programs() const;
 
  private:
-  using ManagedSchema = detail::MaybeManaged<apache::thrift::type::Schema>;
-  ManagedSchema rawSchema_;
   folly::not_null_unique_ptr<const detail::Resolver> resolver_;
 
-  explicit SyntaxGraph(ManagedSchema&&);
+  explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 
-  friend class detail::Resolver;
   friend const DefinitionNode& detail::lookUpDefinition(
       const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);
 };

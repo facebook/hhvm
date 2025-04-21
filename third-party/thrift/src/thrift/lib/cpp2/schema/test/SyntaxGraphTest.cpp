@@ -78,7 +78,6 @@ TEST_F(ServiceSchemaTest, Programs) {
 
   auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
   EXPECT_EQ(mainProgram->definitionsByName().size(), 13);
-  EXPECT_EQ(&mainProgram->syntaxGraph(), &syntaxGraph);
   {
     ProgramNode::IncludesList includes = mainProgram->includes();
     EXPECT_EQ(includes.size(), 2);
@@ -110,7 +109,6 @@ TEST_F(ServiceSchemaTest, TransitivePrograms) {
 
   auto secondProgram = findProgramByName(syntaxGraph, "syntax_graph_2");
   EXPECT_EQ(secondProgram->definitionsByName().size(), 1);
-  EXPECT_EQ(&secondProgram->syntaxGraph(), &syntaxGraph);
   {
     ProgramNode::IncludesList includes = secondProgram->includes();
     EXPECT_EQ(includes.size(), 1);

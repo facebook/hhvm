@@ -41,7 +41,7 @@ fn main() -> ::anyhow::Result<()> {
         let relative_path = RelativePath::make(relative_path::Prefix::Dummy, path.to_path_buf());
 
         let arena = bumpalo::Bump::new();
-        let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(
+        let parsed_file = direct_decl_parser::parse_decls_for_bytecode_obr(
             &Default::default(),
             relative_path,
             &content,

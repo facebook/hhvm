@@ -8105,6 +8105,7 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
 
     if (callCtx.args.size() < finfo->func->params.size()) return true;
     for (auto i = 0; i < finfo->func->params.size(); i++) {
+      if (finfo->func->params[i].outOnly) continue;
       if (checkParam(i)) return true;
     }
     return false;

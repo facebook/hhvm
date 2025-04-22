@@ -1789,6 +1789,9 @@ std::tuple<Type, bool, bool> verify_param_type(const IIndex& index,
   assertx(paramId < ctx.func->params.size());
   auto const& pinfo = ctx.func->params[paramId];
 
+  // Inputs of out-only parameters are not enforced.
+  if (pinfo.outOnly) return { t, true, true };
+
   auto refined = TInitCell;
   auto noop = true;
   auto effectFree = true;

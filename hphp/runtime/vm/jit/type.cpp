@@ -1142,6 +1142,8 @@ Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tcs,
 Type typeFromFuncParam(const Func* func, uint32_t paramId) {
   assertx(paramId < func->numNonVariadicParams());
 
+  if (func->params()[paramId].isOutOnly()) return TInitCell;
+
   auto const getThisType = [&] {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;
   };

@@ -1485,6 +1485,8 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
 
 void verifyParamType(IRGS& env, const Func* func, int32_t id,
                      BCSPRelOffset offset, SSATmp* prologueCtx) {
+  if (func->params()[id].isOutOnly()) return;
+
   auto const verifyFunc = [&](const TypeConstraint& tc, SSATmp* inputVal) -> SSATmp* {
     return verifyTypeImpl(
       env,

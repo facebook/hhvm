@@ -63,8 +63,10 @@ class ServiceInterceptorBase {
     Cpp2ConnContext* context = nullptr;
     detail::ServiceInterceptorOnConnectionStorage* storage = nullptr;
   };
-  virtual void internal_onConnection(ConnectionInfo) = 0;
-  virtual void internal_onConnectionClosed(ConnectionInfo) noexcept = 0;
+  virtual void internal_onConnection(
+      ConnectionInfo, InterceptorMetricCallback&) = 0;
+  virtual void internal_onConnectionClosed(
+      ConnectionInfo, InterceptorMetricCallback&) noexcept = 0;
 
   struct RequestInfo {
     Cpp2RequestContext* context = nullptr;
@@ -123,7 +125,7 @@ class ServiceInterceptorBase {
     const char* methodName = nullptr;
   };
   virtual folly::coro::Task<void> internal_onResponse(
-      ConnectionInfo, ResponseInfo) = 0;
+      ConnectionInfo, ResponseInfo, InterceptorMetricCallback&) = 0;
 
   /**
    * This methods is called by ThriftServer to set the module name for the

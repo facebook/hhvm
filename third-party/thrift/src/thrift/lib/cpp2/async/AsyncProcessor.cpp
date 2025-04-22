@@ -1250,7 +1250,9 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
         methodName_};
     try {
       co_await serviceInterceptors[i]->internal_onResponse(
-          std::move(connectionInfo), std::move(responseInfo));
+          connectionInfo,
+          std::move(responseInfo),
+          server->getInterceptorMetricCallback());
     } catch (...) {
       exceptions.emplace_back(i, folly::current_exception());
     }

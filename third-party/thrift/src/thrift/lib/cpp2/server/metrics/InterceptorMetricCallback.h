@@ -26,21 +26,65 @@ class InterceptorMetricCallback {
   virtual ~InterceptorMetricCallback() = default;
 
   /**
-   * Records the completion of a single interceptor's onResponse call.
+   * Records the completion of a single interceptor's onRequest call.
    *
    * @param qualifiedName The fully qualified name of the interceptor.
-   * @param onResponseTime The time it took to complete the onResponse call.
+   * @param onRequestDuration The time it took to complete the onResponse call.
    */
   virtual void onRequestComplete(
       const ServiceInterceptorQualifiedName& qualifiedName,
       std::chrono::microseconds onRequestDuration) = 0;
+
+  /**
+   * Records the completion of a single interceptor's onResponse call.
+   *
+   * @param qualifiedName The fully qualified name of the interceptor.
+   * @param onResponseDuration The time it took to complete the onResponse call.
+   */
+  virtual void onResponseComplete(
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      std::chrono::microseconds onResponseDuration) = 0;
+
+  /**
+   * Records the completion of a single interceptor's onConnection call.
+   *
+   * @param qualifiedName The fully qualified name of the interceptor.
+   * @param onConnectionDuration The time it took to complete the onResponse
+   * call.
+   */
+  virtual void onConnectionComplete(
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      std::chrono::microseconds onConnectionDuration) = 0;
+
+  /**
+   * Records the completion of a single interceptor's onResponse call.
+   *
+   * @param qualifiedName The fully qualified name of the interceptor.
+   * @param onConnectionClosedDuration The time it took to complete the
+   * onResponse call.
+   */
+  virtual void onConnectionClosedComplete(
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      std::chrono::microseconds onConnectionClosedDuration) = 0;
 };
 
 class NoopInterceptorMetricCallback : public InterceptorMetricCallback {
  public:
   void onRequestComplete(
-      const ServiceInterceptorQualifiedName&,
-      std::chrono::microseconds) override {}
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
+
+  void onResponseComplete(
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
+
+  void onConnectionComplete(
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
+
+  void onConnectionClosedComplete(
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
 };
 
 } // namespace apache::thrift

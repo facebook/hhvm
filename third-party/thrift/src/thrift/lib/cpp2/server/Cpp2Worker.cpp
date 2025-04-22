@@ -209,7 +209,8 @@ void Cpp2Worker::invokeServiceInterceptorsOnConnectionForHeader(
         &context,
         context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
     try {
-      serviceInterceptors[i]->internal_onConnection(std::move(connectionInfo));
+      serviceInterceptors[i]->internal_onConnection(
+          std::move(connectionInfo), server_->getInterceptorMetricCallback());
     } catch (...) {
       didServiceInterceptorOnConnectionThrow = true;
     }

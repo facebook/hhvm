@@ -56,23 +56,32 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
 
  private:
-  void internal_onConnection(ConnectionInfo connectionInfo) final {
+  void internal_onConnection(
+      ConnectionInfo connectionInfo,
+      InterceptorMetricCallback& interceptorMetricCallback) final {
     if (isDisabled()) {
       return;
     }
+    folly::stop_watch<std::chrono::microseconds> onConnectionTimer;
     auto* storage = connectionInfo.storage;
     if (auto value = onConnection(std::move(connectionInfo))) {
       storage->emplace<ConnectionState>(std::move(*value));
     }
+    interceptorMetricCallback.onConnectionComplete(
+        getQualifiedName(), onConnectionTimer.elapsed());
   }
   void internal_onConnectionClosed(
-      ConnectionInfo connectionInfo) noexcept final {
+      ConnectionInfo connectionInfo,
+      InterceptorMetricCallback& interceptorMetricCallback) noexcept final {
     if (isDisabled()) {
       return;
     }
+    folly::stop_watch<std::chrono::microseconds> onConnectionClosedTimer;
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
     onConnectionClosed(connectionState, std::move(connectionInfo));
+    interceptorMetricCallback.onConnectionClosedComplete(
+        getQualifiedName(), onConnectionClosedTimer.elapsed());
   }
 
   folly::coro::Task<void> internal_onRequest(
@@ -82,7 +91,7 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     if (isDisabled()) {
       co_return;
     }
-    folly::stop_watch<std::chrono::milliseconds> onRequestTimer;
+    folly::stop_watch<std::chrono::microseconds> onRequestTimer;
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
     auto* storage = requestInfo.storage;
@@ -95,14 +104,19 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
 
   folly::coro::Task<void> internal_onResponse(
-      ConnectionInfo connectionInfo, ResponseInfo responseInfo) final {
+      ConnectionInfo connectionInfo,
+      ResponseInfo responseInfo,
+      InterceptorMetricCallback& interceptorMetricCallback) final {
     if (isDisabled()) {
       co_return;
     }
+    folly::stop_watch<std::chrono::microseconds> onResponseTimer;
     auto* requestState = getValueAsType<RequestState>(*responseInfo.storage);
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
     co_await onResponse(requestState, connectionState, std::move(responseInfo));
+    interceptorMetricCallback.onResponseComplete(
+        getQualifiedName(), onResponseTimer.elapsed());
   }
 
   void setModuleName(const std::string& moduleName) final {

@@ -1001,8 +1001,8 @@ void ThriftRocketServerHandler::onBeforeHandleFrame() {
 void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
     RocketServerConnection& connection) noexcept {
 #if FOLLY_HAS_COROUTINES
-  const auto& serviceInterceptors =
-      worker_->getServer()->getServiceInterceptors();
+  auto* server = worker_->getServer();
+  const auto& serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
   didExecuteServiceInterceptorsOnConnection_ = true;
 
@@ -1011,7 +1011,8 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
         &connContext_,
         connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
     try {
-      serviceInterceptors[i]->internal_onConnection(std::move(connectionInfo));
+      serviceInterceptors[i]->internal_onConnection(
+          std::move(connectionInfo), server->getInterceptorMetricCallback());
     } catch (...) {
       exceptions.emplace_back(i, folly::current_exception());
     }
@@ -1037,13 +1038,15 @@ void ThriftRocketServerHandler::
     invokeServiceInterceptorsOnConnectionClosed() noexcept {
 #if FOLLY_HAS_COROUTINES
   if (didExecuteServiceInterceptorsOnConnection_) {
-    const auto& serviceInterceptors =
-        worker_->getServer()->getServiceInterceptors();
+    auto* server = worker_->getServer();
+    const auto& serviceInterceptors = server->getServiceInterceptors();
     for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
       ServiceInterceptorBase::ConnectionInfo connectionInfo{
           &connContext_,
           connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-      serviceInterceptors[i]->internal_onConnectionClosed(connectionInfo);
+
+      serviceInterceptors[i]->internal_onConnectionClosed(
+          connectionInfo, server->getInterceptorMetricCallback());
     }
   }
 #endif // FOLLY_HAS_COROUTINES

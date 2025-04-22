@@ -447,7 +447,25 @@ class MockInterceptorMetricCallback : public InterceptorMetricCallback {
  public:
   MOCK_METHOD(
       void,
+      onConnectionComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds onResponseTime),
+      (override));
+  MOCK_METHOD(
+      void,
+      onConnectionClosedComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds onResponseTime),
+      (override));
+  MOCK_METHOD(
+      void,
       onRequestComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds onResponseTime),
+      (override));
+  MOCK_METHOD(
+      void,
+      onResponseComplete,
       (const ServiceInterceptorQualifiedName& qualifiedName,
        std::chrono::microseconds onResponseTime),
       (override));
@@ -466,7 +484,19 @@ CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
         detail::ThriftServerInternals(server).setInterceptorMetricCallback(
             interceptorMetricCallback);
       });
+  const auto callsIfNotHttp2 = [&](int value) -> int {
+    return transportType() == TransportType::HTTP2 ? 0 : value;
+  };
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionComplete(_, _))
+      .Times(callsIfNotHttp2(2))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionClosedComplete(_, _))
+      .Times(callsIfNotHttp2(2))
+      .WillRepeatedly(Return());
   EXPECT_CALL(*interceptorMetricCallback, onRequestComplete(_, _))
+      .Times(2)
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*interceptorMetricCallback, onResponseComplete(_, _))
       .Times(2)
       .WillRepeatedly(Return());
 

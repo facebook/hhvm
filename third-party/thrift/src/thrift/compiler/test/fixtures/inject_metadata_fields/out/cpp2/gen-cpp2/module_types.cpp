@@ -102,10 +102,6 @@ template void Fields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Fields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Fields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Fields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Fields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Fields::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Fields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Fields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2
@@ -199,10 +195,6 @@ template void FieldsInjectedToEmptyStruct::readNoXfer<>(apache::thrift::BinaryPr
 template uint32_t FieldsInjectedToEmptyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t FieldsInjectedToEmptyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldsInjectedToEmptyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void FieldsInjectedToEmptyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t FieldsInjectedToEmptyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t FieldsInjectedToEmptyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t FieldsInjectedToEmptyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2
@@ -302,10 +294,6 @@ template void FieldsInjectedToStruct::readNoXfer<>(apache::thrift::BinaryProtoco
 template uint32_t FieldsInjectedToStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t FieldsInjectedToStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldsInjectedToStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void FieldsInjectedToStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t FieldsInjectedToStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t FieldsInjectedToStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t FieldsInjectedToStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2
@@ -415,10 +403,6 @@ template void FieldsInjectedWithIncludedStruct::readNoXfer<>(apache::thrift::Bin
 template uint32_t FieldsInjectedWithIncludedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void FieldsInjectedWithIncludedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t FieldsInjectedWithIncludedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t FieldsInjectedWithIncludedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t FieldsInjectedWithIncludedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2

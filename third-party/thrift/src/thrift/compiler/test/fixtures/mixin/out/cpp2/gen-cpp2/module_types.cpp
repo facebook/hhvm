@@ -102,10 +102,6 @@ template void Mixin1::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Mixin1::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Mixin1::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Mixin1::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Mixin1::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Mixin1::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Mixin1::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Mixin1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2
@@ -221,10 +217,6 @@ template void Mixin2::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Mixin2::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Mixin2::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Mixin2::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Mixin2::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Mixin2::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Mixin2::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Mixin2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -324,10 +316,6 @@ template void Mixin3Base::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Mixin3Base::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Mixin3Base::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Mixin3Base::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Mixin3Base::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Mixin3Base::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Mixin3Base::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Mixin3Base::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2
@@ -449,10 +437,6 @@ template void Foo::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Foo::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Foo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Foo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Foo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Foo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

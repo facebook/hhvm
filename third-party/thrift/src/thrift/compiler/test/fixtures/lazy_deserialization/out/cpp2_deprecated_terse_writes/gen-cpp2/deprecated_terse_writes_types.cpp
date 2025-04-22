@@ -155,10 +155,6 @@ template void TerseFoo::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t TerseFoo::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t TerseFoo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t TerseFoo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void TerseFoo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t TerseFoo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t TerseFoo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t TerseFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace apache::thrift::test
@@ -423,10 +419,6 @@ template void TerseLazyFoo::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t TerseLazyFoo::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t TerseLazyFoo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t TerseLazyFoo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void TerseLazyFoo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t TerseLazyFoo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t TerseLazyFoo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t TerseLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace apache::thrift::test
@@ -573,10 +565,6 @@ template void TerseOptionalFoo::readNoXfer<>(apache::thrift::BinaryProtocolReade
 template uint32_t TerseOptionalFoo::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t TerseOptionalFoo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t TerseOptionalFoo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void TerseOptionalFoo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t TerseOptionalFoo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t TerseOptionalFoo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t TerseOptionalFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace apache::thrift::test
@@ -841,10 +829,6 @@ template void TerseOptionalLazyFoo::readNoXfer<>(apache::thrift::BinaryProtocolR
 template uint32_t TerseOptionalLazyFoo::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t TerseOptionalLazyFoo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t TerseOptionalLazyFoo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void TerseOptionalLazyFoo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t TerseOptionalLazyFoo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t TerseOptionalLazyFoo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t TerseOptionalLazyFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace apache::thrift::test

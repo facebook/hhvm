@@ -300,10 +300,6 @@ template void StructWithDefaultStruct::readNoXfer<>(apache::thrift::BinaryProtoc
 template uint32_t StructWithDefaultStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t StructWithDefaultStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t StructWithDefaultStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void StructWithDefaultStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t StructWithDefaultStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t StructWithDefaultStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t StructWithDefaultStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace apache::thrift::test

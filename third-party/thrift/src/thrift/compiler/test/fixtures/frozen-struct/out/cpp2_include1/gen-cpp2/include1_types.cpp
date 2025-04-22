@@ -118,10 +118,6 @@ template void IncludedA::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t IncludedA::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t IncludedA::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t IncludedA::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void IncludedA::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t IncludedA::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t IncludedA::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t IncludedA::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace some::ns

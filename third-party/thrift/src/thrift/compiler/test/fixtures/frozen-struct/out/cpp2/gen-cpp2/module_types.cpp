@@ -191,10 +191,6 @@ template void ModuleA::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t ModuleA::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t ModuleA::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t ModuleA::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ModuleA::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ModuleA::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ModuleA::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ModuleA::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -303,10 +299,6 @@ template void ModuleB::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t ModuleB::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t ModuleB::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t ModuleB::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ModuleB::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ModuleB::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ModuleB::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ModuleB::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace some::ns
@@ -391,10 +383,6 @@ template void DirectlyAdapted::readNoXfer<>(apache::thrift::BinaryProtocolReader
 template uint32_t DirectlyAdapted::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t DirectlyAdapted::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t DirectlyAdapted::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void DirectlyAdapted::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t DirectlyAdapted::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t DirectlyAdapted::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t DirectlyAdapted::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace detail
@@ -506,10 +494,6 @@ template void CppRef::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t CppRef::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t CppRef::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t CppRef::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void CppRef::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t CppRef::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t CppRef::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t CppRef::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace some::ns

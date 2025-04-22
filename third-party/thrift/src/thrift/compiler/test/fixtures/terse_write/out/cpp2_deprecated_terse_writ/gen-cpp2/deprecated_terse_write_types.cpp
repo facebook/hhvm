@@ -97,10 +97,6 @@ template void MyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace facebook::thrift::test::terse_write::deprecated
@@ -214,10 +210,6 @@ template void MyUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace facebook::thrift::test::terse_write::deprecated
@@ -413,10 +405,6 @@ template void StructLevelTerseStruct::readNoXfer<>(apache::thrift::BinaryProtoco
 template uint32_t StructLevelTerseStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t StructLevelTerseStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t StructLevelTerseStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void StructLevelTerseStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t StructLevelTerseStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t StructLevelTerseStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t StructLevelTerseStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -834,10 +822,6 @@ template void FieldLevelTerseStruct::readNoXfer<>(apache::thrift::BinaryProtocol
 template uint32_t FieldLevelTerseStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t FieldLevelTerseStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldLevelTerseStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void FieldLevelTerseStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t FieldLevelTerseStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t FieldLevelTerseStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t FieldLevelTerseStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -967,10 +951,6 @@ template void CppRefStructFields::readNoXfer<>(apache::thrift::BinaryProtocolRea
 template uint32_t CppRefStructFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t CppRefStructFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t CppRefStructFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void CppRefStructFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t CppRefStructFields::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t CppRefStructFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t CppRefStructFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -1267,10 +1247,6 @@ template void DeprecatedTerseWriteWithCustomDefault::readNoXfer<>(apache::thrift
 template uint32_t DeprecatedTerseWriteWithCustomDefault::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t DeprecatedTerseWriteWithCustomDefault::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t DeprecatedTerseWriteWithCustomDefault::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void DeprecatedTerseWriteWithCustomDefault::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t DeprecatedTerseWriteWithCustomDefault::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t DeprecatedTerseWriteWithCustomDefault::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t DeprecatedTerseWriteWithCustomDefault::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace facebook::thrift::test::terse_write::deprecated
@@ -1558,10 +1534,6 @@ template void DeprecatedTerseWriteWithRedundantCustomDefault::readNoXfer<>(apach
 template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void DeprecatedTerseWriteWithRedundantCustomDefault::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace facebook::thrift::test::terse_write::deprecated

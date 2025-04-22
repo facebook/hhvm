@@ -96,10 +96,6 @@ template void Foo::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Foo::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Foo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Foo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Foo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Foo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::namespace_from_package::module

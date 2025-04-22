@@ -134,10 +134,6 @@ template void InterceptedFields::readNoXfer<>(apache::thrift::BinaryProtocolRead
 template uint32_t InterceptedFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t InterceptedFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void InterceptedFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t InterceptedFields::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t InterceptedFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace facebook::thrift::test

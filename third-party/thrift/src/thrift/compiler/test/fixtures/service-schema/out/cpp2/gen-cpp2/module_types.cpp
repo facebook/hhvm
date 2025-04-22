@@ -135,10 +135,6 @@ template void CustomException::readNoXfer<>(apache::thrift::BinaryProtocolReader
 template uint32_t CustomException::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t CustomException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t CustomException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void CustomException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t CustomException::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t CustomException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t CustomException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2

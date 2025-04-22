@@ -163,10 +163,6 @@ template void SimpleException::readNoXfer<>(apache::thrift::BinaryProtocolReader
 template uint32_t SimpleException::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t SimpleException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t SimpleException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void SimpleException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t SimpleException::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t SimpleException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t SimpleException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace py3::simple
@@ -279,10 +275,6 @@ template void OptionalRefStruct::readNoXfer<>(apache::thrift::BinaryProtocolRead
 template uint32_t OptionalRefStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t OptionalRefStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t OptionalRefStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void OptionalRefStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t OptionalRefStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t OptionalRefStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t OptionalRefStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace py3::simple
@@ -563,10 +555,6 @@ template void SimpleStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t SimpleStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t SimpleStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t SimpleStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void SimpleStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t SimpleStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t SimpleStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t SimpleStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace py3::simple
@@ -700,10 +688,6 @@ template void HiddenTypeFieldsStruct::readNoXfer<>(apache::thrift::BinaryProtoco
 template uint32_t HiddenTypeFieldsStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t HiddenTypeFieldsStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t HiddenTypeFieldsStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void HiddenTypeFieldsStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t HiddenTypeFieldsStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t HiddenTypeFieldsStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t HiddenTypeFieldsStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -829,10 +813,6 @@ template void AdaptedUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t AdaptedUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t AdaptedUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t AdaptedUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void AdaptedUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t AdaptedUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t AdaptedUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AdaptedUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace detail
@@ -937,10 +917,6 @@ template void HiddenException::readNoXfer<>(apache::thrift::BinaryProtocolReader
 template uint32_t HiddenException::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t HiddenException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t HiddenException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void HiddenException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t HiddenException::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t HiddenException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t HiddenException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace py3::simple
@@ -1114,10 +1090,6 @@ template void ComplexStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*)
 template uint32_t ComplexStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t ComplexStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t ComplexStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ComplexStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ComplexStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ComplexStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ComplexStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -1244,10 +1216,6 @@ template void BinaryUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t BinaryUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t BinaryUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t BinaryUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void BinaryUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t BinaryUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t BinaryUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t BinaryUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace py3::simple
@@ -1337,10 +1305,6 @@ template void BinaryUnionStruct::readNoXfer<>(apache::thrift::BinaryProtocolRead
 template uint32_t BinaryUnionStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t BinaryUnionStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t BinaryUnionStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void BinaryUnionStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t BinaryUnionStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t BinaryUnionStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t BinaryUnionStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -1546,10 +1510,6 @@ template void CustomFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t CustomFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t CustomFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t CustomFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void CustomFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t CustomFields::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t CustomFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t CustomFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -1755,10 +1715,6 @@ template void CustomTypedefFields::readNoXfer<>(apache::thrift::BinaryProtocolRe
 template uint32_t CustomTypedefFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t CustomTypedefFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t CustomTypedefFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void CustomTypedefFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t CustomTypedefFields::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t CustomTypedefFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t CustomTypedefFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -1959,10 +1915,6 @@ template void AdaptedTypedefFields::readNoXfer<>(apache::thrift::BinaryProtocolR
 template uint32_t AdaptedTypedefFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t AdaptedTypedefFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t AdaptedTypedefFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void AdaptedTypedefFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t AdaptedTypedefFields::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t AdaptedTypedefFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AdaptedTypedefFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

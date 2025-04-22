@@ -272,6 +272,7 @@ add_library(
   server/MonitoringMethodNames.cpp
   server/ParallelConcurrencyController.cpp
   server/TokenBucketConcurrencyController.cpp
+  server/ServiceInterceptorQualifiedName.cpp
   server/StandardConcurrencyController.cpp
   server/ThreadManagerLoggingWrapper.cpp
   server/RequestDebugLog.cpp

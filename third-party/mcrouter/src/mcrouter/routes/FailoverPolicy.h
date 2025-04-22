@@ -112,7 +112,7 @@ class FailoverInOrderPolicy {
 
   class ChildProxy {
    public:
-    ChildProxy(RouteHandlePtr child) : child_(child) {}
+    ChildProxy(RouteHandlePtr child) : child_(std::move(child)) {}
 
     template <class Request>
     ReplyT<Request> route(const Request& req) {
@@ -120,7 +120,7 @@ class FailoverInOrderPolicy {
     }
 
    private:
-    const RouteHandlePtr child_;
+    RouteHandlePtr child_;
   };
 
   template <class Request>
@@ -307,7 +307,7 @@ class FailoverDeterministicOrderPolicy {
 
   class ChildProxy {
    public:
-    ChildProxy(RouteHandlePtr child) : child_(child) {}
+    ChildProxy(RouteHandlePtr child) : child_(std::move(child)) {}
 
     template <class Request>
     ReplyT<Request> route(const Request& req) {
@@ -620,7 +620,7 @@ class FailoverRendezvousPolicy {
 
   class ChildProxy {
    public:
-    ChildProxy(RouteHandlePtr child) : child_(child) {}
+    ChildProxy(RouteHandlePtr child) : child_(std::move(child)) {}
 
     template <class Request>
     ReplyT<Request> route(const Request& req) {

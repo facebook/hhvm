@@ -756,6 +756,15 @@ class DynamicPatch {
   /// Applies the patch to the given Thrift Any. Throws if the patch is not
   /// applicable.
   void applyToDataFieldInsideAny(type::AnyStruct&) const;
+  /// @brief Applies the patch to the given blob and returns the result as a
+  /// blob. Throws if the patch is not applicable.
+  ///
+  /// Note, this method uses introspection API `extractMaskFromPatch` to avoid
+  /// full deserialization when applying Thrift Patch to serialized structured
+  /// object in a blob.
+  template <type::StandardProtocol Protocol>
+  std::unique_ptr<folly::IOBuf> applyToSerializedObject(
+      const folly::IOBuf& buf) const;
 
   /// Converts SafePatch stored in Thrift Any to DynamicPatch.
   [[nodiscard]] static DynamicPatch fromSafePatch(const type::AnyStruct& any);

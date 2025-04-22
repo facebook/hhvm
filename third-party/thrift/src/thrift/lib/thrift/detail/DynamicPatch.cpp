@@ -1972,6 +1972,31 @@ void DynamicPatch::applyToDataFieldInsideAny(type::AnyStruct& any) const {
             .toThrift();
 }
 
+template <type::StandardProtocol Protocol>
+std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject(
+    const folly::IOBuf& buf) const {
+  using ProtocolReader = std::conditional_t<
+      Protocol == type::StandardProtocol::Binary,
+      BinaryProtocolReader,
+      CompactProtocolReader>;
+  using ProtocolWriter = std::conditional_t<
+      Protocol == type::StandardProtocol::Binary,
+      BinaryProtocolWriter,
+      CompactProtocolWriter>;
+  auto masks = extractMaskFromPatch();
+  MaskedDecodeResult result =
+      parseObject<ProtocolReader>(buf, masks.read, masks.write);
+  protocol::Value val;
+  val.emplace_object(std::move(result.included));
+  apply(val);
+  return serializeObject<ProtocolWriter>(val.as_object(), result.excluded);
+}
+
+template std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject<
+    type::StandardProtocol::Binary>(const folly::IOBuf& buf) const;
+template std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject<
+    type::StandardProtocol::Compact>(const folly::IOBuf& buf) const;
+
 Object DynamicPatch::toObject() && {
   return std::visit([&](auto&& v) { return std::move(v).toObject(); }, *patch_);
 }

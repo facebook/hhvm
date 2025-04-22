@@ -104,9 +104,10 @@ extractMaskFromPatch(const protocol::Object& patch);
 /// @endcond
 
 template <type::StandardProtocol Protocol>
-[[deprecated("Use DynamicPatch::apply instead.")]] std::unique_ptr<folly::IOBuf>
-applyPatchToSerializedData(
-    const protocol::Object& patch, const folly::IOBuf& buf);
+[[deprecated("Use DynamicPatch::applyToSerializedObject instead.")]] std::
+    unique_ptr<folly::IOBuf>
+    applyPatchToSerializedData(
+        const protocol::Object& patch, const folly::IOBuf& buf);
 
 /**
  * Returns a Thrift Dynamic Patch instance corresponding to the (decoded)

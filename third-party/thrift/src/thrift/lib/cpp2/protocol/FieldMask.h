@@ -121,9 +121,10 @@ Mask operator&(const Mask&, const Mask&); // intersect
 Mask operator|(const Mask&, const Mask&); // union
 Mask operator-(const Mask&, const Mask&); // subtract
 
-// This converts id/ field name to field id automatically which makes
-// FieldMask easier for end-users to construct and use.
-// Id can be Ordinal, FieldId, Ident, TypeTag, and FieldTag.
+// MaskBuilder provides convenient type-safe APIs to use Thrift Mask easier for
+// end-users to consturct and use. This converts Id/ field name to field id
+// automatically. Id can be Ordinal, FieldId, Ident, TypeTag, and FieldTag.
+//
 // Example:
 //   MaskBuilder<Struct> mask(allMask()); // start with allMask
 //   mask.includes<id1, id2>(anotherMask);
@@ -254,6 +255,103 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
 
 template <typename Struct>
 using MaskAdapter = InlineAdapter<MaskBuilder<Struct>>;
+
+// DynamicMaskBuilder provides convenient APIs to use Thrift Mask easier for
+// end-users to consturct and use. Use MaskBuilder if possible for type-safety.
+//
+//  Example:
+//   DynamicMaskBuilder mask(allMask()); // start with allMask
+//   mask.includes({id1, id2}, anotherMask);
+//   mask.excludes({id3}, anotherMask);
+//   mask.toThrift();  // --> reference to the underlying FieldMask.
+struct DynamicMaskBuilder : type::detail::Wrap<Mask> {
+ public:
+  DynamicMaskBuilder() { data_ = Mask{}; }
+  /* implicit */ DynamicMaskBuilder(Mask mask) { data_ = std::move(mask); }
+
+  DynamicMaskBuilder& reset_to_none() {
+    data_ = noneMask();
+    return *this;
+  }
+
+  DynamicMaskBuilder& reset_to_all() {
+    data_ = allMask();
+    return *this;
+  }
+
+  DynamicMaskBuilder& invert() {
+    data_ = reverseMask(std::move(data_));
+    return *this;
+  }
+
+  DynamicMaskBuilder& includes(
+      const detail::FieldPath& path, const Mask& mask = allMask()) {
+    data_ = data_ | detail::fieldPathToMask(path, mask);
+    return *this;
+  }
+
+  DynamicMaskBuilder& includes_map_element(
+      const detail::FieldPath& path,
+      int64_t key,
+      const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_map_ref().emplace()[key] = mask;
+    return includes(path, map);
+  }
+
+  DynamicMaskBuilder& includes_map_element(
+      const detail::FieldPath& path,
+      std::string key,
+      const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_string_map_ref().emplace().emplace(std::move(key), mask);
+    return includes(path, map);
+  }
+
+  DynamicMaskBuilder& includes_type(
+      const detail::FieldPath& path,
+      type::Type type,
+      const Mask& mask = allMask()) {
+    Mask typeMap;
+    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    return includes(path, typeMap);
+  }
+
+  DynamicMaskBuilder& excludes(
+      const detail::FieldPath& path, const Mask& mask = allMask()) {
+    data_ = data_ - detail::fieldPathToMask(path, mask);
+    return *this;
+  }
+
+  DynamicMaskBuilder& excludes_map_element(
+      const detail::FieldPath& path,
+      int64_t key,
+      const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_map_ref().emplace()[key] = mask;
+    return excludes(path, map);
+  }
+
+  DynamicMaskBuilder& excludes_map_element(
+      const detail::FieldPath& path,
+      std::string key,
+      const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_string_map_ref().emplace().emplace(std::move(key), mask);
+    return excludes(path, map);
+  }
+
+  DynamicMaskBuilder& excludes_type(
+      const detail::FieldPath& path,
+      type::Type type,
+      const Mask& mask = allMask()) {
+    Mask typeMap;
+    typeMap.includes_type_ref().emplace().emplace(std::move(type), mask);
+    return excludes(path, typeMap);
+  }
+
+ private:
+};
 
 // Constructs a FieldMask object that includes the fields that are
 // different in the given two Thrift structs/unions.

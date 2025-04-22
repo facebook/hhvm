@@ -41,6 +41,11 @@ struct MaskedDecodeResult {
 };
 
 namespace detail {
+
+// TODO(dokwon): Use Path once avaialble.
+// Path of a field in a Thrift struct as a list of field ids.
+using FieldPath = std::vector<FieldId>;
+
 // Validates the mask with the given Struct. Ensures that mask doesn't contain
 // fields not in the Struct.
 template <typename T>
@@ -554,5 +559,8 @@ MaskedDecodeResult parseObject(
   result.included = std::move(parseValueResult.included.ensure_object());
   return result;
 }
+
+Mask fieldPathToMask(const FieldPath& path, const Mask& other);
+
 } // namespace detail
 } // namespace apache::thrift::protocol

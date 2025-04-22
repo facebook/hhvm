@@ -23,6 +23,7 @@
 
 using apache::thrift::protocol::allMask;
 using apache::thrift::protocol::asValueStruct;
+using apache::thrift::protocol::DynamicMaskBuilder;
 using apache::thrift::protocol::Mask;
 using apache::thrift::protocol::MaskBuilder;
 using apache::thrift::protocol::MaskRef;
@@ -2885,23 +2886,26 @@ TEST(FieldMaskTest, MaskBuilderIncludeExcludeEmpty) {
 template <typename T>
 struct MaskBuilderTester {
   explicit MaskBuilderTester(const Mask& m)
-      : builder_by_ident(m), builder_by_name(m) {}
+      : builder_by_ident(m), builder_by_name(m), builder_by_field_id{m} {}
 
   MaskBuilderTester& reset_to_none() {
     builder_by_ident.reset_to_none();
     builder_by_name.reset_to_none();
+    builder_by_field_id.reset_to_none();
     return *this;
   }
 
   MaskBuilderTester& reset_to_all() {
     builder_by_ident.reset_to_all();
     builder_by_name.reset_to_all();
+    builder_by_field_id.reset_to_all();
     return *this;
   }
 
   MaskBuilderTester& invert() {
     builder_by_ident.invert();
     builder_by_name.invert();
+    builder_by_field_id.invert();
     return *this;
   }
 
@@ -2909,6 +2913,7 @@ struct MaskBuilderTester {
   MaskBuilderTester& includes(const Mask& mask = allMask()) {
     builder_by_ident.template includes<Id...>(mask);
     builder_by_name.includes(identToFieldName<T, Id...>(), mask);
+    builder_by_field_id.includes(identToFieldPath<T, Id...>(), mask);
     return *this;
   }
 
@@ -2939,6 +2944,7 @@ struct MaskBuilderTester {
   MaskBuilderTester& excludes(const Mask& mask = allMask()) {
     builder_by_ident.template excludes<Id...>(mask);
     builder_by_name.excludes(identToFieldName<T, Id...>(), mask);
+    builder_by_field_id.excludes(identToFieldPath<T, Id...>(), mask);
     return *this;
   }
 
@@ -2969,11 +2975,13 @@ struct MaskBuilderTester {
   void check(const Mask& expected) {
     EXPECT_EQ(builder_by_ident.toThrift(), expected);
     EXPECT_EQ(builder_by_name.toThrift(), expected);
+    EXPECT_EQ(builder_by_field_id.toThrift(), expected);
   }
 
  public:
   MaskBuilder<T> builder_by_ident;
   MaskBuilder<T> builder_by_name;
+  DynamicMaskBuilder builder_by_field_id;
 
  private:
   template <typename S>
@@ -2988,6 +2996,21 @@ struct MaskBuilderTester {
     std::vector<folly::StringPiece> v;
     v.reserve(sizeof...(Ids));
     identToFieldNameImpl<S, Ids...>(v);
+    return v;
+  }
+
+  template <typename S>
+  void identToFieldPathImpl(FieldPath&) {}
+  template <typename S, typename Id, typename... Ids>
+  void identToFieldPathImpl(FieldPath& v) {
+    v.push_back(op::get_field_id_v<S, Id>);
+    identToFieldPathImpl<op::get_native_type<S, Id>, Ids...>(v);
+  }
+  template <typename S, typename... Ids>
+  FieldPath identToFieldPath() {
+    FieldPath v;
+    v.reserve(sizeof...(Ids));
+    identToFieldPathImpl<S, Ids...>(v);
     return v;
   }
 };
@@ -4099,6 +4122,25 @@ TEST(FieldMaskTest, MaskRefGetAndTryGet) {
   auto field3 = mr.tryGet(op::get_field_id_v<Bar2, ident::field_3>);
   EXPECT_TRUE(field3.has_value());
   EXPECT_TRUE(field3->isNoneMask());
+}
+
+TEST(FieldMaskTest, DynamicMaskBuilderInvalid) {
+  {
+    // Empty
+    DynamicMaskBuilder builder(noneMask());
+    EXPECT_THROW(builder.includes({}), std::runtime_error);
+    EXPECT_THROW(builder.excludes({}), std::runtime_error);
+    EXPECT_THROW(builder.includes_map_element({}, 42), std::runtime_error);
+    EXPECT_THROW(builder.excludes_map_element({}, 42), std::runtime_error);
+    EXPECT_THROW(builder.includes_map_element({}, "key"), std::runtime_error);
+    EXPECT_THROW(builder.excludes_map_element({}, "key"), std::runtime_error);
+    EXPECT_THROW(
+        builder.includes_type({}, type::Type::get<type::i32_t>()),
+        std::runtime_error);
+    EXPECT_THROW(
+        builder.excludes_type({}, type::Type::get<type::i32_t>()),
+        std::runtime_error);
+  }
 }
 
 } // namespace apache::thrift::test

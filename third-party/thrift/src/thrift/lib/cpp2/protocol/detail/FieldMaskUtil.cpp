@@ -74,4 +74,18 @@ bool filter_fields(
           .toThrift();
   return true;
 }
+
+Mask fieldPathToMask(const FieldPath& path, const Mask& other) {
+  if (path.empty()) {
+    folly::throw_exception<std::runtime_error>("Empty field path.");
+  }
+  Mask mask;
+  Mask* m = &mask;
+  for (auto id : path) {
+    m = &m->includes_ref().emplace()[static_cast<int16_t>(id)];
+  }
+  *m = other;
+  return mask;
+}
+
 } // namespace apache::thrift::protocol::detail

@@ -697,6 +697,7 @@ void emit_locals_and_params(FuncEmitter& fe, const php::Func& func,
       pinfo.phpCode = param.phpCode;
       pinfo.userAttributes = param.userAttributes;
       if (param.inout) pinfo.setFlag(Func::ParamInfo::Flags::InOut);
+      if (param.outOnly) pinfo.setFlag(Func::ParamInfo::Flags::OutOnly);
       if (param.readonly) pinfo.setFlag(Func::ParamInfo::Flags::Readonly);
       if (param.isVariadic) pinfo.setFlag(Func::ParamInfo::Flags::Variadic);
       if (param.isOptional) pinfo.setFlag(Func::ParamInfo::Flags::Optional);

@@ -70,6 +70,10 @@ public:
     return map().find(k);
   }
 
+  bool contains(const key_type& k) const {
+    return map().contains(k);
+  }
+
   // Note: non-const iteration is not allowed, since we don't want to allocate
   // a map on accident.
   const_iterator begin() const  { return map().begin(); }

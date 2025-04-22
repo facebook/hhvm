@@ -83,6 +83,10 @@ inline bool Func::ParamInfo::isInOut() const {
   return flags & (1 << static_cast<int32_t>(Flags::InOut));
 }
 
+inline bool Func::ParamInfo::isOutOnly() const {
+  return flags & (1 << static_cast<int32_t>(Flags::OutOnly));
+}
+
 inline bool Func::ParamInfo::isReadonly() const {
   return flags & (1 << static_cast<int32_t>(Flags::Readonly));
 }

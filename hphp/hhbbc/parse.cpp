@@ -629,6 +629,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe, const UnitEmitt
         param.userAttributes,
         param.phpCode.ptr(ue),
         param.isInOut(),
+        param.isOutOnly(),
         param.isReadonly(),
         param.isVariadic(),
         param.isOptional(),

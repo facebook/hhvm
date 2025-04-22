@@ -135,6 +135,7 @@ struct Func final {
   struct ParamInfo {
     enum class Flags {
       InOut,      // Is this an `inout' parameter?
+      OutOnly,    // Is this an <<__OutOnly>> parameter? Implies InOut.
       Readonly,   // Is this a `readonly` parameter?
       Variadic,   // Is this a `...' parameter?
       Optional,   // Marked as `optional` in an abstract method
@@ -155,6 +156,7 @@ struct Func final {
     bool hasScalarDefaultValue() const;
     bool hasTrivialDefaultValue() const;
     bool isInOut() const;
+    bool isOutOnly() const;
     bool isReadonly() const;
     bool isVariadic() const;
     bool isOptional() const;

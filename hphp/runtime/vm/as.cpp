@@ -126,6 +126,8 @@ struct FatalUnitError {
 
 namespace {
 
+const StaticString s_OutOnly("__OutOnly");
+
 StringData* makeDocComment(const String& s) {
   if (Cfg::Eval::GenerateDocComments) return makeStaticString(s);
   return staticEmptyString();
@@ -2228,6 +2230,10 @@ void parse_parameter_list(AsmState& as) {
     if (as.in.tryConsume("inout")) {
       if (seenVariadic) as.error("inout parameters cannot be variadic");
       param.setFlag(Func::ParamInfo::Flags::InOut);
+
+      if (as.fe->isNative && param.userAttributes.contains(s_OutOnly.get())) {
+        param.setFlag(Func::ParamInfo::Flags::OutOnly);
+      }
     }
 
     if (as.in.tryConsume("readonly")) {
@@ -2375,11 +2381,11 @@ void parse_function(AsmState& as) {
   );
   as.fe->userAttributes = userAttrs;
 
+  check_native(as);
+
   parse_parameter_list(as);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
-
-  check_native(as);
 
   as.in.expectWs('{');
 
@@ -2427,11 +2433,11 @@ void parse_method(AsmState& as) {
   );
   as.fe->userAttributes = userAttrs;
 
+  check_native(as);
+
   parse_parameter_list(as);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
-
-  check_native(as);
 
   as.in.expectWs('{');
 

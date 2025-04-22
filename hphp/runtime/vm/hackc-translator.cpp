@@ -41,6 +41,8 @@ using namespace HPHP::hackc;
 using namespace HPHP::hackc::hhbc;
 
 
+const StaticString s_OutOnly("__OutOnly");
+
 struct TranslationState {
 
   explicit TranslationState(bool isSystemLib): isSystemLib(isSystemLib) {}
@@ -1045,7 +1047,13 @@ void translateParameter(TranslationState& ts,
     assertx(ts.fe->attrs & AttrVariadicParam);
     param.setFlag(Func::ParamInfo::Flags::Variadic);
   }
-  if (p.is_inout) param.setFlag(Func::ParamInfo::Flags::InOut);
+  if (p.is_inout) {
+    param.setFlag(Func::ParamInfo::Flags::InOut);
+
+    if (ts.fe->isNative && param.userAttributes.contains(s_OutOnly.get())) {
+      param.setFlag(Func::ParamInfo::Flags::OutOnly);
+    }
+  }
   if (p.is_readonly) param.setFlag(Func::ParamInfo::Flags::Readonly);
   if (p.is_optional) param.setFlag(Func::ParamInfo::Flags::Optional);
 
@@ -1238,8 +1246,8 @@ void translateFunction(TranslationState& ts,
   ts.fe->retUserType = retTypeInfo.first;
   ts.fe->retTypeConstraints = std::move(tic);
   ts.srcLoc = locationFromSpan(f.body.span);
-  translateFunctionBody(ts, f.body, ubs, {}, {}, hasReifiedGenerics);
   checkNative(ts);
+  translateFunctionBody(ts, f.body, ubs, {}, {}, hasReifiedGenerics);
 }
 
 void translateShadowedTParams(TParamNameVec& vec, const Vector<ClassName>& tpms) {
@@ -1289,8 +1297,8 @@ void translateMethod(TranslationState& ts,
   ts.srcLoc = locationFromSpan(m.body.span);
   ts.fe->retUserType = retTypeInfo.first;
   ts.fe->retTypeConstraints = std::move(tic);
-  translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);
   checkNative(ts);
+  translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);
 }
 
 void translateClass(TranslationState& ts,

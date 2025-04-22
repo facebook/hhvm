@@ -37,7 +37,7 @@ func encodeRequestPayload(
 	protoID types.ProtocolID,
 	rpcKind rpcmetadata.RpcKind,
 	headers map[string]string,
-	zstd bool,
+	compression rpcmetadata.CompressionAlgorithm,
 	dataBytes []byte,
 ) (payload.Payload, error) {
 	metadata := rpcmetadata.NewRequestRpcMetadata()
@@ -48,21 +48,21 @@ func encodeRequestPayload(
 	}
 	metadata.SetProtocol(&rpcProtocolID)
 	metadata.SetKind(&rpcKind)
-	if zstd {
-		compression := rpcmetadata.CompressionAlgorithm_ZSTD
-		metadata.SetCompression(&compression)
-	}
+	metadata.SetCompression(&compression)
 	metadata.OtherMetadata = make(map[string]string)
 	maps.Copy(metadata.OtherMetadata, headers)
 	metadataBytes, err := EncodeCompact(metadata)
 	if err != nil {
 		return nil, err
 	}
-	if zstd {
+	switch compression {
+	case rpcmetadata.CompressionAlgorithm_ZSTD:
 		dataBytes, err = compressZstd(dataBytes)
-		if err != nil {
-			return nil, err
-		}
+	case rpcmetadata.CompressionAlgorithm_ZLIB:
+		dataBytes, err = compressZlib(dataBytes)
+	}
+	if err != nil {
+		return nil, err
 	}
 	pay := payload.New(dataBytes, metadataBytes)
 	return pay, nil

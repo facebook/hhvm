@@ -166,9 +166,9 @@ map::raw::value_type create_map_functions() {
           }
 
           void print_to(
-              tree_printer::scope scope,
+              tree_printer::scope& scope,
               const object_print_options& options) const final {
-            default_print_to("<map.items view>", std::move(scope), options);
+            default_print_to("<map.items view>", scope, options);
           }
 
          private:

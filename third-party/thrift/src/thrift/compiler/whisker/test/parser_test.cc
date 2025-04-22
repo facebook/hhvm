@@ -84,9 +84,9 @@ TEST_F(ParserTest, basic) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:11> 'Some text '\n"
-      "|- interpolation <line:1:11, col:22> 'foo.bar'\n"
-      "|- text <line:1:22, col:32> ' more text'\n");
+      "├─ text <line:1:1, col:11> 'Some text '\n"
+      "├─ interpolation <line:1:11, col:22> 'foo.bar'\n"
+      "╰─ text <line:1:22, col:32> ' more text'\n");
 }
 
 TEST_F(ParserTest, empty_template) {
@@ -105,7 +105,7 @@ TEST_F(ParserTest, variable_is_single_id) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:10> 'foo'\n");
+      "╰─ interpolation <line:1:1, col:10> 'foo'\n");
 }
 
 TEST_F(ParserTest, variable_is_multi_id) {
@@ -113,7 +113,7 @@ TEST_F(ParserTest, variable_is_multi_id) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:19> 'foo.bar.baz'\n");
+      "╰─ interpolation <line:1:1, col:19> 'foo.bar.baz'\n");
 }
 
 TEST_F(ParserTest, variable_is_dot) {
@@ -121,7 +121,7 @@ TEST_F(ParserTest, variable_is_dot) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:7> 'this'\n");
+      "╰─ interpolation <line:1:1, col:7> 'this'\n");
 }
 
 TEST_F(ParserTest, variable_starts_with_dot) {
@@ -154,12 +154,12 @@ TEST_F(ParserTest, basic_section) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- section-block <line:1:1, line:3:23>\n"
-      "| `- variable-lookup <line:1:5, col:21> 'news.has-update?'\n"
-      "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- interpolation <line:2:12, col:19> 'foo'\n"
-      "| |- text <line:2:19, col:30> ' happening!'\n"
-      "| |- newline <line:2:30, line:3:1> '\\n'\n");
+      "╰─ section-block <line:1:1, line:3:23>\n"
+      "   ├─ variable-lookup <line:1:5, col:21> 'news.has-update?'\n"
+      "   ├─ text <line:2:1, col:12> '  Stuff is '\n"
+      "   ├─ interpolation <line:2:12, col:19> 'foo'\n"
+      "   ├─ text <line:2:19, col:30> ' happening!'\n"
+      "   ╰─ newline <line:2:30, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, inverted_section) {
@@ -170,12 +170,12 @@ TEST_F(ParserTest, inverted_section) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- section-block <inverted> <line:1:1, line:3:22>\n"
-      "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- interpolation <line:2:12, col:19> 'foo'\n"
-      "| |- text <line:2:19, col:30> ' happening!'\n"
-      "| |- newline <line:2:30, line:3:1> '\\n'\n");
+      "╰─ section-block <inverted> <line:1:1, line:3:22>\n"
+      "   ├─ variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
+      "   ├─ text <line:2:1, col:12> '  Stuff is '\n"
+      "   ├─ interpolation <line:2:12, col:19> 'foo'\n"
+      "   ├─ text <line:2:19, col:30> ' happening!'\n"
+      "   ╰─ newline <line:2:30, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, nested_sections) {
@@ -188,14 +188,14 @@ TEST_F(ParserTest, nested_sections) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- section-block <line:1:1, line:5:22>\n"
-      "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- section-block <inverted> <line:2:3, line:4:28>\n"
-      "| | `- variable-lookup <line:2:6, col:26> 'update.is-important?'\n"
-      "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
-      "| | |- interpolation <line:3:24, col:31> 'foo'\n"
-      "| | |- text <line:3:31, col:42> ' happening!'\n"
-      "| | |- newline <line:3:42, line:4:1> '\\n'\n");
+      "╰─ section-block <line:1:1, line:5:22>\n"
+      "   ├─ variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
+      "   ╰─ section-block <inverted> <line:2:3, line:4:28>\n"
+      "      ├─ variable-lookup <line:2:6, col:26> 'update.is-important?'\n"
+      "      ├─ text <line:3:1, col:24> '    Important stuff is '\n"
+      "      ├─ interpolation <line:3:24, col:31> 'foo'\n"
+      "      ├─ text <line:3:31, col:42> ' happening!'\n"
+      "      ╰─ newline <line:3:42, line:4:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, mismatched_section_hierarchy) {
@@ -293,12 +293,12 @@ TEST_F(ParserTest, basic_if) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- if-block <line:1:1, line:3:25>\n"
-      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
-      "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- interpolation <line:2:12, col:19> 'foo'\n"
-      "| |- text <line:2:19, col:30> ' happening!'\n"
-      "| |- newline <line:2:30, line:3:1> '\\n'\n");
+      "╰─ if-block <line:1:1, line:3:25>\n"
+      "   ├─ expression <line:1:7, col:23> 'news.has-update?'\n"
+      "   ├─ text <line:2:1, col:12> '  Stuff is '\n"
+      "   ├─ interpolation <line:2:12, col:19> 'foo'\n"
+      "   ├─ text <line:2:19, col:30> ' happening!'\n"
+      "   ╰─ newline <line:2:30, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, basic_if_else) {
@@ -311,15 +311,15 @@ TEST_F(ParserTest, basic_if_else) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- if-block <line:1:1, line:5:25>\n"
-      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
-      "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- interpolation <line:2:12, col:19> 'foo'\n"
-      "| |- text <line:2:19, col:30> ' happening!'\n"
-      "| |- newline <line:2:30, line:3:1> '\\n'\n"
-      "| `- else-block <line:3:1, line:5:1>\n"
-      "|   |- text <line:4:1, col:24> '  Nothing is happening!'\n"
-      "|   |- newline <line:4:24, line:5:1> '\\n'\n");
+      "╰─ if-block <line:1:1, line:5:25>\n"
+      "   ├─ expression <line:1:7, col:23> 'news.has-update?'\n"
+      "   ├─ text <line:2:1, col:12> '  Stuff is '\n"
+      "   ├─ interpolation <line:2:12, col:19> 'foo'\n"
+      "   ├─ text <line:2:19, col:30> ' happening!'\n"
+      "   ├─ newline <line:2:30, line:3:1> '\\n'\n"
+      "   ╰─ else-block <line:3:1, line:5:1>\n"
+      "      ├─ text <line:4:1, col:24> '  Nothing is happening!'\n"
+      "      ╰─ newline <line:4:24, line:5:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, unless_block_repeated_else) {
@@ -374,17 +374,17 @@ TEST_F(ParserTest, if_block_nested) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- if-block <line:1:1, line:7:25>\n"
-      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
-      "| |- if-block <line:2:3, line:6:31>\n"
-      "| | `- expression <line:2:9, col:29> 'update.is-important?'\n"
-      "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
-      "| | |- interpolation <line:3:24, col:31> 'foo'\n"
-      "| | |- text <line:3:31, col:42> ' happening!'\n"
-      "| | |- newline <line:3:42, line:4:1> '\\n'\n"
-      "| | `- else-block <line:4:3, line:6:3>\n"
-      "| |   |- text <line:5:1, col:31> '    Boring stuff is happening!'\n"
-      "| |   |- newline <line:5:31, line:6:1> '\\n'\n");
+      "╰─ if-block <line:1:1, line:7:25>\n"
+      "   ├─ expression <line:1:7, col:23> 'news.has-update?'\n"
+      "   ╰─ if-block <line:2:3, line:6:31>\n"
+      "      ├─ expression <line:2:9, col:29> 'update.is-important?'\n"
+      "      ├─ text <line:3:1, col:24> '    Important stuff is '\n"
+      "      ├─ interpolation <line:3:24, col:31> 'foo'\n"
+      "      ├─ text <line:3:31, col:42> ' happening!'\n"
+      "      ├─ newline <line:3:42, line:4:1> '\\n'\n"
+      "      ╰─ else-block <line:4:3, line:6:3>\n"
+      "         ├─ text <line:5:1, col:31> '    Boring stuff is happening!'\n"
+      "         ╰─ newline <line:5:31, line:6:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, mismatched_if_hierarchy) {
@@ -486,16 +486,16 @@ TEST_F(ParserTest, conditional_block_else_if) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- if-block <line:1:1, line:7:25>\n"
-      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
-      "| |- text <line:2:1, col:26> '  New stuff is happening!'\n"
-      "| |- newline <line:2:26, line:3:1> '\\n'\n"
-      "| `- else-if-block <line:3:1, line:5:1>\n"
-      "|   |- text <line:4:1, col:32> '  Important stuff is happening!'\n"
-      "|   |- newline <line:4:32, line:5:1> '\\n'\n"
-      "| `- else-block <line:5:1, line:7:1>\n"
-      "|   |- text <line:6:1, col:24> '  Nothing is happening!'\n"
-      "|   |- newline <line:6:24, line:7:1> '\\n'\n");
+      "╰─ if-block <line:1:1, line:7:25>\n"
+      "   ├─ expression <line:1:7, col:23> 'news.has-update?'\n"
+      "   ├─ text <line:2:1, col:26> '  New stuff is happening!'\n"
+      "   ├─ newline <line:2:26, line:3:1> '\\n'\n"
+      "   ├─ else-if-block <line:3:1, line:5:1>\n"
+      "   │  ├─ text <line:4:1, col:32> '  Important stuff is happening!'\n"
+      "   │  ╰─ newline <line:4:32, line:5:1> '\\n'\n"
+      "   ╰─ else-block <line:5:1, line:7:1>\n"
+      "      ├─ text <line:6:1, col:24> '  Nothing is happening!'\n"
+      "      ╰─ newline <line:6:24, line:7:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, conditional_block_else_if_after_else) {
@@ -524,10 +524,10 @@ TEST_F(ParserTest, conditional_block_with_not) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- if-block <line:1:1, line:3:31>\n"
-      "| `- expression <line:1:7, col:29> '(not news.has-update?)'\n"
-      "| |- text <line:2:1, col:22> '  Stuff is happening!'\n"
-      "| |- newline <line:2:22, line:3:1> '\\n'\n");
+      "╰─ if-block <line:1:1, line:3:31>\n"
+      "   ├─ expression <line:1:7, col:29> '(not news.has-update?)'\n"
+      "   ├─ text <line:2:1, col:22> '  Stuff is happening!'\n"
+      "   ╰─ newline <line:2:22, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, conditional_block_with_and_or) {
@@ -538,10 +538,10 @@ TEST_F(ParserTest, conditional_block_with_and_or) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- if-block <line:1:1, line:3:30>\n"
-      "| `- expression <line:1:7, col:28> '(and (or no yes) yes)'\n"
-      "| |- text <line:2:1, col:5> 'Yes!'\n"
-      "| |- newline <line:2:5, line:3:1> '\\n'\n");
+      "╰─ if-block <line:1:1, line:3:30>\n"
+      "   ├─ expression <line:1:7, col:28> '(and (or no yes) yes)'\n"
+      "   ├─ text <line:2:1, col:5> 'Yes!'\n"
+      "   ╰─ newline <line:2:5, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, conditional_block_not_wrong_arity) {
@@ -566,11 +566,11 @@ TEST_F(ParserTest, basic_each) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- each-block <line:1:1, line:3:10>\n"
-      "| `- expression <line:1:9, col:21> 'news.updates'\n"
-      "| |- text <line:2:1, col:3> '  '\n"
-      "| |- interpolation <line:2:3, col:8> 'this'\n"
-      "| |- newline <line:2:8, line:3:1> '\\n'\n");
+      "╰─ each-block <line:1:1, line:3:10>\n"
+      "   ├─ expression <line:1:9, col:21> 'news.updates'\n"
+      "   ├─ text <line:2:1, col:3> '  '\n"
+      "   ├─ interpolation <line:2:3, col:8> 'this'\n"
+      "   ╰─ newline <line:2:8, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, basic_each_else) {
@@ -583,14 +583,14 @@ TEST_F(ParserTest, basic_each_else) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- each-block <line:1:1, line:5:10>\n"
-      "| `- expression <line:1:9, col:21> 'news.updates'\n"
-      "| |- text <line:2:1, col:3> '  '\n"
-      "| |- interpolation <line:2:3, col:8> 'this'\n"
-      "| |- newline <line:2:8, line:3:1> '\\n'\n"
-      "| `- else-block <line:3:1, line:5:1>\n"
-      "|   |- text <line:4:1, col:15> '  Got nothing!'\n"
-      "|   |- newline <line:4:15, line:5:1> '\\n'\n");
+      "╰─ each-block <line:1:1, line:5:10>\n"
+      "   ├─ expression <line:1:9, col:21> 'news.updates'\n"
+      "   ├─ text <line:2:1, col:3> '  '\n"
+      "   ├─ interpolation <line:2:3, col:8> 'this'\n"
+      "   ├─ newline <line:2:8, line:3:1> '\\n'\n"
+      "   ╰─ else-block <line:3:1, line:5:1>\n"
+      "      ├─ text <line:4:1, col:15> '  Got nothing!'\n"
+      "      ╰─ newline <line:4:15, line:5:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, each_with_element_capture) {
@@ -601,12 +601,12 @@ TEST_F(ParserTest, each_with_element_capture) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- each-block <line:1:1, line:3:10>\n"
-      "| `- expression <line:1:9, col:21> 'news.updates'\n"
-      "| `- element-capture 'update'\n"
-      "| |- text <line:2:1, col:3> '  '\n"
-      "| |- interpolation <line:2:3, col:13> 'update'\n"
-      "| |- newline <line:2:13, line:3:1> '\\n'\n");
+      "╰─ each-block <line:1:1, line:3:10>\n"
+      "   ├─ expression <line:1:9, col:21> 'news.updates'\n"
+      "   ├─ element-capture 'update'\n"
+      "   ├─ text <line:2:1, col:3> '  '\n"
+      "   ├─ interpolation <line:2:3, col:13> 'update'\n"
+      "   ╰─ newline <line:2:13, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, each_with_element_and_index_captures) {
@@ -617,15 +617,15 @@ TEST_F(ParserTest, each_with_element_and_index_captures) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- each-block <line:1:1, line:3:10>\n"
-      "| `- expression <line:1:9, col:21> 'news.updates'\n"
-      "| `- element-capture 'update'\n"
-      "| `- index-capture 'index'\n"
-      "| |- text <line:2:1, col:3> '  '\n"
-      "| |- interpolation <line:2:3, col:12> 'index'\n"
-      "| |- text <line:2:12, col:14> '. '\n"
-      "| |- interpolation <line:2:14, col:24> 'update'\n"
-      "| |- newline <line:2:24, line:3:1> '\\n'\n");
+      "╰─ each-block <line:1:1, line:3:10>\n"
+      "   ├─ expression <line:1:9, col:21> 'news.updates'\n"
+      "   ├─ element-capture 'update'\n"
+      "   ├─ index-capture 'index'\n"
+      "   ├─ text <line:2:1, col:3> '  '\n"
+      "   ├─ interpolation <line:2:3, col:12> 'index'\n"
+      "   ├─ text <line:2:12, col:14> '. '\n"
+      "   ├─ interpolation <line:2:14, col:24> 'update'\n"
+      "   ╰─ newline <line:2:24, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, each_block_nested) {
@@ -642,24 +642,24 @@ TEST_F(ParserTest, each_block_nested) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- each-block <line:1:1, line:9:10>\n"
-      "| `- expression <line:1:9, col:21> 'news.updates'\n"
-      "| `- element-capture 'update'\n"
-      "| |- each-block <line:2:3, line:6:12>\n"
-      "| | `- expression <line:2:11, col:27> 'update.headlines'\n"
-      "| | `- element-capture 'headline'\n"
-      "| | `- index-capture 'index'\n"
-      "| | |- text <line:3:1, col:5> '    '\n"
-      "| | |- interpolation <line:3:5, col:14> 'index'\n"
-      "| | |- text <line:3:14, col:16> '. '\n"
-      "| | |- interpolation <line:3:16, col:28> 'headline'\n"
-      "| | |- newline <line:3:28, line:4:1> '\\n'\n"
-      "| | `- else-block <line:4:3, line:6:3>\n"
-      "| |   |- text <line:5:1, col:18> '    No headlines!'\n"
-      "| |   |- newline <line:5:18, line:6:1> '\\n'\n"
-      "| `- else-block <line:7:1, line:9:1>\n"
-      "|   |- text <line:8:1, col:14> '  No updates!'\n"
-      "|   |- newline <line:8:14, line:9:1> '\\n'\n");
+      "╰─ each-block <line:1:1, line:9:10>\n"
+      "   ├─ expression <line:1:9, col:21> 'news.updates'\n"
+      "   ├─ element-capture 'update'\n"
+      "   ├─ each-block <line:2:3, line:6:12>\n"
+      "   │  ├─ expression <line:2:11, col:27> 'update.headlines'\n"
+      "   │  ├─ element-capture 'headline'\n"
+      "   │  ├─ index-capture 'index'\n"
+      "   │  ├─ text <line:3:1, col:5> '    '\n"
+      "   │  ├─ interpolation <line:3:5, col:14> 'index'\n"
+      "   │  ├─ text <line:3:14, col:16> '. '\n"
+      "   │  ├─ interpolation <line:3:16, col:28> 'headline'\n"
+      "   │  ├─ newline <line:3:28, line:4:1> '\\n'\n"
+      "   │  ╰─ else-block <line:4:3, line:6:3>\n"
+      "   │     ├─ text <line:5:1, col:18> '    No headlines!'\n"
+      "   │     ╰─ newline <line:5:18, line:6:1> '\\n'\n"
+      "   ╰─ else-block <line:7:1, line:9:1>\n"
+      "      ├─ text <line:8:1, col:14> '  No updates!'\n"
+      "      ╰─ newline <line:8:14, line:9:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, each_block_unclosed_with_else) {
@@ -838,16 +838,16 @@ TEST_F(ParserTest, literals) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:9> 'null'\n"
-      "|- newline <line:1:9, line:2:1> '\\n'\n"
-      "|- interpolation <line:2:1, col:9> 'true'\n"
-      "|- newline <line:2:9, line:3:1> '\\n'\n"
-      "|- interpolation <line:3:1, col:10> 'false'\n"
-      "|- newline <line:3:10, line:4:1> '\\n'\n"
-      "|- interpolation <line:4:1, col:19> '\"hello\\tworld\"'\n"
-      "|- newline <line:4:19, line:5:1> '\\n'\n"
-      "|- interpolation <line:5:1, col:10> '-1234'\n"
-      "|- newline <line:5:10, line:6:1> '\\n'\n");
+      "├─ interpolation <line:1:1, col:9> 'null'\n"
+      "├─ newline <line:1:9, line:2:1> '\\n'\n"
+      "├─ interpolation <line:2:1, col:9> 'true'\n"
+      "├─ newline <line:2:9, line:3:1> '\\n'\n"
+      "├─ interpolation <line:3:1, col:10> 'false'\n"
+      "├─ newline <line:3:10, line:4:1> '\\n'\n"
+      "├─ interpolation <line:4:1, col:19> '\"hello\\tworld\"'\n"
+      "├─ newline <line:4:19, line:5:1> '\\n'\n"
+      "├─ interpolation <line:5:1, col:10> '-1234'\n"
+      "╰─ newline <line:5:10, line:6:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, function_call) {
@@ -855,7 +855,7 @@ TEST_F(ParserTest, function_call) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:48> '(uppercase (lowercase hello space) world)'\n");
+      "╰─ interpolation <line:1:1, col:48> '(uppercase (lowercase hello space) world)'\n");
 }
 
 TEST_F(ParserTest, function_call_named_args) {
@@ -863,7 +863,7 @@ TEST_F(ParserTest, function_call_named_args) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:39> '(str.concat hello world sep=\",\")'\n");
+      "╰─ interpolation <line:1:1, col:39> '(str.concat hello world sep=\",\")'\n");
 }
 
 TEST_F(ParserTest, function_call_named_args_only) {
@@ -871,7 +871,7 @@ TEST_F(ParserTest, function_call_named_args_only) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:31> '(str.concat sep=comma)'\n");
+      "╰─ interpolation <line:1:1, col:31> '(str.concat sep=comma)'\n");
 }
 
 TEST_F(ParserTest, function_call_named_args_duplicate) {
@@ -961,11 +961,11 @@ TEST_F(ParserTest, partial_block_basic) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n"
-      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
-      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+      "╰─ partial-block <line:1:1, line:3:17> 'foo'\n"
+      "   ├─ argument 'arg1'\n"
+      "   ├─ argument 'arg2'\n"
+      "   ├─ text <line:2:1, col:25> 'This is a partial block!'\n"
+      "   ╰─ newline <line:2:25, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, partial_block_export) {
@@ -976,12 +976,12 @@ TEST_F(ParserTest, partial_block_export) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
-      "| `- exported\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n"
-      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
-      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+      "╰─ partial-block <line:1:1, line:3:17> 'foo'\n"
+      "   ├─ exported\n"
+      "   ├─ argument 'arg1'\n"
+      "   ├─ argument 'arg2'\n"
+      "   ├─ text <line:2:1, col:25> 'This is a partial block!'\n"
+      "   ╰─ newline <line:2:25, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, partial_block_with_captures) {
@@ -992,13 +992,13 @@ TEST_F(ParserTest, partial_block_with_captures) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n"
-      "| `- capture 'cap1'\n"
-      "| `- capture 'cap2'\n"
-      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
-      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+      "╰─ partial-block <line:1:1, line:3:17> 'foo'\n"
+      "   ├─ argument 'arg1'\n"
+      "   ├─ argument 'arg2'\n"
+      "   ├─ capture 'cap1'\n"
+      "   ├─ capture 'cap2'\n"
+      "   ├─ text <line:2:1, col:25> 'This is a partial block!'\n"
+      "   ╰─ newline <line:2:25, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, partial_block_only_captures) {
@@ -1009,11 +1009,11 @@ TEST_F(ParserTest, partial_block_only_captures) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
-      "| `- capture 'cap1'\n"
-      "| `- capture 'cap2'\n"
-      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
-      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+      "╰─ partial-block <line:1:1, line:3:17> 'foo'\n"
+      "   ├─ capture 'cap1'\n"
+      "   ├─ capture 'cap2'\n"
+      "   ├─ text <line:2:1, col:25> 'This is a partial block!'\n"
+      "   ╰─ newline <line:2:25, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, partial_block_after_comment) {
@@ -1021,10 +1021,10 @@ TEST_F(ParserTest, partial_block_after_comment) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- comment <line:1:1, col:6> ''\n"
-      "|- partial-block <line:1:6, col:48> 'foo'\n"
-      "| `- argument 'arg'\n");
+      "├─ header\n"
+      "│  ╰─ comment <line:1:1, col:6> ''\n"
+      "╰─ partial-block <line:1:6, col:48> 'foo'\n"
+      "   ╰─ argument 'arg'\n");
 }
 
 TEST_F(ParserTest, partial_block_do_not_consume_whitespace) {
@@ -1039,15 +1039,15 @@ TEST_F(ParserTest, partial_block_do_not_consume_whitespace) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- comment <line:2:1, col:6> ''\n"
-      "|- newline <line:3:1, line:4:1> '\\n'\n"
-      "|- partial-block <line:4:1, line:6:17> 'foo'\n"
-      "| `- argument 'arg'\n"
-      "| |- text <line:5:1, col:17> '  inside partial'\n"
-      "| |- newline <line:5:17, line:6:1> '\\n'\n"
-      "|- text <line:7:1, col:6> 'hello'\n"
-      "|- newline <line:7:6, line:8:1> '\\n'\n");
+      "├─ header\n"
+      "│  ╰─ comment <line:2:1, col:6> ''\n"
+      "├─ newline <line:3:1, line:4:1> '\\n'\n"
+      "├─ partial-block <line:4:1, line:6:17> 'foo'\n"
+      "│  ├─ argument 'arg'\n"
+      "│  ├─ text <line:5:1, col:17> '  inside partial'\n"
+      "│  ╰─ newline <line:5:17, line:6:1> '\\n'\n"
+      "├─ text <line:7:1, col:6> 'hello'\n"
+      "╰─ newline <line:7:6, line:8:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, partial_block_no_arguments) {
@@ -1055,7 +1055,7 @@ TEST_F(ParserTest, partial_block_no_arguments) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-block <line:1:1, col:37> 'foo'\n");
+      "╰─ partial-block <line:1:1, col:37> 'foo'\n");
 }
 
 TEST_F(ParserTest, partial_block_empty_arguments) {
@@ -1169,12 +1169,12 @@ TEST_F(ParserTest, partial_block_nested) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-block <line:1:1, line:4:17> 'foo'\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n"
-      "| |- partial-block <line:2:3, line:3:19> 'bar'\n"
-      "| | `- argument 'arg3'\n"
-      "| | `- argument 'arg4'\n");
+      "╰─ partial-block <line:1:1, line:4:17> 'foo'\n"
+      "   ├─ argument 'arg1'\n"
+      "   ├─ argument 'arg2'\n"
+      "   ╰─ partial-block <line:2:3, line:3:19> 'bar'\n"
+      "      ├─ argument 'arg3'\n"
+      "      ╰─ argument 'arg4'\n");
 }
 
 TEST_F(ParserTest, partial_block_inside_body) {
@@ -1191,25 +1191,25 @@ TEST_F(ParserTest, partial_block_inside_body) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- comment <line:1:1, col:14> ' header '\n"
-      "|- partial-block <line:1:14, line:3:17> 'foo'\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n"
-      "| |- text <line:2:1, col:39> '  body inside a partial does not count'\n"
-      "| |- newline <line:2:39, line:3:1> '\\n'\n"
-      "|- partial-block <line:4:1, col:50> 'foo2'\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n"
-      "|- comment <line:5:1, col:11> ' body'\n"
-      "|- text <line:6:1, col:15> 'Some body text'\n"
-      "|- newline <line:6:15, line:7:1> '\\n'\n"
-      "|- partial-block <line:7:1, col:49> 'bar'\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n"
-      "|- partial-block <line:8:1, col:49> 'baz'\n"
-      "| `- argument 'arg1'\n"
-      "| `- argument 'arg2'\n");
+      "├─ header\n"
+      "│  ╰─ comment <line:1:1, col:14> ' header '\n"
+      "├─ partial-block <line:1:14, line:3:17> 'foo'\n"
+      "│  ├─ argument 'arg1'\n"
+      "│  ├─ argument 'arg2'\n"
+      "│  ├─ text <line:2:1, col:39> '  body inside a partial does not count'\n"
+      "│  ╰─ newline <line:2:39, line:3:1> '\\n'\n"
+      "├─ partial-block <line:4:1, col:50> 'foo2'\n"
+      "│  ├─ argument 'arg1'\n"
+      "│  ╰─ argument 'arg2'\n"
+      "├─ comment <line:5:1, col:11> ' body'\n"
+      "├─ text <line:6:1, col:15> 'Some body text'\n"
+      "├─ newline <line:6:15, line:7:1> '\\n'\n"
+      "├─ partial-block <line:7:1, col:49> 'bar'\n"
+      "│  ├─ argument 'arg1'\n"
+      "│  ╰─ argument 'arg2'\n"
+      "╰─ partial-block <line:8:1, col:49> 'baz'\n"
+      "   ├─ argument 'arg1'\n"
+      "   ╰─ argument 'arg2'\n");
 }
 
 TEST_F(ParserTest, partial_statement_basic) {
@@ -1217,8 +1217,8 @@ TEST_F(ParserTest, partial_statement_basic) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-statement <line:1:1, col:17> 'foo'\n"
-      "| `- standalone-indentation ''\n");
+      "╰─ partial-statement <line:1:1, col:17> 'foo'\n"
+      "   ╰─ standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, partial_statement_with_args) {
@@ -1226,9 +1226,9 @@ TEST_F(ParserTest, partial_statement_with_args) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-statement <line:1:1, col:26> 'foo'\n"
-      "| `- standalone-indentation ''\n"
-      "| `- argument 'bar=1234'\n");
+      "╰─ partial-statement <line:1:1, col:26> 'foo'\n"
+      "   ├─ standalone-indentation ''\n"
+      "   ╰─ argument 'bar=1234'\n");
 }
 
 TEST_F(ParserTest, partial_statement_expression) {
@@ -1237,9 +1237,9 @@ TEST_F(ParserTest, partial_statement_expression) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-statement <line:1:1, col:54> '(fetch-partial \"foo\" bar=1234)'\n"
-      "| `- standalone-indentation ''\n"
-      "| `- argument 'arg1=true'\n");
+      "╰─ partial-statement <line:1:1, col:54> '(fetch-partial \"foo\" bar=1234)'\n"
+      "   ├─ standalone-indentation ''\n"
+      "   ╰─ argument 'arg1=true'\n");
 }
 
 TEST_F(ParserTest, partial_statement_empty) {
@@ -1292,10 +1292,10 @@ TEST_F(ParserTest, partial_statement_standalone) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:4> ' \\t '\n"
-      "|- partial-statement <line:1:4, col:30> 'foo'\n"
-      "| `- standalone-indentation ' \\t '\n"
-      "| `- argument 'arg1=true'\n");
+      "├─ text <line:1:1, col:4> ' \\t '\n"
+      "╰─ partial-statement <line:1:4, col:30> 'foo'\n"
+      "   ├─ standalone-indentation ' \\t '\n"
+      "   ╰─ argument 'arg1=true'\n");
 }
 
 TEST_F(ParserTest, partial_statement_not_standalone) {
@@ -1304,12 +1304,12 @@ TEST_F(ParserTest, partial_statement_not_standalone) {
     EXPECT_EQ(
         to_string(ast),
         "root [path/to/test-1.whisker]\n"
-        "|- text <line:1:1, col:4> ' \\t '\n"
-        "|- partial-statement <line:1:4, col:30> 'foo'\n"
-        "| `- argument 'arg1=true'\n"
-        "|- text <line:1:30, col:33> ' \\t '\n"
-        "|- macro <line:1:33, col:42> 'foo'\n"
-        "|- newline <line:1:42, line:2:1> '\\n'\n");
+        "├─ text <line:1:1, col:4> ' \\t '\n"
+        "├─ partial-statement <line:1:4, col:30> 'foo'\n"
+        "│  ╰─ argument 'arg1=true'\n"
+        "├─ text <line:1:30, col:33> ' \\t '\n"
+        "├─ macro <line:1:33, col:42> 'foo'\n"
+        "╰─ newline <line:1:42, line:2:1> '\\n'\n");
   }
 
   {
@@ -1318,13 +1318,13 @@ TEST_F(ParserTest, partial_statement_not_standalone) {
     EXPECT_EQ(
         to_string(ast),
         "root [path/to/test-2.whisker]\n"
-        "|- if-block <line:1:1, col:57>\n"
-        "| `- expression <line:1:7, col:11> 'true'\n"
-        "| |- text <line:1:13, col:16> ' \\t '\n"
-        "| |- partial-statement <line:1:16, col:42> 'foo'\n"
-        "| | `- argument 'arg1=true'\n"
-        "| |- text <line:1:42, col:45> ' \\t '\n"
-        "|- newline <line:1:57, line:2:1> '\\n'\n");
+        "├─ if-block <line:1:1, col:57>\n"
+        "│  ├─ expression <line:1:7, col:11> 'true'\n"
+        "│  ├─ text <line:1:13, col:16> ' \\t '\n"
+        "│  ├─ partial-statement <line:1:16, col:42> 'foo'\n"
+        "│  │  ╰─ argument 'arg1=true'\n"
+        "│  ╰─ text <line:1:42, col:45> ' \\t '\n"
+        "╰─ newline <line:1:57, line:2:1> '\\n'\n");
   }
 }
 
@@ -1333,8 +1333,8 @@ TEST_F(ParserTest, basic_macro) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- macro <line:1:1, col:24> 'path/to/file'\n"
-      "| `- standalone-indentation ''\n");
+      "╰─ macro <line:1:1, col:24> 'path/to/file'\n"
+      "   ╰─ standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, macro_single_id) {
@@ -1342,8 +1342,8 @@ TEST_F(ParserTest, macro_single_id) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- macro <line:1:1, col:11> 'foo'\n"
-      "| `- standalone-indentation ''\n");
+      "╰─ macro <line:1:1, col:11> 'foo'\n"
+      "   ╰─ standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, macro_in_section) {
@@ -1354,11 +1354,11 @@ TEST_F(ParserTest, macro_in_section) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- section-block <line:1:1, line:3:22>\n"
-      "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- text <line:2:1, col:3> '  '\n"
-      "| |- macro <line:2:3, col:19> 'print/news'\n"
-      "| | `- standalone-indentation '  '\n");
+      "╰─ section-block <line:1:1, line:3:22>\n"
+      "   ├─ variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
+      "   ├─ text <line:2:1, col:3> '  '\n"
+      "   ╰─ macro <line:2:3, col:19> 'print/news'\n"
+      "      ╰─ standalone-indentation '  '\n");
 }
 
 TEST_F(ParserTest, macro_preserves_whitespace_indentation) {
@@ -1366,9 +1366,9 @@ TEST_F(ParserTest, macro_preserves_whitespace_indentation) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:4> ' \\t '\n"
-      "|- macro <line:1:4, col:20> 'print/news'\n"
-      "| `- standalone-indentation ' \\t '\n");
+      "├─ text <line:1:1, col:4> ' \\t '\n"
+      "╰─ macro <line:1:4, col:20> 'print/news'\n"
+      "   ╰─ standalone-indentation ' \\t '\n");
 }
 
 TEST_F(ParserTest, macro_no_id) {
@@ -1398,8 +1398,8 @@ TEST_F(ParserTest, macro_dotted_path) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- macro <line:1:1, col:20> 'path/to.file'\n"
-      "| `- standalone-indentation ''\n");
+      "╰─ macro <line:1:1, col:20> 'path/to.file'\n"
+      "   ╰─ standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, macro_empty_path_part) {
@@ -1429,9 +1429,9 @@ TEST_F(ParserTest, let_statement) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- let-statement <line:1:1, col:32>\n"
-      "| `- identifier 'foo'\n"
-      "| `- expression <line:1:14, col:30> '(not true_value)'\n");
+      "╰─ let-statement <line:1:1, col:32>\n"
+      "   ├─ identifier 'foo'\n"
+      "   ╰─ expression <line:1:14, col:30> '(not true_value)'\n");
 }
 
 TEST_F(ParserTest, let_statement_export) {
@@ -1439,10 +1439,10 @@ TEST_F(ParserTest, let_statement_export) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- let-statement <line:1:1, col:36>\n"
-      "| `- exported\n"
-      "| `- identifier 'foo'\n"
-      "| `- expression <line:1:21, col:34> '(hello world)'\n");
+      "╰─ let-statement <line:1:1, col:36>\n"
+      "   ├─ exported\n"
+      "   ├─ identifier 'foo'\n"
+      "   ╰─ expression <line:1:21, col:34> '(hello world)'\n");
 }
 
 TEST_F(ParserTest, let_statement_with_implicit_context) {
@@ -1450,9 +1450,9 @@ TEST_F(ParserTest, let_statement_with_implicit_context) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- let-statement <line:1:1, col:28>\n"
-      "| `- identifier 'foo'\n"
-      "| `- expression <line:1:14, col:26> '(a.b.c this)'\n");
+      "╰─ let-statement <line:1:1, col:28>\n"
+      "   ├─ identifier 'foo'\n"
+      "   ╰─ expression <line:1:14, col:26> '(a.b.c this)'\n");
 }
 
 TEST_F(ParserTest, let_statement_dotted_name) {
@@ -1537,8 +1537,8 @@ TEST_F(ParserTest, pragma_ignore_newlines) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- pragma-statement 'ignore-newlines' <line:1:1, col:28>\n");
+      "╰─ header\n"
+      "   ╰─ pragma-statement 'ignore-newlines' <line:1:1, col:28>\n");
 }
 
 TEST_F(ParserTest, pragma_unrecognized) {
@@ -1560,10 +1560,10 @@ TEST_F(ParserTest, with_block) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- with-block <line:1:1, line:3:10>\n"
-      "| `- expression <line:1:9, col:16> 'foo.bar'\n"
-      "| |- interpolation <line:2:1, col:8> 'bar'\n"
-      "| |- newline <line:2:8, line:3:1> '\\n'\n");
+      "╰─ with-block <line:1:1, line:3:10>\n"
+      "   ├─ expression <line:1:9, col:16> 'foo.bar'\n"
+      "   ├─ interpolation <line:2:1, col:8> 'bar'\n"
+      "   ╰─ newline <line:2:8, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, with_block_no_expression) {
@@ -1612,9 +1612,9 @@ TEST_F(ParserTest, comment) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:6> 'Hello'\n"
-      "|- comment <line:1:6, col:29> ' #$^& random text '\n"
-      "|- text <line:1:29, col:34> 'world'\n");
+      "├─ text <line:1:1, col:6> 'Hello'\n"
+      "├─ comment <line:1:6, col:29> ' #$^& random text '\n"
+      "╰─ text <line:1:29, col:34> 'world'\n");
 }
 
 TEST_F(ParserTest, comment_empty) {
@@ -1622,8 +1622,8 @@ TEST_F(ParserTest, comment_empty) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- comment <line:1:1, col:6> ''\n");
+      "╰─ header\n"
+      "   ╰─ comment <line:1:1, col:6> ''\n");
 }
 
 TEST_F(ParserTest, comment_escaped) {
@@ -1633,9 +1633,9 @@ TEST_F(ParserTest, comment_escaped) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:6> 'Hello'\n"
-      "|- comment <line:1:6, line:2:32> ' \\nnext line }} still comment '\n"
-      "|- text <line:2:32, col:37> 'world'\n");
+      "├─ text <line:1:1, col:6> 'Hello'\n"
+      "├─ comment <line:1:6, line:2:32> ' \\nnext line }} still comment '\n"
+      "╰─ text <line:2:32, col:37> 'world'\n");
 }
 
 TEST_F(ParserTest, comment_escaped_empty) {
@@ -1643,8 +1643,8 @@ TEST_F(ParserTest, comment_escaped_empty) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- comment <line:1:1, col:10> ''\n");
+      "╰─ header\n"
+      "   ╰─ comment <line:1:1, col:10> ''\n");
 }
 
 TEST_F(ParserTest, header_consumes_whitespace) {
@@ -1661,13 +1661,13 @@ TEST_F(ParserTest, header_consumes_whitespace) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- comment <line:2:1, col:6> ''\n"
-      "| |- pragma-statement 'ignore-newlines' <line:4:1, col:28>\n"
-      "|- newline <line:5:1, line:6:1> '\\n'\n"
-      "|- text <line:6:1, col:6> 'hello'\n"
-      "|- newline <line:6:6, line:7:1> '\\n'\n"
-      "|- pragma-statement 'ignore-newlines' <line:7:1, col:28>\n");
+      "├─ header\n"
+      "│  ├─ comment <line:2:1, col:6> ''\n"
+      "│  ╰─ pragma-statement 'ignore-newlines' <line:4:1, col:28>\n"
+      "├─ newline <line:5:1, line:6:1> '\\n'\n"
+      "├─ text <line:6:1, col:6> 'hello'\n"
+      "├─ newline <line:6:6, line:7:1> '\\n'\n"
+      "╰─ pragma-statement 'ignore-newlines' <line:7:1, col:28>\n");
 }
 
 TEST_F(ParserTest, import_statement_basic) {
@@ -1675,10 +1675,10 @@ TEST_F(ParserTest, import_statement_basic) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- import-statement <line:1:1, col:34>\n"
-      "| | `- path 'path/to/file'\n"
-      "| | `- name 'foo'\n");
+      "╰─ header\n"
+      "   ╰─ import-statement <line:1:1, col:34>\n"
+      "      ├─ path 'path/to/file'\n"
+      "      ╰─ name 'foo'\n");
 }
 
 TEST_F(ParserTest, import_statement_with_header_elements) {
@@ -1691,12 +1691,12 @@ TEST_F(ParserTest, import_statement_with_header_elements) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- comment <line:1:1, col:15> ' comment '\n"
-      "| |- pragma-statement 'ignore-newlines' <line:3:1, col:28>\n"
-      "| |- import-statement <line:5:1, col:34>\n"
-      "| | `- path 'path/to/file'\n"
-      "| | `- name 'foo'\n");
+      "╰─ header\n"
+      "   ├─ comment <line:1:1, col:15> ' comment '\n"
+      "   ├─ pragma-statement 'ignore-newlines' <line:3:1, col:28>\n"
+      "   ╰─ import-statement <line:5:1, col:34>\n"
+      "      ├─ path 'path/to/file'\n"
+      "      ╰─ name 'foo'\n");
 }
 
 TEST_F(ParserTest, import_statement_multiple) {
@@ -1712,17 +1712,17 @@ TEST_F(ParserTest, import_statement_multiple) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- header\n"
-      "| |- pragma-statement 'ignore-newlines' <line:2:1, col:28>\n"
-      "| |- import-statement <line:4:2, col:35>\n"
-      "| | `- path 'path/to/file'\n"
-      "| | `- name 'foo'\n"
-      "| |- comment <line:5:1, col:15> ' comment '\n"
-      "| |- import-statement <line:6:3, col:37>\n"
-      "| | `- path 'path/to/other'\n"
-      "| | `- name 'bar'\n"
-      "|- newline <line:7:1, line:8:1> '\\n'\n"
-      "|- text <line:8:1, col:10> 'Some text'\n");
+      "├─ header\n"
+      "│  ├─ pragma-statement 'ignore-newlines' <line:2:1, col:28>\n"
+      "│  ├─ import-statement <line:4:2, col:35>\n"
+      "│  │  ├─ path 'path/to/file'\n"
+      "│  │  ╰─ name 'foo'\n"
+      "│  ├─ comment <line:5:1, col:15> ' comment '\n"
+      "│  ╰─ import-statement <line:6:3, col:37>\n"
+      "│     ├─ path 'path/to/other'\n"
+      "│     ╰─ name 'bar'\n"
+      "├─ newline <line:7:1, line:8:1> '\\n'\n"
+      "╰─ text <line:8:1, col:10> 'Some text'\n");
 }
 
 TEST_F(ParserTest, import_statement_not_allowed_in_body) {
@@ -1807,14 +1807,14 @@ TEST_F(ParserTest, strip_standalone_lines) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- section-block <line:2:1, line:4:13>\n"
-      "| `- variable-lookup <line:2:4, col:11> 'boolean'\n"
-      "| |- text <line:3:1, col:2> '|'\n"
-      "| |- newline <line:3:2, line:4:1> '\\n'\n"
-      "|- text <line:5:1, col:9> '| A Line'\n"
-      "|- newline <line:5:9, line:6:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "├─ section-block <line:2:1, line:4:13>\n"
+      "│  ├─ variable-lookup <line:2:4, col:11> 'boolean'\n"
+      "│  ├─ text <line:3:1, col:2> '|'\n"
+      "│  ╰─ newline <line:3:2, line:4:1> '\\n'\n"
+      "├─ text <line:5:1, col:9> '| A Line'\n"
+      "╰─ newline <line:5:9, line:6:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, strip_standalone_lines_indented) {
@@ -1827,14 +1827,14 @@ TEST_F(ParserTest, strip_standalone_lines_indented) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- section-block <line:2:3, line:4:15>\n"
-      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
-      "| |- text <line:3:1, col:2> '|'\n"
-      "| |- newline <line:3:2, line:4:1> '\\n'\n"
-      "|- text <line:5:1, col:9> '| A Line'\n"
-      "|- newline <line:5:9, line:6:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "├─ section-block <line:2:3, line:4:15>\n"
+      "│  ├─ variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "│  ├─ text <line:3:1, col:2> '|'\n"
+      "│  ╰─ newline <line:3:2, line:4:1> '\\n'\n"
+      "├─ text <line:5:1, col:9> '| A Line'\n"
+      "╰─ newline <line:5:9, line:6:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, strip_standalone_lines_indented_at_eof) {
@@ -1846,12 +1846,12 @@ TEST_F(ParserTest, strip_standalone_lines_indented_at_eof) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- section-block <line:2:3, line:4:15>\n"
-      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
-      "| |- text <line:3:1, col:2> '|'\n"
-      "| |- newline <line:3:2, line:4:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "╰─ section-block <line:2:3, line:4:15>\n"
+      "   ├─ variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "   ├─ text <line:3:1, col:2> '|'\n"
+      "   ╰─ newline <line:3:2, line:4:1> '\\n'\n");
 }
 
 TEST_F(
@@ -1864,12 +1864,12 @@ TEST_F(
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- section-block <line:2:3, line:4:15>\n"
-      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
-      "| |- text <line:3:1, col:2> '|'\n"
-      "| |- newline <line:3:2, line:4:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "╰─ section-block <line:2:3, line:4:15>\n"
+      "   ├─ variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "   ├─ text <line:3:1, col:2> '|'\n"
+      "   ╰─ newline <line:3:2, line:4:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, strip_standalone_lines_multiple) {
@@ -1883,16 +1883,16 @@ TEST_F(ParserTest, strip_standalone_lines_multiple) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- section-block <line:2:3, line:5:15>\n"
-      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
-      "| |- section-block <line:2:16, line:4:15>\n"
-      "| | `- variable-lookup <line:2:19, col:26> 'boolean'\n"
-      "| | |- text <line:3:1, col:2> '|'\n"
-      "| | |- newline <line:3:2, line:4:1> '\\n'\n"
-      "|- text <line:6:1, col:9> '| A Line'\n"
-      "|- newline <line:6:9, line:7:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "├─ section-block <line:2:3, line:5:15>\n"
+      "│  ├─ variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "│  ╰─ section-block <line:2:16, line:4:15>\n"
+      "│     ├─ variable-lookup <line:2:19, col:26> 'boolean'\n"
+      "│     ├─ text <line:3:1, col:2> '|'\n"
+      "│     ╰─ newline <line:3:2, line:4:1> '\\n'\n"
+      "├─ text <line:6:1, col:9> '| A Line'\n"
+      "╰─ newline <line:6:9, line:7:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, strip_standalone_lines_multiline) {
@@ -1906,14 +1906,14 @@ TEST_F(ParserTest, strip_standalone_lines_multiline) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- section-block <line:2:3, line:5:25>\n"
-      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
-      "| |- text <line:4:1, col:2> '|'\n"
-      "| |- newline <line:4:2, line:5:1> '\\n'\n"
-      "|- text <line:6:1, col:9> '| A Line'\n"
-      "|- newline <line:6:9, line:7:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "├─ section-block <line:2:3, line:5:25>\n"
+      "│  ├─ variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "│  ├─ text <line:4:1, col:2> '|'\n"
+      "│  ╰─ newline <line:4:2, line:5:1> '\\n'\n"
+      "├─ text <line:6:1, col:9> '| A Line'\n"
+      "╰─ newline <line:6:9, line:7:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, strip_standalone_lines_multiline_comment) {
@@ -1927,15 +1927,15 @@ TEST_F(ParserTest, strip_standalone_lines_multiline_comment) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- section-block <inverted> <line:2:3, line:5:25>\n"
-      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
-      "| |- comment <line:3:21, col:38> ' unaffected '\n"
-      "| |- text <line:4:1, col:2> '|'\n"
-      "| |- newline <line:4:2, line:5:1> '\\n'\n"
-      "|- text <line:6:1, col:9> '| A Line'\n"
-      "|- newline <line:6:9, line:7:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "├─ section-block <inverted> <line:2:3, line:5:25>\n"
+      "│  ├─ variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "│  ├─ comment <line:3:21, col:38> ' unaffected '\n"
+      "│  ├─ text <line:4:1, col:2> '|'\n"
+      "│  ╰─ newline <line:4:2, line:5:1> '\\n'\n"
+      "├─ text <line:6:1, col:9> '| A Line'\n"
+      "╰─ newline <line:6:9, line:7:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, strip_standalone_lines_multiline_ineligible) {
@@ -1949,19 +1949,19 @@ TEST_F(ParserTest, strip_standalone_lines_multiline_ineligible) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- text <line:2:1, col:3> '  '\n"
-      "|- section-block <line:2:3, line:5:25>\n"
-      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
-      "| |- text <line:3:20, col:21> ' '\n"
-      "| |- interpolation <line:3:21, col:35> 'ineligible'\n"
-      "| |- text <line:3:35, col:36> ' '\n"
-      "| |- newline <line:3:36, line:4:1> '\\n'\n"
-      "| |- text <line:4:1, col:2> '|'\n"
-      "| |- newline <line:4:2, line:5:1> '\\n'\n"
-      "|- text <line:6:1, col:9> '| A Line'\n"
-      "|- newline <line:6:9, line:7:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "├─ text <line:2:1, col:3> '  '\n"
+      "├─ section-block <line:2:3, line:5:25>\n"
+      "│  ├─ variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "│  ├─ text <line:3:20, col:21> ' '\n"
+      "│  ├─ interpolation <line:3:21, col:35> 'ineligible'\n"
+      "│  ├─ text <line:3:35, col:36> ' '\n"
+      "│  ├─ newline <line:3:36, line:4:1> '\\n'\n"
+      "│  ├─ text <line:4:1, col:2> '|'\n"
+      "│  ╰─ newline <line:4:2, line:5:1> '\\n'\n"
+      "├─ text <line:6:1, col:9> '| A Line'\n"
+      "╰─ newline <line:6:9, line:7:1> '\\n'\n");
 }
 
 TEST_F(
@@ -1977,19 +1977,19 @@ TEST_F(
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- text <line:1:1, col:10> '| This Is'\n"
-      "|- newline <line:1:10, line:2:1> '\\n'\n"
-      "|- text <line:2:1, col:3> '  '\n"
-      "|- section-block <line:2:3, line:5:25>\n"
-      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
-      "| |- text <line:3:20, col:21> ' '\n"
-      "| |- macro <line:3:21, col:37> 'ineligible'\n"
-      "| |- text <line:3:37, col:38> ' '\n"
-      "| |- newline <line:3:38, line:4:1> '\\n'\n"
-      "| |- text <line:4:1, col:2> '|'\n"
-      "| |- newline <line:4:2, line:5:1> '\\n'\n"
-      "|- text <line:6:1, col:9> '| A Line'\n"
-      "|- newline <line:6:9, line:7:1> '\\n'\n");
+      "├─ text <line:1:1, col:10> '| This Is'\n"
+      "├─ newline <line:1:10, line:2:1> '\\n'\n"
+      "├─ text <line:2:1, col:3> '  '\n"
+      "├─ section-block <line:2:3, line:5:25>\n"
+      "│  ├─ variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "│  ├─ text <line:3:20, col:21> ' '\n"
+      "│  ├─ macro <line:3:21, col:37> 'ineligible'\n"
+      "│  ├─ text <line:3:37, col:38> ' '\n"
+      "│  ├─ newline <line:3:38, line:4:1> '\\n'\n"
+      "│  ├─ text <line:4:1, col:2> '|'\n"
+      "│  ╰─ newline <line:4:2, line:5:1> '\\n'\n"
+      "├─ text <line:6:1, col:9> '| A Line'\n"
+      "╰─ newline <line:6:9, line:7:1> '\\n'\n");
 }
 
 } // namespace whisker

@@ -66,9 +66,9 @@ class mstch_array_proxy final : public array {
     return converted_[index];
   }
 
-  void print_to(tree_printer::scope scope, const object_print_options& options)
+  void print_to(tree_printer::scope& scope, const object_print_options& options)
       const override {
-    default_print_to("mstch::array", std::move(scope), options);
+    default_print_to("mstch::array", scope, options);
   }
 
   mutable mstch_array proxied_;
@@ -108,9 +108,9 @@ class mstch_map_proxy final
     return property_names;
   }
 
-  void print_to(tree_printer::scope scope, const object_print_options& options)
+  void print_to(tree_printer::scope& scope, const object_print_options& options)
       const override {
-    default_print_to("mstch::map", *keys(), std::move(scope), options);
+    default_print_to("mstch::map", *keys(), scope, options);
   }
 
   mutable mstch_map proxied_;
@@ -149,17 +149,17 @@ class mstch_object_proxy
   }
 
   void print_to(
-      tree_printer::scope scope,
+      tree_printer::scope& scope,
       [[maybe_unused]] const object_print_options& options) const override {
     assert(scope.semantic_depth() <= options.max_depth);
-    scope.println("mstch::object");
+    scope.print("mstch::object");
 
     for (const auto& key : proxied_->property_names()) {
-      auto element_scope = scope.open_transparent_property();
-      element_scope.println("'{}'", key);
+      tree_printer::scope& element_scope = scope.make_transparent_child();
+      element_scope.print("'{}'", key);
       // It's not safe to access the mstch::object properties since they can
       // have side-effects. So we can only report property names.
-      element_scope.open_node().println("...");
+      element_scope.make_child().print("...");
     }
   }
 

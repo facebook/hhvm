@@ -17,44 +17,91 @@
 #include <thrift/shared/detail/string.h>
 #include <thrift/shared/tree_printer.h>
 
-#include <algorithm>
+#include <boost/algorithm/string/replace.hpp>
+
+#include <sstream>
 
 namespace apache::thrift::tree_printer {
 
-std::string escape(std::string_view str) {
-  return detail::escape(str);
+namespace {
+
+std::string generate_indentation(
+    std::size_t indent,
+    const std::vector<std::size_t>& active,
+    bool last_child) {
+  constexpr std::size_t num_indent_spaces = 3;
+  // Start with all spaces
+  std::string out(indent * num_indent_spaces, ' ');
+
+  // Fill in "|--"-like structure for the deepest node
+  for (std::size_t i : active) {
+    auto offset = out.begin() + (i * num_indent_spaces);
+    const bool is_final_indent = i == active.back();
+    if (is_final_indent) {
+      if (last_child) {
+        *offset++ = '\\';
+      } else {
+        *offset++ = '+';
+      }
+      // Fill in the path to the data of the node with "--"
+      static_assert(num_indent_spaces >= 2);
+      for (std::size_t j = 0; j < num_indent_spaces - 2; ++j) {
+        *offset++ = '-';
+      }
+    } else {
+      *offset = '|';
+    }
+  }
+
+  // Let's use Unicode box characters for better readability. Since these
+  // characters are multi-byte in UTF-8, we perform replacements as a
+  // post-processing step. This allows us to calculate the offsets above in a
+  // sane manner.
+  boost::algorithm::replace_all(out, "+", "├");
+  boost::algorithm::replace_all(out, "-", "─");
+  boost::algorithm::replace_all(out, "\\", "╰");
+  boost::algorithm::replace_all(out, "|", "│");
+
+  return out;
 }
 
-std::ostream& operator<<(
-    std::ostream& out, const scope::nesting_context& self) {
-  using kind = scope::nesting_context::kind;
-  if (self.parent_ == nullptr) {
-    // depth of 0 has no output
-    assert(self.kind_ == kind::node);
-    return out;
+} // namespace
+
+void scope::print_recursively(
+    std::ostream& out,
+    std::size_t indent,
+    std::vector<std::size_t>& active,
+    bool last_child) const {
+  out << generate_indentation(indent, active, last_child);
+  out << data_ << '\n';
+  if (last_child && !active.empty()) {
+    active.pop_back();
   }
 
-  std::string buffer;
-  if (self.kind_ == kind::node) {
-    buffer += "-|";
-  } else {
-    buffer += "-`";
+  if (children_.empty()) {
+    return;
   }
-  for (auto parent = self.parent_; parent != nullptr;
-       parent = parent->parent_) {
-    if (parent->parent_ == nullptr) {
-      // depth of 0 has no output
-      break;
-    }
-    if (parent->kind_ == kind::node) {
-      buffer += " |";
-    } else {
-      buffer += "  ";
-    }
+  active.push_back(indent);
+  for (const scope& child : children_) {
+    child.print_recursively(
+        out, indent + 1, active, &child == &children_.back() /* last_child */);
   }
+}
 
-  std::reverse(buffer.begin(), buffer.end());
-  return out << buffer;
+std::ostream& operator<<(std::ostream& out, const scope& self) {
+  std::vector<std::size_t> active;
+  self.print_recursively(out, 0 /* indent */, active, true /* last_child */);
+  return out;
+}
+
+std::string to_string(const scope& self) {
+  std::ostringstream out;
+  out << self;
+  return std::move(out).str();
+}
+
+std::string escape(std::string_view str) {
+  return detail::escape(str);
 }
 
 } // namespace apache::thrift::tree_printer

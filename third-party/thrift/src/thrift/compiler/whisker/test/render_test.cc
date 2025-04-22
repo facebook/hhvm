@@ -101,7 +101,7 @@ TEST_F(RenderTest, variable_missing_property_in_object) {
           "Object 'foo' has no property named 'bar'.\n"
           "The object with the missing property is:\n"
           "map (size=1)\n"
-          "`-'baz' → 'qux'\n",
+          "╰─ 'baz' → 'qux'\n",
           path_to_file,
           1)));
 }
@@ -210,20 +210,20 @@ TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
               "Name 'value' was not found in the current scope.\n"
               "Tried to search through the following scopes:\n"
               "#0 map (size=1)\n"
-              "`-'oops' → null\n"
+              "╰─ 'oops' → null\n"
               "\n"
               "#1 map (size=1)\n"
-              "`-'factorials' → array (size=5)\n"
-              "  `-[0] map (size=1)\n"
-              "    `-'value' → i64(1)\n"
-              "  `-[1] map (size=1)\n"
-              "    `-'oops' → null\n"
-              "  `-[2] map (size=1)\n"
-              "    `-'value' → i64(6)\n"
-              "  `-[3] map (size=1)\n"
-              "    `-'value' → i64(24)\n"
-              "  `-[4] map (size=1)\n"
-              "    `-'value' → i64(120)\n"
+              "╰─ 'factorials' → array (size=5)\n"
+              "   ├─ [0] map (size=1)\n"
+              "   │  ╰─ 'value' → i64(1)\n"
+              "   ├─ [1] map (size=1)\n"
+              "   │  ╰─ 'oops' → null\n"
+              "   ├─ [2] map (size=1)\n"
+              "   │  ╰─ 'value' → i64(6)\n"
+              "   ├─ [3] map (size=1)\n"
+              "   │  ╰─ 'value' → i64(24)\n"
+              "   ╰─ [4] map (size=1)\n"
+              "      ╰─ 'value' → i64(120)\n"
               "\n"
               "#2 <global scope> (size=0)\n",
               path_to_file,
@@ -1377,7 +1377,7 @@ TEST_F(RenderTest, with_not_map) {
           diagnostic_level::error,
           "Expression 'news' does not evaluate to a map. The encountered value is:\n"
           "array (size=1)\n"
-          "`-[0] i64(0)\n",
+          "╰─ [0] i64(0)\n",
           path_to_file,
           1)));
 }
@@ -1991,8 +1991,8 @@ TEST_F(RenderTest, partial_derived_context) {
               "Name 'x' was not found in the current scope.\n"
               "Tried to search through the following scopes:\n"
               "#0 <global scope> (size=1)\n"
-              "`-'global'\n"
-              "  |-i64(42)\n",
+              "╰─ 'global'\n"
+              "   ╰─ i64(42)\n",
               path_to_file,
               3),
           error_backtrace("#0 foo @ path/to/test.whisker <line:3, col:3>\n"
@@ -2023,8 +2023,8 @@ TEST_F(RenderTest, partial_derived_context_no_leak) {
               "#0 map (size=0)\n"
               "\n"
               "#1 <global scope> (size=1)\n"
-              "`-'global'\n"
-              "  |-i64(42)\n",
+              "╰─ 'global'\n"
+              "   ╰─ i64(42)\n",
               path_to_file,
               6),
           error_backtrace("#0 path/to/test.whisker <line:6, col:3>\n")));
@@ -2364,7 +2364,7 @@ TEST_F(RenderTest, imports_undefined) {
           "Object 'lib' has no property named 'oops'.\n"
           "The object with the missing property is:\n"
           "map (size=1)\n"
-          "`-'answer' → i64(42)\n",
+          "╰─ 'answer' → i64(42)\n",
           path_to_file,
           2)));
   EXPECT_FALSE(result.has_value());

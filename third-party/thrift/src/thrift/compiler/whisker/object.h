@@ -175,7 +175,8 @@ class map {
    * printing as well as encodes the location in an existing print tree where
    * this object should be inline. See its documentation for more details.
    */
-  virtual void print_to(tree_printer::scope, const object_print_options&) const;
+  virtual void print_to(
+      tree_printer::scope&, const object_print_options&) const;
 
   /**
    * Produces a textual representation of the data type represented by this
@@ -205,7 +206,7 @@ class map {
   void default_print_to(
       std::string_view name,
       const std::set<std::string>& property_names,
-      tree_printer::scope,
+      tree_printer::scope&,
       const object_print_options&) const;
 };
 
@@ -242,7 +243,8 @@ class array {
    * printing as well as encodes the location in an existing print tree where
    * this object should be inline. See its documentation for more details.
    */
-  virtual void print_to(tree_printer::scope, const object_print_options&) const;
+  virtual void print_to(
+      tree_printer::scope&, const object_print_options&) const;
 
   /**
    * Produces a textual representation of the data type represented by this
@@ -268,7 +270,7 @@ class array {
    */
   void default_print_to(
       std::string_view name,
-      tree_printer::scope,
+      tree_printer::scope&,
       const object_print_options&) const;
 };
 
@@ -331,7 +333,8 @@ class native_function {
    * Creates a string representation to described this function, primarily for
    * debugging and diagnostic purposes.
    */
-  virtual void print_to(tree_printer::scope, const object_print_options&) const;
+  virtual void print_to(
+      tree_printer::scope&, const object_print_options&) const;
 };
 
 /**
@@ -1109,7 +1112,7 @@ constexpr inline bool is_any_object_type =
  * This is primarily needed for map::print_to() and array::print_to()
  * implementations.
  */
-void print_to(const object&, tree_printer::scope, const object_print_options&);
+void print_to(const object&, tree_printer::scope&, const object_print_options&);
 std::string to_string(const object&, const object_print_options& = {});
 
 std::ostream& operator<<(std::ostream&, const object&);

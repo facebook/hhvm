@@ -143,9 +143,9 @@ TEST(ObjectTest, map_array_equality) {
     std::optional<std::set<std::string>> keys() const override { return keys_; }
 
     void print_to(
-        tree_printer::scope scope,
+        tree_printer::scope& scope,
         const object_print_options& options) const override {
-      default_print_to("always_zero_map", keys_, std::move(scope), options);
+      default_print_to("always_zero_map", keys_, scope, options);
     }
 
    private:
@@ -160,9 +160,9 @@ TEST(ObjectTest, map_array_equality) {
     object at(std::size_t) const override { return w::i64(0); }
 
     void print_to(
-        tree_printer::scope scope,
+        tree_printer::scope& scope,
         const object_print_options& options) const override {
-      default_print_to("always_zero_array", std::move(scope), options);
+      default_print_to("always_zero_array", scope, options);
     }
 
    private:
@@ -413,26 +413,26 @@ TEST(ObjectTest, to_string) {
 
   constexpr std::string_view full_output =
       "map (size=5)\n"
-      "`-'abc' → null\n"
-      "`-'baz' → array (size=4)\n"
-      "  `-[0] 'foo'\n"
-      "  `-[1] true\n"
-      "  `-[2] array [custom] (size=0)\n"
-      "  `-[3] map [custom] (size=0)\n"
-      "`-'foo' → i64(1)\n"
-      "`-'fun' → array (size=3)\n"
-      "  `-[0] f64(2)\n"
-      "  `-[1] array (size=1)\n"
-      "    `-[0] 'foo'\n"
-      "  `-[2] map (size=2)\n"
-      "    `-'bar' → i64(1)\n"
-      "    `-'baz' → array (size=1)\n"
-      "      `-[0] null\n"
-      "`-'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
-      "  |-<prototype (size=1)>\n"
-      "  | `-'foo'\n"
-      "  | |-<prototype (size=1)>\n"
-      "  | | `-'abc'\n";
+      "├─ 'abc' → null\n"
+      "├─ 'baz' → array (size=4)\n"
+      "│  ├─ [0] 'foo'\n"
+      "│  ├─ [1] true\n"
+      "│  ├─ [2] array [custom] (size=0)\n"
+      "│  ╰─ [3] map [custom] (size=0)\n"
+      "├─ 'foo' → i64(1)\n"
+      "├─ 'fun' → array (size=3)\n"
+      "│  ├─ [0] f64(2)\n"
+      "│  ├─ [1] array (size=1)\n"
+      "│  │  ╰─ [0] 'foo'\n"
+      "│  ╰─ [2] map (size=2)\n"
+      "│     ├─ 'bar' → i64(1)\n"
+      "│     ╰─ 'baz' → array (size=1)\n"
+      "│        ╰─ [0] null\n"
+      "╰─ 'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "   ╰─ <prototype (size=1)>\n"
+      "      ├─ 'foo'\n"
+      "      ╰─ <prototype (size=1)>\n"
+      "         ╰─ 'abc'\n";
 
   EXPECT_EQ(to_string(o), full_output);
 
@@ -446,73 +446,73 @@ TEST(ObjectTest, to_string) {
   EXPECT_EQ(
       to_string(o, with_depth(1)),
       "map (size=5)\n"
-      "`-'abc' → null\n"
-      "`-'baz' → ...\n"
-      "`-'foo' → i64(1)\n"
-      "`-'fun' → ...\n"
-      "`-'native' → ...\n");
+      "├─ 'abc' → null\n"
+      "├─ 'baz' → ...\n"
+      "├─ 'foo' → i64(1)\n"
+      "├─ 'fun' → ...\n"
+      "╰─ 'native' → ...\n");
 
   EXPECT_EQ(
       to_string(o, with_depth(2)),
       "map (size=5)\n"
-      "`-'abc' → null\n"
-      "`-'baz' → array (size=4)\n"
-      "  `-[0] 'foo'\n"
-      "  `-[1] true\n"
-      "  `-[2] ...\n"
-      "  `-[3] ...\n"
-      "`-'foo' → i64(1)\n"
-      "`-'fun' → array (size=3)\n"
-      "  `-[0] f64(2)\n"
-      "  `-[1] ...\n"
-      "  `-[2] ...\n"
-      "`-'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
-      "  |-...\n");
+      "├─ 'abc' → null\n"
+      "├─ 'baz' → array (size=4)\n"
+      "│  ├─ [0] 'foo'\n"
+      "│  ├─ [1] true\n"
+      "│  ├─ [2] ...\n"
+      "│  ╰─ [3] ...\n"
+      "├─ 'foo' → i64(1)\n"
+      "├─ 'fun' → array (size=3)\n"
+      "│  ├─ [0] f64(2)\n"
+      "│  ├─ [1] ...\n"
+      "│  ╰─ [2] ...\n"
+      "╰─ 'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "   ╰─ ...\n");
 
   EXPECT_EQ(
       to_string(o, with_depth(3)),
       "map (size=5)\n"
-      "`-'abc' → null\n"
-      "`-'baz' → array (size=4)\n"
-      "  `-[0] 'foo'\n"
-      "  `-[1] true\n"
-      "  `-[2] array [custom] (size=0)\n"
-      "  `-[3] map [custom] (size=0)\n"
-      "`-'foo' → i64(1)\n"
-      "`-'fun' → array (size=3)\n"
-      "  `-[0] f64(2)\n"
-      "  `-[1] array (size=1)\n"
-      "    `-[0] 'foo'\n"
-      "  `-[2] map (size=2)\n"
-      "    `-'bar' → i64(1)\n"
-      "    `-'baz' → ...\n"
-      "`-'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
-      "  |-<prototype (size=1)>\n"
-      "  | `-'foo'\n"
-      "  | |-...\n");
+      "├─ 'abc' → null\n"
+      "├─ 'baz' → array (size=4)\n"
+      "│  ├─ [0] 'foo'\n"
+      "│  ├─ [1] true\n"
+      "│  ├─ [2] array [custom] (size=0)\n"
+      "│  ╰─ [3] map [custom] (size=0)\n"
+      "├─ 'foo' → i64(1)\n"
+      "├─ 'fun' → array (size=3)\n"
+      "│  ├─ [0] f64(2)\n"
+      "│  ├─ [1] array (size=1)\n"
+      "│  │  ╰─ [0] 'foo'\n"
+      "│  ╰─ [2] map (size=2)\n"
+      "│     ├─ 'bar' → i64(1)\n"
+      "│     ╰─ 'baz' → ...\n"
+      "╰─ 'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "   ╰─ <prototype (size=1)>\n"
+      "      ├─ 'foo'\n"
+      "      ╰─ ...\n");
 
   EXPECT_EQ(
       // Proxied objects should be printed the same as the underlying object.
       to_string(object(manage_as_static(o)), with_depth(3)),
       "map (size=5)\n"
-      "`-'abc' → null\n"
-      "`-'baz' → array (size=4)\n"
-      "  `-[0] 'foo'\n"
-      "  `-[1] true\n"
-      "  `-[2] array [custom] (size=0)\n"
-      "  `-[3] map [custom] (size=0)\n"
-      "`-'foo' → i64(1)\n"
-      "`-'fun' → array (size=3)\n"
-      "  `-[0] f64(2)\n"
-      "  `-[1] array (size=1)\n"
-      "    `-[0] 'foo'\n"
-      "  `-[2] map (size=2)\n"
-      "    `-'bar' → i64(1)\n"
-      "    `-'baz' → ...\n"
-      "`-'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
-      "  |-<prototype (size=1)>\n"
-      "  | `-'foo'\n"
-      "  | |-...\n");
+      "├─ 'abc' → null\n"
+      "├─ 'baz' → array (size=4)\n"
+      "│  ├─ [0] 'foo'\n"
+      "│  ├─ [1] true\n"
+      "│  ├─ [2] array [custom] (size=0)\n"
+      "│  ╰─ [3] map [custom] (size=0)\n"
+      "├─ 'foo' → i64(1)\n"
+      "├─ 'fun' → array (size=3)\n"
+      "│  ├─ [0] f64(2)\n"
+      "│  ├─ [1] array (size=1)\n"
+      "│  │  ╰─ [0] 'foo'\n"
+      "│  ╰─ [2] map (size=2)\n"
+      "│     ├─ 'bar' → i64(1)\n"
+      "│     ╰─ 'baz' → ...\n"
+      "╰─ 'native' → <native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "   ╰─ <prototype (size=1)>\n"
+      "      ├─ 'foo'\n"
+      "      ╰─ ...\n");
   // Proxied objects should compare equal to the underlying object.
   EXPECT_EQ(object(manage_as_static(o)), o);
 

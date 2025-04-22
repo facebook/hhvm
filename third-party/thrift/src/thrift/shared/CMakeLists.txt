@@ -23,5 +23,6 @@ add_library(
 
 target_link_libraries(
   shared
+  Boost::boost
   fmt::fmt
 )

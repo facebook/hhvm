@@ -16,156 +16,146 @@
 
 #pragma once
 
-#include <cassert>
-#include <memory>
+#include <iosfwd>
 #include <ostream>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include <fmt/core.h>
 
-// This file implements building blocks that can be used to print a tree
-// structure to an output stream.
-//
-// The format of the tree is loosely based on clang's `-ast-dump`:
-//   https://clang.llvm.org/docs/IntroductionToTheClangAST.html#examining-the-ast
-//
-// The building blocks here do not include any traversal logic and so is not
-// tied to any particular data structure. Instead, the data types here can be
-// used to track tree depth which informs the indentation of the output.
-// Furthermore, the lines of printed tree can be one of {node, property} (see
-// below).
 namespace apache::thrift::tree_printer {
+
+/**
+ * This class is used to print a hierarchical data as a tree structure to an
+ * output stream. A scope object represents a node within the tree structure. It
+ * includes one line of text, and (optionally) children scopes.
+ *
+ * Example:
+ *
+ *     auto root = tree_printer::scope::make_root("encyclopedia");
+ *     {
+ *       tree_printer::scope& culture = root.make_child("culture");
+ *       culture.make_child("art");
+ *       culture.make_child("craft");
+ *     }
+ *     {
+ *       tree_printer::scope& science = root.make_child("science");
+ *       science.make_child("physics");
+ *       science.make_child("chemistry");
+ *     }
+ *     tree_printer::to_string(root)
+ *
+ * Produces the following output:
+ *
+ *     encyclopedia
+ *     ├─ culture
+ *     │  ├─ art
+ *     │  ╰─ craft
+ *     ╰─ science
+ *        ├─ physics
+ *        ╰─ chemistry
+ *
+ * The format of the output is often referred to as a "tree view":
+ *  https://en.wikipedia.org/wiki/Tree_structure#Outlines_and_tree_views
+ */
+class scope {
+ public:
+  scope(scope&&) = default;
+  scope& operator=(scope&&) = default;
+
+  /**
+   * Returns the "semantic" depth of this scope in the domain of the object
+   * being printed.
+   *
+   * The separation of semantic depth from the actual depth is helpful to track
+   * when so that pruning the tree (i.e. deep nodes are condensed to "...") can
+   * be customized by the user.
+   */
+  unsigned semantic_depth() const { return semantic_depth_; }
+
+  /**
+   * Prints a formatted string to the current scope's text.
+   *
+   * WARNING: newlines in the formatted string will cause the printed tree
+   * structure to be malformed.
+   */
+  template <typename... T>
+  void print(fmt::format_string<T...> msg, T&&... args) {
+    fmt::format_to(std::back_inserter(data_), msg, std::forward<T>(args)...);
+  }
+
+  /**
+   * Opens a new child scope that increases the semantic depth by 1.
+   */
+  scope& make_child() {
+    return children_.emplace_back(scope(semantic_depth_ + 1));
+  }
+  /**
+   * Opens a new child scope (as if by make_child()) and prints a formatted
+   * string to it.
+   */
+  template <typename... T>
+  scope& make_child(fmt::format_string<T...> msg, T&&... args) {
+    scope& child = make_child();
+    child.print(msg, std::forward<T>(args)...);
+    return child;
+  }
+
+  /**
+   * Opens a new child scope without changing the semantic depth of this tree.
+   */
+  scope& make_transparent_child() {
+    return children_.emplace_back(scope(semantic_depth_));
+  }
+  /**
+   * Opens a new child scope (as if by make_transparent_child()) and prints a
+   * formatted string to it.
+   */
+  template <typename... T>
+  scope& make_transparent_child(fmt::format_string<T...> msg, T&&... args) {
+    scope& child = make_transparent_child();
+    child.print(msg, std::forward<T>(args)...);
+    return child;
+  }
+
+  /**
+   * Create a scope that represents the root of a new tree.
+   */
+  static scope make_root() { return scope(0 /* semantic_depth */); }
+  /**
+   * Create a scope (as if by make_root()) and print a formatted string to it.
+   */
+  template <typename... T>
+  static scope make_root(fmt::format_string<T...> msg, T&&... args) {
+    scope root = make_root();
+    root.print(msg, std::forward<T>(args)...);
+    return root;
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, const scope&);
+
+ private:
+  explicit scope(unsigned semantic_depth) : semantic_depth_(semantic_depth) {}
+
+  void print_recursively(
+      std::ostream&,
+      std::size_t indent,
+      std::vector<std::size_t>& active,
+      bool last_child) const;
+
+  unsigned semantic_depth_;
+  std::string data_;
+  std::vector<scope> children_;
+};
+
+std::string to_string(const scope&);
 
 /**
  * Escapes a string of common special characters, making the output suitable for
  * printing within a tree.
  */
 std::string escape(std::string_view str);
-
-/**
- * A scope represents a new line with a new degree of indentation
- * within the output string. A scope can be one of {node, property}. In the
- * output node scope are emphasized so that the tree structure is
- * clearer.
- *
- * A node scope is a scope which represents an actual node type in
- * the tree. For example, in Whisker's AST, a section-block is printed via a
- * node scope but the "^" indicating an inversion is via property
- * scope.
- *
- * A property scope represents some data attached to a "real" node,
- * but is not a node itself.
- */
-class scope {
- private:
-  /**
-   * An object representing the current level of indentation (including the
-   * history) for printing the prefix for new lines of the output.
-   */
-  struct nesting_context
-      : public std::enable_shared_from_this<nesting_context> {
-    enum class kind { property, node };
-
-    std::shared_ptr<const nesting_context> parent_;
-    kind kind_;
-
-    explicit nesting_context(
-        std::shared_ptr<const nesting_context> parent, kind kind)
-        : parent_(std::move(parent)), kind_(kind) {}
-
-    static std::shared_ptr<const nesting_context> make_root() {
-      return std::make_shared<nesting_context>(nullptr, kind::node);
-    }
-
-    std::shared_ptr<const nesting_context> open_node() const {
-      return std::make_shared<nesting_context>(shared_from_this(), kind::node);
-    }
-
-    std::shared_ptr<const nesting_context> open_property() const {
-      return std::make_shared<nesting_context>(
-          shared_from_this(), kind::property);
-    }
-  };
-
- public:
-  /**
-   * Returns the "semantic" depth of this scope in the domain of the object
-   * being printed.
-   *
-   * For example, a single whisker::object (like whisker::map) can produce a
-   * subtree of depth 2. However, in the domain of whisker::object's the
-   * semantic depth of such a tree is still 1.
-   */
-  unsigned semantic_depth() const { return semantic_depth_; }
-
-  /**
-   * Opens a new node scope as described above and increases the semantic depth
-   * by 1.
-   */
-  scope open_node() const {
-    return scope(*out_, nesting_context_->open_node(), semantic_depth_ + 1);
-  }
-  /**
-   * Opens a new node scope as described above without changing the semantic
-   * depth of this tree.
-   */
-  scope open_transparent_node() const {
-    return scope(*out_, nesting_context_->open_node(), semantic_depth_);
-  }
-
-  /**
-   * Opens a new property scope as described above and increases the semantic
-   * depth by 1.
-   */
-  scope open_property() const {
-    return scope(*out_, nesting_context_->open_property(), semantic_depth_ + 1);
-  }
-  /**
-   * Opens a new property scope as described above without changing the semantic
-   * depth of this tree.
-   */
-  scope open_transparent_property() const {
-    return scope(*out_, nesting_context_->open_property(), semantic_depth_);
-  }
-
-  template <typename... T>
-  void print(fmt::format_string<T...> msg, T&&... args) {
-    if (!std::exchange(used_, true)) {
-      *out_ << *nesting_context_;
-    }
-    *out_ << fmt::format(msg, std::forward<T>(args)...);
-  }
-
-  template <typename... T>
-  void println(fmt::format_string<T...> msg, T&&... args) {
-    print(msg, std::forward<T>(args)...);
-    *out_ << '\n';
-  }
-
-  static scope make_root(std::ostream& out) {
-    return scope(out, nesting_context::make_root(), 0 /* semantic_depth */);
-  }
-
- private:
-  explicit scope(
-      std::ostream& out,
-      std::shared_ptr<const nesting_context> ctx,
-      unsigned semantic_depth)
-      : out_(&out),
-        nesting_context_(std::move(ctx)),
-        semantic_depth_(semantic_depth) {
-    assert(nesting_context_ != nullptr);
-  }
-
-  std::ostream* out_;
-  std::shared_ptr<const nesting_context> nesting_context_;
-  unsigned semantic_depth_;
-  bool used_{false};
-
-  friend std::ostream& operator<<(
-      std::ostream& out, const nesting_context& self);
-};
 
 } // namespace apache::thrift::tree_printer

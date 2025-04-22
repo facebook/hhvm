@@ -91,13 +91,13 @@ class global_scope_object : public map {
     return std::nullopt;
   }
 
-  void print_to(tree_printer::scope scope, const object_print_options& options)
+  void print_to(tree_printer::scope& scope, const object_print_options& options)
       const override {
-    scope.println("<global scope> (size={})", properties_.size());
+    scope.print("<global scope> (size={})", properties_.size());
     for (const auto& [key, value] : properties_) {
-      auto element_scope = scope.open_transparent_property();
-      element_scope.println("'{}'", key);
-      whisker::print_to(value, element_scope.open_node(), options);
+      tree_printer::scope& element_scope = scope.make_transparent_child();
+      element_scope.print("'{}'", key);
+      whisker::print_to(value, element_scope.make_child(), options);
     }
   }
 

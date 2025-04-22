@@ -496,8 +496,8 @@ class make_function_delegate final : public function {
   }
 
   void print_to(
-      tree_printer::scope scope, const object_print_options&) const final {
-    scope.println("{}", describe_type());
+      tree_printer::scope& scope, const object_print_options&) const final {
+    scope.print("{}", describe_type());
   }
 
  private:

@@ -257,7 +257,7 @@ void WebTransportImpl::StreamReadHandle::readAvailable(
     impl_.wtIngressStreams_.erase(getID());
     return;
   }
-  quic::Buf data = std::move(readRes.value().first);
+  quic::BufPtr data = std::move(readRes.value().first);
   bool eof = readRes.value().second;
   // deliver data, eof
   auto state = dataAvailable(std::move(data), eof);

@@ -373,7 +373,7 @@ class HQSessionTest
     //   [Context ID (i)],
     //   HTTP/3 Datagram Payload (..),
     // }
-    quic::Buf headerBuf = quic::Buf(folly::IOBuf::create(0));
+    quic::BufPtr headerBuf = quic::BufPtr(folly::IOBuf::create(0));
     quic::BufAppender appender(headerBuf.get(),
                                proxygen::kMaxDatagramHeaderSize);
     auto streamIdRes = quic::encodeQuicInteger(

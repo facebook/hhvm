@@ -283,7 +283,7 @@ void HQSession::onStopSending(quic::StreamId id,
 
 void HQSession::onKnob(uint64_t knobSpace,
                        uint64_t knobId,
-                       quic::Buf knobBlob) {
+                       quic::BufPtr knobBlob) {
   VLOG(3) << __func__ << " sess=" << *this
           << " knob frame received: " << " KnobSpace: " << std::hex << knobSpace
           << " KnobId: " << knobId << " KnobBlob: "
@@ -1295,7 +1295,7 @@ void HQSession::readControlStream(HQControlStream* ctrlStream) {
     return;
   }
   resetTimeout();
-  quic::Buf data = std::move(readRes.value().first);
+  quic::BufPtr data = std::move(readRes.value().first);
   auto readSize = data ? data->computeChainDataLength() : 0;
   VLOG(4) << "Read " << readSize << " bytes from control stream";
   ctrlStream->readBuf_.append(std::move(data));
@@ -1443,7 +1443,7 @@ void HQSession::readRequestStream(quic::StreamId id) noexcept {
   }
 
   resetTimeout();
-  quic::Buf data = std::move(readRes.value().first);
+  quic::BufPtr data = std::move(readRes.value().first);
   auto readSize = data ? data->computeChainDataLength() : 0;
   hqStream->readEOF_ = readRes.value().second;
   VLOG(3) << "Got streamID=" << hqStream->getStreamId() << " len=" << readSize
@@ -3814,8 +3814,8 @@ HQSession::HQStreamTransport::sendDatagram(
   //   [Context ID (i)],
   //   HTTP/3 Datagram Payload (..),
   // }
-  quic::Buf headerBuf =
-      quic::Buf(folly::IOBuf::create(session_.sock_->getDatagramSizeLimit()));
+  quic::BufPtr headerBuf = quic::BufPtr(
+      folly::IOBuf::create(session_.sock_->getDatagramSizeLimit()));
   quic::BufAppender appender(headerBuf.get(), kMaxDatagramHeaderSize);
   auto streamIdRes = quic::encodeQuicInteger(
       streamId_.value() / 4, [&](auto val) { appender.writeBE(val); });

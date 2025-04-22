@@ -464,7 +464,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
     EXPECT_CALL(*sock_, readDatagramBufs(testing::_))
         .WillRepeatedly(testing::Invoke(
-            [this](size_t atMost) -> folly::Expected<std::vector<quic::Buf>,
+            [this](size_t atMost) -> folly::Expected<std::vector<quic::BufPtr>,
                                                      quic::LocalErrorCode> {
               auto& connStream = streams_[kConnectionStreamId];
               if (connStream.writeState == CLOSED) {
@@ -476,7 +476,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               } else {
                 atMost = std::min(atMost, inDatagrams_.size());
               }
-              std::vector<Buf> retDatagrams;
+              std::vector<BufPtr> retDatagrams;
               retDatagrams.reserve(atMost);
               std::transform(
                   inDatagrams_.begin(),

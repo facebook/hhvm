@@ -195,7 +195,9 @@ class HQSession
 
   void onConnectionError(quic::QuicError code) noexcept override;
 
-  void onKnob(uint64_t knobSpace, uint64_t knobId, quic::Buf knobBlob) override;
+  void onKnob(uint64_t knobSpace,
+              uint64_t knobId,
+              quic::BufPtr knobBlob) override;
 
   // returns false in case of failure
   bool onTransportReadyCommon() noexcept;
@@ -374,7 +376,7 @@ class HQSession
    * Sends a knob frame on the session.
    */
   folly::Expected<folly::Unit, quic::LocalErrorCode> sendKnob(
-      uint64_t knobSpace, uint64_t knobId, quic::Buf knobBlob) {
+      uint64_t knobSpace, uint64_t knobId, quic::BufPtr knobBlob) {
     return sock_->setKnob(knobSpace, knobId, std::move(knobBlob));
   }
 

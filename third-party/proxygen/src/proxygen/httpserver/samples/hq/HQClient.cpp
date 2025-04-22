@@ -250,7 +250,7 @@ void HQClient::sendKnobFrame(const folly::StringPiece str) {
   }
   uint64_t knobSpace = 0xfaceb00c;
   uint64_t knobId = 100;
-  Buf buf(folly::IOBuf::create(str.size()));
+  BufPtr buf(folly::IOBuf::create(str.size()));
   memcpy(buf->writableData(), str.data(), str.size());
   buf->append(str.size());
   VLOG(10) << "Sending Knob Frame to peer. KnobSpace: " << std::hex << knobSpace

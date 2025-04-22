@@ -524,7 +524,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   std::vector<std::string> alpns;
   folly::Optional<std::vector<CertificateCompressionAlgorithm>> compAlgos;
   bool early = false;
-  std::string proxyHost = "";
+  std::string proxyHost;
   uint16_t proxyPort = 0;
   std::vector<CipherSuite> ciphers{
       CipherSuite::TLS_AES_128_GCM_SHA256,

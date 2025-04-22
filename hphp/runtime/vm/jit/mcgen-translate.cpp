@@ -389,7 +389,7 @@ void retranslateAll(bool skipSerialize) {
   } else {
     assertx(isJitDeserializing());
   }
-  setBaseInliningProfCount(globalProfData()->baseProfCount());
+  setInliningMetadata(globalProfData()->baseProfCount(), FuncOrder::getTargetCounts());
   auto const& sortedFuncs = FuncOrder::get();
   auto const nFuncs = sortedFuncs.size();
 
@@ -467,7 +467,7 @@ void retranslateAll(bool skipSerialize) {
           profData()->unsetOptimized(fid);
         }
         profData()->clearAllOptimizedSKs();
-        clearCachedInliningCost();
+        clearCachedInliningMetadata();
       }
       runParallelRetranslate();
     }

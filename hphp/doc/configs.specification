@@ -1581,6 +1581,19 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - double HHIR.InliningVasmCallerExp = .5, UNKNOWN
 - double HHIR.InliningVasmCalleeExp = .5, UNKNOWN
 - double HHIR.InliningDepthExp = 1.5, UNKNOWN
+- double HHIR.InliningVasmCallsiteExp = 0.0, UNKNOWN
+
+  The higher the number of callsites, the lower the VASM cost limit
+  we allow for inlining.
+  Discount functions with high callsite counts using this formula:
+  (1 / numCallsites) ^ InliningVasmCallsiteExp.
+
+- double HHIR.InliningVasmMinCallsiteFactor = 1.0, UNKNOWN
+
+  Represents the lowest factor we multiply for calculating
+  the VASM cost limit. This is to prevent functions with high
+  number of callsites to be discounted too much.
+
 - uint32_t HHIR.InliningMaxReturnDecRefs = 24, UNKNOWN
 - uint32_t HHIR.InliningMaxReturnLocals = 40, UNKNOWN
 - uint32_t HHIR.InliningMaxInitObjProps = 12, UNKNOWN

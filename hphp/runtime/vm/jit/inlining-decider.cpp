@@ -97,6 +97,8 @@ bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
 }
 
 std::atomic<uint64_t> s_baseProfCount{0};
+folly::ConcurrentHashMap<FuncId, uint32_t> s_funcTargetCounts;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // canInlineAt() helpers.
@@ -369,6 +371,9 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
     adjustedCost *= std::pow((double)callerProfCount / calleeProfCount,
                              Cfg::HHIR::InliningVasmCalleeExp);
   }
+  auto numCallsites = std::max(1U, s_funcTargetCounts[calleeRegion.entry()->func()->getFuncId()]);
+  adjustedCost *= std::max(Cfg::HHIR::InliningVasmMinCallsiteFactor,
+                           std::pow(1.0 / numCallsites, Cfg::HHIR::InliningVasmCallsiteExp));
   adjustedCost *= std::pow(1.0 / (1 + depth),
                            Cfg::HHIR::InliningDepthExp);
   if (adjustedCost < Cfg::HHIR::InliningMinVasmCostLimit) {
@@ -826,15 +831,20 @@ irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
   return {callerSk, region};
 }
 
-void setBaseInliningProfCount(uint64_t value) {
-  s_baseProfCount.store(value);
-  FTRACE(1, "setBaseInliningProfCount: {}\n", value);
+void setInliningMetadata(uint64_t baseProfCount,
+                         const jit::hash_map<FuncId, uint32_t>& funcTargetCounts) {
+  s_baseProfCount.store(baseProfCount);
+  for (auto& [funcId, count] : funcTargetCounts) {
+    s_funcTargetCounts.emplace(funcId, count);
+  }
+  FTRACE(1, "setInliningMetadata: {}\n", baseProfCount);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void clearCachedInliningCost() {
+void clearCachedInliningMetadata() {
   s_inlCostCache.clear();
+  s_funcTargetCounts.clear();
 }
 
 void serializeCachedInliningCost(ProfDataSerializer& ser) {

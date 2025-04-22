@@ -35,6 +35,11 @@ uint64_t compute();
 const std::vector<FuncId>& get();
 
 /*
+ * Get the cached function to callsite counts.
+ */
+const jit::hash_map<FuncId, uint32_t>& getTargetCounts();
+
+/*
  * Serialize/deserialize the cached function order.
  */
 void serialize(ProfDataSerializer&);
@@ -59,4 +64,3 @@ void incCount(const Func* callee, const ActRec* fp);
 void recordTranslation(const TransRec& transRec);
 
 } } }
-

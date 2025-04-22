@@ -105,14 +105,15 @@ irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
                                             Type ctxType,
                                             SrcKey callerSk);
 
-void setBaseInliningProfCount(uint64_t value);
+void setInliningMetadata(uint64_t baseProfCount, 
+                         const jit::hash_map<FuncId, uint32_t>& funcTargetCounts);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Clear all cached inlining costs.
+ * Clear all cached inlining metadata.
  */
-void clearCachedInliningCost();
+void clearCachedInliningMetadata();
 
 void serializeCachedInliningCost(ProfDataSerializer&);
 void deserializeCachedInliningCost(ProfDataDeserializer&);

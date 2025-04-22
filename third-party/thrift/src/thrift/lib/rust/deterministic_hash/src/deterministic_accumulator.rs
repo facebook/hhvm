@@ -84,7 +84,7 @@ impl<T: Hasher, F: Fn() -> T> DeterministicAccumulator<T, F> {
                 }));
             }
             Some(ref mut context) => match context {
-                Context::Ordered(ref mut ordered_context) => {
+                Context::Ordered(ordered_context) => {
                     ordered_context.count += 1;
                 }
                 Context::Unordered(_) => {
@@ -142,10 +142,10 @@ impl<T: Hasher, F: Fn() -> T> DeterministicAccumulator<T, F> {
                 self.result = Some(result);
             }
             Some(ref mut context) => match context {
-                Context::Ordered(ref mut ordered_context) => {
+                Context::Ordered(ordered_context) => {
                     ordered_context.hasher.combine_hasher(&result);
                 }
-                Context::Unordered(ref mut unordered_context) => {
+                Context::Unordered(unordered_context) => {
                     unordered_context.push(result);
                 }
             },
@@ -160,10 +160,10 @@ impl<T: Hasher, F: Fn() -> T> DeterministicAccumulator<T, F> {
                 self.result = Some(hasher.finalize());
             }
             Some(ref mut context) => match context {
-                Context::Ordered(ref mut ordered_context) => {
+                Context::Ordered(ordered_context) => {
                     value.add_to_hasher(&mut ordered_context.hasher);
                 }
-                Context::Unordered(ref mut unordered_context) => {
+                Context::Unordered(unordered_context) => {
                     let mut hasher = (self.generator)();
                     value.add_to_hasher(&mut hasher);
                     unordered_context.push(hasher.finalize());

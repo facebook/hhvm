@@ -299,8 +299,25 @@ void match_type_with_const_value(
     case t_type::type::t_structured: {
       const auto* structured = dynamic_cast<const t_structured*>(type);
       if (auto ttype = value->ttype()) {
-        assert(ttype.resolved());
-        if (ttype->get_true_type() != type) {
+        if (!ttype.resolved()) {
+          ctx.error(
+              value->ref_range().begin,
+              // Here we have expected type which allows us to output more
+              // detail to the error. Hence it's better to error here as opposed
+              // to later in validator which will only print 'unknown symbol'
+              "could not resolve type `{}` (expected `{}`)",
+              ttype.get_unresolved_type()->get_full_name(),
+              type->get_full_name());
+          // Resolve global placeholder to avoid the duplicate message
+          for (auto& td : mctx.bundle->root_program()
+                              ->global_scope()
+                              ->placeholder_typedefs()) {
+            if (!td.type() &&
+                td.name() == ttype.get_unresolved_type()->get_full_name()) {
+              td.set_type(t_type_ref::from_ptr(type));
+            }
+          }
+        } else if (ttype->get_true_type() != type) {
           ctx.error(
               value->ref_range().begin,
               "type mismatch: expected {}, got {}",

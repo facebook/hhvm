@@ -2744,3 +2744,15 @@ TEST(CompilerTest, reported_unresolved_identifiers_in_constants) {
   )";
   check_compile(name_contents_map, "main.thrift");
 }
+
+TEST(CompilerTest, unresolved_struct_in_const) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["main.thrift"] = R"(
+    struct MyDeclaredStruct {
+        1: i64 some_field;
+    }
+    const MyDeclaredStruct X = MyUndeclaredStruct{}; 
+    # expected-error-1: could not resolve type `MyUndeclaredStruct` (expected `main.MyDeclaredStruct`)
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}

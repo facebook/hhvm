@@ -17,6 +17,8 @@
 package thrift
 
 import (
+	"fmt"
+
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
@@ -39,10 +41,6 @@ func (r *responsePayload) Data() []byte {
 	return r.data
 }
 
-func (r *responsePayload) Zstd() bool {
-	return r.metadata != nil && r.metadata.GetCompression() == rpcmetadata.CompressionAlgorithm_ZSTD
-}
-
 func (r *responsePayload) Error() error {
 	if r.exception != nil && !r.exception.IsDeclared() {
 		return r.exception
@@ -62,11 +60,9 @@ func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 		if err := DecodeCompact(metadataBytes, res.metadata); err != nil {
 			return nil, err
 		}
-		if res.Zstd() {
-			res.data, err = decompressZstd(res.data)
-			if err != nil {
-				return nil, err
-			}
+		res.data, err = maybeDecompress(res.data, res.metadata.GetCompression())
+		if err != nil {
+			return nil, fmt.Errorf("response payload decompression failed: %w", err)
 		}
 		if res.metadata.PayloadMetadata != nil && res.metadata.PayloadMetadata.ExceptionMetadata != nil {
 			res.exception = newRocketException(res.metadata.PayloadMetadata.ExceptionMetadata)

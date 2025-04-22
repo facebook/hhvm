@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 
@@ -55,12 +56,7 @@ func encodeRequestPayload(
 	if err != nil {
 		return nil, err
 	}
-	switch compression {
-	case rpcmetadata.CompressionAlgorithm_ZSTD:
-		dataBytes, err = compressZstd(dataBytes)
-	case rpcmetadata.CompressionAlgorithm_ZLIB:
-		dataBytes, err = compressZlib(dataBytes)
-	}
+	dataBytes, err = maybeCompress(dataBytes, compression)
 	if err != nil {
 		return nil, err
 	}
@@ -92,13 +88,7 @@ func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 		return nil, err
 	}
 
-	dataBytes := msg.Data()
-	switch metadata.GetCompression() {
-	case rpcmetadata.CompressionAlgorithm_ZSTD:
-		dataBytes, err = decompressZstd(dataBytes)
-	case rpcmetadata.CompressionAlgorithm_ZLIB:
-		dataBytes, err = decompressZlib(dataBytes)
-	}
+	dataBytes, err := maybeDecompress(msg.Data(), metadata.GetCompression())
 	if err != nil {
 		return nil, fmt.Errorf("request payload decompression failed: %w", err)
 	}
@@ -186,4 +176,31 @@ func rpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {
 		return types.ONEWAY, nil
 	}
 	return 0, fmt.Errorf("unsupported RpcKind %v", kind)
+}
+
+func maybeCompress(data []byte, compression rpcmetadata.CompressionAlgorithm) ([]byte, error) {
+	switch compression {
+	case rpcmetadata.CompressionAlgorithm_NONE:
+		return data, nil
+	case rpcmetadata.CompressionAlgorithm_ZSTD:
+		return compressZstd(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB:
+		return compressZlib(data)
+	default:
+		return nil, errors.New("unknown or unsupported compression algorithm")
+	}
+}
+
+func maybeDecompress(data []byte, compression rpcmetadata.CompressionAlgorithm) ([]byte, error) {
+	switch compression {
+	case rpcmetadata.CompressionAlgorithm_NONE:
+		return data, nil
+	case rpcmetadata.CompressionAlgorithm_ZSTD:
+		return decompressZstd(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB:
+		return decompressZlib(data)
+	default:
+		// Unknown/unsupported compression algorithm
+		return data, nil
+	}
 }

@@ -356,10 +356,14 @@ module Primary = struct
           current_package_pos: Pos.t;
           current_package_def_pos: Pos.t;
           current_package_name: string option;
+          current_package_assignment_kind: string;
           target_package_pos: Pos.t;
           target_package_name: string option;
+          target_package_assignment_kind: string;
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
+          target_id: string;
+          target_symbol_spec: string;
         }
       | Cross_pkg_access_with_requirepackage of {
           pos: Pos.t;
@@ -373,10 +377,14 @@ module Primary = struct
           current_package_pos: Pos.t;
           current_package_def_pos: Pos.t;
           current_package_name: string option;
+          current_package_assignment_kind: string;
           target_package_pos: Pos.t;
           target_package_name: string option;
+          target_package_assignment_kind: string;
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
+          target_id: string;
+          target_symbol_spec: string;
         }
     [@@deriving show]
   end

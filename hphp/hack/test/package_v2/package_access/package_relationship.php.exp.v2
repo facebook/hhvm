@@ -1,7 +1,7 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg4 from package pkg3 [1]
--> This is from package_relationship.php--d.php [2]
--> package_relationship.php--d.php belongs to package pkg4 [3]
--> But package_relationship.php--c.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a class defined in package pkg4 from package pkg3 [1]
+-> D is defined in package_relationship.php--d.php [2]
+-> package_relationship.php--d.php belongs to package pkg4 by this package override [3]
+-> package_relationship.php--c.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg4 [5]
 
 package_relationship.php--c.php:7:13

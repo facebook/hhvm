@@ -52,9 +52,17 @@ type packageV1_error_info = {
 type packageV2_error_info = {
   current_package_pos: Pos.t;
   current_package_name: string option;
+  current_package_assignment_kind: string;
   target_package_name: string option;
   target_package_pos: Pos.t;
+  target_package_assignment_kind: string;
+  target_id: string;
 }
+
+type check_reason =
+  [ `Yes of string
+  | `No
+  ]
 
 let is_excluded env (file : Relative_path.t) =
   let filename = Relative_path.to_absolute file in
@@ -64,11 +72,11 @@ let is_excluded env (file : Relative_path.t) =
   List.exists excluded_patterns ~f:(fun pattern ->
       Str.(string_match (regexp pattern) filename 0))
 
-(* package, package name, package memeberhip position *)
+(* package, package name, package memeberhip position, package membership kind *)
 let get_package_profile
     (env : Typing_env_types.env)
     (pkg_membership : Aast_defs.package_membership option) :
-    Package.t option * string option * Pos.t =
+    Package.t option * string option * Pos.t * string =
   match pkg_membership with
   | Some (Aast_defs.PackageConfigAssignment pkg_name) ->
     let pkg = Env.get_package_by_name env pkg_name in
@@ -77,15 +85,19 @@ let get_package_profile
       | Some p -> Package.get_package_pos p
       | None -> Pos.none
     in
-    (pkg, Some pkg_name, pos)
+    (pkg, Some pkg_name, pos, "package config assignment")
   | Some (Aast_defs.PackageOverride (pkg_pos, pkg_name)) ->
-    (Env.get_package_by_name env pkg_name, Some pkg_name, pkg_pos)
-  | _ -> (None, None, Pos.none)
+    ( Env.get_package_by_name env pkg_name,
+      Some pkg_name,
+      pkg_pos,
+      "package override" )
+  | _ -> (None, None, Pos.none, "")
 
 let can_access_by_package_v2_rules
     ~(env : Typing_env_types.env)
     ~(target_package_membership : Aast_defs.package_membership option)
-    ~(target_pos : Pos_or_decl.t) =
+    ~(target_pos : Pos_or_decl.t)
+    ~(target_id : string) =
   let current_file = Env.get_file env in
   let target_file = Pos_or_decl.filename target_pos in
   (* invariant: if two symbols are in the same file they must be in the same package *)
@@ -103,10 +115,16 @@ let can_access_by_package_v2_rules
   then
     `Yes
   else
-    let (current_pkg, current_package_name, current_package_pos) =
+    let ( current_pkg,
+          current_package_name,
+          current_package_pos,
+          current_package_assignment_kind ) =
       Env.get_current_package_membership env |> get_package_profile env
     in
-    let (target_pkg, target_package_name, target_package_pos) =
+    let ( target_pkg,
+          target_package_name,
+          target_package_pos,
+          target_package_assignment_kind ) =
       get_package_profile env target_package_membership
     in
     match get_package_violation env current_pkg target_pkg with
@@ -116,8 +134,11 @@ let can_access_by_package_v2_rules
         {
           current_package_pos;
           current_package_name;
+          current_package_assignment_kind;
           target_package_name;
           target_package_pos;
+          target_package_assignment_kind;
+          target_id;
         }
       in
       (match pkg_relationship with

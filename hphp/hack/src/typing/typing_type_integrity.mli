@@ -15,7 +15,7 @@ module Simple : sig
 
     Finally, check that classes and type aliases mentioned in types are accessible
     from the current package. We however ignore package errors when
-    `ignore_package_errors` is true. This is usually the case when
+    `should_check_package_boundary` is `No. This is usually the case when
     we are inside the following (to model the behavior of SymbolRefs)
       - type consts
       - type hints
@@ -24,7 +24,7 @@ module Simple : sig
   *)
   val check_well_kinded :
     in_signature:bool ->
-    ignore_package_errors:bool ->
+    should_check_package_boundary:Typing_packages.check_reason ->
     Typing_env_types.env ->
     decl_ty ->
     KindDefs.Simple.named_kind ->
@@ -39,7 +39,7 @@ module Simple : sig
 
       Finally, check that classes and type aliases mentioned in types are accessible
       from the current package. We however ignore package errors when
-      `ignore_package_errors` is true. This is usually the case when
+      `should_check_package_boundary` is `No. This is usually the case when
       we are inside the following (to model the behavior of SymbolRefs)
         - type consts
         - type hints
@@ -48,7 +48,7 @@ module Simple : sig
   *)
   val check_well_kinded_hint :
     in_signature:bool ->
-    ignore_package_errors:bool ->
+    should_check_package_boundary:Typing_packages.check_reason ->
     Typing_env_types.env ->
     Aast.hint ->
     unit

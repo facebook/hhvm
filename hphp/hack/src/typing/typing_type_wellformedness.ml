@@ -287,26 +287,30 @@ and contexts env (_, hl) = List.concat_map ~f:(context_hint env) hl
 
 and contexts_opt env = Option.value_map ~default:[] ~f:(contexts env)
 
-let hint ?(in_signature = true) ?(ignore_package_errors = false) env (p, h) =
+let hint
+    ?(in_signature = true)
+    ?(should_check_package_boundary = `Yes "symbol")
+    env
+    (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   Typing_type_integrity.Simple.check_well_kinded_hint
     ~in_signature
-    ~ignore_package_errors
+    ~should_check_package_boundary
     env.tenv
     (p, h);
   hint_ ~in_signature env p h
 
-let hint_opt ?in_signature ?ignore_package_errors env =
+let hint_opt ?in_signature ?should_check_package_boundary env =
   Option.value_map
     ~default:[]
-    ~f:(hint ?in_signature ?ignore_package_errors env)
+    ~f:(hint ?in_signature ?should_check_package_boundary env)
 
 let hints ?in_signature env = List.concat_map ~f:(hint ?in_signature env)
 
 let type_hint env th =
   Option.value_map
     ~default:[]
-    ~f:(hint ~ignore_package_errors:true env)
+    ~f:(hint ~should_check_package_boundary:`No env)
     (hint_of_type_hint th)
 
 let fun_param env param = type_hint env param.param_type_hint
@@ -316,7 +320,7 @@ let fun_params env = List.concat_map ~f:(fun_param env)
 let tparam env t =
   List.concat_map t.Aast.tp_constraints ~f:(fun (_, h) ->
       (* ignore package checks on tparam constraints *)
-      hint ~ignore_package_errors:true env h)
+      hint ~should_check_package_boundary:`No env h)
 
 let tparams env = List.concat_map ~f:(tparam env)
 
@@ -357,7 +361,7 @@ let enum_opt env =
   Option.value_map ~default:[] ~f
 
 let const env { Aast.cc_type; _ } =
-  hint_opt ~ignore_package_errors:true env cc_type
+  hint_opt ~should_check_package_boundary:`No env cc_type
 
 let consts env cs = List.concat_map ~f:(const env) cs
 
@@ -373,23 +377,27 @@ let typeconsts env tcs cls_name =
     | _ -> (fun _ -> `Skip)
   in
   let f tconst =
-    let ignore_package_errors =
+    let should_check_package_boundary =
       if not @@ Env.package_v2_allow_all_tconst_violations env.tenv then
-        false
+        `Yes "type constant"
       else
         match get_class_const tconst.c_tconst_name with
-        | `Found ttc ->
-          Option.is_none ttc.ttc_reifiable
-          || Env.package_v2_allow_reifiable_tconst_violations env.tenv
-        | _ -> true
+        | `Found ttc when Option.is_none ttc.ttc_reifiable -> `No
+        | `Found _ ->
+          if Env.package_v2_allow_reifiable_tconst_violations env.tenv then
+            `No
+          else
+            `Yes "reifiable type constant"
+        | _ -> `No
     in
     match tconst.c_tconst_kind with
     | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
       ->
-      hint_opt ~ignore_package_errors env c_atc_as_constraint
-      @ hint_opt ~ignore_package_errors env c_atc_super_constraint
-      @ hint_opt ~ignore_package_errors env c_atc_default
-    | TCConcrete { c_tc_type } -> hint ~ignore_package_errors env c_tc_type
+      hint_opt ~should_check_package_boundary env c_atc_as_constraint
+      @ hint_opt ~should_check_package_boundary env c_atc_super_constraint
+      @ hint_opt ~should_check_package_boundary env c_atc_default
+    | TCConcrete { c_tc_type } ->
+      hint ~should_check_package_boundary env c_tc_type
   in
   List.concat_map ~f tcs
 
@@ -548,7 +556,7 @@ let typedef tenv (t : (_, _) typedef) =
     t
   in
   let ( should_check_internal_signature,
-        ignore_package_errors,
+        should_check_package_boundary,
         typedef_tparams,
         hint_constraints_pairs ) =
     match t_assignment with
@@ -558,15 +566,15 @@ let typedef tenv (t : (_, _) typedef) =
        if its type params satisfy the constraints of any tapply it
        references. *)
     | SimpleTypeDef { tvh_vis = Transparent; tvh_hint } ->
-      (true, false, t_tparams, [(tvh_hint, [])])
+      (true, `Yes "transparent type alias", t_tparams, [(tvh_hint, [])])
     | SimpleTypeDef { tvh_vis = _; tvh_hint } ->
-      (false, true, [], [(tvh_hint, [])])
+      (false, `No, [], [(tvh_hint, [])])
     | CaseType (variant, variants) ->
       let variants = variant :: variants in
       let hint_constraints_pairs =
         List.map variants ~f:(fun v -> (v.tctv_hint, v.tctv_where_constraints))
       in
-      (false, false, [], hint_constraints_pairs)
+      (false, `Yes "case type", [], hint_constraints_pairs)
   in
   (* We don't allow constraints on typdef parameters, but we still
      need to record their kinds in the generic var environment *)
@@ -591,20 +599,20 @@ let typedef tenv (t : (_, _) typedef) =
     (* We always check the constraints for internal types, so treat in_signature:true *)
     (Typing_type_integrity.Simple.check_well_kinded_hint
        ~in_signature:true
-       ~ignore_package_errors)
+       ~should_check_package_boundary)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
     (Typing_type_integrity.Simple.check_well_kinded_hint
        ~in_signature:true
-       ~ignore_package_errors)
+       ~should_check_package_boundary)
     tenv_with_typedef_tparams
     t_super_constraint;
   (* TODO check kinded-ness for constraints too *)
   List.iter hint_constraints_pairs ~f:(fun (hint, _constraints) ->
       Typing_type_integrity.Simple.check_well_kinded_hint
         ~in_signature:should_check_internal_signature
-        ~ignore_package_errors
+        ~should_check_package_boundary
         tenv_with_typedef_tparams
         hint);
   let env = { typedef_tparams; tenv } in
@@ -639,11 +647,11 @@ let global_constant tenv gconst =
   } =
     gconst
   in
-  hint_opt ~ignore_package_errors:true env cst_type
+  hint_opt ~should_check_package_boundary:`No env cst_type
 
-let hint ?(ignore_package_errors = false) tenv h =
+let hint ?(should_check_package_boundary = `Yes "symbol") tenv h =
   let env = { typedef_tparams = []; tenv } in
-  hint ~in_signature:false ~ignore_package_errors env h
+  hint ~in_signature:false ~should_check_package_boundary env h
 
 (** Check well-formedness of type hints. See .mli file for more. *)
 let expr tenv ((), _p, e) =
@@ -651,7 +659,7 @@ let expr tenv ((), _p, e) =
   match e with
   | Is (_, h)
   | As { expr = _; hint = h; is_nullable = _; enforce_deep = _ } ->
-    hint tenv h ~ignore_package_errors:true
+    hint tenv h ~should_check_package_boundary:`No
   | Upcast (_, h)
   | Cast (h, _) ->
     hint tenv h
@@ -659,7 +667,7 @@ let expr tenv ((), _p, e) =
   | Call { targs = hl; _ } ->
     List.concat_map hl ~f:(fun (_, h) ->
         (* ignore package checks on targs *)
-        hint ~ignore_package_errors:true tenv h)
+        hint ~should_check_package_boundary:`No tenv h)
   | Lfun (f, _)
   | Efun { ef_fun = f; _ } ->
     fun_ tenv f

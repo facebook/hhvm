@@ -1379,15 +1379,20 @@ end = struct
         (current_package_pos : Pos.t)
         (current_package_def_pos : Pos.t)
         (current_package_name : string option)
+        (current_package_assignment_kind : string)
         (target_package_pos : Pos.t)
         (target_package_name : string option)
+        (target_package_assignment_kind : string)
         (current_filename : Relative_path.t)
         (target_filename : Relative_path.t)
+        (target_id : string)
+        (target_symbol_spec : string)
         (soft : bool) =
       let current_filename = Relative_path.suffix current_filename in
       let target_filename = Relative_path.suffix target_filename in
       let current_package = get_package_str current_package_name in
       let target_package = get_package_str target_package_name in
+      let target_id = Markdown_lite.md_codify (Utils.strip_ns target_id) in
       let relationship =
         if soft then
           "only soft includes"
@@ -1398,19 +1403,27 @@ end = struct
         lazy
           ( pos,
             Printf.sprintf
-              "Cannot access an element which belongs to %s from %s"
+              "Cannot access a %s defined in %s from %s"
+              target_symbol_spec
               target_package
               current_package )
       and reasons =
         lazy
           [
-            (decl_pos, Printf.sprintf "This is from %s" target_filename);
+            ( decl_pos,
+              Printf.sprintf "%s is defined in %s" target_id target_filename );
             ( Pos_or_decl.of_raw_pos target_package_pos,
-              Printf.sprintf "%s belongs to %s" target_filename target_package
-            );
+              Printf.sprintf
+                "%s belongs to %s by this %s"
+                target_filename
+                target_package
+                target_package_assignment_kind );
             ( Pos_or_decl.of_raw_pos current_package_pos,
-              Printf.sprintf "But %s is in %s" current_filename current_package
-            );
+              Printf.sprintf
+                "%s is in %s by this %s"
+                current_filename
+                current_package
+                current_package_assignment_kind );
             ( Pos_or_decl.of_raw_pos current_package_def_pos,
               Printf.sprintf
                 "And %s %s %s"
@@ -1470,10 +1483,14 @@ end = struct
             current_package_pos;
             current_package_def_pos;
             current_package_name;
+            current_package_assignment_kind;
             target_package_pos;
             target_package_name;
+            target_package_assignment_kind;
             current_filename;
             target_filename;
+            target_id;
+            target_symbol_spec;
           } ->
         cross_pkg_access
           pos
@@ -1481,10 +1498,14 @@ end = struct
           current_package_pos
           current_package_def_pos
           current_package_name
+          current_package_assignment_kind
           target_package_pos
           target_package_name
+          target_package_assignment_kind
           current_filename
           target_filename
+          target_id
+          target_symbol_spec
           false (* Soft *)
       | Cross_pkg_access_with_requirepackage
           { pos; decl_pos; current_package_opt; target_package_opt } ->
@@ -1500,10 +1521,14 @@ end = struct
             current_package_pos;
             current_package_def_pos;
             current_package_name;
+            current_package_assignment_kind;
             target_package_pos;
             target_package_name;
+            target_package_assignment_kind;
             current_filename;
             target_filename;
+            target_id;
+            target_symbol_spec;
           } ->
         cross_pkg_access
           pos
@@ -1511,10 +1536,14 @@ end = struct
           current_package_pos
           current_package_def_pos
           current_package_name
+          current_package_assignment_kind
           target_package_pos
           target_package_name
+          target_package_assignment_kind
           current_filename
           target_filename
+          target_id
+          target_symbol_spec
           true (* Soft *)
   end
 

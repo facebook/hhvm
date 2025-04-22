@@ -7,10 +7,10 @@ cross_package_with_requirepackage_attr_method.php--a.php:9:5
    10 |     pkg2_call(); // error: invariant(package pkg2, "") had no effect
    11 |     pkg1_call();
 
-error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_with_requirepackage_attr_method.php--b.php [2]
--> cross_package_with_requirepackage_attr_method.php--b.php belongs to package pkg2 [3]
--> But cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a function defined in package pkg2 from package pkg1 [1]
+-> pkg2_call is defined in cross_package_with_requirepackage_attr_method.php--b.php [2]
+-> cross_package_with_requirepackage_attr_method.php--b.php belongs to package pkg2 by this package override [3]
+-> cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_with_requirepackage_attr_method.php--a.php:8:5
@@ -32,10 +32,10 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_with_requirepackage_attr_method.php--b.php [2]
--> cross_package_with_requirepackage_attr_method.php--b.php belongs to package pkg2 [3]
--> But cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a function defined in package pkg2 from package pkg1 [1]
+-> pkg2_call is defined in cross_package_with_requirepackage_attr_method.php--b.php [2]
+-> cross_package_with_requirepackage_attr_method.php--b.php belongs to package pkg2 by this package override [3]
+-> cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_with_requirepackage_attr_method.php--a.php:10:5
@@ -57,10 +57,10 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_with_requirepackage_attr_method.php--b.php [2]
--> cross_package_with_requirepackage_attr_method.php--b.php belongs to package pkg2 [3]
--> But cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a function defined in package pkg2 from package pkg1 [1]
+-> pkg2_call is defined in cross_package_with_requirepackage_attr_method.php--b.php [2]
+-> cross_package_with_requirepackage_attr_method.php--b.php belongs to package pkg2 by this package override [3]
+-> cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_with_requirepackage_attr_method.php--a.php:17:3

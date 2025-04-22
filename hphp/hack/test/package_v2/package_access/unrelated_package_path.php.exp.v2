@@ -1,7 +1,7 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg6 from package pkg5 [1]
--> This is from unrelated_package_path.php--pkg6/bar.php [2]
--> unrelated_package_path.php--pkg6/bar.php belongs to package pkg6 [3]
--> But unrelated_package_path.php--pkg5/foo.php is in package pkg5 [4]
+error: Typing[4472] Cannot access a function defined in package pkg6 from package pkg5 [1]
+-> bar is defined in unrelated_package_path.php--pkg6/bar.php [2]
+-> unrelated_package_path.php--pkg6/bar.php belongs to package pkg6 by this package config assignment [3]
+-> unrelated_package_path.php--pkg5/foo.php is in package pkg5 by this package config assignment [4]
 -> And package pkg5 does not include package pkg6 [4]
 
 unrelated_package_path.php--pkg5/foo.php:4:3
@@ -27,10 +27,10 @@ PACKAGES.toml:21:11
     22 | include_paths=["//pkg6/"]
     23 | includes = ["pkg1"]
 
-error: Typing[4472] Cannot access an element which belongs to package pkg5 from package pkg6 [1]
--> This is from unrelated_package_path.php--pkg5/foo.php [2]
--> unrelated_package_path.php--pkg5/foo.php belongs to package pkg5 [3]
--> But unrelated_package_path.php--pkg6/bar.php is in package pkg6 [4]
+error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg6 [1]
+-> foo is defined in unrelated_package_path.php--pkg5/foo.php [2]
+-> unrelated_package_path.php--pkg5/foo.php belongs to package pkg5 by this package config assignment [3]
+-> unrelated_package_path.php--pkg6/bar.php is in package pkg6 by this package config assignment [4]
 -> And package pkg6 does not include package pkg5 [4]
 
 unrelated_package_path.php--pkg6/bar.php:6:3

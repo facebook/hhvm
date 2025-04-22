@@ -1,7 +1,7 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg6 from package pkg1 [1]
--> This is from nested_package_path.php--pkg6/bar.php [2]
--> nested_package_path.php--pkg6/bar.php belongs to package pkg6 [3]
--> But nested_package_path.php--foo.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a function defined in package pkg6 from package pkg1 [1]
+-> bar is defined in nested_package_path.php--pkg6/bar.php [2]
+-> nested_package_path.php--pkg6/bar.php belongs to package pkg6 by this package config assignment [3]
+-> nested_package_path.php--foo.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg6 [4]
 
 nested_package_path.php--foo.php:4:3

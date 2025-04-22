@@ -1,7 +1,7 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_type_consts.php--foo.php [2]
--> cross_package_type_consts.php--foo.php belongs to package pkg2 [3]
--> But cross_package_type_consts.php--bar.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+-> BarImpl is defined in cross_package_type_consts.php--foo.php [2]
+-> cross_package_type_consts.php--foo.php belongs to package pkg2 by this package override [3]
+-> cross_package_type_consts.php--bar.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_type_consts.php--bar.php:5:19
@@ -26,10 +26,10 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_type_consts.php--foo.php [2]
--> cross_package_type_consts.php--foo.php belongs to package pkg2 [3]
--> But cross_package_type_consts.php--bar.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+-> TFoo1 is defined in cross_package_type_consts.php--foo.php [2]
+-> cross_package_type_consts.php--foo.php belongs to package pkg2 by this package override [3]
+-> cross_package_type_consts.php--bar.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_type_consts.php--bar.php:6:19
@@ -54,10 +54,10 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_type_consts.php--foo.php [2]
--> cross_package_type_consts.php--foo.php belongs to package pkg2 [3]
--> But cross_package_type_consts.php--bar.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+-> TFoo2 is defined in cross_package_type_consts.php--foo.php [2]
+-> cross_package_type_consts.php--foo.php belongs to package pkg2 by this package override [3]
+-> cross_package_type_consts.php--bar.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_type_consts.php--bar.php:7:19

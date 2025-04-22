@@ -1386,7 +1386,7 @@ let polymorphic_fun_type_of_id env ((use_pos, name) as fn_id) =
             ]
         and access_errs =
           TVis.check_top_level_access
-            ~ignore_package_errors:false
+            ~should_check_package_boundary:(`Yes "function")
             ~in_signature:false
             ~use_pos
             ~def_pos
@@ -1394,6 +1394,7 @@ let polymorphic_fun_type_of_id env ((use_pos, name) as fn_id) =
             fe_internal
             (Option.map fe_module ~f:snd)
             fe_package
+            name
         and explicit_errs =
           List.filter_map
             fun_ty.ft_tparams
@@ -1602,14 +1603,15 @@ let fun_type_of_id env x tal el =
       List.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_top_level_access
-           ~ignore_package_errors:false
+           ~should_check_package_boundary:(`Yes "function")
            ~in_signature:false
            ~use_pos:(fst x)
            ~def_pos:fd.fe_pos
            env
            fd.fe_internal
            (Option.map fd.fe_module ~f:snd)
-           fd.fe_package);
+           fd.fe_package
+           lookup_id);
       (env, fty, tal)
     | _ -> failwith "Expected function type")
 
@@ -10358,26 +10360,33 @@ end = struct
           make_result env [] (Aast.CI c) ty
         | Decl_entry.Found class_ ->
           (if not is_attribute_param then
-            let ignore_package_errors =
-              Env.package_v2 env
-              && (inside_nameof
-                 || is_attribute
-                 || is_catch
-                 || is_function_pointer
-                 || (Env.package_v2_allow_classconst_violations env && is_const)
-                 )
+            let should_check_package_boundary =
+              if not (Env.package_v2 env) then
+                `No
+              else if
+                inside_nameof || is_attribute || is_catch || is_function_pointer
+              then
+                `No
+              else if is_const then begin
+                if Env.package_v2_allow_classconst_violations env then
+                  `No
+                else
+                  `Yes "class"
+              end else
+                `Yes "class"
             in
             List.iter
               ~f:(Typing_error_utils.add_typing_error ~env)
               (TVis.check_top_level_access
                  ~in_signature:false
-                 ~ignore_package_errors
+                 ~should_check_package_boundary
                  ~use_pos:p
                  ~def_pos:(Cls.pos class_)
                  env
                  (Cls.internal class_)
                  (Cls.get_module class_)
-                 (Cls.get_package class_)));
+                 (Cls.get_package class_)
+                 id));
 
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =

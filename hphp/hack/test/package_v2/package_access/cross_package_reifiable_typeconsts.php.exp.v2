@@ -1,7 +1,7 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_reifiable_typeconsts.php--bar.php [2]
--> cross_package_reifiable_typeconsts.php--bar.php belongs to package pkg2 [3]
--> But cross_package_reifiable_typeconsts.php--foo.php is in package pkg1 [4]
+error: Typing[4472] Cannot access a reifiable type constant defined in package pkg2 from package pkg1 [1]
+-> MyInternClass is defined in cross_package_reifiable_typeconsts.php--bar.php [2]
+-> cross_package_reifiable_typeconsts.php--bar.php belongs to package pkg2 by this package override [3]
+-> cross_package_reifiable_typeconsts.php--foo.php is in package pkg1 by this package config assignment [4]
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_reifiable_typeconsts.php--foo.php:11:19

@@ -350,14 +350,18 @@ module Simple = struct
   and check_targ_well_kinded ~in_signature env tyarg (nkind : Simple.named_kind)
       =
     let kind = snd nkind in
-    let in_non_reified =
-      (Simple.to_full_kind_without_bounds kind).reified |> Aast.is_erased
+    let in_reified =
+      not @@ Aast.is_erased (Simple.to_full_kind_without_bounds kind).reified
     in
-    let ignore_package_errors =
-      if not (Env.package_v2_allow_all_generics_violations env) then
-        false
+    let should_check_package_boundary =
+      if
+        in_reified && not (Env.package_v2_allow_reified_generics_violations env)
+      then
+        `Yes "reified generic"
+      else if not (Env.package_v2_allow_all_generics_violations env) then
+        `Yes "generic"
       else
-        in_non_reified || Env.package_v2_allow_reified_generics_violations env
+        `No
     in
     match get_node tyarg with
     | Twildcard ->
@@ -367,10 +371,20 @@ module Simple = struct
           get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
         in
         Errors.add_error Naming_error.(to_user_error @@ HKT_wildcard pos);
-        check_well_kinded ~in_signature ~ignore_package_errors env tyarg nkind
+        check_well_kinded
+          ~in_signature
+          ~should_check_package_boundary
+          env
+          tyarg
+          nkind
       )
     | _ ->
-      check_well_kinded ~in_signature ~ignore_package_errors env tyarg nkind
+      check_well_kinded
+        ~in_signature
+        ~should_check_package_boundary
+        env
+        tyarg
+        nkind
 
   (** Traverse a type and for each encountered type argument of a type X,
   check that it complies with the corresponding type parameter of X (arity and kinds, but not constraints),
@@ -380,16 +394,17 @@ module Simple = struct
   and check_well_kinded_type
       ~allow_missing_targs
       ~in_signature
-      ~ignore_package_errors
+      ~should_check_package_boundary
       env
       (ty : decl_ty) =
     let (r, ty_) = deref ty in
     let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
-    let check ?(ignore_package_errors = ignore_package_errors) ty =
+    let check
+        ?(should_check_package_boundary = should_check_package_boundary) ty =
       check_well_kinded_type
         ~allow_missing_targs:false
         ~in_signature
-        ~ignore_package_errors
+        ~should_check_package_boundary
         env
         ty
     in
@@ -414,8 +429,8 @@ module Simple = struct
     | Tthis ->
       ()
     | Tvec_or_dict (tk, tv) ->
-      check ~ignore_package_errors:true tk;
-      check ~ignore_package_errors:true tv
+      check ~should_check_package_boundary:`No tk;
+      check ~should_check_package_boundary:`No tv
     | Tlike ty
     | Toption ty ->
       check ty
@@ -435,7 +450,7 @@ module Simple = struct
       check_well_kinded_type
         ~allow_missing_targs:true
         ~in_signature
-        ~ignore_package_errors
+        ~should_check_package_boundary
         env
         ty
     | Trefinement (ty, rs) ->
@@ -443,13 +458,13 @@ module Simple = struct
       Class_refinement.iter check rs
     | Tshape { s_fields = map; _ } ->
       TShapeMap.iter
-        (fun _ sft -> check ~ignore_package_errors:true sft.sft_ty)
+        (fun _ sft -> check ~should_check_package_boundary:`No sft.sft_ty)
         map
     | Tfun ({ ft_params; ft_ret; _ } : _ fun_type) ->
       (* FIXME shall we inspect tparams and where_constraints? *)
-      check ~ignore_package_errors:true ft_ret;
+      check ~should_check_package_boundary:`No ft_ret;
       List.iter ft_params ~f:(fun p ->
-          check ~ignore_package_errors:true p.fp_type)
+          check ~should_check_package_boundary:`No p.fp_type)
     (* Interesting cases--------------------------------- *)
     | Tgeneric (name, targs) -> begin
       match Env.get_pos_and_kind_of_generic env name with
@@ -471,7 +486,7 @@ module Simple = struct
       match Env.get_class_or_typedef env cid with
       | Decl_entry.Found (Env.ClassResult class_info) ->
         Typing_visibility.check_top_level_access
-          ~ignore_package_errors
+          ~should_check_package_boundary
           ~in_signature
           ~use_pos
           ~def_pos:(Cls.pos class_info)
@@ -479,12 +494,13 @@ module Simple = struct
           (Cls.internal class_info)
           (Cls.get_module class_info)
           (Cls.get_package class_info)
+          cid
         |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
         let tparams = Cls.tparams class_info in
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
       | Decl_entry.Found (Env.TypedefResult typedef) ->
         Typing_visibility.check_top_level_access
-          ~ignore_package_errors
+          ~should_check_package_boundary
           ~in_signature
           ~use_pos
           ~def_pos:typedef.td_pos
@@ -492,6 +508,7 @@ module Simple = struct
           typedef.td_internal
           (Option.map typedef.td_module ~f:snd)
           typedef.td_package
+          cid
         |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
         check_against_tparams
           ~in_signature
@@ -513,7 +530,7 @@ module Simple = struct
   and in_tp_constraint` to determine whether we should bypass package visibility check. *)
   and check_well_kinded
       ~in_signature
-      ~ignore_package_errors
+      ~should_check_package_boundary
       env
       (ty : decl_ty)
       (expected_nkind : Simple.named_kind) =
@@ -540,7 +557,7 @@ module Simple = struct
       check_well_kinded_type
         ~allow_missing_targs:false
         ~in_signature
-        ~ignore_package_errors
+        ~should_check_package_boundary
         env
         ty
     else
@@ -580,12 +597,13 @@ module Simple = struct
       | Tany _ -> ()
       | _ -> kind_error (Simple.fully_applied_type ()) env
 
-  let check_well_kinded_hint ~in_signature ~ignore_package_errors env hint =
+  let check_well_kinded_hint
+      ~in_signature ~should_check_package_boundary env hint =
     let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
     check_well_kinded_type
       ~allow_missing_targs:false
       ~in_signature
-      ~ignore_package_errors
+      ~should_check_package_boundary
       env
       decl_ty
 
@@ -594,7 +612,7 @@ module Simple = struct
     check_well_kinded_type
       ~in_signature
       ~allow_missing_targs:false
-      ~ignore_package_errors:false
+      ~should_check_package_boundary:`No
       env
       decl_ty
 end

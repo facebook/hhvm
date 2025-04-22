@@ -16,10 +16,10 @@ cross_package_with_package_syntax_invalid_conds.php--pkg3.php:14:11
     15 |         pkg5_call(); // error; assignments aren't allowed in conditionals
     16 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg5 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
--> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 [3]
--> But cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+-> pkg5_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 by this package override [3]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg5 [5]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:6:9
@@ -44,10 +44,10 @@ PACKAGES.toml:13:11
     14 | includes = ["pkg2", "pkg1"]
     15 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg5 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
--> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 [3]
--> But cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+-> pkg5_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 by this package override [3]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg5 [5]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:9:9
@@ -74,10 +74,10 @@ PACKAGES.toml:13:11
     14 | includes = ["pkg2", "pkg1"]
     15 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg5 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
--> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 [3]
--> But cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+-> pkg5_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 by this package override [3]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg5 [5]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:12:9
@@ -104,10 +104,10 @@ PACKAGES.toml:13:11
     14 | includes = ["pkg2", "pkg1"]
     15 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg5 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
--> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 [3]
--> But cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+-> pkg5_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 by this package override [3]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg5 [5]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:15:9
@@ -134,10 +134,10 @@ PACKAGES.toml:13:11
     14 | includes = ["pkg2", "pkg1"]
     15 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg5 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
--> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 [3]
--> But cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+-> pkg5_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg5.php [2]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg5.php belongs to package pkg5 by this package override [3]
+-> cross_package_with_package_syntax_invalid_conds.php--pkg3.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg5 [5]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:18:11

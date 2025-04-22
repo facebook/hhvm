@@ -1458,20 +1458,25 @@ let localize_targ_with_kind
       ((env, None, []), (ty, hint))
   | (hint_pos, _) ->
     let ty = Decl_hint.hint env.decl_env hint in
-    let in_non_reified =
-      (KindDefs.Simple.to_full_kind_without_bounds kind).reified
-      |> Aast.is_erased
+    let in_reified =
+      not
+      @@ Aast.is_erased
+           (KindDefs.Simple.to_full_kind_without_bounds kind).reified
     in
-    let ignore_package_errors =
-      if not (Env.package_v2_allow_all_generics_violations env) then
-        false
+    let should_check_package_boundary =
+      if
+        in_reified && not (Env.package_v2_allow_reified_generics_violations env)
+      then
+        `Yes "reified generic"
+      else if not (Env.package_v2_allow_all_generics_violations env) then
+        `Yes "generic"
       else
-        in_non_reified || Env.package_v2_allow_reified_generics_violations env
+        `No
     in
     if check_well_kinded then
       TIntegrity.Simple.check_well_kinded
         ~in_signature:false
-        ~ignore_package_errors
+        ~should_check_package_boundary
         env
         ty
         nkind;

@@ -1,7 +1,7 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg4 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_if_negation.php--pkg4.php [2]
--> cross_package_with_package_syntax_if_negation.php--pkg4.php belongs to package pkg4 [3]
--> But cross_package_with_package_syntax_if_negation.php--pkg3.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a function defined in package pkg4 from package pkg3 [1]
+-> pkg4_call is defined in cross_package_with_package_syntax_if_negation.php--pkg4.php [2]
+-> cross_package_with_package_syntax_if_negation.php--pkg4.php belongs to package pkg4 by this package override [3]
+-> cross_package_with_package_syntax_if_negation.php--pkg3.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg4 [5]
 
 cross_package_with_package_syntax_if_negation.php--pkg3.php:5:5
@@ -25,10 +25,10 @@ PACKAGES.toml:13:11
     14 | includes = ["pkg2", "pkg1"]
     15 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg4 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_if_negation.php--pkg4.php [2]
--> cross_package_with_package_syntax_if_negation.php--pkg4.php belongs to package pkg4 [3]
--> But cross_package_with_package_syntax_if_negation.php--pkg3.php is in package pkg3 [4]
+error: Typing[4472] Cannot access a function defined in package pkg4 from package pkg3 [1]
+-> pkg4_call is defined in cross_package_with_package_syntax_if_negation.php--pkg4.php [2]
+-> cross_package_with_package_syntax_if_negation.php--pkg4.php belongs to package pkg4 by this package override [3]
+-> cross_package_with_package_syntax_if_negation.php--pkg3.php is in package pkg3 by this package override [4]
 -> And package pkg3 does not include package pkg4 [5]
 
 cross_package_with_package_syntax_if_negation.php--pkg3.php:10:3

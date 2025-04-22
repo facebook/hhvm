@@ -38,7 +38,7 @@ val check_obj_access :
   Typing_error.t option
 
 val check_top_level_access :
-  ignore_package_errors:bool ->
+  should_check_package_boundary:Typing_packages.check_reason ->
   in_signature:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
@@ -46,6 +46,7 @@ val check_top_level_access :
   bool ->
   string option ->
   Aast_defs.package_membership option ->
+  string ->
   Typing_error.t list
 
 val check_meth_caller_access :

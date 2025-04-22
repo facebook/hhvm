@@ -37,7 +37,7 @@ function fb_serialize(mixed $thing, int $options = 0)[]: mixed;
 <<__Native>>
 function fb_unserialize(mixed $thing,
                         <<__OutOnly("KindOfBoolean")>>
-                        inout mixed $success,
+                        inout bool $success,
                         int $options = 0): mixed;
 
 /** Serialize data into a compact format that can be unserialized by
@@ -68,7 +68,7 @@ function fb_compact_serialize(mixed $thing, int $options = 0)[]: mixed;
 <<__Native>>
 function fb_compact_unserialize(mixed $thing,
                                 <<__OutOnly("KindOfBoolean")>>
-                                inout mixed $success,
+                                inout bool $success,
                                 <<__OutOnly>>
                                 inout mixed $errcode): mixed;
 

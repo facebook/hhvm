@@ -35,7 +35,7 @@ function gd_info(): shape(
 <<__Native>>
 function getimagesize(string $filename,
                       <<__OutOnly("darray")>>
-                      inout mixed $imageinfo): mixed;
+                      inout shape(...) $imageinfo): mixed;
 
 /* Identical to getimagesize() except that getimagesizefromstring() accepts
  * a string instead of a file name as the first parameter.
@@ -43,7 +43,7 @@ function getimagesize(string $filename,
 <<__Native>>
 function getimagesizefromstring(string $filename,
                       <<__OutOnly("darray")>>
-                      inout mixed $imageinfo): mixed;
+                      inout shape(...) $imageinfo): mixed;
 
 /* Returns the extension for the given IMAGETYPE_XXX constant.
  */

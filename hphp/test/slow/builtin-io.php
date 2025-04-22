@@ -11,9 +11,9 @@
  *   mixed $m,
  *   inout mixed $mix,
  *   bool retOrig,
- *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
- *   <<__OutOnly("KindOfArray")>> inout mixed $out2,
- *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
+ *   <<__OutOnly("KindOfBoolean")>> inout bool $out1,
+ *   <<__OutOnly("KindOfVec")>> inout vec<mixed> $out2,
+ *   <<__OutOnly("KindOfObject")>> inout stdClass $out3,
  * ): array;
  */
 function go(bool $ret) :mixed{

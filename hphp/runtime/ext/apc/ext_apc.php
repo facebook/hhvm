@@ -105,7 +105,7 @@ function apc_store_with_pure_sleep(mixed $key_or_array,
  */
 <<__Native>>
 function apc_fetch(mixed $key,
-                   <<__OutOnly("KindOfBoolean")>> inout mixed $success)[defaults]: mixed;
+                   <<__OutOnly("KindOfBoolean")>> inout bool $success)[defaults]: mixed;
 
 /**
  * Similar to apc_fetch but requires that any deserialized objects' __wakeup
@@ -114,7 +114,7 @@ function apc_fetch(mixed $key,
 <<__Native>>
 function apc_fetch_with_pure_wakeup(
   mixed $key,
-  <<__OutOnly("KindOfBoolean")>> inout mixed $success,
+  <<__OutOnly("KindOfBoolean")>> inout bool $success,
 )[read_globals]: mixed;
 
 /**
@@ -207,7 +207,7 @@ function apc_sma_info(bool $limited = false)[]: darray<arraykey, mixed> {
 function apc_inc(string $key,
                  int $step,
                  <<__OutOnly("KindOfBoolean")>>
-                 inout mixed $success)[globals]: mixed;
+                 inout bool $success)[globals]: mixed;
 
 /**
  * Decreases a stored integer value.
@@ -225,7 +225,7 @@ function apc_inc(string $key,
 function apc_dec(string $key,
                  int $step,
                  <<__OutOnly("KindOfBoolean")>>
-                 inout mixed $success)[globals]: mixed;
+                 inout bool $success)[globals]: mixed;
 
 /**
  * Update an existing old value to a new value.

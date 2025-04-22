@@ -628,19 +628,19 @@ function ldap_next_reference(resource $link, resource $result_entry): mixed;
 function ldap_parse_reference(resource $link,
                               resource $result_entry,
                               <<__OutOnly("varray")>>
-                              inout mixed $referrals): bool;
+                              inout vec<mixed> $referrals): bool;
 
 <<__Native>>
 function ldap_parse_result(resource $link,
                            resource $result,
                            <<__OutOnly("KindOfInt64")>>
-                           inout mixed $errcode,
+                           inout int $errcode,
                            <<__OutOnly("KindOfString")>>
-                           inout mixed $matcheddn,
+                           inout string $matcheddn,
                            <<__OutOnly("KindOfString")>>
-                           inout mixed $errmsg,
+                           inout string $errmsg,
                            <<__OutOnly("varray")>>
-                           inout mixed $referrals): bool;
+                           inout vec<mixed> $referrals): bool;
 
 /**
  * Frees up the memory allocated internally to store the result. All result
@@ -744,9 +744,9 @@ function ldap_control_paged_result(resource $link,
 function ldap_control_paged_result_response(resource $link,
                                             resource $result,
                                             <<__OutOnly("KindOfString")>>
-                                            inout mixed $cookie,
+                                            inout string $cookie,
                                             <<__OutOnly("KindOfInt64")>>
-                                            inout mixed $estimated): bool;
+                                            inout int $estimated): bool;
 
 /**
  * Escape a string for use in an LDAP filter or DN.

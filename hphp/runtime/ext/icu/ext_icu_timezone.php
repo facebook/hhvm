@@ -84,7 +84,7 @@ class IntlTimeZone {
   <<__Native>>
   public static function getCanonicalID(
     string $zoneId,
-    <<__OutOnly("KindOfBoolean")>> inout mixed $isSystemID,
+    <<__OutOnly("KindOfBoolean")>> inout bool $isSystemID,
   ): mixed;
 
 

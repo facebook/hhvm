@@ -676,7 +676,7 @@ function openssl_x509_read(mixed $x509certdata): mixed;
 <<__Native>>
 function openssl_random_pseudo_bytes(int $length,
                                      <<__OutOnly("KindOfBoolean")>>
-                                     inout mixed $crypto_strong): mixed;
+                                     inout bool $crypto_strong): mixed;
 
 /* Returns the required initialisation vector length for the cipher determined
  * by the mode parameter.

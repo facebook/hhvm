@@ -13,7 +13,7 @@ function icu_match(string $pattern,
 function icu_match_with_matches(string $pattern,
                                 string $subject,
                                 <<__OutOnly("varray")>>
-                                inout mixed $matches,
+                                inout vec<mixed> $matches,
                                 int $flags = 0): mixed;
 
 <<__Native>>

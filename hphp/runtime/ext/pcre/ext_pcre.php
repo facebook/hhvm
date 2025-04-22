@@ -18,7 +18,7 @@ function preg_filter(mixed $pattern,
                      mixed $subject,
                      int $limit,
                      <<__OutOnly("KindOfInt64")>>
-                     inout ?int $count): mixed;
+                     inout int $count): mixed;
 
 /**
  * Return array entries that match the pattern
@@ -263,7 +263,7 @@ function preg_replace_callback(
   mixed $subject,
   int $limit,
   <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  inout int $count,
 )[ctx $callback]: mixed;
 
 /**
@@ -280,7 +280,7 @@ function preg_replace_callback_with_error(
   mixed $subject,
   int $limit,
   <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  inout int $count,
   inout ?int $error,
 )[ctx $callback]: mixed;
 
@@ -319,7 +319,7 @@ function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      mixed $subject,
                                      int $limit,
                                      <<__OutOnly("KindOfInt64")>>
-                                     inout ?int $count)[defaults]: mixed;
+                                     inout int $count)[defaults]: mixed;
 
 /**
  * preg_replace_callback_array, but populates $error in case of error.
@@ -334,7 +334,7 @@ function preg_replace_callback_array_with_error(
   mixed $subject,
   int $limit,
   <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  inout int $count,
   inout ?int $error,
 )[defaults]: mixed;
 
@@ -415,7 +415,7 @@ function preg_replace_with_count(mixed $pattern,
                                  mixed $subject,
                                  int $limit,
                                  <<__OutOnly("KindOfInt64")>>
-                                 inout ?int $count)[]: mixed;
+                                 inout int $count)[]: mixed;
 
 /**
  * preg_replace_with_count, but populates $error in case of error.
@@ -431,7 +431,7 @@ function preg_replace_with_count_and_error(
   mixed $subject,
   int $limit,
   <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  inout int $count,
   inout ?int $error,
 )[]: mixed;
 

@@ -32,7 +32,7 @@ function grapheme_extract(string $haystack,
                           int $extract_type,
                           int $start,
                           <<__OutOnly("KindOfInt64")>>
-                          inout ?int $next): mixed;
+                          inout int $next): mixed;
 
 /**
  * Find position (in grapheme units) of first occurrence of a case-insensitive

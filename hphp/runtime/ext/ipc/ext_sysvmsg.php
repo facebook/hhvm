@@ -132,7 +132,7 @@ function msg_send(resource $queue,
 function msg_receive(resource $queue,
                      int $desiredmsgtype,
                      <<__OutOnly("KindOfInt64")>>
-                     inout mixed $msgtype,
+                     inout int $msgtype,
                      int $maxsize,
                      <<__OutOnly>>
                      inout mixed $message,

@@ -71,9 +71,9 @@ function pagelet_server_task_status(resource $task): int;
 function pagelet_server_task_result(
   resource $task,
   <<__OutOnly('varray')>>
-  inout mixed $headers,
+  inout vec<mixed> $headers,
   <<__OutOnly('KindOfInt64')>>
-  inout mixed $code,
+  inout int $code,
   int $timeout_ms = 0,
 ): string;
 

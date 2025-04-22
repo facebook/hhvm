@@ -234,7 +234,7 @@ function import_request_variables(string $types,
 <<__Native>>
 function parse_str(string $str,
                    <<__OutOnly("darray")>>
-                   inout mixed $arr): void;
+                   inout dict<arraykey, mixed> $arr): void;
 
 }
 

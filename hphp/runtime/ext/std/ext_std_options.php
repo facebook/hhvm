@@ -168,18 +168,18 @@ function getrusage(int $who = 0): shape(
 <<__Native>>
 function clock_getres(int $clk_id,
                       <<__OutOnly('KindOfInt64')>>
-                      inout mixed $sec,
+                      inout int $sec,
                       <<__OutOnly('KindOfInt64')>>
-                      inout mixed $nsec): bool;
+                      inout int $nsec): bool;
 
 /* Gets time of a system clock. "man 3 clock_gettime" for more details.
  */
 <<__Native>>
 function clock_gettime(int $clk_id,
                        <<__OutOnly('KindOfInt64')>>
-                       inout mixed $sec,
+                       inout int $sec,
                        <<__OutOnly('KindOfInt64')>>
-                       inout mixed $nsec)[leak_safe]: bool;
+                       inout int $nsec)[leak_safe]: bool;
 
 /* Same as clock_gettime(), but returns a single integer in nanoseconds.
  * Returns -1 if invalid or non-supported clock is specified.

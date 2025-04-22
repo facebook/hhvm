@@ -246,9 +246,9 @@ void HHVM_FUNCTION(hhbbc_fail_verification) {
  *   mixed $m,
  *   inout mixed $mix,
  *   bool retOrig,
- *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
- *   <<__OutOnly("varray")>> inout mixed $out2,
- *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
+ *   <<__OutOnly("KindOfBoolean")>> inout bool $out1,
+ *   <<__OutOnly("varray")>> inout vec<mixed> $out2,
+ *   <<__OutOnly("KindOfObject")>> inout stdClass $out3,
  * ): array;
  */
 Array HHVM_FUNCTION(

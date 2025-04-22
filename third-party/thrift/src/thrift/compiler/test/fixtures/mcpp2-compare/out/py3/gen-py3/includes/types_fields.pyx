@@ -24,6 +24,7 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
+from thrift.py3.types import _from_python_or_raise
 
 
 import includes.types as _includes_types
@@ -80,6 +81,6 @@ cdef class __AStructB_FieldsSetter(__StructFieldsSetter):
             __reset_field[_includes_cbindings.cAStructB](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _includes_types.AStruct):
-            raise TypeError(f'FieldA is not a { _includes_types.AStruct !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "FieldA", _includes_types.AStruct)
         assign_shared_const_ptr[_includes_cbindings.cAStruct](deref(self._struct_cpp_obj).FieldA_ref(), const_pointer_cast((<_includes_types.AStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

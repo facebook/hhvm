@@ -24,6 +24,7 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
+from thrift.py3.types import _from_python_or_raise
 
 
 import module.types as _module_types
@@ -113,7 +114,7 @@ cdef class __Vehicle_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cVehicle](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Color):
-            raise TypeError(f'color is not a { _module_types.Color !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "color", _module_types.Color)
         deref(self._struct_cpp_obj).color_ref().assign(deref((<_module_types.Color?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -223,7 +224,7 @@ cdef class __Person_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cPerson](deref(self._struct_cpp_obj), 4)
             return
         if not isinstance(_fbthrift_value, _module_types.Color):
-            raise TypeError(f'favoriteColor is not a { _module_types.Color !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "favoriteColor", _module_types.Color)
         deref(self._struct_cpp_obj).favoriteColor_ref().assign(deref((<_module_types.Color?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_5(self, _fbthrift_value) except *:

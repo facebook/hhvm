@@ -210,6 +210,10 @@ template void Limits::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Limits::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Limits::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Limits::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void Limits::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Limits::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Limits::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Limits::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2

@@ -130,6 +130,10 @@ template void RefUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t RefUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t RefUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t RefUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2

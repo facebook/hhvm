@@ -141,6 +141,10 @@ template void SerializedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReade
 template uint32_t SerializedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t SerializedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t SerializedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void SerializedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t SerializedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t SerializedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t SerializedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::fixtures::python_capi
@@ -275,6 +279,10 @@ template void SerializedUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader
 template uint32_t SerializedUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t SerializedUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t SerializedUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void SerializedUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t SerializedUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t SerializedUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t SerializedUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::fixtures::python_capi
@@ -391,6 +399,10 @@ template void SerializedError::readNoXfer<>(apache::thrift::BinaryProtocolReader
 template uint32_t SerializedError::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t SerializedError::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t SerializedError::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void SerializedError::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t SerializedError::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t SerializedError::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t SerializedError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::fixtures::python_capi
@@ -523,6 +535,10 @@ template void MarshalStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*)
 template uint32_t MarshalStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MarshalStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MarshalStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MarshalStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MarshalStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MarshalStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MarshalStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::fixtures::python_capi
@@ -657,6 +673,10 @@ template void MarshalUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MarshalUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MarshalUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MarshalUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MarshalUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MarshalUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MarshalUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MarshalUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::fixtures::python_capi
@@ -773,6 +793,10 @@ template void MarshalError::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MarshalError::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MarshalError::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MarshalError::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MarshalError::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MarshalError::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MarshalError::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MarshalError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::fixtures::python_capi

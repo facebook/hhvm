@@ -92,6 +92,10 @@ template void ReflectionStruct::readNoXfer<>(apache::thrift::BinaryProtocolReade
 template uint32_t ReflectionStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t ReflectionStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t ReflectionStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ReflectionStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ReflectionStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ReflectionStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ReflectionStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 template void ReflectionStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ReflectionStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ReflectionStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;

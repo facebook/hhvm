@@ -93,6 +93,10 @@ template void MyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace apache::thrift::test
@@ -388,6 +392,10 @@ template void EmptiableStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader
 template uint32_t EmptiableStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t EmptiableStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t EmptiableStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void EmptiableStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t EmptiableStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t EmptiableStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t EmptiableStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -676,6 +684,10 @@ template void NotEmptiableStruct::readNoXfer<>(apache::thrift::BinaryProtocolRea
 template uint32_t NotEmptiableStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t NotEmptiableStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t NotEmptiableStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void NotEmptiableStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t NotEmptiableStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t NotEmptiableStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t NotEmptiableStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

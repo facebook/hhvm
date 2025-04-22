@@ -102,6 +102,10 @@ template void EchoRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t EchoRequest::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t EchoRequest::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t EchoRequest::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void EchoRequest::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t EchoRequest::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t EchoRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t EchoRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2
@@ -195,6 +199,10 @@ template void EchoResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t EchoResponse::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t EchoResponse::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t EchoResponse::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void EchoResponse::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t EchoResponse::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t EchoResponse::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t EchoResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace cpp2

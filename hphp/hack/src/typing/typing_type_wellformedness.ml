@@ -324,7 +324,8 @@ let tparam env t =
 
 let tparams env = List.concat_map ~f:(tparam env)
 
-let where_constr env (h1, _, h2) = hint env h1 @ hint env h2
+let where_constr env (h1, _, h2) =
+  hint env h1 @ hint ~should_check_package_boundary:`No env h2
 
 let where_constrs env = List.concat_map ~f:(where_constr env)
 

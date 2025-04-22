@@ -136,11 +136,14 @@ struct struct_private_access {
   template <typename T, typename Ord>
   using ident = decltype(__fbthrift_ident<T, Ord>());
 
-  template <typename T, typename Ord>
-  static typename T::template __fbthrift_id<Ord> __fbthrift_field_id();
+  template <typename T>
+  static constexpr const int16_t* __fbthrift_field_ids() {
+    return T::__fbthrift_reflection_field_ids;
+  }
 
   template <typename T, typename Ord>
-  using field_id = decltype(__fbthrift_field_id<T, Ord>());
+  using field_id = type::field_id<
+      __fbthrift_field_ids<T>()[static_cast<size_t>(Ord::value)]>;
 
   template <typename T, typename Ord>
   static typename T::template __fbthrift_type_tag<Ord> __fbthrift_type_tag();

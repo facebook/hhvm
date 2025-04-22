@@ -482,7 +482,8 @@ class SomeStruct final  {
     ::apache::thrift::ident::tags
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};
+
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>,
     ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>,
@@ -492,20 +493,17 @@ class SomeStruct final  {
 
   static constexpr std::size_t __fbthrift_field_size_v = 4;
 
-  template<class T>
-  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
-
-  template<class T>
+  template <typename T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
 
-  template<class T>
+  template <typename T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
-  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
                                               __fbthrift_reflection_ident_list,
                                               __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_id_list
+      __fbthrift_reflection_field_ids
     )
   >;
   void __fbthrift_clear();
@@ -786,7 +784,8 @@ class MyStruct final  {
     ::apache::thrift::ident::me1_t2
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,4,6};
+  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,4,6};
+
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum2>,
     ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum3>,
@@ -796,20 +795,17 @@ class MyStruct final  {
 
   static constexpr std::size_t __fbthrift_field_size_v = 4;
 
-  template<class T>
-  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
-
-  template<class T>
+  template <typename T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
 
-  template<class T>
+  template <typename T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
-  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
                                               __fbthrift_reflection_ident_list,
                                               __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_id_list
+      __fbthrift_reflection_field_ids
     )
   >;
   void __fbthrift_clear();

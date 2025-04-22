@@ -32,15 +32,15 @@ namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  struct EnterContext final {
+  struct EnterContextState final {
     typedef c_Awaitable::Kind Kind;
 
-    EnterContext(c_WaitableWaitHandle* root, context_idx_t ctx_idx)
-      : m_importSet({root}), m_pending({root}), m_contextIdx(ctx_idx) {
+    EnterContextState(c_WaitableWaitHandle* root, ContextStateIndex ctxStateIdx)
+      : m_importSet({root}), m_pending({root}), m_ctxStateIdx(ctxStateIdx) {
     }
 
     void enqueue(c_WaitableWaitHandle* node) {
-      if (!node->isFinished() && node->getContextIdx() < m_contextIdx) {
+      if (!node->isFinished() && node->getContextStateIndex() < m_ctxStateIdx) {
         if (m_importSet.insert(node).second) {
           m_pending.push_back(node);
         }
@@ -173,7 +173,7 @@ namespace {
             break;
         }
 
-        node->setContextIdx(m_contextIdx);
+        node->setContextStateIndex(m_ctxStateIdx);
 
         switch (node->getKind()) {
           case Kind::AsyncFunction:
@@ -200,15 +200,16 @@ namespace {
 
     hphp_fast_set<c_WaitableWaitHandle*> m_importSet;
     std::vector<c_WaitableWaitHandle*> m_pending;
-    context_idx_t const m_contextIdx;
+    ContextStateIndex const m_ctxStateIdx;
   };
 }
 
-void enter_context_impl(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
+void enter_context_impl(c_WaitableWaitHandle *root,
+                        ContextStateIndex ctxStateIdx) {
   assertx(!root->isFinished());
-  assertx(root->getContextIdx() < ctx_idx);
+  assertx(root->getContextStateIndex() < ctxStateIdx);
 
-  EnterContext ctx(root, ctx_idx);
+  EnterContextState ctx(root, ctxStateIdx);
   ctx.discover();
   ctx.enter();
 }

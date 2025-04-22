@@ -44,7 +44,7 @@ void c_WaitableWaitHandle::join() {
   assertx(!isFinished());
 
   assertx(*ImplicitContext::activeCtx);
-  auto const context = *ImplicitContext::activeCtx;
+  auto const savedIC = *ImplicitContext::activeCtx;
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
@@ -57,13 +57,13 @@ void c_WaitableWaitHandle::join() {
 
   // import this wait handle to the newly created context
   // throws if cross-context cycle found
-  asio::enter_context(this, session->getCurrentContextIdx());
+  asio::enter_context_state(this, session->getCurrentContextStateIndex());
 
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
   assertx(isFinished());
-  assertx(context);
-  ImplicitContext::setActive(Object{context});
+  assertx(savedIC);
+  ImplicitContext::setActive(Object{savedIC});
 }
 
 String c_WaitableWaitHandle::getName() {
@@ -143,41 +143,6 @@ c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
 
   SystemLib::throwInvalidOperationExceptionObject(
     folly::join("", exception_msg_items));
-}
-
-
-Array c_WaitableWaitHandle::getDependencyStack() {
-  if (isFinished()) return empty_vec_array();
-  auto result = Array::CreateVec();
-  hphp_hash_set<c_WaitableWaitHandle*> visited;
-  auto current_handle = this;
-  auto session = AsioSession::Get();
-  while (current_handle != nullptr) {
-    result.append(make_tv<KindOfObject>(current_handle));
-    visited.insert(current_handle);
-    auto context_idx = current_handle->getContextIdx();
-
-    // 1. find parent in the same context
-    auto p = current_handle->getParentChain().firstInContext(context_idx);
-    if (p && visited.find(p) == visited.end()) {
-      current_handle = p;
-      continue;
-    }
-
-    // 2. cross the context boundary
-    auto context = session->getContext(context_idx);
-    if (!context) {
-      break;
-    }
-    current_handle = c_ResumableWaitHandle::getRunning(context->getSavedFP());
-    auto target_context_idx =
-      current_handle ? current_handle->getContextIdx() : 0;
-    while (context_idx > target_context_idx) {
-      --context_idx;
-      result.append(null_object);
-    }
-  }
-  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -33,10 +33,10 @@ inline void c_ResumableWaitHandle::resume() {
   }
 }
 
-inline void c_ResumableWaitHandle::exitContext(context_idx_t ctx_idx) {
+inline void c_ResumableWaitHandle::exitContext(ContextIndex contextIdx) {
   switch (getKind()) {
-    case Kind::AsyncFunction:  return asAsyncFunction()->exitContext(ctx_idx);
-    case Kind::AsyncGenerator: return asAsyncGenerator()->exitContext(ctx_idx);
+    case Kind::AsyncFunction:  return asAsyncFunction()->exitContext(contextIdx);
+    case Kind::AsyncGenerator: return asAsyncGenerator()->exitContext(contextIdx);
     default:                   not_reached();
   }
 }

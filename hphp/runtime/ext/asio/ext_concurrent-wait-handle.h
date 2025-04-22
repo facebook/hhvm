@@ -112,7 +112,7 @@ struct c_ConcurrentWaitHandle final :
 
  private:
   static req::ptr<c_ConcurrentWaitHandle> Alloc(int32_t cnt);
-  void initialize(context_idx_t ctx_idx);
+  void initialize(ContextStateIndex ctxStateIdx);
   void markAsFinished(void);
   void markAsFailed(const Object& exception);
   void setState(uint8_t state) { setKindState(Kind::Concurrent, state); }

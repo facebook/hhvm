@@ -61,7 +61,7 @@ struct c_ExternalThreadEventWaitHandle final :
   bool cancel(const Object& exception);
   void process();
   String getName();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
   void registerToContext();
   void unregisterFromContext();
 

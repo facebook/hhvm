@@ -16,9 +16,6 @@
 */
 #include "hphp/runtime/ext/asio/asio-context.h"
 
-#include <thread>
-
-#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
@@ -30,32 +27,28 @@
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/strobelight/ext_strobelight.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
-#include "hphp/runtime/vm/event-hook.h"
-#include "hphp/system/systemlib.h"
-#include "hphp/util/timer.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
 namespace {
   template<class TWaitHandle>
-  void exitContextQueue(context_idx_t ctx_idx,
+  void exitContextQueue(ContextIndex contextIdx,
                         req::deque<TWaitHandle*>& queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop_front();
-      wait_handle->exitContext(ctx_idx);
+      wait_handle->exitContext(contextIdx);
       decRefObj(wait_handle);
     }
   }
 
   template<class TWaitHandle>
-  void exitContextVector(context_idx_t ctx_idx,
+  void exitContextVector(ContextIndex contextIdx,
                          req::vector<TWaitHandle*> &vector) {
     while (!vector.empty()) {
       auto wait_handle = vector.back();
       vector.pop_back();
-      wait_handle->exitContext(ctx_idx);
+      wait_handle->exitContext(contextIdx);
     }
   }
 
@@ -103,30 +96,47 @@ namespace {
   }
 }
 
-void AsioContext::exit(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx) == this);
+void AsioContext::exit(ContextIndex ctxIdx) {
+  assertx(AsioSession::Get()->getContext(ctxIdx) == this);
 
-  exitContextVector(ctx_idx, m_runnableQueue);
-  exitContextVector(ctx_idx, m_fastRunnableQueue);
+  auto const exitContextState = [&](AsioContextState& state) {
+    exitContextVector(ctxIdx, state.m_runnableQueue);
+    exitContextVector(ctxIdx, state.m_fastRunnableQueue);
 
-  for (auto& it : m_priorityQueueDefault) {
-    exitContextQueue(ctx_idx, it.second);
-  }
-  for (auto& it : m_priorityQueueNoPendingIO) {
-    exitContextQueue(ctx_idx, it.second);
-  }
+    for (auto& it : state.m_priorityQueueDefault) {
+      exitContextQueue(ctxIdx, it.second);
+    }
+    for (auto& it : state.m_priorityQueueNoPendingIO) {
+      exitContextQueue(ctxIdx, it.second);
+    }
+  };
 
-  exitContextVector(ctx_idx, m_sleepEvents);
-  exitContextVector(ctx_idx, m_externalThreadEvents);
+  exitContextState(m_regularState);
+  exitContextState(m_lowState);
+
+  exitContextVector(ctxIdx, m_sleepEvents);
+  exitContextVector(ctxIdx, m_externalThreadEvents);
 }
 
-void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
-                           int64_t priority) {
+void AsioContext::schedule(c_ResumableWaitHandle* wait_handle) {
+  getContextState(wait_handle->getContextStateIndex())->
+    m_runnableQueue.push_back(wait_handle);
+}
+
+void AsioContext::scheduleFast(c_AsyncFunctionWaitHandle* wait_handle) {
+  getContextState(wait_handle->getContextStateIndex())->
+    m_fastRunnableQueue.push_back(wait_handle);
+}
+
+void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle,
+                           uint32_t queue, int64_t priority) {
   assertx(queue == QUEUE_DEFAULT || queue == QUEUE_NO_PENDING_IO);
   assertx(!(priority < 0));
 
-  auto& dst_queue = queue == QUEUE_DEFAULT ? m_priorityQueueDefault :
-                    m_priorityQueueNoPendingIO;
+  auto const contextState = getContextState(wait_handle->getContextStateIndex());
+  auto& dst_queue = queue == QUEUE_DEFAULT ?
+    contextState->m_priorityQueueDefault :
+    contextState->m_priorityQueueNoPendingIO;
 
   // creates a new per-prio queue if necessary
   dst_queue[priority].push_back(wait_handle);
@@ -135,20 +145,23 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
 
 c_AsyncFunctionWaitHandle* AsioContext::maybePopFast() {
   assertx(this == AsioSession::Get()->getCurrentContext());
+  auto const contextState = getContextState(
+    AsioSession::Get()->getCurrentContextStateIndex()
+  );
 
-  while (!m_fastRunnableQueue.empty()) {
-    auto wh = m_fastRunnableQueue.back();
-    m_fastRunnableQueue.pop_back();
+  while (!contextState->m_fastRunnableQueue.empty()) {
+    auto const wh = contextState->m_fastRunnableQueue.back();
+    contextState->m_fastRunnableQueue.pop_back();
 
     if (wh->getState() == c_ResumableWaitHandle::STATE_READY &&
-        wh->isFastResumable()) {
+        wh->isFastResumable() &&
+        wh->getContextStateIndex() ==
+            AsioSession::Get()->getCurrentContextStateIndex()) {
       // We only call maybePopFast() on the current context.  Since `wh' was
       // scheduled in this context at some point, it must still be scheduled
       // here now, since the only way it could leave the context is if the
       // context was destroyed.  (Being scheduled here supercedes it having
       // been scheduled in earlier contexts.)
-      assertx(wh->getContextIdx() ==
-              AsioSession::Get()->getCurrentContextIdx());
       return wh;
     } else {
       // `wh' is blocked or finished in some other context.
@@ -169,33 +182,57 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     session->initAbruptInterruptException();
   }
 
+  // Helper to maintain the session context idx while processing WHs. Runs the
+  // provided func in the given context state. Maintains the session context idx
+  // while processing.
+  auto const whIdx = wait_handle->getContextStateIndex();
+  auto const tryInContext = [&](auto f, AsioContextState &state,
+                                ContextStateIndex ctxStateIdx) {
+    auto const currentIdx = AsioSession::Get()->getCurrentContextStateIndex();
+    SCOPE_EXIT { AsioSession::Get()->setCurrentContextStateIndex(currentIdx); };
+    AsioSession::Get()->setCurrentContextStateIndex(ctxStateIdx);
+    return f(state);
+  };
+
+  auto const tryInRegularContext = [&](auto f) {
+    return tryInContext(f, m_regularState, whIdx.toRegular());
+  };
+
+  auto const tryInLowContext = [&](auto f) {
+    return tryInContext(f, m_lowState, whIdx.toLow());
+  };
+
+  // Run queue of ready async functions once.
+  auto const runQueue = [](auto& queue) {
+    if (!queue.empty()) {
+      auto wh = queue.back();
+      queue.pop_back();
+      if (wh->getState() != c_ResumableWaitHandle::STATE_READY) {
+        // may happen if wh was scheduled in multiple contexts
+        decRefObj(wh);
+      } else {
+        wh->resume();
+      }
+      return true;
+    }
+    return false;
+  };
+
+
+  // Process wait handles until the given `wait_handle` is finished. Will
+  // alternate between regular & low priority context states always preferring
+  // to make progress on regular priority WHs.
   while (!wait_handle->isFinished()) {
-    // Run queue of ready async functions once.
-    if (!m_runnableQueue.empty()) {
-      auto wh = m_runnableQueue.back();
-      m_runnableQueue.pop_back();
-      if (wh->getState() != c_ResumableWaitHandle::STATE_READY) {
-        // may happen if wh was scheduled in multiple contexts
-        decRefObj(wh);
-      } else {
-        wh->resume();
-      }
+    // Attempt to run from any of the regular runnable queues.
+    if (tryInRegularContext([&](auto& contextState) {
+      return runQueue(contextState.m_runnableQueue) ||
+             runQueue(contextState.m_fastRunnableQueue);
+    })) {
       continue;
     }
 
-    if (!m_fastRunnableQueue.empty()) {
-      auto wh = m_fastRunnableQueue.back();
-      m_fastRunnableQueue.pop_back();
-      if (wh->getState() != c_ResumableWaitHandle::STATE_READY) {
-        // may happen if wh was scheduled in multiple contexts
-        decRefObj(wh);
-      } else {
-        wh->resume();
-      }
-      continue;
-    }
-
-    // Process all sleep handles that have completed their sleep.
+    // Process all sleep handles that have completed their sleep. May unblock
+    // additional regular priority wait handles.
     if (session->processSleepEvents()) {
       continue;
     }
@@ -207,8 +244,17 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       continue;
     }
 
+    // Attempt to run from any of the lowpri runnable queues.
+    if (tryInLowContext([&](auto& contextState) {
+      return runQueue(contextState.m_runnableQueue) ||
+             runQueue(contextState.m_fastRunnableQueue);
+    })) {
+      continue;
+    }
+
     // Run default priority queue once.
-    if (runSingle(m_priorityQueueDefault)) {
+    if (runSingle(m_regularState.m_priorityQueueDefault) ||
+        runSingle(m_lowState.m_priorityQueueDefault)) {
       continue;
     }
 
@@ -217,12 +263,13 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       // ...but only until the next sleeper (from any context) finishes.
 
       onIOWaitEnter(session);
-      // check if onIOWaitEnter callback unblocked any wait handles
-      if (LIKELY(m_runnableQueue.empty() &&
-                 m_fastRunnableQueue.empty() &&
-                 !m_externalThreadEvents.empty() &&
-                 !ete_queue->hasReceived() &&
-                 m_priorityQueueDefault.empty())) {
+
+      // onIOWaitEnter may have unblocked some wait handles, so check if there
+      // is any work to do, otherwise receive until the next sleeper is ready
+      if (!m_regularState.hasWork() &&
+          !m_lowState.hasWork() &&
+          !m_externalThreadEvents.empty() &&
+          !ete_queue->hasReceived()) {
         auto waketime = session->sleepWakeTime();
         ete_queue->receiveSomeUntil(waketime);
       }
@@ -240,26 +287,27 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       continue;
     }
 
-    // If we're here, then the only things left are sleepers.  Wait for one to
-    // be ready (in any context).
+    // Only things left are sleepers. Wait for one to be ready (in any context).
     if (!m_sleepEvents.empty()) {
       onIOWaitEnter(session);
-      // check if onIOWaitEnter callback unblocked any wait handles
-      if (LIKELY(m_runnableQueue.empty() &&
-                 m_fastRunnableQueue.empty() &&
-                 m_externalThreadEvents.empty() &&
-                 m_priorityQueueDefault.empty() &&
-                 !m_sleepEvents.empty())) {
+
+      // onIOWaitEnter may have unblocked some wait handles, so check if there
+      // is any work to do, otherwise sleep until the next sleeper is ready
+      if (!m_regularState.hasWork() &&
+          !m_lowState.hasWork() &&
+          m_externalThreadEvents.empty() &&
+          !m_sleepEvents.empty()) {
         std::this_thread::sleep_until(session->sleepWakeTime());
       }
-      onIOWaitExit(session, this);
 
+      onIOWaitExit(session, this);
       session->processSleepEvents();
       continue;
     }
 
-    // Run no-pending-io priority queue once.
-    if (runSingle(m_priorityQueueNoPendingIO)) {
+    // Finally, run no-pending-io priority queue once.
+    if (runSingle(m_regularState.m_priorityQueueNoPendingIO) ||
+        runSingle(m_lowState.m_priorityQueueNoPendingIO)) {
       continue;
     }
 
@@ -282,16 +330,18 @@ c_WaitableWaitHandle* AsioContext::getBlamedWaitHandle() {
   auto session = AsioSession::Get();
   auto ete_queue = session->getExternalThreadEventQueue();
 
-  c_ExternalThreadEventWaitHandle* ewh = ete_queue->lastReceived();
+  c_ExternalThreadEventWaitHandle *ewh = ete_queue->lastReceived();
   if (ewh != nullptr &&
-      ewh->getContextIdx() == session->getCurrentContextIdx()) {
+      ewh->getContextIndex() ==
+        session->getCurrentContextStateIndex().contextIndex()) {
     return ewh;
   }
 
-  // may return cancelled wait handle, which no longer has contextIdx
+  // may return cancelled wait handle, which no longer has ContextIndex
   c_SleepWaitHandle* swh = session->nextSleepEvent();
   if (swh != nullptr && !swh->isFinished() &&
-      swh->getContextIdx() == session->getCurrentContextIdx() &&
+      swh->getContextIndex() ==
+        session->getCurrentContextStateIndex().contextIndex() &&
       swh->getWakeTime() <= AsioSession::TimePoint::clock::now()) {
     return swh;
   }
@@ -329,6 +379,11 @@ bool AsioContext::runSingle(reschedule_priority_queue_t& queue) {
   }
 
   return true;
+}
+
+AsioContextState* AsioContext::getContextState(ContextStateIndex ctxStateIdx) {
+  assertx(AsioSession::Get()->getContext(ctxStateIdx.contextIndex()) == this);
+  return ctxStateIdx.isRegular() ? &m_regularState : &m_lowState;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

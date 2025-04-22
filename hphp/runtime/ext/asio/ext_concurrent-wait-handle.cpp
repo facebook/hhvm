@@ -55,7 +55,7 @@ ObjectData* c_ConcurrentWaitHandle::fromFrameNoCheck(
   assertx(first < last);
 
   auto result = Alloc(cnt);
-  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  auto ctxStateIdx = ContextStateIndex::max();
   auto next = &result->m_children[cnt];
   uint32_t idx = cnt;
 
@@ -66,7 +66,7 @@ ObjectData* c_ConcurrentWaitHandle::fromFrameNoCheck(
     if (waitHandle->isFinished()) continue;
 
     auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);
-    ctx_idx = std::min(ctx_idx, child->getContextIdx());
+    ctxStateIdx = std::min(ctxStateIdx, child->getContextStateIndex());
 
     child->incRefCount();
     (--next)->m_child = child;
@@ -80,13 +80,13 @@ ObjectData* c_ConcurrentWaitHandle::fromFrameNoCheck(
   }
 
   assertx(next == &result->m_children[0]);
-  result->initialize(ctx_idx);
+  result->initialize(ctxStateIdx);
   return result.detach();
 }
 
-void c_ConcurrentWaitHandle::initialize(context_idx_t ctx_idx) {
+void c_ConcurrentWaitHandle::initialize(ContextStateIndex ctxStateIdx) {
   setState(STATE_BLOCKED);
-  setContextIdx(ctx_idx);
+  setContextStateIndex(ctxStateIdx);
 
   // For CCWH not being finished, accounts for edges from all children.
   incRefCount();

@@ -24,8 +24,8 @@
 namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 
-void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
-void enter_context_impl(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
+void enter_context_state(c_WaitableWaitHandle* root, ContextStateIndex ctxStateIdx);
+void enter_context_impl(c_WaitableWaitHandle* root, ContextStateIndex ctxStateIdx);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

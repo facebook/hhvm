@@ -24,6 +24,7 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
   HEADERS
     asio-blockable.h
     asio-context.h
+    asio-context-index.h
     asio-context-inl.h
     asio-context-enter.h
     asio-context-enter-inl.h

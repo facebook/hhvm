@@ -161,14 +161,14 @@ ObjectData* BTFrame::getThis() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-NEVER_INLINE 
+NEVER_INLINE
 c_WaitableWaitHandle* getParentWH(
   c_WaitableWaitHandle* wh,
-  context_idx_t contextIdx,
+  ContextStateIndex ctxStateIdx,
   req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 ) {
   assertx(!wh->isFinished());
-  auto p = wh->getParentChain().firstInContext(contextIdx);
+  auto p = wh->getParentChain().firstInContext(ctxStateIdx);
   if (p == nullptr) return p;
   auto ret = visitedWHs.emplace(p);
   if (ret.second) { // emplace succeeded
@@ -180,7 +180,7 @@ c_WaitableWaitHandle* getParentWH(
 
 BTFrame getARFromWHImpl(
   c_WaitableWaitHandle* currentWaitHandle,
-  context_idx_t contextIdx,
+  ContextStateIndex ctxStateIdx,
   req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 ) {
   while (currentWaitHandle != nullptr) {
@@ -196,9 +196,9 @@ BTFrame getARFromWHImpl(
       auto const ar = resumable->actRec();
       return BTFrame::regular(ar, resumable->suspendOffset());
     }
-    currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
+    currentWaitHandle = getParentWH(currentWaitHandle, ctxStateIdx, visitedWHs);
   }
-  auto const fp = AsioSession::Get()->getContext(contextIdx)->getSavedFP();
+  auto const fp = AsioSession::Get()->getContext(ctxStateIdx.contextIndex())->getSavedFP();
   assertx(fp != nullptr && fp->func() != nullptr);
   return BTFrame::regular(fp, 0);
 }
@@ -209,12 +209,12 @@ BTFrame getARFromWH(
   c_WaitableWaitHandle* currentWaitHandle,
   req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 ) {
-  if (currentWaitHandle->isFinished()) return BTFrame::none();
+  if (currentWaitHandle->isFinished() || !currentWaitHandle->isInContext()) {
+    return BTFrame::none();
+  }
 
-  auto const contextIdx = currentWaitHandle->getContextIdx();
-  if (contextIdx == 0) return BTFrame::none();
-
-  return getARFromWHImpl(currentWaitHandle, contextIdx, visitedWHs);
+  return getARFromWHImpl(
+    currentWaitHandle, currentWaitHandle->getContextStateIndex(), visitedWHs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -274,9 +274,9 @@ BTFrame getPrevActRec(
     }
 
     // Processed all tail frames, continue at the parent ActRec.
-    auto const contextIdx = wh->getContextIdx();
-    auto const parent = getParentWH(wh, contextIdx, visitedWHs);
-    return getARFromWHImpl(parent, contextIdx, visitedWHs);
+    auto const ctxStateIdx = wh->getContextStateIndex();
+    auto const parent = getParentWH(wh, ctxStateIdx, visitedWHs);
+    return getARFromWHImpl(parent, ctxStateIdx, visitedWHs);
   }
 
   auto const wh = [&]() -> c_WaitableWaitHandle* {
@@ -317,9 +317,9 @@ BTFrame getPrevActRec(
       return BTFrame::afwhTailFrame(fp, sk.offset(), index);
     }
 
-    auto const contextIdx = wh->getContextIdx();
-    auto const parent = getParentWH(wh, contextIdx, visitedWHs);
-    return getARFromWHImpl(parent, contextIdx, visitedWHs);
+    auto const ctxStateIdx = wh->getContextStateIndex();
+    auto const parent = getParentWH(wh, ctxStateIdx, visitedWHs);
+    return getARFromWHImpl(parent, ctxStateIdx, visitedWHs);
   }
 
   Offset prevBcOff;

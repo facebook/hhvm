@@ -340,7 +340,7 @@ function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
  * Following conditions must be met to produce non-null backtrace:
  * - $awaitable has not finished yet (i.e. has_finished($awaitable) === false)
  * - $awaitable is part of valid scheduler context
- *     (i.e. $awaitable->getContextIdx() > 0)
+ *     (i.e. $awaitable->getContextStateIndex() > 0)
  * If either condition is not met, backtrace() returns null.
  *
  * @param $awaitable - Awaitable, to take backtrace from.

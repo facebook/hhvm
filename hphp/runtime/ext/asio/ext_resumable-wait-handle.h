@@ -52,7 +52,7 @@ struct c_ResumableWaitHandle :
  public:
   static c_ResumableWaitHandle* getRunning(ActRec* fp);
   void resume();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
 
   static const int8_t STATE_BLOCKED   = 2; // waiting on dependencies.
   static const int8_t STATE_READY     = 3; // ready to run

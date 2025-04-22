@@ -107,7 +107,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle,
   template<typename Iter>
   static Object Create(Iter iter);
   static req::ptr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
-  void initialize(context_idx_t ctx_idx);
+  void initialize(ContextStateIndex ctxStateIdx);
   void markAsFinished(void);
   void markAsFailed(const Object& exception);
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }

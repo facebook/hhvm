@@ -81,7 +81,7 @@ c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
   , m_generator(gen->toObject())
 {
   setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
+  setContextStateIndex(child->getContextStateIndex());
   m_child = child; // no incref, to avoid leaking parent<-->child cycle
 }
 
@@ -109,7 +109,7 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
   assertx(!child->isFinished());
 
   // import child into the current context, throw on cross-context cycles
-  asio::enter_context(child, getContextIdx());
+  asio::enter_context_state(child, getContextStateIndex());
 
   // detect cycles
   detectCycle(child);
@@ -197,8 +197,8 @@ Resumable* c_AsyncGeneratorWaitHandle::resumable() const {
   return generator->resumable();
 }
 
-void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+void c_AsyncGeneratorWaitHandle::exitContext(ContextIndex contextIdx) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -207,8 +207,8 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // not in a context being exited
-  assertx(getContextIdx() <= ctx_idx);
-  if (getContextIdx() != ctx_idx) {
+  assertx(getContextIndex() <= contextIdx);
+  if (getContextIndex() != contextIdx) {
     decRefObj(this);
     return;
   }
@@ -223,10 +223,10 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
 
     case STATE_READY:
       // Recursively move all wait handles blocked by us.
-      getParentChain().exitContext(ctx_idx);
+      getParentChain().exitContext(contextIdx);
 
       // Move us to the parent context.
-      setContextIdx(getContextIdx() - 1);
+      setContextStateIndex(contextIdx.parent().toRegular());
 
       // Reschedule if still in a context.
       if (isInContext()) {

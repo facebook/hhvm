@@ -110,7 +110,7 @@ void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   assertx(!child->isFinished());
 
   setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
+  setContextStateIndex(child->getContextStateIndex());
   m_child = child;
   m_child->incRefCount();
   m_child->getParentChain()

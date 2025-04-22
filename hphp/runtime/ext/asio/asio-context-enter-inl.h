@@ -22,8 +22,8 @@
 namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
-  assertx(ctx_idx <= AsioSession::Get()->getCurrentContextIdx());
+inline void enter_context_state(c_WaitableWaitHandle* root, ContextStateIndex ctxStateIdx) {
+  assertx(ctxStateIdx <= AsioSession::Get()->getCurrentContextStateIndex());
 
   // If this wait handle is being finished and there is a parent A that is being
   // unblocked and a parent B that was not unblocked yet, it is possible that
@@ -36,11 +36,11 @@ inline void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
   }
 
   // Already in a more specific context?
-  if (LIKELY(root->getContextIdx() >= ctx_idx)) {
+  if (LIKELY(root->getContextStateIndex() >= ctxStateIdx)) {
     return;
   }
 
-  enter_context_impl(root, ctx_idx);
+  enter_context_impl(root, ctxStateIdx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -114,16 +114,16 @@ class WaitHandle:
     # Parent chain.
     #
     def parent(self):
-        """Same as wh->getParentChain().firstInContext(wh->getContextIdx())."""
+        """Same as wh->getParentChain().firstInContext(wh->getContextStateIndex())."""
 
-        ctx_idx = self.wh["m_contextIdx"]
+        ctx_idx = self.wh["m_ctxStateIdx"]
         blockable = self.wh["m_parentChain"]["m_lastParent"]
 
         result = None
         while blockable != nullptr():
             wh = WaitHandle.from_blockable(blockable)
 
-            if wh is not None and not wh.finished() and wh["m_contextIdx"] == ctx_idx:
+            if wh is not None and not wh.finished() and wh["m_ctxStateIdx"] == ctx_idx:
                 result = wh
 
             ty = T("HPHP::AsioBlockable").pointer()
@@ -237,7 +237,7 @@ def asio_stacktrace(wh, limit=None):
         count += 1
 
     # FIXME: requires RDS lookup
-    # ar = asio_context(wh['m_contextIdx'])['m_savedFP']
+    # ar = asio_context(wh['m_ctxStateIdx'])['m_savedFP']
     ar = nullptr()
 
     if ar != nullptr():

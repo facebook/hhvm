@@ -80,7 +80,7 @@ struct c_AsyncGeneratorWaitHandle final :
   void failCpp();
   String getName();
   c_WaitableWaitHandle* getChild();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
   bool isRunning() { return getState() == STATE_RUNNING; }
 
   Resumable* resumable() const;

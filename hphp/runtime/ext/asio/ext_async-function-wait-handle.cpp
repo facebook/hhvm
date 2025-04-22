@@ -154,22 +154,24 @@ void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
 
 template <bool lowPri>
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
+  auto ctxStateIdx = AsioSession::Get()->getCurrentContextStateIndex();
+
   if constexpr (lowPri) {
     assertx(!child);
     setState(STATE_READY);
-    setContextIdx(AsioSession::Get()->getCurrentContextIdx());
+    setContextStateIndex(ctxStateIdx.toLow());
     m_children[0].setChild<lowPri>(nullptr);
 
     // Not blocked on anything, so schedule immediately if in context. Otherwise,
     // caller will await/join and schedule later.
     if (isInContext()) {
-      AsioSession::Get()->getCurrentContext()->schedule(this);
+      getContext()->schedule(this);
       incRefCount(); // account for the runnable queue holding this
     }
   } else {
     assertx(child);
     setState(STATE_BLOCKED);
-    setContextIdx(child->getContextIdx());
+    setContextStateIndex(std::min(ctxStateIdx, child->getContextStateIndex()));
     m_children[0].setChild<lowPri>(child);
     incRefCount(); // account for child->this back-reference
   }
@@ -200,7 +202,7 @@ void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
   assertx(!child->isFinished());
 
   // import child into the current context, throw on cross-context cycles
-  asio::enter_context(child, getContextIdx());
+  asio::enter_context_state(child, getContextStateIndex());
 
   // detect cycles
   detectCycle(child);
@@ -332,8 +334,8 @@ c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   }
 }
 
-void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+void c_AsyncFunctionWaitHandle::exitContext(ContextIndex contextIdx) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -342,8 +344,8 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // not in a context being exited
-  assertx(getContextIdx() <= ctx_idx);
-  if (getContextIdx() != ctx_idx) {
+  assertx(getContextIndex() <= contextIdx);
+  if (getContextIndex() != contextIdx) {
     decRefObj(this);
     return;
   }
@@ -358,10 +360,10 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
 
     case STATE_READY:
       // Recursively move all wait handles blocked by us.
-      getParentChain().exitContext(ctx_idx);
+      getParentChain().exitContext(contextIdx);
 
       // Move us to the parent context.
-      setContextIdx(getContextIdx() - 1);
+      setContextStateIndex(contextIdx.parent().toRegular());
 
       // Reschedule if still in a context.
       if (isInContext()) {

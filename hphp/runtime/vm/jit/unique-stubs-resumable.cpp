@@ -130,8 +130,8 @@ void freeAFWH(c_AsyncFunctionWaitHandle* wh) {
  * Store the result provided by `data' and `type' into the wait handle `wh'
  * and mark it as succeeded.
  *
- * Note that this overwrites parentChain and contextIdx, so these fields need
- * to be loaded before the result is stored.
+ * Note that this overwrites parentChain and contextStateIndex, so these fields
+ * need to be loaded before the result is stored.
  */
 void storeWHResult(Vout& v, PhysReg data, PhysReg type, Vptr wh,
                    A::Kind whKind) {
@@ -289,13 +289,13 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   v << cmpqim{0, parentBl[afwhToBl(AFWH::resumeAddrOff())], isNullAddr};
   ifThen(v, CC_E, isNullAddr, cannotResume);
 
-  // Check parentBl->getWH()->getContextIdx() == child->getContextIdx().
+  // Check parentBl->getWH()->getContextStateIndex() == child->getContextStateIndex().
   auto const childContextIdx = v.makeReg();
   auto const parentContextIdx = v.makeReg();
   auto const inSameContext = v.makeReg();
 
-  v << loadb{rvmfp()[afwhToAr(AFWH::contextIdxOff())], childContextIdx};
-  v << loadb{parentBl[afwhToBl(AFWH::contextIdxOff())], parentContextIdx};
+  v << loadb{rvmfp()[afwhToAr(AFWH::ctxStateIdxOff())], childContextIdx};
+  v << loadb{parentBl[afwhToBl(AFWH::ctxStateIdxOff())], parentContextIdx};
   v << cmpb{parentContextIdx, childContextIdx, inSameContext};
   ifThen(v, CC_NE, inSameContext, cannotResume);
 

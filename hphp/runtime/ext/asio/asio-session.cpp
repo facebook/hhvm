@@ -45,9 +45,6 @@ namespace HPHP {
 RDS_LOCAL_NO_CHECK(AsioSession*, AsioSession::s_current)(nullptr);
 
 namespace {
-  const context_idx_t MAX_CONTEXT_DEPTH =
-    std::numeric_limits<context_idx_t>::max();
-
   Object checkCallback(const Variant& callback, char* name) {
     if (!callback.isNull() &&
         (!callback.isObject() ||
@@ -81,27 +78,30 @@ void AsioSession::Init() {
 }
 
 AsioSession::AsioSession()
-    : m_contexts(), m_externalThreadEventQueue() {
+  : m_contexts(), m_externalThreadEventQueue(), m_currCtxStateIdx(0) {
 }
 
 void AsioSession::enterContext(ActRec* savedFP) {
-  if (UNLIKELY(getCurrentContextIdx() >= MAX_CONTEXT_DEPTH)) {
+  assertx(getCurrentContextStateIndex().contextIndex().value == m_contexts.size());
+  if (UNLIKELY(m_contexts.size() >= ContextIndex::max().value)) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Unable to enter asio context: too many contexts open");
   }
 
   m_contexts.push_back(req::make_raw<AsioContext>(savedFP));
-
-  assertx(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+  setCurrentContextStateIndex(
+    ContextIndex{uint8_t(m_contexts.size())}.toRegular());
   assertx(isInContext());
 }
 
 void AsioSession::exitContext() {
   assertx(isInContext());
+  m_contexts.back()->exit(getCurrentContextStateIndex().contextIndex());
 
-  m_contexts.back()->exit(m_contexts.size());
   req::destroy_raw(m_contexts.back());
   m_contexts.pop_back();
+  setCurrentContextStateIndex(
+    ContextIndex{uint8_t(m_contexts.size())}.toRegular());
 }
 
 void AsioSession::initAbruptInterruptException() {

@@ -47,23 +47,28 @@ struct AsioSession final {
     return !m_contexts.empty();
   }
 
-  AsioContext* getContext(context_idx_t ctx_idx) {
-    assertx(ctx_idx <= m_contexts.size());
-    return ctx_idx ? m_contexts[ctx_idx - 1] : nullptr;
+  AsioContext* getContext(ContextIndex ctxIdx) {
+    assertx(ctxIdx.value <= m_contexts.size());
+    return ctxIdx.value ? m_contexts[ctxIdx.value - 1] : nullptr;
   }
 
   AsioContext* getCurrentContext() {
-    assertx(isInContext());
+    assertx(m_currCtxStateIdx.contextIndex().value == m_contexts.size());
     return m_contexts.back();
+  }
+
+  void setCurrentContextStateIndex(ContextStateIndex ctxStateIdx) {
+    assertx(ctxStateIdx.contextIndex().value == m_contexts.size());
+    m_currCtxStateIdx = ctxStateIdx;
   }
 
   size_t getCurrentContextDepth() {
     return m_contexts.size();
   }
 
-  context_idx_t getCurrentContextIdx() {
-    assertx(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
-    return static_cast<context_idx_t>(m_contexts.size());
+  ContextStateIndex getCurrentContextStateIndex() {
+    assertx(m_currCtxStateIdx.contextIndex().value == m_contexts.size());
+    return m_currCtxStateIdx;
   }
 
   // External thread events.
@@ -175,6 +180,7 @@ private:
   req::vector<AsioContext*> m_contexts;
   req::vector<c_SleepWaitHandle*> m_sleepEvents;
   AsioExternalThreadEventQueue m_externalThreadEventQueue;
+  ContextStateIndex m_currCtxStateIdx;
 
   Object m_abruptInterruptException;
   Object m_onIOWaitEnter;

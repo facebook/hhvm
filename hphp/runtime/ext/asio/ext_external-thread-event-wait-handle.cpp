@@ -71,7 +71,7 @@ void c_ExternalThreadEventWaitHandle::initialize(
 ) {
   auto const session = AsioSession::Get();
   setState(STATE_WAITING);
-  setContextIdx(session->getCurrentContextIdx());
+  setContextStateIndex(session->getCurrentContextStateIndex());
   m_event = event;
   m_privData.reset(priv_data);
 
@@ -247,13 +247,13 @@ String c_ExternalThreadEventWaitHandle::getName() {
   return s_externalThreadEvent;
 }
 
-void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+void c_ExternalThreadEventWaitHandle::exitContext(ContextIndex contextIdx) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
   assertx(getState() == STATE_WAITING);
-  assertx(getContextIdx() == ctx_idx);
+  assertx(getContextIndex() == contextIdx);
 
   // Move us to the parent context.
-  setContextIdx(getContextIdx() - 1);
+  setContextStateIndex(contextIdx.parent().toRegular());
 
   // Re-register if still in a context.
   if (isInContext()) {
@@ -261,16 +261,16 @@ void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // Recursively move all wait handles blocked by us.
-  getParentChain().exitContext(ctx_idx);
+  getParentChain().exitContext(contextIdx);
 }
 
 void c_ExternalThreadEventWaitHandle::registerToContext() {
-  AsioContext *ctx = getContext();
+  AsioContext* ctx = getContext();
   m_ctxVecIndex = ctx->registerTo(ctx->getExternalThreadEvents(), this);
 }
 
 void c_ExternalThreadEventWaitHandle::unregisterFromContext() {
-  AsioContext *ctx = getContext();
+  AsioContext* ctx = getContext();
   ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_ctxVecIndex);
 }
 

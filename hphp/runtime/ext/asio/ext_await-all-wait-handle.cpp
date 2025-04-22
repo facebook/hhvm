@@ -54,13 +54,13 @@ namespace {
     return c_StaticWaitHandle::CreateSucceeded(make_tv<KindOfNull>());
   }
 
-  void prepareChild(TypedValue src, context_idx_t& ctx_idx, uint32_t& cnt) {
+  void prepareChild(TypedValue src, ContextStateIndex& ctxStateIdx, uint32_t& cnt) {
     auto const waitHandle = c_Awaitable::fromTV(src);
     if (UNLIKELY(!waitHandle)) failWaitHandle();
     if (waitHandle->isFinished()) return;
     assertx(isa<c_WaitableWaitHandle>(waitHandle));
     auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);
-    ctx_idx = std::min(ctx_idx, child->getContextIdx());
+    ctxStateIdx = std::min(ctxStateIdx, child->getContextStateIndex());
     ++cnt;
   }
 
@@ -84,10 +84,10 @@ void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
 
 template<typename Iter>
 Object c_AwaitAllWaitHandle::Create(Iter iter) {
-  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  auto ctxStateIdx = ContextStateIndex::max();
   uint32_t cnt = 0;
 
-  iter([&](TypedValue v) { prepareChild(v, ctx_idx, cnt); });
+  iter([&](TypedValue v) { prepareChild(v, ctxStateIdx, cnt); });
 
   if (!cnt) {
     return Object{returnEmpty()};
@@ -100,7 +100,7 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
   iter([&](TypedValue v) { addChild(v, next, idx); });
 
   assertx(next == &result->m_children[0]);
-  result->initialize(ctx_idx);
+  result->initialize(ctxStateIdx);
   return Object{std::move(result)};
 }
 
@@ -132,9 +132,9 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
   });
 }
 
-void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
+void c_AwaitAllWaitHandle::initialize(ContextStateIndex ctxStateIdx) {
   setState(STATE_BLOCKED);
-  setContextIdx(ctx_idx);
+  setContextStateIndex(ctxStateIdx);
 
   // For AAWH not being finished, accounts for edges from all children.
   incRefCount();

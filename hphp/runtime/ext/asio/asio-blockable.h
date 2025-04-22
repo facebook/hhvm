@@ -110,9 +110,9 @@ struct AsioBlockableChain final {
                                TypedValue* sp,
                                AsioBlockableChain chain);
   void unblock();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
   void removeFromChain(AsioBlockable* parent);
-  c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
+  c_WaitableWaitHandle* firstInContext(ContextStateIndex ctxStateIdx);
 
 private:
   AsioBlockable* m_lastParent;

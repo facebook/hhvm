@@ -167,15 +167,15 @@ struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
   void scan(type_scan::Scanner&) const;
 
  private: // layout, ignoring ObjectData fields.
-  // 0                         8           9           10       12
-  // [parentChain             ][contextIdx][kind_state][tyindex][ctxVecIndex]
+  // 0                         8            9           10       12
+  // [parentChain             ][ctxStateIdx][kind_state][tyindex][ctxVecIndex]
   // [resultOrException.m_data][m_type]                         [aux]
   static void checkLayout() {
     constexpr auto data = offsetof(c_Awaitable, m_resultOrException);
     constexpr auto type = data + offsetof(TypedValue, m_type);
     constexpr auto aux  = data + offsetof(TypedValue, m_aux);
     static_assert(offsetof(c_Awaitable, m_parentChain) == data, "");
-    static_assert(offsetof(c_Awaitable, m_contextIdx) == type, "");
+    static_assert(offsetof(c_Awaitable, m_ctxStateIdx) == type, "");
     static_assert(offsetof(c_Awaitable, m_kind_state) < aux, "");
     static_assert(offsetof(c_Awaitable, m_ctxVecIndex) == aux, "");
   }
@@ -191,7 +191,7 @@ struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
       AsioBlockableChain m_parentChain;
 
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
-      context_idx_t m_contextIdx;
+      ContextStateIndex m_ctxStateIdx;
 
       // valid in any WaitHandle state. doesn't overlap TypedValue fields.
       uint8_t m_kind_state;

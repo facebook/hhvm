@@ -142,7 +142,7 @@ struct c_AsyncFunctionWaitHandle final :
   void failCpp();
   String getName();
   c_WaitableWaitHandle* getChild();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
   bool isRunning() { return getState() == STATE_RUNNING; }
   String getFilename();
   Offset getNextExecutionOffset();
@@ -158,8 +158,10 @@ struct c_AsyncFunctionWaitHandle final :
 
   bool isFastResumable() const {
     assertx(getState() == STATE_READY);
-    auto const child = m_children[0].getChild();
-    return resumable()->resumeAddr() && child && child->isSucceeded();
+    if (auto const child = m_children[0].getChild()) {
+      return resumable()->resumeAddr() && child->isSucceeded();
+    }
+    return false;
   }
 
   // Access to merged tail frames. We optimize hard for writing these tail

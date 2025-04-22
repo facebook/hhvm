@@ -55,7 +55,7 @@ Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs) {
 void c_SleepWaitHandle::initialize(int64_t usecs) {
   auto const session = AsioSession::Get();
   setState(STATE_WAITING);
-  setContextIdx(session->getCurrentContextIdx());
+  setContextStateIndex(session->getCurrentContextStateIndex());
   m_waketime =
     AsioSession::TimePoint::clock::now() +
     std::chrono::microseconds(usecs);
@@ -135,13 +135,13 @@ String c_SleepWaitHandle::getName() {
   return s_sleep;
 }
 
-void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+void c_SleepWaitHandle::exitContext(ContextIndex contextIdx) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
   assertx(getState() == STATE_WAITING);
-  assertx(getContextIdx() == ctx_idx);
+  assertx(getContextIndex() == contextIdx);
 
   // Move us to the parent context.
-  setContextIdx(getContextIdx() - 1);
+  setContextStateIndex(contextIdx.parent().toRegular());
 
   // Re-register if still in a context.
   if (isInContext()) {
@@ -149,16 +149,16 @@ void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // Recursively move all wait handles blocked by us.
-  getParentChain().exitContext(ctx_idx);
+  getParentChain().exitContext(contextIdx);
 }
 
 void c_SleepWaitHandle::registerToContext() {
-  AsioContext *ctx = getContext();
+  AsioContext* ctx = getContext();
   m_ctxVecIndex = ctx->registerTo(ctx->getSleepEvents(), this);
 }
 
 void c_SleepWaitHandle::unregisterFromContext() {
-  AsioContext *ctx = getContext();
+  AsioContext* ctx = getContext();
   ctx->unregisterFrom(ctx->getSleepEvents(), m_ctxVecIndex);
 }
 

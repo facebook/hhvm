@@ -50,13 +50,14 @@
 // apple silicon can run most x86-64 instructions, but not necessarily all
 #define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 1
 #elif defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE2_BITPERM) && \
-    __has_include(<arm_neon_sve_bridge.h>)
+    __has_include(<arm_neon_sve_bridge.h>) && !FOLLY_MOBILE
 #define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 1
 #else
 #define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 0
 #endif
 
 #if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER && FOLLY_AARCH64
+#include <arm_neon.h>
 #include <arm_neon_sve_bridge.h> // @manual
 #include <arm_sve.h>
 #endif
@@ -430,20 +431,98 @@ uint8_t writeVarintUnrolled(Cursor& c, T value) {
 
 #if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
 
-inline uint64_t compressBits(uint64_t value, uint64_t mask) {
-#if FOLLY_X64
-  return _pdep_u64(value, mask);
-#elif FOLLY_AARCH64
-  // See https://godbolt.org/z/nhc443acd
-  const auto vec = svbdep_u64(svdup_n_u64(value), svdup_n_u64(mask));
-  return vgetq_lane_u64(svget_neonq_u64(vec), 0);
+#if FOLLY_AARCH64
+
+template <class Cursor, class T>
+uint8_t writeVarintSve(Cursor& c, T valueS) {
+  auto value = folly::to_unsigned(valueS);
+  if (FOLLY_LIKELY((value & ~0x7f) == 0)) {
+    c.template write<uint8_t>(static_cast<uint8_t>(value));
+    return 1;
+  }
+
+  if constexpr (sizeof(T) == 1) {
+    c.template write<uint16_t>(static_cast<uint16_t>(value | 0x100));
+    return 2;
+  }
+
+  enum { maxSize = (8 * sizeof(T) + 6) / 7 };
+  c.ensure(maxSize);
+
+  svuint8_t bdepMask = svset_neonq_u8(svundef_u8(), vdupq_n_u8(0x7f));
+  uint64x2_t clzMask = vreinterpretq_u64_u8(vdupq_n_u8(0xff));
+  uint64x2_t vec;
+  vec[0] = value;
+
+  vec = svget_neonq_u64(svbdep_u64(
+      svset_neonq_u64(svundef_u64(), vec), svreinterpret_u64_u8(bdepMask)));
+
+  svuint64_t clzV;
+  uint64x2_t clzMaskV;
+  if constexpr (sizeof(T) == 2) {
+    clzV = svset_neonq_u64(svundef_u64(), vclzq_u32(vec));
+    clzMaskV = svget_neonq_u32(svlsr_u32_x(
+        svptrue_b32(),
+        svset_neonq_u32(svundef_u32(), vreinterpretq_u32_u64(clzMask)),
+        svreinterpret_u32_u64(clzV)));
+  } else {
+    clzV = svclz_u64_x(svptrue_b64(), svset_neonq_u64(svundef_u64(), vec));
+    clzMaskV = svget_neonq_u64(svlsr_u64_x(
+        svptrue_b64(), svset_neonq_u64(svundef_u64(), clzMask), clzV));
+  }
+
+  svuint64_t sizeSV = svlsr_n_u64_x(svptrue_b64(), clzV, 3);
+
+  if constexpr (sizeof(T) == 2) {
+    sizeSV = svsubr_n_u64_x(svptrue_b64(), sizeSV, 4);
+  } else {
+    sizeSV = svsubr_n_u64_x(svptrue_b64(), sizeSV, 8);
+  }
+
+  vec = svget_neonq_u8(svorr_n_u8_x(
+      svptrue_b8(),
+      svset_neonq_u8(svundef_u8(), vreinterpretq_u8_u64(vec)),
+      0x80));
+
+  vec = vandq_u64(vec, clzMaskV);
+
+  if constexpr (sizeof(T) == 8) {
+    uint64_t orMask = value < (1ull << 56) ? 0 : 0x80;
+    uint64x2_t orMaskV = vreinterpretq_u64_u8(vdupq_n_u8(orMask));
+    vec = vorrq_u64(vec, orMaskV);
+  }
+
+  uint8_t* p = c.writableData();
+
+  if constexpr (sizeof(T) == sizeof(uint16_t)) {
+    vst1q_lane_u16(p, vreinterpretq_u16_u64(vec), 0);
+    vst1q_lane_u8(p + 2, vreinterpretq_u8_u64(vec), 2);
+  } else if constexpr (sizeof(T) == sizeof(uint32_t)) {
+    vst1q_lane_u32(p, vreinterpretq_u32_u64(vec), 0);
+    vst1q_lane_u8(p + 4, vreinterpretq_u8_u64(vec), 4);
+  } else {
+    vst1_u8(p, vget_low_u64(vreinterpretq_u8_u64(vec)));
+    p[8] = value >> 56;
+    p[9] = value >> 63;
+  }
+
+  uint8_t size = svget_neonq_u64(sizeSV)[0];
+  if constexpr (sizeof(T) == 8) {
+    size = value < (1ull << 56) ? size : (value >> 63) + 9;
+  }
+
+  c.append(size);
+  return size;
+}
+
 #else
-  static_assert(0, "no pdep-equivalent instruction is available");
-#endif // __BMI2__, __ARM_FEATURE_SVE2_BITPERM
+
+inline uint64_t compressBits(uint64_t value, uint64_t mask) {
+  return _pdep_u64(value, mask);
 }
 
 template <class Cursor, class T>
-uint8_t writeVarintBranchFree(Cursor& c, T valueS) {
+uint8_t writeVarintBranchFreeX86(Cursor& c, T valueS) {
   auto value = folly::to_unsigned(valueS);
   if (FOLLY_LIKELY((value & ~0x7f) == 0)) {
     c.template write<uint8_t>(static_cast<uint8_t>(value));
@@ -492,6 +571,17 @@ uint8_t writeVarintBranchFree(Cursor& c, T valueS) {
     c.append(size);
   }
   return size;
+}
+
+#endif
+
+template <class Cursor, class T>
+uint8_t writeVarintBranchFree(Cursor& c, T valueS) {
+#if FOLLY_AARCH64
+  return writeVarintSve(c, valueS);
+#else
+  return writeVarintBranchFreeX86(c, valueS);
+#endif
 }
 
 template <class Cursor, class T>

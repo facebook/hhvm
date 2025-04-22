@@ -25,6 +25,7 @@
 #include <scripts/rroeser/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/thread_factory/InitThreadFactory.h>
+#include <thrift/conformance/stresstest/server/StressTestServerModule.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -177,6 +178,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   server->setIOThreadPool(
       getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
   server->setNumCPUWorkerThreads(numCpuWorkerThreads);
+  server->addModule(std::make_unique<StressTestServerModule>());
 
   if (FLAGS_enable_checksum) {
     LOG(INFO) << "Checksum support enabled";

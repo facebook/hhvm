@@ -4466,6 +4466,13 @@ function f(): void {
         self.test_driver.run_check()
         self.load_and_run("references_partial_with_server", variables)
 
+    def test_references_partial_with_server_2(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_partial_with_server_2", variables)
+
     def test_references_no_server(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("references.php"))

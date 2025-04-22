@@ -156,29 +156,15 @@ let search_member
   search ctx target include_defs ~hints ~files ~stream_file genv
 
 let search_single_file_for_member
-    ctx
-    (class_name : string)
-    (member : member)
-    ~(naming_table : Naming_table.t)
-    (filename : Relative_path.t) : (string * Pos.t) list =
+    ctx (class_name : string) (member : member) (filename : Relative_path.t) :
+    (string * Pos.t) list =
   let class_name = add_ns class_name in
   let origin_class_name =
     FindRefsService.get_origin_class_name ctx class_name member
   in
-  let descendant_class_files =
-    Relative_path.Set.add Relative_path.Set.empty filename
-  in
-  let descendant_classes =
-    FindRefsService.find_child_classes
-      ctx
-      origin_class_name
-      naming_table
-      descendant_class_files
-  in
-  let class_and_descendants = SSet.add descendant_classes origin_class_name in
   let target =
     FindRefsService.IMember
-      (FindRefsService.Class_set class_and_descendants, member)
+      (FindRefsService.Subclasses_of origin_class_name, member)
   in
   search_single_file ctx target filename
 
@@ -306,13 +292,10 @@ let go ctx action include_defs ~stream_file ~hints genv env =
 let go_for_single_file
     ~(ctx : Provider_context.t)
     ~(action : ServerCommandTypes.Find_refs.action)
-    ~(filename : Relative_path.t)
-    ~(name : string)
-    ~(naming_table : Naming_table.t) =
-  let _ = name in
+    ~(filename : Relative_path.t) =
   match action with
   | Member (class_name, member) ->
-    search_single_file_for_member ctx class_name member filename ~naming_table
+    search_single_file_for_member ctx class_name member filename
   | Function function_name ->
     search_single_file_for_function ctx function_name filename
   | Class class_name ->

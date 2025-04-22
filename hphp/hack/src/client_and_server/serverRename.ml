@@ -559,7 +559,7 @@ let new_name_for_symbol_definition
     new_name
 
 let go_for_single_file
-    ctx ~find_refs_action ~new_name ~filename ~symbol_definition ~naming_table =
+    ctx ~find_refs_action ~new_name ~filename ~symbol_definition =
   let action =
     match find_refs_action with
     | ServerCommandTypes.Find_refs.Class str ->
@@ -569,13 +569,7 @@ let go_for_single_file
       ServerCommandTypes.Find_refs.ExplicitClass str
     | action -> action
   in
-  ( ServerFindRefs.go_for_single_file
-      ~ctx
-      ~action
-      ~filename
-      ~name:(SymbolDefinition.full_name symbol_definition)
-      ~naming_table
-  |> fun refs ->
+  ( ServerFindRefs.go_for_single_file ~ctx ~action ~filename |> fun refs ->
     let changes =
       List.fold_left
         refs

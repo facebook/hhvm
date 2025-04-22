@@ -31,7 +31,6 @@ val go_for_single_file :
   new_name:string ->
   filename:Relative_path.t ->
   symbol_definition:Relative_path.t SymbolDefinition.t ->
-  naming_table:Naming_table.t ->
   (ServerRenameTypes.patch list, 'a) result
 
 val go_ide_with_find_refs_action :

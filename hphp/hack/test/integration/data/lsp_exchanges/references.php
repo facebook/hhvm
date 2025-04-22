@@ -46,3 +46,9 @@ function ref_test_2(int $x): void {   //  Should match
   $size = RefTestEnum::SMALL;
   $shape = shape(RefTestEnum::SMALL => 123);
 }
+
+class References1 {
+  public static function foo(): void {}
+}
+
+class References2 extends References1 {}

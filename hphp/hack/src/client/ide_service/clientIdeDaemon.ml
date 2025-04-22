@@ -935,7 +935,6 @@ let handle_request
                       ~filename
                       ~symbol_definition
                       ~new_name
-                      ~naming_table:istate.naming_table
                   in
                   let patches =
                     match single_file_patches with
@@ -1057,12 +1056,7 @@ let handle_request
                     Relative_path.create_detect_prefix stringified_path
                   in
                   let single_file_ref =
-                    ServerFindRefs.go_for_single_file
-                      ~ctx
-                      ~action
-                      ~filename
-                      ~name
-                      ~naming_table:istate.naming_table
+                    ServerFindRefs.go_for_single_file ~ctx ~action ~filename
                     |> ServerFindRefs.to_absolute
                   in
                   let urikey =

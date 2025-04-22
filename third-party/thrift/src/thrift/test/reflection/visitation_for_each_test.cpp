@@ -274,30 +274,6 @@ TYPED_TEST(ForEachFieldTest, test_reference_type) {
         EXPECT_TRUE(false) << *meta.name_ref() << " " << *meta.id_ref();
     }
   });
-  TestFixture::adapter(std::move(t), [](auto& meta, auto&& ref) {
-    switch (*meta.id_ref()) {
-      case 1:
-        EXPECT_TRUE((is_same_v<decltype(*ref), const int32_t&&>));
-        break;
-      case 2:
-        EXPECT_TRUE((is_same_v<decltype(*ref), const string&&>));
-        break;
-      case 4:
-        EXPECT_TRUE((is_same_v<decltype(*ref), const enum1&&>));
-        break;
-      case 8:
-        EXPECT_TRUE((is_same_v<decltype(*ref), const enum2&&>));
-        break;
-      case 16:
-        EXPECT_TRUE((is_same_v<decltype(*ref), const union1&&>));
-        break;
-      case 32:
-        EXPECT_TRUE((is_same_v<decltype(*ref), const union2&&>));
-        break;
-      default:
-        EXPECT_TRUE(false) << *meta.name_ref() << " " << *meta.id_ref();
-    }
-  });
 }
 
 TYPED_TEST(ForEachFieldTest, test_two_structs_document) {

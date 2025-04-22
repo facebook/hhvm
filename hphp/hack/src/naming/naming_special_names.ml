@@ -1041,6 +1041,8 @@ module StdlibFunctions = struct
 
   let is_any_array = "\\HH\\is_any_array"
 
+  let get_class_from_type = "\\HH\\ReifiedGenerics\\get_class_from_type"
+
   (* All Id funcions that Typing.dispatch_call handles specially *)
   let special_dispatch =
     String.Hash_set.of_list

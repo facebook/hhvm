@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+<<file: __EnableUnstableFeatures('class_type')>>
 namespace HH\ReifiedGenerics;
 
 /**
@@ -20,3 +20,9 @@ function get_type_structure<reify T>()[]: TypeStructure<T>;
  * If this type does not represent a class, throws an exception
  */
 function get_classname<reify T>()[]: classname<T>;
+
+/**
+ * Returns the class that is the value of this reified type.
+ * If this type does not represent a class, throws an exception
+ */
+function get_class_from_type<reify T>()[]: class<T>;

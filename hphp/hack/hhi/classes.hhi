@@ -13,7 +13,7 @@
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
-
+<<file: __EnableUnstableFeatures('class_type')>>
 namespace {
 
   <<__SupportDynamicType>>
@@ -277,4 +277,21 @@ namespace HH {
   }
 
   function is_class(mixed $arg)[]: bool;
+
+  /**
+   * Similar to `get_class`, returns the class that `$object` is an instance
+   * of, rather than a string of that class's name. Raises an exception if the
+   * input is not an object.
+   */
+  function get_class_from_object<T /* as object */>(
+    readonly T $object
+  )[]: class<T>;
+
+  /**
+   * Similar to `get_parent_class`. Returns the parent of the class supplied
+   * if one exists, or null otherwise.
+   */
+  function get_parent_class_from_class(
+    readonly class<mixed> $cls
+  )[]: ?class<mixed>;
 } // namespace HH

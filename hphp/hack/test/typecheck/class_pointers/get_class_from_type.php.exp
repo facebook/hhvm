@@ -1,0 +1,6 @@
+ERROR: File "get_class_from_type.php", line 7, characters 44-50:
+Invalid reified hint (Typing[4494])
+  File "get_class_from_type.php", line 4, characters 23-23:
+  This is an abstract type constant without the __Reifiable attribute, it cannot be used as a reified type argument
+  File "reified_generics.hhi", line 28, characters 36-36:
+  `T` is reified

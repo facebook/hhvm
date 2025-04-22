@@ -461,7 +461,7 @@ function str_replace(mixed $search,
 function str_replace_with_count(mixed $search,
                                 mixed $replace,
                                 mixed $subject,
-                                <<__OutOnly("KindOfInt64")>>
+                                <<__OutOnly>>
                                 inout int $count): mixed;
 
 /**
@@ -496,7 +496,7 @@ function str_ireplace(mixed $search,
 function str_ireplace_with_count(mixed $search,
                                  mixed $replace,
                                  mixed $subject,
-                                 <<__OutOnly("KindOfInt64")>>
+                                 <<__OutOnly>>
                                  inout int $count): mixed;
 
 /**
@@ -1707,7 +1707,7 @@ function levenshtein(string $str1,
 <<__IsFoldable, __Native>>
 function similar_text(string $first,
                       string $second,
-                      <<__OutOnly("KindOfDouble")>>
+                      <<__OutOnly>>
                       inout float $percent): int;
 
 /**

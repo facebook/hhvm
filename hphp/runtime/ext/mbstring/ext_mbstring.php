@@ -570,7 +570,7 @@ function mb_output_handler(string $contents, int $status)[leak_safe]: string;
  */
 <<__Native>>
 function mb_parse_str(string $encoded_string,
-                      <<__OutOnly("darray")>>
+                      <<__OutOnly>>
                       inout dict<arraykey, mixed> $result)[leak_safe]: bool;
 
 /**

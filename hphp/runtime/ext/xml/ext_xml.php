@@ -67,9 +67,9 @@ function xml_parse(resource $parser, string $data, bool $is_final = true): int;
 <<__Native>>
 function xml_parse_into_struct(resource $parser,
                                string $data,
-                               <<__OutOnly("varray")>>
+                               <<__OutOnly>>
                                inout vec<mixed> $values,
-                               <<__OutOnly("darray")>>
+                               <<__OutOnly>>
                                inout dict<arraykey, mixed> $index): int;
 
 /**

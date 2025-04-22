@@ -168,7 +168,7 @@ class NumberFormatter {
    */
   <<__Native>>
   public function parseCurrency(string $value,
-                                <<__OutOnly("KindOfString")>>
+                                <<__OutOnly>>
                                 inout string $currency,
                                 inout mixed $position): mixed;
 

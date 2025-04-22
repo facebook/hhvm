@@ -31,7 +31,7 @@ function grapheme_extract(string $haystack,
                           int $size,
                           int $extract_type,
                           int $start,
-                          <<__OutOnly("KindOfInt64")>>
+                          <<__OutOnly>>
                           inout int $next): mixed;
 
 /**

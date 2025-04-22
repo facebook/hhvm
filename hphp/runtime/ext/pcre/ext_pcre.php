@@ -17,7 +17,7 @@ function preg_filter(mixed $pattern,
                      mixed $replacement,
                      mixed $subject,
                      int $limit,
-                     <<__OutOnly("KindOfInt64")>>
+                     <<__OutOnly>>
                      inout int $count): mixed;
 
 /**
@@ -262,7 +262,7 @@ function preg_replace_callback(
   (function(darray<arraykey, string>)[_]: string) $callback,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
+  <<__OutOnly>>
   inout int $count,
 )[ctx $callback]: mixed;
 
@@ -279,7 +279,7 @@ function preg_replace_callback_with_error(
   (function(darray<arraykey, string>)[_]: string) $callback,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
+  <<__OutOnly>>
   inout int $count,
   inout ?int $error,
 )[ctx $callback]: mixed;
@@ -318,7 +318,7 @@ function preg_replace_callback_with_error(
 function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      mixed $subject,
                                      int $limit,
-                                     <<__OutOnly("KindOfInt64")>>
+                                     <<__OutOnly>>
                                      inout int $count)[defaults]: mixed;
 
 /**
@@ -333,7 +333,7 @@ function preg_replace_callback_array_with_error(
   mixed $patterns_and_callbacks,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
+  <<__OutOnly>>
   inout int $count,
   inout ?int $error,
 )[defaults]: mixed;
@@ -414,7 +414,7 @@ function preg_replace_with_count(mixed $pattern,
                                  mixed $replacement,
                                  mixed $subject,
                                  int $limit,
-                                 <<__OutOnly("KindOfInt64")>>
+                                 <<__OutOnly>>
                                  inout int $count)[]: mixed;
 
 /**
@@ -430,7 +430,7 @@ function preg_replace_with_count_and_error(
   mixed $replacement,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
+  <<__OutOnly>>
   inout int $count,
   inout ?int $error,
 )[]: mixed;

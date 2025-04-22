@@ -105,7 +105,7 @@ function apc_store_with_pure_sleep(mixed $key_or_array,
  */
 <<__Native>>
 function apc_fetch(mixed $key,
-                   <<__OutOnly("KindOfBoolean")>> inout bool $success)[defaults]: mixed;
+                   <<__OutOnly>> inout bool $success)[defaults]: mixed;
 
 /**
  * Similar to apc_fetch but requires that any deserialized objects' __wakeup
@@ -114,7 +114,7 @@ function apc_fetch(mixed $key,
 <<__Native>>
 function apc_fetch_with_pure_wakeup(
   mixed $key,
-  <<__OutOnly("KindOfBoolean")>> inout bool $success,
+  <<__OutOnly>> inout bool $success,
 )[read_globals]: mixed;
 
 /**
@@ -206,7 +206,7 @@ function apc_sma_info(bool $limited = false)[]: darray<arraykey, mixed> {
 <<__Native>>
 function apc_inc(string $key,
                  int $step,
-                 <<__OutOnly("KindOfBoolean")>>
+                 <<__OutOnly>>
                  inout bool $success)[globals]: mixed;
 
 /**
@@ -224,7 +224,7 @@ function apc_inc(string $key,
 <<__Native>>
 function apc_dec(string $key,
                  int $step,
-                 <<__OutOnly("KindOfBoolean")>>
+                 <<__OutOnly>>
                  inout bool $success)[globals]: mixed;
 
 /**

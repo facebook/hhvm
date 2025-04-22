@@ -357,7 +357,7 @@ function ftruncate(resource $handle, int $size): bool;
 <<__Native>>
 function flock(resource $handle,
                int $operation,
-               <<__OutOnly("KindOfBoolean")>>
+               <<__OutOnly>>
                inout bool $wouldblock): bool;
 
 /**

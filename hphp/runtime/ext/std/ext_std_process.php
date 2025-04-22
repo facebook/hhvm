@@ -31,9 +31,9 @@ function shell_exec(string $cmd): mixed;
  */
 <<__Native>>
 function exec(string $command,
-              <<__OutOnly("varray")>>
+              <<__OutOnly>>
               inout vec<string> $output,
-              <<__OutOnly("KindOfInt64")>>
+              <<__OutOnly>>
               inout int $return_var): string;
 
 /**
@@ -54,7 +54,7 @@ function exec(string $command,
  */
 <<__Native>>
 function passthru(string $command,
-                  <<__OutOnly("KindOfInt64")>>
+                  <<__OutOnly>>
                   inout int $return_var): void;
 
 /**
@@ -75,7 +75,7 @@ function passthru(string $command,
  */
 <<__Native>>
 function system(string $command,
-                <<__OutOnly("KindOfInt64")>>
+                <<__OutOnly>>
                 inout int $return_var): string;
 
 /**
@@ -123,7 +123,7 @@ function system(string $command,
 <<__Native>>
 function proc_open(string $cmd,
                    darray<int, mixed> $descriptorspec,
-                   <<__OutOnly("darray")>>
+                   <<__OutOnly>>
                    inout dict<int, resource> $pipes,
                    ?string $cwd = null,
                    mixed $env = null,

@@ -133,7 +133,7 @@ function pcntl_signal(int $signo,
 function pcntl_sigprocmask(
   int $how,
   varray<int> $set,
-  <<__OutOnly("varray")>>
+  <<__OutOnly>>
   inout vec<int> $oldset
 ): bool;
 
@@ -167,7 +167,7 @@ function pcntl_sigprocmask(
  */
 <<__Native>>
 function pcntl_wait(
-  <<__OutOnly("KindOfInt64")>>
+  <<__OutOnly>>
   inout int $status,
   int $options = 0
 ): int;
@@ -204,7 +204,7 @@ function pcntl_wait(
  */
 <<__Native>>
 function pcntl_waitpid(int $pid,
-                       <<__OutOnly("KindOfInt64")>>
+                       <<__OutOnly>>
                        inout int $status,
                        int $options = 0): int;
 

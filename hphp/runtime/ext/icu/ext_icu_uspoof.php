@@ -30,7 +30,7 @@ class SpoofChecker {
    */
   <<__Native>>
   public function isSuspicious(string $text,
-                               <<__OutOnly("KindOfInt64")>>
+                               <<__OutOnly>>
                                inout int $issuesFound): bool;
 
   /**
@@ -54,7 +54,7 @@ class SpoofChecker {
    */
   <<__Native>>
   public function areConfusable(string $s1, string $s2,
-                                <<__OutOnly("KindOfInt64")>>
+                                <<__OutOnly>>
                                 inout int $issuesFound): bool;
 
   /**

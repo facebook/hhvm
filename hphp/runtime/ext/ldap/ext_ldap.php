@@ -627,19 +627,19 @@ function ldap_next_reference(resource $link, resource $result_entry): mixed;
 <<__Native>>
 function ldap_parse_reference(resource $link,
                               resource $result_entry,
-                              <<__OutOnly("varray")>>
+                              <<__OutOnly>>
                               inout vec<mixed> $referrals): bool;
 
 <<__Native>>
 function ldap_parse_result(resource $link,
                            resource $result,
-                           <<__OutOnly("KindOfInt64")>>
+                           <<__OutOnly>>
                            inout int $errcode,
-                           <<__OutOnly("KindOfString")>>
+                           <<__OutOnly>>
                            inout string $matcheddn,
-                           <<__OutOnly("KindOfString")>>
+                           <<__OutOnly>>
                            inout string $errmsg,
-                           <<__OutOnly("varray")>>
+                           <<__OutOnly>>
                            inout vec<mixed> $referrals): bool;
 
 /**
@@ -743,9 +743,9 @@ function ldap_control_paged_result(resource $link,
 <<__Native>>
 function ldap_control_paged_result_response(resource $link,
                                             resource $result,
-                                            <<__OutOnly("KindOfString")>>
+                                            <<__OutOnly>>
                                             inout string $cookie,
-                                            <<__OutOnly("KindOfInt64")>>
+                                            <<__OutOnly>>
                                             inout int $estimated): bool;
 
 /**

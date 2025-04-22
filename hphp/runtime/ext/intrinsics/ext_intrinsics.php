@@ -114,9 +114,9 @@ function builtin_io(
   mixed $m,
   inout mixed $mix,
   bool $retOrig,
-  <<__OutOnly("KindOfBoolean")>> inout bool $out1,
-  <<__OutOnly("varray")>> inout vec<mixed> $out2,
-  <<__OutOnly("KindOfObject")>> inout \stdClass $out3,
+  <<__OutOnly>> inout bool $out1,
+  <<__OutOnly>> inout vec<mixed> $out2,
+  <<__OutOnly>> inout \stdClass $out3,
 ): varray;
 
 <<__Native("NoFCallBuiltin")>>
@@ -130,9 +130,9 @@ function builtin_io_no_fca(
   mixed $m,
   inout mixed $mix,
   bool $retOrig,
-  <<__OutOnly("KindOfBoolean")>> inout bool $out1,
-  <<__OutOnly("varray")>> inout vec<mixed> $out2,
-  <<__OutOnly("KindOfObject")>> inout \stdClass $out3,
+  <<__OutOnly>> inout bool $out1,
+  <<__OutOnly>> inout vec<mixed> $out2,
+  <<__OutOnly>> inout \stdClass $out3,
 ): varray;
 
 /*

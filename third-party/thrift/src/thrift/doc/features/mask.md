@@ -116,6 +116,43 @@ Mask& mask = builder.toThrift();
 
 It also provides `MaskAdapter`, which adapts `Mask` to be `MaskBuilder` in a thrift struct.
 
+## DynamicMaskBuilder
+
+`DynamicMaskBuilder` serves as a wrapper for Thrift Mask, providing convenient methods for mask population. It does not provide type validation, and prefer to use `MaskBuilder` if the generated struct is known in advance.
+
+```cpp
+struct DynamicMaskBuilder {
+    // All methods for constructing Mask return itself to chain
+    DynamicMaskBuilder& reset_to_none();
+    DynamicMaskBuilder& reset_to_all();
+    DynamicMaskBuilder& invert();
+    Mask& toThrift();
+
+    DynamicMaskBuilder& includes(FieldPath ids, const Mask& mask = allMask());
+    DynamicMaskBuilder& includes_map_element(FieldPath ids, int64_t key, const Mask& mask = allMask());
+    DynamicMaskBuilder& includes_map_element(FieldPath ids, std::string key, const Mask& mask = allMask());
+    DynamicMaskBuilder& includes_type(FieldPath ids, type::Type type, const Mask& mask = allMask());
+
+    DynamicMaskBuilder& excludes(FieldPath ids, const Mask& mask = allMask());
+    DynamicMaskBuilder& excludes_map_element(FieldPath ids, int64_t key, const Mask& mask = allMask());
+    DynamicMaskBuilder& excludes_map_element(FieldPath ids, std::string key, const Mask& mask = allMask());
+    DynamicMaskBuilder& excludes_type(FieldPath ids, type::Type type, const Mask& mask = allMask());
+}
+```
+
+`DynamicMaskBuilder` can be used for the same `MyStruct` above as the following.
+
+```cpp
+// For inclusive mask, start with noneMask which masks no fields.
+// If started with allMask, all includes API is no-op since allMask already includes them.
+DynamicMaskBuilder builder(noneMask());
+builder.includes({FieldId{1}});
+builder.includes_map_element({FieldId{2}}, 42);
+builder.includes_map_element({FieldId{3}}, "myKey");
+builder.includes_type({FieldId{4}}, type::Type::get<type::struct_t<MyOtherStruct>>());
+Mask& mask = builder.toThrift();
+```
+
 ## Logical operators
 
 The following logical operators are available for mask construction:

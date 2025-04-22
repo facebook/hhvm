@@ -41,17 +41,20 @@ func encodeRequestPayload(
 	compression rpcmetadata.CompressionAlgorithm,
 	dataBytes []byte,
 ) (payload.Payload, error) {
-	metadata := rpcmetadata.NewRequestRpcMetadata()
-	metadata.SetName(&name)
 	rpcProtocolID, err := protocolIDToRPCProtocolID(protoID)
 	if err != nil {
 		return nil, err
 	}
-	metadata.SetProtocol(&rpcProtocolID)
-	metadata.SetKind(&rpcKind)
-	metadata.SetCompression(&compression)
-	metadata.OtherMetadata = make(map[string]string)
-	maps.Copy(metadata.OtherMetadata, headers)
+	headersCopy := make(map[string]string, len(headers))
+	maps.Copy(headersCopy, headers)
+
+	metadata := rpcmetadata.NewRequestRpcMetadata().
+		SetName(&name).
+		SetProtocol(&rpcProtocolID).
+		SetKind(&rpcKind).
+		SetCompression(&compression).
+		SetOtherMetadata(headersCopy)
+
 	metadataBytes, err := EncodeCompact(metadata)
 	if err != nil {
 		return nil, err

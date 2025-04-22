@@ -18,16 +18,20 @@
 
 from __future__ import annotations
 
+import types
+
 import unittest
 
 from typing import Type, TypeVar
 
 import python_test.refs.thrift_mutable_types as mutable_types
-import python_test.refs.thrift_types as immutable_ypes
+import python_test.refs.thrift_types as immutable_types
+import thrift.python.mutable_serializer as mutable_serializer
+import thrift.python.serializer as immutable_serializer
 
 from parameterized import parameterized_class
 
-from python_test.refs.thrift_types import ComplexRef as ComplexRefType
+from python_test.refs.thrift_types import Circular, ComplexRef as ComplexRefType
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
     _ThriftMapWrapper,
@@ -42,8 +46,11 @@ MapValue = TypeVar("MapValue")
 
 
 @parameterized_class(
-    ("test_types"),
-    [(immutable_ypes,), (mutable_types,)],
+    ("test_types", "serializer_module"),
+    [
+        (immutable_types, immutable_serializer),
+        (mutable_types, mutable_serializer),
+    ],
 )
 class RefTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -52,11 +59,14 @@ class RefTest(unittest.TestCase):
         pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
         behind `test_types`.
         """
-        # pyre-ignore[16]: has no attribute `sets_types`
+        # pyre-ignore[16]: has no attribute `test_types`
         self.ComplexRef: Type[ComplexRefType] = self.test_types.ComplexRef
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        self.Circular: Type[Circular] = self.test_types.Circular
+        # pyre-ignore[16]: has no attribute `serializer_module`
+        self.serializer: types.ModuleType = self.serializer_module
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -65,6 +75,25 @@ class RefTest(unittest.TestCase):
         self, map_data: dict[MapKey, MapValue]
     ) -> dict[MapKey, MapValue] | _ThriftMapWrapper:
         return to_thrift_map(map_data) if self.is_mutable_run else map_data
+
+    def test_circular(self) -> None:
+        # works whether `child` is specified or left defaulted
+        c = self.Circular(val="foo", child=self.Circular())
+        self.assertEqual(c.val, "foo")
+        c = c(child=c)
+        self.assertIsNotNone(c.child)
+        self.assertEqual(c.child.val, "foo")
+
+        # thrift mutable python fails on serialize with PyList check error
+        # if we rely on __call__ API
+        if self.is_mutable_run:
+            c = mutable_types.Circular(val="foo")
+            c.child = c
+            # if we proceed, will get stack overflow on serialize
+            return
+
+        buf = self.serializer.serialize(c)
+        self.assertEqual(self.serializer.deserialize(self.Circular, buf), c)
 
     def test_create_default(self) -> None:
         x = self.ComplexRef()

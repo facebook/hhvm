@@ -29,3 +29,11 @@ struct ComplexRef {
   10: optional set<ComplexRef> set_const_shared_ref;
   11: optional ComplexRef recursive;
 }
+
+struct Circular {
+  1: string val;
+  2: optional Circular child;
+  // This makes any init of struct fail with stack overflow
+  // from infinite recursion in `getStandardDefaultValueForType`
+  // 3: Circular unqualified_child;
+}

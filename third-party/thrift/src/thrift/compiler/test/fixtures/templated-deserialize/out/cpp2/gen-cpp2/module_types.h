@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct small_A;
 struct small_B;
@@ -121,8 +119,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldU);
 APACHE_THRIFT_DEFINE_ACCESSOR(fieldX);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -134,17 +131,12 @@ enum class MyEnumA {
   fieldC = 4,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::MyEnumA> :
+template<> struct std::hash<::cpp2::MyEnumA> :
   ::apache::thrift::detail::enum_hash<::cpp2::MyEnumA> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::MyEnumA>;
 
@@ -176,10 +168,7 @@ template <> struct TEnumTraits<::cpp2::MyEnumA> {
   static constexpr type max() { return type::fieldC; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {

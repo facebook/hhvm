@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct fieldA;
 struct fieldB;
@@ -91,8 +89,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fieldA);
 APACHE_THRIFT_DEFINE_ACCESSOR(fieldB);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace test::fixtures::tablebased {
@@ -103,17 +100,12 @@ enum class ExampleEnum {
   NONZERO = 123,
 };
 
-
-
 } // namespace test::fixtures::tablebased
 
-namespace std {
-template<> struct hash<::test::fixtures::tablebased::ExampleEnum> :
+template<> struct std::hash<::test::fixtures::tablebased::ExampleEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::tablebased::ExampleEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>;
 
@@ -145,10 +137,7 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
   static constexpr type max() { return type::NONZERO; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::tablebased {
@@ -1416,7 +1405,7 @@ unsigned long ExampleUnion::read(Protocol_* iprot) {
 
 } // namespace test::fixtures::tablebased
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type>;
 
@@ -1436,10 +1425,8 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleUnion::Type>
     return ret.data();
   }
 };
-}} // apache::thrift
-namespace apache {
-namespace thrift {
-namespace detail {
+} // namespace apache::thrift
+namespace apache::thrift::detail {
 template <>
 struct TypeToInfo<
     ::apache::thrift::type_class::structure,
@@ -1464,4 +1451,4 @@ struct TypeToInfo<
         ::test::fixtures::tablebased::ExampleEnum> {
     static const ::apache::thrift::detail::TypeInfo typeInfo;
   };
-}}} // namespace apache::thrift::detail
+} // namespace apache::thrift::detail

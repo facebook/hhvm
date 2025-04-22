@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct err_code;
 struct optional_blob;
@@ -301,8 +299,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace py3::simple {
@@ -316,16 +313,12 @@ enum class AnEnum {
   FOUR = 4,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AnEnumRenamed", "kind": "enum" } */
 enum class AnEnumRenamed {
   name = 0,
   value = 1,
   normal = 2,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "Flags", "kind": "enum" } */
 enum class Flags {
@@ -335,21 +328,16 @@ enum class Flags {
   flag_D = 8,
 };
 
-
-
 } // namespace py3::simple
 
-namespace std {
-template<> struct hash<::py3::simple::AnEnum> :
+template<> struct std::hash<::py3::simple::AnEnum> :
   ::apache::thrift::detail::enum_hash<::py3::simple::AnEnum> {};
-template<> struct hash<::py3::simple::AnEnumRenamed> :
+template<> struct std::hash<::py3::simple::AnEnumRenamed> :
   ::apache::thrift::detail::enum_hash<::py3::simple::AnEnumRenamed> {};
-template<> struct hash<::py3::simple::Flags> :
+template<> struct std::hash<::py3::simple::Flags> :
   ::apache::thrift::detail::enum_hash<::py3::simple::Flags> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::py3::simple::AnEnum>;
 
@@ -381,7 +369,6 @@ template <> struct TEnumTraits<::py3::simple::AnEnum> {
   static constexpr type max() { return type::FOUR; }
 };
 
-
 template <> struct TEnumDataStorage<::py3::simple::AnEnumRenamed>;
 
 template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
@@ -411,7 +398,6 @@ template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   static constexpr type min() { return type::name; }
   static constexpr type max() { return type::normal; }
 };
-
 
 template <> struct TEnumDataStorage<::py3::simple::Flags>;
 
@@ -443,10 +429,7 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
   static constexpr type max() { return type::flag_D; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace py3::simple {
@@ -4793,7 +4776,7 @@ unsigned long AdaptedTypedefFields::read(Protocol_* iprot) {
 
 } // namespace py3::simple
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type>;
 
@@ -4832,4 +4815,4 @@ template <> struct TEnumTraits<::py3::simple::BinaryUnion::Type> {
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

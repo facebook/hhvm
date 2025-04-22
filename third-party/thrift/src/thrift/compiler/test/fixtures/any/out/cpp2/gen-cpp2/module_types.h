@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct myString;
 struct myString;
@@ -31,11 +29,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myString);
 APACHE_THRIFT_DEFINE_ACCESSOR(myString);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
-
 // END declare_enums
 // BEGIN forward_declare
 namespace facebook::thrift::compiler::test::fixtures::any {
@@ -627,7 +623,7 @@ unsigned long MyException::read(Protocol_* iprot) {
 
 } // namespace facebook::thrift::compiler::test::fixtures::any
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>;
 
@@ -647,4 +643,4 @@ template <> struct TEnumTraits<::facebook::thrift::compiler::test::fixtures::any
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

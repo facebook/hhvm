@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct useless_field;
 struct i;
@@ -36,8 +34,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(s);
 APACHE_THRIFT_DEFINE_ACCESSOR(message);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -47,17 +44,12 @@ enum class B {
   HELLO = 0,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::B> :
+template<> struct std::hash<::cpp2::B> :
   ::apache::thrift::detail::enum_hash<::cpp2::B> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::B>;
 
@@ -89,10 +81,7 @@ template <> struct TEnumTraits<::cpp2::B> {
   static constexpr type max() { return type::HELLO; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {
@@ -734,7 +723,7 @@ unsigned long Bang::read(Protocol_* iprot) {
 
 } // namespace cpp2
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::U::Type>;
 
@@ -754,4 +743,4 @@ template <> struct TEnumTraits<::cpp2::U::Type> {
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

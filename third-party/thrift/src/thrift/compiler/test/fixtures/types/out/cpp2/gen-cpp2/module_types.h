@@ -4,15 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/included_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct field;
 struct fieldA;
@@ -332,8 +330,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(UintTypedef_field);
 APACHE_THRIFT_DEFINE_ACCESSOR(__field);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace apache::thrift::fixtures::types {
@@ -346,7 +343,6 @@ enum class has_bitwise_ops {
   two = 4,
   three = 8,
 };
-
 inline constexpr has_bitwise_ops operator&(has_bitwise_ops a, has_bitwise_ops b) {
   using E = has_bitwise_ops;
   using U = std::underlying_type_t<E>;
@@ -379,14 +375,11 @@ inline constexpr has_bitwise_ops operator~(has_bitwise_ops a) {
   using U = std::underlying_type_t<E>;
   return static_cast<E>(~static_cast<U>(a));
 }
-
 /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "name": "is_unscoped", "kind": "enum" } */
 enum is_unscoped : int {
   hello = 0,
   world = 1,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "name": "MyForwardRefEnum", "kind": "enum" } */
 enum class MyForwardRefEnum {
@@ -394,21 +387,16 @@ enum class MyForwardRefEnum {
   NONZERO = 12,
 };
 
-
-
 } // namespace apache::thrift::fixtures::types
 
-namespace std {
-template<> struct hash<::apache::thrift::fixtures::types::has_bitwise_ops> :
+template<> struct std::hash<::apache::thrift::fixtures::types::has_bitwise_ops> :
   ::apache::thrift::detail::enum_hash<::apache::thrift::fixtures::types::has_bitwise_ops> {};
-template<> struct hash<::apache::thrift::fixtures::types::is_unscoped> :
+template<> struct std::hash<::apache::thrift::fixtures::types::is_unscoped> :
   ::apache::thrift::detail::enum_hash<::apache::thrift::fixtures::types::is_unscoped> {};
-template<> struct hash<::apache::thrift::fixtures::types::MyForwardRefEnum> :
+template<> struct std::hash<::apache::thrift::fixtures::types::MyForwardRefEnum> :
   ::apache::thrift::detail::enum_hash<::apache::thrift::fixtures::types::MyForwardRefEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>;
 
@@ -440,7 +428,6 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_op
   static constexpr type max() { return type::three; }
 };
 
-
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>;
 
 template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
@@ -470,7 +457,6 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
   static constexpr type min() { return type::hello; }
   static constexpr type max() { return type::world; }
 };
-
 
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>;
 
@@ -502,10 +488,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
   static constexpr type max() { return type::NONZERO; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace apache::thrift::fixtures::types {

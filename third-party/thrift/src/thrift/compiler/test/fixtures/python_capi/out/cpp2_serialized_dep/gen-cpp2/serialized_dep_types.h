@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct s;
 struct i;
@@ -106,11 +104,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(os);
 APACHE_THRIFT_DEFINE_ACCESSOR(rs);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
-
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::python_capi {
@@ -1963,7 +1959,7 @@ unsigned long MarshalError::read(Protocol_* iprot) {
 
 } // namespace test::fixtures::python_capi
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::SerializedUnion::Type>;
 
@@ -2002,4 +1998,4 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MarshalUnion::Type
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

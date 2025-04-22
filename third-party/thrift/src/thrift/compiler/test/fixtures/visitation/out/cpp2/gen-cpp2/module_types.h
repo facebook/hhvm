@@ -4,17 +4,15 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_B_types.h"
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_C_types.h"
 #include "thrift/test/fatal_custom_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct ui;
 struct ud;
@@ -794,8 +792,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 APACHE_THRIFT_DEFINE_ACCESSOR(fields);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace test_cpp2::cpp_reflection {
@@ -807,8 +804,6 @@ enum class enum1 {
   field2 = 2,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "name": "enum2", "kind": "enum" } */
 enum class enum2 {
   field0_2 = 0,
@@ -816,15 +811,11 @@ enum class enum2 {
   field2_2 = 2,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "name": "enum3", "kind": "enum" } */
 enum class enum3 {
   field0_3 = 0,
   field1_3 = 1,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "name": "enum_with_special_names", "kind": "enum" } */
 enum class enum_with_special_names {
@@ -858,23 +849,18 @@ enum class enum_with_special_names {
   fields = 27,
 };
 
-
-
 } // namespace test_cpp2::cpp_reflection
 
-namespace std {
-template<> struct hash<::test_cpp2::cpp_reflection::enum1> :
+template<> struct std::hash<::test_cpp2::cpp_reflection::enum1> :
   ::apache::thrift::detail::enum_hash<::test_cpp2::cpp_reflection::enum1> {};
-template<> struct hash<::test_cpp2::cpp_reflection::enum2> :
+template<> struct std::hash<::test_cpp2::cpp_reflection::enum2> :
   ::apache::thrift::detail::enum_hash<::test_cpp2::cpp_reflection::enum2> {};
-template<> struct hash<::test_cpp2::cpp_reflection::enum3> :
+template<> struct std::hash<::test_cpp2::cpp_reflection::enum3> :
   ::apache::thrift::detail::enum_hash<::test_cpp2::cpp_reflection::enum3> {};
-template<> struct hash<::test_cpp2::cpp_reflection::enum_with_special_names> :
+template<> struct std::hash<::test_cpp2::cpp_reflection::enum_with_special_names> :
   ::apache::thrift::detail::enum_hash<::test_cpp2::cpp_reflection::enum_with_special_names> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>;
 
@@ -906,7 +892,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum1> {
   static constexpr type max() { return type::field2; }
 };
 
-
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>;
 
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
@@ -936,7 +921,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
   static constexpr type min() { return type::field0_2; }
   static constexpr type max() { return type::field2_2; }
 };
-
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>;
 
@@ -968,7 +952,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
   static constexpr type max() { return type::field1_3; }
 };
 
-
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>;
 
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names> {
@@ -999,10 +982,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_na
   static constexpr type max() { return type::fields; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace test_cpp2::cpp_reflection {
@@ -11988,7 +11968,7 @@ unsigned long struct_with_special_names::read(Protocol_* iprot) {
 
 } // namespace test_cpp2::cpp_reflection
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>;
 
@@ -12084,4 +12064,4 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::union_with_special_n
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

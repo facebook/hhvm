@@ -4,16 +4,14 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct i32Field;
 struct strField;
@@ -88,8 +86,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(opt_shared_const_field);
 APACHE_THRIFT_DEFINE_ACCESSOR(boxed_field);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace some::ns {
@@ -99,17 +96,12 @@ enum class EnumB {
   EMPTY = 1,
 };
 
-
-
 } // namespace some::ns
 
-namespace std {
-template<> struct hash<::some::ns::EnumB> :
+template<> struct std::hash<::some::ns::EnumB> :
   ::apache::thrift::detail::enum_hash<::some::ns::EnumB> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::some::ns::EnumB>;
 
@@ -141,10 +133,7 @@ template <> struct TEnumTraits<::some::ns::EnumB> {
   static constexpr type max() { return type::EMPTY; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace some::ns {

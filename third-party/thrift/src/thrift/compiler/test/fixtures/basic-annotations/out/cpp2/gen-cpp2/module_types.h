@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct name;
 struct majorVer;
@@ -76,8 +74,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(id);
 APACHE_THRIFT_DEFINE_ACCESSOR(password);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -89,17 +86,12 @@ enum class YourEnum {
   REALM = 2,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::YourEnum> :
+template<> struct std::hash<::cpp2::YourEnum> :
   ::apache::thrift::detail::enum_hash<::cpp2::YourEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::YourEnum>;
 
@@ -131,10 +123,7 @@ template <> struct TEnumTraits<::cpp2::YourEnum> {
   static constexpr type max() { return type::REALM; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {
@@ -1393,7 +1382,7 @@ unsigned long SecretStruct::read(Protocol_* iprot) {
 
 } // namespace cpp2
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::detail::YourUnion::Type>;
 
@@ -1413,4 +1402,4 @@ template <> struct TEnumTraits<::cpp2::detail::YourUnion::Type> {
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

@@ -4,15 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct injected_field;
 struct injected_field;
@@ -57,11 +55,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(injected_structured_annotation_field);
 APACHE_THRIFT_DEFINE_ACCESSOR(injected_unstructured_annotation_field);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
-
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {

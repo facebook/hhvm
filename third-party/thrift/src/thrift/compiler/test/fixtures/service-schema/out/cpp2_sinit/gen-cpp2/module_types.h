@@ -4,15 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct name;
 struct result;
@@ -27,8 +25,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(name);
 APACHE_THRIFT_DEFINE_ACCESSOR(result);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -40,17 +37,12 @@ enum class Result {
   GOOD = 2,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::Result> :
+template<> struct std::hash<::cpp2::Result> :
   ::apache::thrift::detail::enum_hash<::cpp2::Result> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::Result>;
 
@@ -82,10 +74,7 @@ template <> struct TEnumTraits<::cpp2::Result> {
   static constexpr type max() { return type::GOOD; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {

@@ -25,24 +25,19 @@ enum {{^enum:self.cpp_is_unscoped}}class {{/enum:self.cpp_is_unscoped}}{{enum:se
   {{enum_value:self.cpp_name}} = {{enum_value:value}},
 {{/enum:values}}
 };
-
 {{#enum:self.cpp_declare_bitwise_ops}}
 {{> module_types_h/enum_bitwise_ops}}
 {{/enum:self.cpp_declare_bitwise_ops}}
-
 {{/program:enums}}
 
 } // namespace {{program:qualified_namespace}}
 
-namespace std {
 {{#program:enums}}
-template<> struct hash<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> :
+template<> struct std::hash<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> :
   ::apache::thrift::detail::enum_hash<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {};
 {{/program:enums}}
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 {{#program:enums}}
 
 template <> struct TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>;
@@ -76,11 +71,8 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cp
   static constexpr type max() { return type::{{enum:self.cpp_max}}; }
   {{/if (not (array.empty? enum:self.values))}}
 };
-
 {{/program:enums}}
 
-}} // apache::thrift
-
+} // namespace apache::thrift
 {{/program:enums?}}
-
 // END declare_enums

@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct field;
 struct list_field;
@@ -96,8 +94,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(bar_field);
 APACHE_THRIFT_DEFINE_ACCESSOR(adapted_list_field);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace facebook::thrift::test {
@@ -108,17 +105,12 @@ enum class Enum {
   second = 2,
 };
 
-
-
 } // namespace facebook::thrift::test
 
-namespace std {
-template<> struct hash<::facebook::thrift::test::Enum> :
+template<> struct std::hash<::facebook::thrift::test::Enum> :
   ::apache::thrift::detail::enum_hash<::facebook::thrift::test::Enum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::Enum>;
 
@@ -150,10 +142,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::Enum> {
   static constexpr type max() { return type::second; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace facebook::thrift::test {

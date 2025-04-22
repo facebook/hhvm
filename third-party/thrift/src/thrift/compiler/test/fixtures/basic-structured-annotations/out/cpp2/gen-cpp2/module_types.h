@@ -4,16 +4,14 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/included_types.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/namespaced_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct count;
 struct name;
@@ -98,8 +96,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(first);
 APACHE_THRIFT_DEFINE_ACCESSOR(second);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace test::fixtures::basic-structured-annotations {
@@ -110,17 +107,12 @@ enum class MyEnum {
   ONE = 1,
 };
 
-
-
 } // namespace test::fixtures::basic-structured-annotations
 
-namespace std {
-template<> struct hash<::test::fixtures::basic-structured-annotations::MyEnum> :
+template<> struct std::hash<::test::fixtures::basic-structured-annotations::MyEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::basic-structured-annotations::MyEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>;
 
@@ -152,10 +144,7 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
   static constexpr type max() { return type::ONE; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::basic-structured-annotations {
@@ -2086,7 +2075,7 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 
 } // namespace test::fixtures::basic-structured-annotations
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>;
 
@@ -2106,4 +2095,4 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

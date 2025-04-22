@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct anInteger;
 struct aString;
@@ -301,8 +299,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(unique_string_ref);
 APACHE_THRIFT_DEFINE_ACCESSOR(shared_string_ref);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -313,27 +310,20 @@ enum class MyEnum {
   One = 1,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "TypedEnum", "kind": "enum" } */
 enum class TypedEnum : ::std::int16_t {
   VAL1 = 0,
   VAL2 = 1,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::MyEnum> :
+template<> struct std::hash<::cpp2::MyEnum> :
   ::apache::thrift::detail::enum_hash<::cpp2::MyEnum> {};
-template<> struct hash<::cpp2::TypedEnum> :
+template<> struct std::hash<::cpp2::TypedEnum> :
   ::apache::thrift::detail::enum_hash<::cpp2::TypedEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::MyEnum>;
 
@@ -365,7 +355,6 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
   static constexpr type max() { return type::One; }
 };
 
-
 template <> struct TEnumDataStorage<::cpp2::TypedEnum>;
 
 template <> struct TEnumTraits<::cpp2::TypedEnum> {
@@ -396,10 +385,7 @@ template <> struct TEnumTraits<::cpp2::TypedEnum> {
   static constexpr type max() { return type::VAL2; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {
@@ -5417,7 +5403,7 @@ unsigned long StructWithString::read(Protocol_* iprot) {
 
 } // namespace cpp2
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::MyUnion::Type>;
 
@@ -5456,4 +5442,4 @@ template <> struct TEnumTraits<::cpp2::NonTriviallyDestructibleUnion::Type> {
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

@@ -16,7 +16,7 @@
 
 }}{{#program:unions?}}
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 {{#program:structs}}{{#struct:union?}}
 
 template <> struct TEnumDataStorage<{{struct:cpp_fullname}}::Type>;
@@ -38,5 +38,5 @@ template <> struct TEnumTraits<{{struct:cpp_fullname}}::Type> {
   }
 };
 {{/struct:union?}}{{/program:structs}}
-}} // apache::thrift
+} // namespace apache::thrift
 {{/program:unions?}}

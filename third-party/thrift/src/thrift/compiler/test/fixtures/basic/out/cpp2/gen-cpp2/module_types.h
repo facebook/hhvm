@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct MyIntField;
 struct MyStringField;
@@ -146,8 +144,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(reserved_field);
 APACHE_THRIFT_DEFINE_ACCESSOR(reserved_field);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace test::fixtures::basic {
@@ -158,27 +155,20 @@ enum class MyEnum {
   MyValue2 = 1,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "name": "HackEnum", "kind": "enum" } */
 enum class HackEnum {
   Value1 = 0,
   Value2 = 1,
 };
 
-
-
 } // namespace test::fixtures::basic
 
-namespace std {
-template<> struct hash<::test::fixtures::basic::MyEnum> :
+template<> struct std::hash<::test::fixtures::basic::MyEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::basic::MyEnum> {};
-template<> struct hash<::test::fixtures::basic::HackEnum> :
+template<> struct std::hash<::test::fixtures::basic::HackEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::basic::HackEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::basic::MyEnum>;
 
@@ -210,7 +200,6 @@ template <> struct TEnumTraits<::test::fixtures::basic::MyEnum> {
   static constexpr type max() { return type::MyValue2; }
 };
 
-
 template <> struct TEnumDataStorage<::test::fixtures::basic::HackEnum>;
 
 template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
@@ -241,10 +230,7 @@ template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
   static constexpr type max() { return type::Value2; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::basic {
@@ -2704,7 +2690,7 @@ unsigned long UnionToBeRenamed::read(Protocol_* iprot) {
 
 } // namespace test::fixtures::basic
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::basic::MyUnion::Type>;
 
@@ -2743,4 +2729,4 @@ template <> struct TEnumTraits<::test::fixtures::basic::UnionToBeRenamed::Type> 
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

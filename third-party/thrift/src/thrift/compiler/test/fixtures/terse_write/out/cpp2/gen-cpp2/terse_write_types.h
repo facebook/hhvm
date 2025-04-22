@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct bool_field;
 struct byte_field;
@@ -336,8 +334,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field3);
 APACHE_THRIFT_DEFINE_ACCESSOR(msg);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace facebook::thrift::test::terse_write {
@@ -348,17 +345,12 @@ enum class MyEnum {
   ME1 = 1,
 };
 
-
-
 } // namespace facebook::thrift::test::terse_write
 
-namespace std {
-template<> struct hash<::facebook::thrift::test::terse_write::MyEnum> :
+template<> struct std::hash<::facebook::thrift::test::terse_write::MyEnum> :
   ::apache::thrift::detail::enum_hash<::facebook::thrift::test::terse_write::MyEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>;
 
@@ -390,10 +382,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyEnum> {
   static constexpr type max() { return type::ME1; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace facebook::thrift::test::terse_write {
@@ -4432,7 +4421,7 @@ unsigned long TerseException::read(Protocol_* iprot) {
 
 } // namespace facebook::thrift::test::terse_write
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>;
 
@@ -4452,4 +4441,4 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::T
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

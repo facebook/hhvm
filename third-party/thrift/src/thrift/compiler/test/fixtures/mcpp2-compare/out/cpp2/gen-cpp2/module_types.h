@@ -4,16 +4,14 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
 #include <folly/small_vector.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct boolField;
 struct boolField;
@@ -793,8 +791,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(doubleSide);
 APACHE_THRIFT_DEFINE_ACCESSOR(intField);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace some::valid::ns {
@@ -806,15 +803,12 @@ enum class MyEnumA {
   fieldC = 4,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AnnotatedEnum", "kind": "enum" } */
 enum class AnnotatedEnum : ::std::uint32_t {
   FIELDA = 2,
   FIELDB = 4,
   FIELDC = 9,
 };
-
 inline constexpr AnnotatedEnum operator&(AnnotatedEnum a, AnnotatedEnum b) {
   using E = AnnotatedEnum;
   using U = std::underlying_type_t<E>;
@@ -847,14 +841,12 @@ inline constexpr AnnotatedEnum operator~(AnnotatedEnum a) {
   using U = std::underlying_type_t<E>;
   return static_cast<E>(~static_cast<U>(a));
 }
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AnnotatedEnum2", "kind": "enum" } */
 enum class AnnotatedEnum2 : ::std::int16_t {
   FIELDA = 2,
   FIELDB = 4,
   FIELDC = 9,
 };
-
 inline constexpr AnnotatedEnum2 operator&(AnnotatedEnum2 a, AnnotatedEnum2 b) {
   using E = AnnotatedEnum2;
   using U = std::underlying_type_t<E>;
@@ -887,29 +879,23 @@ inline constexpr AnnotatedEnum2 operator~(AnnotatedEnum2 a) {
   using U = std::underlying_type_t<E>;
   return static_cast<E>(~static_cast<U>(a));
 }
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "MyEnumB", "kind": "enum" } */
 enum class MyEnumB {
   AField = 0,
 };
 
-
-
 } // namespace some::valid::ns
 
-namespace std {
-template<> struct hash<::some::valid::ns::MyEnumA> :
+template<> struct std::hash<::some::valid::ns::MyEnumA> :
   ::apache::thrift::detail::enum_hash<::some::valid::ns::MyEnumA> {};
-template<> struct hash<::some::valid::ns::AnnotatedEnum> :
+template<> struct std::hash<::some::valid::ns::AnnotatedEnum> :
   ::apache::thrift::detail::enum_hash<::some::valid::ns::AnnotatedEnum> {};
-template<> struct hash<::some::valid::ns::AnnotatedEnum2> :
+template<> struct std::hash<::some::valid::ns::AnnotatedEnum2> :
   ::apache::thrift::detail::enum_hash<::some::valid::ns::AnnotatedEnum2> {};
-template<> struct hash<::some::valid::ns::MyEnumB> :
+template<> struct std::hash<::some::valid::ns::MyEnumB> :
   ::apache::thrift::detail::enum_hash<::some::valid::ns::MyEnumB> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumA>;
 
@@ -941,7 +927,6 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumA> {
   static constexpr type max() { return type::fieldC; }
 };
 
-
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum>;
 
 template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum> {
@@ -971,7 +956,6 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum> {
   static constexpr type min() { return type::FIELDA; }
   static constexpr type max() { return type::FIELDC; }
 };
-
 
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>;
 
@@ -1003,7 +987,6 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum2> {
   static constexpr type max() { return type::FIELDC; }
 };
 
-
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumB>;
 
 template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
@@ -1034,10 +1017,7 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
   static constexpr type max() { return type::AField; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace some::valid::ns {
@@ -10381,7 +10361,7 @@ unsigned long AllRequiredNoExceptMoveCtrStruct::read(Protocol_* iprot) {
 
 } // namespace some::valid::ns
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::some::valid::ns::SimpleUnion::Type>;
 
@@ -10439,4 +10419,4 @@ template <> struct TEnumTraits<::some::valid::ns::FloatUnion::Type> {
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

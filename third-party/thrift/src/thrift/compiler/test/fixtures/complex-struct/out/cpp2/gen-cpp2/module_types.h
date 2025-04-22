@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct myLongField;
 struct MyByteField;
@@ -746,8 +744,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_i32_map_list_i32_i32);
 APACHE_THRIFT_DEFINE_ACCESSOR(map_i32_map_list_struct_i32);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -761,17 +758,12 @@ enum class MyEnum {
   MyValue5 = 5,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::MyEnum> :
+template<> struct std::hash<::cpp2::MyEnum> :
   ::apache::thrift::detail::enum_hash<::cpp2::MyEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::MyEnum>;
 
@@ -803,10 +795,7 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
   static constexpr type max() { return type::MyValue5; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {
@@ -10825,7 +10814,7 @@ unsigned long Containers::read(Protocol_* iprot) {
 
 } // namespace cpp2
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::MyUnion::Type>;
 
@@ -10864,4 +10853,4 @@ template <> struct TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type> {
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

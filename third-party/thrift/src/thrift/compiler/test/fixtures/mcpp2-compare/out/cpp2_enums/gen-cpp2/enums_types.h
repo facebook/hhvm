@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct fieldA;
 } // namespace ident
@@ -21,8 +19,7 @@ namespace detail {
 APACHE_THRIFT_DEFINE_ACCESSOR(fieldA);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace facebook::ns::qwerty {
@@ -32,54 +29,41 @@ enum class AnEnumA {
   FIELDA = 0,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumB", "kind": "enum" } */
 enum class AnEnumB {
   FIELDA = 0,
   FIELDB = 2,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumC", "kind": "enum" } */
 enum class AnEnumC {
   FIELDC = 0,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumD", "kind": "enum" } */
 enum class AnEnumD {
   FIELDD = 0,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/enums.thrift", "name": "AnEnumE", "kind": "enum" } */
 enum class AnEnumE {
   FIELDA = 0,
 };
 
-
-
 } // namespace facebook::ns::qwerty
 
-namespace std {
-template<> struct hash<::facebook::ns::qwerty::AnEnumA> :
+template<> struct std::hash<::facebook::ns::qwerty::AnEnumA> :
   ::apache::thrift::detail::enum_hash<::facebook::ns::qwerty::AnEnumA> {};
-template<> struct hash<::facebook::ns::qwerty::AnEnumB> :
+template<> struct std::hash<::facebook::ns::qwerty::AnEnumB> :
   ::apache::thrift::detail::enum_hash<::facebook::ns::qwerty::AnEnumB> {};
-template<> struct hash<::facebook::ns::qwerty::AnEnumC> :
+template<> struct std::hash<::facebook::ns::qwerty::AnEnumC> :
   ::apache::thrift::detail::enum_hash<::facebook::ns::qwerty::AnEnumC> {};
-template<> struct hash<::facebook::ns::qwerty::AnEnumD> :
+template<> struct std::hash<::facebook::ns::qwerty::AnEnumD> :
   ::apache::thrift::detail::enum_hash<::facebook::ns::qwerty::AnEnumD> {};
-template<> struct hash<::facebook::ns::qwerty::AnEnumE> :
+template<> struct std::hash<::facebook::ns::qwerty::AnEnumE> :
   ::apache::thrift::detail::enum_hash<::facebook::ns::qwerty::AnEnumE> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>;
 
@@ -111,7 +95,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumA> {
   static constexpr type max() { return type::FIELDA; }
 };
 
-
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>;
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
@@ -141,7 +124,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
   static constexpr type min() { return type::FIELDA; }
   static constexpr type max() { return type::FIELDB; }
 };
-
 
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>;
 
@@ -173,7 +155,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumC> {
   static constexpr type max() { return type::FIELDC; }
 };
 
-
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>;
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
@@ -203,7 +184,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
   static constexpr type min() { return type::FIELDD; }
   static constexpr type max() { return type::FIELDD; }
 };
-
 
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>;
 
@@ -235,10 +215,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
   static constexpr type max() { return type::FIELDA; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace facebook::ns::qwerty {

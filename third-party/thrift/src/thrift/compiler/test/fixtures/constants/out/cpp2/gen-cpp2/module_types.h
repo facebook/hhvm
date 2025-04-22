@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct weeks;
 struct title;
@@ -141,8 +139,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(s);
 APACHE_THRIFT_DEFINE_ACCESSOR(u);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -151,8 +148,6 @@ namespace cpp2 {
 enum class EmptyEnum {
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "City", "kind": "enum" } */
 enum class City {
   NYC = 0,
@@ -160,8 +155,6 @@ enum class City {
   SEA = 2,
   LON = 3,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift", "name": "Company", "kind": "enum" } */
 enum class Company {
@@ -172,21 +165,16 @@ enum class Company {
   __FRIEND__FEED = 4,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::EmptyEnum> :
+template<> struct std::hash<::cpp2::EmptyEnum> :
   ::apache::thrift::detail::enum_hash<::cpp2::EmptyEnum> {};
-template<> struct hash<::cpp2::City> :
+template<> struct std::hash<::cpp2::City> :
   ::apache::thrift::detail::enum_hash<::cpp2::City> {};
-template<> struct hash<::cpp2::Company> :
+template<> struct std::hash<::cpp2::Company> :
   ::apache::thrift::detail::enum_hash<::cpp2::Company> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::EmptyEnum>;
 
@@ -215,7 +203,6 @@ template <> struct TEnumTraits<::cpp2::EmptyEnum> {
     return ret.data();
   }
 };
-
 
 template <> struct TEnumDataStorage<::cpp2::City>;
 
@@ -247,7 +234,6 @@ template <> struct TEnumTraits<::cpp2::City> {
   static constexpr type max() { return type::LON; }
 };
 
-
 template <> struct TEnumDataStorage<::cpp2::Company>;
 
 template <> struct TEnumTraits<::cpp2::Company> {
@@ -278,10 +264,7 @@ template <> struct TEnumTraits<::cpp2::Company> {
   static constexpr type max() { return type::__FRIEND__FEED; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {
@@ -2659,7 +2642,7 @@ unsigned long union2::read(Protocol_* iprot) {
 
 } // namespace cpp2
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::union1::Type>;
 
@@ -2698,4 +2681,4 @@ template <> struct TEnumTraits<::cpp2::union2::Type> {
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

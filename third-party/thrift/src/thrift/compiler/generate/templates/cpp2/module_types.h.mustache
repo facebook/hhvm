@@ -16,14 +16,13 @@
 
 }}
 {{> Autogen}}
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
 {{#program:frozen?}}
 #include <thrift/lib/cpp/Frozen.h>
 {{/program:frozen?}}
-
 {{#program:thrift_includes}}
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 {{/program:thrift_includes}}
@@ -32,8 +31,7 @@
 {{/program:cpp_includes}}
 
 {{#program:structs?}}
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 {{#program:structs}}
 {{#struct:fields}}
@@ -51,8 +49,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR({{field:cpp_name}});
 {{/struct:fields}}
 {{/program:structs}}
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 {{/program:structs?}}
 {{> module_types_h/declare_enums}}
@@ -386,9 +383,7 @@ using {{struct:cpp_name}} = {{struct:cpp_underlying_type}};
 {{> module_types_h/declare_union_types}}{{!
 
 }}{{#program:tablebased?}}
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 {{#program:structs}}
 template <>
 struct TypeToInfo<
@@ -405,5 +400,5 @@ struct TypeToInfo<
     static const ::apache::thrift::detail::TypeInfo typeInfo;
   };
 {{/program:enums}}
-}}} // namespace apache::thrift::detail
+} // namespace apache::thrift::detail
 {{/program:tablebased?}}

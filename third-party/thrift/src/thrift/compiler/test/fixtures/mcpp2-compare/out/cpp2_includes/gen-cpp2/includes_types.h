@@ -4,15 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "folly/sorted_vector_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct FieldA;
 struct FieldA;
@@ -27,8 +25,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(FieldA);
 APACHE_THRIFT_DEFINE_ACCESSOR(FieldA);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace a::different::ns {
@@ -39,17 +36,12 @@ enum class AnEnum {
   FIELDB = 4,
 };
 
-
-
 } // namespace a::different::ns
 
-namespace std {
-template<> struct hash<::a::different::ns::AnEnum> :
+template<> struct std::hash<::a::different::ns::AnEnum> :
   ::apache::thrift::detail::enum_hash<::a::different::ns::AnEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::a::different::ns::AnEnum>;
 
@@ -81,10 +73,7 @@ template <> struct TEnumTraits<::a::different::ns::AnEnum> {
   static constexpr type max() { return type::FIELDB; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace a::different::ns {

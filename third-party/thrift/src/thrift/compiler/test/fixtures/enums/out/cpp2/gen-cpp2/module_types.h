@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct reasonable;
 struct fine;
@@ -56,8 +54,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(me1_t1);
 APACHE_THRIFT_DEFINE_ACCESSOR(me1_t2);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace test::fixtures::enums {
@@ -70,8 +67,6 @@ enum class Metasyntactic {
   BAX = 4,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum1", "kind": "enum" } */
 enum class MyEnum1 {
   ME1_0 = 0,
@@ -82,16 +77,12 @@ enum class MyEnum1 {
   ME1_6 = 6,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum2", "kind": "enum" } */
 enum class MyEnum2 {
   ME2_0 = 0,
   ME2_1 = 1,
   ME2_2 = 2,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum3", "kind": "enum" } */
 enum class MyEnum3 {
@@ -103,8 +94,6 @@ enum class MyEnum3 {
   ME3_10 = 10,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyEnum4", "kind": "enum" } */
 enum class MyEnum4 {
   ME4_A = 2147483645,
@@ -113,15 +102,12 @@ enum class MyEnum4 {
   ME4_D = -2147483648,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyBitmaskEnum1", "kind": "enum" } */
 enum class MyBitmaskEnum1 {
   ONE = 1,
   TWO = 2,
   FOUR = 4,
 };
-
 inline constexpr MyBitmaskEnum1 operator&(MyBitmaskEnum1 a, MyBitmaskEnum1 b) {
   using E = MyBitmaskEnum1;
   using U = std::underlying_type_t<E>;
@@ -154,14 +140,12 @@ inline constexpr MyBitmaskEnum1 operator~(MyBitmaskEnum1 a) {
   using U = std::underlying_type_t<E>;
   return static_cast<E>(~static_cast<U>(a));
 }
-
 /** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "MyBitmaskEnum2", "kind": "enum" } */
 enum class MyBitmaskEnum2 {
   ONE = 1,
   TWO = 2,
   FOUR = 4,
 };
-
 inline constexpr MyBitmaskEnum2 operator&(MyBitmaskEnum2 a, MyBitmaskEnum2 b) {
   using E = MyBitmaskEnum2;
   using U = std::underlying_type_t<E>;
@@ -194,28 +178,24 @@ inline constexpr MyBitmaskEnum2 operator~(MyBitmaskEnum2 a) {
   using U = std::underlying_type_t<E>;
   return static_cast<E>(~static_cast<U>(a));
 }
-
 } // namespace test::fixtures::enums
 
-namespace std {
-template<> struct hash<::test::fixtures::enums::Metasyntactic> :
+template<> struct std::hash<::test::fixtures::enums::Metasyntactic> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enums::Metasyntactic> {};
-template<> struct hash<::test::fixtures::enums::MyEnum1> :
+template<> struct std::hash<::test::fixtures::enums::MyEnum1> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enums::MyEnum1> {};
-template<> struct hash<::test::fixtures::enums::MyEnum2> :
+template<> struct std::hash<::test::fixtures::enums::MyEnum2> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enums::MyEnum2> {};
-template<> struct hash<::test::fixtures::enums::MyEnum3> :
+template<> struct std::hash<::test::fixtures::enums::MyEnum3> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enums::MyEnum3> {};
-template<> struct hash<::test::fixtures::enums::MyEnum4> :
+template<> struct std::hash<::test::fixtures::enums::MyEnum4> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enums::MyEnum4> {};
-template<> struct hash<::test::fixtures::enums::MyBitmaskEnum1> :
+template<> struct std::hash<::test::fixtures::enums::MyBitmaskEnum1> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enums::MyBitmaskEnum1> {};
-template<> struct hash<::test::fixtures::enums::MyBitmaskEnum2> :
+template<> struct std::hash<::test::fixtures::enums::MyBitmaskEnum2> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enums::MyBitmaskEnum2> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::enums::Metasyntactic>;
 
@@ -247,7 +227,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   static constexpr type max() { return type::BAX; }
 };
 
-
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum1>;
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
@@ -277,7 +256,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
   static constexpr type min() { return type::ME1_0; }
   static constexpr type max() { return type::ME1_6; }
 };
-
 
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum2>;
 
@@ -309,7 +287,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
   static constexpr type max() { return type::ME2_2; }
 };
 
-
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum3>;
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
@@ -339,7 +316,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
   static constexpr type min() { return type::ME3_N2; }
   static constexpr type max() { return type::ME3_10; }
 };
-
 
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum4>;
 
@@ -371,7 +347,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   static constexpr type max() { return type::ME4_C; }
 };
 
-
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>;
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
@@ -401,7 +376,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   static constexpr type min() { return type::ONE; }
   static constexpr type max() { return type::FOUR; }
 };
-
 
 template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>;
 
@@ -433,10 +407,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
   static constexpr type max() { return type::FOUR; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::enums {

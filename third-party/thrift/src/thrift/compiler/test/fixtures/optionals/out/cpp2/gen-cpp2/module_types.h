@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct red;
 struct green;
@@ -111,8 +109,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(afraidOfAnimal);
 APACHE_THRIFT_DEFINE_ACCESSOR(vehicles);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace cpp2 {
@@ -124,17 +121,12 @@ enum class Animal {
   TARANTULA = 3,
 };
 
-
-
 } // namespace cpp2
 
-namespace std {
-template<> struct hash<::cpp2::Animal> :
+template<> struct std::hash<::cpp2::Animal> :
   ::apache::thrift::detail::enum_hash<::cpp2::Animal> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::cpp2::Animal>;
 
@@ -166,10 +158,7 @@ template <> struct TEnumTraits<::cpp2::Animal> {
   static constexpr type max() { return type::TARANTULA; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {

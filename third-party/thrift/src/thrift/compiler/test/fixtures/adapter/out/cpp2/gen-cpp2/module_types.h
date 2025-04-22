@@ -4,15 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "adapter_dependency.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct signature;
 struct color;
@@ -497,8 +495,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(name);
 APACHE_THRIFT_DEFINE_ACCESSOR(field);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace facebook::thrift::test {
@@ -511,27 +508,20 @@ enum class Color {
   BLUE = 3,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "ThriftAdaptedEnum", "kind": "enum" } */
 enum class ThriftAdaptedEnum {
   Zero = 0,
   One = 1,
 };
 
-
-
 } // namespace facebook::thrift::test
 
-namespace std {
-template<> struct hash<::facebook::thrift::test::Color> :
+template<> struct std::hash<::facebook::thrift::test::Color> :
   ::apache::thrift::detail::enum_hash<::facebook::thrift::test::Color> {};
-template<> struct hash<::facebook::thrift::test::ThriftAdaptedEnum> :
+template<> struct std::hash<::facebook::thrift::test::ThriftAdaptedEnum> :
   ::apache::thrift::detail::enum_hash<::facebook::thrift::test::ThriftAdaptedEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::Color>;
 
@@ -563,7 +553,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::Color> {
   static constexpr type max() { return type::BLUE; }
 };
 
-
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>;
 
 template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
@@ -594,10 +583,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
   static constexpr type max() { return type::One; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace facebook::thrift::test {
@@ -8709,7 +8695,7 @@ using RenamedStructWithStructAdapterAndFieldAdapter = ::apache::thrift::adapt_de
 
 } // namespace facebook::thrift::test
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::Baz::Type>;
 
@@ -8748,4 +8734,4 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::T
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

@@ -4,11 +4,10 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/thrift_dep_types.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/serialized_dep_types.h"
 #include "thrift/lib/thrift/gen-cpp2/id_types.h"
@@ -23,8 +22,7 @@
 #include "thrift/test/python_capi/adapter.h"
 #include "thrift/lib/cpp2/util/ManagedStringView.h"
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct inty;
 struct stringy;
@@ -424,8 +422,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(iobuf_ptr);
 APACHE_THRIFT_DEFINE_ACCESSOR(iobufRef);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace test::fixtures::python_capi {
@@ -436,27 +433,20 @@ enum class MyEnum {
   MyValue2 = 1,
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "NormalDecentEnum", "kind": "enum" } */
 enum class NormalDecentEnum {
   l0O1 = 1,
   FuBaR = 2,
 };
 
-
-
 } // namespace test::fixtures::python_capi
 
-namespace std {
-template<> struct hash<::test::fixtures::python_capi::MyEnum> :
+template<> struct std::hash<::test::fixtures::python_capi::MyEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::python_capi::MyEnum> {};
-template<> struct hash<::test::fixtures::python_capi::NormalDecentEnum> :
+template<> struct std::hash<::test::fixtures::python_capi::NormalDecentEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::python_capi::NormalDecentEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::MyEnum>;
 
@@ -488,7 +478,6 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
   static constexpr type max() { return type::MyValue2; }
 };
 
-
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>;
 
 template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> {
@@ -519,10 +508,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> 
   static constexpr type max() { return type::FuBaR; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::python_capi {
@@ -6533,7 +6519,7 @@ unsigned long SomeBinary::read(Protocol_* iprot) {
 
 } // namespace test::fixtures::python_capi
 
-namespace apache { namespace thrift {
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type>;
 
@@ -6572,4 +6558,4 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type> 
     return ret.data();
   }
 };
-}} // apache::thrift
+} // namespace apache::thrift

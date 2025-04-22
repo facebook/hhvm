@@ -4,14 +4,12 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-
-
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct myEnum;
 struct myBigEnum;
@@ -26,8 +24,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myEnum);
 APACHE_THRIFT_DEFINE_ACCESSOR(myBigEnum);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
 namespace test::fixtures::enumstrict {
@@ -36,15 +33,11 @@ namespace test::fixtures::enumstrict {
 enum class EmptyEnum {
 };
 
-
-
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   ONE = 1,
   TWO = 2,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyUseIntrinsicDefaultEnum", "kind": "enum" } */
 enum class MyUseIntrinsicDefaultEnum {
@@ -52,8 +45,6 @@ enum class MyUseIntrinsicDefaultEnum {
   ONE = 1,
   TWO = 2,
 };
-
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyBigEnum", "kind": "enum" } */
 enum class MyBigEnum {
@@ -79,23 +70,18 @@ enum class MyBigEnum {
   NINETEEN = 19,
 };
 
-
-
 } // namespace test::fixtures::enumstrict
 
-namespace std {
-template<> struct hash<::test::fixtures::enumstrict::EmptyEnum> :
+template<> struct std::hash<::test::fixtures::enumstrict::EmptyEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::EmptyEnum> {};
-template<> struct hash<::test::fixtures::enumstrict::MyEnum> :
+template<> struct std::hash<::test::fixtures::enumstrict::MyEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::MyEnum> {};
-template<> struct hash<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> :
+template<> struct std::hash<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {};
-template<> struct hash<::test::fixtures::enumstrict::MyBigEnum> :
+template<> struct std::hash<::test::fixtures::enumstrict::MyBigEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::MyBigEnum> {};
-} // std
 
-namespace apache { namespace thrift {
-
+namespace apache::thrift {
 
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>;
 
@@ -124,7 +110,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
     return ret.data();
   }
 };
-
 
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>;
 
@@ -156,7 +141,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
   static constexpr type max() { return type::TWO; }
 };
 
-
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>;
 
 template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
@@ -186,7 +170,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefau
   static constexpr type min() { return type::ZERO; }
   static constexpr type max() { return type::TWO; }
 };
-
 
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>;
 
@@ -218,10 +201,7 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
   static constexpr type max() { return type::NINETEEN; }
 };
 
-
-}} // apache::thrift
-
-
+} // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::enumstrict {

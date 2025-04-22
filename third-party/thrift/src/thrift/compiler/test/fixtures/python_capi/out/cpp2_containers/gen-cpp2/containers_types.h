@@ -4,11 +4,10 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-
-
 #include <deque>
 #include <unordered_map>
 #include <unordered_set>
@@ -18,8 +17,7 @@
 #include <folly/small_vector.h>
 #include <thrift/test/python_capi/indirection.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct std_string;
 struct deque_string;
@@ -144,11 +142,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(lst);
 APACHE_THRIFT_DEFINE_ACCESSOR(lst);
 #endif
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 // BEGIN declare_enums
-
 // END declare_enums
 // BEGIN forward_declare
 namespace test::fixtures::python_capi {

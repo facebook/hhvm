@@ -368,76 +368,37 @@ void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
 
 //////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_outOnly("__OutOnly");
-
-static MaybeDataType typeForOutParam(TypedValue attr) {
-
-  if (!isArrayLikeType(attr.m_type) || attr.m_data.parr->size() < 1) {
-    return {};
-  }
-
-  auto const& type = attr.m_data.parr->nvGetVal(attr.m_data.parr->iter_begin());
-  if (!isStringType(type.m_type)) return {};
-
-  auto const str = type.m_data.pstr->data();
-  if (strcmp(str, "varray") == 0) return KindOfVec;
-  if (strcmp(str, "darray") == 0) return KindOfDict;
-
-#define DT(name, ...) if (strcmp(str, "KindOf" #name) == 0) return KindOf##name;
-  DATATYPES
-#undef DT
-
-  return {};
-}
-
-MaybeDataType builtinOutType(
-  const TypeConstraint& tc,
-  const UserAttributeMap& map
-) {
-  // FIXME(T116301380): native builtins don't resolve properly
-  auto const tcDT = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-
-  auto const it = map.find(s_outOnly.get());
-  if (it == map.end()) return tcDT;
-
-  auto const dt = typeForOutParam(it->second);
-  return dt ? dt : tcDT;
-}
-
 static Optional<TypedValue> builtinInValue(
   const Func::ParamInfo& pinfo
 ) {
-  auto& map = pinfo.userAttributes;
+  if (!pinfo.isOutOnly()) return {};
 
-  auto const it = map.find(s_outOnly.get());
-  if (it == map.end()) return {};
-
-  auto const dt = typeForOutParam(it->second);
+  auto const dt = pinfo.typeConstraints.underlyingDataType();
   if (!dt) return make_tv<KindOfNull>();
 
   switch (*dt) {
-  case KindOfNull:    return make_tv<KindOfNull>();
-  case KindOfBoolean: return make_tv<KindOfBoolean>(false);
-  case KindOfInt64:   return make_tv<KindOfInt64>(0);
-  case KindOfDouble:  return make_tv<KindOfDouble>(0.0);
-  case KindOfPersistentString:
-  case KindOfString:  return make_tv<KindOfString>(staticEmptyString());
-  case KindOfPersistentVec:
-  case KindOfVec:     return make_tv<KindOfVec>(ArrayData::CreateVec());
-  case KindOfPersistentDict:
-  case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
-  case KindOfPersistentKeyset:
-  case KindOfKeyset:  return make_tv<KindOfNull>();
-  case KindOfUninit:
-  case KindOfObject:
-  case KindOfResource:
-  case KindOfEnumClassLabel:
-  case KindOfRFunc:
-  case KindOfFunc:
-  case KindOfClass:
-  case KindOfLazyClass:
-  case KindOfClsMeth:
-  case KindOfRClsMeth: return make_tv<KindOfNull>();
+    case KindOfNull:    return make_tv<KindOfNull>();
+    case KindOfBoolean: return make_tv<KindOfBoolean>(false);
+    case KindOfInt64:   return make_tv<KindOfInt64>(0);
+    case KindOfDouble:  return make_tv<KindOfDouble>(0.0);
+    case KindOfPersistentString:
+    case KindOfString:  return make_tv<KindOfString>(staticEmptyString());
+    case KindOfPersistentVec:
+    case KindOfVec:     return make_tv<KindOfVec>(ArrayData::CreateVec());
+    case KindOfPersistentDict:
+    case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:  return make_tv<KindOfKeyset>(ArrayData::CreateKeyset());
+    case KindOfUninit:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfEnumClassLabel:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfLazyClass:
+    case KindOfClsMeth:
+    case KindOfRClsMeth: return make_tv<KindOfNull>();
   }
 
   not_reached();

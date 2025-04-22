@@ -49,8 +49,9 @@ Type native_function_return_type(const php::Func* f) {
 
   for (auto const& p : f->params) {
     if (!p.inout) continue;
-    auto const dt =
-      Native::builtinOutType(p.typeConstraints.main(), p.userAttributes);
+    auto const dt = p.typeConstraints.main().isUnresolved()
+      ? KindOfObject
+      : p.typeConstraints.main().underlyingDataType();
     if (!dt) {
       types.emplace_back(TInitCell);
       continue;

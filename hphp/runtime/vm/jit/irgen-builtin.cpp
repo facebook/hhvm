@@ -1725,7 +1725,8 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
 
   auto const& pinfo = builtin->params()[i];
   auto const& tc = pinfo.typeConstraints.main();
-  if (auto const dt = Native::builtinOutType(tc, pinfo.userAttributes)) {
+  auto const dt = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
+  if (dt) {
     const auto ty = Type{*dt};
     return tc.isNullable() ? ty | TInitNull : ty;
   }
@@ -1736,9 +1737,6 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
     switch (tc.metaType()) {
     case AnnotMetaType::Precise:
     case AnnotMetaType::SubObject:
-      if (auto const dt = tc.underlyingDataType()) {
-        return Type{*dt};
-      }
       return TInitCell;
     case AnnotMetaType::Mixed:
       return TInitCell;

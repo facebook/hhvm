@@ -417,11 +417,9 @@ struct NativeFunctionInfo {
 };
 
 /*
- * Known output types for inout parameters on builtins and optional default
- * values to be passed to builtins which use inout paramaters purely as out
- * values, ignoring their inputs.
+ * Default values to be passed to builtins which use inout paramaters purely
+ * as out values, ignoring their inputs.
  */
-MaybeDataType builtinOutType(const TypeConstraint&, const UserAttributeMap&);
 Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i);
 
 /////////////////////////////////////////////////////////////////////////////

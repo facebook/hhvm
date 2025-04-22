@@ -139,7 +139,7 @@ IntervalSet IntervalSet::Above(value_type start) {
 }
 
 std::string IntervalSet::toString() const {
-  std::string sep("");
+  std::string sep;
   std::ostringstream os;
   os << "{";
   for (auto const& i : intervals) {

@@ -31,6 +31,11 @@ var (
 	transport_header map[string]string
 )
 
+type WriteFlusher interface {
+	io.Writer
+	Flush() error
+}
+
 func init() {
 	transport_bdata = make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 	for i := 0; i < TRANSPORT_BINARY_DATA_SIZE; i++ {
@@ -40,7 +45,7 @@ func init() {
 		"value": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36"}
 }
 
-func TransportTest(t *testing.T, writer io.Writer, reader io.Reader) {
+func TransportTest(t *testing.T, writer WriteFlusher, reader io.Reader) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 
 	// Special case for header transport -- need to reset protocol on read
@@ -52,7 +57,7 @@ func TransportTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	_, err := writer.Write(transport_bdata)
 	require.NoError(t, err)
 
-	err = flush(writer)
+	err = writer.Flush()
 	require.NoError(t, err)
 
 	if headerTrans != nil {
@@ -69,7 +74,7 @@ func TransportTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	_, err = writer.Write(transport_bdata)
 	require.NoError(t, err)
 
-	err = flush(writer)
+	err = writer.Flush()
 	require.NoError(t, err)
 
 	if headerTrans != nil {
@@ -90,7 +95,7 @@ func TransportTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	}
 }
 
-func transportHTTPClientTest(t *testing.T, writer io.Writer, reader io.Reader) {
+func transportHTTPClientTest(t *testing.T, writer WriteFlusher, reader io.Reader) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 
 	// Need to assert type of Transport to HTTPClient to expose the Setter
@@ -100,7 +105,7 @@ func transportHTTPClientTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	_, err := writer.Write(transport_bdata)
 	require.NoError(t, err)
 
-	err = flush(writer)
+	err = writer.Flush()
 	require.NoError(t, err)
 
 	// Need to assert type of Transport to HTTPClient to expose the Getter

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package format
 
 import (
 	"encoding/binary"
@@ -49,12 +49,14 @@ func NewBinaryFormatOptions(readWriter types.ReadWriteSizer, strictRead, strictW
 	}
 }
 
-func newBinaryEncoder(writer io.Writer) types.Encoder {
+// NewBinaryEncoder create a new binary encoder.
+func NewBinaryEncoder(writer io.Writer) types.Encoder {
 	// This default for binaryEncoder's strictWrite matches cpp implementation
 	return &binaryEncoder{writer: writer, strictWrite: true}
 }
 
-func newBinaryDecoder(reader types.ReadSizer) types.Decoder {
+// NewBinaryDecoder create a new binary decoder.
+func NewBinaryDecoder(reader types.ReadSizer) types.Decoder {
 	// This default for binaryEncoder's strictRead matches cpp implementation
 	return &binaryDecoder{reader: reader, strictRead: false}
 }

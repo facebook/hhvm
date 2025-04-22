@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package format
 
 import (
 	"encoding/binary"
@@ -87,11 +87,13 @@ func NewCompactFormat(readWriter types.ReadWriteSizer) types.Format {
 	return p
 }
 
-func newCompactEncoder(writer io.Writer) types.Encoder {
+// NewCompactEncoder create a new compact encoder.
+func NewCompactEncoder(writer io.Writer) types.Encoder {
 	return &compactEncoder{writer: writer, version: COMPACT_VERSION_BE}
 }
 
-func newCompactDecoder(reader types.ReadSizer) types.Decoder {
+// NewCompactDecoder create a new compact decoder.
+func NewCompactDecoder(reader types.ReadSizer) types.Decoder {
 	return &compactDecoder{reader: reader, version: COMPACT_VERSION_BE}
 }
 

@@ -21,6 +21,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -61,9 +62,9 @@ func (p *headerProtocol) resetProtocol() error {
 	switch p.protoID {
 	case types.ProtocolIDBinary:
 		// These defaults match cpp implementation
-		p.Format = NewBinaryFormatOptions(p.trans, false, true)
+		p.Format = format.NewBinaryFormatOptions(p.trans, false, true)
 	case types.ProtocolIDCompact:
-		p.Format = NewCompactFormat(p.trans)
+		p.Format = format.NewCompactFormat(p.trans)
 	default:
 		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 	}

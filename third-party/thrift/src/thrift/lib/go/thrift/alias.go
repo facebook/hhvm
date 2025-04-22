@@ -17,6 +17,9 @@
 package thrift
 
 import (
+	"io"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -116,4 +119,20 @@ func NewFormatException(err error) FormatException {
 
 func NewTransportExceptionFromError(err error) types.TransportException {
 	return types.NewTransportExceptionFromError(err)
+}
+
+func NewCompactFormat(readWriter types.ReadWriteSizer) types.Format {
+	return format.NewCompactFormat(readWriter)
+}
+
+func NewBinaryFormat(readWriter types.ReadWriteSizer) types.Format {
+	return format.NewBinaryFormat(readWriter)
+}
+
+func NewBinaryFormatOptions(readWriter types.ReadWriteSizer, strictRead, strictWrite bool) types.Format {
+	return format.NewBinaryFormatOptions(readWriter, strictRead, strictWrite)
+}
+
+func NewSimpleJSONFormat(readWriter io.ReadWriter) types.Format {
+	return format.NewSimpleJSONFormat(readWriter)
 }

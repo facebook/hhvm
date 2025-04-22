@@ -27,6 +27,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -384,9 +385,9 @@ func (hdr *tHeader) readVarHeader(buf byteReader) error {
 
 // analyzeFirst32Bit Guess client type from the first 4 bytes
 func analyzeFirst32Bit(word uint32) ClientType {
-	if IsBinaryFramed(word) {
+	if format.IsBinaryFramed(word) {
 		return UnframedDeprecated
-	} else if IsCompactFramed(word) {
+	} else if format.IsCompactFramed(word) {
 		return UnframedCompactDeprecated
 	} else if word == HTTPMagicCONNECT ||
 		word == HTTPMagicDELETE ||
@@ -405,10 +406,10 @@ func analyzeFirst32Bit(word uint32) ClientType {
 
 // analyzeSecond32Bit Find the header client type from the 4-8th bytes of header
 func analyzeSecond32Bit(word uint32) ClientType {
-	if IsBinaryFramed(word) {
+	if format.IsBinaryFramed(word) {
 		return FramedDeprecated
 	}
-	if IsCompactFramed(word) {
+	if format.IsCompactFramed(word) {
 		return FramedCompact
 	}
 	if (word & HeaderMask) == HeaderMagic {

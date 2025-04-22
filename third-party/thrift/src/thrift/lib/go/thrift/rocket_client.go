@@ -25,6 +25,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -92,11 +93,11 @@ func newRocketClientFromRsocket(
 	}
 	switch p.protoID {
 	case types.ProtocolIDBinary:
-		p.Decoder = newBinaryDecoder(p.rbuf)
-		p.Encoder = newBinaryEncoder(p.wbuf)
+		p.Decoder = format.NewBinaryDecoder(p.rbuf)
+		p.Encoder = format.NewBinaryEncoder(p.wbuf)
 	case types.ProtocolIDCompact:
-		p.Decoder = newCompactDecoder(p.rbuf)
-		p.Encoder = newCompactEncoder(p.wbuf)
+		p.Decoder = format.NewCompactDecoder(p.rbuf)
+		p.Encoder = format.NewCompactEncoder(p.wbuf)
 	default:
 		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 	}

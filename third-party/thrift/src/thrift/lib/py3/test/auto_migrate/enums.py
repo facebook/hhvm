@@ -19,11 +19,9 @@ import pickle
 import unittest
 from typing import cast, Type, TypeVar
 
+from testing.thrift_types import Color as python_Color, Kind as python_Kind
+
 from testing.types import BadMembers, Color, ColorGroups, File, Kind, Perm
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
-    brokenInAutoMigrate,
-    is_auto_migrated,
-)
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import BadEnum, Enum, Flag
@@ -68,6 +66,20 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(Protocol.DEPRECATED_VERBOSE_JSON.value, 1)
         self.assertEqual(Protocol.COMPACT.value, 2)
         self.assertEqual(Protocol.JSON.value, 5)
+
+    def test_python_py3_equivalence(self) -> None:
+        self.assertIs(Color, python_Color)
+        self.assertIs(Color.red, python_Color.red)
+
+        self.assertEqual(Color.red, python_Color.red)
+        self.assertNotEqual(Color.blue, python_Color.red)
+
+        # basic validation that pyre doesn't complain
+        cg = ColorGroups(
+            color_list=[python_Color.red, python_Color.blue, python_Color.green]
+        )
+        self.assertEqual(cg.color_list, [Color.red, Color.blue, Color.green])
+        self.assertEqual(File(type=python_Kind.CHAR).type, Kind.CHAR)
 
     def test_bad_enum_hash_same(self) -> None:
         x = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)

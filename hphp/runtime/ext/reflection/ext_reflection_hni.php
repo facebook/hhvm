@@ -187,6 +187,14 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   }
 
   /**
+   * Extract type var names used in a function's parameter type hints.
+   *
+   * @return keyset containing type var names as strings
+   */
+  <<__Native>>
+  public function getParamTypeVarNames()[]: keyset<string>;
+
+  /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getstartline.php )
    *

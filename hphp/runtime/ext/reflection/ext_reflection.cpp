@@ -742,6 +742,22 @@ static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getNumberOfParameters) {
   return func->numParams();
 }
 
+static Array HHVM_METHOD(
+  ReflectionFunctionAbstract, getParamTypeVarNames
+) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  Array ret = Array::CreateKeyset();
+  for (auto const& param : func->params()) {
+    for (auto const& tc : param.typeConstraints.range()) {
+      if (tc.isTypeVar()) {
+        ret.append(make_tv<KindOfPersistentString>(tc.typeName()));
+      }
+    }
+  }
+
+  return ret;
+}
+
 ALWAYS_INLINE
 static Array get_function_param_info(const Func* func) {
   const Func::ParamInfoVec& params = func->params();
@@ -1590,19 +1606,19 @@ void addClassConstantNames(const Class* cls,
   const Class::Const* consts = cls->constants();
   bool has_constants_from_included_enums = false;
   for (size_t i = 0; i < numConsts; i++) {
-    if (!consts[i].isAbstractAndUninit() && 
+    if (!consts[i].isAbstractAndUninit() &&
         consts[i].kind() == ConstModifiers::Kind::Value) {
-      if (consts[i].cls == cls) { 
+      if (consts[i].cls == cls) {
         st->add(const_cast<StringData*>(consts[i].name.get()));
       } else if (cls->hasIncludedEnums()
                  && cls->allIncludedEnums().contains(consts[i].cls->name())) {
-        has_constants_from_included_enums = true;   
+        has_constants_from_included_enums = true;
       }
     }
   }
-  if (has_constants_from_included_enums && 
+  if (has_constants_from_included_enums &&
       Cfg::Eval::ReflectionMissConstantFromIncludedEnumsNotice) {
-    raise_notice(Strings::REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS, 
+    raise_notice(Strings::REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS,
                  cls->name()->data());
   }
 
@@ -2339,6 +2355,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getCoeffects);
     HHVM_ME(ReflectionFunctionAbstract, getModule);
     HHVM_ME(ReflectionFunctionAbstract, returnsReadonly);
+    HHVM_ME(ReflectionFunctionAbstract, getParamTypeVarNames);
 
     HHVM_ME(ReflectionMethod, __init);
     HHVM_ME(ReflectionMethod, isFinal);

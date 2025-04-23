@@ -143,6 +143,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function inNamespace()[]: bool;
   public function getNamespaceName()[]: string;
   public function getShortName()[]: string;
+  public function getParamTypeVarNames()[]: keyset<string>;
   public function isHack()[]: bool;
   public function isInternal()[]: bool;
   public function isClosure()[]: bool;

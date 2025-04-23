@@ -50,6 +50,11 @@ struct populator_opts {
   // Probability to use for populating optional fields.
   float optional_field_prob = 0.0;
   size_t recursion_limit = 0;
+  // A budget for the total size of the generated object.
+  // The populator will stop generating more list/set/map elements if the budget
+  // is reached. Note that the budget is not counting container overhead, so the
+  // generated object may be slightly larger than the budget.
+  size_t size_budget = 100 * 1024 * 1024;
 };
 
 namespace detail {
@@ -151,6 +156,7 @@ struct State {
   Rng& rng;
   const populator_opts& opts;
   std::map<std::type_index, size_t> tag_counts;
+  size_t size{};
 };
 
 // Using the type_info of the tags to check if we are populating recursively
@@ -208,11 +214,13 @@ struct populator_methods<
   static void populate(
       detail::State<Rng>& state, std::vector<bool>::reference out) {
     out = next_value(state.rng);
+    state.size += sizeof(Int);
   }
 
   template <typename Rng>
   static void populate(detail::State<Rng>& state, Int& out) {
     out = next_value(state.rng);
+    state.size += sizeof(Int);
   }
 };
 
@@ -226,6 +234,7 @@ struct populator_methods<
   static void populate(detail::State<Rng>& state, Fp& out) {
     std::uniform_real_distribution<Fp> gen;
     out = gen(state.rng);
+    state.size += sizeof(Fp);
     DVLOG(4) << "generated real: " << out;
   }
 };
@@ -247,6 +256,7 @@ struct populator_methods<type::string_t, std::string> {
     std::generate_n(str.begin(), length, [&]() {
       return static_cast<char>(char_gen(state.rng));
     });
+    state.size += sizeof(char) * length;
 
     DVLOG(4) << "generated string of len" << length;
   }
@@ -282,6 +292,7 @@ struct populator_methods<type::binary_t, std::string> {
     bin = std::string(length, 0);
     auto iter = bin.begin();
     generate_bytes(state.rng, bin, length, [&](uint8_t c) { *iter++ = c; });
+    state.size += length;
   }
 };
 
@@ -309,6 +320,7 @@ struct populator_methods<
     folly::io::RWUnshareCursor range(&bin);
     generate_bytes(
         state.rng, range, length, [&](uint8_t c) { range.write<uint8_t>(c); });
+    state.size += length;
   }
 };
 
@@ -355,6 +367,7 @@ struct populator_methods<
     int_type tmp;
     int_methods::populate(state, tmp);
     out = static_cast<Type>(tmp);
+    state.size += sizeof(Type);
   }
 };
 
@@ -377,9 +390,11 @@ struct populator_methods<type::list<ElemTag>, Type> {
 
     DVLOG(3) << "populating list size " << list_size;
 
-    out.resize(list_size);
-    for (decltype(list_size) i = 0; i < list_size; i++) {
-      elem_methods::populate(state, out[i]);
+    out.reserve(list_size);
+    for (decltype(list_size) i = 0;
+         i < list_size && state.size < state.opts.size_budget;
+         i++) {
+      elem_methods::populate(state, out.emplace_back());
     }
   }
 };
@@ -405,7 +420,9 @@ struct populator_methods<type::set<ElemTag>, Type> {
     DVLOG(3) << "populating set size " << set_size;
     out = Type();
 
-    for (decltype(set_size) i = 0; i < set_size; i++) {
+    for (decltype(set_size) i = 0;
+         i < set_size && state.size < state.opts.size_budget;
+         i++) {
       elem_type tmp;
       elem_methods::populate(state, tmp);
       out.insert(std::move(tmp));
@@ -436,7 +453,9 @@ struct populator_methods<type::map<KeyTag, MappedTag>, Type> {
     DVLOG(3) << "populating map size " << map_size;
     out = Type();
 
-    for (decltype(map_size) i = 0; i < map_size; i++) {
+    for (decltype(map_size) i = 0;
+         i < map_size && state.size < state.opts.size_budget;
+         i++) {
       key_type key_tmp;
       key_methods::populate(state, key_tmp);
       mapped_methods::populate(state, out[std::move(key_tmp)]);
@@ -449,7 +468,7 @@ template <typename Union>
 struct populator_methods<type::union_t<Union>, Union> {
   template <typename Rng>
   static void populate(detail::State<Rng>& state, Union& out) {
-    DVLOG(3) << "begin writing union: "
+    DVLOG(0) << "begin writing union: "
              << op::get_class_name_v<Union> << ", type: "
              << folly::to_underlying(out.getType());
 
@@ -465,14 +484,14 @@ struct populator_methods<type::union_t<Union>, Union> {
           op::get_type_tag<Union, Ord>,
           op::get_native_type<Union, Ord>>;
 
-      DVLOG(3) << "writing union field "
+      DVLOG(0) << "writing union field "
                << op::get_name_v<Union, Ord> << ", fid: "
                << folly::to_underlying(op::get_field_id_v<Union, Ord>);
 
       methods::populate(state, op::get<Ord>(out).ensure());
     });
 
-    DVLOG(3) << "end writing union";
+    DVLOG(0) << "end writing union";
   }
 };
 
@@ -484,6 +503,7 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
    public:
     template <typename Ord, typename Rng>
     void operator()(Ord, detail::State<Rng>& state, Struct& out) {
+      DVLOG(0) << "begin writing union: " << op::get_class_name_v<Struct>;
       using methods = populator_methods<
           op::get_type_tag<Struct, Ord>,
           op::get_native_type<Struct, Ord>>;
@@ -494,7 +514,8 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
       // Popualate optional fields with `optional_field_prob` probability.
       const auto skip = //
           ::apache::thrift::detail::is_optional_field_ref_v<field_ref_type> &&
-          !detail::get_bernoulli(state.rng, state.opts.optional_field_prob);
+          (state.size >= state.opts.size_budget ||
+           !detail::get_bernoulli(state.rng, state.opts.optional_field_prob));
       if (skip) {
         return;
       }
@@ -504,6 +525,7 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
       op::ensure<Ord>(out);
       methods::populate(
           state, detail::deref<field_ref_type>::clear_and_get(got));
+      DVLOG(0) << "end writing union";
     }
   };
 
@@ -560,7 +582,8 @@ struct populator_methods<
 
 template <typename Type, typename Rng, typename Tag = detail::infer_tag<Type>>
 void populate(Type& out, const populator_opts& opts, Rng& rng) {
-  detail::State<Rng> state{rng, opts, {}};
+  detail::State<Rng> state{
+      .rng = rng, .opts = opts, .tag_counts = {}, .size = 0};
   return populator_methods<Tag, Type>::populate(state, out);
 }
 

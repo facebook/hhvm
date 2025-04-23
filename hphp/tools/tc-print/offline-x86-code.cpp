@@ -163,7 +163,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
     //    move r10, IMMEDIATE
     //    call r10
     xed_iclass_enum_t iclass = xed_decoded_inst_get_iclass(&xedd);
-    string callDest = "";
+    string callDest;
 
     if (iclass == XED_ICLASS_CALL_NEAR || iclass == XED_ICLASS_CALL_FAR) {
       const xed_inst_t    *xi       = xed_decoded_inst_inst(&xedd);

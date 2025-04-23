@@ -189,5 +189,9 @@ void MemFile::unzip() {
   m_len = len;
 }
 
+bool MemFile::lock(int operation, bool &wouldblock /* = false */) {
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

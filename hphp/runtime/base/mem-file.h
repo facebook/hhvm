@@ -51,6 +51,7 @@ struct MemFile : File {
   bool eof() override;
   bool rewind() override;
   bool flush() override;
+  bool lock(int operation, bool &wouldblock) override;
 
   Array getMetaData() override;
 
@@ -65,4 +66,3 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

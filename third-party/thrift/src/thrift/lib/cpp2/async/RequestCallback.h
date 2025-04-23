@@ -48,8 +48,8 @@ struct RpcTransportStats {
   uint32_t responseWireSizeBytes{0};
 
   // I/O latencies
-  std::chrono::nanoseconds requestLatency{0};
-  std::chrono::nanoseconds responseLatency{0};
+  std::chrono::nanoseconds requestWriteLatency{0};
+  std::chrono::nanoseconds responseRoundTripLatency{0};
 };
 
 class ClientReceiveState {

@@ -600,8 +600,8 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
     stats.requestSerializedSizeBytes = requestSerializedSize_;
     stats.requestWireSizeBytes = requestWireSize_;
     stats.requestMetadataAndPayloadSizeBytes = requestMetadataAndPayloadSize_;
-    stats.requestLatency = timeEndSend_ - timeBeginSend_;
-    stats.responseLatency = clock::now() - timeEndSend_;
+    stats.requestWriteLatency = timeEndSend_ - timeBeginSend_;
+    stats.responseRoundTripLatency = clock::now() - timeEndSend_;
     ResponseSerializationHandler handler(protocolId_);
     if (payload.hasException()) {
       if (!payload.exception().with_exception<rocket::RocketException>(

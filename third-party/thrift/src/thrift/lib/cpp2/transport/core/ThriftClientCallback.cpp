@@ -101,8 +101,8 @@ void ThriftClientCallback::onThriftResponse(
   cancelTimeout();
   if (active_) {
     RpcTransportStats stats;
-    stats.requestLatency = timeEndSend_ - timeBeginSend_;
-    stats.responseLatency = clock::now() - timeEndSend_;
+    stats.requestWriteLatency = timeEndSend_ - timeBeginSend_;
+    stats.responseRoundTripLatency = clock::now() - timeEndSend_;
 
     active_ = false;
     auto tHeader = std::make_unique<transport::THeader>();

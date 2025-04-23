@@ -65,6 +65,7 @@ final class ThriftContextPropHandlerTest extends WWWTest {
     ThriftContextPropState::get()->setRequestId(null);
     ThriftContextPropState::get()->setOriginId(null);
     ThriftContextPropState::get()->setPrivacyUniverse(null);
+    ThriftContextPropState::get()->setBaggage(null);
     $v = ThriftContextPropHandler::makeV();
     expect($v)->toBeNull();
 

@@ -40,7 +40,7 @@ TEST(IovecCursor, construct) {
 }
 
 TEST(IovecCursor, construct_empty) {
-  std::string buf1 = "";
+  std::string buf1;
   auto p = getIovecCursor({buf1});
   auto& cursor = p.first;
 

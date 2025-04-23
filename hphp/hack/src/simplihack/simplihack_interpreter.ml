@@ -6,6 +6,25 @@
  *
  *)
 
+(*
+ * SimpliHack Interpreter
+ *
+ * This module implements an interpreter for the SimpliHack DSL, a simplified subset
+ * of Hack used for code generation and metaprogramming tasks. The interpreter
+ * evaluates expressions in user attributes and produces string outputs that can be
+ * used as prompts or code snippets.
+ *
+ * Key components:
+ * - Value: Represents runtime values (strings, unit)
+ * - Context: Maintains interpreter state during evaluation
+ * - ControlFlow: Handles statement execution flow
+ * - Expr/Stmt/Block: Handle evaluation of different language constructs
+ * - ClassId/Call/Binop: Support specific language features
+ *
+ * The interpreter follows a recursive descent pattern where each language
+ * construct is handled by a dedicated module.
+ *)
+
 open Hh_prelude
 
 (* StackFrame module represents a single frame in the call stack *)
@@ -214,6 +233,18 @@ module ControlFlow = struct
     | Return of Value.t (* Return with a value *)
     | Next of Context.t (* Continue to next statement with updated context *)
 end
+
+(*
+ * Note on mutual recursion:
+ * The following modules (Expr, Stmt, Block, ClassId, Call, Binop) are mutually
+ * recursive. This structure is required by OCaml to handle circular dependencies.
+ *
+ * Evaluation flow:
+ * - Expr.eval: Evaluates expressions (may call Call.eval for function calls)
+ * - Call.eval: Evaluates function calls (may call Block.eval for function bodies)
+ * - Block.eval: Evaluates blocks of statements (calls Stmt.eval for each statement)
+ * - Stmt.eval: Evaluates statements (may call Expr.eval for expressions)
+ *)
 
 (* Mutually recursive modules for evaluating different language constructs *)
 

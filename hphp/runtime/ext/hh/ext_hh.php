@@ -194,10 +194,11 @@ function dynamic_fun(string $name)[]: mixed;
 
 /**
  * Construct a cls_meth pointer for the method $cls::$meth. The method should be
- * a static method marked __DynamicallyCallable.
+ * a static method marked __DynamicallyCallable. Raises a notice similar to
+ * $cls::foo() if $cls is a string.
  */
 <<__Native("NoRecording")>>
-function dynamic_class_meth(string $cls, string $meth)[]: mixed;
+function dynamic_class_meth(class_or_classname<mixed> $cls, string $meth)[]: mixed;
 
 /**
  * Same as dynamic_fun but can't be used in RepoAuthoritative mode and
@@ -208,12 +209,12 @@ function dynamic_class_meth(string $cls, string $meth)[]: mixed;
 function dynamic_fun_force(string $name)[]: mixed;
 
 /**
- * Same as dynamic_class_meth but can't be used in RepoAuthoritative mode
- * and doesn't raise warnings or errors
- * on methods not marked __DynamicallyCallable.
+ * Same as dynamic_class_meth but can't be used in RepoAuthoritative mode and
+ * doesn't raise warnings or errors on methods not marked __DynamicallyCallable.
+ * Raises a notice similar to $cls::foo() if $cls is a string.
  */
 <<__Native>>
-function dynamic_class_meth_force(string $cls, string $meth)[]: mixed;
+function dynamic_class_meth_force(class_or_classname<mixed> $cls, string $meth)[]: mixed;
 
 /**
  * Creates a LazyClass pointer from input $classname. It does not eagerly

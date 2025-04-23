@@ -913,30 +913,57 @@ TypedValue dynamicFun(const StringData* fun) {
 }
 
 template <DynamicAttr DA = DynamicAttr::Require, bool checkVis = true>
-TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
-  auto const c = Class::load(cls);
-  if (!c) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find class {}", cls->data())
-    );
-  }
+TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
+  auto const c = [&] () {
+    switch (clsVal.m_type) {
+      case KindOfString:
+      case KindOfPersistentString:
+      {
+        auto const n = val(clsVal).pstr;
+        auto const cls = Class::load(n);
+        if (cls) {
+          raise_str_to_class_notice(n);
+        } else {
+          SystemLib::throwInvalidArgumentExceptionObject(
+            folly::sformat("Unable to find class {}", n->data())
+          );
+        }
+        return cls;
+      }
+      case KindOfLazyClass:
+      {
+        auto const n = val(clsVal).plazyclass.name();
+        auto const cls = Class::load(n);
+        if (UNLIKELY(!cls)) {
+          SystemLib::throwInvalidArgumentExceptionObject(
+            folly::sformat("Unable to find class {}", n->data())
+          );
+        }
+        return cls;
+      }
+      case KindOfClass:
+        return val(clsVal).pclass;
+      default:
+        always_assert(false); // unreachable by type hint violation
+    }
+  }();
   auto const func = c->lookupMethod(meth);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Unable to find method {}::{}",
-                     cls->data(), meth->data())
+                     c->name()->data(), meth->data())
     );
   }
   if (!func->isStaticInPrologue()) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Method {}::{} is not static",
-                     cls->data(), meth->data())
+                     c->name()->data(), meth->data())
     );
   }
   if (func->isAbstract()) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Method {}::{} is abstract",
-                     cls->data(), meth->data())
+                     c->name()->data(), meth->data())
     );
   }
   if (!func->isPublic() && checkVis) {
@@ -949,7 +976,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
         SystemLib::throwInvalidArgumentExceptionObject(
           folly::sformat(fcls == c ? "Method {}::{} is marked Private"
                                    : "Unable to find method {}::{}",
-                         cls->data(), meth->data())
+                         c->name()->data(), meth->data())
         );
       }
     } else if (func->attrs() & AttrProtected) {
@@ -957,7 +984,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
       if (!ctx || (!ctx->classof(fcls) && !fcls->classof(ctx))) {
         SystemLib::throwInvalidArgumentExceptionObject(
           folly::sformat("Method {}::{} is marked Protected",
-                         cls->data(), meth->data())
+                         c->name()->data(), meth->data())
         );
       }
     }
@@ -966,12 +993,13 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
     if (func->getReifiedGenericsInfo().allGenericsSoft()) {
       raise_warning(
         "Method %s::%s is reified and cannot be used with dynamic_class_meth",
-        cls->data(),
+        c->name()->data(),
         meth->data()
       );
     } else {
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Method {}::{} is reified", cls->data(), meth->data())
+        folly::sformat("Method {}::{} is reified",
+                       c->name()->data(), meth->data())
       );
     }
   }
@@ -980,12 +1008,12 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat("Method {}::{} not marked dynamic",
-                       cls->data(), meth->data())
+                       c->name()->data(), meth->data())
       );
     }
     if (level == 1) {
       raise_warning("Method %s::%s not marked dynamic",
-                    cls->data(), meth->data());
+                    c->name()->data(), meth->data());
     }
   }
   return tvReturn(ClsMethDataRef::create(c, func));
@@ -1004,16 +1032,17 @@ TypedValue HHVM_FUNCTION(dynamic_fun_force, StringArg fun) {
   return dynamicFun<DynamicAttr::Ignore>(fun.get());
 }
 
-TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
-  return dynamicClassMeth(cls.get(), meth.get());
+TypedValue HHVM_FUNCTION(dynamic_class_meth, TypedValue cls, StringArg meth) {
+
+  return dynamicClassMeth(cls, meth.get());
 }
 
-TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
+TypedValue HHVM_FUNCTION(dynamic_class_meth_force, TypedValue cls,
                          StringArg meth) {
   if (Cfg::Repo::Authoritative) {
     raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
   }
-  return dynamicClassMeth<DynamicAttr::Ignore, false>(cls.get(), meth.get());
+  return dynamicClassMeth<DynamicAttr::Ignore, false>(cls, meth.get());
 }
 
 TypedValue HHVM_FUNCTION(classname_from_string_unsafe, StringArg cls) {

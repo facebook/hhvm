@@ -479,7 +479,7 @@ TEST(HTTPMessage, CheckHeaderForToken) {
 }
 
 TEST(HTTPHeaders, AddStringPiece) {
-  const char foo[] = "name:value";
+  constexpr const char* foo = "name:value";
   HTTPHeaders headers;
 
   folly::StringPiece str(foo);

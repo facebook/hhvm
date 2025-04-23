@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+<<file:__EnableUnstableFeatures('class_type')>>
 interface Reflector extends IPureStringishObject {
   public function __toString()[]: string;
 }
@@ -60,7 +60,7 @@ class ReflectionClass implements Reflector {
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
   final public function getAttributeClass<T as HH\ClassLikeAttribute>(
-    classname<T> $c,
+    class<T> $c,
   )[]: ?T;
   public function getMethod(string $name)[]: ReflectionMethod;
   public function getMethods(?int $filter = null)[]: varray<ReflectionMethod>;
@@ -193,7 +193,7 @@ class ReflectionFunction
   public function invokeArgs(vec<mixed> $args): HH\FIXME\MISSING_RETURN_TYPE;
   public function getClosure(): HH\FIXME\MISSING_RETURN_TYPE;
   final public function getAttributeClass<T as HH\FunctionAttribute>(
-    classname<T> $c,
+    class<T> $c,
   )[]: ?T;
 }
 
@@ -246,7 +246,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   <<__PHPStdLib>>
   public function setAccessible(bool $accessible)[write_props]: void;
   final public function getAttributeClass<T as HH\MethodAttribute>(
-    classname<T> $c,
+    class<T> $c,
   )[]: ?T;
 
   /**
@@ -312,7 +312,7 @@ class ReflectionParameter implements Reflector {
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
   final public function getAttributeClass<T as HH\ParameterAttribute>(
-    classname<T> $c,
+    class<T> $c,
   )[]: ?T;
   final public function getAttributes()[]: darray<string, varray<mixed>>;
 }
@@ -418,7 +418,7 @@ class ReflectionTypeAlias implements Reflector {
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
   final public function getAttributeClass<T as HH\TypeAliasAttribute>(
-    classname<T> $c,
+    class<T> $c,
   )[]: ?T;
 }
 
@@ -443,7 +443,7 @@ class ReflectionFile implements Reflector {
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
   final public function getAttributeClass<T as HH\FileAttribute>(
-    classname<T> $c,
+    class<T> $c,
   )[]: ?T;
 }
 
@@ -456,6 +456,6 @@ class ReflectionModule implements Reflector {
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
   final public function getAttributeClass<T as HH\ModuleAttribute>(
-    classname<T> $c,
+    class<T> $c,
   )[]: ?T;
 }

@@ -743,6 +743,26 @@ void doCursorReadRemainEndTest(int count) {
   }
 }
 
+TEST(CursorSerializer, Refs) {
+  Refs wrapper;
+
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::unique>(Empty{});
+  writer.write<ident::shared>(Empty{});
+  writer.write<ident::shared_mutable>(Empty{});
+  writer.write<ident::box>(Empty{});
+  writer.write<ident::intern_box>(Empty{});
+  wrapper.endWrite(std::move(writer));
+
+  auto reader = wrapper.beginRead();
+  EXPECT_EQ(reader.read<ident::unique>(), Empty{});
+  EXPECT_EQ(reader.read<ident::shared>(), Empty{});
+  EXPECT_EQ(reader.read<ident::shared_mutable>(), Empty{});
+  EXPECT_EQ(reader.read<ident::box>(), Empty{});
+  EXPECT_EQ(reader.read<ident::intern_box>(), Empty{});
+  wrapper.endRead(std::move(reader));
+}
+
 TEST(CursorBasedSerializer, CursorReadRemainingEndOne) {
   doCursorReadRemainEndTest(1);
 }

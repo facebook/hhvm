@@ -135,3 +135,17 @@ struct ReadRemaining {
 
 @cpp.UseCursorSerialization
 typedef ReadRemaining ReadRemainingWrapper
+
+@cpp.UseCursorSerialization
+struct Refs {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional Empty unique;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: optional Empty shared;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: optional Empty shared_mutable;
+  @thrift.Box
+  4: optional Empty box;
+  @thrift.InternBox
+  5: Empty intern_box;
+}

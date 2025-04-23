@@ -1645,12 +1645,20 @@ end = struct
       in
       create ~code:Error_code.SimpliHackRunPrompt ~claim ()
 
+    let evaluation_error pos stack_trace =
+      let claim =
+        lazy (pos, "Error while evaluating this SimpliHack expression")
+      in
+      create ~code:Error_code.SimpliHackEvalError ~claim ~reasons:stack_trace ()
+
     let to_error t ~env:_ =
       let open Typing_error.Primary.SimpliHack in
       match t with
       | Run_prompt { pos } -> run_prompt pos
       | Rerun_prompt { pos; prompt_digest; expected_digest } ->
         rerun_prompt pos prompt_digest expected_digest
+      | Evaluation_error { pos; stack_trace } ->
+        evaluation_error pos stack_trace
   end
 
   let unify_error pos msg_opt reasons_opt =

@@ -13,6 +13,7 @@
   provider_context
   tast_env
   typing_deps
+  typing_error
   typing_skeleton
   utils_core)
  (preprocess

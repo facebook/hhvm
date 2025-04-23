@@ -1,0 +1,10 @@
+ERROR: File "unsupported_expression.php", line 19, characters 16-29:
+Error while evaluating this SimpliHack expression (Typing[4495])
+  File "unsupported_expression.php", line 5, characters 3-41:
+  Unsupported statement
+  File "unsupported_expression.php", line 12, characters 10-31:
+  via prompt3(...)
+  File "unsupported_expression.php", line 16, characters 10-27:
+  via prompt2(...)
+  File "unsupported_expression.php", line 19, characters 16-29:
+  via prompt(...)

@@ -1,1 +1,8 @@
-No errors
+ERROR: File "nonliteral_attrs.php", line 16, characters 25-30:
+Error while evaluating this SimpliHack expression (Typing[4495])
+  File "nonliteral_attrs.php", line 16, characters 28-29:
+  Unsupported expression
+ERROR: File "nonliteral_attrs.php", line 16, characters 33-41:
+Error while evaluating this SimpliHack expression (Typing[4495])
+  File "nonliteral_attrs.php", line 16, characters 33-41:
+  Unsupported expression

@@ -14,7 +14,7 @@ type t = {
   edit_span: Pos.t;
 }
 
-let derive_prompt env e () = Simplihack_interpreter.eval env e
+let derive_prompt env e () = Simplihack_interpreter.eval env e |> Result.ok
 
 let find ctx tast =
   let user_attribute env edit_span acc ua =

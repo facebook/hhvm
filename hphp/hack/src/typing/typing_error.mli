@@ -411,6 +411,10 @@ module Primary : sig
           prompt_digest: string;
           expected_digest: string;
         }
+      | Evaluation_error of {
+          pos: Pos.t;
+          stack_trace: Pos_or_decl.t Message.t list Lazy.t;
+        }
     [@@deriving show]
   end
 

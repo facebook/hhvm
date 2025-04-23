@@ -784,6 +784,7 @@ module Typing = struct
     | UninstantiableClassViaStatic [@value 4492]
     | SimpliHackRunPrompt [@value 4493]
     | InvalidReifiedArgumentFIXMEable [@value 4494]
+    | SimpliHackEvalError [@value 4495]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

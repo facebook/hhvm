@@ -6,4 +6,7 @@
  *
  *)
 
-val eval : Tast_env.t -> Tast.expr -> string option
+val eval :
+  Tast_env.t ->
+  Tast.expr ->
+  (string, Typing_error.Primary.SimpliHack.t) Result.t

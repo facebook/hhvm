@@ -35,12 +35,18 @@ let handler =
         | [prompt] ->
           (* We evaluate the prompt in order to record dependencies, though we do not include
              the hash of the prompt in the error message. *)
-          let _prompt_value = Simplihack_interpreter.eval env prompt in
-          (* Report a SimpliHackRunPrompt error. This error should point to the position of the prompt expression
-             and tell the user to run an AI Code Action by clicking on that position in the file.
-          *)
-          let pos = Tast.get_position prompt in
-          report_error env @@ Typing_error.Primary.SimpliHack.Run_prompt { pos }
+          let prompt_value = Simplihack_interpreter.eval env prompt in
+          let err =
+            match prompt_value with
+            | Ok _ ->
+              (* Report a SimpliHackRunPrompt error. This error should point to the position of the prompt expression
+                 and tell the user to run an AI Code Action by clicking on that position in the file.
+              *)
+              let pos = Tast.get_position prompt in
+              Typing_error.Primary.SimpliHack.Run_prompt { pos }
+            | Error err -> err
+          in
+          report_error env err
         | [prompt; hash] ->
           (*
           Evalute prompt and hash using Simplihack_interpreter.eval. If both evaluate to a string then do the following.
@@ -55,9 +61,8 @@ let handler =
           (* Evaluate prompt and hash expressions *)
           let prompt_value = Simplihack_interpreter.eval env prompt in
           let hash_value = Simplihack_interpreter.eval env hash in
-
           (match (prompt_value, hash_value) with
-          | (Some prompt_str, Some expected_digest) ->
+          | (Result.Ok prompt_str, Result.Ok expected_digest) ->
             (* Compute digest of prompt string *)
             let prompt_digest = compute_digest prompt_str in
 
@@ -66,6 +71,8 @@ let handler =
               report_error env
               @@ Typing_error.Primary.SimpliHack.Rerun_prompt
                    { pos = prompt_pos; prompt_digest; expected_digest }
-          | _ -> ())
+          | (err1, err2) ->
+            Result.iter_error ~f:(report_error env) err1;
+            Result.iter_error ~f:(report_error env) err2)
         | _ -> ()
   end

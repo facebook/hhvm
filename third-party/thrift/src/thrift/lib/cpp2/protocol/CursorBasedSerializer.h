@@ -102,12 +102,21 @@ class CursorSerializationWrapper {
       : serializedData_(std::move(serialized)) {}
 
   ~CursorSerializationWrapper() {
-    DCHECK(std::holds_alternative<std::monostate>(protocol_))
-        << "Destroying wrapper with active read or write";
+    DCHECK(!isActive()) << "Destroying wrapper with active read or write";
   }
-  CursorSerializationWrapper(CursorSerializationWrapper&&) = default;
-  // Not worth manually implementing this to keep the DCHECK.
-  CursorSerializationWrapper& operator=(CursorSerializationWrapper&&) = default;
+  // Moving wrapper during reads/writes will throw.
+  CursorSerializationWrapper(CursorSerializationWrapper&& other) noexcept(
+      false) {
+    other.checkInactive("Moving wrapper during reads/writes not supported");
+    serializedData_ = std::move(other.serializedData_);
+  }
+  CursorSerializationWrapper& operator=(
+      CursorSerializationWrapper&& other) noexcept(false) {
+    checkInactive("Moving wrapper during reads/writes not supported");
+    other.checkInactive("Moving wrapper during reads/writes not supported");
+    serializedData_ = std::move(other.serializedData_);
+    return *this;
+  }
 
   /**
    * Object write path (traditional Thrift serialization)
@@ -210,7 +219,7 @@ class CursorSerializationWrapper {
 
  private:
   ProtocolReader* reader() {
-    checkInactive();
+    checkInactive("Concurrent reads/writes not supported");
     auto& reader = protocol_.template emplace<ProtocolReader>();
     folly::io::Cursor cursor(serializedData_.get());
     reader.setInput(cursor);
@@ -218,7 +227,7 @@ class CursorSerializationWrapper {
   }
 
   ProtocolWriter* writer(const CursorWriteOpts& opts) {
-    checkInactive();
+    checkInactive("Concurrent reads/writes not supported");
     auto& writer = protocol_.template emplace<ProtocolWriter>(opts.sharing);
     if (opts.padBuffer) {
       queue_.preallocate(opts.minGrowth, opts.minGrowth);
@@ -232,10 +241,12 @@ class CursorSerializationWrapper {
 
   void done() { protocol_.template emplace<std::monostate>(); }
 
-  void checkInactive() const {
-    if (!std::holds_alternative<std::monostate>(protocol_)) {
-      folly::throw_exception<std::runtime_error>(
-          "Concurrent reads/writes not supported");
+  bool isActive() const {
+    return !std::holds_alternative<std::monostate>(protocol_);
+  }
+  void checkInactive(const char* message) const {
+    if (isActive()) {
+      folly::throw_exception<std::runtime_error>(message);
     }
   }
   void checkHasData() const {

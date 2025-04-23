@@ -792,3 +792,22 @@ TEST(CursorSerializer, AbandonedWrite) {
   writer.write<ident::opt>(3);
   wrapper.abandonWrite(std::move(writer));
 }
+
+TEST(CursorSerializer, MoveActiveWrapper) {
+  // @lint-ignore-all CLANGTIDY bugprone-use-after-move
+  CursorSerializationWrapper<Qualifiers> wrapper;
+  auto writer = wrapper.beginWrite();
+  std::optional<CursorSerializationWrapper<Qualifiers>> wrapper2;
+  EXPECT_THROW(wrapper2.emplace(std::move(wrapper)), std::runtime_error);
+  wrapper2.emplace();
+  EXPECT_THROW((*wrapper2 = std::move(wrapper)), std::runtime_error);
+  wrapper.abandonWrite(std::move(writer));
+
+  wrapper2.emplace(std::move(wrapper));
+
+  auto writer2 = wrapper2->beginWrite();
+  EXPECT_THROW((*wrapper2 = std::move(wrapper)), std::runtime_error);
+  wrapper2->abandonWrite(std::move(writer2));
+
+  *wrapper2 = std::move(wrapper);
+}

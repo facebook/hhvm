@@ -37,7 +37,6 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
-from thrift.py3.types import _from_python_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -902,9 +901,11 @@ cdef class union1(thrift.py3.types.Union):
             if not isinstance(i, int):
                 raise TypeError(f'i is not a { int !r}.')
             i = <cint32_t> i
+
         if d is not None:
             if not isinstance(d, (float, int)):
                 raise TypeError(f'd is not a { float !r}.')
+
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(union1._make_instance(
           NULL,
           i,
@@ -1078,22 +1079,18 @@ cdef class union2(thrift.py3.types.Union):
         self, *,
         i=None,
         d=None,
-        s=None,
-        u=None
+        struct1 s=None,
+        union1 u=None
     ):
         if i is not None:
             if not isinstance(i, int):
                 raise TypeError(f'i is not a { int !r}.')
             i = <cint32_t> i
+
         if d is not None:
             if not isinstance(d, (float, int)):
                 raise TypeError(f'd is not a { float !r}.')
-        if s is not None:
-            if not isinstance(s, struct1):
-                s = _from_python_or_raise(s, "s", struct1)
-        if u is not None:
-            if not isinstance(u, union1):
-                u = _from_python_or_raise(u, "u", union1)
+
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(union2._make_instance(
           NULL,
           i,

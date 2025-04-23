@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pickle
 import unittest
 from pickle import loads
 
@@ -44,26 +45,14 @@ class ThriftPicklingTest(unittest.TestCase):
         loaded = loads(self.py3_pickled_data)
         py3_types.nested_pickle(c=loaded)
 
-    def test_pickled_python_struct_load_and_nest_in_py3_struct(self) -> None:
-        # pickled data is python, and loading it into a python struct
+    def test_pickled_python_struct_load_and_nest_in_py3(self) -> None:
         loaded = loads(self.python_pickled_data)
-
-        # Now testing __init__ function of py3 struct by passing the python struct
-        py3_struct1 = py3_types.nested_pickle(c=loaded)
-
-        # Now testing __call__ function of py3 struct by passing the python struct
-        py3_struct2 = py3_struct1(c=loaded)
-        self.assertEqual(py3_struct2.c.val, 42)
-
-    def test_pickled_python_struct_load_and_nest_in_py3_union(self) -> None:
-        # pickled data is python, and loading it into a python struct
-        loaded = loads(self.python_pickled_data)
-
-        # Now testing __init__ function of py3 union by passing the python struct
-        py3_union1 = py3_types.nested_pickle_union(c=loaded)
-
-        self.assertEqual(py3_union1.type, py3_union1.Type.c)
-        self.assertEqual(py3_union1.c.val, 42)
+        if is_auto_migrated():
+            py3_types.nested_pickle(c=loaded)
+        else:
+            # TODO(T216883007): support nesting of a python struct in a py3 struct
+            with self.assertRaises(TypeError):
+                py3_types.nested_pickle(c=loaded)
 
     def test_pickled_py3_struct_load_and_nest_in_python(self) -> None:
         loaded = loads(self.py3_pickled_data)

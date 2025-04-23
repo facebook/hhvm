@@ -81,7 +81,7 @@ class StructMeta(type):
         # enforce no inheritance, for in-place migrated structs
         for base in bases:
             if (
-                base is Struct or
+                base is Struct or 
                 hasattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE')
                 or not hasattr(base, '_FBTHRIFT__PYTHON_CLASS')
             ):
@@ -760,16 +760,3 @@ def _is_python_enum(obj):
         isinstance(obj, _fbthrift_python_Enum) and
         obj.__class__.__module__.endswith(".thrift_enums")
     )
-
-def _from_python_or_raise(thrift_value, field_name, py3_type):
-    try:
-        thrift_value = thrift_value._to_py3()
-        if not isinstance(thrift_value, py3_type):
-            raise TypeError(
-                f"{field_name} is a thrift-python value of type {type(thrift_value) !r} "
-                f"that can not be converted to {py3_type !r}."
-            )
-
-        return thrift_value
-    except AttributeError:
-        raise TypeError(f'{field_name} is not a {py3_type !r}.')

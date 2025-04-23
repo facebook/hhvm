@@ -24,7 +24,6 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
-from thrift.py3.types import _from_python_or_raise
 
 import transitive.types as _transitive_types
 
@@ -65,6 +64,6 @@ cdef class __Included_FieldsSetter(__StructFieldsSetter):
             __reset_field[_includes_cbindings.cIncluded](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _transitive_types.Foo):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "MyTransitiveField", _transitive_types.Foo)
+            raise TypeError(f'MyTransitiveField is not a { _transitive_types.Foo !r}.')
         deref(self._struct_cpp_obj).MyTransitiveField_ref().assign(deref((<_transitive_types.Foo?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

@@ -24,7 +24,6 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
-from thrift.py3.types import _from_python_or_raise
 
 
 import module.types as _module_types
@@ -81,7 +80,7 @@ cdef class __Mixin2_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cMixin2](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Mixin1):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "m1", _module_types.Mixin1)
+            raise TypeError(f'm1 is not a { _module_types.Mixin1 !r}.')
         deref(self._struct_cpp_obj).m1_ref().assign(deref((<_module_types.Mixin1?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -155,7 +154,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.Mixin2):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "m2", _module_types.Mixin2)
+            raise TypeError(f'm2 is not a { _module_types.Mixin2 !r}.')
         deref(self._struct_cpp_obj).m2_ref().assign(deref((<_module_types.Mixin2?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -164,6 +163,6 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.Mixin3Base):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "m3", _module_types.Mixin3Base)
+            raise TypeError(f'm3 is not a { _module_types.Mixin3Base !r}.')
         deref(self._struct_cpp_obj).m3_ref().assign(deref((<_module_types.Mixin3Base?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

@@ -37,7 +37,6 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
-from thrift.py3.types import _from_python_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -93,6 +92,7 @@ cdef class MyUnion(thrift.py3.types.Union):
             if not isinstance(anInteger, int):
                 raise TypeError(f'anInteger is not a { int !r}.')
             anInteger = <cint32_t> anInteger
+
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(MyUnion._make_instance(
           NULL,
           anInteger,
@@ -268,6 +268,7 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
             if not isinstance(int_field, int):
                 raise TypeError(f'int_field is not a { int !r}.')
             int_field = <cint32_t> int_field
+
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(NonTriviallyDestructibleUnion._make_instance(
           NULL,
           int_field,

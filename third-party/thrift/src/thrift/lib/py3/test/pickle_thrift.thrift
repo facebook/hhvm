@@ -24,8 +24,3 @@ struct easy_pickle {
 struct nested_pickle {
   1: easy_pickle c;
 }
-
-union nested_pickle_union {
-  1: easy_pickle c;
-  2: i32 i32_val;
-}

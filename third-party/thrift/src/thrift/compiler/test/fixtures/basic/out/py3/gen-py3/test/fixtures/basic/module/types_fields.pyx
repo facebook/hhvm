@@ -24,7 +24,6 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
-from thrift.py3.types import _from_python_or_raise
 
 
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
@@ -80,7 +79,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyDataItem):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "MyDataField", _test_fixtures_basic_module_types.MyDataItem)
+            raise TypeError(f'MyDataField is not a { _test_fixtures_basic_module_types.MyDataItem !r}.')
         deref(self._struct_cpp_obj).MyDataField_ref().assign(deref((<_test_fixtures_basic_module_types.MyDataItem?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
@@ -239,7 +238,7 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
             __reset_field[_test_fixtures_basic_module_cbindings.cMyException](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "myStruct", _test_fixtures_basic_module_types.MyStruct)
+            raise TypeError(f'myStruct is not a { _test_fixtures_basic_module_types.MyStruct !r}.')
         deref(self._struct_cpp_obj).myStruct_ref().assign(deref((<_test_fixtures_basic_module_types.MyStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
@@ -248,7 +247,7 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
             __reset_field[_test_fixtures_basic_module_cbindings.cMyException](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyUnion):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "myUnion", _test_fixtures_basic_module_types.MyUnion)
+            raise TypeError(f'myUnion is not a { _test_fixtures_basic_module_types.MyUnion !r}.')
         deref(self._struct_cpp_obj).myUnion_ref().assign(deref((<_test_fixtures_basic_module_types.MyUnion?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -297,7 +296,7 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
             __reset_field[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "myStruct", _test_fixtures_basic_module_types.MyStruct)
+            raise TypeError(f'myStruct is not a { _test_fixtures_basic_module_types.MyStruct !r}.')
         deref(self._struct_cpp_obj).myStruct_ref().assign(deref((<_test_fixtures_basic_module_types.MyStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
@@ -306,7 +305,7 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
             __reset_field[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyUnion):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "myUnion", _test_fixtures_basic_module_types.MyUnion)
+            raise TypeError(f'myUnion is not a { _test_fixtures_basic_module_types.MyUnion !r}.')
         deref(self._struct_cpp_obj).myUnion_ref().assign(deref((<_test_fixtures_basic_module_types.MyUnion?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 

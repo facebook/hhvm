@@ -22,7 +22,6 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types import _from_python_or_raise
 
 import b.types as _b_types
 import c.types as _c_types

@@ -22,7 +22,6 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types import _from_python_or_raise
 
 
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types

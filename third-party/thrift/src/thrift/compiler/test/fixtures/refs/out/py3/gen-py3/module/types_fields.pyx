@@ -24,7 +24,6 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
-from thrift.py3.types import _from_python_or_raise
 
 
 import module.types as _module_types
@@ -165,7 +164,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "opt_ref", _module_types.MyField)
+            raise TypeError(f'opt_ref is not a { _module_types.MyField !r}.')
         assign_unique_ptr[_module_cbindings.cMyField](deref(self._struct_cpp_obj).opt_ref_ref(), make_unique[_module_cbindings.cMyField](deref((<_module_types.MyField?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -174,7 +173,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "ref", _module_types.MyField)
+            raise TypeError(f'ref is not a { _module_types.MyField !r}.')
         assign_unique_ptr[_module_cbindings.cMyField](deref(self._struct_cpp_obj).ref_ref(), make_unique[_module_cbindings.cMyField](deref((<_module_types.MyField?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -183,7 +182,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "req_ref", _module_types.MyField)
+            raise TypeError(f'req_ref is not a { _module_types.MyField !r}.')
         assign_unique_ptr[_module_cbindings.cMyField](deref(self._struct_cpp_obj).req_ref_ref(), make_unique[_module_cbindings.cMyField](deref((<_module_types.MyField?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
@@ -212,7 +211,7 @@ cdef class __StructWithUnion_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithUnion](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.MyUnion):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "u", _module_types.MyUnion)
+            raise TypeError(f'u is not a { _module_types.MyUnion !r}.')
         assign_unique_ptr[_module_cbindings.cMyUnion](deref(self._struct_cpp_obj).u_ref(), make_unique[_module_cbindings.cMyUnion](deref((<_module_types.MyUnion?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -230,7 +229,7 @@ cdef class __StructWithUnion_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithUnion](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "f", _module_types.MyField)
+            raise TypeError(f'f is not a { _module_types.MyField !r}.')
         deref(self._struct_cpp_obj).f_ref().assign(deref((<_module_types.MyField?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -349,7 +348,7 @@ cdef class __StructWithSharedConst_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithSharedConst](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "opt_shared_const", _module_types.MyField)
+            raise TypeError(f'opt_shared_const is not a { _module_types.MyField !r}.')
         assign_shared_const_ptr[_module_cbindings.cMyField](deref(self._struct_cpp_obj).opt_shared_const_ref(), const_pointer_cast((<_module_types.MyField?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -358,7 +357,7 @@ cdef class __StructWithSharedConst_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithSharedConst](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "shared_const", _module_types.MyField)
+            raise TypeError(f'shared_const is not a { _module_types.MyField !r}.')
         assign_shared_const_ptr[_module_cbindings.cMyField](deref(self._struct_cpp_obj).shared_const_ref(), const_pointer_cast((<_module_types.MyField?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -367,7 +366,7 @@ cdef class __StructWithSharedConst_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithSharedConst](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "req_shared_const", _module_types.MyField)
+            raise TypeError(f'req_shared_const is not a { _module_types.MyField !r}.')
         assign_shared_const_ptr[_module_cbindings.cMyField](deref(self._struct_cpp_obj).req_shared_const_ref(), const_pointer_cast((<_module_types.MyField?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -413,7 +412,7 @@ cdef class __StructWithRef_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRef](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "def_field", _module_types.Empty)
+            raise TypeError(f'def_field is not a { _module_types.Empty !r}.')
         assign_unique_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).def_field_ref(), make_unique[_module_cbindings.cEmpty](deref((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -422,7 +421,7 @@ cdef class __StructWithRef_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRef](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "opt_field", _module_types.Empty)
+            raise TypeError(f'opt_field is not a { _module_types.Empty !r}.')
         assign_unique_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).opt_field_ref(), make_unique[_module_cbindings.cEmpty](deref((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -431,7 +430,7 @@ cdef class __StructWithRef_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRef](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "req_field", _module_types.Empty)
+            raise TypeError(f'req_field is not a { _module_types.Empty !r}.')
         assign_unique_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).req_field_ref(), make_unique[_module_cbindings.cEmpty](deref((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
@@ -476,7 +475,7 @@ cdef class __StructWithBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithBox](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.StructWithRef):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "c", _module_types.StructWithRef)
+            raise TypeError(f'c is not a { _module_types.StructWithRef !r}.')
         deref(self._struct_cpp_obj).c_ref().assign(deref((<_module_types.StructWithRef?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -504,7 +503,7 @@ cdef class __StructWithInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithInternBox](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field1", _module_types.Empty)
+            raise TypeError(f'field1 is not a { _module_types.Empty !r}.')
         deref(self._struct_cpp_obj).field1_ref().assign(deref((<_module_types.Empty?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -513,7 +512,7 @@ cdef class __StructWithInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithInternBox](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field2", _module_types.MyField)
+            raise TypeError(f'field2 is not a { _module_types.MyField !r}.')
         deref(self._struct_cpp_obj).field2_ref().assign(deref((<_module_types.MyField?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -541,7 +540,7 @@ cdef class __StructWithTerseInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithTerseInternBox](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field1", _module_types.Empty)
+            raise TypeError(f'field1 is not a { _module_types.Empty !r}.')
         deref(self._struct_cpp_obj).field1_ref().assign(deref((<_module_types.Empty?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -550,7 +549,7 @@ cdef class __StructWithTerseInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithTerseInternBox](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field2", _module_types.MyField)
+            raise TypeError(f'field2 is not a { _module_types.MyField !r}.')
         deref(self._struct_cpp_obj).field2_ref().assign(deref((<_module_types.MyField?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -578,7 +577,7 @@ cdef class __AdaptedStructWithInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cAdaptedStructWithInternBox](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field1", _module_types.Empty)
+            raise TypeError(f'field1 is not a { _module_types.Empty !r}.')
         deref(self._struct_cpp_obj).field1_ref().assign(deref((<_module_types.Empty?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -587,7 +586,7 @@ cdef class __AdaptedStructWithInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cAdaptedStructWithInternBox](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field2", _module_types.MyField)
+            raise TypeError(f'field2 is not a { _module_types.MyField !r}.')
         deref(self._struct_cpp_obj).field2_ref().assign(deref((<_module_types.MyField?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -615,7 +614,7 @@ cdef class __AdaptedStructWithTerseInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cAdaptedStructWithTerseInternBox](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field1", _module_types.Empty)
+            raise TypeError(f'field1 is not a { _module_types.Empty !r}.')
         deref(self._struct_cpp_obj).field1_ref().assign(deref((<_module_types.Empty?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -624,7 +623,7 @@ cdef class __AdaptedStructWithTerseInternBox_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cAdaptedStructWithTerseInternBox](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.MyField):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "field2", _module_types.MyField)
+            raise TypeError(f'field2 is not a { _module_types.MyField !r}.')
         deref(self._struct_cpp_obj).field2_ref().assign(deref((<_module_types.MyField?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -653,7 +652,7 @@ cdef class __StructWithRefTypeUnique_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeUnique](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "def_field", _module_types.Empty)
+            raise TypeError(f'def_field is not a { _module_types.Empty !r}.')
         assign_unique_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).def_field_ref(), make_unique[_module_cbindings.cEmpty](deref((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -662,7 +661,7 @@ cdef class __StructWithRefTypeUnique_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeUnique](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "opt_field", _module_types.Empty)
+            raise TypeError(f'opt_field is not a { _module_types.Empty !r}.')
         assign_unique_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).opt_field_ref(), make_unique[_module_cbindings.cEmpty](deref((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -671,7 +670,7 @@ cdef class __StructWithRefTypeUnique_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeUnique](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "req_field", _module_types.Empty)
+            raise TypeError(f'req_field is not a { _module_types.Empty !r}.')
         assign_unique_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).req_field_ref(), make_unique[_module_cbindings.cEmpty](deref((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
@@ -700,7 +699,7 @@ cdef class __StructWithRefTypeShared_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeShared](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "def_field", _module_types.Empty)
+            raise TypeError(f'def_field is not a { _module_types.Empty !r}.')
         assign_shared_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).def_field_ref(), (<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -709,7 +708,7 @@ cdef class __StructWithRefTypeShared_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeShared](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "opt_field", _module_types.Empty)
+            raise TypeError(f'opt_field is not a { _module_types.Empty !r}.')
         assign_shared_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).opt_field_ref(), (<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -718,7 +717,7 @@ cdef class __StructWithRefTypeShared_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeShared](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "req_field", _module_types.Empty)
+            raise TypeError(f'req_field is not a { _module_types.Empty !r}.')
         assign_shared_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).req_field_ref(), (<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
 
@@ -747,7 +746,7 @@ cdef class __StructWithRefTypeSharedConst_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeSharedConst](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "def_field", _module_types.Empty)
+            raise TypeError(f'def_field is not a { _module_types.Empty !r}.')
         assign_shared_const_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).def_field_ref(), const_pointer_cast((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -756,7 +755,7 @@ cdef class __StructWithRefTypeSharedConst_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeSharedConst](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "opt_field", _module_types.Empty)
+            raise TypeError(f'opt_field is not a { _module_types.Empty !r}.')
         assign_shared_const_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).opt_field_ref(), const_pointer_cast((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -765,7 +764,7 @@ cdef class __StructWithRefTypeSharedConst_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cStructWithRefTypeSharedConst](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "req_field", _module_types.Empty)
+            raise TypeError(f'req_field is not a { _module_types.Empty !r}.')
         assign_shared_const_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).req_field_ref(), const_pointer_cast((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -792,7 +791,7 @@ cdef class __StructWithRefAndAnnotCppNoexceptMoveCtor_FieldsSetter(__StructField
             __reset_field[_module_cbindings.cStructWithRefAndAnnotCppNoexceptMoveCtor](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Empty):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "def_field", _module_types.Empty)
+            raise TypeError(f'def_field is not a { _module_types.Empty !r}.')
         assign_unique_ptr[_module_cbindings.cEmpty](deref(self._struct_cpp_obj).def_field_ref(), make_unique[_module_cbindings.cEmpty](deref((<_module_types.Empty?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 

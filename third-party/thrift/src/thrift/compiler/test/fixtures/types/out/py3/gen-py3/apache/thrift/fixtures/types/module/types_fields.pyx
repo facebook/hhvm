@@ -24,7 +24,6 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
-from thrift.py3.types import _from_python_or_raise
 
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
@@ -318,7 +317,7 @@ cdef class __TrivialNestedWithDefault_FieldsSetter(__StructFieldsSetter):
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTrivialNestedWithDefault](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.TrivialNumeric):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "n", _apache_thrift_fixtures_types_module_types.TrivialNumeric)
+            raise TypeError(f'n is not a { _apache_thrift_fixtures_types_module_types.TrivialNumeric !r}.')
         deref(self._struct_cpp_obj).n_ref().assign(deref((<_apache_thrift_fixtures_types_module_types.TrivialNumeric?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -390,7 +389,7 @@ cdef class __ComplexNestedWithDefault_FieldsSetter(__StructFieldsSetter):
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cComplexNestedWithDefault](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ComplexString):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "n", _apache_thrift_fixtures_types_module_types.ComplexString)
+            raise TypeError(f'n is not a { _apache_thrift_fixtures_types_module_types.ComplexString !r}.')
         deref(self._struct_cpp_obj).n_ref().assign(deref((<_apache_thrift_fixtures_types_module_types.ComplexString?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -593,7 +592,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyDataItem):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "data", _apache_thrift_fixtures_types_module_types.MyDataItem)
+            raise TypeError(f'data is not a { _apache_thrift_fixtures_types_module_types.MyDataItem !r}.')
         deref(self._struct_cpp_obj).data_ref().assign(deref((<_apache_thrift_fixtures_types_module_types.MyDataItem?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -701,7 +700,7 @@ cdef class __ForwardUsageRoot_FieldsSetter(__StructFieldsSetter):
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "ForwardUsageStruct", _apache_thrift_fixtures_types_module_types.ForwardUsageStruct)
+            raise TypeError(f'ForwardUsageStruct is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageStruct !r}.')
         deref(self._struct_cpp_obj).ForwardUsageStruct_ref().assign(deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -710,7 +709,7 @@ cdef class __ForwardUsageRoot_FieldsSetter(__StructFieldsSetter):
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageByRef):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "ForwardUsageByRef", _apache_thrift_fixtures_types_module_types.ForwardUsageByRef)
+            raise TypeError(f'ForwardUsageByRef is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageByRef !r}.')
         assign_unique_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef](deref(self._struct_cpp_obj).ForwardUsageByRef_ref(), make_unique[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageByRef?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
@@ -737,7 +736,7 @@ cdef class __ForwardUsageStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageRoot):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "foo", _apache_thrift_fixtures_types_module_types.ForwardUsageRoot)
+            raise TypeError(f'foo is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageRoot !r}.')
         assign_unique_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
@@ -764,7 +763,7 @@ cdef class __ForwardUsageByRef_FieldsSetter(__StructFieldsSetter):
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageRoot):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "foo", _apache_thrift_fixtures_types_module_types.ForwardUsageRoot)
+            raise TypeError(f'foo is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageRoot !r}.')
         assign_unique_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 

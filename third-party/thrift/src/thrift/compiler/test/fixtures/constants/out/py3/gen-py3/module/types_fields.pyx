@@ -24,7 +24,6 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
-from thrift.py3.types import _from_python_or_raise
 
 
 import module.types as _module_types
@@ -220,7 +219,7 @@ cdef class __struct2_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cstruct2](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.struct1):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "c", _module_types.struct1)
+            raise TypeError(f'c is not a { _module_types.struct1 !r}.')
         deref(self._struct_cpp_obj).c_ref().assign(deref((<_module_types.struct1?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
@@ -275,7 +274,7 @@ cdef class __struct3_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cstruct3](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.struct2):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "c", _module_types.struct2)
+            raise TypeError(f'c is not a { _module_types.struct2 !r}.')
         deref(self._struct_cpp_obj).c_ref().assign(deref((<_module_types.struct2?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 

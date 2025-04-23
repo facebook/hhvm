@@ -24,7 +24,6 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
-from thrift.py3.types import _from_python_or_raise
 
 
 import module.types as _module_types
@@ -263,7 +262,7 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cComplexStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "structOne", _module_types.SimpleStruct)
+            raise TypeError(f'structOne is not a { _module_types.SimpleStruct !r}.')
         deref(self._struct_cpp_obj).structOne_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -272,7 +271,7 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cComplexStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "structTwo", _module_types.SimpleStruct)
+            raise TypeError(f'structTwo is not a { _module_types.SimpleStruct !r}.')
         deref(self._struct_cpp_obj).structTwo_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -363,7 +362,7 @@ cdef class __BinaryUnionStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cBinaryUnionStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.BinaryUnion):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "u", _module_types.BinaryUnion)
+            raise TypeError(f'u is not a { _module_types.BinaryUnion !r}.')
         deref(self._struct_cpp_obj).u_ref().assign(deref((<_module_types.BinaryUnion?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -465,7 +464,7 @@ cdef class __CustomFields_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cCustomFields](deref(self._struct_cpp_obj), 8)
             return
         if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "struct_field", _module_types.SimpleStruct)
+            raise TypeError(f'struct_field is not a { _module_types.SimpleStruct !r}.')
         deref(self._struct_cpp_obj).struct_field_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -567,7 +566,7 @@ cdef class __CustomTypedefFields_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cCustomTypedefFields](deref(self._struct_cpp_obj), 8)
             return
         if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "struct_field", _module_types.SimpleStruct)
+            raise TypeError(f'struct_field is not a { _module_types.SimpleStruct !r}.')
         deref(self._struct_cpp_obj).struct_field_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
@@ -669,6 +668,6 @@ cdef class __AdaptedTypedefFields_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cAdaptedTypedefFields](deref(self._struct_cpp_obj), 8)
             return
         if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
-            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "struct_field", _module_types.SimpleStruct)
+            raise TypeError(f'struct_field is not a { _module_types.SimpleStruct !r}.')
         deref(self._struct_cpp_obj).struct_field_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 

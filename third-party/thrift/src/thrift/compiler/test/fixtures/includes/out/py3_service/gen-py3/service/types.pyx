@@ -37,7 +37,6 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
-from thrift.py3.types import _from_python_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf

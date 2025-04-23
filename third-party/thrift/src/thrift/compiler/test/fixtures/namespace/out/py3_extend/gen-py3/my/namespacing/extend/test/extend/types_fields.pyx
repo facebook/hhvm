@@ -22,7 +22,6 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types import _from_python_or_raise
 
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 

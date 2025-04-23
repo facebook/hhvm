@@ -131,6 +131,6 @@ apache::thrift::ServiceRequestInfoMap MyServiceFastServiceInfoHolder::staticRequ
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyServiceFast>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyServiceFast, false>::bundle)() =
     nullptr;
 }

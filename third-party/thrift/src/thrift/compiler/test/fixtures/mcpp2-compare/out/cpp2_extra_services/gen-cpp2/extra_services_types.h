@@ -936,7 +936,7 @@ unsigned long containerStruct2::read(Protocol_* iprot) {
 } // namespace extra::svc
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::extra::svc::containerStruct2> {
+template <> struct TSchemaAssociation<::extra::svc::containerStruct2, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = 7963631300631695261;
   static constexpr ::std::string_view definitionKey = {"\xc6\x12\x3e\xc6\x1b\x32\x4e\x22\x97\x31\xac\xc3\x83\xa8\x00\x64", 16};

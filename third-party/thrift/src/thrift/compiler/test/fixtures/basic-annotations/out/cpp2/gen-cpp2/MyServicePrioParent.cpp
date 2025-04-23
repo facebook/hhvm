@@ -319,6 +319,6 @@ apache::thrift::ServiceRequestInfoMap MyServicePrioParentServiceInfoHolder::stat
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyServicePrioParent>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyServicePrioParent, false>::bundle)() =
     nullptr;
 }

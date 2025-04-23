@@ -319,6 +319,6 @@ apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticReques
 } // namespace apache::thrift::fixtures::types
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::SomeService>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::SomeService, false>::bundle)() =
     nullptr;
 }

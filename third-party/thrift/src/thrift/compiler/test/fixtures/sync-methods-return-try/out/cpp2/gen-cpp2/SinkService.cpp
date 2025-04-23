@@ -827,6 +827,6 @@ apache::thrift::ServiceRequestInfoMap SinkServiceServiceInfoHolder::staticReques
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::SinkService>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::SinkService, false>::bundle)() =
     nullptr;
 }

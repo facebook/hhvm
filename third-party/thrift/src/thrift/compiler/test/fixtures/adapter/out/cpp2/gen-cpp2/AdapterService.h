@@ -76,7 +76,7 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::facebook::thrift::test::AdapterService> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::AdapterService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = 6075707212720674476;
   static constexpr ::std::string_view definitionKey = {"\x03\x9b\xff\xc3\x6a\xf9\xef\x06\x28\x55\x40\x94\x5b\xa1\x2c\xd7", 16};

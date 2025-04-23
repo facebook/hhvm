@@ -1185,6 +1185,6 @@ std::unique_ptr<apache::thrift::Tile> MyServiceAsyncProcessor::createInteraction
 }} // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyService>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyService, false>::bundle)() =
     nullptr;
 }

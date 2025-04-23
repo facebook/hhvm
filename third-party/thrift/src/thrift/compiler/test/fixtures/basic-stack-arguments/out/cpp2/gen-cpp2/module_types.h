@@ -306,12 +306,12 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::cpp2::MyStruct> {
+template <> struct TSchemaAssociation<::cpp2::MyStruct, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = -3445220662518901917;
   static constexpr ::std::string_view definitionKey = {"\x67\xe7\x97\xb3\xf2\x66\xb1\x2a\x05\x7c\x24\x4c\xe9\x65\xf9\x41", 16};
 };
-template <> struct TSchemaAssociation<::cpp2::MyEnum> {
+template <> struct TSchemaAssociation<::cpp2::MyEnum, true> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = -3445220662518901917;
   static constexpr ::std::string_view definitionKey = {"\x13\x0d\x4c\xaf\x4f\xfb\x8d\x8e\x98\x04\x37\x0c\x36\xe9\xbc\xce", 16};

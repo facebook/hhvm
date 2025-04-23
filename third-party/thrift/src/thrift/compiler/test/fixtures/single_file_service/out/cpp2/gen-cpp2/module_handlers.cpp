@@ -319,7 +319,7 @@ std::unique_ptr<apache::thrift::Tile> AAsyncProcessor::createInteractionImpl(con
 }} // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::A>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::A, false>::bundle)() =
     nullptr;
 }
 
@@ -752,7 +752,7 @@ apache::thrift::ServiceRequestInfoMap BServiceInfoHolder::staticRequestInfoMap()
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::B>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::B, false>::bundle)() =
     nullptr;
 }
 
@@ -938,7 +938,7 @@ std::unique_ptr<apache::thrift::Tile> CAsyncProcessor::createInteractionImpl(con
 }} // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::C>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::C, false>::bundle)() =
     nullptr;
 }
 

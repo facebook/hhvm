@@ -57,7 +57,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::thrift::shared_
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::thrift::shared_interactions::DoSomethingResult>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::thrift::shared_interactions::DoSomethingResult, false>::bundle)() =
     nullptr;
 
 } // namespace detail

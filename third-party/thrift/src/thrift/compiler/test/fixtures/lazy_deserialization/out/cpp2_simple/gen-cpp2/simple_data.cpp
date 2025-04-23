@@ -323,31 +323,31 @@ THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::Foo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::Foo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::LazyFoo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::LazyFoo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalFoo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalFoo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalLazyFoo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalLazyFoo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalBoxedLazyFoo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalBoxedLazyFoo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::LazyCppRef>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::LazyCppRef, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::IndexedFoo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::IndexedFoo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalIndexedFoo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalIndexedFoo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::Empty>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::Empty, false>::bundle)() =
     nullptr;
 
 } // namespace detail

@@ -57,10 +57,10 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::CustomExc
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::CustomException>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::CustomException, false>::bundle)() =
     &::cpp2::module_constants::_fbthrift_schema_b747839c13cb3aa5_includes;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Result>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Result, true>::bundle)() =
     &::cpp2::module_constants::_fbthrift_schema_b747839c13cb3aa5_includes;
 
 } // namespace detail

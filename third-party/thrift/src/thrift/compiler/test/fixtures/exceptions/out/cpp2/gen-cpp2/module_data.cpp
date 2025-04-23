@@ -169,25 +169,25 @@ THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::Banal>::i
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Fiery>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Fiery, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Serious>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Serious, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ComplexFieldNames>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ComplexFieldNames, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::CustomFieldNames>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::CustomFieldNames, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ExceptionWithPrimitiveField>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ExceptionWithPrimitiveField, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ExceptionWithStructuredAnnotation>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ExceptionWithStructuredAnnotation, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Banal>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Banal, false>::bundle)() =
     nullptr;
 
 } // namespace detail

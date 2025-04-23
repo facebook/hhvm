@@ -69,10 +69,10 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::EchoRespo
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::EchoRequest>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::EchoRequest, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::EchoResponse>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::EchoResponse, false>::bundle)() =
     nullptr;
 
 } // namespace detail

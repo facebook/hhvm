@@ -819,6 +819,6 @@ apache::thrift::ServiceRequestInfoMap service2ServiceInfoHolder::staticRequestIn
 } // namespace test_cpp2::cpp_reflection
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::service2>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::service2, false>::bundle)() =
     nullptr;
 }

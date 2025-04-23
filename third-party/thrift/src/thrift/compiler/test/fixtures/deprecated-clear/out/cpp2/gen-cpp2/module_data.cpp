@@ -112,10 +112,10 @@ THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::apache::thrift
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::StructWithDefaultStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::StructWithDefaultStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::MyEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::MyEnum, true>::bundle)() =
     nullptr;
 
 } // namespace detail

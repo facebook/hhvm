@@ -319,6 +319,6 @@ apache::thrift::ServiceRequestInfoMap HeaderClientMethodsAnnotationOnFunctionSer
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction, false>::bundle)() =
     nullptr;
 }

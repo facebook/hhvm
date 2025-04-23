@@ -66,7 +66,7 @@ class ServiceHandler<::py3::simple::RederivedService> : virtual public ::py3::si
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::py3::simple::RederivedService> {
+template <> struct TSchemaAssociation<::py3::simple::RederivedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = -1303334149772697254;
   static constexpr ::std::string_view definitionKey = {"\x85\x32\xed\xbb\x45\x11\xc6\x49\x2e\xbb\xa9\x45\xd3\x8e\x5a\x24", 16};

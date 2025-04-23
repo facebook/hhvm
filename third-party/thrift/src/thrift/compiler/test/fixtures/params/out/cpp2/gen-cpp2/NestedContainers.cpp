@@ -697,6 +697,6 @@ apache::thrift::ServiceRequestInfoMap NestedContainersServiceInfoHolder::staticR
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::NestedContainers>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::NestedContainers, false>::bundle)() =
     nullptr;
 }

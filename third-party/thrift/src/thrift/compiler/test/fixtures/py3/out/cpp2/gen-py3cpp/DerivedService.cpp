@@ -193,6 +193,6 @@ apache::thrift::ServiceRequestInfoMap DerivedServiceServiceInfoHolder::staticReq
 } // namespace py3::simple
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::DerivedService>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::DerivedService, false>::bundle)() =
     nullptr;
 }

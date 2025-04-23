@@ -76,7 +76,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments> {
+template <> struct TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = 4623621384729371878;
   static constexpr ::std::string_view definitionKey = {"\xaf\x3f\x98\x62\x71\x40\xdf\xb7\xce\x40\x6f\xad\x95\x64\x7b\xa6", 16};

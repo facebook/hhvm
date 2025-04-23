@@ -156,7 +156,7 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::test::fixtures::basic::MyService> {
+template <> struct TSchemaAssociation<::test::fixtures::basic::MyService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = 4623621384729371878;
   static constexpr ::std::string_view definitionKey = {"\x2c\x98\x5b\xeb\x51\x21\x74\x8c\x7c\xe2\xa0\x9b\xbe\xf5\x54\x63", 16};

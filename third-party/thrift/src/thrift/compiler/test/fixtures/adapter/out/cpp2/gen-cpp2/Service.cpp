@@ -191,6 +191,6 @@ apache::thrift::ServiceRequestInfoMap ServiceServiceInfoHolder::staticRequestInf
 } // namespace facebook::thrift::test
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Service>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Service, false>::bundle)() =
     nullptr;
 }

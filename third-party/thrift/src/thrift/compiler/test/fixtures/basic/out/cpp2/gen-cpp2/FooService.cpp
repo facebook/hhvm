@@ -193,6 +193,6 @@ apache::thrift::ServiceRequestInfoMap FooServiceServiceInfoHolder::staticRequest
 } // namespace test::fixtures::basic
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::FooService>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::FooService, false>::bundle)() =
     nullptr;
 }

@@ -59,10 +59,10 @@ THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::Nada>::is
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Empty>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Empty, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Nada>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Nada, false>::bundle)() =
     nullptr;
 
 } // namespace detail

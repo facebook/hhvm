@@ -79,10 +79,10 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::module2::BigStr
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::module2::Struct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::module2::Struct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::module2::BigStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::module2::BigStruct, false>::bundle)() =
     nullptr;
 
 } // namespace detail

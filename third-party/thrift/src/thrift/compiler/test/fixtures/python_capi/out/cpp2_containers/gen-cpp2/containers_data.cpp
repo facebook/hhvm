@@ -239,25 +239,25 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateLists>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateLists, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateSets>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateSets, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateMaps>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateMaps, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TWrapped>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TWrapped, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionA>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionA, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionB>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionB, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionC>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionC, false>::bundle)() =
     nullptr;
 
 } // namespace detail

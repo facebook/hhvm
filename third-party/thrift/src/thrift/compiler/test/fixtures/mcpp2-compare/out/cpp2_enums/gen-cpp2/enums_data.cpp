@@ -52,22 +52,22 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::ns::q
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::SomeStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::SomeStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumA>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumA, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumB>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumB, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumC>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumC, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumD>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumD, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumE>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumE, true>::bundle)() =
     nullptr;
 
 } // namespace detail

@@ -261,34 +261,34 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::Containers>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::Containers, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyDataItem>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyDataItem, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyException>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyException, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyExceptionWithMessage>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyExceptionWithMessage, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::ReservedKeyword>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::ReservedKeyword, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::UnionToBeRenamed>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::UnionToBeRenamed, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyEnum, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::HackEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::HackEnum, true>::bundle)() =
     nullptr;
 
 } // namespace detail

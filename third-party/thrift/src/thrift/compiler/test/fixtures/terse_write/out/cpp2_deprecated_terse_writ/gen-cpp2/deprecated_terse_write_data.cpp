@@ -484,28 +484,28 @@ THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::facebook::thri
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyEnum, true>::bundle)() =
     nullptr;
 
 } // namespace detail

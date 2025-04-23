@@ -5317,6 +5317,6 @@ apache::thrift::ServiceRequestInfoMap SimpleServiceServiceInfoHolder::staticRequ
 } // namespace py3::simple
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleService>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleService, false>::bundle)() =
     nullptr;
 }

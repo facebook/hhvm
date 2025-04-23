@@ -69,10 +69,10 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::ShouldBeB
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::CustomException>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::CustomException, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ShouldBeBoxed>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ShouldBeBoxed, false>::bundle)() =
     nullptr;
 
 } // namespace detail

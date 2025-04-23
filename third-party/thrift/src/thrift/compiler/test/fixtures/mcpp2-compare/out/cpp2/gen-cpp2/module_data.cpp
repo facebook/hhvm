@@ -990,61 +990,61 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::some::valid::ns
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::Empty>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::Empty, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ASimpleStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ASimpleStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ASimpleStructNoexcept>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ASimpleStructNoexcept, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::SimpleUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::SimpleUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ComplexUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ComplexUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnException>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnException, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnotherException>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnotherException, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::containerStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::containerStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyIncludedStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyIncludedStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ComplexContainerStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ComplexContainerStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::FloatStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::FloatStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::FloatUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::FloatUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyEnumA>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyEnumA, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedEnum, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedEnum2>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedEnum2, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyEnumB>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyEnumB, true>::bundle)() =
     nullptr;
 
 } // namespace detail

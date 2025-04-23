@@ -770,118 +770,118 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::empty_struct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::empty_struct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::decorated_struct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::decorated_struct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ContainerStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ContainerStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CppTypeStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CppTypeStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::VirtualStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::VirtualStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::TrivialNumeric>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::TrivialNumeric, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::TrivialNestedWithDefault, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ComplexString>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ComplexString, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ComplexNestedWithDefault, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MinPadding>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MinPadding, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MinPaddingWithCustomType, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyDataItem>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyDataItem, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::Renamed>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::Renamed, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AnnotatedTypes>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AnnotatedTypes, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageRoot>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageRoot, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageByRef>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageByRef, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteMap>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteMap, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteMapDep>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteMapDep, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteMap>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteMap, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteMapDep>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteMapDep, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteList>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteList, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteListDep>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteListDep, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteList>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteList, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteListDep>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::CompleteListDep, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AdaptedList>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AdaptedList, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::detail::AdaptedListDep>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::detail::AdaptedListDep, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::DependentAdaptedList>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::DependentAdaptedList, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AllocatorAware>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AllocatorAware, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AllocatorAware2>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::AllocatorAware2, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::TypedefStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::TypedefStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::StructWithDoubleUnderscores, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::has_bitwise_ops>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::has_bitwise_ops, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::is_unscoped>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::is_unscoped, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyForwardRefEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::MyForwardRefEnum, true>::bundle)() =
     nullptr;
 
 } // namespace detail

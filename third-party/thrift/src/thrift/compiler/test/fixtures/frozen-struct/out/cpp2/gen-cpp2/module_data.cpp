@@ -153,19 +153,19 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::some::ns::CppRe
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::ModuleA>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::ModuleA, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::ModuleB>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::ModuleB, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::detail::DirectlyAdapted>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::detail::DirectlyAdapted, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::CppRef>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::CppRef, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::EnumB>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::ns::EnumB, true>::bundle)() =
     nullptr;
 
 } // namespace detail

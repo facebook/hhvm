@@ -714,12 +714,12 @@ unsigned long TestStruct::read(Protocol_* iprot) {
 } // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct> {
+template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = -6351212033995931189;
   static constexpr ::std::string_view definitionKey = {"\x2d\x60\x8b\x88\x79\x46\xff\x6e\x68\xe3\xf7\xf9\x8b\x0b\x74\xdb", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct> {
+template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = -6351212033995931189;
   static constexpr ::std::string_view definitionKey = {"\x9d\xe7\x5b\x5d\x71\xcc\x3f\xb2\xf7\x7b\xe9\x63\x03\x19\x76\xe6", 16};

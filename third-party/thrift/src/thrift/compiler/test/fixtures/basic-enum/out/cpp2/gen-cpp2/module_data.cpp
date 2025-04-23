@@ -57,19 +57,19 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::EmptyEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::EmptyEnum, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyEnum, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyBigEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enumstrict::MyBigEnum, true>::bundle)() =
     nullptr;
 
 } // namespace detail

@@ -163,19 +163,19 @@ THRIFT_DATA_MEMBER const std::array<int, 12> TStructDataStorage<::facebook::thri
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Foo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Foo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Bar>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Bar, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Baz>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Baz, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::OpEncodeStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::OpEncodeStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Enum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Enum, true>::bundle)() =
     nullptr;
 
 } // namespace detail

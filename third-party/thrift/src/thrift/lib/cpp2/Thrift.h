@@ -485,7 +485,7 @@ constexpr std::bool_constant<std::is_invocable_v<F&&, T&>> callable(F&&) {
 /**
  * Specialization defn in _types.h / service.h
  */
-template <typename T>
+template <typename T, bool IsEnum = std::is_enum_v<T>>
 struct TSchemaAssociation {
   static_assert(sizeof(T) == ~0ull, "invalid use of base template");
 };

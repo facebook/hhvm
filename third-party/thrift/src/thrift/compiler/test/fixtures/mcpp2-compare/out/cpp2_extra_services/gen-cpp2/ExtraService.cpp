@@ -975,6 +975,6 @@ apache::thrift::ServiceRequestInfoMap ExtraServiceServiceInfoHolder::staticReque
 } // namespace extra::svc
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::extra::svc::ExtraService>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::extra::svc::ExtraService, false>::bundle)() =
     nullptr;
 }

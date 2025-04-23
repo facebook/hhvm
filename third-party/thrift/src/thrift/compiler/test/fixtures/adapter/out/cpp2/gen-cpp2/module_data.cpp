@@ -923,112 +923,112 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::MyAnnotation>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::MyAnnotation, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Foo>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Foo, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Baz>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Baz, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Bar>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Bar, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::DirectlyAdapted>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::DirectlyAdapted, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::IndependentDirectlyAdapted, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::StructWithFieldAdapter>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::StructWithFieldAdapter, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::TerseAdaptedFields>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::TerseAdaptedFields, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::B>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::B, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::A>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::A, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Config>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Config, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::MyStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::MyStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AdaptTestStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AdaptTestStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AdaptTemplatedTestStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AdaptTemplatedTestStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ThriftAdaptTestUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ThriftAdaptTestUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ThriftAdaptedStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ThriftAdaptedStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::DirectlyAdaptedStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::StructFieldAdaptedStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::StructFieldAdaptedStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CircularAdaptee>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CircularAdaptee, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CircularStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CircularStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ReorderedStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ReorderedStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::DeclaredAfterStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::DeclaredAfterStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::UnderlyingRenamedStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::UnderlyingRenamedStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::UnderlyingSameNamespaceStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::HeapAllocated>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::HeapAllocated, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::MoveOnly>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::MoveOnly, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AlsoMoveOnly>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::AlsoMoveOnly, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ApplyAdapter>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ApplyAdapter, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::TransitiveAdapted>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::detail::TransitiveAdapted, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CountingStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CountingStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Person>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Person, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Person2>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Person2, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Renamed>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Renamed, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Color>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Color, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ThriftAdaptedEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::ThriftAdaptedEnum, true>::bundle)() =
     nullptr;
 
 } // namespace detail

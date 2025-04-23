@@ -464,49 +464,49 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::Ad
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleException>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleException, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::OptionalRefStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::OptionalRefStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenTypeFieldsStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenTypeFieldsStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::detail::AdaptedUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::detail::AdaptedUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenException>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenException, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::ComplexStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::ComplexStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnion>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnion, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnionStruct>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnionStruct, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomFields>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomFields, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomTypedefFields>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomTypedefFields, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AdaptedTypedefFields>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AdaptedTypedefFields, false>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnum>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnum, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnumRenamed>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnumRenamed, true>::bundle)() =
     nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::Flags>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::Flags, true>::bundle)() =
     nullptr;
 
 } // namespace detail

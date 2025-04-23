@@ -129,7 +129,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::extra::svc::ExtraService> {
+template <> struct TSchemaAssociation<::extra::svc::ExtraService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
   static constexpr int64_t programId = 7963631300631695261;
   static constexpr ::std::string_view definitionKey = {"\xf4\x9d\x99\xcb\xe7\xe7\xbe\xb5\xb8\x9b\x41\x92\x5b\xd2\x28\x1b", 16};

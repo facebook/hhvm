@@ -976,6 +976,6 @@ std::unique_ptr<apache::thrift::Tile> InteractWithSharedAsyncProcessor::createIn
 }} // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::InteractWithShared>::bundle)() =
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::InteractWithShared, false>::bundle)() =
     nullptr;
 }

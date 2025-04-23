@@ -1874,3 +1874,20 @@ module Locl_subst = struct
     else
       apply_ty ty ~subst ~combine_reasons
 end
+
+let find_locl_ty locl_ty ~p =
+  let acc = ref None in
+  let on_ty ty ~ctx =
+    let ty =
+      if p ty then begin
+        acc := Some ty;
+        `Stop ty
+      end else
+        `Continue ty
+    in
+    (ctx, ty)
+  in
+  let id_pass = Pass.identity () in
+  let top_down = Pass.{ id_pass with on_ty_locl_ty = Some on_ty } in
+  let _ = transform_ty_locl_ty locl_ty ~ctx:() ~top_down ~bottom_up:id_pass in
+  !acc

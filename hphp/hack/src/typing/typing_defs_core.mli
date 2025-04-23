@@ -794,3 +794,6 @@ module Locl_subst : sig
       (src:Typing_reason.t -> dest:Typing_reason.t -> Typing_reason.t) ->
     locl_phase ty fun_type
 end
+
+(** Find the first element of a [locl_ty] satisfying the predicate [p] *)
+val find_locl_ty : locl_ty -> p:(locl_ty -> bool) -> locl_ty option

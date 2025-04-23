@@ -1,12 +1,12 @@
 ERROR: File "lambda_bad_co.php", line 26, characters 29-30:
 Invalid argument (Typing[4110])
   File "lambda_bad_co.php", line 16, characters 15-19:
-  Expected `Tblah#2` which corresponds to the type parameter `Tblah` in the polymorphic function
+  Expected `Tblah#2` which corresponds to the rank-2 type parameter `Tblah` in the polymorphic function
   File "lambda_bad_co.php", line 25, characters 21-25:
   But got `bool`
 ERROR: File "lambda_bad_co.php", line 28, characters 29-46:
 Invalid argument (Typing[4110])
   File "lambda_bad_co.php", line 16, characters 15-19:
-  Expected `Tblah#2` which corresponds to the type parameter `Tblah` in the polymorphic function
+  Expected `Tblah#2` which corresponds to the rank-2 type parameter `Tblah` in the polymorphic function
   File "lambda_bad_co.php", line 28, characters 42-46:
   But got `bool`

@@ -6583,6 +6583,19 @@ end = struct
     in
     create ~code:Error_code.NeedsConcreteOverride ~reasons ()
 
+  let higher_rank_tparam_escape
+      tvar_pos pos_with_generic generic_reason generic_name =
+    let reasons =
+      lazy
+        (( pos_with_generic,
+           Format.sprintf
+             "A higher rank generic `%s` will escape its scope"
+             generic_name )
+         :: Typing_reason.to_string "" generic_reason
+        @ [(tvar_pos, "Please make this type explicit")])
+    in
+    create ~code:Error_code.RigidTVarEscape ~reasons ()
+
   let eval t ~env ~current_span =
     let open Typing_error.Secondary in
     match t with
@@ -6801,6 +6814,14 @@ end = struct
       Eval_result.single (label_unknown enum_name decl_pos most_similar)
     | Needs_concrete_override { pos; parent_pos } ->
       Eval_result.single (needs_concrete_override pos parent_pos)
+    | Higher_rank_tparam_escape
+        { tvar_pos; pos_with_generic; generic_reason; generic_name } ->
+      Eval_result.single
+        (higher_rank_tparam_escape
+           tvar_pos
+           pos_with_generic
+           generic_reason
+           generic_name)
 end
 
 and Eval_callback : sig

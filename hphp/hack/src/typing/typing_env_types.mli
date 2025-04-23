@@ -64,6 +64,8 @@ type env = {
       (** A set of constraints that are global to a given method *)
   log_levels: int SMap.t;
   inference_env: Typing_inference_env.t;
+  rank: int;
+      (** The rank at which fresh type variables and type parameters should be generated *)
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
@@ -137,3 +139,9 @@ val get_equal_bounds :
   env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
 
 val get_tparams_in_ty_and_acc : env -> SSet.t -> locl_ty -> SSet.t
+
+val get_rank : env -> int
+
+val increment_rank : env -> env
+
+val decrement_rank : env -> env

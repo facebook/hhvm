@@ -274,6 +274,7 @@ type prj_asymm =
   | Prj_asymm_nullable
   | Prj_asymm_arraykey
   | Prj_asymm_num
+  | Prj_asymm_contains
 [@@deriving hash]
 
 let prj_asymm_to_json = function
@@ -283,6 +284,7 @@ let prj_asymm_to_json = function
   | Prj_asymm_nullable -> Hh_json.JSON_String "Prj_asymm_nullable"
   | Prj_asymm_arraykey -> Hh_json.JSON_String "Prj_asymm_arraykey"
   | Prj_asymm_num -> Hh_json.JSON_String "Prj_asymm_num"
+  | Prj_asymm_contains -> Hh_json.JSON_String "Prj_asymm_contains"
 
 (* ~~ Flow kinds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -1053,7 +1055,8 @@ type witness_decl =
   | Pessimised_this of (Pos_or_decl.t[@hash.ignore])
   | Illegal_recursive_type of (Pos_or_decl.t[@hash.ignore]) * string
   | Support_dynamic_type_assume of (Pos_or_decl.t[@hash.ignore])
-  | Polymorphic_type_param of (Pos_or_decl.t[@hash.ignore]) * string
+  | Polymorphic_type_param of
+      (Pos_or_decl.t[@hash.ignore]) * string * string * int
 [@@deriving hash]
 
 let witness_decl_to_raw_pos = function
@@ -1085,7 +1088,7 @@ let witness_decl_to_raw_pos = function
   | Pessimised_prop (pos_or_decl, _)
   | Illegal_recursive_type (pos_or_decl, _)
   | Support_dynamic_type_assume pos_or_decl
-  | Polymorphic_type_param (pos_or_decl, _) ->
+  | Polymorphic_type_param (pos_or_decl, _, _, _) ->
     pos_or_decl
 
 let map_pos_witness_decl pos_or_decl witness =
@@ -1121,8 +1124,8 @@ let map_pos_witness_decl pos_or_decl witness =
   | Illegal_recursive_type (p, name) ->
     Illegal_recursive_type (pos_or_decl p, name)
   | Support_dynamic_type_assume p -> Support_dynamic_type_assume (pos_or_decl p)
-  | Polymorphic_type_param (p, orig_name) ->
-    Polymorphic_type_param (pos_or_decl p, orig_name)
+  | Polymorphic_type_param (p, new_name, orig_name, rank) ->
+    Polymorphic_type_param (pos_or_decl p, new_name, orig_name, rank)
 
 let string_of_pessimise_reason = function
   | PRabstract -> "abstract"
@@ -1216,10 +1219,14 @@ let pp_witness_decl fmt witness =
     | Support_dynamic_type_assume p
     | Global_class_prop p ->
       Pos_or_decl.pp fmt p
-    | Polymorphic_type_param (p, s) ->
+    | Polymorphic_type_param (p, s1, s2, r) ->
       Pos_or_decl.pp fmt p;
       comma ();
-      Format.pp_print_string fmt s
+      Format.pp_print_string fmt s1;
+      comma ();
+      Format.pp_print_string fmt s2;
+      comma ();
+      Format.pp_print_int fmt r
     | Tconst_no_cstr pid -> pp_pos_id fmt pid
     | Cstr_on_generics (p, pid) ->
       Pos_or_decl.pp fmt p;
@@ -1352,12 +1359,18 @@ let witness_decl_to_json = function
           ( "Support_dynamic_type_assume",
             JSON_Array [Pos_or_decl.json pos_or_decl] );
         ])
-  | Polymorphic_type_param (pos_or_decl, orig_name) ->
+  | Polymorphic_type_param (pos_or_decl, new_name, orig_name, rank) ->
     Hh_json.(
       JSON_Object
         [
           ( "Polymorphic_type_param",
-            JSON_Array [Pos_or_decl.json pos_or_decl; string_ orig_name] );
+            JSON_Array
+              [
+                Pos_or_decl.json pos_or_decl;
+                string_ new_name;
+                string_ orig_name;
+                int_ rank;
+              ] );
         ])
   | Pessimised_inout pos_or_decl ->
     Hh_json.(
@@ -1405,12 +1418,24 @@ let pessimise_reason_to_string pr =
 let witness_decl_to_string prefix witness =
   match witness with
   | Witness_from_decl pos_or_decl -> (pos_or_decl, prefix)
-  | Polymorphic_type_param (pos_or_decl, orig_name) ->
-    ( pos_or_decl,
-      Format.sprintf
-        {|%s which corresponds to the type parameter `%s` in the polymorphic function|}
-        prefix
-        orig_name )
+  | Polymorphic_type_param (pos_or_decl, new_name, orig_name, rank) ->
+    let msg =
+      let new_name = Format.sprintf "`%s`" new_name in
+      if String.is_suffix prefix ~suffix:new_name then
+        Format.sprintf
+          {|%s which corresponds to the rank-%n type parameter `%s` in the polymorphic function|}
+          prefix
+          (rank + 1)
+          orig_name
+      else
+        Format.sprintf
+          {|%s where %s corresponds to the rank-%n type parameter `%s` in the polymorphic function|}
+          prefix
+          new_name
+          (rank + 1)
+          orig_name
+    in
+    (pos_or_decl, msg)
   | Idx_vector_from_decl pos_or_decl ->
     ( pos_or_decl,
       prefix
@@ -2561,8 +2586,8 @@ module Constructors = struct
 
   let yield_send p = from_witness_locl @@ Yield_send p
 
-  let polymorphic_type_param (p, orig_name) =
-    from_witness_decl @@ Polymorphic_type_param (p, orig_name)
+  let polymorphic_type_param (p, new_name, orig_name, rank) =
+    from_witness_decl @@ Polymorphic_type_param (p, new_name, orig_name, rank)
 
   let lost_info (s, r, b) = Lost_info (s, r, b)
 
@@ -2817,6 +2842,12 @@ module Constructors = struct
 
   let prj_asymm_super ~super ~super_prj prj =
     Prj_one { part = super_prj; prj; whole = super }
+
+  let prj_contains_sub ~sub ~sub_prj =
+    prj_asymm_sub ~sub ~sub_prj Prj_asymm_contains
+
+  let prj_contains_super ~super ~super_prj =
+    prj_asymm_super ~super ~super_prj Prj_asymm_contains
 
   let prj_union_sub ~sub ~sub_prj = prj_asymm_sub ~sub ~sub_prj Prj_asymm_union
 
@@ -3369,6 +3400,8 @@ module Derivation = struct
         "The subtype is an arraykey type so next I checked the subtype constraint is satisfied for both the int and string parts."
       | Prj_asymm_neg ->
         "The subtype is a negated type so next I checked the inner type."
+      | Prj_asymm_contains ->
+        "The subtype is some aggregate type so next I checked one the types that it contains."
 
     let explain_prj_asymm_super prj =
       match prj with
@@ -3384,6 +3417,8 @@ module Derivation = struct
         "The supertype is an arraykey type so next I checked the subtype constraint is satisfied for either the int or string part."
       | Prj_asymm_neg ->
         "The supertype is a negated type so I checked the inner type."
+      | Prj_asymm_contains ->
+        "The supertype is some aggregate type so next I checked one the types that it contains."
 
     let explain = function
       | Using_prj prj -> explain_prj prj

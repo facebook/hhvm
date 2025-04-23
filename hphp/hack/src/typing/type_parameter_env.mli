@@ -15,6 +15,8 @@ type tparam_info = Typing_kinding_defs.kind
 
 type t [@@deriving hash]
 
+val bindings : t -> (tparam_name * tparam_info) list
+
 val empty : t
 
 val mem : tparam_name -> t -> bool
@@ -63,6 +65,8 @@ val get_require_dynamic : t -> tparam_name -> bool
 val get_tparam_names : t -> tparam_name list
 
 val get_tparams : t -> (Pos_or_decl.t * tparam_info) SMap.t
+
+val get_rank : t -> tparam_name -> int
 
 val is_consistent : t -> bool
 

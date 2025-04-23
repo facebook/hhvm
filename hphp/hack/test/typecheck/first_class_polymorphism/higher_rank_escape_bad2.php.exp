@@ -1,0 +1,8 @@
+ERROR: File "higher_rank_escape_bad2.php", line 11, characters 18-19:
+Invalid argument (Typing[4110])
+  File "higher_rank_escape_bad2.php", line 7, characters 42-47:
+  A higher rank generic `T#1` will escape its scope
+  File "higher_rank_escape_bad2.php", line 7, characters 35-35:
+   where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "higher_rank_escape_bad2.php", line 10, characters 13-13:
+  Please make this type explicit

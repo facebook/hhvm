@@ -93,6 +93,8 @@ let expand_var env r v =
   let (inference_env, ty_solution) = Inf.expand_var env.inference_env r v in
   ({ env with inference_env }, ty_solution)
 
+let rank_of_tvar { inference_env; _ } tvid = Inf.get_rank inference_env tvid
+
 let fresh_type_reason ?variance env p r =
   log_env_change_ "fresh_type_reason" env
   @@
@@ -106,6 +108,18 @@ let fresh_type env p =
   @@
   let (inference_env, res) =
     Inf.fresh_type env.inference_env env.tvar_id_provider p
+  in
+  ({ env with inference_env }, res)
+
+let fresh_type_invariant_with_rank env rank p =
+  log_env_change_ "fresh_type_invariant_with_rank" env
+  @@
+  let (inference_env, res) =
+    Inf.fresh_type_invariant_with_rank
+      env.inference_env
+      env.tvar_id_provider
+      rank
+      p
   in
   ({ env with inference_env }, res)
 
@@ -500,6 +514,7 @@ let add_fresh_generic_parameter env pos prefix ~reified ~enforceable ~newable =
         newable;
         require_dynamic = true;
         parameters = [];
+        rank = 0;
       }
   in
   add_fresh_generic_parameter_by_kind env pos prefix kind
@@ -525,6 +540,7 @@ let get_tpenv_tparams env =
               require_dynamic = _;
               (* FIXME what to do here? it seems dangerous to just traverse *)
               parameters = _;
+              rank = _;
             }
           acc ->
         let folder ty acc =
@@ -2110,3 +2126,5 @@ let with_outside_expr_tree env ~macro_variables f =
   (env, r1, r2, new_macro_type_mapping)
 
 let is_in_expr_tree env = Option.is_some env.in_expr_tree
+
+let rank_of_tparam env tparam = Type_parameter_env.get_rank env.tpenv tparam

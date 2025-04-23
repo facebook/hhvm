@@ -43,6 +43,9 @@ val fresh_type_reason :
 
 val fresh_type_invariant : t -> Tvid.provider -> Pos.t -> t * locl_ty
 
+val fresh_type_invariant_with_rank :
+  t -> Tvid.provider -> int -> Pos.t -> t * locl_ty
+
 val open_tyvars : t -> Pos.t -> t
 
 val get_current_tyvars : t -> Tvid.t list
@@ -175,3 +178,5 @@ val remove_var :
 val force_lazy_values : t -> t
 
 val is_error : t -> Tvid.t -> bool
+
+val get_rank : t -> Tvid.t -> int

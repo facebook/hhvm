@@ -254,6 +254,7 @@ module Subtype_env = struct
             class_sub_classname typechecker option, but it is unconditionally
             false for type well-formedness checks. *)
     recursion_tracker: Subtype_recursion_tracker.t;
+    check_rank: bool;
   }
 
   let set_on_error t on_error = { t with on_error }
@@ -283,6 +284,7 @@ module Subtype_env = struct
       ?(is_coeffect = false)
       ?(in_transitive_closure = false)
       ?(ignore_likes = false)
+      ?(check_rank = false)
       ~class_sub_classname
       ~(log_level : int)
       on_error =
@@ -302,6 +304,7 @@ module Subtype_env = struct
       ignore_likes;
       class_sub_classname;
       recursion_tracker = Subtype_recursion_tracker.empty;
+      check_rank;
     }
 
   let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
@@ -335,8 +338,7 @@ module Subtype_env = struct
       Typing_error.Secondary.Violated_constraint
         { cstrs; ty_sub; ty_sup = ty_super; is_coeffect }
 
-  let fail t ~ty_sub ~ty_super =
-    let secondary_error = mk_secondary_error t ty_sub ty_super in
+  let fail_with_secondary_error t secondary_error =
     match t.tparam_constraints with
     | [] ->
       Option.map
@@ -353,6 +355,9 @@ module Subtype_env = struct
         ~f:
           Typing_error.(
             (fun on_error -> apply_reasons ~on_error secondary_error))
+
+  let fail t ~ty_sub ~ty_super =
+    fail_with_secondary_error t (mk_secondary_error t ty_sub ty_super)
 
   let fail_with_suffix t ~ty_sub ~ty_super suffix =
     let secondary_error = mk_secondary_error t ty_sub ty_super in
@@ -385,6 +390,10 @@ module Subtype_env = struct
       op
     |> Result.map ~f:(fun recursion_tracker ->
            { subtype_env with recursion_tracker })
+
+  let set_check_rank t check_rank = { t with check_rank }
+
+  let get_check_rank { check_rank; _ } = check_rank
 end
 
 module Logging = struct
@@ -777,6 +786,27 @@ end = struct
         ty_super
   end
 
+  (* Find the first generic occurring in [ty] with a rank higher than [rank]  *)
+  let find_higher_rank_generic env subtype_env ty rank =
+    (* To avoid this potentially expensive check we record when the sub- or
+       supertype _may_ contain a higher rank type parameter. *)
+    if Subtype_env.get_check_rank subtype_env then
+      let p ty =
+        match get_node ty with
+        | Tgeneric (name, _) -> Env.rank_of_tparam env name > rank
+        | _ -> false
+      in
+      let ty_opt = Typing_defs_core.find_locl_ty ty ~p in
+      Option.map ty_opt ~f:(fun ty ->
+          match deref ty with
+          | (r, Tgeneric (name, _)) -> (r, name)
+          | _ ->
+            (* We are guaranteed that if the result if [Some(...)] then the type
+               is a [Tgeneric] so something is seriously wrong here *)
+            failwith "find_higher_rank_generic: unexpected type")
+    else
+      None
+
   let is_final_and_invariant env id =
     let class_def = Env.get_class env id in
     match class_def with
@@ -1007,39 +1037,57 @@ end = struct
         (sub_supportdyn, tyl)
         rhs
         env
-    | (_, Tvar id) ->
-      (* For subtyping queries of the form
-       *
-       *   Tvar #id <: (Tvar #id | ...)
-       *
-       * `remove_tyvar_from_upper_bound` simplifies the union to
-       * `mixed`. This indicates that the query is discharged. If we find
-       * any other upper bound, we leave the subtyping query as it is.
-       *)
-      let (env, simplified_super_ty) =
-        Typing_solver_utils.remove_tyvar_from_upper_bound
-          env
-          id
-          (LoclType ty_super)
-      in
-      (* If the type is already in the upper bounds of the type variable,
-       * then we already know that this subtype assertion is valid
-       *)
-      if ITySet.mem simplified_super_ty (Env.get_tyvar_upper_bounds env id) then
-        valid env
-      else
-        let mixed = MakeType.mixed Reason.none in
-        (match simplified_super_ty with
-        | LoclType simplified_super_ty when ty_equal simplified_super_ty mixed
-          ->
-          valid env
-        | _ ->
-          mk_issubtype_prop
-            ~sub_supportdyn
-            ~coerce:subtype_env.Subtype_env.coerce
+    | (r_sub, Tvar id) -> begin
+      (* Ensure that higher-ranked type parameters don't escape their scope *)
+      let tvar_rank = Env.rank_of_tvar env id in
+      match find_higher_rank_generic env subtype_env ty_super tvar_rank with
+      | Some (generic_reason, generic_name) ->
+        let error =
+          Typing_error.Secondary.Higher_rank_tparam_escape
+            {
+              tvar_pos = Typing_reason.to_pos r_sub;
+              pos_with_generic = Typing_reason.to_pos (get_reason ty_super);
+              generic_reason;
+              generic_name;
+            }
+        in
+        let fail = Subtype_env.fail_with_secondary_error subtype_env error in
+        invalid ~fail env
+      | _ ->
+        (* For subtyping queries of the form
+         *
+         *   Tvar #id <: (Tvar #id | ...)
+         *
+         * `remove_tyvar_from_upper_bound` simplifies the union to
+         * `mixed`. This indicates that the query is discharged. If we find
+         * any other upper bound, we leave the subtyping query as it is.
+         *)
+        let (env, simplified_super_ty) =
+          Typing_solver_utils.remove_tyvar_from_upper_bound
             env
-            (LoclType lty_sub)
-            (LoclType ty_super))
+            id
+            (LoclType ty_super)
+        in
+        (* If the type is already in the upper bounds of the type variable,
+         * then we already know that this subtype assertion is valid
+         *)
+        if ITySet.mem simplified_super_ty (Env.get_tyvar_upper_bounds env id)
+        then
+          valid env
+        else
+          let mixed = MakeType.mixed Reason.none in
+          (match simplified_super_ty with
+          | LoclType simplified_super_ty when ty_equal simplified_super_ty mixed
+            ->
+            valid env
+          | _ ->
+            mk_issubtype_prop
+              ~sub_supportdyn
+              ~coerce:subtype_env.Subtype_env.coerce
+              env
+              (LoclType lty_sub)
+              (LoclType ty_super))
+    end
     | (r_sub, Tintersection tyl) ->
       (* A & B <: C iif A <: C | !B *)
       (match Subtype_negation.find_type_with_exact_negation env tyl with
@@ -1078,33 +1126,48 @@ end = struct
         (LoclType lty_sub)
         (LoclType ty_super)
     | (r_generic, Tgeneric (name_sub, tyargs)) -> begin
-      match
-        VisitedGoals.try_add_visited_generic_sub
-          subtype_env.Subtype_env.visited
-          name_sub
-          ty_super
-      with
-      | None ->
-        (* If we've seen this type parameter before then we must have gone
-             * round a cycle so we fail
-        *)
-        invalid ~fail env
-      | Some new_visited -> begin
-        let subtype_env = Subtype_env.set_visited subtype_env new_visited in
-
-        let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
-          simplify ~subtype_env ~this_ty ~lhs ~rhs env
+      match deref ty_super with
+      | (r_super, Tvar id)
+        when Env.rank_of_tparam env name_sub > Env.rank_of_tvar env id ->
+        let error =
+          Typing_error.Secondary.Higher_rank_tparam_escape
+            {
+              tvar_pos = Typing_reason.to_pos r_super;
+              pos_with_generic = Typing_reason.to_pos r_generic;
+              generic_reason = r_generic;
+              generic_name = name_sub;
+            }
         in
-        Common.simplify_generic_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop
-          (sub_supportdyn, r_generic, name_sub, tyargs)
-          { super_like; super_supportdyn = false; ty_super }
-          { super_like = false; super_supportdyn = false; ty_super }
-          env
-      end
+        let fail = Subtype_env.fail_with_secondary_error subtype_env error in
+        invalid ~fail env
+      | _ ->
+        (match
+           VisitedGoals.try_add_visited_generic_sub
+             subtype_env.Subtype_env.visited
+             name_sub
+             ty_super
+         with
+        | None ->
+          (* If we've seen this type parameter before then we must have gone
+               * round a cycle so we fail
+          *)
+          invalid ~fail env
+        | Some new_visited -> begin
+          let subtype_env = Subtype_env.set_visited subtype_env new_visited in
+
+          let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
+            simplify ~subtype_env ~this_ty ~lhs ~rhs env
+          in
+          Common.simplify_generic_l
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~mk_prop
+            (sub_supportdyn, r_generic, name_sub, tyargs)
+            { super_like; super_supportdyn = false; ty_super }
+            { super_like = false; super_supportdyn = false; ty_super }
+            env
+        end)
     end
     | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
       valid env
@@ -3199,54 +3262,71 @@ end = struct
     | ((_, Tvar var_sub), (_, Tvar var_super)) when Tvid.equal var_sub var_super
       ->
       valid env
-    | ( ( _,
+    | ( ( r_sub,
           ( Tany _ | Tnonnull | Tdynamic | Tprim _ | Tvar _ | Tfun _ | Ttuple _
           | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _ | Taccess _
           | Tnewtype _ | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _
           | Tlabel _ | Tclass_ptr _ ) ),
-        (_r_super, Tvar var_super_id) ) -> begin
-      let (env, simplified_sub_ty) =
-        Typing_solver_utils.remove_tyvar_from_lower_bound
-          env
-          var_super_id
-          (LoclType ty_sub)
-      in
-      match simplified_sub_ty with
-      | LoclType simplified_sub_ty
-      (* Better than checking nothing like this might be to change
-         remove_tyvar_from_lower_bound to return an Option to distinguish
-         whether a simplification was actually done.
-         And then we can recursively do a subtype check to check this.
-      *)
-        when ty_equal simplified_sub_ty (MakeType.nothing Reason.none) ->
-        valid env
-      | _ ->
-        (match subtype_env.Subtype_env.coerce with
-        | Some cd ->
-          mk_issubtype_prop
-            ~sub_supportdyn
-            ~coerce:(Some cd)
+        (r_super, Tvar var_super_id) ) -> begin
+      (* Ensure that higher-ranked type parameters don't escape their scope *)
+      let tvar_rank = Env.rank_of_tvar env var_super_id in
+      match find_higher_rank_generic env subtype_env ty_sub tvar_rank with
+      | Some (generic_reason, generic_name) ->
+        let error =
+          Typing_error.Secondary.Higher_rank_tparam_escape
+            {
+              tvar_pos = Typing_reason.to_pos r_super;
+              pos_with_generic = Typing_reason.to_pos r_sub;
+              generic_reason;
+              generic_name;
+            }
+        in
+        let fail = Subtype_env.fail_with_secondary_error subtype_env error in
+        invalid ~fail env
+      | _ -> begin
+        let (env, simplified_sub_ty) =
+          Typing_solver_utils.remove_tyvar_from_lower_bound
             env
+            var_super_id
             (LoclType ty_sub)
-            (LoclType ty_super)
-        | None ->
-          if super_like then
-            let (env, ty_sub) =
-              Typing_dynamic.strip_covariant_like env ty_sub
-            in
-            simplify
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-              env
-          else
+        in
+        match simplified_sub_ty with
+        | LoclType simplified_sub_ty
+        (* Better than checking nothing like this might be to change
+           remove_tyvar_from_lower_bound to return an Option to distinguish
+           whether a simplification was actually done.
+           And then we can recursively do a subtype check to check this.
+        *)
+          when ty_equal simplified_sub_ty (MakeType.nothing Reason.none) ->
+          valid env
+        | _ ->
+          (match subtype_env.Subtype_env.coerce with
+          | Some cd ->
             mk_issubtype_prop
               ~sub_supportdyn
-              ~coerce:subtype_env.Subtype_env.coerce
+              ~coerce:(Some cd)
               env
               (LoclType ty_sub)
-              (LoclType ty_super))
+              (LoclType ty_super)
+          | None ->
+            if super_like then
+              let (env, ty_sub) =
+                Typing_dynamic.strip_covariant_like env ty_sub
+              in
+              simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+                env
+            else
+              mk_issubtype_prop
+                ~sub_supportdyn
+                ~coerce:subtype_env.Subtype_env.coerce
+                env
+                (LoclType ty_sub)
+                (LoclType ty_super))
+      end
     end
     (* -- C-Inter-R --------------------------------------------------------- *)
     | ((r_sub, Tunion ty_subs), (_r_super, Tintersection _)) ->
@@ -3865,9 +3945,23 @@ end = struct
            in
            SSet.mem name_sub generic_lower_bounds ->
       valid env
-      (* When decomposing subtypes for the purpose of adding bounds on generic
-       * parameters to the context, (so seen_generic_params = None), leave
-       * subtype so that the bounds get added *)
+    (* Ensure that higher-ranked type parameters don't escape their scope *)
+    | ((r_sub, Tvar tv_sub), (r_super, Tgeneric (tp_sup, _)))
+      when Env.rank_of_tparam env tp_sup > Env.rank_of_tvar env tv_sub ->
+      let error =
+        Typing_error.Secondary.Higher_rank_tparam_escape
+          {
+            tvar_pos = Typing_reason.to_pos r_sub;
+            pos_with_generic = Typing_reason.to_pos r_super;
+            generic_reason = r_super;
+            generic_name = tp_sup;
+          }
+      in
+      let fail = Subtype_env.fail_with_secondary_error subtype_env error in
+      invalid env ~fail
+    (* When decomposing subtypes for the purpose of adding bounds on generic
+     * parameters to the context, (so seen_generic_params = None), leave
+     * subtype so that the bounds get added *)
     | ((_, (Tvar _ | Tunion _)), (_, Tgeneric _)) ->
       default_subtype
         ~subtype_env
@@ -4448,6 +4542,29 @@ end = struct
     | (_, (_, Tany _)) -> valid env
     (* -- C-Fun ------------------------------------------------------------- *)
     | ((r_sub, Tfun ft_sub), (r_super, Tfun ft_super)) ->
+      (* If one or both function types are polymorphic we need to ensure that
+         any higher-rank type parameters do not escape into the bounds of any
+         lower ranked type variables. To do this we increase the rank of
+         any fresh type variables and type parameters generated when we move
+         through a binder then check that ranks are compatible when subtyping
+         type parameters against type variables and that ranks are equal when
+         when subtyping two type variables *)
+      let either_polymorphic =
+        not (ft_sub.ft_instantiated && ft_super.ft_instantiated)
+      in
+      let subtype_env =
+        let check_rank_outer = Subtype_env.get_check_rank subtype_env in
+        Subtype_env.set_check_rank
+          subtype_env
+          (check_rank_outer || either_polymorphic)
+      in
+      let env =
+        if either_polymorphic then
+          Typing_env_types.increment_rank env
+        else
+          env
+      in
+      let rank = Typing_env_types.get_rank env in
       let ((env, err_opt), ft_sub) =
         if ft_sub.ft_instantiated then
           ((env, None), ft_sub)
@@ -4457,7 +4574,7 @@ end = struct
           in
           (* Replace all quantifiers with fresh type variables adding any declared
              bounds *)
-          Instantiate.instantiate_fun_type pos ft_sub ~env
+          Instantiate.instantiate_fun_type pos ft_sub rank ~env
       in
       (* Handle any error - we can fail to instantiate if the function type has
          unsatisfiable bounds *)
@@ -4473,18 +4590,30 @@ end = struct
             Instantiate.freshen_and_bind_fun_type_quantifiers
               r_super
               ft_super
+              rank
               ~env
         in
         (* Simplify the subtype proposition between the instantiated subtype
            and the the supertype in the modified context *)
-        simplify_funs
-          ~subtype_env
-          ~check_return:true
-          ~for_override:false
-          ~super_like
-          (r_sub, ft_sub)
-          (r_super, ft_super)
-          env
+        let (env, prop) =
+          simplify_funs
+            ~subtype_env
+            ~check_return:true
+            ~for_override:false
+            ~super_like
+            (r_sub, ft_sub)
+            (r_super, ft_super)
+            env
+        in
+        (* If we incremented the rank during the instantiation of polymorphic
+           function types we need to decrement it here *)
+        let env =
+          if either_polymorphic then
+            Typing_env_types.decrement_rank env
+          else
+            env
+        in
+        (env, prop)
     | ( ( _,
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
           | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
@@ -7594,27 +7723,45 @@ end = struct
       in
       mk_subty_prop env &&& mk_cstr_prop
     | (r_generic, Tgeneric (nm, tyargs)) ->
-      let mk_prop_generic
-          ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
-        simplify_disj_r
+      (match deref rhs_subtype.Subtype.ty_super with
+      (* Before using the upper bounds of the generic in a call to
+         [simplify_generic_l] we need to check if the super type is a type
+         variable and, if so, ensure the two have compatible ranks *)
+      | (r_super, Tvar tv_sup)
+        when Env.rank_of_tparam env nm > Env.rank_of_tvar env tv_sup ->
+        let error =
+          Typing_error.Secondary.Higher_rank_tparam_escape
+            {
+              tvar_pos = Typing_reason.to_pos r_super;
+              pos_with_generic = Typing_reason.to_pos r_generic;
+              generic_reason = r_generic;
+              generic_name = nm;
+            }
+        in
+        let fail = Subtype_env.fail_with_secondary_error subtype_env error in
+        invalid ~fail env
+      | _ ->
+        let mk_prop_generic
+            ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
+          simplify_disj_r
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~lift_rhs
+            ~mk_prop
+            (sub_supportdyn, ty_sub)
+            rhs
+            env
+        in
+        simplify_generic_l
           ~subtype_env
           ~this_ty
           ~fail
-          ~lift_rhs
-          ~mk_prop
-          (sub_supportdyn, ty_sub)
+          ~mk_prop:mk_prop_generic
+          (sub_supportdyn, r_generic, nm, tyargs)
           rhs
-          env
-      in
-      simplify_generic_l
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~mk_prop:mk_prop_generic
-        (sub_supportdyn, r_generic, nm, tyargs)
-        rhs
-        rhs
-        env
+          rhs
+          env)
     | (r_dep, Tdependent (dep_ty, ty_sub_inner)) ->
       let mk_prop_dependent
           ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
@@ -8697,6 +8844,7 @@ and Instantiate : sig
   val bind_tparams :
     Typing_reason.t ->
     Typing_defs.locl_ty Typing_defs.tparam list ->
+    int ->
     Typing_env_types.env ->
     Type_parameter_env.t ->
     Typing_env_types.env * Type_parameter_env.t
@@ -8704,16 +8852,18 @@ and Instantiate : sig
   val instantiate_fun_type :
     Pos.t ->
     Typing_defs.locl_fun_type ->
+    int ->
     env:Typing_env_types.env ->
     (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_fun_type
 
   val freshen_and_bind_fun_type_quantifiers :
     Typing_reason.t ->
     Typing_defs.locl_fun_type ->
+    int ->
     env:Typing_env_types.env ->
     Typing_env_types.env * Typing_defs.locl_fun_type
 end = struct
-  let freshen_fun_ty fun_ty env =
+  let freshen_fun_ty fun_ty env rank =
     let (env, ft_tparams_rev, subst) =
       List.fold_left
         fun_ty.ft_tparams
@@ -8724,7 +8874,8 @@ end = struct
           let tparam = { tparam with tp_name = (pos, new_name) } in
           let ty =
             mk
-              ( Typing_reason.polymorphic_type_param (pos, old_name),
+              ( Typing_reason.polymorphic_type_param
+                  (pos, new_name, old_name, rank),
                 Tgeneric (new_name, []) )
           in
           (env, tparam :: acc, SMap.add old_name ty subst))
@@ -8734,7 +8885,7 @@ end = struct
     ( env,
       Locl_subst.apply_fun { fun_ty with ft_tparams } ~subst ~combine_reasons )
 
-  let bind_tparams r tparams env tp_env =
+  let bind_tparams r tparams rank env tp_env =
     List.fold_left
       tparams
       ~init:(env, tp_env)
@@ -8812,12 +8963,20 @@ end = struct
               newable;
               require_dynamic;
               parameters = [];
+              rank;
             }
         in
         (env, Type_parameter_env.add ~def_pos name info tp_env))
 
-  let bind_quantifiers r { ft_tparams; _ } env tp_env =
-    bind_tparams r ft_tparams env tp_env
+  let freshen_and_bind_fun_type_quantifiers reason fun_ty rank ~env =
+    let (env, fun_ty) = freshen_fun_ty fun_ty env rank in
+    let fun_ty = { fun_ty with ft_instantiated = true } in
+    let env =
+      let { ft_tparams; _ } = fun_ty in
+      let (env, tpenv) = bind_tparams reason ft_tparams rank env env.tpenv in
+      Typing_env_types.{ env with tpenv }
+    in
+    (env, fun_ty)
 
   let add_constraint (env, err_opts) pos (ty_subj, constraint_kind, ty_cstr) =
     let callback = Some (Typing_error.Reasons_callback.unify_error_at pos) in
@@ -8837,7 +8996,7 @@ end = struct
 
   (** Instantiate a polymorphic function type with fresh type variables and
     assert subtype constraints from type parameter bounds and where constraints*)
-  let instantiate_fun_type pos fun_ty ~env =
+  let instantiate_fun_type pos fun_ty rank ~env =
     (* We need to build the substitution before generating constraints because
        type parameters may appear as upper / lower bounds of other type
        parameters, e.g.
@@ -8852,7 +9011,7 @@ end = struct
             let (_, name) = tp_name in
             (* We don't want to solve these type variable so we create them as
                invariant *)
-            let (env, ty) = Env.fresh_type_invariant env pos in
+            let (env, ty) = Env.fresh_type_invariant_with_rank env rank pos in
             (env, (name, ty) :: subst))
       in
       (env, SMap.of_list name_tys)
@@ -8882,15 +9041,6 @@ end = struct
     in
     let err_opt = Typing_error.multiple_opt @@ List.filter_opt err_opts in
     ((env, err_opt), { fun_ty with ft_instantiated = true })
-
-  let freshen_and_bind_fun_type_quantifiers reason fun_ty ~env =
-    let (env, fun_ty) = freshen_fun_ty fun_ty env in
-    let fun_ty = { fun_ty with ft_instantiated = true } in
-    let env =
-      let (env, tpenv) = bind_quantifiers reason fun_ty env env.tpenv in
-      Typing_env_types.{ env with tpenv }
-    in
-    (env, fun_ty)
 end
 
 (* == API =================================================================== *)
@@ -9355,6 +9505,7 @@ let apply_where_constraints pos def_pos tparams where_constraints ~env =
       Instantiate.bind_tparams
         (Reason.witness_from_decl def_pos)
         tparams
+        0
         env
         tpenv
     in
@@ -9759,7 +9910,9 @@ let is_type_disjoint env ty1 ty2 =
 
 (* == Polymorphic type instatiation ========================================= *)
 
-include Instantiate
+(* Expose for use from typing but ensure tyvar ranks are 0 *)
+let instantiate_fun_type pos fun_ty ~env =
+  Instantiate.instantiate_fun_type pos fun_ty 0 ~env
 
 (* -- Set function references ----------------------------------------------- *)
 let set_fun_refs () =

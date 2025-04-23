@@ -331,6 +331,7 @@ let rec tparam_info_as_value env tpinfo =
           newable;
           require_dynamic;
           parameters;
+          rank;
         } =
     tpinfo
   in
@@ -343,6 +344,7 @@ let rec tparam_info_as_value env tpinfo =
       ("newable", bool_as_value newable);
       ("require_dynamic", bool_as_value require_dynamic);
       ("parameters", named_tparam_info_list_as_value env parameters);
+      ("rank", string_as_value (Int.to_string rank));
     ]
 
 and named_tparam_info_list_as_value env parameters =
@@ -625,6 +627,7 @@ let env_as_value env =
     log_levels = _;
     allow_wildcards;
     inference_env;
+    rank;
     big_envs = _;
     fun_tast_info;
     loaded_packages = _;
@@ -647,6 +650,7 @@ let env_as_value env =
       ("tpenv", tpenv_as_value env tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);
       ("inference_env", Inf.Log.inference_env_as_value inference_env);
+      ("rank", string_as_value (Int.to_string rank));
       ("fun_tast_info", fun_tast_info_as_map fun_tast_info);
     ]
 

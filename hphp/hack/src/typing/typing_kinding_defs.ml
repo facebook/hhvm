@@ -14,6 +14,7 @@ type kind = {
   newable: bool;
   require_dynamic: bool;
   parameters: named_kind list;
+  rank: int;
 }
 
 and named_kind = Typing_defs.pos_id * kind [@@deriving hash, show]
@@ -100,6 +101,7 @@ module Simple = struct
         newable;
         require_dynamic = false;
         parameters = [];
+        rank = 0;
       },
       NonLocalized [] )
 
@@ -171,6 +173,7 @@ let rec force_lazy_values (kind : kind) =
     newable;
     require_dynamic;
     parameters;
+    rank;
   } =
     kind
   in
@@ -182,6 +185,7 @@ let rec force_lazy_values (kind : kind) =
     newable;
     require_dynamic;
     parameters = List.map parameters ~f:force_lazy_values_named_kind;
+    rank;
   }
 
 and force_lazy_values_named_kind ((p, kind) : named_kind) =

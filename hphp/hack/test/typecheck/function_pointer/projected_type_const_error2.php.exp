@@ -19,13 +19,13 @@ Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 20, characters 52-57:
   Expected `IntBox`
   File "projected_type_const_error2.php", line 13, characters 20-23:
-  But got `TBox#1` which corresponds to the type parameter `TBox` in the polymorphic function
+  But got `TBox#1` which corresponds to the rank-2 type parameter `TBox` in the polymorphic function
 ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 20, characters 60-65:
   Expected `string`
   File "projected_type_const_error2.php", line 13, characters 63-66:
-  But got `TVal#1` which corresponds to the type parameter `TVal` in the polymorphic function
+  But got `TVal#1` which corresponds to the rank-2 type parameter `TVal` in the polymorphic function
 ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 20, characters 60-65:

@@ -1877,6 +1877,12 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Higher_rank_tparam_escape of {
+        tvar_pos: Pos_or_decl.t;
+        pos_with_generic: Pos_or_decl.t;
+        generic_reason: Typing_reason.t;
+        generic_name: string;
+      }
   [@@deriving show]
 end = struct
   type t =
@@ -2178,6 +2184,12 @@ end = struct
     | Needs_concrete_override of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
+      }
+    | Higher_rank_tparam_escape of {
+        tvar_pos: Pos_or_decl.t;
+        pos_with_generic: Pos_or_decl.t;
+        generic_reason: Typing_reason.t;
+        generic_name: string;
       }
   [@@deriving show]
 end

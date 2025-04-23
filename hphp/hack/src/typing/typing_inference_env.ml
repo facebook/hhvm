@@ -46,6 +46,7 @@ type tyvar_info = {
   eager_solve_failed: bool;
   solving_info: solving_info;
   is_error: bool;
+  rank: int;
 }
 
 type tvenv = tyvar_info Tvid.Map.t
@@ -87,13 +88,16 @@ module Log = struct
       variant_as_value "TVIConstraints" (tyvar_constraints_as_value tvcstr)
 
   let tyvar_info_as_value tvinfo =
-    let { tyvar_pos; eager_solve_failed; solving_info; is_error } = tvinfo in
+    let { tyvar_pos; eager_solve_failed; solving_info; is_error; rank } =
+      tvinfo
+    in
     make_map
       [
         ("tyvar_pos", pos_as_value tyvar_pos);
         ("eager_solve_failed", bool_as_value eager_solve_failed);
         ("solving_info", solving_info_as_value solving_info);
         ("is_error", bool_as_value is_error);
+        ("rank", Typing_log_value.Atom (Int.to_string rank));
       ]
 
   let tvenv_as_value (tvenv : tvenv) =
@@ -158,7 +162,7 @@ module Log = struct
     let open Hh_json in
     match Tvid.Map.find_opt v env.tvenv with
     | None -> JSON_Null
-    | Some { tyvar_pos; eager_solve_failed; solving_info; is_error } ->
+    | Some { tyvar_pos; eager_solve_failed; solving_info; is_error; rank } ->
       JSON_Object
         [
           ("tyvar_pos", string_ @@ Pos.string (Pos.to_absolute tyvar_pos));
@@ -166,6 +170,7 @@ module Log = struct
           ( "solving_info",
             solving_info_to_json p_locl_ty p_internal_type solving_info );
           ("is_error", JSON_Bool is_error);
+          ("rank", JSON_Number (Int.to_string rank));
         ]
 end
 
@@ -188,9 +193,10 @@ let empty_tyvar_constraints =
     type_constants = SMap.empty;
   }
 
-let empty_tyvar_info pos =
+let empty_tyvar_info tyvar_pos rank =
   {
-    tyvar_pos = pos;
+    tyvar_pos;
+    rank;
     eager_solve_failed = false;
     solving_info = TVIConstraints empty_tyvar_constraints;
     is_error = false;
@@ -210,7 +216,7 @@ let set_solving_info env ?(tyvar_pos = Pos.none) x solving_info =
   let tvinfo =
     Option.value
       (get_tyvar_info_opt env x)
-      ~default:(empty_tyvar_info tyvar_pos)
+      ~default:(empty_tyvar_info tyvar_pos 0)
   in
   let tvinfo = { tvinfo with solving_info } in
   set_tyvar_info env x tvinfo
@@ -340,15 +346,15 @@ let create_tyvar_constraints variance =
   in
   TVIConstraints tyvar_constraints
 
-let fresh_unsolved_tyvar env v ?variance ?(is_error = false) tyvar_pos =
+let fresh_unsolved_tyvar env v rank ?variance ?(is_error = false) tyvar_pos =
   let solving_info = create_tyvar_constraints variance in
   let tvinfo =
-    { tyvar_pos; solving_info; eager_solve_failed = false; is_error }
+    { tyvar_pos; solving_info; eager_solve_failed = false; is_error; rank }
   in
   set_tyvar_info env v tvinfo
 
-let add_current_tyvar ?variance ?is_error env p v =
-  let env = fresh_unsolved_tyvar env v ?variance ?is_error p in
+let add_current_tyvar ?variance ?is_error env p v rank =
+  let env = fresh_unsolved_tyvar env v rank ?variance ?is_error p in
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
@@ -357,7 +363,7 @@ let add_current_tyvar ?variance ?is_error env p v =
 let fresh_type_reason ?variance ?is_error env id_provider p mk_reason =
   let v = Tvid.make id_provider in
   let r = mk_reason v in
-  let env = add_current_tyvar ?variance ?is_error env p v in
+  let env = add_current_tyvar ?variance ?is_error env p v 0 in
   (env, mk (r, Tvar v))
 
 let fresh_type ?variance env id_provider p =
@@ -371,6 +377,20 @@ let fresh_type ?variance env id_provider p =
 
 let fresh_type_invariant = fresh_type ~variance:Ast_defs.Invariant
 
+let fresh_type_invariant_with_rank env provider rank pos =
+  let tvid = Tvid.make provider in
+  let reason = Typing_reason.type_variable pos tvid in
+  let env =
+    add_current_tyvar
+      ~variance:Ast_defs.Invariant
+      ~is_error:false
+      env
+      pos
+      tvid
+      rank
+  in
+  (env, mk (reason, Tvar tvid))
+
 let wrap_ty_in_var env id_provider r ty =
   let v = Tvid.make id_provider in
   let tvinfo =
@@ -379,6 +399,7 @@ let wrap_ty_in_var env id_provider r ty =
       eager_solve_failed = false;
       solving_info = TVIType ty;
       is_error = false;
+      rank = 0;
     }
   in
   let env = set_tyvar_info env v tvinfo in
@@ -725,7 +746,13 @@ module Size = struct
       ubound_size + lbound_size + tconst_size
 
   let tyvar_info_size env tvinfo =
-    let { tyvar_pos = _; solving_info; eager_solve_failed = _; is_error = _ } =
+    let {
+      tyvar_pos = _;
+      solving_info;
+      eager_solve_failed = _;
+      is_error = _;
+      rank = _;
+    } =
       tvinfo
     in
     solving_info_size env solving_info
@@ -797,6 +824,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
     eager_solve_failed = esf1;
     solving_info = sinfo1;
     is_error = is_error1;
+    rank = rank1;
   } =
     tvinfo1
   in
@@ -805,6 +833,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
     eager_solve_failed = esf2;
     solving_info = sinfo2;
     is_error = is_error2;
+    rank = rank2;
   } =
     tvinfo2
   in
@@ -817,6 +846,11 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
     eager_solve_failed = esf1 || esf2;
     solving_info = merge_solving_infos sinfo1 sinfo2;
     is_error = is_error1 || is_error2;
+    (* Why the min of the two? We use rank to prevent higher ranked quantifiers
+       escaping into the bounds of type variables of lower-rank by choosing the
+       minimum here we are ensuring escape is prevented.
+       TODO(mjt) should we restrict this operation to tyars of equal rank? *)
+    rank = min rank1 rank2;
   }
 
 let merge_tyvars env v1 v2 =
@@ -865,6 +899,7 @@ let simple_merge env1 env2 =
             eager_solve_failed = eager_solve_failed1;
             solving_info = sinfo1;
             is_error = is_error1;
+            rank = rank1;
           } =
             tvinfo1
           in
@@ -873,6 +908,7 @@ let simple_merge env1 env2 =
             eager_solve_failed = eager_solve_failed2;
             solving_info = sinfo2;
             is_error = is_error2;
+            rank = rank2;
           } =
             tvinfo2
           in
@@ -893,6 +929,7 @@ let simple_merge env1 env2 =
                 | (TVIType _, TVIType _) ->
                   sinfo1);
               is_error = is_error1 || is_error2;
+              rank = min rank1 rank2;
             }
           in
           Some tvinfo)
@@ -942,10 +979,16 @@ let solving_info_carries_information = function
     || (not @@ SMap.is_empty type_constants)
 
 let tyvar_info_carries_information tvinfo =
-  let { tyvar_pos = _; solving_info; eager_solve_failed = _; is_error = _ } =
+  let {
+    tyvar_pos = _;
+    solving_info;
+    eager_solve_failed = _;
+    is_error = _;
+    rank;
+  } =
     tvinfo
   in
-  solving_info_carries_information solving_info
+  solving_info_carries_information solving_info || rank > 0
 
 let compress env =
   let { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences } = env in
@@ -1075,4 +1118,8 @@ let force_lazy_values (env : t) =
 
 let is_error { tvenv; _ } tvid =
   Option.value_map ~default:false ~f:(fun { is_error; _ } -> is_error)
+  @@ Tvid.Map.find_opt tvid tvenv
+
+let get_rank { tvenv; _ } tvid =
+  Option.value_map ~default:0 ~f:(fun { rank; _ } -> rank)
   @@ Tvid.Map.find_opt tvid tvenv

@@ -41,6 +41,9 @@ type t = {
 }
 [@@deriving hash, show { with_path = false }]
 
+let bindings { tparams; _ } =
+  List.map ~f:(fun (k, (_, v)) -> (k, v)) (SMap.bindings tparams)
+
 let empty = { tparams = SMap.empty; consistent = true }
 
 let mem name tpenv = SMap.mem name tpenv.tparams
@@ -136,6 +139,11 @@ let get_pos tpenv name =
   | None -> Pos_or_decl.none
   | Some (pos, _) -> pos
 
+let get_rank tpenv name =
+  match get name tpenv with
+  | None -> 0
+  | Some { rank; _ } -> rank
+
 let get_tparam_names tpenv = SMap.keys tpenv.tparams
 
 let is_consistent tpenv = tpenv.consistent
@@ -167,6 +175,7 @@ let add_upper_bound_ tpenv name ty =
             newable = false;
             require_dynamic = false;
             parameters = [];
+            rank = 0;
           } )
       | Some (pos, tp) ->
         (pos, { tp with upper_bounds = TySet.add ty tp.upper_bounds })
@@ -191,6 +200,7 @@ let add_lower_bound_ tpenv name ty =
             newable = false;
             require_dynamic = false;
             parameters = [];
+            rank = 0;
           } )
       | Some (pos, tp) ->
         (pos, { tp with lower_bounds = TySet.add ty tp.lower_bounds })
@@ -236,6 +246,7 @@ let add_upper_bound ?intersect env_tpenv name ty =
     let newable = get_newable env_tpenv name in
     let require_dynamic = get_require_dynamic env_tpenv name in
     let parameters = [] in
+    let rank = get_rank env_tpenv name in
     add
       ~def_pos
       name
@@ -247,6 +258,7 @@ let add_upper_bound ?intersect env_tpenv name ty =
         newable;
         require_dynamic;
         parameters;
+        rank;
       }
       tpenv
 
@@ -280,6 +292,7 @@ let add_lower_bound ?union env_tpenv name ty =
     let newable = get_newable env_tpenv name in
     let require_dynamic = get_require_dynamic env_tpenv name in
     let parameters = [] in
+    let rank = get_rank env_tpenv name in
     add
       ~def_pos
       name
@@ -291,6 +304,7 @@ let add_lower_bound ?union env_tpenv name ty =
         newable;
         require_dynamic;
         parameters;
+        rank;
       }
       tpenv
 
@@ -358,6 +372,7 @@ let add_generic_parameters tpenv tparaml =
       newable;
       require_dynamic;
       parameters = nested_params;
+      rank = 0;
     }
   in
 

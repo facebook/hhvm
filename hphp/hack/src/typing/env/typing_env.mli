@@ -74,6 +74,10 @@ val fresh_type_reason :
     it won't be solved automatically at the end of the scope *)
 val fresh_type_invariant : env -> Pos.t -> env * locl_ty
 
+(** Generate a fresh type variable type with a specified ranks for use
+    in subtyping of rank-n polymorphic types *)
+val fresh_type_invariant_with_rank : env -> int -> Pos.t -> env * locl_ty
+
 (** Generate a fresh type variable to stand for an unknown type in the
     case of type errors. *)
 val fresh_type_error : env -> Pos.t -> env * locl_ty
@@ -642,3 +646,7 @@ val update_ity_reason :
   internal_type ->
   f:(locl_phase Typing_reason.t_ -> locl_phase Typing_reason.t_) ->
   internal_type
+
+val rank_of_tvar : env -> Tvid.t -> int
+
+val rank_of_tparam : env -> string -> int

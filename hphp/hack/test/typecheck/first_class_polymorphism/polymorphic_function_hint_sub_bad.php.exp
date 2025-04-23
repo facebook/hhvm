@@ -7,7 +7,7 @@ Invalid argument (Typing[4323])
   File "polymorphic_function_hint_sub_bad.php", line 23, characters 32-36:
   Expected `Three`
   File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:
-  But got `T#1` which corresponds to the type parameter `T` in the polymorphic function
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
 ERROR: File "polymorphic_function_hint_sub_bad.php", line 27, characters 15-16:
 Invalid argument (Typing[4323])
   File "polymorphic_function_hint_sub_bad.php", line 23, characters 27-27:
@@ -39,6 +39,6 @@ Invalid argument (Typing[4323])
   File "polymorphic_function_hint_sub_bad.php", line 30, characters 41-45:
   This type constraint is violated
   File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:
-  Expected `T#1` which corresponds to the type parameter `T` in the polymorphic function
+  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
   File "polymorphic_function_hint_sub_bad.php", line 30, characters 41-45:
   But got `Three`

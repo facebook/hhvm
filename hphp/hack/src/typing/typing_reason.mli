@@ -242,7 +242,7 @@ val yield_asyncnull : Pos.t -> t
 
 val yield_send : Pos.t -> t
 
-val polymorphic_type_param : Pos_or_decl.t * string -> t
+val polymorphic_type_param : Pos_or_decl.t * string * string * int -> t
 
 val lost_info : string * t * blame -> t
 
@@ -530,6 +530,18 @@ val prj_fn_ret :
   sub_prj:locl_phase t_ ->
   super:locl_phase t_ ->
   locl_phase t_
+
+(** Record the decomposition of a subtype constraint between an aggregate type in
+    subtype position and some other type into another contraint between some
+    type contained in the aggregate and the other type *)
+val prj_contains_sub :
+  sub:locl_phase t_ -> sub_prj:locl_phase t_ -> locl_phase t_
+
+(** Record the decomposition of a subtype constraint between an aggregate type in
+    supertype position and some other type into another contraint between some
+    type contained in the aggregate and the other type *)
+val prj_contains_super :
+  super:locl_phase t_ -> super_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a union type in
     subtype position and some other type into another contraint between some

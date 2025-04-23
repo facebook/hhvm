@@ -44,6 +44,7 @@ type env = {
   tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;
   inference_env: Typing_inference_env.t;
+  rank: int;
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
@@ -127,6 +128,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     tpenv = Type_parameter_env.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
     inference_env = Typing_inference_env.empty_inference_env;
+    rank = 0;
     allow_wildcards = false;
     big_envs = ref [];
     fun_tast_info = None;
@@ -189,3 +191,9 @@ let get_tparams_in_ty_and_acc env acc ty =
     end
   in
   (tparams_visitor env)#on_type acc ty
+
+let get_rank { rank; _ } = rank
+
+let increment_rank env = { env with rank = env.rank + 1 }
+
+let decrement_rank env = { env with rank = env.rank - 1 }

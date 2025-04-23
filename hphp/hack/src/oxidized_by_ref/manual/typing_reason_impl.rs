@@ -105,7 +105,7 @@ impl<'a> WitnessDecl<'a> {
             | WitnessDecl::IllegalRecursiveType((p, _))
             | WitnessDecl::SupportDynamicTypeAssume(p)
             | WitnessDecl::PessimisedThis(p)
-            | WitnessDecl::PolymorphicTypeParam((p, _)) => p,
+            | WitnessDecl::PolymorphicTypeParam((p, _, _, _)) => p,
         }
     }
 }

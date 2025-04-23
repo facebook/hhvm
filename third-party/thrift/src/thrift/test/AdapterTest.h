@@ -518,8 +518,8 @@ struct VariableWrapper {
       : value{v}, name{n}, uri{u} {}
 
   T value;
-  std::string name = "";
-  std::string uri = "";
+  std::string name;
+  std::string uri;
 };
 
 struct VariableAdapter {

@@ -2470,30 +2470,10 @@ class EnumMeta(type):
             '__module__',
         ]
 
-# check whether two classes are equivalent, meaning
-# they have the same class name, py3 namespace, and thrift module name.
-# The trailing `.types` or `.thrift_types` is ignored.
-cdef inline _fbthrift_enum_equivalent(a, b):
-    cdef a_cls = a.__class__
-    cdef b_cls = b.__class__
-    if a_cls.__name__ != b_cls.__name__:
-        return False
-    cdef str a_module = a_cls.__module__
-    cdef str b_module = b_cls.__module__
-    # ignore trailing .types or .thrift_types
-    cdef int a_types = a_module.rfind(".")
-    cdef int b_types = b_module.rfind(".")
-    return a_module[:a_types] == b_module[:b_types]
-
 cdef inline bint _enum_eq_(self, other):
     if isinstance(other, Enum):
-        if self is other:
-            return True
-        # handle py3 vs python comparison
-        return (
-            self._fbthrift_value_ == other._fbthrift_value_ and
-            _fbthrift_enum_equivalent(self, other)
-        )
+        # enums are singletons, so use `is` to compare
+        return self is other
     if cFollyIsDebug and isinstance(other, (bool, float)):
         warnings.warn(
             f"Did you really mean to compare {type(self)} and {type(other)}?",

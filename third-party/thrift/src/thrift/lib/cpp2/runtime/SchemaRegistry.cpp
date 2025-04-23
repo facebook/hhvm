@@ -24,6 +24,13 @@
 
 namespace apache::thrift {
 
+SchemaRegistry::SchemaRegistry(BaseSchemaRegistry& base) : base_(base) {
+  auto resolver = std::make_unique<schema::detail::IncrementalResolver>();
+  resolver_ = resolver.get();
+  syntaxGraph_ = std::make_unique<schema::SyntaxGraph>(std::move(resolver));
+}
+SchemaRegistry::~SchemaRegistry() = default;
+
 SchemaRegistry& SchemaRegistry::get() {
   static folly::Indestructible<SchemaRegistry> self(BaseSchemaRegistry::get());
   return *self;

@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
 
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
+#include <thrift/lib/cpp2/schema/detail/Merge.h>
 
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
@@ -69,12 +70,12 @@ class DefinitionKeyEqual : public std::equal_to<type::DefinitionKey> {
     return Delegate::operator()(lhs.get(), rhs);
   }
 };
+} // namespace
 
 class SchemaIndex {
  public:
   explicit SchemaIndex(Resolver& resolver) : resolver_(resolver) {}
 
- private:
   // Annotations are referred to in schema.thrift using DefinitionKey, not
   // TypeStruct. Therefore, we use this map to keep their resolved TypeStruct
   // instances alive.
@@ -784,8 +785,6 @@ const type::Type* SchemaIndex::tryGetAnnotationType(
   return std::addressof(element->second);
 }
 
-} // namespace
-
 folly::not_null_unique_ptr<Resolver> createResolverfromSchema(
     type::Schema&& schema) {
   return std::make_unique<FullyResolvedSchemaBackedResolver>(std::move(schema));
@@ -793,6 +792,83 @@ folly::not_null_unique_ptr<Resolver> createResolverfromSchema(
 folly::not_null_unique_ptr<Resolver> createResolverfromSchemaRef(
     const type::Schema& schema) {
   return std::make_unique<FullyResolvedSchemaRefBackedResolver>(schema);
+}
+
+IncrementalResolver::IncrementalResolver()
+    : index_(std::make_unique<SchemaIndex>(*this)) {}
+IncrementalResolver::~IncrementalResolver() = default;
+
+const ProgramNode& IncrementalResolver::programOf(
+    const type::ProgramId& id) const {
+  return index_->programOf(id);
+}
+const protocol::Value& IncrementalResolver::valueOf(
+    const type::ValueId& id) const {
+  return index_->valueOf(id);
+}
+const DefinitionNode* IncrementalResolver::definitionOf(
+    const type::DefinitionKey& key) const {
+  return index_->definitionOf(key);
+}
+ProgramNode::IncludesList IncrementalResolver::programs() const {
+  return index_->programs();
+}
+
+const DefinitionNode& IncrementalResolver::getDefinitionNode(
+    const type::DefinitionKey& key,
+    type::ProgramId programId,
+    std::string_view name,
+    ::folly::Range<const ::std::string_view*> (*bundle)()) const {
+  {
+    auto schemaReadGuard = schema_.rlock();
+    if (auto* def = index_->definitionOf(key)) {
+      return *def;
+    }
+  }
+
+  if (!bundle) {
+    folly::throw_exception<std::out_of_range>(
+        fmt::format("Definition `{}` does not have bundled schema.", name));
+  }
+
+  auto schemaWriteGuard = schema_.wlock();
+  if (auto* def = index_->definitionOf(key)) {
+    return *def;
+  }
+
+  auto src = mergeSchemas((*bundle)());
+  auto& dst = *schemaWriteGuard;
+
+  // Merge new schema data in
+  // TODO: avoid deserializing shared deps
+  std::copy_if(
+      std::make_move_iterator(src.programs()->begin()),
+      std::make_move_iterator(src.programs()->end()),
+      std::back_inserter(*dst.programs()),
+      [this](const auto& program) {
+        return index_->programsById_.count(*program.id()) == 0;
+      });
+  dst.valuesMap()->insert(
+      std::make_move_iterator(src.valuesMap()->begin()),
+      std::make_move_iterator(src.valuesMap()->end()));
+  dst.definitionsMap()->insert(
+      std::make_move_iterator(src.definitionsMap()->begin()),
+      std::make_move_iterator(src.definitionsMap()->end()));
+
+  // Rebuild indices
+  // TODO: incremental rebuild
+  index_->init(dst);
+
+  if (auto* def = index_->definitionOf(key)) {
+    return *def;
+  }
+
+  if (index_->programsById_.count(programId)) {
+    folly::throw_exception<InvalidSyntaxGraphError>(fmt::format(
+        "Definition `{}` not found in its program's schema.", name));
+  }
+  folly::throw_exception<std::out_of_range>(
+      fmt::format("Definition `{}` does not have bundled schema.", name));
 }
 
 } // namespace apache::thrift::schema::detail

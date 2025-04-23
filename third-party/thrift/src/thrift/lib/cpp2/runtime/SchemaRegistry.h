@@ -23,6 +23,9 @@
 #include <unordered_set>
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
+#include <thrift/lib/cpp2/schema/SyntaxGraph.h>
+#include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
+#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 
 namespace apache::thrift {
 
@@ -36,13 +39,25 @@ class SchemaRegistry {
   // Access all data registered
   Ptr getMergedSchema();
 
-  explicit SchemaRegistry(BaseSchemaRegistry& base) : base_(base) {}
+  /**
+   * Gets node for given definition, or throws `std::out_of_range` if not
+   * present in schema.
+   */
+  template <typename T>
+  const schema::DefinitionNode& getDefinitionNode() const {
+    return resolver_->getDefinitionNode<T>();
+  }
+
+  explicit SchemaRegistry(BaseSchemaRegistry& base);
+  ~SchemaRegistry();
 
  private:
   BaseSchemaRegistry& base_;
   Ptr mergedSchema_;
   folly::relaxed_atomic<bool> mergedSchemaAccessed_{false};
   std::unordered_set<type::ProgramId> includedPrograms_;
+  std::unique_ptr<schema::SyntaxGraph> syntaxGraph_;
+  schema::detail::IncrementalResolver* resolver_;
 };
 
 } // namespace apache::thrift

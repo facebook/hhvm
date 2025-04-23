@@ -19,8 +19,10 @@
 
 #include <folly/Utility.h>
 
+#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
+#include <thrift/annotation/gen-cpp2/thrift_types.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_2_handlers.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_handlers.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_types.h>
@@ -459,6 +461,28 @@ TEST_F(ServiceSchemaTest, LookupByDefinitionKeys) {
         detail::lookUpDefinition(syntaxGraph, definitionKey);
     EXPECT_TRUE(definition.isService());
   }
+}
+
+TEST(SyntaxGraphTest, getDefinitionNode) {
+  auto& registry = SchemaRegistry::get();
+
+  const DefinitionNode& testStruct =
+      registry.getDefinitionNode<test::TestStruct>();
+  const StructNode& stct = testStruct.asStruct();
+  EXPECT_EQ(stct.definition().name(), "TestStruct");
+
+  const DefinitionNode& testEnum = registry.getDefinitionNode<test::TestEnum>();
+  const EnumNode& enm = testEnum.asEnum();
+  EXPECT_EQ(enm.definition().name(), "TestEnum");
+
+  const DefinitionNode& testService =
+      registry.getDefinitionNode<test::TestService>();
+  const ServiceNode& serv = testService.asService();
+  EXPECT_EQ(serv.definition().name(), "TestService");
+
+  EXPECT_THROW(
+      registry.getDefinitionNode<facebook::thrift::annotation::Experimental>(),
+      std::out_of_range);
 }
 
 } // namespace apache::thrift::schema

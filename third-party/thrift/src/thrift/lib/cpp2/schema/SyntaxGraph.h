@@ -1449,10 +1449,10 @@ class SyntaxGraph final {
    */
   ProgramNode::IncludesList programs() const;
 
+  explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
+
  private:
   folly::not_null_unique_ptr<const detail::Resolver> resolver_;
-
-  explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 
   friend const DefinitionNode& detail::lookUpDefinition(
       const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);

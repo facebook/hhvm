@@ -48,7 +48,7 @@ def is_jitted(fp, ip):
 
 def php_filename(func):
     func = func.cast(T("HPHP::Func").pointer())
-    filename = rawptr(rawptr(func["m_shared"])["m_originalFilename"])
+    filename = rawptr(rawptr(func["m_shared"])["m_originalUnit"])
 
     if filename == nullptr():
         filename = rawptr(func["m_unit"]["m_origFilepath"])

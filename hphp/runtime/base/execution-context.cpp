@@ -1225,8 +1225,8 @@ StringData* ExecutionContext::getContainingFileName() {
   if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
   if (ar == nullptr) return staticEmptyString();
   Unit* unit = ar->func()->unit();
-  auto const path = ar->func()->originalFilename() ?
-    ar->func()->originalFilename() : unit->filepath();
+  auto const path =  ar->func()->originalUnit() ?
+    ar->func()->originalUnit() : unit->filepath();
   return const_cast<StringData*>(path);
 }
 

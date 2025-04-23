@@ -440,8 +440,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Builtins and generators don't have a file and line number.
     if (prev && !prev.func()->isBuiltin()) {
       auto const prevFunc = prev.func();
-      auto const prevFile = prevFunc->originalFilename()
-        ? prevFunc->originalFilename()
+      auto const prevFile = prevFunc->originalUnit()
+        ? prevFunc->originalUnit()
         : prevFunc->unit()->filepath();
 
       assertx(prevFile != nullptr);
@@ -684,8 +684,8 @@ Array CompactTraceData::extract() const {
       auto const prevFunc = prev->func;
       auto const prevUnit = prevFunc->unit();
       auto prevFile = prevUnit->filepath();
-      if (prevFunc->originalFilename()) {
-        prevFile = prevFunc->originalFilename();
+      if (prevFunc->originalUnit()) {
+        prevFile = prevFunc->originalUnit();
       }
 
       auto const prevPc = prev->prevPc;

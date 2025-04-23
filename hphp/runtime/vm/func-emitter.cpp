@@ -61,7 +61,7 @@ FuncEmitter::FuncEmitter(int sn, Id id, const StringData* n)
   , maxStackCells(0)
   , retUserType()
   , docComment(nullptr)
-  , originalFilename(nullptr)
+  , originalUnit(nullptr)
   , originalModuleName(nullptr)
   , memoizePropName(nullptr)
   , memoizeGuardPropName(nullptr)
@@ -84,7 +84,7 @@ FuncEmitter::FuncEmitter(int sn, const StringData* n, PreClassEmitter* pce)
   , maxStackCells(0)
   , retUserType()
   , docComment(nullptr)
-  , originalFilename(nullptr)
+  , originalUnit(nullptr)
   , originalModuleName(nullptr)
   , memoizePropName(nullptr)
   , memoizeGuardPropName(nullptr)
@@ -379,12 +379,12 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   std::vector<Func::ParamInfo> fParams = params;
   auto const originalFullName =
-    (!originalFilename ||
+    (!originalUnit ||
      !Cfg::Repo::Authoritative ||
-     FileUtil::isAbsolutePath(originalFilename->slice())) ?
-    originalFilename :
+     FileUtil::isAbsolutePath(originalUnit->slice())) ?
+    originalUnit :
     makeStaticString(Cfg::Server::SourceRoot +
-                     originalFilename->toCppString());
+                     originalUnit->toCppString());
 
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
@@ -398,7 +398,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_userAttributes = userAttributes;
   f->shared()->m_retTypeConstraints = retTypeConstraints;
   f->shared()->m_retUserType = retUserType;
-  f->shared()->m_originalFilename = originalFullName;
+  f->shared()->m_originalUnit = originalFullName;
   f->shared()->m_allFlags.m_isGenerated = HPHP::is_generated(name);
   f->shared()->m_repoReturnType = repoReturnType;
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
@@ -763,7 +763,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (userAttributes)
     (retTypeConstraints)
     (retUserType)
-    (originalFilename)
+    (originalUnit)
     (originalModuleName)
     (coeffectRules)
     ;

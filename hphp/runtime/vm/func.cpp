@@ -719,7 +719,7 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   : m_bc(bc.isPtr() ? BCPtr::FromPtr(allocateBCRegion(bc.ptr(), bclen)) : bc)
   , m_preClass(preClass)
   , m_line1(line1)
-  , m_originalFilename(nullptr)
+  , m_originalUnit(nullptr)
   , m_cti_base(0)
   , m_numLocals(0)
   , m_numIterators(0)

@@ -686,7 +686,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType.ptr(ue);
   ret->retTypeConstraints = fe.retTypeConstraints;
-  ret->originalFilename   = fe.originalFilename;
+  ret->originalUnit       = fe.originalUnit;
   ret->originalModuleName = unit->moduleName;
 
   ret->isClosureBody       = fe.isClosureBody;

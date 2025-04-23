@@ -342,7 +342,7 @@ public:
   };
 
   LowStringPtr docComment;
-  LowStringPtr originalFilename;
+  LowStringPtr originalUnit;
   LowStringPtr originalModuleName;
 
   UserAttributeMap userAttributes;

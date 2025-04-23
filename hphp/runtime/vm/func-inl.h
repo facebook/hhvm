@@ -238,8 +238,8 @@ inline const StringData* Func::methCallerMethName() const {
 ///////////////////////////////////////////////////////////////////////////////
 // File info.
 
-inline const StringData* Func::originalFilename() const {
-  return shared()->m_originalFilename;
+inline const StringData* Func::originalUnit() const {
+  return shared()->m_originalUnit;
 }
 
 inline const StringData* Func::filename() const {
@@ -250,7 +250,7 @@ inline const StringData* Func::filename() const {
 
   // Use the original filename if it exists, otherwise grab the filename from
   // the unit
-  const StringData* name = originalFilename();
+  const StringData* name = originalUnit();
   if (!name) {
     assertx(m_unit);
     name = m_unit->filepath();

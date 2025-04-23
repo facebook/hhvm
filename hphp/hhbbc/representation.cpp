@@ -100,7 +100,6 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
     (numIters)
     (mainEntry)
     (returnUserType)
-    (originalFilename)
     (originalUnit)
     (originalClass)
     (originalModuleName)

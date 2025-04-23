@@ -725,8 +725,8 @@ void maybe_output_prof_trans_rec_trace(
     auto const unit = sk.unit();
     auto const func = sk.func();
     const char *filePath = "";
-    if (func->originalFilename() && func->originalFilename()->size()) {
-      filePath = func->originalFilename()->data();
+    if (func->originalUnit() && func->originalUnit()->size()) {
+      filePath = func->originalUnit()->data();
     } else if (unit->origFilepath()->data() && unit->origFilepath()->size()) {
       filePath = unit->origFilepath()->data();
     }
@@ -919,8 +919,8 @@ void maybe_output_target_profile_trace(
         auto const func = srcKey.func();
         auto const unit = srcKey.unit();
         const char *filePath = "";
-        if (func->originalFilename() && func->originalFilename()->size()) {
-          filePath = func->originalFilename()->data();
+        if (func->originalUnit() && func->originalUnit()->size()) {
+          filePath = func->originalUnit()->data();
         } else if (unit->origFilepath()->data() && unit->origFilepath()->size()) {
           filePath = unit->origFilepath()->data();
         }

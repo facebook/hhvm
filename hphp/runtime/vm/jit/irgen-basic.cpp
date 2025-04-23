@@ -534,8 +534,8 @@ void emitDir(IRGS& env) {
     return;
   }
   auto const p = [&] {
-    if (auto const of = curFunc(env)->originalFilename()) {
-      return of;
+    if (auto const ou = curFunc(env)->originalUnit()) {
+      return ou;
     }
     return unit->origFilepath();
   }();
@@ -548,11 +548,11 @@ void emitFile(IRGS& env) {
   if (handle != rds::kUninitHandle) {
     assertx(!Cfg::Repo::Authoritative);
     assertx(Cfg::Eval::ReuseUnitsByHash);
-    assertx(!curFunc(env)->originalFilename());
+    assertx(!curFunc(env)->originalUnit());
     push(env, gen(env, LdUnitPerRequestFilepath, RDSHandleData { handle }));
     return;
   }
-  if (auto const of = curFunc(env)->originalFilename()) {
+  if (auto const of = curFunc(env)->originalUnit()) {
     push(env, cns(env, of));
     return;
   }

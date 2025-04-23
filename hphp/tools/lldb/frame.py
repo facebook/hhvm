@@ -250,7 +250,7 @@ def php_filename(func: lldb.SBValue, target: lldb.SBTarget) -> str:
         The filename as a string
     """
     m_shared = utils.rawptr(utils.get(func, "m_shared"))
-    filename = utils.rawptr(utils.get(m_shared, "m_originalFilename"))
+    filename = utils.rawptr(utils.get(m_shared, "m_originalUnit"))
 
     if filename.unsigned == 0:  # null ptr
         filename = utils.rawptr(utils.get(func, "m_unit", "m_origFilepath"))

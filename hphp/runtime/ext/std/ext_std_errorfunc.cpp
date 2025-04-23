@@ -104,8 +104,8 @@ bool hphp_debug_caller_info_impl(
     RuntimeStruct::registerRuntimeStruct(s_hphp_debug_caller_info, s_fields);
 
   auto const cls = func->cls();
-  auto const path = func->originalFilename() ?
-    func->originalFilename() : func->unit()->filepath();
+  auto const path = func->originalUnit() ?
+    func->originalUnit() : func->unit()->filepath();
 
   auto const has_cls = cls && !func->isClosureBody();
   StructDictInit init(s_struct, has_cls ? 4 : 3);

@@ -1090,8 +1090,8 @@ OPTBLD_INLINE void iopFalse() {
 }
 
 OPTBLD_INLINE void iopFile() {
-  if (auto const of = vmfp()->func()->originalFilename()) {
-    vmStack().pushStaticString(of);
+  if (auto const ou = vmfp()->func()->originalUnit()) {
+    vmStack().pushStaticString(ou);
     return;
   }
   auto s = vmfp()->func()->unit()->filepath();
@@ -1100,8 +1100,8 @@ OPTBLD_INLINE void iopFile() {
 
 OPTBLD_INLINE void iopDir() {
   auto const p = [&] {
-    if (auto const of = vmfp()->func()->originalFilename()) {
-      return of;
+    if (auto const ou = vmfp()->func()->originalUnit()) {
+      return ou;
     }
     return vmfp()->func()->unit()->filepath();
   }();

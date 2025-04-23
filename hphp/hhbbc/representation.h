@@ -303,6 +303,16 @@ struct Func : FuncBase {
    */
   LSString name;
   SrcInfo srcInfo;
+
+
+  /*
+   * If hhbbc flattens a trait, we keep the original filename of the file
+   * that defined the trait in originalUnit to get to the srcLocs. This
+   * ensures that backtraces and whatnot work correctly. Otherwise this is
+   * nullptr. This field lives above `attrs` for alignment reasons.
+   */
+  LSString originalUnit{};
+
   Attr attrs;
 
   /*
@@ -347,17 +357,6 @@ struct Func : FuncBase {
    * passed through to expose it to reflection.
    */
   LSString returnUserType;
-
-  /*
-   * If traits are being flattened by hphpc, we keep the original
-   * filename of a function (the file that defined the trait) so
-   * backtraces and things work correctly.  Otherwise this is nullptr.
-   * Similarly, if hhbbc did the flattening itself, we need the original
-   * unit, to get to the srcLocs. Once we stop flattening in hphpc, we can
-   * drop the originalFilename.
-   */
-  LSString originalFilename;
-  LSString originalUnit{};
 
   /*
    * The reference of the trait where the method was originally

@@ -972,8 +972,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
   fe.retTypeConstraints = func.retTypeConstraints;
-  fe.originalFilename =
-    func.originalFilename ? func.originalFilename :
+  fe.originalUnit =
     func.originalUnit ? func.originalUnit : nullptr;
   fe.originalModuleName = func.originalModuleName;
   fe.requiresFromOriginalModule = func.requiresFromOriginalModule;

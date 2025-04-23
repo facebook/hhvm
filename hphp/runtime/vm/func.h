@@ -383,7 +383,7 @@ public:
    * In repo mode, we flatten traits into the classes they're used in, so we
    * need this to track the original file for backtraces and errors.
    */
-  const StringData* originalFilename() const;
+  const StringData* originalUnit() const;
 
   /*
    * The original filename if it is defined, the unit's filename otherwise.
@@ -1401,7 +1401,7 @@ private:
     UserAttributeMap m_userAttributes;
     // The link can be bound for const Func.
     mutable rds::Link<bool, rds::Mode::Normal> m_funcHasDebuggerIntr;
-    LowStringPtr m_originalFilename;
+    LowStringPtr m_originalUnit;
     TypeIntersectionConstraint m_retTypeConstraints;
     RepoAuthType m_repoReturnType;
     RepoAuthType m_repoAwaitedReturnType;

@@ -1020,8 +1020,8 @@ void in(ISS& env, const bc::File&) {
     return push(env, TSStr);
   }
 
-  auto filename = env.ctx.func->originalFilename
-    ? env.ctx.func->originalFilename
+  auto filename = env.ctx.func->originalUnit
+    ? env.ctx.func->originalUnit
     : env.ctx.func->unit;
   if (!FileUtil::isAbsolutePath(filename->slice())) {
     filename = makeStaticString(
@@ -1038,8 +1038,8 @@ void in(ISS& env, const bc::Dir&) {
     return push(env, TSStr);
   }
 
-  auto filename = env.ctx.func->originalFilename
-    ? env.ctx.func->originalFilename
+  auto filename = env.ctx.func->originalUnit
+    ? env.ctx.func->originalUnit
     : env.ctx.func->unit;
   if (!FileUtil::isAbsolutePath(filename->slice())) {
     filename = makeStaticString(

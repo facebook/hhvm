@@ -44,6 +44,23 @@ final class ThriftContextPropState {
     self::initFromString($tfm, $skip_experiment_id_ingestion);
   }
 
+  /**
+  * Initializes ThriftContextPropState from WWW subrequest Headers.
+  * Takes in custom subrequest headers
+  */
+  public static function getOriginIdFromSubrequestHeaders(
+    HTTPHeaders $headers,
+  )[defaults]: ?int {
+    $tfm = $headers->getHeader(HTTPRequestHeader::THRIFT_FMHK);
+    $skip_experiment_id_ingestion =
+      !JustKnobs::eval('lumos/experimentation:enable_www_experiment_id_api');
+    if ($tfm === null) {
+      return 0;
+    }
+    return
+      self::getTfmFromString($tfm, $skip_experiment_id_ingestion)->origin_id;
+  }
+
   // If anything changes with the ThriftFrameworkMetadata, throw out the
   // serialized representation.
   private function dirty()[write_props]: void {
@@ -100,24 +117,16 @@ final class ThriftContextPropState {
   )[defaults]: void {
     try {
       $rid_set = false;
+
       if ($s !== null) {
-        $transport = Base64::decode($s);
-        $buf = new TMemoryBuffer($transport);
-        $prot = new TCompactProtocolAccelerated($buf);
-        $tfm = ThriftFrameworkMetadata::withDefaultValues();
-        $tfm->read($prot);
+        $tfm = self::getTfmFromString($s, $skip_experiment_id_ingestion);
+        self::get()->storage = $tfm;
+        self::get()->dirty();
 
         $rid = $tfm->request_id;
         if ($rid !== null && !Str\is_empty($rid)) {
           $rid_set = true;
         }
-
-        if ($skip_experiment_id_ingestion && $tfm->experiment_ids is nonnull) {
-          $tfm->experiment_ids = vec[];
-        }
-
-        self::get()->storage = $tfm;
-        self::get()->dirty();
       }
     } catch (\Exception $ex) {
       // Swallow the error, rather than nuke the whole request
@@ -130,6 +139,24 @@ final class ThriftContextPropState {
       self::get()->storage->request_id = self::generateRequestId();
       self::get()->dirty();
     }
+  }
+
+  private static function getTfmFromString(
+    string $s,
+    bool $skip_experiment_id_ingestion = true,
+  ): ThriftFrameworkMetadata {
+    $transport = Base64::decode($s);
+    $buf = new TMemoryBuffer($transport);
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->read($prot);
+
+    if ($skip_experiment_id_ingestion && $tfm->experiment_ids is nonnull) {
+      $tfm->experiment_ids = vec[];
+    }
+
+    return $tfm;
+
   }
 
   // update FB user id from explicit value

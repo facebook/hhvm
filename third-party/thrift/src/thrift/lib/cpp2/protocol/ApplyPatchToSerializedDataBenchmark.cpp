@@ -16,9 +16,9 @@
 
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
+#include <thrift/lib/cpp2/patch/DynamicPatch.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
-#include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types.h>
 
@@ -40,7 +40,7 @@ Object getObject1And4(int n) {
   return obj;
 }
 
-Object getPatchObj1And4(bool clear) {
+DynamicPatch getPatch1And4(bool clear) {
   Value intPatch;
   intPatch.ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
       asValueStruct<type::i32_t>(1);
@@ -55,7 +55,7 @@ Object getPatchObj1And4(bool clear) {
   }
   Object patchObj;
   patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
-  return patchObj;
+  return DynamicPatch::fromObject(std::move(patchObj));
 }
 
 // Testcase 2 uses an object with a large bool list and patch contains
@@ -71,7 +71,7 @@ Object getObject2(int n) {
   return obj;
 }
 
-Object getPatchObj2() {
+DynamicPatch getPatch2() {
   Value intPatch;
   intPatch.ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
       asValueStruct<type::i32_t>(1);
@@ -83,7 +83,7 @@ Object getPatchObj2() {
   objPatch.ensure_object()[FieldId{2}] = intPatch;
   Object patchObj;
   patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
-  return patchObj;
+  return DynamicPatch::fromObject(std::move(patchObj));
 }
 
 // Testcase 3 uses an object with many fields and patch contains all the fields.
@@ -95,7 +95,7 @@ Object getObject3(int n) {
   return obj;
 }
 
-Object getPatchObj3(int n) {
+DynamicPatch getPatch3(int n) {
   Value intPatch;
   intPatch.ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Add)}] =
       asValueStruct<type::i32_t>(1);
@@ -105,7 +105,7 @@ Object getPatchObj3(int n) {
   }
   Object patchObj;
   patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
-  return patchObj;
+  return DynamicPatch::fromObject(std::move(patchObj));
 }
 
 Object getObjectWithMap(int n) {
@@ -120,7 +120,7 @@ Object getObjectWithMap(int n) {
 
 // Testcase 5 uses an object with map<string, string> and patch contains some
 // map elements with MapPatch::Put.
-Object getPatchObj5() {
+DynamicPatch getPatch5() {
   Object patchObj;
   auto& mapPatchObj =
       patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}]
@@ -133,12 +133,12 @@ Object getPatchObj5() {
       asValueStruct<type::binary_t>("42"), asValueStruct<type::binary_t>("42"));
   put.emplace(
       asValueStruct<type::binary_t>("43"), asValueStruct<type::binary_t>("43"));
-  return patchObj;
+  return DynamicPatch::fromObject(std::move(patchObj));
 }
 
 // Testcase 6 uses an object with map<string, string> and patch contains all the
 // map elements with MapPatch::Put.
-Object getPatchObj6(int n) {
+DynamicPatch getPatch6(int n) {
   Object patchObj;
   auto& mapPatchObj =
       patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}]
@@ -150,12 +150,12 @@ Object getPatchObj6(int n) {
         .ensure_map()
         .emplace(v, v);
   }
-  return patchObj;
+  return DynamicPatch::fromObject(std::move(patchObj));
 }
 
 // Testcase 7 uses an object with map<string, string> and patch contains some
 // map elements with MapPatch::PatchAfter.
-Object getPatchObj7() {
+DynamicPatch getPatch7() {
   Value assignPatchValue;
   assignPatchValue
       .emplace_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
@@ -172,12 +172,12 @@ Object getPatchObj7() {
           .ensure_map();
   put.emplace(asValueStruct<type::binary_t>("42"), assignPatchValue);
   put.emplace(asValueStruct<type::binary_t>("43"), assignPatchValue);
-  return patchObj;
+  return DynamicPatch::fromObject(std::move(patchObj));
 }
 
 // Testcase 8 uses an object with map<string, string> and patch contains all the
 // map elements with MapPatch::PatchAfter.
-Object getPatchObj8(int n) {
+DynamicPatch getPatch8(int n) {
   Value assignPatchValue;
   assignPatchValue
       .emplace_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
@@ -194,119 +194,110 @@ Object getPatchObj8(int n) {
         .ensure_map()
         .emplace(v, assignPatchValue);
   }
-  return patchObj;
+  return DynamicPatch::fromObject(std::move(patchObj));
 }
 
 std::unique_ptr<folly::IOBuf> serialized1, serialized2, serialized3,
     serialized4, serialized5, serialized6, serialized7, serialized8;
-Object patchObj1, patchObj2, patchObj3, patchObj4, patchObj5, patchObj6,
-    patchObj7, patchObj8;
+DynamicPatch patch1, patch2, patch3, patch4, patch5, patch6, patch7, patch8;
 
 void init(int n) {
   serialized1 =
       serializeObject<apache::thrift::CompactProtocolWriter>(getObject1And4(n));
-  patchObj1 = getPatchObj1And4(false);
+  patch1 = getPatch1And4(false);
   serialized2 =
       serializeObject<apache::thrift::CompactProtocolWriter>(getObject2(n));
-  patchObj2 = getPatchObj2();
+  patch2 = getPatch2();
   serialized3 =
       serializeObject<apache::thrift::CompactProtocolWriter>(getObject3(n));
-  patchObj3 = getPatchObj3(n);
+  patch3 = getPatch3(n);
   serialized4 =
       serializeObject<apache::thrift::CompactProtocolWriter>(getObject1And4(n));
-  patchObj4 = getPatchObj1And4(true);
+  patch4 = getPatch1And4(true);
   serialized5 = serializeObject<apache::thrift::CompactProtocolWriter>(
       getObjectWithMap(n));
-  patchObj5 = getPatchObj5();
+  patch5 = getPatch5();
   serialized6 = serializeObject<apache::thrift::CompactProtocolWriter>(
       getObjectWithMap(n));
-  patchObj6 = getPatchObj6(n);
+  patch6 = getPatch6(n);
   serialized7 = serializeObject<apache::thrift::CompactProtocolWriter>(
       getObjectWithMap(n));
-  patchObj7 = getPatchObj7();
+  patch7 = getPatch7();
   serialized8 = serializeObject<apache::thrift::CompactProtocolWriter>(
       getObjectWithMap(n));
-  patchObj8 = getPatchObj8(n);
+  patch8 = getPatch8(n);
 }
 
 void runOriginalApproach(
-    std::unique_ptr<folly::IOBuf>& serialized, const Object& patchObj) {
+    std::unique_ptr<folly::IOBuf>& serialized, const DynamicPatch& patch) {
   Value value;
   value.emplace_object(parseObject<CompactProtocolReader>(*serialized));
-  protocol::applyPatch(patchObj, value);
+  patch.apply(value);
   protocol::serializeObject<CompactProtocolWriter>(value.as_object());
 }
 
 BENCHMARK(few_small_fields) {
-  runOriginalApproach(serialized1, patchObj1);
+  runOriginalApproach(serialized1, patch1);
 }
 
 BENCHMARK(few_small_fields_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj1, *serialized1);
+  patch1.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized1);
 }
 
 BENCHMARK(large_fields) {
-  runOriginalApproach(serialized2, patchObj2);
+  runOriginalApproach(serialized2, patch2);
 }
 
 BENCHMARK(large_fields_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj2, *serialized2);
+  patch2.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized2);
 }
 
 BENCHMARK(all_small_fields) {
-  runOriginalApproach(serialized3, patchObj3);
+  runOriginalApproach(serialized3, patch3);
 }
 
 BENCHMARK(all_small_fields_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj3, *serialized3);
+  patch3.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized3);
 }
 
 BENCHMARK(clear_large_fields) {
-  runOriginalApproach(serialized4, patchObj4);
+  runOriginalApproach(serialized4, patch4);
 }
 
 BENCHMARK(clear_large_fields_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj4, *serialized4);
+  patch4.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized4);
 }
 
 BENCHMARK(few_map_elems_with_put) {
-  runOriginalApproach(serialized5, patchObj5);
+  runOriginalApproach(serialized5, patch5);
 }
 
 BENCHMARK(few_map_elems_with_put_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj5, *serialized5);
+  patch5.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized5);
 }
 
 BENCHMARK(all_map_elems_with_put) {
-  runOriginalApproach(serialized6, patchObj6);
+  runOriginalApproach(serialized6, patch6);
 }
 
 BENCHMARK(all_map_elems_with_put_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj6, *serialized6);
+  patch6.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized6);
 }
 
 BENCHMARK(few_map_elems_with_patch_after) {
-  runOriginalApproach(serialized7, patchObj7);
+  runOriginalApproach(serialized7, patch7);
 }
 
 BENCHMARK(few_map_elems_with_patch_after_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj7, *serialized7);
+  patch7.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized7);
 }
 
 BENCHMARK(all_map_elems_with_patch_after) {
-  runOriginalApproach(serialized8, patchObj8);
+  runOriginalApproach(serialized8, patch8);
 }
 
 BENCHMARK(all_map_elems_with_patch_after_partial_deser) {
-  applyPatchToSerializedData<type::StandardProtocol::Compact>(
-      patchObj8, *serialized8);
+  patch8.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized8);
 }
 
 } // namespace apache::thrift::protocol

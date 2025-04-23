@@ -7,7 +7,7 @@ class N1234MyClass {}
 //@bento-cell-end
 
 //@bento-cell:{"cell_bento_metadata":{},"cell_type":"markdown","id":3}
-/*
+/*@non_hack:
 ## Markdown cell (cell 3)
 
 I am a *markdown* **cell**

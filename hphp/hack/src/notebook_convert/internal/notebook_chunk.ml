@@ -50,7 +50,26 @@ let cell_end_regexp = Str.regexp ({|^ *|} ^ bento_cell_end_comment)
 
 let is_chunk_end_comment s = Str.string_match cell_end_regexp s 0
 
-let wrap_in_comment = Printf.sprintf "/*\n%s\n*/"
+let non_hack_prefix = "/*@non_hack:\n"
+
+let non_hack_suffix = "\n*/"
+
+let strip_non_hack_comment (code : string) =
+  if
+    String.is_prefix code ~prefix:non_hack_prefix
+    && String.is_suffix code ~suffix:non_hack_suffix
+  then
+    String.sub
+      code
+      ~pos:(String.length non_hack_prefix)
+      ~len:
+        (String.length code
+        - String.length non_hack_prefix
+        - String.length non_hack_suffix)
+  else
+    code
+
+let wrap_in_comment : string -> string = Printf.sprintf "/*@non_hack:\n%s\n*/"
 
 let to_hack { chunk_kind; id; contents; cell_bento_metadata } : string =
   let (cell_type, body) =
@@ -126,7 +145,11 @@ let metadata_of_comment (comment : string) :
     Error (Notebook_convert_error.Invalid_input msg)
   | metadata -> Ok metadata
 
-let strip_comment_wrapper (hack : string) : string =
+(** remove leading `/*\n` and trailing `\n*/`. These were inserted
+* by older versions  of the conversion script for non-hack cells.
+* We also handle the newer format of `/*@non_hack:\n` ... `\n*/`
+*)
+let strip_legacy_comment_wrapper (hack : string) : string =
   let stripped = String.strip hack in
   String.sub
     stripped
@@ -138,12 +161,13 @@ let of_hack ~(comment : string) (hack : string) :
   Result.map
     (metadata_of_comment comment)
     ~f:(fun { metadata_id = id; metadata_cell_type; cell_bento_metadata } ->
+      let hack = strip_non_hack_comment hack in
       if String.equal "code" metadata_cell_type then
         { id; chunk_kind = Hack; contents = hack; cell_bento_metadata }
       else
         {
           id;
           chunk_kind = Non_hack { cell_type = metadata_cell_type };
-          contents = strip_comment_wrapper hack;
+          contents = strip_legacy_comment_wrapper hack;
           cell_bento_metadata;
         })

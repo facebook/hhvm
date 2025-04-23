@@ -21,7 +21,7 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":["# Check it out\n","I am a *markdown* **cell**"]
+      "source":["non_hack:\n","# Check it out\n","I am a *markdown* **cell**"]
     },
     {
       "cell_type":"code",

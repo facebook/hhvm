@@ -30,6 +30,13 @@
       "metadata":{},
       "outputs":[],
       "source":["echo \"hi2\";\n","$m->hello();"]
+    },
+    {
+      "cell_type":"code",
+      "execution_count":null,
+      "metadata":{"language":"python"},
+      "outputs":[],
+      "source":["%%python\n","print('Hello from python')"]
     }
   ],
   "metadata":{

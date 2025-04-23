@@ -10,6 +10,14 @@ I am a *markdown* **cell**
 */
 //@bento-cell-end
 
+//@bento-cell:{"cell_bento_metadata":{"language":"python"},"cell_type":"code","id":4}
+/*@non_hack:
+%%python
+
+print('Hello from python')
+*/
+//@bento-cell-end
+
 //@bento-cell:{"id": 1, "cell_type": "code"}
 class N1234MyClass {
   public function hello(): void {

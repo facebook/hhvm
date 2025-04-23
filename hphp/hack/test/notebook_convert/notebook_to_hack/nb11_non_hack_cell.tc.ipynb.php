@@ -7,7 +7,7 @@ class N1234MyClass {}
 //@bento-cell-end
 
 //@bento-cell:{"cell_bento_metadata":{"language":"sql"},"cell_type":"code","id":3}
-/*
+/*@non_hack:
 SELECT
     col1,
     col2
@@ -21,7 +21,7 @@ LIMIT
 //@bento-cell-end
 
 //@bento-cell:{"cell_type":"code","id":4}
-/*
+/*@non_hack:
 %%python
 print('hello from python', {'python': 'dictionary'})
 print('no semicolons')

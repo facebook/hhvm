@@ -31,6 +31,7 @@
 
 #include <folly/compression/Compression.h>
 #include <thrift/lib/cpp2/op/Sha256Hasher.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -46,6 +47,7 @@ enum class ast_protocol {
   json,
   debug,
   compact,
+  binary,
 };
 
 template <typename Writer, typename T>
@@ -85,6 +87,8 @@ class t_ast_generator : public t_generator {
           protocol_ = ast_protocol::debug;
         } else if (pair.second == "compact") {
           protocol_ = ast_protocol::compact;
+        } else if (pair.second == "binary") {
+          protocol_ = ast_protocol::binary;
         } else {
           throw std::runtime_error(
               fmt::format("Unknown protocol `{}`", pair.second));
@@ -511,6 +515,9 @@ void t_ast_generator::generate_program() {
       break;
     case ast_protocol::compact:
       f_out_ << serialize<CompactProtocolWriter>(ast);
+      break;
+    case ast_protocol::binary:
+      f_out_ << serialize<BinaryProtocolWriter>(ast);
       break;
   }
   f_out_.close();

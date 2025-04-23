@@ -8,11 +8,13 @@
 
 open Hh_prelude
 
+exception EvalError
+
 (* Value module represents the different types of values that can be produced during interpretation *)
 module Value = struct
   type t =
     | Str of string  (** String values *)
-    | Error  (** Represents evaluation errors *)
+    | Unit  (** Represents the unit value *)
 
   (* Helper functions to safely extract values from the Value.t type.
      These functions are primarily used during evaluation to safely assert
@@ -21,8 +23,8 @@ module Value = struct
      Returns None if the value is not of the expected type. *)
 
   let str = function
-    | Str s -> Some s
-    | _ -> None
+    | Str s -> s
+    | _ -> raise EvalError
 end
 
 (* Context module maintains the interpreter's state during evaluation *)
@@ -68,7 +70,10 @@ module Context = struct
         | None -> (* Handle missing local *)
       ]}
   *)
-  let load ~ctx local = Local_id.Map.find_opt local ctx.locals
+  let load ~ctx local =
+    match Local_id.Map.find_opt local ctx.locals with
+    | Some value -> value
+    | None -> raise EvalError
 
   (** [fresh ctx] creates a new context with the same provider and dependent_root but empty locals
 
@@ -100,14 +105,19 @@ module Context = struct
       ]}
   *)
   let find_class ~ctx name =
-    let open Option.Let_syntax in
     add_dep ctx Typing_deps.Dep.(Type name);
-    let* path = Naming_provider.get_class_path ctx.provider name in
-    add_file_dep ctx path;
-    let* class_ =
-      Ast_provider.find_class_in_file ~full:true ctx.provider path name
+    let cls =
+      let open Option.Let_syntax in
+      let* path = Naming_provider.get_class_path ctx.provider name in
+      add_file_dep ctx path;
+      let* class_ =
+        Ast_provider.find_class_in_file ~full:true ctx.provider path name
+      in
+      return @@ Naming.class_ ctx.provider class_
     in
-    return @@ Naming.class_ ctx.provider class_
+    match cls with
+    | Some cls -> cls
+    | None -> raise EvalError
 
   (** [find_static_method ~ctx class_ name] finds a method with [name] in [class_]
       Returns [None] if the method is not found
@@ -128,8 +138,12 @@ module Context = struct
   *)
   let find_static_method ~ctx class_ name =
     add_dep ctx Typing_deps.Dep.(SMethod (snd class_.Aast.c_name, name));
-    List.find class_.Aast.c_methods ~f:(fun meth ->
-        String.equal (snd meth.Aast.m_name) name)
+    match
+      List.find class_.Aast.c_methods ~f:(fun meth ->
+          String.equal (snd meth.Aast.m_name) name)
+    with
+    | Some meth -> meth
+    | None -> raise EvalError
 
   (** [find_function ~ctx name] looks up a function definition by name using the context's provider
       Returns [None] if the function is not found
@@ -142,14 +156,19 @@ module Context = struct
       ]}
   *)
   let find_function ~ctx name =
-    let open Option.Let_syntax in
     add_dep ctx Typing_deps.Dep.(Fun name);
-    let* path = Naming_provider.get_fun_path ctx.provider name in
-    add_file_dep ctx path;
-    let* fun_def =
-      Ast_provider.find_fun_in_file ~full:true ctx.provider path name
+    let func =
+      let open Option.Let_syntax in
+      let* path = Naming_provider.get_fun_path ctx.provider name in
+      add_file_dep ctx path;
+      let* fun_def =
+        Ast_provider.find_fun_in_file ~full:true ctx.provider path name
+      in
+      return @@ Naming.fun_def ctx.provider fun_def
     in
-    return @@ Naming.fun_def ctx.provider fun_def
+    match func with
+    | Some func -> func
+    | None -> raise EvalError
 end
 
 (* ControlFlow module represents the possible outcomes of statement evaluation *)
@@ -171,25 +190,22 @@ end = struct
   (* Main expression evaluation function *)
   let rec expr (ctx : Context.t) (Expr e) =
     let expr ctx (_, _, e) = expr ctx (Expr e) in
-    let open Option.Let_syntax in
-    Option.value ~default:Value.Error
-    @@
     match e with
     | Aast.String str ->
       (* Evaluates a string literal *)
-      return @@ Value.Str str
+      Value.Str str
     | Aast.String2 exprs ->
-      let* value =
+      let value =
         List.fold
-          ~init:(Some "")
+          ~init:""
           ~f:(fun acc e ->
-            let* lhs = acc in
-            let* rhs = Value.str @@ expr ctx e in
-            return @@ lhs ^ rhs)
+            let lhs = acc in
+            let rhs = Value.str @@ expr ctx e in
+            lhs ^ rhs)
           exprs
       in
-      return @@ Value.Str value
-    | Aast.Nameof (_, _, Aast.CI (_, name)) -> return @@ Value.Str name
+      Value.Str value
+    | Aast.Nameof (_, _, Aast.CI (_, name)) -> Value.Str name
     | Aast.Lvar (_, name) ->
       (* Looks up value of a local variable *)
       Context.load ~ctx name
@@ -199,7 +215,7 @@ end = struct
     | Aast.(Binop { bop; lhs; rhs }) ->
       (* Handles binary operations *)
       Binop.eval ctx bop lhs rhs
-    | _ -> None
+    | _ -> raise EvalError
 
   let eval (ctx : Context.t) (_, _, e) = expr ctx (Expr e)
 end
@@ -232,7 +248,7 @@ end
 
 (* Block module handles evaluation of statement blocks *)
 and Block : sig
-  val eval : Context.t -> (_, _) Aast.block -> Value.t option
+  val eval : Context.t -> (_, _) Aast.block -> Value.t
 end = struct
   type t = Block : (_, _) Aast.block -> t
 
@@ -240,13 +256,13 @@ end = struct
   let rec block (ctx : Context.t) (Block b) =
     let block ctx b = block ctx (Block b) in
     match b with
-    | [] -> None
+    | [] -> Value.Unit
     | statement :: rest -> begin
       let open ControlFlow in
       match Stmt.eval ctx statement with
       | Next ctx -> block ctx rest (* Continue with next statement *)
-      | Return value -> Some value (* Return from block *)
-      | Exit -> None (* Exit evaluation *)
+      | Return value -> value (* Return from block *)
+      | Exit -> Value.Unit (* Exit evaluation *)
     end
 
   let eval (ctx : Context.t) b = block ctx (Block b)
@@ -254,14 +270,14 @@ end
 
 (* ClassId module handles class identifier evaluation *)
 and ClassId : sig
-  val eval : Context.t -> (_, _) Aast.class_id -> Nast.class_ option
+  val eval : Context.t -> (_, _) Aast.class_id -> Nast.class_
 end = struct
   type t = ClassId : (_, _) Aast.class_id_ -> t
 
   let class_id (ctx : Context.t) (ClassId cid) =
     match cid with
     | Aast.(CIparent | CIself | CIstatic | CIexpr _) ->
-      None (* Special class refs not supported *)
+      raise EvalError (* Special class refs not supported *)
     | Aast.CI (_, name) -> Context.find_class ~ctx name (* Named class *)
 
   let eval (ctx : Context.t) (_, _, cid) = class_id ctx (ClassId cid)
@@ -270,7 +286,7 @@ end
 (* Call module handles function/method calls *)
 and Call : sig
   val eval :
-    Context.t -> (_, _) Aast.expr -> (_, _) Aast.argument list -> Value.t option
+    Context.t -> (_, _) Aast.expr -> (_, _) Aast.argument list -> Value.t
 end = struct
   (* Build new context for function call with arguments *)
   let build_ctx ~ctx params args =
@@ -294,51 +310,50 @@ end = struct
       (ctx : Context.t)
       (func : (_, _) Aast.expr)
       (args : (_, _) Aast.argument list) =
-    let open Option.Let_syntax in
     let (_, _, func) = func in
     match (func, args) with
     | (Aast.Id (_, id), [Aast.Anormal arg])
       when String.equal id Naming_special_names.SimpliHack.file ->
-      let* path = Value.str @@ Expr.eval ctx arg in
+      let path = Value.str @@ Expr.eval ctx arg in
       let path = Relative_path.from_root ~suffix:path in
       Context.add_file_dep ctx path;
-      let* contents = File_provider.get_contents path in
-      return @@ Value.Str contents
+      let contents =
+        match File_provider.get_contents path with
+        | Some contents -> contents
+        | None -> raise EvalError
+      in
+      Value.Str contents
     | (Aast.Id (_, name), args) ->
-      let* Aast.{ fd_fun = { f_params = params; f_body = body; _ }; _ } =
+      let Aast.{ fd_fun = { f_params = params; f_body = body; _ }; _ } =
         Context.find_function ~ctx name
       in
       invoke ctx (params, body) args
     | (Aast.Class_const (cid, (_, name)), args) ->
-      let* class_ = ClassId.eval ctx cid in
-      let* Aast.{ m_params = params; m_body = body; _ } =
+      let class_ = ClassId.eval ctx cid in
+      let Aast.{ m_params = params; m_body = body; _ } =
         Context.find_static_method ~ctx class_ name
       in
       invoke ctx (params, body) args
-    | _ -> None
+    | _ -> raise EvalError
 end
 
 (* Binop module handles binary operations *)
 and Binop : sig
   val eval :
-    Context.t ->
-    Ast_defs.bop ->
-    (_, _) Aast.expr ->
-    (_, _) Aast.expr ->
-    Value.t option
+    Context.t -> Ast_defs.bop -> (_, _) Aast.expr -> (_, _) Aast.expr -> Value.t
 end = struct
   let eval (ctx : Context.t) bop lhs_expr rhs_expr =
     match bop with
     | Ast_defs.Dot ->
-      let open Option.Let_syntax in
-      let* lhs_str = Value.str @@ Expr.eval ctx lhs_expr in
-      let* rhs_str = Value.str @@ Expr.eval ctx rhs_expr in
-      Some (Value.Str (lhs_str ^ rhs_str))
-    | _ -> None
+      let lhs_str = Value.str @@ Expr.eval ctx lhs_expr in
+      let rhs_str = Value.str @@ Expr.eval ctx rhs_expr in
+      Value.Str (lhs_str ^ rhs_str)
+    | _ -> raise EvalError
 end
 
 (* Top-level evaluation function for user attributes *)
 let eval env (e : Tast.expr) =
   let Decl_env.{ ctx; droot; _ } = Tast_env.get_decl_env env in
   let ctx = Context.init ctx droot in
-  Value.str @@ Expr.eval ctx e
+  try Some (Value.str @@ Expr.eval ctx e) with
+  | EvalError -> None

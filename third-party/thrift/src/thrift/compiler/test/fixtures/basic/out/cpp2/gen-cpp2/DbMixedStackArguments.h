@@ -75,6 +75,13 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getDataByKey1{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4623621384729371878;
+  static constexpr ::std::string_view definitionKey = {"\xaf\x3f\x98\x62\x71\x40\xdf\xb7\xce\x40\x6f\xad\x95\x64\x7b\xa6", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace test::fixtures::basic {

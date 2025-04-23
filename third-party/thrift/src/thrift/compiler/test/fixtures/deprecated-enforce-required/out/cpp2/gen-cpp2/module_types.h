@@ -190,3 +190,11 @@ unsigned long Foo::read(Protocol_* iprot) {
 
 
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::Foo> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 382017812111905410;
+  static constexpr ::std::string_view definitionKey = {"\x87\x22\xcf\x58\x98\x3e\x82\x2f\x04\xcf\xb4\x7d\x01\x6a\xca\xa2", 16};
+};
+} // namespace apache::thrift::detail

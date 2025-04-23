@@ -206,6 +206,13 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_serialize{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::MyService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5169293820847068718;
+  static constexpr ::std::string_view definitionKey = {"\x0e\xaf\xf2\xf1\x82\x1d\xbd\x43\x7c\x61\x21\x39\xfd\xa3\xbe\xf3", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_data.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::name = "SomeStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_names = { {
@@ -50,5 +50,25 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::ns::q
   0,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::SomeStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumA>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumB>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumC>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumD>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::ns::qwerty::AnEnumE>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

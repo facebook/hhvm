@@ -316,3 +316,16 @@ unsigned long CustomException::read(Protocol_* iprot) {
 
 
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::CustomException> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -5240074935052059995;
+  static constexpr ::std::string_view definitionKey = {"\x79\xe3\xbb\xb3\x2b\x3c\x0d\x8b\x7b\xd6\x62\xb3\xb0\xf3\xf5\xe4", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::Result> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -5240074935052059995;
+  static constexpr ::std::string_view definitionKey = {"\x9c\x7a\x36\x2b\x69\x6a\x84\xe3\x92\xdb\xb4\x40\x04\xf4\xb0\x85", 16};
+};
+} // namespace apache::thrift::detail

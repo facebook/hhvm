@@ -76,6 +76,13 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_binary_keyed_map{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::SomeService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4410187887135363947;
+  static constexpr ::std::string_view definitionKey = {"\xac\xf8\x9d\x7d\xf5\x5c\xba\xd0\xbb\x73\xe6\x2d\xa7\x56\x4e\xc1", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace apache::thrift::fixtures::types {

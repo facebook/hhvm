@@ -317,3 +317,8 @@ apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticReques
   return requestInfoMap;
 }
 } // namespace apache::thrift::fixtures::types
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::fixtures::types::SomeService>::bundle)() =
+    nullptr;
+}

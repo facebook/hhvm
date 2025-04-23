@@ -65,6 +65,13 @@ class ServiceHandler<::cpp2::MyLeaf> : virtual public ::cpp2::MyNodeSvIf {
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_do_leaf{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::MyLeaf> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 8628767142313694045;
+  static constexpr ::std::string_view definitionKey = {"\x6a\x3a\x26\x43\xc2\xc8\xa5\xac\x79\xbe\xad\x50\x92\x69\x2b\x76", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

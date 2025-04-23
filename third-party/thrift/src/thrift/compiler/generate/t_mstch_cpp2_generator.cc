@@ -303,12 +303,32 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_out_of_line_services(const std::vector<t_service*>& services);
   void generate_inline_services(const std::vector<t_service*>& services);
 
+  prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_program(proto);
+    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
+    def.property(
+        "cpp_qualified_namespace", &cpp2::get_gen_unprefixed_namespace);
+    return std::move(def).make();
+  }
+
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
     auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
     def.property("cpp_name", [](const t_named& named) {
       return cpp2::get_name(&named);
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
+
+    def.property("cpp_qualified_underlying_name", [this](const t_type& type) {
+      return cpp_context_->resolver().get_underlying_namespaced_name(type);
     });
 
     return std::move(def).make();

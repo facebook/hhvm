@@ -209,6 +209,13 @@ class ServiceHandler<::some::valid::ns::ReturnService> : public apache::thrift::
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_readData{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::some::valid::ns::ReturnService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -7324834132563700898;
+  static constexpr ::std::string_view definitionKey = {"\x11\xd6\x98\xbb\xd5\x09\x27\xd6\x1c\x9c\x77\x12\x11\x54\x34\x79", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace some::valid::ns {

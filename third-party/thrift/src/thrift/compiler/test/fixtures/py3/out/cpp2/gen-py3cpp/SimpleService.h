@@ -471,6 +471,13 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_get_struct_hidden{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::py3::simple::SimpleService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x18\x44\x21\x78\xec\x6b\x61\x47\x4d\xac\x8a\xe5\xab\x82\xbe\x79", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace py3::simple {

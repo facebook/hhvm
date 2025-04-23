@@ -65,6 +65,13 @@ class ServiceHandler<::test::fixtures::basic::FooService> : public apache::thrif
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple_rpc{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::test::fixtures::basic::FooService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4623621384729371878;
+  static constexpr ::std::string_view definitionKey = {"\x40\x41\x80\xeb\xb4\x94\x4b\x7e\x4f\x0e\x01\x3c\x05\xc8\xb5\xf5", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace test::fixtures::basic {

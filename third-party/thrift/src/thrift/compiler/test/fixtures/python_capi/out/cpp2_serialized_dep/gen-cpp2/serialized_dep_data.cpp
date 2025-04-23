@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_data.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::SerializedStruct>::name = "SerializedStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::python_capi::SerializedStruct>::fields_names = { {
@@ -195,5 +195,25 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures:
   -1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::SerializedStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::SerializedUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::SerializedError>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::MarshalStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::MarshalUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::MarshalError>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

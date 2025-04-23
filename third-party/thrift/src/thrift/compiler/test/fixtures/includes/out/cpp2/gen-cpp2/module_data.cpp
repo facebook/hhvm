@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::cpp2::MyStruct>::fields_names = { {
@@ -60,5 +60,10 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::MyStruct>
   2,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyStruct>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

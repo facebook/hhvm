@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_data.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::SimpleException>::name = "SimpleException";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_names = { {
@@ -462,5 +462,52 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::Ad
   8,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleException>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::OptionalRefStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenTypeFieldsStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::detail::AdaptedUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenException>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::ComplexStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnionStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomFields>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomTypedefFields>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AdaptedTypedefFields>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnum>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnumRenamed>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::Flags>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

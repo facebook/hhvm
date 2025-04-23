@@ -4442,3 +4442,46 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::T
   }
 };
 } // namespace apache::thrift
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::MyStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\x15\x80\xe4\x9d\xfd\xd0\x1e\x43\x7c\xb3\xdc\xb5\x29\x12\x42\x95", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::MyUnion> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\x46\x25\xbf\x0e\x98\x7e\xe6\x91\xbb\x7b\x35\xa1\xeb\x5c\xb2\xad", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\xc3\xd5\x63\xda\xaf\x64\x2f\x2d\x0d\x66\x4b\xd4\xd4\x67\x93\xbc", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::StructLevelTerseStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\x82\x44\x70\xe4\x73\x94\x19\x43\x3e\x5e\xf0\xee\x2e\x7e\x6f\x2f", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\x5d\x53\x80\xc8\x16\x69\x7b\x0d\xf1\x85\xb2\xf9\xec\x39\xcb\xf4", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::AdaptedFields> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\x40\xf5\x27\x2f\x8f\x10\xae\x92\x86\xc8\xf6\x19\x7b\xc0\x79\x18", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::TerseException> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\xeb\xf5\x57\x82\xa9\x2b\xc6\x04\x6e\x45\xa8\x68\x07\xae\x0c\x1c", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::MyEnum> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 4864117094717901523;
+  static constexpr ::std::string_view definitionKey = {"\x7a\x91\x9d\x16\x71\x40\xc6\x16\x32\x43\xaa\xc3\x5e\x45\x2e\xf2", 16};
+};
+} // namespace apache::thrift::detail

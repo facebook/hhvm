@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_data.h"
+#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::TerseFoo>::name = "TerseFoo";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_names = { {
@@ -161,5 +161,19 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseLazyFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseOptionalFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseOptionalLazyFoo>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

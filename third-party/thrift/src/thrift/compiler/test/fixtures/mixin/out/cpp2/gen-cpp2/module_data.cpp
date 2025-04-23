@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/mixin/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/mixin/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Mixin1>::name = "Mixin1";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::Mixin1>::fields_names = { {
@@ -116,5 +116,19 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::Foo>::iss
   2,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Mixin1>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Mixin2>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Mixin3Base>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Foo>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

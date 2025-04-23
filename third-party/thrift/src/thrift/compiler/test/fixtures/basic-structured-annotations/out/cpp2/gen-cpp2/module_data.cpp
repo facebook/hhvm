@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::name = "runtime_annotation";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::fields_names = { {
@@ -221,5 +221,37 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures:
   1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::runtime_annotation>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyException>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyEnum>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

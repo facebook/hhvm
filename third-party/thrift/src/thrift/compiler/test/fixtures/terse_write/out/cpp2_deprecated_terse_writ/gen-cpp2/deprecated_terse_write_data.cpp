@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_data.h"
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_names = { {
@@ -482,5 +482,31 @@ THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::facebook::thri
   12,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyEnum>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/tablebased/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/tablebased/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::name = "TrivialTypesStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_names = { {
@@ -144,5 +144,19 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures:
   1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::tablebased::TrivialTypesStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::tablebased::ContainerStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::tablebased::ExampleUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::tablebased::ExampleEnum>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

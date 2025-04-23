@@ -64,3 +64,8 @@ apache::thrift::ServiceRequestInfoMap NullServiceServiceInfoHolder::staticReques
   return requestInfoMap;
 }
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::NullService>::bundle)() =
+    nullptr;
+}

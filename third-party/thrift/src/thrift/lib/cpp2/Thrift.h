@@ -482,6 +482,14 @@ constexpr std::bool_constant<std::is_invocable_v<F&&, T&>> callable(F&&) {
        [&](auto&& VARIABLE) -> std::void_t<decltype(__VA_ARGS__)> {}) \
        .value)
 
+/**
+ * Specialization defn in _types.h / service.h
+ */
+template <typename T>
+struct TSchemaAssociation {
+  static_assert(sizeof(T) == ~0ull, "invalid use of base template");
+};
+
 } // namespace detail
 
 } // namespace apache::thrift

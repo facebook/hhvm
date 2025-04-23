@@ -353,3 +353,11 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 
 
 } // namespace facebook::thrift::compiler::test
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::MyStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 2162972314762179418;
+  static constexpr ::std::string_view definitionKey = {"\x88\x7d\xb7\xa6\x28\x05\xc5\x37\x1f\x55\x22\xb6\x1e\x96\x08\x2f", 16};
+};
+} // namespace apache::thrift::detail

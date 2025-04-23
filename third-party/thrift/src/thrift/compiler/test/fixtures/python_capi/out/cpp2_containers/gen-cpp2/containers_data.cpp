@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_data.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::TemplateLists>::name = "TemplateLists";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::python_capi::TemplateLists>::fields_names = { {
@@ -237,5 +237,28 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
   0,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateLists>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateSets>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateMaps>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TWrapped>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionA>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionB>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionC>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

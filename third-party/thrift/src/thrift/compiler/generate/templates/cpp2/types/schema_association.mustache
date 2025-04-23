@@ -1,0 +1,36 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{! Declaration of `TSchemaAssociation` for the passed-in definition, the t_type `node`. }}
+{{#let export partial declaration |node|}}
+template <> struct TSchemaAssociation<{{node.cpp_qualified_underlying_name}}> {
+  {{! This is a pointer to the generated schema bundle constant's accessor, to defer initialization of the data until we know it will be accessed. }}
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = {{node.program.definition_key.buffer}};
+  static constexpr ::std::string_view definitionKey = {"{{node.definition_key.buffer}}", {{node.definition_key.length}}};
+};
+{{/let partial}}
+
+{{! Definition of `TSchemaAssociation` for the passed-in definition, the t_type `node`. }}
+{{#let export partial definition |node|}}
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<{{node.cpp_qualified_underlying_name}}>::bundle)() =
+  {{#if node.program.schema_name}}
+    &::{{node.program.cpp_qualified_namespace}}::{{node.program.name}}_constants::{{node.program.schema_name}}_includes;
+  {{#else}}
+    nullptr;
+  {{/if node.program.schema_name}}
+{{/let partial}}

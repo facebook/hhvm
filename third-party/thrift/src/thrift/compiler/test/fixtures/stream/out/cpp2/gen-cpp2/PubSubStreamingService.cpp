@@ -1041,3 +1041,8 @@ apache::thrift::ServiceRequestInfoMap PubSubStreamingServiceServiceInfoHolder::s
   return requestInfoMap;
 }
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::PubSubStreamingService>::bundle)() =
+    nullptr;
+}

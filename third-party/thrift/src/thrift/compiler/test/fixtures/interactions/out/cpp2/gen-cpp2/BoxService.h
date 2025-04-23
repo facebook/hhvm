@@ -92,6 +92,13 @@ class BoxedInteractionIf : public apache::thrift::Tile, public apache::thrift::S
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getABoxSession{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::BoxService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5169293820847068718;
+  static constexpr ::std::string_view definitionKey = {"\xe7\x89\x5a\x8d\x94\xf7\x9a\xaf\x07\x4e\x7a\xa5\x2d\xa1\x1c\xfc", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

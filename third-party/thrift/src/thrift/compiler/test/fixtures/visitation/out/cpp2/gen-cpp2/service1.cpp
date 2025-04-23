@@ -817,3 +817,8 @@ apache::thrift::ServiceRequestInfoMap service1ServiceInfoHolder::staticRequestIn
   return requestInfoMap;
 }
 } // namespace test_cpp2::cpp_reflection
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::service1>::bundle)() =
+    nullptr;
+}

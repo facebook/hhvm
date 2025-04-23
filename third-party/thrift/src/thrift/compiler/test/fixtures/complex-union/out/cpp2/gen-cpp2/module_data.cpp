@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::ComplexUnion>::name = "ComplexUnion";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_names = { {
@@ -224,5 +224,31 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::NonCopyab
   0,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ComplexUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ListUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::DataUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Val>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::ValUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::VirtualComplexUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::NonCopyableStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::NonCopyableUnion>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

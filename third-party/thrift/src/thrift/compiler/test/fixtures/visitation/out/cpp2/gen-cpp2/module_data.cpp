@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/visitation/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test_cpp2::cpp_reflection::union1>::name = "union1";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_names = { {
@@ -1024,5 +1024,73 @@ THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp
   27,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::union1>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::union2>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::union3>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::structA>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::unionA>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::structB>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::structC>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::struct1>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::struct2>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::struct3>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::struct4>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::struct5>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::struct_binary>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::dep_A_struct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::dep_B_struct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::annotated>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::union_with_special_names>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::struct_with_special_names>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::enum1>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::enum2>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::enum3>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::enum_with_special_names>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

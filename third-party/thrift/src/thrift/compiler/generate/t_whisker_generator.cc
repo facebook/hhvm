@@ -68,18 +68,18 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
   def.property("program", mem_fn(&t_named::program, proto.of<t_program>()));
 
   def.property("definition_key", [this](const t_named& named) {
+    map::raw m;
     detail::schematizer s(*named.program()->global_scope(), source_mgr_, {});
     auto unescaped = s.identify_definition(named);
     std::string escaped;
     for (unsigned char chr : unescaped) {
       fmt::format_to(std::back_inserter(escaped), "\\x{:02x}", chr);
     }
-    return escaped;
-  });
-  def.property("definition_key_length", [](const t_named&) -> int64_t {
+    m["buffer"] = escaped;
     // NOTE: this is not the same as `string.len self.definition_key` because
     // of escape sequences!
-    return detail::schematizer::definition_identifier_length();
+    m["length"] = i64(detail::schematizer::definition_identifier_length());
+    return map::of(std::move(m));
   });
 
   return std::move(def).make();
@@ -249,6 +249,24 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
       mem_fn(&t_program::structured_definitions, proto.of<t_structured>()));
   def.property("services", mem_fn(&t_program::services, proto.of<t_service>()));
   def.property("typedefs", mem_fn(&t_program::typedefs, proto.of<t_typedef>()));
+  def.property("definition_key", [this](const t_program& self) {
+    map::raw m;
+    detail::schematizer s(*self.global_scope(), source_mgr_, {});
+    auto id = std::to_string(s.identify_program(self));
+    // NOTE: this overrides a property on t_named which is not the strlen,
+    // but this is the same as the strlen. Provided for consistency to avoid
+    // bugs when using the base implementation.
+    m["length"] = i64(id.length());
+    m["buffer"] = std::move(id);
+    return map::of(std::move(m));
+  });
+  def.property("schema_name", [this](const t_program& self) {
+    auto name = detail::schematizer::name_schema(source_mgr_, self);
+    if (self.find(name)) {
+      return object(std::move(name));
+    }
+    return object();
+  });
   return std::move(def).make();
 }
 

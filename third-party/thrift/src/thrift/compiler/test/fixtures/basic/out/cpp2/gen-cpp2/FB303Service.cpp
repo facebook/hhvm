@@ -191,3 +191,8 @@ apache::thrift::ServiceRequestInfoMap FB303ServiceServiceInfoHolder::staticReque
   return requestInfoMap;
 }
 } // namespace test::fixtures::basic
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::FB303Service>::bundle)() =
+    nullptr;
+}

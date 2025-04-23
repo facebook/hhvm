@@ -448,3 +448,8 @@ apache::thrift::ServiceRequestInfoMap PrimitivesServiceServiceInfoHolder::static
   return requestInfoMap;
 }
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::PrimitivesService>::bundle)() =
+    &::cpp2::module_constants::_fbthrift_schema_b747839c13cb3aa5_includes;
+}

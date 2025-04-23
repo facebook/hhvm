@@ -29,3 +29,6 @@ using ::apache::thrift::detail::operator>=;
 
 
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+} // namespace apache::thrift::detail

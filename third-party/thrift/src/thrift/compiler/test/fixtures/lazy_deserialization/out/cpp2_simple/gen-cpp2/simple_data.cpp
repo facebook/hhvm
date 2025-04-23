@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_data.h"
+#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::Foo>::name = "Foo";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::Foo>::fields_names = { {
@@ -321,5 +321,34 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::ap
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::test::Empty>::isset_indexes = { {
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::Foo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::LazyFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalLazyFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalBoxedLazyFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::LazyCppRef>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::IndexedFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::OptionalIndexedFoo>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::Empty>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

@@ -315,3 +315,8 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
   return requestInfoMap;
 }
 } // namespace test::fixtures::basic-structured-annotations
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyService>::bundle)() =
+    nullptr;
+}

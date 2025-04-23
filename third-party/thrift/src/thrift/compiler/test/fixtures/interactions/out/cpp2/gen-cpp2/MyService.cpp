@@ -1183,3 +1183,8 @@ std::unique_ptr<apache::thrift::Tile> MyServiceAsyncProcessor::createInteraction
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyService>::bundle)() =
+    nullptr;
+}

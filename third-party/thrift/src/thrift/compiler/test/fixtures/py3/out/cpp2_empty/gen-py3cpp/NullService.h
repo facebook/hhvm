@@ -51,6 +51,13 @@ class ServiceHandler<::cpp2::NullService> : public apache::thrift::ServerInterfa
   static ::cpp2::NullServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::NullService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 1205150269192565637;
+  static constexpr ::std::string_view definitionKey = {"\x8c\xed\x4e\x40\x8d\x25\xb0\xaf\x62\xfc\xe5\x34\x19\x22\x66\x6c", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

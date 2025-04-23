@@ -71,6 +71,13 @@ class ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public a
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echo_2{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 8289997534464861998;
+  static constexpr ::std::string_view definitionKey = {"\x9c\xdd\xc7\xa5\x1c\x0f\xae\x50\xa3\x27\xa7\xe4\xe1\x56\xea\x62", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

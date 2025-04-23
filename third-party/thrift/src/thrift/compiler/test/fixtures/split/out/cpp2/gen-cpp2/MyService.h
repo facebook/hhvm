@@ -131,6 +131,13 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_lobDataById{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::MyService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 1560411752922467026;
+  static constexpr ::std::string_view definitionKey = {"\xf5\x63\xe0\x45\x58\xc2\x4d\x1b\xd0\xe9\x18\xf7\x59\x45\x2e\xd1", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

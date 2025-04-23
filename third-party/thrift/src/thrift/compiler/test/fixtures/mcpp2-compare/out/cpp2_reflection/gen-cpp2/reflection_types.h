@@ -192,3 +192,11 @@ unsigned long ReflectionStruct::read(Protocol_* iprot) {
 
 
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::ReflectionStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 1901735943368972403;
+  static constexpr ::std::string_view definitionKey = {"\xc5\xa2\x1a\xc0\x9a\x8e\x1c\x2c\xee\x11\x57\xb1\xe8\x91\x3e\xf1", 16};
+};
+} // namespace apache::thrift::detail

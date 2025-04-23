@@ -132,6 +132,13 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_responseandstreamboththrows{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::PubSubStreamingService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 781496598431143912;
+  static constexpr ::std::string_view definitionKey = {"\x85\x5a\x6c\xd0\x63\x3a\xe4\x88\xda\x99\x4b\xc4\x8a\x26\x98\x36", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

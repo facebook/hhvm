@@ -75,6 +75,13 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_adaptedTypes{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::facebook::thrift::test::AdapterService> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 6075707212720674476;
+  static constexpr ::std::string_view definitionKey = {"\x03\x9b\xff\xc3\x6a\xf9\xef\x06\x28\x55\x40\x94\x5b\xa1\x2c\xd7", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace facebook::thrift::test {

@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_data.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::name = "DoSomethingResult";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::fields_names = { {
@@ -55,5 +55,10 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::thrift::shared_
   1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::thrift::shared_interactions::DoSomethingResult>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

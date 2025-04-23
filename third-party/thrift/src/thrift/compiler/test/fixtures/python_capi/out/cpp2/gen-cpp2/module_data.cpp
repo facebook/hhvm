@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::fields_names = { {
@@ -596,5 +596,55 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures:
   -1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::MyStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::MyDataItem>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TransitiveDoubler>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::detail::DoubledPair>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::StringPair>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::VapidStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::PrimitiveStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::AdaptedFields>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::ListStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::SetStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::MapStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::ComposeStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::Shallot>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::SomeBinary>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::MyEnum>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::NormalDecentEnum>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

@@ -307,3 +307,8 @@ std::unique_ptr<apache::thrift::Tile> BoxServiceAsyncProcessor::createInteractio
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::BoxService>::bundle)() =
+    nullptr;
+}

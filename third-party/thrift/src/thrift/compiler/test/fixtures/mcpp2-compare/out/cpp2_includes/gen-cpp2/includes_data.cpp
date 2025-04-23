@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_data.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::a::different::ns::AStruct>::name = "AStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::a::different::ns::AStruct>::fields_names = { {
@@ -67,5 +67,16 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::a::different::n
   -1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::a::different::ns::AStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::a::different::ns::AStructB>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::a::different::ns::AnEnum>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

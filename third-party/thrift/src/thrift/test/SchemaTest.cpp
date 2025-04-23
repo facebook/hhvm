@@ -144,3 +144,43 @@ TEST(SchemaTest, service_schema) {
   EXPECT_EQ(
       service.functions()[0].returnType()->baseType(), type::BaseType::Void);
 }
+
+TEST(SchemaTest, schema_data_traits) {
+  using apache::thrift::detail::TSchemaAssociation;
+  EXPECT_GT(
+      TSchemaAssociation<facebook::thrift::test::schema::TestService>::bundle()
+          .size(),
+      0);
+  EXPECT_GT(
+      TSchemaAssociation<facebook::thrift::test::schema::Empty>::bundle()
+          .size(),
+      0);
+  EXPECT_GT(
+      TSchemaAssociation<facebook::thrift::test::schema::Enum>::bundle().size(),
+      0);
+
+  EXPECT_EQ(
+      TSchemaAssociation<facebook::thrift::annotation::Experimental>::bundle,
+      nullptr);
+
+  EXPECT_EQ(
+      TSchemaAssociation<
+          facebook::thrift::test::schema::TestService>::programId,
+      TSchemaAssociation<facebook::thrift::test::schema::Empty>::programId);
+  EXPECT_NE(
+      TSchemaAssociation<
+          facebook::thrift::test::schema::TestService>::programId,
+      TSchemaAssociation<
+          facebook::thrift::annotation::Experimental>::programId);
+
+  EXPECT_NE(
+      TSchemaAssociation<
+          facebook::thrift::test::schema::TestService>::definitionKey,
+      TSchemaAssociation<
+          facebook::thrift::annotation::Experimental>::definitionKey);
+  ServiceHandler<facebook::thrift::test::schema::TestService> handler;
+  EXPECT_EQ(
+      handler.getServiceSchema()->definitions[0],
+      TSchemaAssociation<
+          facebook::thrift::test::schema::TestService>::definitionKey);
+}

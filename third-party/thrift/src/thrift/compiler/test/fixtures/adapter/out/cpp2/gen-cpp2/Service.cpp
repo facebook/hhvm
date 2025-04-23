@@ -189,3 +189,8 @@ apache::thrift::ServiceRequestInfoMap ServiceServiceInfoHolder::staticRequestInf
   return requestInfoMap;
 }
 } // namespace facebook::thrift::test
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Service>::bundle)() =
+    nullptr;
+}

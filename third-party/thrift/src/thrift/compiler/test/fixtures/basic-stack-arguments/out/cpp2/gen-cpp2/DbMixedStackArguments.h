@@ -71,6 +71,13 @@ class ServiceHandler<::cpp2::DbMixedStackArguments> : public apache::thrift::Ser
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getDataByKey1{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::cpp2::DbMixedStackArguments> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -3445220662518901917;
+  static constexpr ::std::string_view definitionKey = {"\x41\x18\x36\x1c\x2b\x79\xf0\x05\x71\xd4\x8f\x3f\xd5\x56\x62\xa1", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace cpp2 {

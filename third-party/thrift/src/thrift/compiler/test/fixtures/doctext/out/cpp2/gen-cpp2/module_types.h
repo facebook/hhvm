@@ -744,3 +744,26 @@ template <> struct TEnumTraits<::cpp2::U::Type> {
   }
 };
 } // namespace apache::thrift
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::A> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -2642339036077964808;
+  static constexpr ::std::string_view definitionKey = {"\xcf\x1a\x96\xa6\x3b\x23\xb0\x83\xf0\x11\x23\x41\xa2\x87\x9d\xd6", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::U> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -2642339036077964808;
+  static constexpr ::std::string_view definitionKey = {"\x00\x4e\x7a\x90\x82\xa4\x31\x5d\x15\x7c\xd9\xf9\x22\xa6\x06\xdd", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::Bang> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -2642339036077964808;
+  static constexpr ::std::string_view definitionKey = {"\x7d\x12\xf2\x76\x01\xfa\x32\x18\xdc\x74\x08\x66\x80\x7f\xe3\x91", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::B> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -2642339036077964808;
+  static constexpr ::std::string_view definitionKey = {"\xfa\xff\x23\xd8\x8b\xe3\x23\xc3\xfd\x16\x8d\x93\x66\x74\xb1\xf1", 16};
+};
+} // namespace apache::thrift::detail

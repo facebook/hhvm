@@ -366,3 +366,11 @@ unsigned long BasicTypes::read(Protocol_* iprot) {
 
 
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::BasicTypes> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -2085189577537265531;
+  static constexpr ::std::string_view definitionKey = {"\x15\xaa\xb3\x9b\x40\xf8\xf9\x2e\xc0\xea\x9a\x58\x08\x64\x5e\x7d", 16};
+};
+} // namespace apache::thrift::detail

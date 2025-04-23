@@ -4816,3 +4816,81 @@ template <> struct TEnumTraits<::py3::simple::BinaryUnion::Type> {
   }
 };
 } // namespace apache::thrift
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::py3::simple::SimpleException> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x9a\x23\x70\xb4\x54\xbd\x64\x66\x5c\x30\x4e\x73\x74\x40\xe9\x56", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::OptionalRefStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x92\x81\x1d\xec\x0f\x8f\x16\x38\xa3\xff\x85\xb0\xff\x0a\x11\xee", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::SimpleStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x36\x07\xc5\xb7\x14\xef\x1b\x74\xaa\x3f\x4e\x48\x9a\x94\xe5\x6c", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::HiddenTypeFieldsStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x8c\xb9\x64\x5c\x35\x93\x95\x12\x67\x03\xfb\x98\x00\x8e\x11\xa2", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::detail::AdaptedUnion> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\xa2\xad\x17\xef\xe5\x44\xfe\x78\x86\x2a\xf2\xaf\xb3\x6b\xa6\xde", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::HiddenException> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\xa1\x1d\x9a\x48\xc1\x90\x0d\x22\x58\xd9\x54\x16\xce\x94\x72\xf4", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::ComplexStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\xaa\x84\x40\xc1\xd6\xc7\xf1\x8d\xcf\xf0\xf5\xf4\x50\xff\x46\x6c", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::BinaryUnion> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x51\x72\x9a\x3d\xf2\xcd\xd2\x71\x90\x7c\x1a\x2d\x66\xfa\x34\xc8", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::BinaryUnionStruct> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\xc2\x5c\x05\x6b\xf0\xd9\xa4\x77\x5b\xa1\x22\xcf\xb3\xd6\x9f\x01", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::CustomFields> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\xd7\x11\xbd\xac\x9d\x06\x29\x49\x9a\xf3\xb9\x32\x7f\xdc\x79\xb4", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::CustomTypedefFields> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\xf5\xc9\x04\x80\x2e\xb2\x11\xd6\x51\xea\xc4\x80\x02\x8d\xa0\x87", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::AdaptedTypedefFields> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x82\x3b\x8f\x44\x89\xcc\x8c\x67\xe2\x7a\x33\x94\x09\xfe\x1b\x6f", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::AnEnum> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x8d\x24\x11\xb7\x8b\xba\x47\x38\xf0\x40\x93\x18\xb4\xd9\x9b\xbb", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::AnEnumRenamed> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\x66\xe4\x2b\x9f\x9a\x86\xcc\x65\xd9\xfc\x26\x60\x8d\xf3\xae\xbe", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::Flags> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -1303334149772697254;
+  static constexpr ::std::string_view definitionKey = {"\xa9\x87\x48\xed\xae\xd7\x48\x26\x5f\x6b\x92\xfd\x4a\x7f\x29\x57", 16};
+};
+} // namespace apache::thrift::detail

@@ -583,3 +583,8 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
   return requestInfoMap;
 }
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyService>::bundle)() =
+    nullptr;
+}

@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::valid::ns::Empty>::name = "Empty";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::some::valid::ns::Empty>::fields_names = { {
@@ -988,5 +988,64 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::some::valid::ns
   -1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::Empty>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ASimpleStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ASimpleStructNoexcept>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::SimpleUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ComplexUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnException>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnotherException>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::containerStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyIncludedStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ComplexContainerStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::FloatStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::FloatUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyEnumA>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedEnum>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::AnnotatedEnum2>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::MyEnumB>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

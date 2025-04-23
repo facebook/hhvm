@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_data.h"
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::fields_names = { {
@@ -437,5 +437,31 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyUnion>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::AdaptedFields>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::TerseException>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyEnum>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

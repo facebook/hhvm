@@ -334,6 +334,13 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_fields{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
+namespace detail {
+template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service_with_special_names> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -5817357428381503798;
+  static constexpr ::std::string_view definitionKey = {"\xda\xb0\x97\xda\x9e\x15\x21\x4d\x51\x5d\x8f\x3a\x53\x97\xf7\x83", 16};
+};
+}
 } // namespace apache::thrift
 
 namespace test_cpp2::cpp_reflection {

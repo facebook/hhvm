@@ -15,9 +15,11 @@
   limitations under the License.
 
 }}
+{{#import "types/schema_association" as schema_association}}
 {{> Autogen}}
 
 #include "{{program:include_prefix}}{{program:name}}_data.h"
+#include "{{program:include_prefix}}{{program:name}}_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -42,8 +44,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 {{#program:structs}}
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<{{struct:cpp_fullname}}>::name = "{{struct:name}}";
@@ -74,5 +75,15 @@ THRIFT_DATA_MEMBER const std::array<int, {{struct:fields_size}}> TStructDataStor
 }};
 {{/program:structs}}
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+{{#program:structs}}
+
+{{#partial schema_association.definition node=struct:self}}
+{{/program:structs}}
+{{#program:enums}}
+
+{{#partial schema_association.definition node=enum:self}}
+{{/program:enums}}
+
+} // namespace detail
+} // namespace apache::thrift

@@ -64,3 +64,8 @@ apache::thrift::ServiceRequestInfoMap EmptyServiceServiceInfoHolder::staticReque
   return requestInfoMap;
 }
 } // namespace some::valid::ns
+
+namespace apache::thrift::detail {
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::EmptyService>::bundle)() =
+    nullptr;
+}

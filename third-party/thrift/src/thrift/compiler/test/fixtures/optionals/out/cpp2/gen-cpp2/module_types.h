@@ -1526,3 +1526,26 @@ unsigned long Person::read(Protocol_* iprot) {
 
 
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::Color> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 443004397410733061;
+  static constexpr ::std::string_view definitionKey = {"\xf9\xd1\xd6\x4c\x8a\x23\xcb\x99\xef\x24\xc0\x89\xa8\x17\x88\x81", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::Vehicle> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 443004397410733061;
+  static constexpr ::std::string_view definitionKey = {"\x5c\xc5\xa8\xc3\x9a\xb7\xbf\x28\x0b\x77\x5d\xdc\xaf\x54\xe9\x40", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::Person> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 443004397410733061;
+  static constexpr ::std::string_view definitionKey = {"\x3d\x96\xc6\x66\xff\x30\x6f\x22\x53\x0d\xe5\xb6\x59\x0f\xa2\xa5", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::Animal> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 443004397410733061;
+  static constexpr ::std::string_view definitionKey = {"\x74\xa8\x9f\x64\x2e\xfd\x1e\x39\x5a\x3c\x6f\x07\x8d\xae\x1c\xbe", 16};
+};
+} // namespace apache::thrift::detail

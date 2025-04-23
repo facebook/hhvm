@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "types/schema_association" as schema_association}}
 {{> Autogen}}
 
 #pragma once
@@ -380,9 +381,18 @@ using {{struct:cpp_name}} = {{struct:cpp_underlying_type}};
 {{> module_types_h/frozen}}
 
 {{/program:structs}}{{/program:frozen?}}
-{{> module_types_h/declare_union_types}}{{!
+{{> module_types_h/declare_union_types}}
 
-}}{{#program:tablebased?}}
+namespace apache::thrift::detail {
+{{#program:structs}}
+{{#partial schema_association.declaration node=struct:self}}
+{{/program:structs}}
+{{#program:enums}}
+{{#partial schema_association.declaration node=enum:self}}
+{{/program:enums}}
+} // namespace apache::thrift::detail
+{{#program:tablebased?}}
+
 namespace apache::thrift::detail {
 {{#program:structs}}
 template <>

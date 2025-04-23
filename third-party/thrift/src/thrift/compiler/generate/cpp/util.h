@@ -45,9 +45,14 @@ namespace apache::thrift::compiler::cpp2 {
 const t_field_id kInjectMetadataFieldsStartId = -1000;
 const t_field_id kInjectMetadataFieldsLastId = -2000;
 
-template <typename Node>
-const std::string& get_name(const Node* node) {
+inline const std::string& get_name(const t_named* node) {
   return cpp_name_resolver::get_cpp_name(*node);
+}
+inline std::string get_qualified_name(const t_named& node) {
+  return fmt::format(
+      "{}::{}",
+      cpp_name_resolver::gen_namespace(*node.program()),
+      get_name(&node));
 }
 
 bool is_custom_type(const t_field& field);

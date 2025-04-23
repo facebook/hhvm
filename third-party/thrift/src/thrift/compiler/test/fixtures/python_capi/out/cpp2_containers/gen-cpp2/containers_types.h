@@ -2252,3 +2252,41 @@ unsigned long IndirectionC::read(Protocol_* iprot) {
 
 
 } // namespace test::fixtures::python_capi
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::test::fixtures::python_capi::TemplateLists> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5137144707430888653;
+  static constexpr ::std::string_view definitionKey = {"\xd4\xe7\x73\xb0\xfe\xda\xd2\x95\xbf\xb8\xad\x7e\x1f\x30\x9e\x22", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::python_capi::TemplateSets> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5137144707430888653;
+  static constexpr ::std::string_view definitionKey = {"\xbd\xe6\xae\xaa\xd1\x9e\x3e\x89\xf4\xd1\xbe\x20\xa6\xac\xea\xb1", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::python_capi::TemplateMaps> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5137144707430888653;
+  static constexpr ::std::string_view definitionKey = {"\x66\x02\x67\x8e\x8e\x38\x47\x82\xd8\xbf\xbc\x7d\x66\xbc\x8e\x08", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::python_capi::TWrapped> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5137144707430888653;
+  static constexpr ::std::string_view definitionKey = {"\x42\x86\x41\x50\x42\x6f\x0e\xbe\x04\x57\xd7\x7b\x48\x40\x51\x06", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::python_capi::IndirectionA> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5137144707430888653;
+  static constexpr ::std::string_view definitionKey = {"\x9f\x0d\x6f\xc7\xfc\xdc\xcb\x51\x0c\x56\x3a\xb4\x3d\x9e\x7f\x75", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::python_capi::IndirectionB> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5137144707430888653;
+  static constexpr ::std::string_view definitionKey = {"\x48\x78\xf3\xa5\xa9\x97\xa2\x26\x92\xb0\x11\xae\xba\xae\xa4\x4b", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::python_capi::IndirectionC> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 5137144707430888653;
+  static constexpr ::std::string_view definitionKey = {"\x9e\x85\xc3\xfd\x63\x89\x60\xbc\xe6\x84\x39\x6e\x30\x85\x72\xda", 16};
+};
+} // namespace apache::thrift::detail

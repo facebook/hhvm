@@ -569,3 +569,11 @@ unsigned long Limits::read(Protocol_* iprot) {
 
 
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::Limits> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = 7679448199460944269;
+  static constexpr ::std::string_view definitionKey = {"\x99\xa8\x8e\x26\x67\x17\x25\x40\xcf\xdb\x5f\x9b\x19\x6a\x4f\x30", 16};
+};
+} // namespace apache::thrift::detail

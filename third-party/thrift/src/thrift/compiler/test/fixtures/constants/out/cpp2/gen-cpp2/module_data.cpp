@@ -6,6 +6,7 @@
  */
 
 #include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_data.h"
+#include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
@@ -30,8 +31,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 #define THRIFT_DATA_MEMBER
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Internship>::name = "Internship";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::cpp2::Internship>::fields_names = { {
@@ -254,5 +254,40 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::union2>::
   3,
 }};
 
-} // namespace thrift
-} // namespace apache
+namespace detail {
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Internship>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Range>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::struct1>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::struct2>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::struct3>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::struct4>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::union1>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::union2>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::EmptyEnum>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::City>::bundle)() =
+    nullptr;
+
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Company>::bundle)() =
+    nullptr;
+
+} // namespace detail
+} // namespace apache::thrift

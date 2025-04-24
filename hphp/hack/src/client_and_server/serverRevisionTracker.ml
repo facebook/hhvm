@@ -308,12 +308,6 @@ let files_changed local_config count =
     count
     "files"
 
-let decl_changed local_config count =
-  make_decision
-    local_config.ServerLocalConfig.hg_aware_redecl_restart_threshold
-    count
-    "declarations"
-
 let typing_changed local_config count =
   make_decision
     local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold

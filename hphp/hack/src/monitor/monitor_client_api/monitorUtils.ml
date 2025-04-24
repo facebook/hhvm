@@ -17,33 +17,6 @@ type monitor_config = {
   monitor_log_file: string;  (** The path to the monitor log file *)
 }
 
-(* In an Informant-directed restart, Watchman provided a new
- * mergebase, a new clock, and a list of files changed w.r.t.
- * that mergebase.
- *
- * A new server instance can "resume" from that new mergebase
- * given that it handles the list of files changed w.r.t. that
- * new mergebase, and just starts a watchman subscription
- * beginning with that clock.
- *)
-type watchman_mergebase = {
-  (* Watchman says current repo mergebase is this. *)
-  mergebase_global_rev: int;
-  (* ... plus these files changed to represent its current state *)
-  files_changed: SSet.t; [@printer SSet.pp_large]
-  (* ...as of this clock *)
-  watchman_clock: string;
-}
-[@@deriving show]
-
-let watchman_mergebase_to_string
-    { mergebase_global_rev; files_changed; watchman_clock } =
-  Printf.sprintf
-    "watchman_mergebase (mergebase_global_rev: %d; files_changed count: %d; watchman_clock: %s)"
-    mergebase_global_rev
-    (SSet.cardinal files_changed)
-    watchman_clock
-
 type build_mismatch_info = {
   existing_version: string;
   existing_build_commit_time: string;

@@ -59,16 +59,6 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
-(library
- (name state_loader_stubs)
- (wrapped false)
- (modules saved_state_loader state_loader_futures state_loader_lwt)
- (libraries
-  hg
-  typechecker_options)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
  ; this stub file is used by both buck2 and dune
 (rule
  (target remote_old_decls_ffi.ml)

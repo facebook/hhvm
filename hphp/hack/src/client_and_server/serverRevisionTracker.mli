@@ -49,6 +49,4 @@ val check_non_blocking : is_full_check_done:bool -> unit
  * *)
 val files_changed : ServerLocalConfig.t -> int -> unit
 
-val decl_changed : ServerLocalConfig.t -> int -> unit
-
 val typing_changed : ServerLocalConfig.t -> int -> unit

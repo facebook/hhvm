@@ -19,8 +19,8 @@ from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
-import apache.thrift.fixtures.types.module.thrift_enums as _fbthrift_python_enums
 import apache.thrift.fixtures.types.module.thrift_types as _fbthrift_python_types
+import apache.thrift.fixtures.types.module.thrift_enums as _fbthrift_python_enums
 
 
 import apache.thrift.fixtures.types.included.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _apache_thrift_fixtures_types_included_types

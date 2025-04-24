@@ -27,7 +27,8 @@ from thrift.python.client import (
 )
 from thrift.python.common cimport MetadataBox
 from thrift.python.exceptions import GeneratedError as PyGeneratedError
-from thrift.python.metadata import gen_metadata as python_gen_metadata, ThriftKind, ThriftConstKind
+from thrift.python.metadata import ThriftKind, ThriftConstKind
+import thrift.python.metadata as python_metadata
 from thrift.python.types import (
     Enum as PyEnum,
     ServiceInterface as PyServiceInterface,
@@ -40,7 +41,10 @@ from apache.thrift.metadata.cbindings cimport (
     cThriftService,
     cThriftEnum,
 )
-from apache.thrift.metadata.thrift_types import ThriftEnum as ThriftPythonEnum
+from apache.thrift.metadata.thrift_types import (
+    ThriftEnum as ThriftPythonEnum,
+    ThriftMetadata as ThriftPythonMetadata,
+)
 from apache.thrift.metadata.types import (
     ThriftMetadata,
     ThriftStruct,
@@ -442,6 +446,17 @@ def use_python_metadata(cls):
 
     return False
 
+cdef convert_metadata_to_py3(meta):
+    if isinstance(meta, (ThriftPythonMetadata, ThriftPythonEnum)):
+        # this is just a thrift struct
+        return meta._to_py3()
+    if isinstance(meta, python_metadata.ThriftStructProxy):
+        return ThriftStructProxy(meta.name, meta.thriftMeta._to_py3())
+    if isinstance(meta, python_metadata.ThriftExceptionProxy):
+        return ThriftExceptionProxy(meta.name, meta.thriftMeta._to_py3())
+    if isinstance(meta, python_metadata.ThriftServiceProxy):
+        return ThriftServiceProxy(meta.name, meta.thriftMeta._to_py3())
+    raise TypeError(f"Unknown metadata type: {type(meta)}")
 
 def gen_metadata(obj_or_cls):
     if hasattr(obj_or_cls, "getThriftModuleMetadata"):
@@ -452,10 +467,11 @@ def gen_metadata(obj_or_cls):
     # For in-place migrate, just use the thrift-python class
     # with the thrift-python metadata library.
     if hasattr(cls, "_FBTHRIFT__PYTHON_CLASS"):
-        return python_gen_metadata(cls._FBTHRIFT__PYTHON_CLASS)
+        python_meta = python_metadata.gen_metadata(cls._FBTHRIFT__PYTHON_CLASS)
+        return convert_metadata_to_py3(python_meta)
 
     if use_python_metadata(cls):
-        meta = python_gen_metadata(cls)
+        meta = python_metadata.gen_metadata(cls)
         if isinstance(meta, ThriftPythonEnum):
             meta = meta._to_py3()
         return meta

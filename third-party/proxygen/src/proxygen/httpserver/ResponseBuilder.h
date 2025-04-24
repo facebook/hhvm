@@ -117,8 +117,8 @@ class ResponseBuilder {
 
   template <typename T>
   ResponseBuilder& body(T&& t) {
-    return body(folly::IOBuf::maybeCopyBuffer(
-        folly::to<std::string>(std::forward<T>(t))));
+    return body(
+        folly::IOBuf::fromString(folly::to<std::string>(std::forward<T>(t))));
   }
 
   ResponseBuilder& closeConnection() {

@@ -153,7 +153,7 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
 
   private static function createContext(
     this::TData $context,
-  ): ImplicitContext\_Private\ImplicitContextData {
+  )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
     return ImplicitContext\_Private\create_memo_agnostic(
       static::class,
       $context,
@@ -180,7 +180,7 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
 
   private static function createContext(
     this::TData $context,
-  ): ImplicitContext\_Private\ImplicitContextData {
+  )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
     return ImplicitContext\_Private\create_memo_sensitive(
       static::class,
       $context,

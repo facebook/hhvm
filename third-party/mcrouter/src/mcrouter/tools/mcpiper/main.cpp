@@ -149,7 +149,7 @@ Settings parseOptions(int argc, char** argv) {
   }
 
   // Handles help
-  if (vm.count("help")) {
+  if (vm.contains("help")) {
     std::cerr << getUsage(argv[0]);
     std::cerr << std::endl;
 
@@ -158,7 +158,7 @@ Settings parseOptions(int argc, char** argv) {
     exit(0);
   }
 
-  if (vm.count("version")) {
+  if (vm.contains("version")) {
     std::cerr << facebook::memcache::getVersion() << std::endl;
     exit(0);
   }

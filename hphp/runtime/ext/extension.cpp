@@ -45,8 +45,6 @@ Extension::Extension(const char* name, const char* version, const char* oncall)
   ExtensionRegistry::registerExtension(this);
 }
 
-const static std::string s_systemlibPhpName("systemlib.php");
-
 bool Extension::IsSystemlibPath(const std::string& name) {
   return !name.compare(0, 2, "/:");
 }

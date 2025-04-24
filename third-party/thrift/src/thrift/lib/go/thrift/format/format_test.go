@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 const PROTOCOL_BINARY_DATA_SIZE = 155
@@ -70,9 +71,6 @@ var (
 	}
 )
 
-// var floatValues   []float32 = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
-
-// func floatValues() []
 func init() {
 	protocolBdata = make([]byte, PROTOCOL_BINARY_DATA_SIZE)
 	for i := 0; i < PROTOCOL_BINARY_DATA_SIZE; i++ {
@@ -191,9 +189,7 @@ func ReadBool(t testing.TB, p types.Format) {
 	thetype := types.BOOL
 	thelen := len(boolValues)
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %v", "ReadBool", p, err, boolValues)
-	}
+	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
@@ -205,40 +201,30 @@ func ReadBool(t testing.TB, p types.Format) {
 	}
 	for k, v := range boolValues {
 		value, err := p.ReadBool()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading bool at index %d: %t", "ReadBool", p, err, k, v)
-		}
+		require.NoError(t, err)
 		if v != value {
 			t.Fatalf("%s: index %d %q %q %t != %t", "ReadBool", k, p, v, value)
 		}
 	}
 	err = p.ReadListEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadBool", p, err)
-	}
+	require.NoError(t, err)
 }
 
 func WriteBool(t testing.TB, p types.Format) {
 	thetype := types.BOOL
 	thelen := len(boolValues)
 	err := p.WriteListBegin(thetype, thelen)
-	if err != nil {
-		t.Fatalf("%s: %T %q Error writing list begin: %q", "WriteBool", p, err, thetype)
-	}
+	require.NoError(t, err)
 	for k, v := range boolValues {
 		err = p.WriteBool(v)
 		if err != nil {
 			t.Fatalf("%s: %T %q Error writing bool in list at index %d: %t", "WriteBool", p, err, k, v)
 		}
 	}
-	p.WriteListEnd()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error writing list end: %v", "WriteBool", p, err, boolValues)
-	}
+	err = p.WriteListEnd()
+	require.NoError(t, err)
 	err = p.Flush()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to flush: %q", "WriteBool", p, err)
-	}
+	require.NoError(t, err)
 }
 
 func ReadWriteBool(t testing.TB, p types.Format) {
@@ -250,9 +236,7 @@ func WriteByte(t testing.TB, p types.Format) {
 	thetype := types.BYTE
 	thelen := len(byteValues)
 	err := p.WriteListBegin(thetype, thelen)
-	if err != nil {
-		t.Fatalf("%s: %T %q Error writing list begin: %q", "WriteByte", p, err, thetype)
-	}
+	require.NoError(t, err)
 	for k, v := range byteValues {
 		err = p.WriteByte(v)
 		if err != nil {
@@ -260,22 +244,16 @@ func WriteByte(t testing.TB, p types.Format) {
 		}
 	}
 	err = p.WriteListEnd()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error writing list end: %q", "WriteByte", p, err, byteValues)
-	}
+	require.NoError(t, err)
 	err = p.Flush()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error flushing list of bytes: %q", "WriteByte", p, err, byteValues)
-	}
+	require.NoError(t, err)
 }
 
 func ReadByte(t testing.TB, p types.Format) {
 	thetype := types.BYTE
 	thelen := len(byteValues)
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %q", "ReadByte", p, err, byteValues)
-	}
+	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
@@ -295,9 +273,7 @@ func ReadByte(t testing.TB, p types.Format) {
 		}
 	}
 	err = p.ReadListEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadByte", p, err)
-	}
+	require.NoError(t, err)
 }
 
 func ReadWriteByte(t testing.TB, p types.Format) {
@@ -320,9 +296,7 @@ func ReadI16(t testing.TB, p types.Format) {
 	thetype := types.I16
 	thelen := len(int16Values)
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %q", "ReadI16", p, err, int16Values)
-	}
+	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
@@ -342,9 +316,7 @@ func ReadI16(t testing.TB, p types.Format) {
 		}
 	}
 	err = p.ReadListEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadI16", p, err)
-	}
+	require.NoError(t, err)
 }
 
 func ReadWriteI16(t testing.TB, p types.Format) {
@@ -367,9 +339,7 @@ func ReadI32(t testing.TB, p types.Format) {
 	thetype := types.I32
 	thelen := len(int32Values)
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %q", "ReadI32", p, err, int32Values)
-	}
+	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
@@ -413,9 +383,7 @@ func ReadI64(t testing.TB, p types.Format) {
 	thetype := types.I64
 	thelen := len(int64Values)
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %q", "ReadI64", p, err, int64Values)
-	}
+	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
@@ -462,9 +430,7 @@ func ReadDouble(t testing.TB, p types.Format) {
 	thetype := types.DOUBLE
 	thelen := len(doubleValues)
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %v", "ReadDouble", p, err, doubleValues)
-	}
+	require.NoError(t, err)
 	if thetype != thetype2 {
 		t.Fatalf("%s: %T type %s != type %s", "ReadDouble", p, thetype, thetype2)
 	}
@@ -485,9 +451,7 @@ func ReadDouble(t testing.TB, p types.Format) {
 		}
 	}
 	err = p.ReadListEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadDouble", p, err)
-	}
+	require.NoError(t, err)
 }
 
 func ReadWriteDouble(t testing.TB, p types.Format) {
@@ -516,9 +480,7 @@ func ReadFloat(t testing.TB, p types.Format) {
 	thelen := len(floatValues)
 
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %v", "ReadFloat", p, err, floatValues)
-	}
+	require.NoError(t, err)
 	if thetype != thetype2 {
 		t.Fatalf("%s: %T type %s != type %s", "ReadFloat", p, thetype, thetype2)
 	}
@@ -606,9 +568,7 @@ func WriteBinary(t testing.TB, p types.Format) {
 func ReadBinary(t testing.TB, p types.Format) {
 	v := protocolBdata
 	value, err := p.ReadBinary()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read binary: %s", "ReadBinary", p, err.Error())
-	}
+	require.NoError(t, err)
 	if len(v) != len(value) {
 		t.Fatalf("%s: %T len(v) != len(value)... %d != %d", "ReadBinary", p, len(v), len(value))
 	} else {
@@ -631,33 +591,23 @@ func WriteStruct(t testing.TB, p types.Format) {
 	p.WriteStructBegin(v.name)
 	p.WriteFieldBegin(v.fields[0].name, v.fields[0].typ, v.fields[0].id)
 	err := p.WriteBool(v.fields[0].value.(bool))
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read bool: %s", "WriteStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 	p.WriteFieldEnd()
 	p.WriteFieldBegin(v.fields[1].name, v.fields[1].typ, v.fields[1].id)
 	err = p.WriteString(v.fields[1].value.(string))
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read string: %s", "WriteStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 	p.WriteFieldEnd()
 	p.WriteStructEnd()
 	err = p.Flush()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to flush: %s", "WriteStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 }
 
 func ReadStruct(t testing.TB, p types.Format) {
 	v := structTestData
 	_, err := p.ReadStructBegin()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read struct begin: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 	_, typeID, id, err := p.ReadFieldBegin()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read field begin: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 	if v.fields[0].typ != typeID {
 		t.Fatalf("%s: %T type (%d) != (%d)", "ReadStruct", p, v.fields[0].typ, typeID)
 	}
@@ -666,22 +616,16 @@ func ReadStruct(t testing.TB, p types.Format) {
 	}
 
 	val, err := p.ReadBool()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read bool: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 	if v.fields[0].value != val {
 		t.Fatalf("%s: %T value (%v) != (%v)", "ReadStruct", p, v.fields[0].value, val)
 	}
 
 	err = p.ReadFieldEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read field end: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 
 	_, typeID, id, err = p.ReadFieldBegin()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read field begin: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 	if v.fields[1].typ != typeID {
 		t.Fatalf("%s: %T type (%d) != (%d)", "ReadStruct", p, v.fields[1].typ, typeID)
 	}
@@ -690,22 +634,16 @@ func ReadStruct(t testing.TB, p types.Format) {
 	}
 
 	strVal, err := p.ReadString()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read string: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 	if v.fields[1].value != strVal {
 		t.Fatalf("%s: %T value %T (%s) != (%s)", "ReadStruct", p, v.fields[1].value, strVal)
 	}
 
 	err = p.ReadFieldEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read field end: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 
 	err = p.ReadStructEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read struct end: %s", "ReadStruct", p, err.Error())
-	}
+	require.NoError(t, err)
 }
 
 func ReadWriteStruct(t testing.TB, p types.Format) {

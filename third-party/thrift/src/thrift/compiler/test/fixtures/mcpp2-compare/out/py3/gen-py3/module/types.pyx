@@ -37,6 +37,7 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
+from thrift.py3.types cimport _ensure_py3_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -675,6 +676,7 @@ cdef class SimpleUnion(thrift.py3.types.Union):
         if intValue is not None:
             if not isinstance(intValue, int):
                 raise TypeError(f'intValue is not a { int !r}.')
+
             intValue = <cint64_t> intValue
 
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(SimpleUnion._make_instance(
@@ -852,44 +854,60 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         opt_union_map=None,
         object enum_field=None,
         enum_container=None,
-        MyStruct a_struct=None,
+        a_struct=None,
         a_set_struct=None,
-        SimpleUnion a_union=None,
-        SimpleUnion opt_a_union=None,
+        a_union=None,
+        opt_a_union=None,
         a_union_list=None,
         a_union_typedef=None,
         a_union_typedef_list=None,
         bytes MyBinaryField=None,
         bytes MyBinaryField2=None,
         MyBinaryListField4=None,
-        MyStruct ref_field=None,
-        MyStruct ref_field2=None,
-        AnException excp_field=None,
+        ref_field=None,
+        ref_field2=None,
+        excp_field=None,
         _fbthrift_iobuf.IOBuf MyCustomField=None
     ):
         if intValue is not None:
             if not isinstance(intValue, int):
                 raise TypeError(f'intValue is not a { int !r}.')
+
             intValue = <cint64_t> intValue
 
         if opt_intValue is not None:
             if not isinstance(opt_intValue, int):
                 raise TypeError(f'opt_intValue is not a { int !r}.')
+
             opt_intValue = <cint64_t> opt_intValue
 
         if intValue2 is not None:
             if not isinstance(intValue2, int):
                 raise TypeError(f'intValue2 is not a { int !r}.')
+
             intValue2 = <cint16_t> intValue2
 
         if intValue3 is not None:
             if not isinstance(intValue3, int):
                 raise TypeError(f'intValue3 is not a { int !r}.')
+
             intValue3 = <cint32_t> intValue3
 
         if doubelValue is not None:
             if not isinstance(doubelValue, (float, int)):
                 raise TypeError(f'doubelValue is not a { float !r}.')
+
+        a_struct = _ensure_py3_or_raise(a_struct, "a_struct", MyStruct)
+
+        a_union = _ensure_py3_or_raise(a_union, "a_union", SimpleUnion)
+
+        opt_a_union = _ensure_py3_or_raise(opt_a_union, "opt_a_union", SimpleUnion)
+
+        ref_field = _ensure_py3_or_raise(ref_field, "ref_field", MyStruct)
+
+        ref_field2 = _ensure_py3_or_raise(ref_field2, "ref_field2", MyStruct)
+
+        excp_field = _ensure_py3_or_raise(excp_field, "excp_field", AnException)
 
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(ComplexUnion._make_instance(
           NULL,

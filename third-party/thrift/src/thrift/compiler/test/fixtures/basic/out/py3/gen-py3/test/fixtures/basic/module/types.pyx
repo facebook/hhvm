@@ -37,6 +37,7 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
+from thrift.py3.types cimport _ensure_py3_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -502,10 +503,14 @@ cdef class MyUnion(thrift.py3.types.Union):
     def __init__(
         self, *,
         object myEnum=None,
-        MyStruct myStruct=None,
-        MyDataItem myDataItem=None,
+        myStruct=None,
+        myDataItem=None,
         floatSet=None
     ):
+        myStruct = _ensure_py3_or_raise(myStruct, "myStruct", MyStruct)
+
+        myDataItem = _ensure_py3_or_raise(myDataItem, "myDataItem", MyDataItem)
+
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(MyUnion._make_instance(
           NULL,
           myEnum,
@@ -1081,6 +1086,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         if reserved_field is not None:
             if not isinstance(reserved_field, int):
                 raise TypeError(f'reserved_field is not a { int !r}.')
+
             reserved_field = <cint32_t> reserved_field
 
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(UnionToBeRenamed._make_instance(

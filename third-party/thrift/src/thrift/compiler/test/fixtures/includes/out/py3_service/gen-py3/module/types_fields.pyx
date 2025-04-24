@@ -24,6 +24,7 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
+from thrift.py3.types import _from_python_or_raise
 
 import includes.types as _includes_types
 
@@ -55,7 +56,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _includes_types.Included):
-            raise TypeError(f'MyIncludedField is not a { _includes_types.Included !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "MyIncludedField", _includes_types.Included)
         deref(self._struct_cpp_obj).MyIncludedField_ref().assign(deref((<_includes_types.Included?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -64,7 +65,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _includes_types.Included):
-            raise TypeError(f'MyOtherIncludedField is not a { _includes_types.Included !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "MyOtherIncludedField", _includes_types.Included)
         deref(self._struct_cpp_obj).MyOtherIncludedField_ref().assign(deref((<_includes_types.Included?> _fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:

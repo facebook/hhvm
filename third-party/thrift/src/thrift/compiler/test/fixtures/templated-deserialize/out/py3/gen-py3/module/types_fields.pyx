@@ -24,6 +24,7 @@ from thrift.py3.types cimport (
 
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
+from thrift.py3.types import _from_python_or_raise
 
 
 import module.types as _module_types
@@ -223,7 +224,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 15)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
-            raise TypeError(f'fieldS is not a { _module_types.SmallStruct !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "fieldS", _module_types.SmallStruct)
         assign_unique_ptr[_module_cbindings.cSmallStruct](deref(self._struct_cpp_obj).fieldS_ref(), make_unique[_module_cbindings.cSmallStruct](deref((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_16(self, _fbthrift_value) except *:
@@ -232,7 +233,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 16)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
-            raise TypeError(f'fieldT is not a { _module_types.SmallStruct !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "fieldT", _module_types.SmallStruct)
         assign_shared_ptr[_module_cbindings.cSmallStruct](deref(self._struct_cpp_obj).fieldT_ref(), (<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     cdef void _set_field_17(self, _fbthrift_value) except *:
@@ -241,7 +242,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 17)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
-            raise TypeError(f'fieldU is not a { _module_types.SmallStruct !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "fieldU", _module_types.SmallStruct)
         assign_shared_const_ptr[_module_cbindings.cSmallStruct](deref(self._struct_cpp_obj).fieldU_ref(), const_pointer_cast((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_18(self, _fbthrift_value) except *:
@@ -250,6 +251,6 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 18)
             return
         if not isinstance(_fbthrift_value, _module_types.SmallStruct):
-            raise TypeError(f'fieldX is not a { _module_types.SmallStruct !r}.')
+            _fbthrift_value = _from_python_or_raise(_fbthrift_value, "fieldX", _module_types.SmallStruct)
         assign_unique_ptr[_module_cbindings.cSmallStruct](deref(self._struct_cpp_obj).fieldX_ref(), make_unique[_module_cbindings.cSmallStruct](deref((<_module_types.SmallStruct?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 

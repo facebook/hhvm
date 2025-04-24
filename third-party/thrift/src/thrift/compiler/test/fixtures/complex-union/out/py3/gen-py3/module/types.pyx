@@ -37,6 +37,7 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
+from thrift.py3.types cimport _ensure_py3_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -93,6 +94,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         if intValue is not None:
             if not isinstance(intValue, int):
                 raise TypeError(f'intValue is not a { int !r}.')
+
             intValue = <cint64_t> intValue
 
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(ComplexUnion._make_instance(
@@ -777,9 +779,13 @@ cdef class ValUnion(thrift.py3.types.Union):
 
     def __init__(
         self, *,
-        Val v1=None,
-        Val v2=None
+        v1=None,
+        v2=None
     ):
+        v1 = _ensure_py3_or_raise(v1, "v1", Val)
+
+        v2 = _ensure_py3_or_raise(v2, "v2", Val)
+
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(ValUnion._make_instance(
           NULL,
           v1,
@@ -1198,8 +1204,10 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
 
     def __init__(
         self, *,
-        NonCopyableStruct s=None
+        s=None
     ):
+        s = _ensure_py3_or_raise(s, "s", NonCopyableStruct)
+
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(NonCopyableUnion._make_instance(
           NULL,
           s,

@@ -37,7 +37,7 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
-from thrift.py3.types import _is_python_enum, _is_python_struct
+from thrift.py3.types cimport _ensure_py3_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -836,16 +836,8 @@ cdef class BinaryUnion(thrift.py3.types.Union):
 
     def __init__(
         self, *,
-        iobuf_val=None
+        _fbthrift_iobuf.IOBuf iobuf_val=None
     ):
-        if iobuf_val is not None:
-            if not isinstance(iobuf_val, _fbthrift_iobuf.IOBuf):
-                if _is_python_struct(iobuf_val) or _is_python_enum(iobuf_val):
-                    iobuf_val = iobuf_val._to_py3()
-                    if not isinstance(iobuf_val, _fbthrift_iobuf.IOBuf):
-                        raise TypeError(f'iobuf_val is a thrift-python type that can not be converted to { _fbthrift_iobuf.IOBuf !r}.')
-                else:
-                    raise TypeError(f'iobuf_val is not a { _fbthrift_iobuf.IOBuf !r}.')
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(BinaryUnion._make_instance(
           NULL,
           iobuf_val,

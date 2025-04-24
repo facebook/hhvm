@@ -61,7 +61,7 @@ class __MyUnionType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-_MyUnion__MyUnionType = __MyUnionType
+_fbthrift__MyUnionType = __MyUnionType
 
 __all__.append("__MyUnionType")
 
@@ -73,7 +73,7 @@ class __UnionToBeRenamedType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-_UnionToBeRenamed__UnionToBeRenamedType = __UnionToBeRenamedType
+_fbthrift__UnionToBeRenamedType = __UnionToBeRenamedType
 
 __all__.append("__UnionToBeRenamedType")
 
@@ -746,7 +746,7 @@ class MyUnion(thrift.py3.types.Union):
         "myDataItem",
         "floatSet",
     )
-    Type = __MyUnionType
+    Type = _fbthrift__MyUnionType
     _fbthrift__inner : _fbthrift_python_types.MyUnion
     _fbthrift_inner__myStruct : MyStruct | None
     _fbthrift_inner__myDataItem : MyDataItem | None
@@ -1264,7 +1264,7 @@ class UnionToBeRenamed(thrift.py3.types.Union):
     _FBTHRIFT__FIELD_NAMES = (
         "reserved_field",
     )
-    Type = __UnionToBeRenamedType
+    Type = _fbthrift__UnionToBeRenamedType
     _fbthrift__inner : _fbthrift_python_types.UnionToBeRenamed
     _fbthrift_inner__type: Type
     _fbthrift_inner__value: int | None

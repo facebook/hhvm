@@ -64,7 +64,7 @@ class __union1Type(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-_union1__union1Type = __union1Type
+_fbthrift__union1Type = __union1Type
 
 __all__.append("__union1Type")
 
@@ -79,7 +79,7 @@ class __union2Type(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-_union2__union2Type = __union2Type
+_fbthrift__union2Type = __union2Type
 
 __all__.append("__union2Type")
 
@@ -1484,7 +1484,7 @@ class union1(thrift.py3.types.Union):
         "i",
         "d",
     )
-    Type = __union1Type
+    Type = _fbthrift__union1Type
     _fbthrift__inner : _fbthrift_python_types.union1
     _fbthrift_inner__type: Type
     _fbthrift_inner__value: int | float | None
@@ -1625,7 +1625,7 @@ class union2(thrift.py3.types.Union):
         "s",
         "u",
     )
-    Type = __union2Type
+    Type = _fbthrift__union2Type
     _fbthrift__inner : _fbthrift_python_types.union2
     _fbthrift_inner__s : struct1 | None
     _fbthrift_inner__u : union1 | None

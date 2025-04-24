@@ -562,5 +562,10 @@ service ClientMetadataTestingService {
   string getMetadaField(1: string key);
 }
 
+union _UnderscoreUnion {
+  1: string _a;
+  2: i64 _b;
+}
+
 struct EmptyStruct {}
 exception EmptyError {}

@@ -21,6 +21,7 @@ import unittest
 
 from folly.iobuf import IOBuf
 from testing.types import (
+    _UnderscoreUnion,
     Color,
     ComplexUnion,
     easy,
@@ -254,6 +255,20 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(x.type, ReservedUnion.Type.ok)
         self.assertEqual(x.value, "bar")
         self.assertEqual(x.ok, "bar")
+
+    def test_underscore_union(self) -> None:
+        x = _UnderscoreUnion(_a="foo")
+        self.assertEqual(x.type, _UnderscoreUnion.Type._a)
+        self.assertEqual(x._a, "foo")
+
+        x = _UnderscoreUnion(_b=31)
+        self.assertEqual(x.type, _UnderscoreUnion.Type._b)
+        self.assertEqual(x._b, 31)
+
+        if is_auto_migrated():
+            self.assertEqual(x.Type.__name__, "_UnderscoreUnion")
+        else:
+            self.assertEqual(x.Type.__name__, "___UnderscoreUnionType")
 
     def test_instance_base_class(self) -> None:
         self.assertIsInstance(ComplexUnion(tiny=1), Union)

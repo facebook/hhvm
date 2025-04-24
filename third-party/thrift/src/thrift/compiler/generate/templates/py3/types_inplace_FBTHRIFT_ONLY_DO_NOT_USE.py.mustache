@@ -82,7 +82,7 @@ __all__.append("{{enum:name}}")
 
 
 {{! this is a dumb hack due to dunder class mangling rules}}
-_{{struct:name}}__{{struct:name}}Type = __{{struct:name}}Type
+_fbthrift__{{struct:name}}Type = __{{struct:name}}Type
 
 {{#program:inplace_migrate?}}
 __all__.append("__{{struct:name}}Type")
@@ -124,7 +124,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
     _fbthrift_allow_inheritance_DO_NOT_USE = True
     {{/struct:allow_inheritance?}}
     {{#struct:union?}}
-    Type = __{{struct:name}}Type
+    Type = _fbthrift__{{struct:name}}Type
     {{/struct:union?}}
     _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
     {{#struct:fields_and_mixin_fields}}

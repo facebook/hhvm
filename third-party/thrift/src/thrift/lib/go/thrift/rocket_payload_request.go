@@ -198,9 +198,13 @@ func maybeDecompress(data []byte, compression rpcmetadata.CompressionAlgorithm) 
 	switch compression {
 	case rpcmetadata.CompressionAlgorithm_NONE:
 		return data, nil
-	case rpcmetadata.CompressionAlgorithm_ZSTD:
+	case rpcmetadata.CompressionAlgorithm_ZSTD,
+		rpcmetadata.CompressionAlgorithm_ZSTD_LESS,
+		rpcmetadata.CompressionAlgorithm_ZSTD_MORE:
 		return decompressZstd(data)
-	case rpcmetadata.CompressionAlgorithm_ZLIB:
+	case rpcmetadata.CompressionAlgorithm_ZLIB,
+		rpcmetadata.CompressionAlgorithm_ZLIB_LESS,
+		rpcmetadata.CompressionAlgorithm_ZLIB_MORE:
 		return decompressZlib(data)
 	default:
 		// Unknown/unsupported compression algorithm

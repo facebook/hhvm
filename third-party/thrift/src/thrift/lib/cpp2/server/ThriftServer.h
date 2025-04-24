@@ -2240,6 +2240,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       });
     }
 
+    THRIFT_SERVER_EVENT(addModule).log(
+        *this, [=]() { return folly::dynamic::object("module_name", name); });
+
     if (unprocessedModulesSpecification_.names.count(name)) {
       throw std::invalid_argument(
           fmt::format("Duplicate module name: {}", name));

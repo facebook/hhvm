@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	"github.com/rsocket/rsocket-go/logger"
@@ -42,7 +42,8 @@ func (log rsocketLogger) Errorf(format string, args ...any) {
 	log(format, args...)
 }
 
-func setRsocketLogger(log func(format string, args ...any)) {
+// SetRsocketLogger sets the logger for rsocket-go.
+func SetRsocketLogger(log func(format string, args ...any)) {
 	logger.SetLevel(logger.LevelError)
 	logger.SetLogger(rsocketLogger(log))
 }

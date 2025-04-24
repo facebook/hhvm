@@ -27,6 +27,7 @@ import (
 	"github.com/rsocket/rsocket-go/payload"
 	"github.com/rsocket/rsocket-go/rx/mono"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 )
 
@@ -46,7 +47,7 @@ type rocketServer struct {
 }
 
 func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
-	setRsocketLogger(opts.log)
+	rocket.SetRsocketLogger(opts.log)
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
@@ -64,7 +65,7 @@ func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions)
 }
 
 func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
-	setRsocketLogger(opts.log)
+	rocket.SetRsocketLogger(opts.log)
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,

@@ -36,30 +36,30 @@ type Serializer struct {
 	format types.Format
 }
 
-// NewBinarySerializer creates a new serializer using the binary format
-func NewBinarySerializer(readWriter types.ReadWriteSizer) *Serializer {
+// newBinarySerializer creates a new serializer using the binary format
+func newBinarySerializer(readWriter types.ReadWriteSizer) *Serializer {
 	return &Serializer{format: format.NewBinaryFormat(readWriter)}
 }
 
-// NewCompactSerializer creates a new serializer using the compact format
-func NewCompactSerializer(readWriter types.ReadWriteSizer) *Serializer {
+// newCompactSerializer creates a new serializer using the compact format
+func newCompactSerializer(readWriter types.ReadWriteSizer) *Serializer {
 	return &Serializer{format: format.NewCompactFormat(readWriter)}
 }
 
-// NewCompactJSONSerializer creates a new serializer using the CompactJSON format
-func NewCompactJSONSerializer(readWriter io.ReadWriter) *Serializer {
+// newCompactJSONSerializer creates a new serializer using the CompactJSON format
+func newCompactJSONSerializer(readWriter io.ReadWriter) *Serializer {
 	return &Serializer{format: format.NewCompactJSONFormat(readWriter)}
 }
 
-// NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
-func NewSimpleJSONSerializer(readWriter io.ReadWriter) *Serializer {
+// newSimpleJSONSerializer creates a new serializer using the SimpleJSON format
+func newSimpleJSONSerializer(readWriter io.ReadWriter) *Serializer {
 	return &Serializer{format: format.NewSimpleJSONFormat(readWriter)}
 }
 
 // EncodeCompact serializes msg using the compact format
 func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewCompactSerializer(buffer).Encode(msg)
+	err := newCompactSerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
 // EncodeBinary serializes msg using the binary format
 func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewBinarySerializer(buffer).Encode(msg)
+	err := newBinarySerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
 // EncodeCompactJSON serializes msg using the compact JSON format
 func EncodeCompactJSON(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewCompactJSONSerializer(buffer).Encode(msg)
+	err := newCompactJSONSerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func EncodeCompactJSON(msg types.WritableStruct) ([]byte, error) {
 // EncodeSimpleJSON serializes msg using the simple JSON format
 func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewSimpleJSONSerializer(buffer).Encode(msg)
+	err := newSimpleJSONSerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -109,48 +109,48 @@ type Deserializer struct {
 	format types.Format
 }
 
-// NewBinaryDeserializer creates a new deserializer using the binary format
-func NewBinaryDeserializer(readWriter types.ReadWriteSizer) *Deserializer {
+// newBinaryDeserializer creates a new deserializer using the binary format
+func newBinaryDeserializer(readWriter types.ReadWriteSizer) *Deserializer {
 	return &Deserializer{format: format.NewBinaryFormat(readWriter)}
 }
 
-// NewCompactDeserializer creates a new deserializer using the compact format
-func NewCompactDeserializer(readWriter types.ReadWriteSizer) *Deserializer {
+// newCompactDeserializer creates a new deserializer using the compact format
+func newCompactDeserializer(readWriter types.ReadWriteSizer) *Deserializer {
 	return &Deserializer{format: format.NewCompactFormat(readWriter)}
 }
 
-// NewCompactJSONDeserializer creates a new deserializer using the JSON format
-func NewCompactJSONDeserializer(readWriter io.ReadWriter) *Deserializer {
+// newCompactJSONDeserializer creates a new deserializer using the JSON format
+func newCompactJSONDeserializer(readWriter io.ReadWriter) *Deserializer {
 	return &Deserializer{format: format.NewCompactJSONFormat(readWriter)}
 }
 
-// NewSimpleJSONDeserializer creates a new deserializer using the simple JSON format
-func NewSimpleJSONDeserializer(readWriter io.ReadWriter) *Deserializer {
+// newSimpleJSONDeserializer creates a new deserializer using the simple JSON format
+func newSimpleJSONDeserializer(readWriter io.ReadWriter) *Deserializer {
 	return &Deserializer{format: format.NewSimpleJSONFormat(readWriter)}
 }
 
 // DecodeCompact deserializes a compact format message
 func DecodeCompact(data []byte, msg types.ReadableStruct) error {
 	reader := bytes.NewBuffer(data)
-	return NewCompactDeserializer(reader).Decode(msg)
+	return newCompactDeserializer(reader).Decode(msg)
 }
 
 // DecodeBinary deserializes a binary format message
 func DecodeBinary(data []byte, msg types.ReadableStruct) error {
 	reader := bytes.NewBuffer(data)
-	return NewBinaryDeserializer(reader).Decode(msg)
+	return newBinaryDeserializer(reader).Decode(msg)
 }
 
 // DecodeCompactJSON deserializes a compact JSON format message
 func DecodeCompactJSON(data []byte, msg types.ReadableStruct) error {
 	reader := bytes.NewBuffer(data)
-	return NewCompactJSONDeserializer(reader).Decode(msg)
+	return newCompactJSONDeserializer(reader).Decode(msg)
 }
 
 // DecodeSimpleJSON deserializes a simple JSON format message
 func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
 	reader := bytes.NewBuffer(data)
-	return NewSimpleJSONDeserializer(reader).Decode(msg)
+	return newSimpleJSONDeserializer(reader).Decode(msg)
 }
 
 // Decode deserializes a Thrift struct from the underlying format

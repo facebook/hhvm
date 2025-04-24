@@ -116,26 +116,26 @@ func TestConsequentSerDes(t *testing.T) {
 
 	t.Run("Binary", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewBinarySerializer(buffer)
-		deserializer := NewBinaryDeserializer(buffer)
+		serializer := newBinarySerializer(buffer)
+		deserializer := newBinaryDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 	t.Run("Compact", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewCompactSerializer(buffer)
-		deserializer := NewCompactDeserializer(buffer)
+		serializer := newCompactSerializer(buffer)
+		deserializer := newCompactDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 	t.Run("CompactJSON", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewCompactJSONSerializer(buffer)
-		deserializer := NewCompactJSONDeserializer(buffer)
+		serializer := newCompactJSONSerializer(buffer)
+		deserializer := newCompactJSONDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 	t.Run("SimpleJSON", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewSimpleJSONSerializer(buffer)
-		deserializer := NewSimpleJSONDeserializer(buffer)
+		serializer := newSimpleJSONSerializer(buffer)
+		deserializer := newSimpleJSONDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 }

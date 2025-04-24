@@ -22,12 +22,42 @@
 
 #include <unordered_set>
 #include <folly/synchronization/RelaxedAtomic.h>
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 
 namespace apache::thrift {
+namespace detail {
+template <typename T>
+struct SyntaxGraphNodeTag {
+  using type = T;
+};
+
+template <typename T>
+constexpr auto getSyntaxGraphNodeTypeFor() {
+  if constexpr (is_thrift_service_tag_v<T>) {
+    return SyntaxGraphNodeTag<schema::ServiceNode>{};
+  } else if constexpr (is_thrift_struct_v<T>) {
+    return SyntaxGraphNodeTag<schema::StructNode>{};
+  } else if constexpr (is_thrift_union_v<T>) {
+    return SyntaxGraphNodeTag<schema::UnionNode>{};
+  } else if constexpr (is_thrift_exception_v<T>) {
+    return SyntaxGraphNodeTag<schema::ExceptionNode>{};
+  } else if constexpr (util::is_thrift_enum_v<T>) {
+    return SyntaxGraphNodeTag<schema::EnumNode>{};
+  } else {
+    static_assert(folly::always_false<T>, "Unsupported Thrift type");
+  }
+  // It's unclear how to include typedefs and constants here.
+  // TODO: interactions
+}
+
+template <typename T>
+using SyntaxGraphNodeTypeFor =
+    typename decltype(getSyntaxGraphNodeTypeFor<T>())::type;
+} // namespace detail
 
 class SchemaRegistry {
  public:
@@ -46,6 +76,18 @@ class SchemaRegistry {
   template <typename T>
   const schema::DefinitionNode& getDefinitionNode() const {
     return resolver_->getDefinitionNode<T>();
+  }
+
+  /**
+   * Gets node for given definition, or throws `std::out_of_range` if not
+   * present in schema.
+   * Returns most-derived type (e.g. StructNode) that matches the template
+   * parameter.
+   */
+  template <typename T>
+  const detail::SyntaxGraphNodeTypeFor<T>& getNode() const {
+    return resolver_->getDefinitionNode<T>()
+        .template as<detail::SyntaxGraphNodeTypeFor<T>>();
   }
 
   explicit SchemaRegistry(BaseSchemaRegistry& base);

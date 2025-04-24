@@ -183,6 +183,9 @@ template <typename T>
 struct IsThriftUnion<T, folly::void_t<typename T::__fbthrift_cpp2_type>>
     : std::bool_constant<T::__fbthrift_cpp2_is_union> {};
 
+template <typename T>
+using detect_complete = decltype(sizeof(T));
+
 // __fbthrift_clear_terse_fields should be called for a terse struct field
 // before deserialization so that it only clears out terse fields in a terse
 // struct.
@@ -220,6 +223,15 @@ constexpr bool is_thrift_exception_v =
 template <typename T>
 constexpr bool is_thrift_struct_v =
     is_thrift_class_v<T> && !is_thrift_union_v<T> && !is_thrift_exception_v<T>;
+
+template <typename T>
+constexpr bool is_thrift_service_tag_v = //
+    folly::is_detected_v< //
+        detail::st::detect_complete,
+        apache::thrift::Client<T>> ||
+    folly::is_detected_v<
+        detail::st::detect_complete,
+        apache::thrift::ServiceHandler<T>>;
 
 template <typename T, typename Fallback>
 using type_class_of_thrift_class_or_t = //

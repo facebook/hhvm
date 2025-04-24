@@ -485,4 +485,21 @@ TEST(SyntaxGraphTest, getDefinitionNode) {
       std::out_of_range);
 }
 
+TEST(SyntaxGraphTest, getNode) {
+  auto& registry = SchemaRegistry::get();
+
+  const StructNode& stct = registry.getNode<test::TestStruct>();
+  EXPECT_EQ(stct.definition().name(), "TestStruct");
+
+  const EnumNode& enm = registry.getNode<test::TestEnum>();
+  EXPECT_EQ(enm.definition().name(), "TestEnum");
+
+  const ServiceNode& serv = registry.getNode<test::TestService>();
+  EXPECT_EQ(serv.definition().name(), "TestService");
+
+  EXPECT_THROW(
+      registry.getNode<facebook::thrift::annotation::Experimental>(),
+      std::out_of_range);
+}
+
 } // namespace apache::thrift::schema

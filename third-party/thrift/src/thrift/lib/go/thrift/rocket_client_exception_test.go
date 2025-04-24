@@ -24,13 +24,10 @@ import (
 )
 
 func TestNewRocketException(t *testing.T) {
-	kind := rpcmetadata.ErrorKind_PERMANENT
-	blame := rpcmetadata.ErrorBlame_CLIENT
-	safety := rpcmetadata.ErrorSafety_SAFE
 	class := &rpcmetadata.ErrorClassification{
-		Kind:   &kind,
-		Blame:  &blame,
-		Safety: &safety,
+		Kind:   Pointerize(rpcmetadata.ErrorKind_PERMANENT),
+		Blame:  Pointerize(rpcmetadata.ErrorBlame_CLIENT),
+		Safety: Pointerize(rpcmetadata.ErrorSafety_SAFE),
 	}
 	declaredException := &rpcmetadata.PayloadExceptionMetadataBase{
 		Metadata: &rpcmetadata.PayloadExceptionMetadata{

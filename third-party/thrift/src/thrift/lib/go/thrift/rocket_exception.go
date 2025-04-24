@@ -122,22 +122,20 @@ func newUnknownPayloadExceptionMetadataBase(name string, what string) *rpcmetada
 }
 
 func newPayloadExceptionMetadataBase(err *rocketException) *rpcmetadata.PayloadExceptionMetadataBase {
-	base := rpcmetadata.NewPayloadExceptionMetadataBase()
-	base.SetNameUTF8(&err.Name)
-	base.SetWhatUTF8(&err.What)
-	class := rpcmetadata.NewErrorClassification()
-	class.SetKind(&err.Kind)
-	class.SetBlame(&err.Blame)
-	class.SetSafety(&err.Safety)
+	classification := rpcmetadata.NewErrorClassification().
+		SetKind(&err.Kind).
+		SetBlame(&err.Blame).
+		SetSafety(&err.Safety)
+
 	metadata := rpcmetadata.NewPayloadExceptionMetadata()
 	switch err.ExceptionType {
 	case rocketExceptionDeclared:
-		declared := rpcmetadata.NewPayloadDeclaredExceptionMetadata()
-		declared.SetErrorClassification(class)
+		declared := rpcmetadata.NewPayloadDeclaredExceptionMetadata().
+			SetErrorClassification(classification)
 		metadata.SetDeclaredException(declared)
 	case rocketExceptionAppUnknown:
-		appUnknown := rpcmetadata.NewPayloadAppUnknownExceptionMetdata()
-		appUnknown.SetErrorClassification(class)
+		appUnknown := rpcmetadata.NewPayloadAppUnknownExceptionMetdata().
+			SetErrorClassification(classification)
 		metadata.SetAppUnknownException(appUnknown)
 	case rocketExceptionAny:
 		metadata.SetAnyException(rpcmetadata.NewPayloadAnyExceptionMetadata())
@@ -147,7 +145,11 @@ func newPayloadExceptionMetadataBase(err *rocketException) *rpcmetadata.PayloadE
 	default:
 		panic("unreachable")
 	}
-	base.SetMetadata(metadata)
+
+	base := rpcmetadata.NewPayloadExceptionMetadataBase().
+		SetNameUTF8(&err.Name).
+		SetWhatUTF8(&err.What).
+		SetMetadata(metadata)
 	return base
 }
 

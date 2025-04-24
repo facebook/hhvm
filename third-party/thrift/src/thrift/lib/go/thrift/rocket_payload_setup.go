@@ -60,10 +60,10 @@ func checkRequestSetupMetadata8(pay payload.Payload) error {
 }
 
 func newRequestSetupMetadataVersion8() *rpcmetadata.RequestSetupMetadata {
-	res := rpcmetadata.NewRequestSetupMetadata()
 	version := int32(8)
-	res.SetMaxVersion(&version)
-	res.SetMinVersion(&version)
+	res := rpcmetadata.NewRequestSetupMetadata().
+		SetMaxVersion(&version).
+		SetMinVersion(&version)
 	return res
 }
 
@@ -95,10 +95,10 @@ func newRequestSetupPayloadVersion8() (payload.Payload, error) {
 
 // If connection establishment was successful, the server MUST respond with a SetupResponse control message.
 func newSetupResponseVersion8() *rpcmetadata.SetupResponse {
-	res := rpcmetadata.NewSetupResponse()
 	version := int32(8)
-	res.SetVersion(&version)
 	zstdSupported := true
-	res.SetZstdSupported(&zstdSupported)
+	res := rpcmetadata.NewSetupResponse().
+		SetVersion(&version).
+		SetZstdSupported(&zstdSupported)
 	return res
 }

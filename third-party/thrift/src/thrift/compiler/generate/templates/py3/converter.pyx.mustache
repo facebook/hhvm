@@ -27,9 +27,9 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
     }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{#program:gen_legacy_container_converters?}}
 
-{{#program:inplace_migrate?}}
+{{#program:inplace_migrate?}}{{^program:auto_migrate?}}
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
-{{/program:inplace_migrate?}}
+{{/program:auto_migrate?}}{{/program:inplace_migrate?}}
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 {{#program:includeNamespaces}}
 {{#hasTypes?}}

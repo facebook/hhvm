@@ -38,7 +38,6 @@
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
-#include "hphp/hhbbc/type-builtins.h"
 
 #include "hphp/runtime/vm/reified-generics.h"
 
@@ -1949,9 +1948,6 @@ Type return_type_from_constraints(
   const std::function<Optional<res::Class>(SString)>& resolve,
   const std::function<Optional<Type>()>& self
 ) {
-  // Return type of native functions is calculated differently.
-  if (f.isNative) return native_function_return_type(&f);
-
   if (f.isMemoizeWrapper) return TInitCell;
 
   if (f.isGenerator) {
@@ -1969,6 +1965,15 @@ Type return_type_from_constraints(
       lookup.upper = promote_classish(std::move(lookup.upper));
     } else if (lookup.coerceClassToString == TriBool::Maybe) {
       lookup.upper |= TSStr;
+    }
+
+    if (f.isNative &&
+      lookup.upper.subtypeOf(BStr | BObj | BRes | BArrLike)
+    ) {
+      // TODO: T220184756 Remove implicit assumption that non-simple
+      // types (ones that are represented by pointers) can always
+      // possibly be null
+      lookup.upper = opt(std::move(lookup.upper));
     }
     return unctx(std::move(lookup.upper));
   };

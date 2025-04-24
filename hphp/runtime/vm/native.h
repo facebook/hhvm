@@ -422,6 +422,14 @@ struct NativeFunctionInfo {
  */
 Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i);
 
+/**
+* This function inspects the user attribute map to determine if a given
+* parameter is out-only. It returns a pair that contains a boolean
+* indicating that the attribute is present, and an optional return type,
+* if specified by the user.
+*/
+std::pair<bool, MaybeDataType> typeForOutParam(const UserAttributeMap& map);
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -538,7 +546,6 @@ registerNativeFunc(FuncTable& nativeFuncs, const char* name,
 /////////////////////////////////////////////////////////////////////////////
 
 const char* checkTypeFunc(const NativeSig& sig,
-                          const TypeConstraint& retType,
                           const FuncEmitter* func);
 
 String fullName(const StringData* fname, const StringData* cname,

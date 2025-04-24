@@ -208,8 +208,7 @@ bool checkNativeFunc(const FuncEmitter* func, const UnitEmitter* unit, ErrorMode
     return false;
   }
 
-  auto const& tc = func->retTypeConstraints.main();
-  auto const message = Native::checkTypeFunc(info.sig, tc, func);
+  auto const message = Native::checkTypeFunc(info.sig, func);
 
   if (message) {
     auto const tstr = info.sig.toString(clsname ? clsname->data() : nullptr,

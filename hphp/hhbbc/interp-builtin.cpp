@@ -27,7 +27,6 @@
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/optimize.h"
-#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"

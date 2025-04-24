@@ -184,7 +184,7 @@ void callFuncImpl(const Func* const func,
                   TypedValue& ret) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
-  auto retType = func->returnTypeConstraints().main().asSystemlibType();
+  auto retType = func->returnTypeConstraints().asSystemlibType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
@@ -505,22 +505,29 @@ static bool tcCheckNativeIO(
     return checkDT(tv->m_type);
   }
 
-  auto const& tc = pinfo.typeConstraints.main();
-  if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
-      tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isArrayLike() || tc.isClassname() || tc.isClass() ||
-      tc.isClassOrClassname() || tc.isTypeVar()) {
-    return ty == T::MixedIO;
-  }
+  auto const checkOne = [&](auto const& tc) {
+    if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
+        tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
+        tc.isArrayLike() || tc.isClassname() || tc.isClass() ||
+        tc.isClassOrClassname() || tc.isTypeVar()) {
+      return ty == T::MixedIO;
+    }
 
-  // FIXME(T116301380): native builtins don't resolve properly
-  if (tc.isUnresolved()) return ty == T::ObjectIO;
+    // FIXME(T116301380): native builtins don't resolve properly
+    if (tc.isUnresolved()) return ty == T::ObjectIO;
 
-  if (!tc.underlyingDataType()) {
-    return false;
-  }
+    if (!tc.underlyingDataType()) {
+      return false;
+    }
 
-  return checkDT(*tc.underlyingDataType());
+    return checkDT(*tc.underlyingDataType());
+  };
+
+  return std::any_of(
+    pinfo.typeConstraints.range().begin(),
+    pinfo.typeConstraints.range().end(),
+    [&](auto const& tc) { return checkOne(tc); }
+  );
 }
 
 const char* kInvalidReturnTypeMessage = "Invalid return type detected";
@@ -538,11 +545,20 @@ static const StaticString
   s_actrec("ActRec");
 
 const char* checkTypeFunc(const NativeSig& sig,
-                          const TypeConstraint& retType,
                           const FuncEmitter* func) {
   using T = NativeSig::Type;
 
-  if (!tcCheckNative(retType, sig.ret)) return kInvalidReturnTypeMessage;
+  auto const check = [](auto const& tcs, const T type) {
+    return std::any_of(
+      tcs.range().begin(),
+      tcs.range().end(),
+      [&](auto const& tc) { return tcCheckNative(tc, type); }
+    );
+  };
+
+  if (!check(func->retTypeConstraints, sig.ret)) {
+    return kInvalidReturnTypeMessage;
+  }
 
   auto argIt = sig.args.begin();
   auto endIt = sig.args.end();
@@ -573,7 +589,7 @@ const char* checkTypeFunc(const NativeSig& sig,
       continue;
     }
 
-    if (!tcCheckNative(pInfo.typeConstraints.main(), argTy)) {
+    if (!check(pInfo.typeConstraints, argTy)) {
       return kInvalidArgTypeMessage;
     }
   }

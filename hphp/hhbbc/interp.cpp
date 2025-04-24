@@ -51,7 +51,6 @@
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-ops.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
@@ -2131,12 +2130,19 @@ void in(ISS& env, const bc::ChainFaults&) {
 }
 
 void in(ISS& env, const bc::NativeImpl&) {
-  killLocals(env);
+  auto const& func = env.ctx.func;
+  assertx(func->isNative);
 
-  if (env.ctx.func->isNative) {
-    return doRet(env, native_function_return_type(env.ctx.func), true);
-  }
-  doRet(env, TInitCell, true);
+  killLocals(env);
+  return doRet(
+    env,
+    return_type_from_constraints(
+      *func,
+      [&] (SString name) { return env.index.resolve_class(name); },
+      [&] () { return selfCls(env.index, env.ctx); }
+    ),
+    true
+  );
 }
 
 void in(ISS& env, const bc::CGetL& op) {

@@ -22,24 +22,38 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestZstd(t *testing.T) {
+func compressDecompressTestHelper(t *testing.T, compress, decompress func([]byte) ([]byte, error)) {
 	want := []byte{0x28, 0xb5, 0x2f, 0xfd}
-	compressed, err := compressZstd(want)
+
+	compressed, err := compress(want)
 	require.NoError(t, err)
 	require.NotEqual(t, want, compressed)
 
-	got, err := decompressZstd(compressed)
+	got, err := decompress(compressed)
 	require.NoError(t, err)
 	require.Equal(t, want, got)
 }
 
-func TestZlib(t *testing.T) {
-	want := []byte{0x28, 0xb5, 0x2f, 0xfd}
-	compressed, err := compressZlib(want)
-	require.NoError(t, err)
-	require.NotEqual(t, want, compressed)
+func TestZstd(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		compressDecompressTestHelper(t, compressZstd, decompressZstd)
+	})
+	t.Run("less", func(t *testing.T) {
+		compressDecompressTestHelper(t, compressZstdLess, decompressZstd)
+	})
+	t.Run("more", func(t *testing.T) {
+		compressDecompressTestHelper(t, compressZstdMore, decompressZstd)
+	})
+}
 
-	got, err := decompressZlib(compressed)
-	require.NoError(t, err)
-	require.Equal(t, want, got)
+func TestZlib(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		compressDecompressTestHelper(t, compressZlib, decompressZlib)
+	})
+	t.Run("less", func(t *testing.T) {
+		compressDecompressTestHelper(t, compressZlibLess, decompressZlib)
+	})
+	t.Run("more", func(t *testing.T) {
+		compressDecompressTestHelper(t, compressZlibMore, decompressZlib)
+	})
 }

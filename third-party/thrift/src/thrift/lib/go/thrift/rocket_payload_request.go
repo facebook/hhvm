@@ -187,8 +187,16 @@ func maybeCompress(data []byte, compression rpcmetadata.CompressionAlgorithm) ([
 		return data, nil
 	case rpcmetadata.CompressionAlgorithm_ZSTD:
 		return compressZstd(data)
+	case rpcmetadata.CompressionAlgorithm_ZSTD_LESS:
+		return compressZstdLess(data)
+	case rpcmetadata.CompressionAlgorithm_ZSTD_MORE:
+		return compressZstdMore(data)
 	case rpcmetadata.CompressionAlgorithm_ZLIB:
 		return compressZlib(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB_LESS:
+		return compressZlibLess(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB_MORE:
+		return compressZlibMore(data)
 	default:
 		return nil, errors.New("unknown or unsupported compression algorithm")
 	}

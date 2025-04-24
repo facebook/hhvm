@@ -28,7 +28,19 @@ import (
 // Requests may be compressed by the client after they have been serialized as described in #Request-serialization. If the request was compressed, the compression algorithm must be specified in the request metadata.
 // Reference: https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/server/interface/#request-compression
 func compressZstd(data []byte) ([]byte, error) {
-	z, err := zstd.NewWriter(nil)
+	return compressZstdWithLevel(data, zstd.SpeedDefault)
+}
+
+func compressZstdLess(data []byte) ([]byte, error) {
+	return compressZstdWithLevel(data, zstd.SpeedFastest)
+}
+
+func compressZstdMore(data []byte) ([]byte, error) {
+	return compressZstdWithLevel(data, zstd.SpeedBestCompression)
+}
+
+func compressZstdWithLevel(data []byte, level zstd.EncoderLevel) ([]byte, error) {
+	z, err := zstd.NewWriter(nil, zstd.WithEncoderLevel(level))
 	if err != nil {
 		return nil, err
 	}
@@ -46,9 +58,24 @@ func decompressZstd(data []byte) ([]byte, error) {
 }
 
 func compressZlib(data []byte) ([]byte, error) {
+	return compressZlibWithLevel(data, zlib.DefaultCompression)
+}
+
+func compressZlibLess(data []byte) ([]byte, error) {
+	return compressZlibWithLevel(data, zlib.BestSpeed)
+}
+
+func compressZlibMore(data []byte) ([]byte, error) {
+	return compressZlibWithLevel(data, zlib.BestCompression)
+}
+
+func compressZlibWithLevel(data []byte, level int) ([]byte, error) {
 	var compressedBuffer bytes.Buffer
-	zlibWriter := zlib.NewWriter(&compressedBuffer)
-	_, err := zlibWriter.Write(data)
+	zlibWriter, err := zlib.NewWriterLevel(&compressedBuffer, level)
+	if err != nil {
+		return nil, err
+	}
+	_, err = zlibWriter.Write(data)
 	if err != nil {
 		return nil, err
 	}

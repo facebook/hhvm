@@ -62,6 +62,8 @@ enum AddrRangeClass : uint32_t {
   LowEmergency,                    // below kLowArenaMaxAddr
   Uncounted,                       // [kLowArenaMaxAddr, kHighArenaMaxAddr)
   UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
+  Global,                          // [kArena0Base, ...)
+  NumRangeClasses,
 };
 
 // Direction of the bump allocator.

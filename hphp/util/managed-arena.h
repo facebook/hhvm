@@ -135,8 +135,8 @@ inline HighArena* highArena() {
 
 using PreMappedArena = alloc::ManagedArena<alloc::RangeFallbackExtentAllocator>;
 
-extern PreMappedArena* g_arena0;
 extern std::vector<PreMappedArena*> g_local_arenas; // keyed by numa node id
+extern std::vector<PreMappedArena*> g_auto_arenas;
 
 }
 

@@ -123,13 +123,11 @@ struct MultiRangeExtentAllocator {
  * mappings when the initial range runs out. Pages in the range are never
  * returned to the system, so be careful if memory is tight.
  */
-struct RangeFallbackExtentAllocator : RangeState {
+struct RangeFallbackExtentAllocator {
  public:
-  // Only one range allowed, must initialize at the beginning.  Add mappers
-  // later.
-  template<typename... Args>
-  explicit RangeFallbackExtentAllocator(Args&&... args)
-    : RangeState(std::forward<Args>(args)...) {}
+  explicit RangeFallbackExtentAllocator(RangeMapper* mapper)
+    : m_mapper(mapper) {}
+
 
   RangeFallbackExtentAllocator(const RangeFallbackExtentAllocator&) = delete;
   RangeFallbackExtentAllocator&
@@ -151,12 +149,18 @@ struct RangeFallbackExtentAllocator : RangeState {
   extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
                size_t offset, size_t length, unsigned arena_ind);
 
+  size_t retained() const {
+    return m_mapper->getRangeState().retained();
+  }
+
  private:
   bool inRange(void* addr) {
     auto const p = reinterpret_cast<uintptr_t>(addr);
-    return p < high() && p >= low();
+    auto const& range = m_mapper->getRangeState();
+    return p < range.high() && p >= range.low();
   }
 
+  RangeMapper* m_mapper;
  public:
   // The hook passed to the underlying arena upon creation.
   static extent_hooks_t s_hooks;

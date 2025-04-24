@@ -2030,8 +2030,7 @@ static int execute_program_impl(int argc, char** argv) {
 #if USE_JEMALLOC_EXTENT_HOOKS
   if (Cfg::Server::Mode) {
     purge_all();
-    setup_arena0({Cfg::Eval::Num1GPagesForA0,
-                  Cfg::Eval::Num2MPagesForA0});
+    setup_auto_arenas({Cfg::Eval::Num1GPagesForA0, Cfg::Eval::Num2MPagesForA0});
   }
   if (Cfg::Eval::FileBackedColdArena) {
     set_cold_file_dir(Cfg::Eval::ColdArenaFileDir.c_str());

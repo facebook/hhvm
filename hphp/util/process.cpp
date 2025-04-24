@@ -451,8 +451,8 @@ void ProcStatus::update() {
     unused += alloc::getRange(alloc::AddrRangeClass::VeryLow).retained();
     unused += alloc::getRange(alloc::AddrRangeClass::Low).retained();
     unused += alloc::getRange(alloc::AddrRangeClass::Uncounted).retained();
-    if (alloc::g_arena0) {
-      unused += alloc::g_arena0->retained();
+    for (auto const arena : alloc::g_auto_arenas) {
+      if (arena) unused += arena->retained();
     }
     for (auto const arena : alloc::g_local_arenas) {
       if (arena) unused += arena->retained();

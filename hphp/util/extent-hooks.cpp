@@ -151,7 +151,7 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
     return fallback_hooks->alloc(extent_hooks, addr, size, alignment,
                                  zero, commit, arena_ind);
   }
-  if (auto addr = extAlloc->getLowMapper()->alloc(size, alignment)) return addr;
+  if (auto addr = extAlloc->m_mapper->alloc(size, alignment)) return addr;
   return fallback_hooks->alloc(extent_hooks, addr, size, alignment,
                                zero, commit, arena_ind);
 }

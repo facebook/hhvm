@@ -126,7 +126,7 @@ unsigned get_local_arena(uint32_t node);
 SlabManager* get_local_slab_manager(uint32_t node);
 void shutdown_slab_managers();
 
-void setup_arena0(PageSpec);
+void setup_auto_arenas(PageSpec);
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 

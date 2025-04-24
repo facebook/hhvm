@@ -333,7 +333,7 @@ void setup_high_arena(PageSpec s) {
   high_cold_arena_flags = MALLOCX_ARENA(high_cold_arena) | MALLOCX_TCACHE_NONE;
 }
 
-void setup_arena0(PageSpec s) {
+void setup_auto_arenas(PageSpec s) {
   size_t size = size1g * s.n1GPages + size2m * s.n2MPages;
   if (size == 0) return;
   // Give arena 0 some huge pages, starting at 2TB.
@@ -347,14 +347,20 @@ void setup_arena0(PageSpec s) {
   }
   assertx(base % size1g == 0);
 
-  auto a0 = PreMappedArena::AttachTo(low_malloc(sizeof(PreMappedArena)), 0,
-                                     base, base + size, Reserved{});
-  auto mapper = getMapperChain(*a0, s.n1GPages,
-                               s.n2MPages, s.n2MPages,
-                               false,
+  RangeState& range = getRange(AddrRangeClass::Global);
+  new (&range) RangeState(base, base + size, Reserved{});
+  auto mapper = getMapperChain(range, s.n1GPages,
+                               (bool)s.n2MPages, s.n2MPages,
+                               false,   // don't use normal pages
                                numa_node_set, 0);
-  a0->setLowMapper(mapper);
-  g_arena0 = a0;
+  range.setLowMapper(mapper);
+  unsigned auto_arenas = 0;
+  mallctlRead<unsigned>("opt.narenas", &auto_arenas);
+  for (unsigned i = 0; i < auto_arenas; ++i) {
+    auto a = PreMappedArena::AttachTo(low_malloc(sizeof(PreMappedArena)),
+                                      i, mapper);
+    g_auto_arenas.push_back(a);
+  }
 }
 
 // Set up extra arenas for use in non-VM threads, when we have short bursts of
@@ -508,15 +514,18 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
       base = newBase;
     }
     assert(base % size1g == 0);
-    auto arena = PreMappedArena::CreateAt(low_malloc(sizeof(PreMappedArena)),
-                                          base, base + reserveSize, Reserved{});
-    auto mapper = getMapperChain(*arena,
+    auto range = new RangeState(base, base + reserveSize, Reserved{});
+    auto mapper = getMapperChain(*range,
                                  spec.n1GPages,
                                  (bool)spec.n2MPages,
                                  spec.n2MPages,
                                  false,       // don't use normal pages
                                  1u << i,
                                  i);
+    range->setLowMapper(mapper);
+    auto arena = PreMappedArena::CreateAt(low_malloc(sizeof(PreMappedArena)),
+                                          mapper);
+
     // Allocate some slabs first, which are not given to the arena, but managed
     // separately by the slab manager.
     auto const totalSlabSize = std::min(slabs * kSlabSize, reserveSize);
@@ -527,7 +536,6 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
       }
     }
     if (totalSlabSize == reserveSize) continue;
-    arena->setLowMapper(mapper);
     g_local_arenas[i] = arena;
   }
 #endif

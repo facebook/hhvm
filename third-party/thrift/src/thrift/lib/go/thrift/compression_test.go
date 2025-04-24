@@ -17,41 +17,10 @@
 package thrift
 
 import (
-	"io"
 	"testing"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/stretchr/testify/require"
 )
-
-func TestHeaderZstd(t *testing.T) {
-	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
-	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
-	uncompressedlen := 30
-
-	err := trans.AddTransform(TransformSnappy)
-	require.Error(t, err, "should have failed adding unsupported transform")
-
-	err = trans.AddTransform(TransformZstd)
-	require.NoError(t, err)
-
-	_, err = trans.Write(data)
-	require.NoError(t, err)
-
-	err = trans.Flush()
-	require.NoError(t, err)
-
-	err = trans.ResetProtocol()
-	require.NoError(t, err)
-
-	frame, err := io.ReadAll(trans)
-	require.NoError(t, err)
-	require.Equal(t, data, frame)
-	// This is a bit of a stupid test, but make sure that the data
-	// got changed somehow
-	require.NotEqual(t, uncompressedlen, len(frame))
-}
 
 func TestZstd(t *testing.T) {
 	want := []byte{0x28, 0xb5, 0x2f, 0xfd}

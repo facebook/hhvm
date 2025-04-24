@@ -29,6 +29,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/klauspost/compress/zstd"
 )
 
 // Header keys
@@ -155,7 +156,7 @@ var supportedTransforms = map[TransformID]bool{
 	TransformHMAC:   false,
 	TransformSnappy: false,
 	TransformQLZ:    false,
-	TransformZstd:   zstdTransformSupport,
+	TransformZstd:   true,
 }
 
 // Untransformer will find a transform function to wrap a reader with to transformed the data.
@@ -174,7 +175,13 @@ func (c TransformID) Untransformer() (func(byteReader) (byteReader, error), erro
 			return ensureByteReader(zlrd), nil
 		}, nil
 	case TransformZstd:
-		return zstdRead, nil
+		return func(rd byteReader) (byteReader, error) {
+			zlrd, err := zstd.NewReader(rd)
+			if err != nil {
+				return nil, err
+			}
+			return ensureByteReader(zlrd), nil
+		}, nil
 	default:
 		return nil, types.NewProtocolExceptionWithType(
 			types.NOT_IMPLEMENTED, fmt.Errorf("Header transform %s not supported", c.String()),

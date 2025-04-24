@@ -24,32 +24,6 @@ import (
 	"github.com/klauspost/compress/zstd"
 )
 
-const (
-	zstdTransformSupport = true
-)
-
-func zstdRead(rd byteReader) (byteReader, error) {
-	zlrd, err := zstd.NewReader(rd)
-	if err != nil {
-		return nil, err
-	}
-	return ensureByteReader(zlrd), nil
-}
-
-func zstdWriter(tmpbuf *bytes.Buffer, buf *bytes.Buffer) error {
-	zwr, err := zstd.NewWriter(tmpbuf)
-	if err != nil {
-		return err
-	}
-	if _, err := buf.WriteTo(zwr); err != nil {
-		return err
-	}
-	if err := zwr.Close(); err != nil {
-		return err
-	}
-	return nil
-}
-
 // ## Request Compression
 // Requests may be compressed by the client after they have been serialized as described in #Request-serialization. If the request was compressed, the compression algorithm must be specified in the request metadata.
 // Reference: https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/server/interface/#request-compression

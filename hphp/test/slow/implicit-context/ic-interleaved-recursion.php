@@ -3,25 +3,15 @@
 // this test: recurse zig zag from memo agnostic to sensitive and back
 
 function printAndReturnMSIC(): ?int {
-  try {
-    echo "MSIC: ";
-    var_dump(MemoSensitiveIntCtx::getContext());
-    return MemoSensitiveIntCtx::getContext();
-  } catch (InvalidOperationException $e) {
-    echo $e->getMessage()."\n";
-    return 99;
-  }
+  echo "MSIC: ";
+  var_dump(MemoSensitiveIntCtx::getContext());
+  return MemoSensitiveIntCtx::getContext();
 }
 
 function printAndReturnMAIC(): ?int {
-  try {
-    echo "MAIC: ";
-    var_dump(MemoAgnosticIntCtx::getContext());
-    return MemoAgnosticIntCtx::getContext();
-  } catch (InvalidOperationException $e) {
-    echo $e->getMessage()."\n";
-    return 99;
-  }
+  echo "MAIC: ";
+  var_dump(MemoAgnosticIntCtx::getContext());
+  return MemoAgnosticIntCtx::getContext();
 }
 
 <<__Memoize>>

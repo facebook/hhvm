@@ -31,7 +31,7 @@ abstract final class ClassContext extends HH\ImplicitContext {
   public static async function genStart(Base $context, (function (): int) $f)[zoned] {
     return await parent::runWithAsync($context, $f);
   }
-  public static function getContext()[zoned]: Base {
-    return parent::get() as nonnull;
+  public static function getContext()[zoned]: ?Base {
+    return parent::get();
   }
 }

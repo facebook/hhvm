@@ -266,7 +266,7 @@ TypedValue HHVM_FUNCTION(get_implicit_context, TypedValue key) {
 
   auto const it = context->m_map.find(resolveClass(key));
   if (it == context->m_map.end()) {
-    throw_implicit_context_exception("Implicit context is set to inaccessible");
+    return make_tv<KindOfNull>();
   }
   auto const result = it->second.first;
   tvIncRefGen(result);

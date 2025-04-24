@@ -5,11 +5,7 @@
 <<__EntryPoint>>
 function main_error() :mixed{
   echo "Reading implicit context\n";
-  try {
-    var_dump(IntContext::get());
-  } catch (InvalidOperationException $e){
-    echo $e->getMessage();
-  }
+  var_dump(IntContext::get());
 }
 
 // FILE: main.php

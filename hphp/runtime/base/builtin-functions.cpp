@@ -764,10 +764,6 @@ void throw_call_reified_func_without_generics(const Func* f) {
   SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
-void throw_implicit_context_exception(std::string s) {
-  SystemLib::throwInvalidOperationExceptionObject(s);
-}
-
 void raise_implicit_context_warning(std::string s) {
   raise_warning(s);
 }

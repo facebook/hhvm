@@ -1,19 +1,19 @@
 >>>>> from null
-  Before: Implicit context is set to inaccessible
-Implicit context is set to inaccessible
+  Before: null
+null
 Hash:
 vec(0) {
 }
 memoNoArg passed
-  After: Implicit context is set to inaccessible
+  After: null
 ------------------------
-  Before: Implicit context is set to inaccessible
-Implicit context is set to inaccessible
+  Before: null
+null
 Hash:
 vec(0) {
 }
 memoWithArg passed
-  After: Implicit context is set to inaccessible
+  After: null
 ------------------------
 >>>>> from value
   Before: C
@@ -37,22 +37,22 @@ memoWithArg passed
   After: C
 ------------------------
 >>>>> from inaccessible
-  Before: Implicit context is set to inaccessible
+  Before: null
 memoNoArg passed
-  After: Implicit context is set to inaccessible
+  After: null
 ------------------------
-  Before: Implicit context is set to inaccessible
+  Before: null
 memoWithArg passed
-  After: Implicit context is set to inaccessible
+  After: null
 ------------------------
 >>>>> from soft run with
-  Before: Implicit context is set to inaccessible
+  Before: null
 memoNoArg passed
-  After: Implicit context is set to inaccessible
+  After: null
 ------------------------
-  Before: Implicit context is set to inaccessible
+  Before: null
 memoWithArg passed
-  After: Implicit context is set to inaccessible
+  After: null
 ------------------------
 >>>>> final report
 No arg ran: 2 times

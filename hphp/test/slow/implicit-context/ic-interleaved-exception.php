@@ -5,19 +5,11 @@ function throwExn(): mixed {
 }
 
 function printMSIC(): void {
-  try {
-    var_dump(MemoSensitiveIntCtx::getContext());
-  } catch (InvalidOperationException $e) {
-    echo $e->getMessage()."\n";
-  }
+  var_dump(MemoSensitiveIntCtx::getContext());
 }
 
 function printMAIC()[leak_safe]: void {
-  try {
-    echo (MemoAgnosticIntCtx::getContext())."\n";
-  } catch (InvalidOperationException $e) {
-    echo $e->getMessage()."\n";
-  }
+  echo (MemoAgnosticIntCtx::getContext())."\n";
 }
 
 

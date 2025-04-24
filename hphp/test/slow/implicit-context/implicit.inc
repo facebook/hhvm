@@ -31,8 +31,8 @@ trait ClassContextDefs {
   public static function start(Base $context, (function (): int) $f)[zoned, ctx $f] {
     return parent::runWith($context, $f);
   }
-  public static function getContext()[zoned]: Base {
-    return parent::get() as nonnull;
+  public static function getContext()[zoned]: ?Base {
+    return parent::get();
   }
   public static function exists()[zoned]: bool {
     return parent::exists() as bool;

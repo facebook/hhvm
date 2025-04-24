@@ -1,19 +1,11 @@
 <?hh
 
 function printMSIC(): void {
-  try {
-    var_dump(MemoSensitiveIntCtx::getContext());
-  } catch (InvalidOperationException $e) {
-    echo $e->getMessage()."\n";
-  }
+  var_dump(MemoSensitiveIntCtx::getContext());
 }
 
 function printMAIC(): void {
-  try {
-    var_dump(MemoAgnosticIntCtx::getContext());
-  } catch (InvalidOperationException $e) {
-    echo $e->getMessage()."\n";
-  }
+  var_dump(MemoAgnosticIntCtx::getContext());
 }
 
 function s1(): void {

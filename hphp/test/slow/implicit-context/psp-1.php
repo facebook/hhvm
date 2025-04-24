@@ -17,14 +17,8 @@ async function main() :Awaitable<mixed>{
   include 'async-implicit.inc';
 
   register_postsend_function(() ==> {
-    try {
-      $name = ClassContext::getContext()->name();
-      echo 'Fail: got context ' . $name . "\n";
-    } catch (TypeAssertionException $_) {
-      echo "Fail: no context!\n";
-    } catch (InvalidOperationException $e) {
-      echo "Correct: " . $e->getMessage();
-    }
+    $name = ClassContext::getContext()?->name() ?? 'null';
+    echo 'Got context ' . $name . "\n";
   });
   await ClassContext::genStart(new C, f<>);
 }

@@ -12,13 +12,13 @@ function memoOK($x) :mixed{
 
 <<__Memoize(#MakeICInaccessible)>>
 function memoNoArgFail() :mixed{
-  echo ClassContext::getContext()->name() . "\n";
+  echo (ClassContext::getContext()?->name() ?? 'null') . "\n";
   return 1;
 }
 
 <<__Memoize(#MakeICInaccessible)>>
 function memoFail($x) :mixed{
-  echo ClassContext::getContext()->name() . "\n";
+  echo (ClassContext::getContext()?->name() ?? 'null') . "\n";
   return $x;
 }
 
@@ -42,14 +42,14 @@ function f() :mixed{
     tuple('memoExn', () ==> memoExn(1)),
   ];
   foreach ($v as list($name, $f)) {
-    echo "  Before: " . ClassContext::getContext()->name() . "\n";
+    echo "  Before: " . (ClassContext::getContext()?->name() ?? 'null') . "\n";
     try {
       $f();
       echo $name . " passed\n";
     } catch (Exception $e) {
       echo $name . " failed with: " . $e->getMessage() . "\n";
     }
-    echo "  After: " . ClassContext::getContext()->name() . "\n";
+    echo "  After: " . (ClassContext::getContext()?->name() ?? 'null') . "\n";
     echo "------------------------\n";
   }
 }

@@ -7,11 +7,13 @@ memoOK passed
   After: C
 ------------------------
   Before: C
-memoNoArgFail failed with: Implicit context is set to inaccessible
+null
+memoNoArgFail passed
   After: C
 ------------------------
   Before: C
-memoFail failed with: Implicit context is set to inaccessible
+null
+memoFail passed
   After: C
 ------------------------
   Before: C

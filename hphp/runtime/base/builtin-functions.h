@@ -61,7 +61,6 @@ void NEVER_INLINE throw_invalid_property_name(const String& name);
 [[noreturn]]
 void NEVER_INLINE throw_call_reified_func_without_generics(const Func* f);
 
-[[noreturn]] void NEVER_INLINE throw_implicit_context_exception(std::string);
 void NEVER_INLINE raise_implicit_context_warning(std::string);
 
 [[noreturn]]

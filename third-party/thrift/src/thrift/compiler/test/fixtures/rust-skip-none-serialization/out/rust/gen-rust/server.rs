@@ -425,6 +425,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"ping";
@@ -454,12 +455,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.ping", exception = ?exn);
+                ::tracing::error!(method = "MyService.ping", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.ping", exn);
-                ::tracing::error!(method = "MyService.ping", panic = ?aexn);
+                ::tracing::error!(method = "MyService.ping", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::PingExn::ApplicationException(aexn))
             }
         };
@@ -486,6 +487,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"getRandomData";
@@ -515,12 +517,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.getRandomData", exception = ?exn);
+                ::tracing::error!(method = "MyService.getRandomData", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.getRandomData", exn);
-                ::tracing::error!(method = "MyService.getRandomData", panic = ?aexn);
+                ::tracing::error!(method = "MyService.getRandomData", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::GetRandomDataExn::ApplicationException(aexn))
             }
         };
@@ -547,6 +549,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"hasDataById";
@@ -577,12 +580,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.hasDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.hasDataById", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.hasDataById", exn);
-                ::tracing::error!(method = "MyService.hasDataById", panic = ?aexn);
+                ::tracing::error!(method = "MyService.hasDataById", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::HasDataByIdExn::ApplicationException(aexn))
             }
         };
@@ -609,6 +612,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"getDataById";
@@ -639,12 +643,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.getDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.getDataById", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.getDataById", exn);
-                ::tracing::error!(method = "MyService.getDataById", panic = ?aexn);
+                ::tracing::error!(method = "MyService.getDataById", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::GetDataByIdExn::ApplicationException(aexn))
             }
         };
@@ -671,6 +675,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"putDataById";
@@ -702,12 +707,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.putDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.putDataById", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.putDataById", exn);
-                ::tracing::error!(method = "MyService.putDataById", panic = ?aexn);
+                ::tracing::error!(method = "MyService.putDataById", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::PutDataByIdExn::ApplicationException(aexn))
             }
         };
@@ -734,6 +739,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"lobDataById";
@@ -765,12 +771,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.lobDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.lobDataById", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.lobDataById", exn);
-                ::tracing::error!(method = "MyService.lobDataById", panic = ?aexn);
+                ::tracing::error!(method = "MyService.lobDataById", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::LobDataByIdExn::ApplicationException(aexn))
             }
         };

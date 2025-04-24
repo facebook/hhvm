@@ -412,6 +412,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"method";
@@ -441,12 +442,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SinkService.method", exception = ?exn);
+                ::tracing::error!(method = "SinkService.method", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.method", exn);
-                ::tracing::error!(method = "SinkService.method", panic = ?aexn);
+                ::tracing::error!(method = "SinkService.method", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::sink_service::MethodExn::ApplicationException(aexn))
             }
         };
@@ -541,6 +542,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodAndReponse";
@@ -570,12 +572,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SinkService.methodAndReponse", exception = ?exn);
+                ::tracing::error!(method = "SinkService.methodAndReponse", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodAndReponse", exn);
-                ::tracing::error!(method = "SinkService.methodAndReponse", panic = ?aexn);
+                ::tracing::error!(method = "SinkService.methodAndReponse", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::sink_service::MethodAndReponseExn::ApplicationException(aexn))
             }
         };
@@ -671,6 +673,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodThrow";
@@ -700,12 +703,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SinkService.methodThrow", exception = ?exn);
+                ::tracing::error!(method = "SinkService.methodThrow", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodThrow", exn);
-                ::tracing::error!(method = "SinkService.methodThrow", panic = ?aexn);
+                ::tracing::error!(method = "SinkService.methodThrow", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::sink_service::MethodThrowExn::ApplicationException(aexn))
             }
         };
@@ -800,6 +803,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodSinkThrow";
@@ -829,12 +833,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SinkService.methodSinkThrow", exception = ?exn);
+                ::tracing::error!(method = "SinkService.methodSinkThrow", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodSinkThrow", exn);
-                ::tracing::error!(method = "SinkService.methodSinkThrow", panic = ?aexn);
+                ::tracing::error!(method = "SinkService.methodSinkThrow", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::sink_service::MethodSinkThrowExn::ApplicationException(aexn))
             }
         };
@@ -929,6 +933,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodFinalThrow";
@@ -958,12 +963,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SinkService.methodFinalThrow", exception = ?exn);
+                ::tracing::error!(method = "SinkService.methodFinalThrow", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodFinalThrow", exn);
-                ::tracing::error!(method = "SinkService.methodFinalThrow", panic = ?aexn);
+                ::tracing::error!(method = "SinkService.methodFinalThrow", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::sink_service::MethodFinalThrowExn::ApplicationException(aexn))
             }
         };
@@ -1064,6 +1069,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodBothThrow";
@@ -1093,12 +1099,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SinkService.methodBothThrow", exception = ?exn);
+                ::tracing::error!(method = "SinkService.methodBothThrow", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodBothThrow", exn);
-                ::tracing::error!(method = "SinkService.methodBothThrow", panic = ?aexn);
+                ::tracing::error!(method = "SinkService.methodBothThrow", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::sink_service::MethodBothThrowExn::ApplicationException(aexn))
             }
         };
@@ -1199,6 +1205,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SinkService";
         const METHOD_NAME: &::std::ffi::CStr = c"methodFast";
@@ -1228,12 +1235,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SinkService.methodFast", exception = ?exn);
+                ::tracing::error!(method = "SinkService.methodFast", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodFast", exn);
-                ::tracing::error!(method = "SinkService.methodFast", panic = ?aexn);
+                ::tracing::error!(method = "SinkService.methodFast", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::sink_service::MethodFastExn::ApplicationException(aexn))
             }
         };

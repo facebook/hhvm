@@ -197,6 +197,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Foo";
         const METHOD_NAME: &::std::ffi::CStr = c"return";
@@ -227,12 +228,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Foo.return", exception = ?exn);
+                ::tracing::error!(method = "Foo.return", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Foo.return", exn);
-                ::tracing::error!(method = "Foo.return", panic = ?aexn);
+                ::tracing::error!(method = "Foo.return", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::foo::ReturnExn::ApplicationException(aexn))
             }
         };
@@ -259,6 +260,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Foo";
         const METHOD_NAME: &::std::ffi::CStr = c"super";
@@ -289,12 +291,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Foo.super", exception = ?exn);
+                ::tracing::error!(method = "Foo.super", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Foo.super", exn);
-                ::tracing::error!(method = "Foo.super", panic = ?aexn);
+                ::tracing::error!(method = "Foo.super", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::foo::SuperExn::ApplicationException(aexn))
             }
         };

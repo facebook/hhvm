@@ -271,6 +271,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"doBland";
@@ -300,12 +301,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Raiser.doBland", exception = ?exn);
+                ::tracing::error!(method = "Raiser.doBland", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.doBland", exn);
-                ::tracing::error!(method = "Raiser.doBland", panic = ?aexn);
+                ::tracing::error!(method = "Raiser.doBland", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::raiser::DoBlandExn::ApplicationException(aexn))
             }
         };
@@ -332,6 +333,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"doRaise";
@@ -361,12 +363,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Raiser.doRaise", exception = ?exn);
+                ::tracing::error!(method = "Raiser.doRaise", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.doRaise", exn);
-                ::tracing::error!(method = "Raiser.doRaise", panic = ?aexn);
+                ::tracing::error!(method = "Raiser.doRaise", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::raiser::DoRaiseExn::ApplicationException(aexn))
             }
         };
@@ -393,6 +395,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"get200";
@@ -422,12 +425,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Raiser.get200", exception = ?exn);
+                ::tracing::error!(method = "Raiser.get200", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.get200", exn);
-                ::tracing::error!(method = "Raiser.get200", panic = ?aexn);
+                ::tracing::error!(method = "Raiser.get200", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::raiser::Get200Exn::ApplicationException(aexn))
             }
         };
@@ -454,6 +457,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Raiser";
         const METHOD_NAME: &::std::ffi::CStr = c"get500";
@@ -483,12 +487,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Raiser.get500", exception = ?exn);
+                ::tracing::error!(method = "Raiser.get500", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.get500", exn);
-                ::tracing::error!(method = "Raiser.get500", panic = ?aexn);
+                ::tracing::error!(method = "Raiser.get500", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::raiser::Get500Exn::ApplicationException(aexn))
             }
         };

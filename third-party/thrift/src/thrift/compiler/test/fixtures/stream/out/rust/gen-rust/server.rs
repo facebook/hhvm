@@ -670,6 +670,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"returnstream";
@@ -705,7 +706,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.returnstream", exn);
-                ::tracing::error!(method = "PubSubStreamingService.returnstream", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.returnstream", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamExn::ApplicationException(aexn))
             }
         };
@@ -768,6 +769,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"streamthrows";
@@ -802,7 +804,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.streamthrows", exn);
-                ::tracing::error!(method = "PubSubStreamingService.streamthrows", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.streamthrows", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(aexn))
             }
         };
@@ -873,6 +875,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"servicethrows";
@@ -907,7 +910,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.servicethrows", exn);
-                ::tracing::error!(method = "PubSubStreamingService.servicethrows", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.servicethrows", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(aexn))
             }
         };
@@ -970,6 +973,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"servicethrows2";
@@ -1004,7 +1008,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.servicethrows2", exn);
-                ::tracing::error!(method = "PubSubStreamingService.servicethrows2", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.servicethrows2", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn))
             }
         };
@@ -1067,6 +1071,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"boththrows";
@@ -1101,7 +1106,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.boththrows", exn);
-                ::tracing::error!(method = "PubSubStreamingService.boththrows", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.boththrows", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(aexn))
             }
         };
@@ -1172,6 +1177,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"responseandstreamstreamthrows";
@@ -1206,7 +1212,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.responseandstreamstreamthrows", exn);
-                ::tracing::error!(method = "PubSubStreamingService.responseandstreamstreamthrows", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.responseandstreamstreamthrows", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::ApplicationException(aexn))
             }
         };
@@ -1277,6 +1283,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"responseandstreamservicethrows";
@@ -1311,7 +1318,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.responseandstreamservicethrows", exn);
-                ::tracing::error!(method = "PubSubStreamingService.responseandstreamservicethrows", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.responseandstreamservicethrows", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::ApplicationException(aexn))
             }
         };
@@ -1374,6 +1381,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"responseandstreamboththrows";
@@ -1408,7 +1416,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.responseandstreamboththrows", exn);
-                ::tracing::error!(method = "PubSubStreamingService.responseandstreamboththrows", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.responseandstreamboththrows", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::ApplicationException(aexn))
             }
         };
@@ -1479,6 +1487,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
         const METHOD_NAME: &::std::ffi::CStr = c"returnstreamFast";
@@ -1514,7 +1523,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.returnstreamFast", exn);
-                ::tracing::error!(method = "PubSubStreamingService.returnstreamFast", panic = ?aexn);
+                ::tracing::error!(method = "PubSubStreamingService.returnstreamFast", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(aexn))
             }
         };

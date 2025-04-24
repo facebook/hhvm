@@ -368,6 +368,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
         const METHOD_NAME: &::std::ffi::CStr = c"mapList";
@@ -398,12 +399,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "NestedContainers.mapList", exception = ?exn);
+                ::tracing::error!(method = "NestedContainers.mapList", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.mapList", exn);
-                ::tracing::error!(method = "NestedContainers.mapList", panic = ?aexn);
+                ::tracing::error!(method = "NestedContainers.mapList", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::nested_containers::MapListExn::ApplicationException(aexn))
             }
         };
@@ -430,6 +431,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
         const METHOD_NAME: &::std::ffi::CStr = c"mapSet";
@@ -460,12 +462,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "NestedContainers.mapSet", exception = ?exn);
+                ::tracing::error!(method = "NestedContainers.mapSet", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.mapSet", exn);
-                ::tracing::error!(method = "NestedContainers.mapSet", panic = ?aexn);
+                ::tracing::error!(method = "NestedContainers.mapSet", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::nested_containers::MapSetExn::ApplicationException(aexn))
             }
         };
@@ -492,6 +494,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
         const METHOD_NAME: &::std::ffi::CStr = c"listMap";
@@ -522,12 +525,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "NestedContainers.listMap", exception = ?exn);
+                ::tracing::error!(method = "NestedContainers.listMap", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.listMap", exn);
-                ::tracing::error!(method = "NestedContainers.listMap", panic = ?aexn);
+                ::tracing::error!(method = "NestedContainers.listMap", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::nested_containers::ListMapExn::ApplicationException(aexn))
             }
         };
@@ -554,6 +557,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
         const METHOD_NAME: &::std::ffi::CStr = c"listSet";
@@ -584,12 +588,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "NestedContainers.listSet", exception = ?exn);
+                ::tracing::error!(method = "NestedContainers.listSet", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.listSet", exn);
-                ::tracing::error!(method = "NestedContainers.listSet", panic = ?aexn);
+                ::tracing::error!(method = "NestedContainers.listSet", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::nested_containers::ListSetExn::ApplicationException(aexn))
             }
         };
@@ -616,6 +620,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
         const METHOD_NAME: &::std::ffi::CStr = c"turtles";
@@ -646,12 +651,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "NestedContainers.turtles", exception = ?exn);
+                ::tracing::error!(method = "NestedContainers.turtles", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.turtles", exn);
-                ::tracing::error!(method = "NestedContainers.turtles", panic = ?aexn);
+                ::tracing::error!(method = "NestedContainers.turtles", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::nested_containers::TurtlesExn::ApplicationException(aexn))
             }
         };

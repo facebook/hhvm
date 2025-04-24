@@ -166,6 +166,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Service";
         const METHOD_NAME: &::std::ffi::CStr = c"func";
@@ -198,12 +199,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Service.func", exception = ?exn);
+                ::tracing::error!(method = "Service.func", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Service.func", exn);
-                ::tracing::error!(method = "Service.func", panic = ?aexn);
+                ::tracing::error!(method = "Service.func", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::service::FuncExn::ApplicationException(aexn))
             }
         };
@@ -575,6 +576,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"AdapterService";
         const METHOD_NAME: &::std::ffi::CStr = c"count";
@@ -604,12 +606,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "AdapterService.count", exception = ?exn);
+                ::tracing::error!(method = "AdapterService.count", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("AdapterService.count", exn);
-                ::tracing::error!(method = "AdapterService.count", panic = ?aexn);
+                ::tracing::error!(method = "AdapterService.count", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::adapter_service::CountExn::ApplicationException(aexn))
             }
         };
@@ -636,6 +638,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"AdapterService";
         const METHOD_NAME: &::std::ffi::CStr = c"adaptedTypes";
@@ -666,12 +669,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "AdapterService.adaptedTypes", exception = ?exn);
+                ::tracing::error!(method = "AdapterService.adaptedTypes", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("AdapterService.adaptedTypes", exn);
-                ::tracing::error!(method = "AdapterService.adaptedTypes", panic = ?aexn);
+                ::tracing::error!(method = "AdapterService.adaptedTypes", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::ApplicationException(aexn))
             }
         };

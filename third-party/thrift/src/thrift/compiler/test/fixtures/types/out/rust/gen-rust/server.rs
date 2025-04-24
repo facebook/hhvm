@@ -197,6 +197,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SomeService";
         const METHOD_NAME: &::std::ffi::CStr = c"bounce_map";
@@ -227,12 +228,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SomeService.bounce_map", exception = ?exn);
+                ::tracing::error!(method = "SomeService.bounce_map", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SomeService.bounce_map", exn);
-                ::tracing::error!(method = "SomeService.bounce_map", panic = ?aexn);
+                ::tracing::error!(method = "SomeService.bounce_map", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::some_service::BounceMapExn::ApplicationException(aexn))
             }
         };
@@ -259,6 +260,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"SomeService";
         const METHOD_NAME: &::std::ffi::CStr = c"binary_keyed_map";
@@ -289,12 +291,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SomeService.binary_keyed_map", exception = ?exn);
+                ::tracing::error!(method = "SomeService.binary_keyed_map", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("SomeService.binary_keyed_map", exn);
-                ::tracing::error!(method = "SomeService.binary_keyed_map", panic = ?aexn);
+                ::tracing::error!(method = "SomeService.binary_keyed_map", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::some_service::BinaryKeyedMapExn::ApplicationException(aexn))
             }
         };

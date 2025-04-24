@@ -142,6 +142,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyRoot";
         const METHOD_NAME: &::std::ffi::CStr = c"do_root";
@@ -171,12 +172,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyRoot.do_root", exception = ?exn);
+                ::tracing::error!(method = "MyRoot.do_root", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyRoot.do_root", exn);
-                ::tracing::error!(method = "MyRoot.do_root", panic = ?aexn);
+                ::tracing::error!(method = "MyRoot.do_root", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_root::DoRootExn::ApplicationException(aexn))
             }
         };
@@ -493,6 +494,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyNode";
         const METHOD_NAME: &::std::ffi::CStr = c"do_mid";
@@ -522,12 +524,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyNode.do_mid", exception = ?exn);
+                ::tracing::error!(method = "MyNode.do_mid", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyNode.do_mid", exn);
-                ::tracing::error!(method = "MyNode.do_mid", panic = ?aexn);
+                ::tracing::error!(method = "MyNode.do_mid", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_node::DoMidExn::ApplicationException(aexn))
             }
         };
@@ -862,6 +864,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyLeaf";
         const METHOD_NAME: &::std::ffi::CStr = c"do_leaf";
@@ -891,12 +894,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyLeaf.do_leaf", exception = ?exn);
+                ::tracing::error!(method = "MyLeaf.do_leaf", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyLeaf.do_leaf", exn);
-                ::tracing::error!(method = "MyLeaf.do_leaf", panic = ?aexn);
+                ::tracing::error!(method = "MyLeaf.do_leaf", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_leaf::DoLeafExn::ApplicationException(aexn))
             }
         };

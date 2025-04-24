@@ -687,6 +687,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
@@ -716,12 +717,12 @@ pub mod my_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -748,6 +749,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
@@ -777,12 +779,12 @@ pub mod my_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
                 }
             };
@@ -809,6 +811,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
@@ -842,7 +845,7 @@ pub mod my_service {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
                 }
             };
@@ -905,6 +908,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.encode";
@@ -934,12 +938,12 @@ pub mod my_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
-                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::EncodeExn::ApplicationException(aexn))
                 }
             };
@@ -1239,6 +1243,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
@@ -1268,12 +1273,12 @@ pub mod my_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
-                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -1300,6 +1305,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
@@ -1329,12 +1335,12 @@ pub mod my_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
-                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
                 }
             };
@@ -1361,6 +1367,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
@@ -1394,7 +1401,7 @@ pub mod my_service {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
                 }
             };
@@ -1457,6 +1464,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.encode";
@@ -1486,12 +1494,12 @@ pub mod my_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.encode", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.encode", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", exn);
-                    ::tracing::error!(method = "MyInteractionFast.encode", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.encode", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::EncodeExn::ApplicationException(aexn))
                 }
             };
@@ -1791,6 +1799,7 @@ pub mod my_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
             const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
@@ -1820,12 +1829,12 @@ pub mod my_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
-                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -2334,6 +2343,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"foo";
@@ -2363,12 +2373,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.foo", exception = ?exn);
+                ::tracing::error!(method = "MyService.foo", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.foo", exn);
-                ::tracing::error!(method = "MyService.foo", panic = ?aexn);
+                ::tracing::error!(method = "MyService.foo", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::FooExn::ApplicationException(aexn))
             }
         };
@@ -2395,6 +2405,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"interact";
@@ -2428,12 +2439,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.interact", exception = ?exn);
+                ::tracing::error!(method = "MyService.interact", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.interact", exn);
-                ::tracing::error!(method = "MyService.interact", panic = ?aexn);
+                ::tracing::error!(method = "MyService.interact", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::InteractExn::ApplicationException(aexn))
             }
         };
@@ -2460,6 +2471,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"interactFast";
@@ -2492,12 +2504,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyService.interactFast", exception = ?exn);
+                ::tracing::error!(method = "MyService.interactFast", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.interactFast", exn);
-                ::tracing::error!(method = "MyService.interactFast", panic = ?aexn);
+                ::tracing::error!(method = "MyService.interactFast", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::InteractFastExn::ApplicationException(aexn))
             }
         };
@@ -2524,6 +2536,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
         const METHOD_NAME: &::std::ffi::CStr = c"serialize";
@@ -2560,7 +2573,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.serialize", exn);
-                ::tracing::error!(method = "MyService.serialize", panic = ?aexn);
+                ::tracing::error!(method = "MyService.serialize", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::my_service::SerializeExn::ApplicationException(aexn))
             }
         };
@@ -2966,6 +2979,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
@@ -2995,12 +3009,12 @@ pub mod factories {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -3027,6 +3041,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
@@ -3056,12 +3071,12 @@ pub mod factories {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
                 }
             };
@@ -3088,6 +3103,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
@@ -3121,7 +3137,7 @@ pub mod factories {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
                 }
             };
@@ -3184,6 +3200,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.encode";
@@ -3213,12 +3230,12 @@ pub mod factories {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
-                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::EncodeExn::ApplicationException(aexn))
                 }
             };
@@ -3518,6 +3535,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
@@ -3547,12 +3565,12 @@ pub mod factories {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
-                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -3579,6 +3597,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
@@ -3608,12 +3627,12 @@ pub mod factories {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
-                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
                 }
             };
@@ -3640,6 +3659,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
@@ -3673,7 +3693,7 @@ pub mod factories {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
                 }
             };
@@ -3736,6 +3756,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.encode";
@@ -3765,12 +3786,12 @@ pub mod factories {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.encode", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.encode", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", exn);
-                    ::tracing::error!(method = "MyInteractionFast.encode", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.encode", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::EncodeExn::ApplicationException(aexn))
                 }
             };
@@ -4070,6 +4091,7 @@ pub mod factories {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
             const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
@@ -4099,12 +4121,12 @@ pub mod factories {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
-                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -4550,6 +4572,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
         const METHOD_NAME: &::std::ffi::CStr = c"foo";
@@ -4579,12 +4602,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Factories.foo", exception = ?exn);
+                ::tracing::error!(method = "Factories.foo", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Factories.foo", exn);
-                ::tracing::error!(method = "Factories.foo", panic = ?aexn);
+                ::tracing::error!(method = "Factories.foo", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::factories::FooExn::ApplicationException(aexn))
             }
         };
@@ -4611,6 +4634,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
         const METHOD_NAME: &::std::ffi::CStr = c"interact";
@@ -4644,12 +4668,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Factories.interact", exception = ?exn);
+                ::tracing::error!(method = "Factories.interact", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Factories.interact", exn);
-                ::tracing::error!(method = "Factories.interact", panic = ?aexn);
+                ::tracing::error!(method = "Factories.interact", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::factories::InteractExn::ApplicationException(aexn))
             }
         };
@@ -4676,6 +4700,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
         const METHOD_NAME: &::std::ffi::CStr = c"interactFast";
@@ -4708,12 +4733,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Factories.interactFast", exception = ?exn);
+                ::tracing::error!(method = "Factories.interactFast", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Factories.interactFast", exn);
-                ::tracing::error!(method = "Factories.interactFast", panic = ?aexn);
+                ::tracing::error!(method = "Factories.interactFast", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::factories::InteractFastExn::ApplicationException(aexn))
             }
         };
@@ -4740,6 +4765,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
         const METHOD_NAME: &::std::ffi::CStr = c"serialize";
@@ -4776,7 +4802,7 @@ where
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Factories.serialize", exn);
-                ::tracing::error!(method = "Factories.serialize", panic = ?aexn);
+                ::tracing::error!(method = "Factories.serialize", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::factories::SerializeExn::ApplicationException(aexn))
             }
         };
@@ -5164,6 +5190,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
@@ -5193,12 +5220,12 @@ pub mod perform {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -5225,6 +5252,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
@@ -5254,12 +5282,12 @@ pub mod perform {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
                 }
             };
@@ -5286,6 +5314,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
@@ -5319,7 +5348,7 @@ pub mod perform {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
                 }
             };
@@ -5382,6 +5411,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.encode";
@@ -5411,12 +5441,12 @@ pub mod perform {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
-                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::EncodeExn::ApplicationException(aexn))
                 }
             };
@@ -5716,6 +5746,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
@@ -5745,12 +5776,12 @@ pub mod perform {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
-                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -5777,6 +5808,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
@@ -5806,12 +5838,12 @@ pub mod perform {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
-                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
                 }
             };
@@ -5838,6 +5870,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
@@ -5871,7 +5904,7 @@ pub mod perform {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
                 }
             };
@@ -5934,6 +5967,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.encode";
@@ -5963,12 +5997,12 @@ pub mod perform {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.encode", exception = ?exn);
+                    ::tracing::error!(method = "MyInteractionFast.encode", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", exn);
-                    ::tracing::error!(method = "MyInteractionFast.encode", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteractionFast.encode", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction_fast::EncodeExn::ApplicationException(aexn))
                 }
             };
@@ -6268,6 +6302,7 @@ pub mod perform {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
             const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
@@ -6297,12 +6332,12 @@ pub mod perform {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
-                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -6648,6 +6683,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
         const METHOD_NAME: &::std::ffi::CStr = c"foo";
@@ -6677,12 +6713,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "Perform.foo", exception = ?exn);
+                ::tracing::error!(method = "Perform.foo", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("Perform.foo", exn);
-                ::tracing::error!(method = "Perform.foo", panic = ?aexn);
+                ::tracing::error!(method = "Perform.foo", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::perform::FooExn::ApplicationException(aexn))
             }
         };
@@ -7019,6 +7055,7 @@ pub mod interact_with_shared {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
@@ -7048,12 +7085,12 @@ pub mod interact_with_shared {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
                 }
             };
@@ -7080,6 +7117,7 @@ pub mod interact_with_shared {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
@@ -7109,12 +7147,12 @@ pub mod interact_with_shared {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
                 }
             };
@@ -7141,6 +7179,7 @@ pub mod interact_with_shared {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
@@ -7174,7 +7213,7 @@ pub mod interact_with_shared {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
                 }
             };
@@ -7237,6 +7276,7 @@ pub mod interact_with_shared {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
             const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.encode";
@@ -7266,12 +7306,12 @@ pub mod interact_with_shared {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn);
+                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
-                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn);
+                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::my_interaction::EncodeExn::ApplicationException(aexn))
                 }
             };
@@ -7571,6 +7611,7 @@ pub mod interact_with_shared {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
             const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.init";
@@ -7600,12 +7641,12 @@ pub mod interact_with_shared {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SharedInteraction.init", exception = ?exn);
+                    ::tracing::error!(method = "SharedInteraction.init", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.init", exn);
-                    ::tracing::error!(method = "SharedInteraction.init", panic = ?aexn);
+                    ::tracing::error!(method = "SharedInteraction.init", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::shared_interaction::InitExn::ApplicationException(aexn))
                 }
             };
@@ -7632,6 +7673,7 @@ pub mod interact_with_shared {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
             const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.do_something";
@@ -7661,12 +7703,12 @@ pub mod interact_with_shared {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SharedInteraction.do_something", exception = ?exn);
+                    ::tracing::error!(method = "SharedInteraction.do_something", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.do_something", exn);
-                    ::tracing::error!(method = "SharedInteraction.do_something", panic = ?aexn);
+                    ::tracing::error!(method = "SharedInteraction.do_something", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::shared_interaction::DoSomethingExn::ApplicationException(aexn))
                 }
             };
@@ -7693,6 +7735,7 @@ pub mod interact_with_shared {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
             const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.tear_down";
@@ -7722,12 +7765,12 @@ pub mod interact_with_shared {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SharedInteraction.tear_down", exception = ?exn);
+                    ::tracing::error!(method = "SharedInteraction.tear_down", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.tear_down", exn);
-                    ::tracing::error!(method = "SharedInteraction.tear_down", panic = ?aexn);
+                    ::tracing::error!(method = "SharedInteraction.tear_down", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::shared_interaction::TearDownExn::ApplicationException(aexn))
                 }
             };
@@ -8048,6 +8091,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
         const METHOD_NAME: &::std::ffi::CStr = c"do_some_similar_things";
@@ -8077,12 +8121,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "InteractWithShared.do_some_similar_things", exception = ?exn);
+                ::tracing::error!(method = "InteractWithShared.do_some_similar_things", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("InteractWithShared.do_some_similar_things", exn);
-                ::tracing::error!(method = "InteractWithShared.do_some_similar_things", panic = ?aexn);
+                ::tracing::error!(method = "InteractWithShared.do_some_similar_things", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::interact_with_shared::DoSomeSimilarThingsExn::ApplicationException(aexn))
             }
         };
@@ -8411,6 +8455,7 @@ pub mod box_service {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::futures::FutureExt as _;
+            use ::fbthrift::ExceptionInfo;
     
             const SERVICE_NAME: &::std::ffi::CStr = c"BoxService";
             const METHOD_NAME: &::std::ffi::CStr = c"BoxedInteraction.getABox";
@@ -8440,12 +8485,12 @@ pub mod box_service {
                     ::std::result::Result::Ok(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "BoxedInteraction.getABox", exception = ?exn);
+                    ::tracing::error!(method = "BoxedInteraction.getABox", exception = ?exn, error = exn.exn_value());
                     ::std::result::Result::Err(exn)
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("BoxedInteraction.getABox", exn);
-                    ::tracing::error!(method = "BoxedInteraction.getABox", panic = ?aexn);
+                    ::tracing::error!(method = "BoxedInteraction.getABox", panic = ?aexn, error = aexn.exn_value());
                     ::std::result::Result::Err(crate::services::boxed_interaction::GetABoxExn::ApplicationException(aexn))
                 }
             };
@@ -8738,6 +8783,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"BoxService";
         const METHOD_NAME: &::std::ffi::CStr = c"getABoxSession";
@@ -8771,12 +8817,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "BoxService.getABoxSession", exception = ?exn);
+                ::tracing::error!(method = "BoxService.getABoxSession", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("BoxService.getABoxSession", exn);
-                ::tracing::error!(method = "BoxService.getABoxSession", panic = ?aexn);
+                ::tracing::error!(method = "BoxService.getABoxSession", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::box_service::GetABoxSessionExn::ApplicationException(aexn))
             }
         };

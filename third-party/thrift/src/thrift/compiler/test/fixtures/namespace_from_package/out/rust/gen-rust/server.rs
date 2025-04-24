@@ -140,6 +140,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"TestService";
         const METHOD_NAME: &::std::ffi::CStr = c"init";
@@ -170,12 +171,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "TestService.init", exception = ?exn);
+                ::tracing::error!(method = "TestService.init", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("TestService.init", exn);
-                ::tracing::error!(method = "TestService.init", panic = ?aexn);
+                ::tracing::error!(method = "TestService.init", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::test_service::InitExn::ApplicationException(aexn))
             }
         };

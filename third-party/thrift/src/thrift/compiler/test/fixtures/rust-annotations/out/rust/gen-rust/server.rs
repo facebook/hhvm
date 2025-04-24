@@ -160,6 +160,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"S1";
         const METHOD_NAME: &::std::ffi::CStr = c"r";
@@ -190,12 +191,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "S1.r", exception = ?exn);
+                ::tracing::error!(method = "S1.r", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("S1.r", exn);
-                ::tracing::error!(method = "S1.r", panic = ?aexn);
+                ::tracing::error!(method = "S1.r", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::service1::RExn::ApplicationException(aexn))
             }
         };
@@ -510,6 +511,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"S2";
         const METHOD_NAME: &::std::ffi::CStr = c"r";
@@ -539,12 +541,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "S2.r", exception = ?exn);
+                ::tracing::error!(method = "S2.r", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("S2.r", exn);
-                ::tracing::error!(method = "S2.r", panic = ?aexn);
+                ::tracing::error!(method = "S2.r", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::s2_proxy::RExn::ApplicationException(aexn))
             }
         };
@@ -906,6 +908,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"AllMethods";
         const METHOD_NAME: &::std::ffi::CStr = c"foo";
@@ -935,12 +938,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "AllMethods.foo", exception = ?exn);
+                ::tracing::error!(method = "AllMethods.foo", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("AllMethods.foo", exn);
-                ::tracing::error!(method = "AllMethods.foo", panic = ?aexn);
+                ::tracing::error!(method = "AllMethods.foo", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::all_methods::FooExn::ApplicationException(aexn))
             }
         };
@@ -967,6 +970,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"AllMethods";
         const METHOD_NAME: &::std::ffi::CStr = c"bar";
@@ -996,12 +1000,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "AllMethods.bar", exception = ?exn);
+                ::tracing::error!(method = "AllMethods.bar", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("AllMethods.bar", exn);
-                ::tracing::error!(method = "AllMethods.bar", panic = ?aexn);
+                ::tracing::error!(method = "AllMethods.bar", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::all_methods::BarExn::ApplicationException(aexn))
             }
         };
@@ -1374,6 +1378,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"OneMethod";
         const METHOD_NAME: &::std::ffi::CStr = c"foo";
@@ -1403,12 +1408,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "OneMethod.foo", exception = ?exn);
+                ::tracing::error!(method = "OneMethod.foo", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethod.foo", exn);
-                ::tracing::error!(method = "OneMethod.foo", panic = ?aexn);
+                ::tracing::error!(method = "OneMethod.foo", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::one_method::FooExn::ApplicationException(aexn))
             }
         };
@@ -1435,6 +1440,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"OneMethod";
         const METHOD_NAME: &::std::ffi::CStr = c"bar";
@@ -1464,12 +1470,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "OneMethod.bar", exception = ?exn);
+                ::tracing::error!(method = "OneMethod.bar", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethod.bar", exn);
-                ::tracing::error!(method = "OneMethod.bar", panic = ?aexn);
+                ::tracing::error!(method = "OneMethod.bar", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::one_method::BarExn::ApplicationException(aexn))
             }
         };
@@ -1842,6 +1848,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"OneMethodOptOut";
         const METHOD_NAME: &::std::ffi::CStr = c"foo";
@@ -1871,12 +1878,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "OneMethodOptOut.foo", exception = ?exn);
+                ::tracing::error!(method = "OneMethodOptOut.foo", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethodOptOut.foo", exn);
-                ::tracing::error!(method = "OneMethodOptOut.foo", panic = ?aexn);
+                ::tracing::error!(method = "OneMethodOptOut.foo", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::one_method_opt_out::FooExn::ApplicationException(aexn))
             }
         };
@@ -1903,6 +1910,7 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         use ::futures::FutureExt as _;
+        use ::fbthrift::ExceptionInfo;
 
         const SERVICE_NAME: &::std::ffi::CStr = c"OneMethodOptOut";
         const METHOD_NAME: &::std::ffi::CStr = c"bar";
@@ -1932,12 +1940,12 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "OneMethodOptOut.bar", exception = ?exn);
+                ::tracing::error!(method = "OneMethodOptOut.bar", exception = ?exn, error = exn.exn_value());
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("OneMethodOptOut.bar", exn);
-                ::tracing::error!(method = "OneMethodOptOut.bar", panic = ?aexn);
+                ::tracing::error!(method = "OneMethodOptOut.bar", panic = ?aexn, error = aexn.exn_value());
                 ::std::result::Result::Err(crate::services::one_method_opt_out::BarExn::ApplicationException(aexn))
             }
         };

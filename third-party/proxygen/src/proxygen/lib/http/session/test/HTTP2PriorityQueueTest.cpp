@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <array>
 #include <list>
 #include <map>
 #include <thread>
@@ -617,7 +618,7 @@ TEST_F(QueueTest, ChromeTest) {
   // add-exclusive, signal, clear and remove with 3 insertion points
   // (hi,mid,low).  Note the test uses rand32() with a particular seed so the
   // output is predictable.
-  HTTPCodec::StreamID pris[3] = {0, 3, 5};
+  std::array<HTTPCodec::StreamID, 3> pris = {0, 3, 5};
   addTransaction(0, {kRootNodeId, true, 99});
   signalEgress(0, false);
   addTransaction(3, {0, true, 99});

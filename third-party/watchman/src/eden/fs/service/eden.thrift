@@ -38,6 +38,21 @@ namespace hack edenfs.service
  * without rewriting your new endpoint.
  */
 
+/**
+ * To support testing of the EdenFS client library, we need to be able to
+ * mock the EdenFS Thrift APIs. This is done by defining a mock service,
+ * using `mockall::mock!`, that implements the EdenFS Thrift APIs.
+ *
+ * The mock definitions will require updates whenever the EdenFS Thrift API
+ * changes. Not all changes will require an update, only those that either:
+ *   1. Add/Rename a new method to the interface
+ *   2. Change the parameters or return type of a method
+ *   3. Introduce a breaking Thrift API changes (e.g. rename a method)
+ *
+ * For reference, the EdenFS client library mocks are defined here:
+ *   https://www.internalfb.com/code/fbsource/fbcode/eden/fs/cli_rs/edenfs-client/src/client/mock_service.rs
+ */
+
 /** Thrift doesn't really do unsigned numbers, but we can sort of fake it.
  * This type is serialized as an integer value that is 64-bits wide and
  * should round-trip with full fidelity for C++ client/server, but for

@@ -15,7 +15,11 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
-from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
+from thrift.py3.types import (
+    _fbthrift__round_float32,
+    _fbthrift__is_float32,
+    _fbthrift__filter_kwargs,
+)
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -58,7 +62,12 @@ class CustomException(thrift.py3.exceptions.GeneratedError):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.CustomException(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.CustomException(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.CustomException(*args, **kwargs)
+
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
     def __new__(cls, *args, **kwargs) -> CustomException:
@@ -156,7 +165,12 @@ class ShouldBeBoxed(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.ShouldBeBoxed(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.ShouldBeBoxed(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.ShouldBeBoxed(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> ShouldBeBoxed:
         instance = super().__new__(cls)

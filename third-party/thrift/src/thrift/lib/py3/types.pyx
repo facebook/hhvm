@@ -744,6 +744,23 @@ cdef class StructFieldsSetter:
     cdef void set_field(self, const char* name, object val) except *:
         pass
 
+# thrift-py3 drops kwargs with None value but thrift-python does not.
+# This function emulates the thrift-py3 behavior for in-place migrate
+def _fbthrift__filter_kwargs(kwargs, tuple field_names):
+    cdef list bad_kwargs = []
+    for key, val in kwargs.items():
+        if val is None and key not in field_names:
+            bad_kwargs.append(key)
+
+    for bad in bad_kwargs:
+        warnings.warn(
+            f"Discarding unexpected kwarg set to None: {bad}",
+            RuntimeWarning,
+        )
+        kwargs.pop(key)
+
+    return kwargs
+
 
 cdef translate_cpp_enum_to_python(object EnumClass, int value):
     try:

@@ -15,7 +15,11 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
-from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
+from thrift.py3.types import (
+    _fbthrift__round_float32,
+    _fbthrift__is_float32,
+    _fbthrift__filter_kwargs,
+)
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -58,7 +62,12 @@ class DoSomethingResult(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.DoSomethingResult(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.DoSomethingResult(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.DoSomethingResult(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> DoSomethingResult:
         instance = super().__new__(cls)

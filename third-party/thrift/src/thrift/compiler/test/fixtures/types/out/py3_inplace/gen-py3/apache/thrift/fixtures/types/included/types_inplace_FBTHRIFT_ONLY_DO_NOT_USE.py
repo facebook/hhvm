@@ -15,7 +15,11 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
-from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
+from thrift.py3.types import (
+    _fbthrift__round_float32,
+    _fbthrift__is_float32,
+    _fbthrift__filter_kwargs,
+)
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types

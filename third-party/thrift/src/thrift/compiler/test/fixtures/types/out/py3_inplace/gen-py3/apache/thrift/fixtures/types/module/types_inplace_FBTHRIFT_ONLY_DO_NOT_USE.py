@@ -15,7 +15,11 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
-from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
+from thrift.py3.types import (
+    _fbthrift__round_float32,
+    _fbthrift__is_float32,
+    _fbthrift__filter_kwargs,
+)
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -1224,7 +1228,12 @@ class empty_struct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.empty_struct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.empty_struct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.empty_struct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> empty_struct:
         instance = super().__new__(cls)
@@ -1316,7 +1325,12 @@ class decorated_struct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.decorated_struct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.decorated_struct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.decorated_struct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> decorated_struct:
         instance = super().__new__(cls)
@@ -1435,7 +1449,12 @@ class ContainerStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.ContainerStruct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.ContainerStruct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.ContainerStruct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> ContainerStruct:
         instance = super().__new__(cls)
@@ -1601,7 +1620,12 @@ class CppTypeStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.CppTypeStruct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.CppTypeStruct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.CppTypeStruct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> CppTypeStruct:
         instance = super().__new__(cls)
@@ -1702,7 +1726,12 @@ class VirtualStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.VirtualStruct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.VirtualStruct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.VirtualStruct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> VirtualStruct:
         instance = super().__new__(cls)
@@ -1799,7 +1828,12 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.MyStructWithForwardRefEnum(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.MyStructWithForwardRefEnum(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.MyStructWithForwardRefEnum(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> MyStructWithForwardRefEnum:
         instance = super().__new__(cls)
@@ -1900,7 +1934,12 @@ class TrivialNumeric(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.TrivialNumeric(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.TrivialNumeric(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.TrivialNumeric(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> TrivialNumeric:
         instance = super().__new__(cls)
@@ -2003,7 +2042,12 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.TrivialNestedWithDefault(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.TrivialNestedWithDefault(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.TrivialNestedWithDefault(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> TrivialNestedWithDefault:
         instance = super().__new__(cls)
@@ -2111,7 +2155,12 @@ class ComplexString(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.ComplexString(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.ComplexString(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.ComplexString(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> ComplexString:
         instance = super().__new__(cls)
@@ -2219,7 +2268,12 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.ComplexNestedWithDefault(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.ComplexNestedWithDefault(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.ComplexNestedWithDefault(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> ComplexNestedWithDefault:
         instance = super().__new__(cls)
@@ -2328,7 +2382,12 @@ class MinPadding(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.MinPadding(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.MinPadding(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.MinPadding(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> MinPadding:
         instance = super().__new__(cls)
@@ -2444,7 +2503,12 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.MinPaddingWithCustomType(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.MinPaddingWithCustomType(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.MinPaddingWithCustomType(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> MinPaddingWithCustomType:
         instance = super().__new__(cls)
@@ -2561,7 +2625,12 @@ class MyStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.MyStruct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.MyStruct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.MyStruct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> MyStruct:
         instance = super().__new__(cls)
@@ -2673,7 +2742,12 @@ class MyDataItem(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.MyDataItem(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.MyDataItem(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.MyDataItem(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> MyDataItem:
         instance = super().__new__(cls)
@@ -2765,7 +2839,12 @@ class Renaming(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.Renaming(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.Renaming(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.Renaming(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> Renaming:
         instance = super().__new__(cls)
@@ -2864,7 +2943,12 @@ class AnnotatedTypes(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.AnnotatedTypes(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.AnnotatedTypes(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.AnnotatedTypes(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> AnnotatedTypes:
         instance = super().__new__(cls)
@@ -2974,7 +3058,12 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.ForwardUsageRoot(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.ForwardUsageRoot(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.ForwardUsageRoot(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> ForwardUsageRoot:
         instance = super().__new__(cls)
@@ -3090,7 +3179,12 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.ForwardUsageStruct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.ForwardUsageStruct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.ForwardUsageStruct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> ForwardUsageStruct:
         instance = super().__new__(cls)
@@ -3195,7 +3289,12 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.ForwardUsageByRef(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.ForwardUsageByRef(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.ForwardUsageByRef(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> ForwardUsageByRef:
         instance = super().__new__(cls)
@@ -3300,7 +3399,12 @@ class IncompleteMap(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.IncompleteMap(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteMap(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteMap(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> IncompleteMap:
         instance = super().__new__(cls)
@@ -3402,7 +3506,12 @@ class IncompleteMapDep(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.IncompleteMapDep(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteMapDep(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteMapDep(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> IncompleteMapDep:
         instance = super().__new__(cls)
@@ -3496,7 +3605,12 @@ class CompleteMap(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.CompleteMap(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.CompleteMap(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.CompleteMap(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> CompleteMap:
         instance = super().__new__(cls)
@@ -3598,7 +3712,12 @@ class CompleteMapDep(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.CompleteMapDep(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.CompleteMapDep(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.CompleteMapDep(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> CompleteMapDep:
         instance = super().__new__(cls)
@@ -3692,7 +3811,12 @@ class IncompleteList(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.IncompleteList(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteList(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteList(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> IncompleteList:
         instance = super().__new__(cls)
@@ -3794,7 +3918,12 @@ class IncompleteListDep(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.IncompleteListDep(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteListDep(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.IncompleteListDep(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> IncompleteListDep:
         instance = super().__new__(cls)
@@ -3888,7 +4017,12 @@ class CompleteList(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.CompleteList(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.CompleteList(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.CompleteList(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> CompleteList:
         instance = super().__new__(cls)
@@ -3990,7 +4124,12 @@ class CompleteListDep(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.CompleteListDep(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.CompleteListDep(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.CompleteListDep(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> CompleteListDep:
         instance = super().__new__(cls)
@@ -4084,7 +4223,12 @@ class AdaptedList(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.AdaptedList(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.AdaptedList(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.AdaptedList(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> AdaptedList:
         instance = super().__new__(cls)
@@ -4189,7 +4333,12 @@ class DependentAdaptedList(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.DependentAdaptedList(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.DependentAdaptedList(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.DependentAdaptedList(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> DependentAdaptedList:
         instance = super().__new__(cls)
@@ -4304,7 +4453,12 @@ class AllocatorAware(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.AllocatorAware(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.AllocatorAware(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.AllocatorAware(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> AllocatorAware:
         instance = super().__new__(cls)
@@ -4440,7 +4594,12 @@ class AllocatorAware2(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.AllocatorAware2(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.AllocatorAware2(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.AllocatorAware2(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> AllocatorAware2:
         instance = super().__new__(cls)
@@ -4542,7 +4701,12 @@ class TypedefStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.TypedefStruct(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.TypedefStruct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.TypedefStruct(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> TypedefStruct:
         instance = super().__new__(cls)
@@ -4646,7 +4810,12 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.StructWithDoubleUnderscores(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.StructWithDoubleUnderscores(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.StructWithDoubleUnderscores(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> StructWithDoubleUnderscores:
         instance = super().__new__(cls)

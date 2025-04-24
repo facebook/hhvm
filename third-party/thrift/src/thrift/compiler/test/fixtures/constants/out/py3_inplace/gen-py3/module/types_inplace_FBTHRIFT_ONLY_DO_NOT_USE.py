@@ -15,7 +15,11 @@ from builtins import property as _python__property
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
-from thrift.py3.types import _fbthrift__round_float32, _fbthrift__is_float32
+from thrift.py3.types import (
+    _fbthrift__round_float32,
+    _fbthrift__is_float32,
+    _fbthrift__filter_kwargs,
+)
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
@@ -827,7 +831,12 @@ class Internship(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.Internship(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.Internship(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.Internship(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> Internship:
         instance = super().__new__(cls)
@@ -940,7 +949,12 @@ class Range(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.Range(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.Range(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.Range(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> Range:
         instance = super().__new__(cls)
@@ -1041,7 +1055,12 @@ class struct1(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.struct1(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.struct1(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.struct1(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> struct1:
         instance = super().__new__(cls)
@@ -1148,7 +1167,12 @@ class struct2(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.struct2(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.struct2(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.struct2(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> struct2:
         instance = super().__new__(cls)
@@ -1270,7 +1294,12 @@ class struct3(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.struct3(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.struct3(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.struct3(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> struct3:
         instance = super().__new__(cls)
@@ -1381,7 +1410,12 @@ class struct4(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.struct4(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.struct4(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.struct4(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> struct4:
         instance = super().__new__(cls)
@@ -1491,7 +1525,12 @@ class union1(thrift.py3.types.Union):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.union1(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.union1(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.union1(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> union1:
         instance = super().__new__(cls)
@@ -1634,7 +1673,12 @@ class union2(thrift.py3.types.Union):
 
 
     def __init__(self, *args, **kwargs) -> None:
-        self._fbthrift__inner = _fbthrift_python_types.union2(*args, **kwargs)
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.union2(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.union2(*args, **kwargs)
+
 
     def __new__(cls, *args, **kwargs) -> union2:
         instance = super().__new__(cls)

@@ -658,6 +658,17 @@ class NumericalConversionsTests(unittest.TestCase):
         rt = self.roundtrip(n)
         assert_strict(rt)
 
+    def test_bad_kwarg(self) -> None:
+        if is_auto_migrated():
+            with self.assertRaises(TypeError):
+                # pyre-ignore[28]: simulating customer clowntown
+                numerical(bad_kwarg=None)
+        else:
+            # pyre-ignore[28]: simulating customer clowntown
+            n = numerical(bad_kwarg=None)
+            # thrift-py3 ignores
+            self.assertIsInstance(n, numerical)
+
 
 class TestSubclass(OptionalFile):
     pass

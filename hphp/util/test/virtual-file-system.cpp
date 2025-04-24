@@ -226,24 +226,27 @@ TEST_F(TestVirtualFileSystem, fileSize) {
     EXPECT_EQ(*vfs.fileSize("/var/www/r/foo.dat"), kFooContent.size());
     EXPECT_EQ(*vfs.fileSize("/var/www/r/bar.dat"), kBarContent.size());
 
-    // Empty files and directories should all not have a filesize
-    EXPECT_TRUE(!vfs.fileSize("foo.dat"));
-    EXPECT_TRUE(!vfs.fileSize("bar.dat"));
-    EXPECT_TRUE(!vfs.fileSize("baz/foo.dat"));
-    EXPECT_TRUE(!vfs.fileSize("baz/bar.dat"));
+    // Empty files and directories should have a size of 0
+    EXPECT_EQ(*vfs.fileSize("foo.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize("bar.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize("baz/foo.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize("baz/bar.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize(""), 0);
+    EXPECT_EQ(*vfs.fileSize("baz"), 0);
+
+    EXPECT_EQ(*vfs.fileSize("/var/www/foo.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize("/var/www/bar.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize("/var/www/baz/foo.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize("/var/www/baz/bar.dat"), 0);
+    EXPECT_EQ(*vfs.fileSize("/var/www/"), 0);
+    EXPECT_EQ(*vfs.fileSize("/var/www/baz"), 0);
+
+    // Non existing files should return none
     EXPECT_TRUE(!vfs.fileSize("baz.dat"));
     EXPECT_TRUE(!vfs.fileSize("baz/baz.dat"));
-    EXPECT_TRUE(!vfs.fileSize(""));
-    EXPECT_TRUE(!vfs.fileSize("baz"));
 
-    EXPECT_TRUE(!vfs.fileSize("/var/www/foo.dat"));
-    EXPECT_TRUE(!vfs.fileSize("/var/www/bar.dat"));
-    EXPECT_TRUE(!vfs.fileSize("/var/www/baz/foo.dat"));
-    EXPECT_TRUE(!vfs.fileSize("/var/www/baz/bar.dat"));
     EXPECT_TRUE(!vfs.fileSize("/var/www/baz.dat"));
     EXPECT_TRUE(!vfs.fileSize("/var/www/baz/baz.dat"));
-    EXPECT_TRUE(!vfs.fileSize("/var/www/"));
-    EXPECT_TRUE(!vfs.fileSize("/var/www/baz"));
   }
 }
 

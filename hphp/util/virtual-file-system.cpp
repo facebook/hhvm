@@ -341,10 +341,13 @@ std::vector<std::string> VirtualFileSystem::listDirectory(
 
 Optional<size_t> VirtualFileSystem::fileSize(const std::string& path) const {
   auto entry = get(path);
-  if (!entry || !entry->isRegularFile()) {
+  if (!entry) {
     return {};
   }
-  return { entry->fileSize() };
+  if (entry->isRegularFile()) {
+    return { entry->fileSize() };
+  }
+  return { 0 };
 }
 
 namespace {

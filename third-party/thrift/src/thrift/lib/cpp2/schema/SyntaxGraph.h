@@ -813,6 +813,187 @@ class FunctionStream final : folly::MoveOnly {
   std::vector<TypeRef> exceptions_;
 };
 
+class TypeRef final {
+ public:
+  using Alternative = std::variant<
+      Primitive,
+      detail::Lazy<StructNode>,
+      detail::Lazy<UnionNode>,
+      detail::Lazy<ExceptionNode>,
+      detail::Lazy<EnumNode>,
+      detail::Lazy<TypedefNode>,
+      List,
+      Set,
+      Map>;
+  static_assert(std::is_copy_constructible_v<Alternative>);
+
+  enum class Kind {
+    PRIMITIVE = detail::IndexOf<Alternative, Primitive>,
+    STRUCT = detail::IndexOf<Alternative, detail::Lazy<StructNode>>,
+    UNION = detail::IndexOf<Alternative, detail::Lazy<UnionNode>>,
+    EXCEPTION = detail::IndexOf<Alternative, detail::Lazy<ExceptionNode>>,
+    ENUM = detail::IndexOf<Alternative, detail::Lazy<EnumNode>>,
+    TYPEDEF = detail::IndexOf<Alternative, detail::Lazy<TypedefNode>>,
+    LIST = detail::IndexOf<Alternative, List>,
+    SET = detail::IndexOf<Alternative, Set>,
+    MAP = detail::IndexOf<Alternative, Map>,
+  };
+  Kind kind() const { return static_cast<Kind>(type_.index()); }
+
+  bool isPrimitive() const noexcept { return kind() == Kind::PRIMITIVE; }
+  bool isStruct() const noexcept { return kind() == Kind::STRUCT; }
+  bool isUnion() const noexcept { return kind() == Kind::UNION; }
+  bool isException() const noexcept { return kind() == Kind::EXCEPTION; }
+  bool isEnum() const noexcept { return kind() == Kind::ENUM; }
+  bool isTypedef() const noexcept { return kind() == Kind::TYPEDEF; }
+  bool isList() const noexcept { return kind() == Kind::LIST; }
+  bool isSet() const noexcept { return kind() == Kind::SET; }
+  bool isMap() const noexcept { return kind() == Kind::MAP; }
+
+  const Primitive& asPrimitive() const { return as<Primitive>(); }
+  const StructNode& asStruct() const { return as<StructNode>(); }
+  const UnionNode& asUnion() const { return as<UnionNode>(); }
+  const ExceptionNode& asException() const { return as<ExceptionNode>(); }
+  const EnumNode& asEnum() const { return as<EnumNode>(); }
+  const TypedefNode& asTypedef() const { return as<TypedefNode>(); }
+  const List& asList() const { return as<List>(); }
+  const Set& asSet() const { return as<Set>(); }
+  const Map& asMap() const { return as<Map>(); }
+
+  bool isStructured() const {
+    switch (kind()) {
+      case Kind::STRUCT:
+      case Kind::UNION:
+      case Kind::EXCEPTION:
+        return true;
+      default:
+        return false;
+    }
+  }
+  /**
+   * Returns the `StructuredNode` object reference, assuming the active variant
+   * alternative is a structured type.
+   *
+   * Pre-conditions:
+   *   - kind() is one of {STRUCT, UNION, EXCEPTION}.
+   */
+  const StructuredNode& asStructured() const {
+    switch (kind()) {
+      case Kind::STRUCT:
+        return asStruct();
+      case Kind::UNION:
+        return asUnion();
+      case Kind::EXCEPTION:
+        return asException();
+      default:
+        break;
+    }
+    folly::throw_exception<std::bad_variant_access>();
+  }
+
+  bool isContainer() const {
+    switch (kind()) {
+      case Kind::LIST:
+      case Kind::SET:
+      case Kind::MAP:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Returns a new `TypeRef` object by recursively resolving typedefs.
+   *
+   * If this type is a typedef, then this function returns the trueType() of the
+   * underlying type.
+   *
+   * If this type does not represent a typedef, then this function returns a
+   * copy of `*this`.
+   *
+   * Post-conditions:
+   *   - kind() != Kind::TYPEDEF
+   */
+  TypeRef trueType() const {
+    switch (kind()) {
+      case Kind::TYPEDEF:
+        return asTypedef().targetType().trueType();
+      default:
+        return *this;
+    }
+  }
+
+  /**
+   * An `std::visit`-like API for pattern-matching on the active variant
+   * alternative of the underlying type.
+   */
+  template <typename... F>
+  decltype(auto) visit(F&&... visitors) const {
+    auto overloaded = folly::overload(std::forward<F>(visitors)...);
+    return folly::variant_match(
+        type_,
+        [&](const Primitive& primitive) -> decltype(auto) {
+          return overloaded(primitive);
+        },
+        [&](const List& list) -> decltype(auto) { return overloaded(list); },
+        [&](const Set& set) -> decltype(auto) { return overloaded(set); },
+        [&](const Map& map) -> decltype(auto) { return overloaded(map); },
+        [&](auto&& lazy) -> decltype(auto) { return overloaded(*lazy); });
+  }
+
+  /**
+   * `as<T>` produces the contained T, assuming it is the currently active
+   * variant alternative.
+   *
+   * Pre-conditions:
+   *   - T is the active variant alternative, else throws
+   *     `std::bad_variant_access`
+   */
+  template <typename T>
+  const T& as() const {
+    return visit(
+        [](const T& value) -> const T& { return value; },
+        [](auto&&) -> const T& {
+          folly::throw_exception<std::bad_variant_access>();
+        });
+  }
+
+  friend bool operator==(const TypeRef&, const TypeRef&);
+  friend bool operator==(const TypeRef&, const DefinitionNode&);
+  friend bool operator==(const DefinitionNode& lhs, const TypeRef& rhs) {
+    return rhs == lhs;
+  }
+
+  /**
+   * Produces a string representation of the definition that is useful for
+   * debugging ONLY.
+   *
+   * This string is not guaranteed to be stable, nor is it guaranteed to include
+   * complete information.
+   */
+  std::string toDebugString() const;
+  friend std::ostream& operator<<(std::ostream&, const TypeRef&);
+
+  static TypeRef of(Primitive);
+  static TypeRef of(const StructNode&);
+  static TypeRef of(const UnionNode&);
+  static TypeRef of(const ExceptionNode&);
+  static TypeRef of(const EnumNode&);
+  static TypeRef of(const List&);
+  static TypeRef of(const Set&);
+  static TypeRef of(const Map&);
+
+  explicit TypeRef(Alternative&& type) : type_(std::move(type)) {}
+
+ private:
+  Alternative type_;
+};
+// `TypeRef` is a value type and should behave like one.
+static_assert(std::is_copy_constructible_v<TypeRef>);
+static_assert(std::is_move_constructible_v<TypeRef>);
+static_assert(std::is_copy_assignable_v<TypeRef>);
+static_assert(std::is_move_assignable_v<TypeRef>);
+
 class FunctionSink final : folly::MoveOnly {
  public:
   // A Thrift sink in IDL takes the form:
@@ -1166,187 +1347,6 @@ class DefinitionNode final : folly::MoveOnly,
   apache::thrift::type::ProgramId programId_;
   Alternative definition_;
 };
-
-class TypeRef final {
- public:
-  using Alternative = std::variant<
-      Primitive,
-      detail::Lazy<StructNode>,
-      detail::Lazy<UnionNode>,
-      detail::Lazy<ExceptionNode>,
-      detail::Lazy<EnumNode>,
-      detail::Lazy<TypedefNode>,
-      List,
-      Set,
-      Map>;
-  static_assert(std::is_copy_constructible_v<Alternative>);
-
-  enum class Kind {
-    PRIMITIVE = detail::IndexOf<Alternative, Primitive>,
-    STRUCT = detail::IndexOf<Alternative, detail::Lazy<StructNode>>,
-    UNION = detail::IndexOf<Alternative, detail::Lazy<UnionNode>>,
-    EXCEPTION = detail::IndexOf<Alternative, detail::Lazy<ExceptionNode>>,
-    ENUM = detail::IndexOf<Alternative, detail::Lazy<EnumNode>>,
-    TYPEDEF = detail::IndexOf<Alternative, detail::Lazy<TypedefNode>>,
-    LIST = detail::IndexOf<Alternative, List>,
-    SET = detail::IndexOf<Alternative, Set>,
-    MAP = detail::IndexOf<Alternative, Map>,
-  };
-  Kind kind() const { return static_cast<Kind>(type_.index()); }
-
-  bool isPrimitive() const noexcept { return kind() == Kind::PRIMITIVE; }
-  bool isStruct() const noexcept { return kind() == Kind::STRUCT; }
-  bool isUnion() const noexcept { return kind() == Kind::UNION; }
-  bool isException() const noexcept { return kind() == Kind::EXCEPTION; }
-  bool isEnum() const noexcept { return kind() == Kind::ENUM; }
-  bool isTypedef() const noexcept { return kind() == Kind::TYPEDEF; }
-  bool isList() const noexcept { return kind() == Kind::LIST; }
-  bool isSet() const noexcept { return kind() == Kind::SET; }
-  bool isMap() const noexcept { return kind() == Kind::MAP; }
-
-  const Primitive& asPrimitive() const { return as<Primitive>(); }
-  const StructNode& asStruct() const { return as<StructNode>(); }
-  const UnionNode& asUnion() const { return as<UnionNode>(); }
-  const ExceptionNode& asException() const { return as<ExceptionNode>(); }
-  const EnumNode& asEnum() const { return as<EnumNode>(); }
-  const TypedefNode& asTypedef() const { return as<TypedefNode>(); }
-  const List& asList() const { return as<List>(); }
-  const Set& asSet() const { return as<Set>(); }
-  const Map& asMap() const { return as<Map>(); }
-
-  bool isStructured() const {
-    switch (kind()) {
-      case Kind::STRUCT:
-      case Kind::UNION:
-      case Kind::EXCEPTION:
-        return true;
-      default:
-        return false;
-    }
-  }
-  /**
-   * Returns the `StructuredNode` object reference, assuming the active variant
-   * alternative is a structured type.
-   *
-   * Pre-conditions:
-   *   - kind() is one of {STRUCT, UNION, EXCEPTION}.
-   */
-  const StructuredNode& asStructured() const {
-    switch (kind()) {
-      case Kind::STRUCT:
-        return asStruct();
-      case Kind::UNION:
-        return asUnion();
-      case Kind::EXCEPTION:
-        return asException();
-      default:
-        break;
-    }
-    folly::throw_exception<std::bad_variant_access>();
-  }
-
-  bool isContainer() const {
-    switch (kind()) {
-      case Kind::LIST:
-      case Kind::SET:
-      case Kind::MAP:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  /**
-   * Returns a new `TypeRef` object by recursively resolving typedefs.
-   *
-   * If this type is a typedef, then this function returns the trueType() of the
-   * underlying type.
-   *
-   * If this type does not represent a typedef, then this function returns a
-   * copy of `*this`.
-   *
-   * Post-conditions:
-   *   - kind() != Kind::TYPEDEF
-   */
-  TypeRef trueType() const {
-    switch (kind()) {
-      case Kind::TYPEDEF:
-        return asTypedef().targetType().trueType();
-      default:
-        return *this;
-    }
-  }
-
-  /**
-   * An `std::visit`-like API for pattern-matching on the active variant
-   * alternative of the underlying type.
-   */
-  template <typename... F>
-  decltype(auto) visit(F&&... visitors) const {
-    auto overloaded = folly::overload(std::forward<F>(visitors)...);
-    return folly::variant_match(
-        type_,
-        [&](const Primitive& primitive) -> decltype(auto) {
-          return overloaded(primitive);
-        },
-        [&](const List& list) -> decltype(auto) { return overloaded(list); },
-        [&](const Set& set) -> decltype(auto) { return overloaded(set); },
-        [&](const Map& map) -> decltype(auto) { return overloaded(map); },
-        [&](auto&& lazy) -> decltype(auto) { return overloaded(*lazy); });
-  }
-
-  /**
-   * `as<T>` produces the contained T, assuming it is the currently active
-   * variant alternative.
-   *
-   * Pre-conditions:
-   *   - T is the active variant alternative, else throws
-   *     `std::bad_variant_access`
-   */
-  template <typename T>
-  const T& as() const {
-    return visit(
-        [](const T& value) -> const T& { return value; },
-        [](auto&&) -> const T& {
-          folly::throw_exception<std::bad_variant_access>();
-        });
-  }
-
-  friend bool operator==(const TypeRef&, const TypeRef&);
-  friend bool operator==(const TypeRef&, const DefinitionNode&);
-  friend bool operator==(const DefinitionNode& lhs, const TypeRef& rhs) {
-    return rhs == lhs;
-  }
-
-  /**
-   * Produces a string representation of the definition that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const TypeRef&);
-
-  static TypeRef of(Primitive);
-  static TypeRef of(const StructNode&);
-  static TypeRef of(const UnionNode&);
-  static TypeRef of(const ExceptionNode&);
-  static TypeRef of(const EnumNode&);
-  static TypeRef of(const List&);
-  static TypeRef of(const Set&);
-  static TypeRef of(const Map&);
-
-  explicit TypeRef(Alternative&& type) : type_(std::move(type)) {}
-
- private:
-  Alternative type_;
-};
-// `TypeRef` is a value type and should behave like one.
-static_assert(std::is_copy_constructible_v<TypeRef>);
-static_assert(std::is_move_constructible_v<TypeRef>);
-static_assert(std::is_copy_assignable_v<TypeRef>);
-static_assert(std::is_move_assignable_v<TypeRef>);
 
 class Annotation final : folly::MoveOnly {
  public:

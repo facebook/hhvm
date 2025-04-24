@@ -2231,7 +2231,15 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
  public:
   void addModule(std::unique_ptr<ServerModule> module) {
     CHECK(configMutable());
+
     auto name = module->getName();
+    if (runtimeServerActions_.setupThreadManagerCalledByUser ||
+        runtimeServerActions_.runtimeResourcePoolsChecksCalledByUser) {
+      THRIFT_SERVER_EVENT(addModuleAfterSetup).log(*this, [=]() {
+        return folly::dynamic::object("module_name", name);
+      });
+    }
+
     if (unprocessedModulesSpecification_.names.count(name)) {
       throw std::invalid_argument(
           fmt::format("Duplicate module name: {}", name));

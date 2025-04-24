@@ -109,6 +109,8 @@ THRIFT_FLAG_DECLARE_bool(dump_snapshot_on_long_shutdown);
 THRIFT_FLAG_DECLARE_bool(server_check_unimplemented_extra_interfaces);
 THRIFT_FLAG_DECLARE_bool(enable_io_queue_lag_detection);
 THRIFT_FLAG_DECLARE_bool(enforce_queue_concurrency_resource_pools);
+THRIFT_FLAG_DECLARE_bool(
+    init_decorated_processor_factory_only_resource_pools_checks);
 
 namespace wangle {
 class ConnectionManager;
@@ -1997,6 +1999,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void callOnStartServing();
   void callOnStopRequested();
 
+  void ensureDecoratedProcessorFactoryInitialized();
   void ensureProcessedServiceDescriptionInitialized();
 
   bool serverRanWithDCHECK();
@@ -2026,6 +2029,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   bool quickExitOnShutdownTimeout_ = false;
 
   bool setupThreadManagerCalled_ = false;
+
+  bool initDecoratedProcessorFactoryOnlyResourcePools_ = false;
 
  protected:
   folly::observer::CallbackHandle getSSLCallbackHandle();
@@ -2171,13 +2176,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   struct ProcessedServiceDescription {
     ProcessedModuleSet modules;
-    std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory;
 
-    ProcessedServiceDescription(
-        ProcessedModuleSet moduleSet,
-        std::unique_ptr<AsyncProcessorFactory> processorFactory)
-        : modules(std::move(moduleSet)),
-          decoratedProcessorFactory(std::move(processorFactory)) {}
+    explicit ProcessedServiceDescription(ProcessedModuleSet moduleSet)
+        : modules(std::move(moduleSet)) {}
 
     ProcessedServiceDescription(ProcessedServiceDescription&& modules) =
         default;
@@ -2224,6 +2225,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       return ptr;
     }
   };
+  std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory_;
   ProcessedServiceDescription::UniquePtr processedServiceDescription_{nullptr};
 
  public:
@@ -2936,11 +2938,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    *    │ (setControlInterface)  │
    *    └────────────────────────┘
    */
-  AsyncProcessorFactory& getDecoratedProcessorFactory() const {
-    CHECK(processedServiceDescription_)
-        << "Server must be set up before calling this method";
-    return *processedServiceDescription_->decoratedProcessorFactory;
-  }
+  AsyncProcessorFactory& getDecoratedProcessorFactory() const;
 
   /**
    * Returns an AsyncProcessor from getDecoratedProcessorFactory() without any

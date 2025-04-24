@@ -3873,6 +3873,45 @@ TEST(ThriftServer, HasModule) {
   }
 }
 
+TEST(ThriftServer, AddModuleAfterSetupThreadManager) {
+  {
+    THRIFT_FLAG_SET_MOCK(
+        init_decorated_processor_factory_only_resource_pools_checks, true);
+    ScopedServerInterfaceThread runner(
+        std::make_shared<apache::thrift::ServiceHandler<TestService>>(),
+        "::1",
+        0,
+        [](auto& ts) {
+          class TestModule : public apache::thrift::ServerModule {
+           public:
+            std::string getName() const override { return "TestModule"; }
+          };
+          ts.setupThreadManager();
+          ts.addModule(std::make_unique<TestModule>());
+        });
+
+    EXPECT_EQ(runner.getThriftServer().hasModule("TestModule"), true);
+  }
+  {
+    THRIFT_FLAG_SET_MOCK(
+        init_decorated_processor_factory_only_resource_pools_checks, false);
+    ScopedServerInterfaceThread runner(
+        std::make_shared<apache::thrift::ServiceHandler<TestService>>(),
+        "::1",
+        0,
+        [](auto& ts) {
+          class TestModule : public apache::thrift::ServerModule {
+           public:
+            std::string getName() const override { return "TestModule"; }
+          };
+          ts.setupThreadManager();
+          ts.addModule(std::make_unique<TestModule>());
+        });
+
+    EXPECT_EQ(runner.getThriftServer().hasModule("TestModule"), false);
+  }
+}
+
 TEST(ThriftServer, GetSetMaxRequests) {
   auto getExecutionLimitRequests = [](const ThriftServer& server) {
     return server.resourcePoolSet()

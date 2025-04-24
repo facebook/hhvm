@@ -111,6 +111,8 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
 THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
 THRIFT_FLAG_DEFINE_bool(watch_default_ticket_path, true);
+THRIFT_FLAG_DEFINE_bool(
+    init_decorated_processor_factory_only_resource_pools_checks, false);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -273,7 +275,9 @@ ThriftServer::ThriftServer()
       addresses_(1),
       wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
       lastRequestTime_(
-          std::chrono::steady_clock::now().time_since_epoch().count()) {
+          std::chrono::steady_clock::now().time_since_epoch().count()),
+      initDecoratedProcessorFactoryOnlyResourcePools_(THRIFT_FLAG(
+          init_decorated_processor_factory_only_resource_pools_checks)) {
   tracker_.emplace(instrumentation::kThriftServerTrackerKey, *this);
   initializeDefaults();
 }
@@ -1181,8 +1185,17 @@ bool ThriftServer::runtimeResourcePoolsChecksImpl() {
     }
     runtimeDisableResourcePoolsDeprecated();
   } else {
-    // Need to set this up now to check.
-    ensureProcessedServiceDescriptionInitialized();
+    // A call to ensureProcessedServiceDescriptionInitialized causes any
+    // ServerModule added afterwards to not work, since this
+    // call finalizes the list of modules.
+    // The fix for this bug is to call
+    // ensureDecoratedProcessorFactoryInitialized instead. We are branching
+    // here based on the value of the flag used to gate the rollout of this fix.
+    if (initDecoratedProcessorFactoryOnlyResourcePools_) {
+      ensureDecoratedProcessorFactoryInitialized();
+    } else {
+      ensureProcessedServiceDescriptionInitialized();
+    }
     runtimeServerActions_.moduleListFinalized = true;
 
     // Check whether there are any wildcard services.
@@ -1558,6 +1571,7 @@ void ThriftServer::cleanUp() {
   // Clear the service description so that it's re-created if the server
   // is restarted.
   processedServiceDescription_.reset();
+  decoratedProcessorFactory_.reset();
 }
 
 uint64_t ThriftServer::getNumDroppedConnections() const {
@@ -1739,12 +1753,16 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
   internalStatus_.store(ServerStatus::NOT_RUNNING, std::memory_order_release);
 }
 
-void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
+AsyncProcessorFactory& ThriftServer::getDecoratedProcessorFactory() const {
+  CHECK(decoratedProcessorFactory_)
+      << "Server must be set up before calling this method";
+  return *decoratedProcessorFactory_;
+}
+
+void ThriftServer::ensureDecoratedProcessorFactoryInitialized() {
   DCHECK(getProcessorFactory().get());
-  if (processedServiceDescription_ == nullptr) {
-    auto modules = processModulesSpecification(
-        std::exchange(unprocessedModulesSpecification_, {}));
-    auto decoratedProcessorFactory = createDecoratedProcessorFactory(
+  if (decoratedProcessorFactory_ == nullptr) {
+    decoratedProcessorFactory_ = createDecoratedProcessorFactory(
         getProcessorFactory(),
         getStatusInterface(),
         getMonitoringInterface(),
@@ -1752,11 +1770,17 @@ void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
         getSecurityInterface(),
         isCheckUnimplementedExtraInterfacesAllowed() &&
             THRIFT_FLAG(server_check_unimplemented_extra_interfaces));
+  }
+}
+
+void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
+  ensureDecoratedProcessorFactoryInitialized();
+  if (processedServiceDescription_ == nullptr) {
+    auto modules = processModulesSpecification(
+        std::exchange(unprocessedModulesSpecification_, {}));
     processedServiceDescription_ =
         ProcessedServiceDescription::createAndActivate(
-            *this,
-            ProcessedServiceDescription{
-                std::move(modules), std::move(decoratedProcessorFactory)});
+            *this, ProcessedServiceDescription{std::move(modules)});
   }
 }
 

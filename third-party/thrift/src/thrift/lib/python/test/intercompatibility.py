@@ -67,6 +67,21 @@ class Py3CompatibilityTest(unittest.TestCase):
         python_complex_union = python_types.ComplexUnion(easy_struct=py3_easy)
         self.assertEqual("foo", python_complex_union.easy_struct.name)
 
+    def test_init_python_union_with_py3_exception(self) -> None:
+        py3_error = py3_types.HardError(errortext="oops", code=404)
+        # pyre-ignore[6]: In call `python_types.ValueOrError.__init__`, for 1st positional argument, expected `Optional[thrift_types.HardError]` but got `HardError`.
+        python_union = python_types.ValueOrError(error=py3_error)
+        self.assertEqual(python_union.type, python_types.ValueOrError.Type.error)
+        self.assertIsInstance(python_union.error, python_types.HardError)
+        self.assertEqual(python_union.error, py3_error._to_python())
+
+    def test_init_python_struct_with_py3_exception(self) -> None:
+        py3_error = py3_types.HardError(errortext="oops", code=404)
+        # pyre-ignore[6]: In call `python_types.NestedError.__init__`, for 1st positional argument, expected `Optional[thrift_types.HardError]` but got `HardError`.
+        python_struct = python_types.NestedError(val_error=py3_error)
+        self.assertIsInstance(python_struct.val_error, python_types.HardError)
+        self.assertEqual(python_struct.val_error, py3_error._to_python())
+
 
 class DeserializationCompatibilityTest(unittest.TestCase):
     def assert_struct_ordering(

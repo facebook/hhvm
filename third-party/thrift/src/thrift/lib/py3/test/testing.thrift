@@ -115,6 +115,10 @@ exception UnfriendlyError {
   2: i32 code;
 }
 
+struct NestedError {
+  1: HardError val_error;
+}
+
 enum Color {
   red = 0,
   blue = 1,

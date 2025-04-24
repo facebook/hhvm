@@ -44,14 +44,23 @@ cdef extern from *:
     #undef _serialize
     """
 
+_fbthrift__PY3_STRUCTURED = None
 
-def _is_py3_structured(obj):
-    try:
-        import thrift.py3.types
-        return isinstance(obj, thrift.py3.types.Struct)
-    except ImportError:
-        return False
+cdef class _fbthrift_UnmatchableType:
+    pass
 
+cdef _is_py3_structured(obj):
+    global _fbthrift__PY3_STRUCTURED
+    if _fbthrift__PY3_STRUCTURED is None:
+        try:
+            from thrift.py3.types import Struct
+            from thrift.py3.exceptions import GeneratedError
+            _fbthrift__PY3_STRUCTURED = (Struct, GeneratedError)
+        except ImportError:
+            _fbthrift__PY3_STRUCTURED = _fbthrift_UnmatchableType
+
+    return isinstance(obj, _fbthrift__PY3_STRUCTURED)
+    
 
 def _make_noncached_property(getter_function, struct_class, field_name):
     prop = property(getter_function)
@@ -846,12 +855,15 @@ cdef class StructTypeInfo(TypeInfoBase):
               py3 to thrift-python conversion, if applicable).
         """
         if not isinstance(value, self._class):
-            if not _is_py3_structured(value):
-                raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
+            if _is_py3_structured(value):
+                value = value._to_python()
+            else:
+                raise TypeError(
+                    f"value {value} is not a {self._class !r}, is actually of type {type(value)}."
+                )
 
-            value = value._to_python()
             if not isinstance(value, self._class):
-                raise TypeError(f"value {value} is a py3 struct of type {type(value)}, cannot be converted to {self._class !r}.")
+                raise TypeError(f"value {value} of type {type(value)}, cannot be converted to {self._class !r}.")
 
         if isinstance(value, Struct):
             return (<Struct>value)._fbthrift_data

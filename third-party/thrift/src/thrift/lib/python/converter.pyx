@@ -26,11 +26,13 @@ from thrift.python.types cimport (
     MapTypeInfo,
     EnumTypeInfo,
 )
+from thrift.python.exceptions import GeneratedError
 from thrift.python.types import (
     Struct,
     Union,
     BadEnum,
 )
+import thrift.py3.exceptions as py3_exceptions
 import thrift.py3.types as py3_types
 
 
@@ -72,7 +74,7 @@ cdef object _to_immutable_python_struct_or_union(
 
     See `to_python_struct()`.
     """
-    if issubclass(immutable_thrift_python_cls, Struct):
+    if issubclass(immutable_thrift_python_cls, (Struct, GeneratedError)):
         return immutable_thrift_python_cls(
             **{
                 field.py_name: _to_immutable_python_field_value(
@@ -113,7 +115,7 @@ cdef object _get_src_struct_field_value(object src_struct, FieldInfo field):
 
     """
     # thrift-py3
-    if isinstance(src_struct, py3_types.Struct):
+    if isinstance(src_struct, (py3_types.Struct, py3_exceptions.GeneratedError)):
         return getattr(src_struct, field.py_name, None)
 
     # mutable thrift-python

@@ -8,6 +8,7 @@
 
 #include <fizz/crypto/aead/IOBufUtil.h>
 #include <fizz/record/EncryptedRecordLayer.h>
+#include <fizz/record/RecordLayerUtils.h>
 
 namespace fizz {
 
@@ -118,26 +119,13 @@ EncryptedReadRecordLayer::ReadResult<TLSMessage> EncryptedReadRecordLayer::read(
   }
 
   TLSMessage msg{};
-  // Iterate over the buffers while trying to find
-  // the first non-zero octet. This is much faster than
-  // first iterating and then trimming.
-  auto currentBuf = decryptedBuf->get();
-  bool nonZeroFound = false;
-  do {
-    currentBuf = currentBuf->prev();
-    size_t i = currentBuf->length();
-    while (i > 0 && !nonZeroFound) {
-      nonZeroFound = (currentBuf->data()[i - 1] != 0);
-      i--;
-    }
-    if (nonZeroFound) {
-      msg.type = static_cast<ContentType>(currentBuf->data()[i]);
-    }
-    currentBuf->trimEnd(currentBuf->length() - i);
-  } while (!nonZeroFound && currentBuf != decryptedBuf->get());
-  if (!nonZeroFound) {
+  // Use the utility function to parse and remove content type
+  auto maybeContentType =
+      RecordLayerUtils::parseAndRemoveContentType(*decryptedBuf);
+  if (!maybeContentType) {
     throw std::runtime_error("No content type found");
   }
+  msg.type = *maybeContentType;
   msg.fragment = std::move(*decryptedBuf);
 
   switch (msg.type) {

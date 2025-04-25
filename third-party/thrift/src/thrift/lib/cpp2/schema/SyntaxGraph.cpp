@@ -654,8 +654,6 @@ void SyntaxGraph::printTo(
   }
 }
 
-#undef THRIFT_SYNTAX_GRAPH_DEFINE_DEBUG_FUNCTIONS
-
 } // namespace apache::thrift::schema
 
 #endif // THRIFT_SCHEMA_AVAILABLE

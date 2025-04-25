@@ -1562,8 +1562,6 @@ const T& Lazy<T>::operator*() const {
 }
 } // namespace detail
 
-#undef THRIFT_SYNTAX_GRAPH_DECLARE_DEBUG_FUNCTIONS
-
 } // namespace apache::thrift::schema
 
 #endif // THRIFT_SCHEMA_AVAILABLE

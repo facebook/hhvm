@@ -731,7 +731,6 @@ TEST_F(HTTP2FramerTest, ExHeaders) {
                  headersLen,
                  streamID,
                  attr,
-                 folly::none,
                  padding,
                  false,
                  false);
@@ -769,7 +768,6 @@ TEST_F(HTTP2FramerTest, ExHeadersWithFlagsSet) {
                  headersLen,
                  streamID,
                  HTTPCodec::ExAttributes(controlStream, true),
-                 folly::none,
                  padding,
                  true,
                  true);

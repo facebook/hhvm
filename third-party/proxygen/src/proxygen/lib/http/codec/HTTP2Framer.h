@@ -402,8 +402,6 @@ size_t writeData(folly::IOBufQueue& writeBuf,
  *                 underlying buffers inside this function.
  * @param headersLen The length of the encoded headers data (already in writBuf)
  * @param stream The stream identifier of the HEADERS frame.
- * @param priority If present, the priority depedency information to
- *                 update the stream with.
  * @param padding If not kNoPadding, adds 1 byte pad len and @padding pad bytes
  * @param endStream True iff this frame ends the stream.
  * @param endHeaders True iff no CONTINUATION frames will follow this frame.
@@ -414,7 +412,6 @@ size_t writeHeaders(uint8_t* headerBuf,
                     folly::IOBufQueue& queue,
                     size_t headersLen,
                     uint32_t stream,
-                    folly::Optional<PriorityUpdate> priority,
                     folly::Optional<uint8_t> padding,
                     bool endStream,
                     bool endHeaders) noexcept;
@@ -434,8 +431,6 @@ size_t writeHeaders(uint8_t* headerBuf,
  * @param headersLen The length encoded headers (already in queue).
  * @param stream The stream identifier of the ExHEADERS frame.
  * @param exAttributes Attributes specific to ExHEADERS frame.
- * @param priority If present, the priority depedency information to
- *                 update the stream with.
  * @param padding If not kNoPadding, adds 1 byte pad len and @padding pad bytes
  * @param endStream True iff this frame ends the stream.
  * @param endHeaders True iff no CONTINUATION frames will follow this frame.
@@ -447,7 +442,6 @@ size_t writeExHeaders(uint8_t* headerBuf,
                       size_t headersLen,
                       uint32_t stream,
                       const HTTPCodec::ExAttributes& exAttributes,
-                      const folly::Optional<PriorityUpdate>& priority,
                       const folly::Optional<uint8_t>& padding,
                       bool endStream,
                       bool endHeaders) noexcept;

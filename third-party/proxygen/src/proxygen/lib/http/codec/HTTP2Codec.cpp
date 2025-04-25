@@ -1258,10 +1258,8 @@ void HTTP2Codec::generateHeaderImpl(
       pri = http2::DefaultPriority;
     }
   }
-  auto headerSize = http2::calculatePreHeaderBlockSize(assocStream.has_value(),
-                                                       exAttributes.has_value(),
-                                                       pri.has_value(),
-                                                       false);
+  auto headerSize = http2::calculatePreHeaderBlockSize(
+      assocStream.has_value(), exAttributes.has_value(), false, false);
   auto maxFrameSize = maxSendFrameSize();
   uint32_t remainingFrameSize =
       maxFrameSize - headerSize + http2::kFrameHeaderSize;
@@ -1305,7 +1303,6 @@ void HTTP2Codec::generateHeaderImpl(
                               chunkLen,
                               stream,
                               *exAttributes,
-                              pri,
                               http2::kNoPadding,
                               eom,
                               endHeaders));
@@ -1318,7 +1315,6 @@ void HTTP2Codec::generateHeaderImpl(
                             writeBuf,
                             chunkLen,
                             stream,
-                            pri,
                             http2::kNoPadding,
                             eom,
                             endHeaders));
@@ -1456,7 +1452,6 @@ size_t HTTP2Codec::generateTrailers(folly::IOBufQueue& writeBuf,
                                                     writeBuf,
                                                     chunkLen,
                                                     stream,
-                                                    folly::none,
                                                     http2::kNoPadding,
                                                     true /*eom*/,
                                                     endHeaders));

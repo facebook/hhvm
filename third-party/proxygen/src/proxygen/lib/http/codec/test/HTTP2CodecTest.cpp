@@ -63,13 +63,12 @@ class HTTP2CodecTest : public HTTPParallelCodecTest {
   void writeHeaders(folly::IOBufQueue& writeBuf,
                     std::unique_ptr<folly::IOBuf> headers,
                     uint32_t stream,
-                    folly::Optional<http2::PriorityUpdate> priority,
                     folly::Optional<uint8_t> padding,
                     bool endStream,
                     bool endHeaders) {
     auto headersLen = headers ? headers->computeChainDataLength() : 0;
     auto headerSize = http2::calculatePreHeaderBlockSize(
-        false, false, priority.has_value(), padding.has_value());
+        false, false, false, padding.has_value());
     auto header = writeBuf.preallocate(headerSize, 32);
     writeBuf.postallocate(headerSize);
     writeBuf.append(std::move(headers));
@@ -78,7 +77,6 @@ class HTTP2CodecTest : public HTTPParallelCodecTest {
                         writeBuf,
                         headersLen,
                         stream,
-                        priority,
                         padding,
                         endStream,
                         endHeaders);
@@ -409,7 +407,6 @@ TEST_F(HTTP2CodecTest, BadHeaders) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  true,
                  true);
@@ -425,7 +422,6 @@ TEST_F(HTTP2CodecTest, BadHeaders) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  true,
                  true);
@@ -459,7 +455,6 @@ TEST_F(HTTP2CodecTest, BadPseudoHeaders) {
   writeHeaders(output_,
                std::move(encodedHeaders),
                stream,
-               folly::none,
                http2::kNoPadding,
                true,
                true);
@@ -494,7 +489,6 @@ TEST_F(HTTP2CodecTest, BadHeaderValues) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  true,
                  true);
@@ -533,7 +527,6 @@ TEST_F(HTTP2CodecTest, HostAuthority) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  true,
                  true);
@@ -677,7 +670,6 @@ TEST_F(HTTP2CodecTest, BadConnect) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  true,
                  true);
@@ -713,7 +705,6 @@ TEST_F(HTTP2CodecTest, TemplateDrivenConnect) {
   writeHeaders(output_,
                std::move(encodedHeaders),
                stream,
-               folly::none /* priority */,
                http2::kNoPadding /* padding */,
                true,
                true);
@@ -869,7 +860,6 @@ TEST_F(HTTP2CodecTest, BadHeadersReply) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  true,
                  true);
@@ -885,7 +875,6 @@ TEST_F(HTTP2CodecTest, BadHeadersReply) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  true,
                  true);
@@ -949,13 +938,8 @@ TEST_F(HTTP2CodecTest, StripLwsHeaderValue) {
 
   auto encodedHeaders = headerCodec.encode(reqHeaders);
   id = upstreamCodec_.createStream();
-  writeHeaders(output_,
-               std::move(encodedHeaders),
-               id,
-               folly::none,
-               http2::kNoPadding,
-               true,
-               true);
+  writeHeaders(
+      output_, std::move(encodedHeaders), id, http2::kNoPadding, true, true);
 
   parseAndCheckExpectations();
   parsedHeaders = callbacks_.msg->extractHeaders();
@@ -2275,7 +2259,6 @@ TEST_F(HTTP2CodecTest, WebsocketBadHeader) {
     writeHeaders(output_,
                  std::move(encodedHeaders),
                  stream,
-                 folly::none,
                  http2::kNoPadding,
                  false,
                  true);
@@ -2302,13 +2285,8 @@ TEST_F(HTTP2CodecTest, WebsocketDupProtocol) {
   };
   HPACKCodec headerCodec(TransportDirection::UPSTREAM);
   auto encodedHeaders = headerCodec.encode(headers);
-  writeHeaders(output_,
-               std::move(encodedHeaders),
-               1,
-               folly::none,
-               http2::kNoPadding,
-               false,
-               true);
+  writeHeaders(
+      output_, std::move(encodedHeaders), 1, http2::kNoPadding, false, true);
   parse();
   EXPECT_EQ(callbacks_.messageBegin, 1);
   EXPECT_EQ(callbacks_.headersComplete, 0);
@@ -2471,13 +2449,8 @@ TEST_F(HTTP2CodecTest, TrailersWithPseudoHeaders) {
   std::vector<proxygen::compress::Header> trailers = {
       Header::makeHeaderForTest(headers::kMethod, post)};
   auto encodedTrailers = headerCodec.encode(trailers);
-  writeHeaders(output_,
-               std::move(encodedTrailers),
-               1,
-               folly::none,
-               http2::kNoPadding,
-               true,
-               true);
+  writeHeaders(
+      output_, std::move(encodedTrailers), 1, http2::kNoPadding, true, true);
 
   parse();
 
@@ -2672,13 +2645,8 @@ TEST_F(HTTP2CodecTest, TrailersReplyWithPseudoHeaders) {
   std::vector<proxygen::compress::Header> trailers = {
       Header::makeHeaderForTest(headers::kMethod, post)};
   auto encodedTrailers = headerCodec.encode(trailers);
-  writeHeaders(output_,
-               std::move(encodedTrailers),
-               1,
-               folly::none,
-               http2::kNoPadding,
-               true,
-               true);
+  writeHeaders(
+      output_, std::move(encodedTrailers), 1, http2::kNoPadding, true, true);
   parseUpstream();
 
   // Unfortunately, you get 2x messageBegin calls for parse error in

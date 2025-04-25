@@ -207,6 +207,15 @@ impl ConfigFile {
                 .collect()
         })
     }
+
+    pub fn copy_key(&mut self, other: &ConfigFile, key: &str) -> Result<(), String> {
+        if let Some(value) = other.get_str(key) {
+            self.map.insert(key.to_owned(), value.to_owned());
+            Ok(())
+        } else {
+            Err(format!("Missing {key} in input"))
+        }
+    }
 }
 
 impl FromIterator<(String, String)> for ConfigFile {

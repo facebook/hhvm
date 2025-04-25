@@ -1596,23 +1596,21 @@ let check_sealed env c =
   let is_enum = is_enum_or_enum_class c.c_kind in
   sealed_subtype (Env.get_ctx env) c ~is_enum ~hard_error ~env
 
-let check_class_require_non_strict_constraints env c =
+let check_class_require_non_strict_constraints env c tc =
   let req_non_strict_constraints =
-    List.filter_map c.c_reqs ~f:(fun req ->
-        match req with
-        | (t, RequireClass) ->
-          let pos = fst t in
-          Some ((pos, Hthis), Ast_defs.Constraint_eq, t)
-        | (t, RequireThisAs) ->
-          let pos = fst t in
-          Some ((pos, Hthis), Ast_defs.Constraint_as, t)
-        | _ -> None)
+    List.map (Cls.all_ancestor_req_class_requirements tc) ~f:(fun (_p, t) ->
+        (mk (Reason.none, Tthis), Ast_defs.Constraint_eq, t))
+    @ List.map (Cls.all_ancestor_req_this_as_requirements tc) ~f:(fun (_p, t) ->
+          (mk (Reason.none, Tthis), Ast_defs.Constraint_as, t))
+  in
+  let tparams : decl_tparam list =
+    List.map c.c_tparams ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
   in
   let (env, ty_err_opt1) =
-    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+    Phase.localize_and_add_generic_parameters_and_where_constraints
+      ~ety_env:empty_expand_env
       env
-      ~ignore_errors:false
-      c.c_tparams
+      tparams
       req_non_strict_constraints
   in
   Option.iter ty_err_opt1 ~f:(Typing_error_utils.add_typing_error ~env);
@@ -1710,8 +1708,8 @@ let check_class_attributes env ~cls =
   (env, (user_attributes, file_attrs))
 
 (** Check type parameter definition, including variance, and add constraints to the environment. *)
-let check_class_type_parameters_add_constraints env c =
-  let env = check_class_require_non_strict_constraints env c in
+let check_class_type_parameters_add_constraints env c tc =
+  let env = check_class_require_non_strict_constraints env c tc in
   Typing_variance.class_def env c;
   env
 
@@ -1739,7 +1737,7 @@ let class_wellformedness_checks env c tc (parents : class_parents) =
     Env.run_with_no_self env (check_class_attributes ~cls:c)
   in
   NastInitCheck.class_ env c;
-  let env = check_class_type_parameters_add_constraints env c in
+  let env = check_class_type_parameters_add_constraints env c tc in
   let env = check_hint_wellformedness_in_class env c parents in
   check_no_generic_static_property env tc;
   (env, user_attributes, file_attrs)
@@ -1978,7 +1976,7 @@ let make_class_member_standalone_check_env ctx class_ =
   let name = Ast_defs.get_id class_.c_name in
   let open Option in
   Env.get_class env name |> Decl_entry.to_option >>| fun cls ->
-  let env = check_class_type_parameters_add_constraints env class_ in
+  let env = check_class_type_parameters_add_constraints env class_ cls in
   (env, { env; cls; class_ })
 
 let method_def_standalone standalone_env method_name =

@@ -101,7 +101,15 @@ TEST(TypeIdTest, TestKind) {
   EXPECT_FALSE(t::uri("meta.com/thrift/Test").isList());
   EXPECT_THROW(t::uri("meta.com/thrift/Test").asList(), std::runtime_error);
   EXPECT_THROW(
-      t::uri("meta.com/thrift/Test").asType<TypeId::List>(),
+      {
+        try {
+          t::uri("meta.com/thrift/Test").asType<TypeId::List>();
+        } catch (const std::runtime_error& e) {
+          EXPECT_THAT(
+              std::string(e.what()), testing::HasSubstr("userDefinedType"));
+          throw;
+        }
+      },
       std::runtime_error);
 
   EXPECT_EQ(t::list(t::Bool).asList(), TypeId::List(t::Bool));

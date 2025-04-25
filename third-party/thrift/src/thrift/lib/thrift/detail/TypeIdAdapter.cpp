@@ -73,9 +73,10 @@ std::string toTypeidName(const MapTypeId& mapType) {
       "TypeId::Map does not contain a value type. This indicates invalid schema information.");
 }
 
-[[noreturn]] void throwTypeIdAccessInactiveKind() {
-  folly::throw_exception<std::runtime_error>(
-      "tried to access TypeId with inactive kind");
+[[noreturn]] void throwTypeIdAccessInactiveKind(std::string_view actualKind) {
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "tried to access TypeId with inactive kind, actual kind was: {}",
+      actualKind));
 }
 
 } // namespace apache::thrift::dynamic::detail

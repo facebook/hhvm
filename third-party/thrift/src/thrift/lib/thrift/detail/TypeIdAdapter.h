@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
@@ -184,7 +185,7 @@ std::string toTypeidName(const MapTypeId&);
 [[noreturn]] void throwSetBadElementType();
 [[noreturn]] void throwMapBadKeyType();
 [[noreturn]] void throwMapBadValueType();
-[[noreturn]] void throwTypeIdAccessInactiveKind();
+[[noreturn]] void throwTypeIdAccessInactiveKind(std::string_view actualKind);
 
 template <typename T>
 class ListTypeIdWrapper final
@@ -566,7 +567,7 @@ class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
   const V& asType() const {
     return visit(
         [](const V& value) -> const V& { return value; },
-        [](const auto&) -> const V& { throwTypeIdAccessInactiveKind(); });
+        [&](const auto&) -> const V& { throwTypeIdAccessInactiveKind(); });
   }
 
   friend bool operator==(const TypeIdWrapper& lhs, Bool) {
@@ -617,6 +618,12 @@ class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
   template <typename V>
   friend bool operator!=(const V& lhs, const TypeIdWrapper& rhs) {
     return !(lhs == rhs);
+  }
+
+ private:
+  [[noreturn]] void throwTypeIdAccessInactiveKind() const {
+    detail::throwTypeIdAccessInactiveKind(
+        util::enumNameSafe(this->data_.getType()));
   }
 };
 

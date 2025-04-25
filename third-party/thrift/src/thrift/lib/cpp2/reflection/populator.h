@@ -35,18 +35,14 @@
 namespace apache::thrift::populator {
 
 struct populator_opts {
-  template <typename Int = std::size_t>
-  struct range {
-    Int min;
-    Int max;
-    range(Int min, Int max) : min(min), max(max) { assert(min <= max); }
-  };
-
-  range<> list_len = range<>(0, 0xFF);
-  range<> set_len = range<>(0, 0xFF);
-  range<> map_len = range<>(0, 0xFF);
-  range<> bin_len = range<>(0, 0xFF);
-  range<> str_len = range<>(0, 0xFF);
+  // Container sizes are chosen randomly (geometrically distributed)
+  bool random_container_size = true;
+  // (Average) container sizes
+  size_t list_len = 10;
+  size_t set_len = 10;
+  size_t map_len = 10;
+  size_t bin_len = 10;
+  size_t str_len = 10;
   // Probability to use for populating optional fields.
   float optional_field_prob = 0.0;
   size_t recursion_limit = 0;
@@ -66,9 +62,9 @@ bool get_bernoulli(Rng& rng, float p) {
   return gen(rng);
 }
 
-// generate a value of type Int within [range.min, range.max]
+// generate a value of type Int within [min, max]
 template <typename Int, typename Rng>
-Int rand_in_range(Rng& rng, const populator_opts::range<Int>& range) {
+Int rand_in_range(Rng& rng, Int min, Int max) {
   // uniform_int_distribution undefined for char,
   // use the next larger type if it's small
   using int_type = std::conditional_t<
@@ -79,7 +75,7 @@ Int rand_in_range(Rng& rng, const populator_opts::range<Int>& range) {
           signed short,
           unsigned short>>;
 
-  std::uniform_int_distribution<int_type> gen(range.min, range.max);
+  std::uniform_int_distribution<int_type> gen(min, max);
   int_type tmp = gen(rng);
   return static_cast<Int>(tmp);
 }
@@ -190,6 +186,17 @@ class RecursionGuard {
   RecursionGuard& operator=(RecursionGuard&&) = delete;
 };
 
+template <typename Rng>
+size_t get_container_size(State<Rng>& state, size_t mean_size) {
+  if (state.opts.random_container_size) {
+    double p = 1.0 / static_cast<double>(mean_size + 1);
+    std::geometric_distribution<size_t> gen(p);
+    return gen(state.rng);
+  } else {
+    return mean_size;
+  }
+}
+
 } // namespace detail
 
 template <typename Tag, typename Type, typename Enable = void>
@@ -203,8 +210,7 @@ struct populator_methods<
   template <typename Rng>
   static Int next_value(Rng& rng) {
     using limits = std::numeric_limits<Int>;
-    Int out = detail::rand_in_range(
-        rng, populator_opts::range<Int>(limits::min(), limits::max()));
+    Int out = detail::rand_in_range(rng, limits::min(), limits::max());
     DVLOG(4) << "generated int: " << out;
     return out;
   }
@@ -250,7 +256,7 @@ struct populator_methods<type::string_t, std::string> {
     std::uniform_int_distribution<larger_char> char_gen(0x20, 0x7E);
 
     const std::size_t length =
-        detail::rand_in_range(state.rng, state.opts.str_len);
+        detail::get_container_size(state, state.opts.str_len);
 
     str = std::string(length, 0);
     std::generate_n(str.begin(), length, [&]() {
@@ -288,7 +294,7 @@ template <>
 struct populator_methods<type::binary_t, std::string> {
   template <typename Rng>
   static void populate(detail::State<Rng>& state, std::string& bin) {
-    const auto length = detail::rand_in_range(state.rng, state.opts.bin_len);
+    const auto length = detail::get_container_size(state, state.opts.bin_len);
     bin = std::string(length, 0);
     auto iter = bin.begin();
     generate_bytes(state.rng, bin, length, [&](uint8_t c) { *iter++ = c; });
@@ -314,7 +320,7 @@ struct populator_methods<
     folly::IOBuf> {
   template <typename Rng>
   static void populate(detail::State<Rng>& state, folly::IOBuf& bin) {
-    const auto length = detail::rand_in_range(state.rng, state.opts.bin_len);
+    const auto length = detail::get_container_size(state, state.opts.bin_len);
     bin = folly::IOBuf(folly::IOBuf::CREATE, length);
     bin.append(length);
     folly::io::RWUnshareCursor range(&bin);
@@ -385,12 +391,11 @@ struct populator_methods<type::list<ElemTag>, Type> {
     }
 
     std::uint32_t list_size =
-        detail::rand_in_range(state.rng, state.opts.list_len);
+        detail::get_container_size(state, state.opts.list_len);
     out = Type();
 
     DVLOG(3) << "populating list size " << list_size;
 
-    out.reserve(list_size);
     for (decltype(list_size) i = 0;
          i < list_size && state.size < state.opts.size_budget;
          i++) {
@@ -415,7 +420,7 @@ struct populator_methods<type::set<ElemTag>, Type> {
     }
 
     std::uint32_t set_size =
-        detail::rand_in_range(state.rng, state.opts.set_len);
+        detail::get_container_size(state, state.opts.set_len);
 
     DVLOG(3) << "populating set size " << set_size;
     out = Type();
@@ -448,7 +453,7 @@ struct populator_methods<type::map<KeyTag, MappedTag>, Type> {
     }
 
     std::uint32_t map_size =
-        detail::rand_in_range(state.rng, state.opts.map_len);
+        detail::get_container_size(state, state.opts.map_len);
 
     DVLOG(3) << "populating map size " << map_size;
     out = Type();
@@ -472,8 +477,8 @@ struct populator_methods<type::union_t<Union>, Union> {
              << op::get_class_name_v<Union> << ", type: "
              << folly::to_underlying(out.getType());
 
-    const auto selected = static_cast<type::Ordinal>(detail::rand_in_range(
-        state.rng, populator_opts::range<size_t>{0, op::size_v<Union> - 1}));
+    const auto selected = static_cast<type::Ordinal>(
+        detail::rand_in_range<size_t>(state.rng, 0, op::size_v<Union> - 1));
 
     op::for_each_ordinal<Union>([&](auto ord) {
       using Ord = decltype(ord);

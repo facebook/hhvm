@@ -37,9 +37,12 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
+
+#include <thrift/shared/tree_printer.h>
 
 #include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
 
@@ -472,11 +475,88 @@ inline constexpr std::size_t IndexOf = IndexOfImpl<Variant, T>::value;
 const DefinitionNode& lookUpDefinition(
     const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);
 
+/**
+ * This class tracks the set of nodes that have already been visited when debug
+ * printing the graph. The graph may include cycles, so this is necessary to
+ * avoid infinite recursion.
+ *
+ * Since every node has a unique identity (and thus address), we store and
+ * compare against the memory address of nodes. Once a node has been visited, it
+ * may not be "un-visited".
+ */
+class VisitationTracker {
+ public:
+  struct MarkResult {
+    /**
+     * True if the node has been marked already before this call.
+     */
+    bool already;
+  };
+
+  MarkResult mark(const DefinitionNode& definition) {
+    auto [_, inserted] = visited_.insert(addressOf(definition));
+    return {!inserted};
+  }
+  MarkResult mark(const ProgramNode& program) {
+    auto [_, inserted] = visited_.insert(addressOf(program));
+    return {!inserted};
+  }
+
+ private:
+  template <typename T>
+  static std::uintptr_t addressOf(const T& object) {
+    return reinterpret_cast<std::uintptr_t>(std::addressof(object));
+  }
+
+  std::unordered_set<std::uintptr_t> visited_;
+};
+
+/**
+ * CTRP base class to implement debug printing for node types.
+ *
+ * The "Self" type is expected to have a member function with the following
+ * signature:
+ *
+ *     void printTo(tree_printer::scope&, VisitationTracker&) const;
+ */
+template <typename Self>
+class WithDebugPrinting {
+ public:
+  /**
+   * Produces a string representation of this node that is useful for debugging
+   * ONLY.
+   *
+   * This string is not guaranteed to be stable, nor is it guaranteed to include
+   * complete information.
+   *
+   * The printTo() function includes an overload that includes a set of
+   * already-visited nodes since the graph may contain cycles.
+   */
+  void printTo(tree_printer::scope& scope) const {
+    detail::VisitationTracker visited;
+    static_cast<const Self&>(*this).printTo(scope, visited);
+  }
+
+  std::string toDebugString() const {
+    auto scope = tree_printer::scope::make_root();
+    this->printTo(scope);
+    return tree_printer::to_string(scope);
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, const Self& self) {
+    auto scope = tree_printer::scope::make_root();
+    detail::VisitationTracker visited;
+    self.printTo(scope, visited);
+    return out << scope;
+  }
+};
+
 } // namespace detail
 
 class FieldNode final : folly::MoveOnly,
                         detail::WithResolver,
-                        detail::WithName {
+                        detail::WithName,
+                        public detail::WithDebugPrinting<FieldNode> {
  public:
   /**
    * The presence qualification for a field. If a field is not marked optional,
@@ -515,6 +595,9 @@ class FieldNode final : folly::MoveOnly,
         type_(std::move(type)),
         customDefaultId_(std::move(customDefaultId)) {}
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   detail::DefinitionKeyRef parent_;
   FieldId id_;
@@ -543,69 +626,55 @@ class StructuredNode : detail::WithDefinition, detail::WithUri {
   std::vector<FieldNode> fields_;
 };
 
-class StructNode final : folly::MoveOnly, public StructuredNode {
+class StructNode final : folly::MoveOnly,
+                         public StructuredNode,
+                         public detail::WithDebugPrinting<StructNode> {
  public:
-  /**
-   * Produces a string representation of this Struct that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const StructNode&);
-
   StructNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       std::string_view uri,
       std::vector<FieldNode> fields)
       : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 };
 
-class UnionNode final : folly::MoveOnly, public StructuredNode {
+class UnionNode final : folly::MoveOnly,
+                        public StructuredNode,
+                        public detail::WithDebugPrinting<UnionNode> {
  public:
-  /**
-   * Produces a string representation of this Union that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const UnionNode&);
-
   UnionNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       std::string_view uri,
       std::vector<FieldNode> fields)
       : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 };
 
-class ExceptionNode final : folly::MoveOnly, public StructuredNode {
+class ExceptionNode final : folly::MoveOnly,
+                            public StructuredNode,
+                            public detail::WithDebugPrinting<ExceptionNode> {
  public:
-  /**
-   * Produces a string representation of this Exception that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const ExceptionNode&);
-
   ExceptionNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       std::string_view uri,
       std::vector<FieldNode> fields)
       : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 };
 
 class EnumNode final : folly::MoveOnly,
                        detail::WithDefinition,
-                       detail::WithUri {
+                       detail::WithUri,
+                       public detail::WithDebugPrinting<EnumNode> {
  public:
   /**
    * A mapping of enum name to its i32 value.
@@ -634,16 +703,6 @@ class EnumNode final : folly::MoveOnly,
   using detail::WithUri::uri;
   folly::span<const Value> values() const { return values_; }
 
-  /**
-   * Produces a string representation of this Enum that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const EnumNode&);
-
   EnumNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
@@ -653,11 +712,16 @@ class EnumNode final : folly::MoveOnly,
         detail::WithUri(uri),
         values_(std::move(values)) {}
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   std::vector<Value> values_;
 };
 
-class TypedefNode final : folly::MoveOnly, detail::WithDefinition {
+class TypedefNode final : folly::MoveOnly,
+                          detail::WithDefinition,
+                          public detail::WithDebugPrinting<TypedefNode> {
  public:
   using detail::WithDefinition::definition;
   /**
@@ -665,27 +729,22 @@ class TypedefNode final : folly::MoveOnly, detail::WithDefinition {
    */
   const TypeRef& targetType() const { return *targetType_; }
 
-  /**
-   * Produces a string representation of this `TypedefNode` that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const TypedefNode&);
-
   TypedefNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       TypeRef&& targetType);
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
   // Heap usage prevents mutual recursion with `TypeRef` and `DefinitionNode`.
   folly::not_null_unique_ptr<TypeRef> targetType_;
 };
 
-class ConstantNode final : folly::MoveOnly, detail::WithDefinition {
+class ConstantNode final : folly::MoveOnly,
+                           detail::WithDefinition,
+                           public detail::WithDebugPrinting<ConstantNode> {
  public:
   using detail::WithDefinition::definition;
   const TypeRef& type() const { return *type_; }
@@ -697,13 +756,16 @@ class ConstantNode final : folly::MoveOnly, detail::WithDefinition {
       TypeRef&& type,
       apache::thrift::type::ValueId valueId);
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   // Heap usage prevents mutual recursion with `TypeRef` and `Definition`.
   folly::not_null_unique_ptr<TypeRef> type_;
   apache::thrift::type::ValueId valueId_;
 };
 
-class List final {
+class List final : public detail::WithDebugPrinting<List> {
  public:
   const TypeRef& elementType() const { return *elementType_; }
 
@@ -715,26 +777,19 @@ class List final {
 
   friend bool operator==(const List& lhs, const List& rhs);
 
-  /**
-   * Produces a string representation of the List type that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const List&);
-
   static List of(TypeRef elementType);
 
   explicit List(TypeRef&& elementType);
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
   folly::not_null_unique_ptr<TypeRef> elementType_;
 };
 
-class Set final {
+class Set final : public detail::WithDebugPrinting<Set> {
  public:
   const TypeRef& elementType() const { return *elementType_; }
 
@@ -746,26 +801,19 @@ class Set final {
 
   friend bool operator==(const Set& lhs, const Set& rhs);
 
-  /**
-   * Produces a string representation of the Set type that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const Set&);
-
   static Set of(TypeRef elementType);
 
   explicit Set(TypeRef&& elementType);
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
   folly::not_null_unique_ptr<TypeRef> elementType_;
 };
 
-class Map final {
+class Map final : public detail::WithDebugPrinting<Map> {
  public:
   const TypeRef& keyType() const { return *keyType_; }
   const TypeRef& valueType() const { return *valueType_; }
@@ -778,19 +826,12 @@ class Map final {
 
   friend bool operator==(const Map& lhs, const Map& rhs);
 
-  /**
-   * Produces a string representation of the Map type that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const Map&);
-
   static Map of(TypeRef keyType, TypeRef valueType);
 
   Map(TypeRef&& keyType, TypeRef&& valueType);
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
@@ -798,7 +839,8 @@ class Map final {
   folly::not_null_unique_ptr<TypeRef> valueType_;
 };
 
-class FunctionStream final : folly::MoveOnly {
+class FunctionStream final : folly::MoveOnly,
+                             public detail::WithDebugPrinting<FunctionStream> {
  public:
   // A Thrift stream in IDL takes the form:
   //     stream<{payloadType} throws (... {exceptions} ...)>
@@ -807,13 +849,16 @@ class FunctionStream final : folly::MoveOnly {
 
   FunctionStream(TypeRef&& payloadType, std::vector<TypeRef>&& exceptions);
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   // Heap usage prevents mutual recursion with `DefinitionNode`.
   folly::not_null_unique_ptr<TypeRef> payloadType_;
   std::vector<TypeRef> exceptions_;
 };
 
-class TypeRef final {
+class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
  public:
   using Alternative = std::variant<
       Primitive,
@@ -964,16 +1009,6 @@ class TypeRef final {
     return rhs == lhs;
   }
 
-  /**
-   * Produces a string representation of the definition that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const TypeRef&);
-
   static TypeRef of(Primitive);
   static TypeRef of(const StructNode&);
   static TypeRef of(const UnionNode&);
@@ -985,6 +1020,9 @@ class TypeRef final {
 
   explicit TypeRef(Alternative&& type) : type_(std::move(type)) {}
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   Alternative type_;
 };
@@ -994,7 +1032,8 @@ static_assert(std::is_move_constructible_v<TypeRef>);
 static_assert(std::is_copy_assignable_v<TypeRef>);
 static_assert(std::is_move_assignable_v<TypeRef>);
 
-class FunctionSink final : folly::MoveOnly {
+class FunctionSink final : folly::MoveOnly,
+                           detail::WithDebugPrinting<FunctionSink> {
  public:
   // A Thrift sink in IDL takes the form:
   //     sink<{payloadType} throws (... {clientExceptions} ...),
@@ -1010,6 +1049,9 @@ class FunctionSink final : folly::MoveOnly {
       std::vector<TypeRef>&& clientExceptions,
       std::vector<TypeRef>&& serverExceptions);
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   // Heap usage prevents mutual recursion with `DefinitionNode`.
   folly::not_null_unique_ptr<TypeRef> payloadType_;
@@ -1018,7 +1060,9 @@ class FunctionSink final : folly::MoveOnly {
   std::vector<TypeRef> serverExceptions_;
 };
 
-class FunctionResponse final : folly::MoveOnly {
+class FunctionResponse final
+    : folly::MoveOnly,
+      public detail::WithDebugPrinting<FunctionResponse> {
  public:
   /**
    * Returns the initial response data type of an RPC, or nullptr if the
@@ -1064,6 +1108,9 @@ class FunctionResponse final : folly::MoveOnly {
         interaction_(std::move(interaction)),
         sinkOrStream_(std::move(sinkOrStream)) {}
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   std::unique_ptr<TypeRef> type_;
   std::optional<detail::Lazy<InteractionNode>> interaction_;
@@ -1072,7 +1119,8 @@ class FunctionResponse final : folly::MoveOnly {
 
 class FunctionParam final : folly::MoveOnly,
                             detail::WithResolver,
-                            detail::WithName {
+                            detail::WithName,
+                            public detail::WithDebugPrinting<FunctionParam> {
  public:
   using detail::WithName::name;
   FieldId id() const { return id_; }
@@ -1088,6 +1136,9 @@ class FunctionParam final : folly::MoveOnly,
         id_(id),
         type_(std::move(type)) {}
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   FieldId id_;
   folly::not_null_unique_ptr<TypeRef> type_;
@@ -1096,7 +1147,8 @@ class FunctionParam final : folly::MoveOnly,
 class FunctionNode final : folly::MoveOnly,
                            detail::WithResolver,
                            detail::WithName,
-                           detail::WithAnnotations {
+                           detail::WithAnnotations,
+                           public detail::WithDebugPrinting<FunctionNode> {
  public:
   using detail::WithAnnotations::annotations;
   using detail::WithName::name;
@@ -1122,6 +1174,9 @@ class FunctionNode final : folly::MoveOnly,
       std::string_view name,
       std::vector<Param>&& params,
       std::vector<TypeRef>&& exceptions);
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
   detail::DefinitionKeyRef parent_;
@@ -1149,6 +1204,9 @@ class RpcInterfaceNode : detail::WithDefinition, detail::WithUri {
   RpcInterfaceNode(RpcInterfaceNode&&) = default;
   RpcInterfaceNode& operator=(RpcInterfaceNode&&) = default;
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  protected:
   RpcInterfaceNode(
       const detail::Resolver& resolver,
@@ -1162,7 +1220,9 @@ class RpcInterfaceNode : detail::WithDefinition, detail::WithUri {
   std::vector<FunctionNode> functions_;
 };
 
-class ServiceNode final : folly::MoveOnly, public RpcInterfaceNode {
+class ServiceNode final : folly::MoveOnly,
+                          public RpcInterfaceNode,
+                          public detail::WithDebugPrinting<ServiceNode> {
  public:
   const ServiceNode* FOLLY_NULLABLE baseService() const;
 
@@ -1175,11 +1235,17 @@ class ServiceNode final : folly::MoveOnly, public RpcInterfaceNode {
       : RpcInterfaceNode(resolver, definitionKey, uri, std::move(functions)),
         baseServiceKey_(std::move(baseServiceKey)) {}
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   std::optional<detail::DefinitionKeyRef> baseServiceKey_;
 };
 
-class InteractionNode final : folly::MoveOnly, public RpcInterfaceNode {
+class InteractionNode final
+    : folly::MoveOnly,
+      public RpcInterfaceNode,
+      public detail::WithDebugPrinting<InteractionNode> {
  public:
   InteractionNode(
       const detail::Resolver& resolver,
@@ -1187,12 +1253,16 @@ class InteractionNode final : folly::MoveOnly, public RpcInterfaceNode {
       std::string_view uri,
       std::vector<FunctionNode>&& functions)
       : RpcInterfaceNode(resolver, definitionKey, uri, std::move(functions)) {}
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 };
 
 class DefinitionNode final : folly::MoveOnly,
                              detail::WithResolver,
                              detail::WithName,
-                             detail::WithAnnotations {
+                             detail::WithAnnotations,
+                             public detail::WithDebugPrinting<DefinitionNode> {
  public:
   using Alternative = std::variant<
       StructNode,
@@ -1326,22 +1396,15 @@ class DefinitionNode final : folly::MoveOnly,
         });
   }
 
-  /**
-   * Produces a string representation of the definition that is useful for
-   * debugging ONLY.
-   *
-   * This string is not guaranteed to be stable, nor is it guaranteed to include
-   * complete information.
-   */
-  std::string toDebugString() const;
-  friend std::ostream& operator<<(std::ostream&, const DefinitionNode&);
-
   DefinitionNode(
       const detail::Resolver& resolver,
       apache::thrift::type::ProgramId programId,
       std::vector<Annotation>&& annotations,
       std::string_view name,
       Alternative&& definition);
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
   apache::thrift::type::ProgramId programId_;
@@ -1358,6 +1421,9 @@ class Annotation final : folly::MoveOnly {
 
   Annotation(TypeRef&& type, Fields&& fields);
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   folly::not_null_unique_ptr<TypeRef> type_;
   Fields fields_;
@@ -1365,7 +1431,8 @@ class Annotation final : folly::MoveOnly {
 
 class ProgramNode final : folly::MoveOnly,
                           detail::WithResolver,
-                          detail::WithName {
+                          detail::WithName,
+                          public detail::WithDebugPrinting<ProgramNode> {
  public:
   using detail::WithName::name;
 
@@ -1393,13 +1460,16 @@ class ProgramNode final : folly::MoveOnly,
         includes_(std::move(includes)),
         definitions_(std::move(definitions)) {}
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   std::string_view path_;
   std::vector<apache::thrift::type::ProgramId> includes_;
   Definitions definitions_;
 };
 
-class SyntaxGraph final {
+class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
  public:
   SyntaxGraph(const SyntaxGraph&) = delete;
   SyntaxGraph& operator=(const SyntaxGraph&) = delete;
@@ -1451,6 +1521,9 @@ class SyntaxGraph final {
 
   explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
  private:
   folly::not_null_unique_ptr<const detail::Resolver> resolver_;
 
@@ -1488,6 +1561,8 @@ const T& Lazy<T>::operator*() const {
       [](const Resolved& resolved) -> const T& { return *resolved.value; });
 }
 } // namespace detail
+
+#undef THRIFT_SYNTAX_GRAPH_DECLARE_DEBUG_FUNCTIONS
 
 } // namespace apache::thrift::schema
 

@@ -288,6 +288,25 @@ scope DebugTree<protocol::Value>::operator()(
   return v;
 }
 
+namespace {
+std::string toDebugString(const DefinitionNode& definition) {
+  std::string_view kindString = definition.visit(
+      [](const StructNode&) { return "Struct"; },
+      [](const UnionNode&) { return "Union"; },
+      [](const ExceptionNode&) { return "Exception"; },
+      [](const EnumNode&) { return "Enum"; },
+      [](const TypedefNode&) { return "Typedef"; },
+      [](const ConstantNode&) { return "Constant"; },
+      [](const ServiceNode&) { return "Service"; },
+      [](const InteractionNode&) { return "Interaction"; });
+  return fmt::format(
+      "Definition(kind={}, name='{}', program='{}.thrift')",
+      kindString,
+      definition.name(),
+      definition.program().name());
+}
+} // namespace
+
 scope DebugTree<protocol::Object>::operator()(
     const protocol::Object& object,
     const SGWrapper& graph,
@@ -303,7 +322,7 @@ scope DebugTree<protocol::Object>::operator()(
 
   const auto* node = ifStructured(type);
   auto ret = scope::make_root(
-      "{}", node ? node->definition().toDebugString() : "<UNKNOWN STRUCT>");
+      "{}", node ? toDebugString(node->definition()) : "<UNKNOWN STRUCT>");
   for (auto id : ids) {
     auto next = scope::make_root("{}", getFieldName(node, id));
     next.make_child() = debugTree(object.at(id), graph, getFieldType(node, id));

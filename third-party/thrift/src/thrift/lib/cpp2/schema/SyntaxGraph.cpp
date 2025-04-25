@@ -26,6 +26,7 @@
 
 #include <fmt/core.h>
 
+#include <functional>
 #include <ostream>
 #include <stdexcept>
 
@@ -73,53 +74,12 @@ const StructuredNode& FieldNode::parent() const {
   return detail::lazyResolve(resolver(), parent_).asStructured();
 }
 
-std::string StructNode::toDebugString() const {
-  return fmt::format(
-      "Struct(uri='{}', {})", uri(), definition().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const StructNode& s) {
-  return out << s.toDebugString();
-}
-
-std::string UnionNode::toDebugString() const {
-  return fmt::format(
-      "Union(uri='{}', {})", uri(), definition().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const UnionNode& u) {
-  return out << u.toDebugString();
-}
-
-std::string ExceptionNode::toDebugString() const {
-  return fmt::format(
-      "Exception(uri='{}', {})", uri(), definition().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const ExceptionNode& e) {
-  return out << e.toDebugString();
-}
-
-std::string EnumNode::toDebugString() const {
-  return fmt::format("Enum(uri='{}', {})", uri(), definition().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const EnumNode& e) {
-  return out << e.toDebugString();
-}
-
 TypedefNode::TypedefNode(
     const detail::Resolver& resolver,
     const type::DefinitionKey& definitionKey,
     TypeRef&& targetType)
     : detail::WithDefinition(resolver, definitionKey),
       targetType_(folly::copy_to_unique_ptr(std::move(targetType))) {}
-
-std::string TypedefNode::toDebugString() const {
-  return fmt::format(
-      "Typedef(to={}, {})",
-      targetType().toDebugString(),
-      definition().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const TypedefNode& t) {
-  return out << t.toDebugString();
-}
 
 ConstantNode::ConstantNode(
     const detail::Resolver& resolver,
@@ -147,13 +107,6 @@ bool operator==(const List& lhs, const List& rhs) {
   return lhs.elementType() == rhs.elementType();
 }
 
-std::string List::toDebugString() const {
-  return fmt::format("List(of={})", elementType().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const List& l) {
-  return out << l.toDebugString();
-}
-
 /* static */ List List::of(TypeRef elementType) {
   return List(std::move(elementType));
 }
@@ -169,13 +122,6 @@ Set& Set::operator=(const Set& other) {
 
 bool operator==(const Set& lhs, const Set& rhs) {
   return lhs.elementType() == rhs.elementType();
-}
-
-std::string Set::toDebugString() const {
-  return fmt::format("Set(of={})", elementType().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const Set& s) {
-  return out << s.toDebugString();
 }
 
 /* static */ Set Set::of(TypeRef elementType) {
@@ -197,16 +143,6 @@ Map& Map::operator=(const Map& other) {
 bool operator==(const Map& lhs, const Map& rhs) {
   return std::tie(lhs.keyType(), lhs.valueType()) ==
       std::tie(rhs.keyType(), rhs.valueType());
-}
-
-std::string Map::toDebugString() const {
-  return fmt::format(
-      "Map(of={}, to={})",
-      keyType().toDebugString(),
-      valueType().toDebugString());
-}
-std::ostream& operator<<(std::ostream& out, const Map& m) {
-  return out << m.toDebugString();
 }
 
 /* static */ Map Map::of(TypeRef keyType, TypeRef valueType) {
@@ -317,26 +253,6 @@ const ProgramNode& DefinitionNode::program() const {
   return resolver().programOf(programId_);
 }
 
-std::string DefinitionNode::toDebugString() const {
-  std::string_view kindString = visit(
-      [](const StructNode&) { return "Struct"; },
-      [](const UnionNode&) { return "Union"; },
-      [](const ExceptionNode&) { return "Exception"; },
-      [](const EnumNode&) { return "Enum"; },
-      [](const TypedefNode&) { return "Typedef"; },
-      [](const ConstantNode&) { return "Constant"; },
-      [](const ServiceNode&) { return "Service"; },
-      [](const InteractionNode&) { return "Interaction"; });
-  return fmt::format(
-      "Definition(kind={}, name='{}', program='{}.thrift')",
-      kindString,
-      name(),
-      program().name());
-}
-std::ostream& operator<<(std::ostream& out, const DefinitionNode& definition) {
-  return out << definition.toDebugString();
-}
-
 /* static */ TypeRef TypeRef::of(Primitive p) {
   return TypeRef(p);
 }
@@ -401,15 +317,6 @@ bool operator==(const TypeRef& lhs, const DefinitionNode& rhs) {
       });
 }
 
-std::string TypeRef::toDebugString() const {
-  return visit(
-      [&](Primitive p) -> std::string { return std::string(toString(p)); },
-      [&](const auto& t) -> std::string { return t.toDebugString(); });
-}
-std::ostream& operator<<(std::ostream& out, const TypeRef& type) {
-  return out << type.toDebugString();
-}
-
 Annotation::Annotation(TypeRef&& type, Fields&& fields)
     : type_(folly::copy_to_unique_ptr(std::move(type))),
       fields_(std::move(fields)) {}
@@ -469,6 +376,285 @@ const DefinitionNode& lazyResolve(
 }
 
 } // namespace detail
+
+void FieldNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print(
+      "FieldNode (id={}, presence={}, name='{}')",
+      id(),
+      enumNameSafe(presence()),
+      name());
+  type().printTo(scope.make_child("type = "), visited);
+  if (customDefault()) {
+    // TODO(praihan): Implement printing custom default values
+    scope.make_child("customDefault = ...");
+  }
+}
+
+void StructNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("StructNode '{}'", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+  for (const auto& field : fields()) {
+    field.printTo(scope.make_child(), visited);
+  }
+}
+
+void UnionNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("UnionNode '{}'", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+  for (const auto& field : fields()) {
+    field.printTo(scope.make_child(), visited);
+  }
+}
+
+void ExceptionNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("ExceptionNode '{}'", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+  for (const auto& field : fields()) {
+    field.printTo(scope.make_child(), visited);
+  }
+}
+
+void EnumNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("EnumNode '{}'", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+  for (const auto& entry : values()) {
+    scope.make_child("'{}' → {}", entry.name(), entry.i32());
+  }
+}
+
+void TypedefNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("TypedefNode '{}'", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+  targetType().printTo(scope.make_child("targetType = "), visited);
+}
+
+void ConstantNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("ConstantNode '{}'", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+  type().printTo(scope.make_child("type = "), visited);
+  // TODO(praihan): Implement printing constant values
+  scope.make_child("value = ...");
+}
+
+void List::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("List");
+  elementType().printTo(scope.make_child("elementType = "), visited);
+}
+
+void Set::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("Set");
+  elementType().printTo(scope.make_child("elementType = "), visited);
+}
+
+void Map::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("Map");
+  keyType().printTo(scope.make_child("keyType = "), visited);
+  valueType().printTo(scope.make_child("valueType = "), visited);
+}
+
+void TypeRef::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  visit(
+      [&](const Primitive& primitive) {
+        scope.print("{}", enumNameSafe(primitive));
+      },
+      [&](const auto& node) { node.printTo(scope, visited); });
+}
+
+void FunctionNode::Stream::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("FunctionNode::Stream");
+
+  // A Thrift stream in IDL takes the form:
+  //     stream<{payloadType} throws (... {exceptions} ...)>
+
+  payloadType().printTo(scope.make_child("payloadType = "), visited);
+  if (folly::span<const TypeRef> excepts = exceptions(); !excepts.empty()) {
+    tree_printer::scope& exceptionsScope = scope.make_child("exceptions");
+    for (const TypeRef& e : excepts) {
+      e.printTo(exceptionsScope.make_child(), visited);
+    }
+  }
+}
+
+void FunctionNode::Sink::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("FunctionNode::Sink");
+
+  // A Thrift sink in IDL takes the form:
+  //     sink<{payloadType} throws (... {clientExceptions} ...),
+  //          {finalResponseType} throws (... {serverExceptions} ...)>
+
+  payloadType().printTo(scope.make_child("payloadType = "), visited);
+  if (folly::span<const TypeRef> exceptions = clientExceptions();
+      !exceptions.empty()) {
+    tree_printer::scope& clientExceptionsScope =
+        scope.make_child("clientExceptions");
+    for (const TypeRef& e : exceptions) {
+      e.printTo(clientExceptionsScope.make_child(), visited);
+    }
+  }
+
+  finalResponseType().printTo(
+      scope.make_child("finalResponseType = "), visited);
+  if (folly::span<const TypeRef> exceptions = serverExceptions();
+      !exceptions.empty()) {
+    tree_printer::scope& serverExceptionsScope =
+        scope.make_child("serverExceptions");
+    for (const TypeRef& e : exceptions) {
+      e.printTo(serverExceptionsScope.make_child(), visited);
+    }
+  }
+}
+
+void FunctionNode::Response::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("FunctionNode::Response");
+
+  tree_printer::scope& returnTypeNode = scope.make_child("returnType = ");
+  if (const TypeRef* ret = type()) {
+    ret->printTo(returnTypeNode, visited);
+  } else {
+    returnTypeNode.print("void");
+  }
+  if (const InteractionNode* returnedInteraction = interaction()) {
+    returnedInteraction->printTo(scope.make_child(), visited);
+  }
+
+  if (const FunctionNode::Sink* sinkNode = sink()) {
+    sinkNode->printTo(scope.make_child(), visited);
+  } else if (const FunctionNode::Stream* streamNode = stream()) {
+    streamNode->printTo(scope.make_child(), visited);
+  }
+}
+
+void FunctionNode::Param::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("FunctionNode::Param (id={}, name='{}')", id(), name());
+  type().printTo(scope.make_child("type = "), visited);
+}
+
+void FunctionNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("FunctionNode (name='{}')", name());
+  response().printTo(scope.make_child(), visited);
+
+  if (folly::span<const FunctionNode::Param> paramList = params();
+      !paramList.empty()) {
+    tree_printer::scope& paramsScope = scope.make_child("params");
+    for (const FunctionNode::Param& p : paramList) {
+      p.printTo(paramsScope.make_child(), visited);
+    }
+  }
+}
+
+void ServiceNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("ServiceNode (name='{}')", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+
+  if (const ServiceNode* base = baseService()) {
+    base->printTo(scope.make_child("baseService = "), visited);
+  }
+
+  if (folly::span<const FunctionNode> funcs = functions(); !funcs.empty()) {
+    tree_printer::scope& functionsScope = scope.make_child("functions");
+    for (const FunctionNode& f : funcs) {
+      f.printTo(functionsScope.make_child(), visited);
+    }
+  }
+}
+
+void InteractionNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("InteractionNode (name='{}')", definition().name());
+  if (visited.mark(definition()).already) {
+    return;
+  }
+
+  if (folly::span<const FunctionNode> funcs = functions(); !funcs.empty()) {
+    tree_printer::scope& functionsScope = scope.make_child("functions");
+    for (const FunctionNode& f : funcs) {
+      f.printTo(functionsScope.make_child(), visited);
+    }
+  }
+}
+
+void DefinitionNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("DefinitionNode (name='{}')", name());
+  if (visited.mark(*this).already) {
+    return;
+  }
+  visit([&](const auto& def) { def.printTo(scope.make_child(), visited); });
+}
+
+void Annotation::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("Annotation");
+  type().printTo(scope.make_child("type = "), visited);
+  // TODO(praihan): Implement printing annotation values
+  scope.make_child("value = ...");
+}
+
+void ProgramNode::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("ProgramNode (path='{}')", path());
+  if (visited.mark(*this).already) {
+    return;
+  }
+
+  if (ProgramNode::IncludesList includesList = includes();
+      !includesList.empty()) {
+    tree_printer::scope& includesScope = scope.make_child("includes");
+    for (folly::not_null<const ProgramNode*> include : includesList) {
+      include->printTo(includesScope.make_child(), visited);
+    }
+  }
+
+  if (ProgramNode::Definitions definitionsList = definitions();
+      !definitionsList.empty()) {
+    tree_printer::scope& definitionsScope = scope.make_child("definitions");
+    for (folly::not_null<const DefinitionNode*> def : definitionsList) {
+      def->printTo(definitionsScope.make_child(), visited);
+    }
+  }
+}
+
+void SyntaxGraph::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("SyntaxGraph");
+  tree_printer::scope& programsScope = scope.make_child("programs");
+  for (folly::not_null<const ProgramNode*> program : programs()) {
+    program->printTo(programsScope.make_child(), visited);
+  }
+}
+
+#undef THRIFT_SYNTAX_GRAPH_DEFINE_DEBUG_FUNCTIONS
 
 } // namespace apache::thrift::schema
 

@@ -162,6 +162,13 @@ TEST_F(ServiceSchemaTest, Enum) {
       {"VALUE_2", 2},
   };
   EXPECT_THAT(e.values(), testing::ElementsAreArray(expected));
+
+  EXPECT_EQ(
+      e.toDebugString(),
+      "EnumNode 'TestEnum'\n"
+      "├─ 'UNSET' → 0\n"
+      "├─ 'VALUE_1' → 1\n"
+      "╰─ 'VALUE_2' → 2\n");
 }
 
 TEST_F(ServiceSchemaTest, Struct) {
@@ -196,6 +203,18 @@ TEST_F(ServiceSchemaTest, Struct) {
   EXPECT_EQ(s.fields()[1].name(), "field2");
   EXPECT_STREQ(s.fields()[1].name().data(), "field2");
   EXPECT_EQ(s.fields()[1].customDefault(), nullptr);
+
+  EXPECT_EQ(
+      s.toDebugString(),
+      "StructNode 'TestStruct'\n"
+      "├─ FieldNode (id=1, presence=UNQUALIFIED, name='field1')\n"
+      "│  ├─ type = I32\n"
+      "│  ╰─ customDefault = ...\n"
+      "╰─ FieldNode (id=2, presence=OPTIONAL, name='field2')\n"
+      "   ╰─ type = EnumNode 'TestEnum'\n"
+      "      ├─ 'UNSET' → 0\n"
+      "      ├─ 'VALUE_1' → 1\n"
+      "      ╰─ 'VALUE_2' → 2\n");
 }
 
 TEST_F(ServiceSchemaTest, Union) {
@@ -223,6 +242,22 @@ TEST_F(ServiceSchemaTest, Union) {
   EXPECT_EQ(
       &u.fields()[1].type().asEnum(),
       &program->definitionsByName().at("TestEnum")->asEnum());
+
+  EXPECT_EQ(
+      u.toDebugString(),
+      "UnionNode 'TestUnion'\n"
+      "├─ FieldNode (id=1, presence=UNQUALIFIED, name='s')\n"
+      "│  ╰─ type = StructNode 'TestStruct'\n"
+      "│     ├─ FieldNode (id=1, presence=UNQUALIFIED, name='field1')\n"
+      "│     │  ├─ type = I32\n"
+      "│     │  ╰─ customDefault = ...\n"
+      "│     ╰─ FieldNode (id=2, presence=OPTIONAL, name='field2')\n"
+      "│        ╰─ type = EnumNode 'TestEnum'\n"
+      "│           ├─ 'UNSET' → 0\n"
+      "│           ├─ 'VALUE_1' → 1\n"
+      "│           ╰─ 'VALUE_2' → 2\n"
+      "╰─ FieldNode (id=2, presence=UNQUALIFIED, name='e')\n"
+      "   ╰─ type = EnumNode 'TestEnum'\n");
 }
 
 TEST_F(ServiceSchemaTest, Typedefs) {
@@ -252,6 +287,35 @@ TEST_F(ServiceSchemaTest, Typedefs) {
 
   EXPECT_EQ(t2.targetType(), *listOfTestStructTypedef);
   EXPECT_EQ(t2.targetType().trueType(), t.targetType());
+
+  EXPECT_EQ(
+      t.toDebugString(),
+      "TypedefNode 'ListOfTestStruct'\n"
+      "╰─ targetType = List\n"
+      "   ╰─ elementType = StructNode 'TestStruct'\n"
+      "      ├─ FieldNode (id=1, presence=UNQUALIFIED, name='field1')\n"
+      "      │  ├─ type = I32\n"
+      "      │  ╰─ customDefault = ...\n"
+      "      ╰─ FieldNode (id=2, presence=OPTIONAL, name='field2')\n"
+      "         ╰─ type = EnumNode 'TestEnum'\n"
+      "            ├─ 'UNSET' → 0\n"
+      "            ├─ 'VALUE_1' → 1\n"
+      "            ╰─ 'VALUE_2' → 2\n");
+
+  EXPECT_EQ(
+      t2.toDebugString(),
+      "TypedefNode 'TypedefToListOfTestStruct'\n"
+      "╰─ targetType = TypedefNode 'ListOfTestStruct'\n"
+      "   ╰─ targetType = List\n"
+      "      ╰─ elementType = StructNode 'TestStruct'\n"
+      "         ├─ FieldNode (id=1, presence=UNQUALIFIED, name='field1')\n"
+      "         │  ├─ type = I32\n"
+      "         │  ╰─ customDefault = ...\n"
+      "         ╰─ FieldNode (id=2, presence=OPTIONAL, name='field2')\n"
+      "            ╰─ type = EnumNode 'TestEnum'\n"
+      "               ├─ 'UNSET' → 0\n"
+      "               ├─ 'VALUE_1' → 1\n"
+      "               ╰─ 'VALUE_2' → 2\n");
 }
 
 TEST_F(ServiceSchemaTest, Exception) {
@@ -270,6 +334,12 @@ TEST_F(ServiceSchemaTest, Exception) {
   EXPECT_EQ(e.fields()[0].id(), FieldId{1});
   EXPECT_EQ(e.fields()[0].name(), "blob");
   EXPECT_EQ(e.fields()[0].type().asPrimitive(), Primitive::BINARY);
+
+  EXPECT_EQ(
+      e.toDebugString(),
+      "ExceptionNode 'TestException'\n"
+      "╰─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
+      "   ╰─ type = BINARY\n");
 }
 
 TEST_F(ServiceSchemaTest, Constant) {
@@ -288,6 +358,20 @@ TEST_F(ServiceSchemaTest, Constant) {
       &program->definitionsByName().at("TestStruct")->asStruct());
   const auto& value = c.value().as_object();
   EXPECT_EQ(value.at(FieldId{1}).as_i32(), 2);
+
+  EXPECT_EQ(
+      c.toDebugString(),
+      "ConstantNode 'testConst'\n"
+      "├─ type = StructNode 'TestStruct'\n"
+      "│  ├─ FieldNode (id=1, presence=UNQUALIFIED, name='field1')\n"
+      "│  │  ├─ type = I32\n"
+      "│  │  ╰─ customDefault = ...\n"
+      "│  ╰─ FieldNode (id=2, presence=OPTIONAL, name='field2')\n"
+      "│     ╰─ type = EnumNode 'TestEnum'\n"
+      "│        ├─ 'UNSET' → 0\n"
+      "│        ├─ 'VALUE_1' → 1\n"
+      "│        ╰─ 'VALUE_2' → 2\n"
+      "╰─ value = ...\n");
 }
 
 TEST_F(ServiceSchemaTest, Service) {
@@ -349,6 +433,50 @@ TEST_F(ServiceSchemaTest, Service) {
 
   EXPECT_EQ(s2.functions().size(), 0);
   EXPECT_EQ(s2.baseService(), &s);
+
+  EXPECT_EQ(
+      s2.toDebugString(),
+      "ServiceNode (name='TestService2')\n"
+      "╰─ baseService = ServiceNode (name='TestService')\n"
+      "   ╰─ functions\n"
+      "      ├─ FunctionNode (name='foo')\n"
+      "      │  ├─ FunctionNode::Response\n"
+      "      │  │  ╰─ returnType = StructNode 'TestStruct'\n"
+      "      │  │     ├─ FieldNode (id=1, presence=UNQUALIFIED, name='field1')\n"
+      "      │  │     │  ├─ type = I32\n"
+      "      │  │     │  ╰─ customDefault = ...\n"
+      "      │  │     ╰─ FieldNode (id=2, presence=OPTIONAL, name='field2')\n"
+      "      │  │        ╰─ type = EnumNode 'TestEnum'\n"
+      "      │  │           ├─ 'UNSET' → 0\n"
+      "      │  │           ├─ 'VALUE_1' → 1\n"
+      "      │  │           ╰─ 'VALUE_2' → 2\n"
+      "      │  ╰─ params\n"
+      "      │     ╰─ FunctionNode::Param (id=1, name='input')\n"
+      "      │        ╰─ type = I32\n"
+      "      ├─ FunctionNode (name='createInteraction')\n"
+      "      │  ╰─ FunctionNode::Response\n"
+      "      │     ├─ returnType = void\n"
+      "      │     ╰─ InteractionNode (name='TestInteraction')\n"
+      "      │        ╰─ functions\n"
+      "      │           ╰─ FunctionNode (name='foo')\n"
+      "      │              ├─ FunctionNode::Response\n"
+      "      │              │  ╰─ returnType = I32\n"
+      "      │              ╰─ params\n"
+      "      │                 ╰─ FunctionNode::Param (id=1, name='input')\n"
+      "      │                    ╰─ type = StructNode 'TestRecursiveStruct'\n"
+      "      │                       ╰─ FieldNode (id=1, presence=OPTIONAL, name='myself')\n"
+      "      │                          ╰─ type = StructNode 'TestRecursiveStruct'\n"
+      "      ├─ FunctionNode (name='createStream')\n"
+      "      │  ╰─ FunctionNode::Response\n"
+      "      │     ├─ returnType = I32\n"
+      "      │     ╰─ FunctionNode::Stream\n"
+      "      │        ╰─ payloadType = I32\n"
+      "      ╰─ FunctionNode (name='createInteractionAndStream')\n"
+      "         ╰─ FunctionNode::Response\n"
+      "            ├─ returnType = I32\n"
+      "            ├─ InteractionNode (name='TestInteraction')\n"
+      "            ╰─ FunctionNode::Stream\n"
+      "               ╰─ payloadType = I32\n");
 }
 
 TEST_F(ServiceSchemaTest, Interaction) {
@@ -376,6 +504,19 @@ TEST_F(ServiceSchemaTest, Interaction) {
   EXPECT_EQ(i.functions()[0].params()[0].name(), "input");
   EXPECT_EQ(
       i.functions()[0].params()[0].type(), TypeRef::of(testRecursiveStruct));
+
+  EXPECT_EQ(
+      i.toDebugString(),
+      "InteractionNode (name='TestInteraction')\n"
+      "╰─ functions\n"
+      "   ╰─ FunctionNode (name='foo')\n"
+      "      ├─ FunctionNode::Response\n"
+      "      │  ╰─ returnType = I32\n"
+      "      ╰─ params\n"
+      "         ╰─ FunctionNode::Param (id=1, name='input')\n"
+      "            ╰─ type = StructNode 'TestRecursiveStruct'\n"
+      "               ╰─ FieldNode (id=1, presence=OPTIONAL, name='myself')\n"
+      "                  ╰─ type = StructNode 'TestRecursiveStruct'\n");
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotation) {
@@ -446,6 +587,12 @@ TEST_F(ServiceSchemaTest, RecursiveStruct) {
 
   EXPECT_EQ(s.fields().size(), 1);
   EXPECT_EQ(s.fields()[0].type(), TypeRef::of(s));
+
+  EXPECT_EQ(
+      s.toDebugString(),
+      "StructNode 'TestRecursiveStruct'\n"
+      "╰─ FieldNode (id=1, presence=OPTIONAL, name='myself')\n"
+      "   ╰─ type = StructNode 'TestRecursiveStruct'\n");
 }
 
 TEST_F(ServiceSchemaTest, LookupByDefinitionKeys) {

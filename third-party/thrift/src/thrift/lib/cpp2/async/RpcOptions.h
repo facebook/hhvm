@@ -28,15 +28,21 @@ namespace apache::thrift {
 
 struct SerializedAuthProofs {
   SerializedAuthProofs() = default;
+  ~SerializedAuthProofs() = default;
+
   explicit SerializedAuthProofs(std::unique_ptr<folly::IOBuf> newBuf)
       : buf(std::move(newBuf)) {}
 
   SerializedAuthProofs(const SerializedAuthProofs& other) {
     buf = other.buf ? other.buf->clone() : nullptr;
   }
-  void operator=(const SerializedAuthProofs& other) {
+  SerializedAuthProofs& operator=(const SerializedAuthProofs& other) {
     buf = other.buf ? other.buf->clone() : nullptr;
+    return *this;
   }
+
+  SerializedAuthProofs(SerializedAuthProofs&&) = default;
+  SerializedAuthProofs& operator=(SerializedAuthProofs&&) = default;
 
   std::unique_ptr<folly::IOBuf> buf{nullptr};
 };

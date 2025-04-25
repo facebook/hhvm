@@ -1248,16 +1248,6 @@ void HTTP2Codec::generateHeaderImpl(
            exAttributes);
   }
 
-  auto httpPri = msg.getHTTP2Priority();
-  folly::Optional<http2::PriorityUpdate> pri;
-  if (httpPri) {
-    pri = http2::PriorityUpdate{
-        std::get<0>(*httpPri), std::get<1>(*httpPri), std::get<2>(*httpPri)};
-    if (pri->streamDependency == stream) {
-      LOG(ERROR) << "Overwriting circular dependency for stream=" << stream;
-      pri = http2::DefaultPriority;
-    }
-  }
   auto headerSize = http2::calculatePreHeaderBlockSize(
       assocStream.has_value(), exAttributes.has_value(), false, false);
   auto maxFrameSize = maxSendFrameSize();

@@ -800,8 +800,6 @@ class HTTPSession
   void invalidStream(HTTPCodec::StreamID stream,
                      ErrorCode code = ErrorCode::STREAM_CLOSED);
 
-  http2::PriorityUpdate getMessagePriority(const HTTPMessage* msg);
-
   bool isConnWindowFull() const {
     return connFlowControl_ && connFlowControl_->getAvailableSend() == 0;
   }

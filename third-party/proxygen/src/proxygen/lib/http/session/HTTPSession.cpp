@@ -703,22 +703,6 @@ size_t HTTPSession::getCodecSendWindowSize() const {
   return codec_->getDefaultWindowSize();
 }
 
-http2::PriorityUpdate HTTPSession::getMessagePriority(const HTTPMessage* msg) {
-  http2::PriorityUpdate h2Pri = http2::DefaultPriority;
-
-  // if HTTP2 priorities are enabled, get them from the message
-  // and ignore otherwise
-  if (getHTTP2PrioritiesEnabled() && msg) {
-    auto res = msg->getHTTP2Priority();
-    if (res) {
-      h2Pri.streamDependency = std::get<0>(*res);
-      h2Pri.exclusive = std::get<1>(*res);
-      h2Pri.weight = std::get<2>(*res);
-    }
-  }
-  return h2Pri;
-}
-
 void HTTPSession::onMessageBegin(HTTPCodec::StreamID streamID,
                                  HTTPMessage* msg) {
   VLOG(4) << "processing new msg streamID=" << streamID << " " << *this;
@@ -740,11 +724,8 @@ void HTTPSession::onMessageBegin(HTTPCodec::StreamID streamID,
     infoCallback_->onRequestBegin(*this);
   }
 
-  http2::PriorityUpdate messagePriority = getMessagePriority(msg);
-  txn = createTransaction(streamID,
-                          HTTPCodec::NoStream,
-                          HTTPCodec::NoExAttributes,
-                          messagePriority);
+  txn = createTransaction(
+      streamID, HTTPCodec::NoStream, HTTPCodec::NoExAttributes);
   if (!txn) {
     return; // This could happen if the socket is bad.
   }
@@ -810,9 +791,8 @@ void HTTPSession::onPushMessageBegin(HTTPCodec::StreamID streamID,
     return;
   }
 
-  http2::PriorityUpdate messagePriority = getMessagePriority(msg);
-  auto txn = createTransaction(
-      streamID, assocStreamID, HTTPCodec::NoExAttributes, messagePriority);
+  auto txn =
+      createTransaction(streamID, assocStreamID, HTTPCodec::NoExAttributes);
   if (!txn) {
     return; // This could happen if the socket is bad.
   }
@@ -851,12 +831,10 @@ void HTTPSession::onExMessageBegin(HTTPCodec::StreamID streamID,
     return;
   }
 
-  http2::PriorityUpdate messagePriority = getMessagePriority(msg);
   auto txn =
       createTransaction(streamID,
                         HTTPCodec::NoStream,
-                        HTTPCodec::ExAttributes(controlStream, unidirectional),
-                        messagePriority);
+                        HTTPCodec::ExAttributes(controlStream, unidirectional));
   if (!txn) {
     return; // This could happen if the socket is bad.
   }

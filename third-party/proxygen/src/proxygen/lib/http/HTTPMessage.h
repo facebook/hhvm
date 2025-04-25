@@ -782,10 +782,6 @@ class HTTPMessage {
 
   using HTTP2Priority = std::tuple<uint64_t, bool, uint8_t>;
 
-  folly::Optional<HTTP2Priority> getHTTP2Priority() const {
-    return h2Pri_;
-  }
-
   void setHTTP2Priority(const HTTP2Priority& h2Pri) {
     h2Pri_ = h2Pri;
   }

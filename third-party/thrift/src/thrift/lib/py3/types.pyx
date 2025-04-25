@@ -769,8 +769,8 @@ cdef translate_cpp_enum_to_python(object EnumClass, int value):
         return BadEnum(EnumClass, value)
 
 
-def _is_python_struct(obj):
-    return isinstance(obj, _fbthrift_python_StructOrUnion)
+cdef _is_python_structured(obj):
+    return isinstance(obj, (_fbthrift_python_StructOrUnion, _fbthrift_python_GeneratedError))
 
 def _is_python_enum(obj):
     return (
@@ -779,16 +779,15 @@ def _is_python_enum(obj):
     )
 
 def _from_python_or_raise(thrift_value, field_name, py3_type):
-    try:
+    if _is_python_structured(thrift_value):
         thrift_value = thrift_value._to_py3()
         if not isinstance(thrift_value, py3_type):
             raise TypeError(
                 f"{field_name} is a thrift-python value of type {type(thrift_value) !r} "
                 f"that can not be converted to {py3_type !r}."
             )
-
         return thrift_value
-    except AttributeError:
+    else:
         raise TypeError(f'{field_name} is not a {py3_type !r}.')
 
 cdef _ensure_py3_or_raise(thrift_value, str field_name, py3_type):

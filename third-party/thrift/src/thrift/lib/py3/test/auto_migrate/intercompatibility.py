@@ -30,6 +30,27 @@ class PythonCompatibilityTest(unittest.TestCase):
         py3_easy = py3_types.easy(an_int=python_integers)
         self.assertEqual(2023, py3_easy.an_int.small)
 
+    def test_init_py3_struct_with_python_exception(self) -> None:
+        python_exception = python_types.HardError(errortext="hard error")
+        # pyre-ignore[6]: Incompatible parameter type [6]: In call `py3_types.NestedError.__init__`, for argument `val_error`, expected `Optional[py3_types.HardError]` but got `python_types.HardError`.
+        py3_nesterror = py3_types.NestedError(val_error=python_exception)
+        self.assertIsInstance(py3_nesterror.val_error, py3_types.HardError)
+        self.assertEqual("hard error", py3_nesterror.val_error.errortext)
+
+    def test_init_py3_union_with_python_exception(self) -> None:
+        python_exception = python_types.HardError(errortext="hard error")
+        # pyre-ignore[6]: Incompatible parameter type [6]: In call `py3_types.ValueOrError.__init__`, for argument `error`, expected `Optional[py3_types.HardError]` but got `python_types.HardError`.
+        py3_nested_union = py3_types.ValueOrError(error=python_exception)
+        self.assertIsInstance(py3_nested_union.error, py3_types.HardError)
+        self.assertEqual("hard error", py3_nested_union.error.errortext)
+
+    def test_init_py3_exception_with_python_exception(self) -> None:
+        python_exception = python_types.HardError(errortext="hard error")
+        # pyre-ignore[6]: Incompatible parameter type [6]: In call `py3_types.NestedHardError.__init__`, for argument `error`, expected `Optional[py3_types.HardError]` but got `python_types.HardError`.
+        py3_nested_exception = py3_types.NestedHardError(error=python_exception)
+        self.assertIsInstance(py3_nested_exception.error, py3_types.HardError)
+        self.assertEqual("hard error", py3_nested_exception.error.errortext)
+
     def test_update_py3_struct_with_python_union(self) -> None:
         py3_easy = py3_types.easy()
         python_integers = python_types.Integers(small=2023)

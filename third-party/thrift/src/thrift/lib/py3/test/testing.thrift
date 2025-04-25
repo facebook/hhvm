@@ -110,6 +110,10 @@ exception HardError {
   2: i32 code;
 }
 
+exception NestedHardError {
+  1: HardError error;
+}
+
 exception UnfriendlyError {
   1: string errortext;
   2: i32 code;

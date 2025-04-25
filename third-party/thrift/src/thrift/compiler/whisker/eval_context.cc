@@ -95,9 +95,7 @@ class global_scope_object : public map {
       const override {
     scope.print("<global scope> (size={})", properties_.size());
     for (const auto& [key, value] : properties_) {
-      tree_printer::scope& element_scope = scope.make_transparent_child();
-      element_scope.print("'{}'", key);
-      whisker::print_to(value, element_scope.make_child(), options);
+      whisker::print_to(value, scope.make_child("'{}' → ", key), options);
     }
   }
 

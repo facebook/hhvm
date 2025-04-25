@@ -118,8 +118,7 @@ class to_string_visitor {
     std::set<std::string> keys = proto->keys();
     scope.print("<prototype (size={})>", keys.size());
     for (const auto& key : keys) {
-      tree_printer::scope& element_scope = scope.make_transparent_child();
-      element_scope.print("'{}'", key);
+      scope.make_child("'{}'", key);
     }
     if (const prototype<>::ptr& parent = proto->parent()) {
       visit_maybe_truncate(parent, scope.make_child());
@@ -127,12 +126,12 @@ class to_string_visitor {
   }
 
   [[nodiscard]] bool at_max_depth(const tree_printer::scope& scope) const {
-    return scope.semantic_depth() == opts_.max_depth;
+    return scope.depth() == opts_.max_depth;
   }
 
   void require_within_max_depth(
       [[maybe_unused]] const tree_printer::scope& scope) const {
-    assert(scope.semantic_depth() <= opts_.max_depth);
+    assert(scope.depth() <= opts_.max_depth);
   }
 
   const object_print_options& opts_;
@@ -225,7 +224,7 @@ void map::default_print_to(
     const std::set<std::string>& property_names,
     tree_printer::scope& scope,
     const object_print_options& options) const {
-  assert(scope.semantic_depth() <= options.max_depth);
+  assert(scope.depth() <= options.max_depth);
   const auto size = property_names.size();
   scope.print("{} (size={})", name, size);
 
@@ -296,7 +295,7 @@ void array::default_print_to(
     std::string_view name,
     tree_printer::scope& scope,
     const object_print_options& options) const {
-  assert(scope.semantic_depth() <= options.max_depth);
+  assert(scope.depth() <= options.max_depth);
 
   const auto sz = size();
   scope.print("{} (size={})", name, sz);

@@ -151,15 +151,13 @@ class mstch_object_proxy
   void print_to(
       tree_printer::scope& scope,
       [[maybe_unused]] const object_print_options& options) const override {
-    assert(scope.semantic_depth() <= options.max_depth);
+    assert(scope.depth() <= options.max_depth);
     scope.print("mstch::object");
 
     for (const auto& key : proxied_->property_names()) {
-      tree_printer::scope& element_scope = scope.make_transparent_child();
-      element_scope.print("'{}'", key);
       // It's not safe to access the mstch::object properties since they can
       // have side-effects. So we can only report property names.
-      element_scope.make_child().print("...");
+      scope.make_child("'{}' → ...", key);
     }
   }
 

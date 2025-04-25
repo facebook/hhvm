@@ -327,12 +327,12 @@ TEST_F(MstchCompatTest, mstch_object) {
       to_string(converted),
       testing::AllOf(
           testing::HasSubstr("mstch::object"),
-          testing::HasSubstr("'volatile'\n"),
-          testing::HasSubstr("'foo:bar'\n"),
-          testing::HasSubstr("'array'\n"),
-          testing::HasSubstr("'error'\n"),
-          testing::HasSubstr("'copy'\n"),
-          testing::HasSubstr("'w_i64'\n")));
+          testing::HasSubstr("'volatile'"),
+          testing::HasSubstr("'foo:bar'"),
+          testing::HasSubstr("'array'"),
+          testing::HasSubstr("'error'"),
+          testing::HasSubstr("'copy'"),
+          testing::HasSubstr("'w_i64'")));
 }
 
 } // namespace whisker

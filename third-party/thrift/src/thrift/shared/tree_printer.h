@@ -66,14 +66,10 @@ class scope {
   scope& operator=(scope&&) = default;
 
   /**
-   * Returns the "semantic" depth of this scope in the domain of the object
-   * being printed.
-   *
-   * The separation of semantic depth from the actual depth is helpful to track
-   * when so that pruning the tree (i.e. deep nodes are condensed to "...") can
-   * be customized by the user.
+   * Returns the depth of this scope in the tree being printed. This can be used
+   * to prune the tree (i.e. deep nodes are condensed to "...") if necessary.
    */
-  unsigned semantic_depth() const { return semantic_depth_; }
+  unsigned depth() const { return depth_; }
 
   /**
    * Prints a formatted string to the current scope's text.
@@ -87,14 +83,11 @@ class scope {
   }
 
   /**
-   * Opens a new child scope that increases the semantic depth by 1.
+   * Opens a new child scope with one additional level of depth.
    */
-  scope& make_child() {
-    return children_.emplace_back(scope(semantic_depth_ + 1));
-  }
+  scope& make_child() { return children_.emplace_back(scope(depth_ + 1)); }
   /**
-   * Opens a new child scope (as if by make_child()) and prints a formatted
-   * string to it.
+   * Opens a new child scope and prints a formatted string to the its line.
    */
   template <typename... T>
   scope& make_child(fmt::format_string<T...> msg, T&&... args) {
@@ -104,28 +97,11 @@ class scope {
   }
 
   /**
-   * Opens a new child scope without changing the semantic depth of this tree.
-   */
-  scope& make_transparent_child() {
-    return children_.emplace_back(scope(semantic_depth_));
-  }
-  /**
-   * Opens a new child scope (as if by make_transparent_child()) and prints a
-   * formatted string to it.
-   */
-  template <typename... T>
-  scope& make_transparent_child(fmt::format_string<T...> msg, T&&... args) {
-    scope& child = make_transparent_child();
-    child.print(msg, std::forward<T>(args)...);
-    return child;
-  }
-
-  /**
    * Create a scope that represents the root of a new tree.
    */
-  static scope make_root() { return scope(0 /* semantic_depth */); }
+  static scope make_root() { return scope(0 /* depth */); }
   /**
-   * Create a scope (as if by make_root()) and print a formatted string to it.
+   * Create a scope and print a formatted string to its line.
    */
   template <typename... T>
   static scope make_root(fmt::format_string<T...> msg, T&&... args) {
@@ -137,7 +113,7 @@ class scope {
   friend std::ostream& operator<<(std::ostream& out, const scope&);
 
  private:
-  explicit scope(unsigned semantic_depth) : semantic_depth_(semantic_depth) {}
+  explicit scope(unsigned depth) : depth_(depth) {}
 
   void print_recursively(
       std::ostream&,
@@ -145,7 +121,7 @@ class scope {
       std::vector<std::size_t>& active,
       bool last_child) const;
 
-  unsigned semantic_depth_;
+  unsigned depth_;
   std::string data_;
   std::vector<scope> children_;
 };

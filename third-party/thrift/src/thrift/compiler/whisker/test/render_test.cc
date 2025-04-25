@@ -1991,8 +1991,7 @@ TEST_F(RenderTest, partial_derived_context) {
               "Name 'x' was not found in the current scope.\n"
               "Tried to search through the following scopes:\n"
               "#0 <global scope> (size=1)\n"
-              "╰─ 'global'\n"
-              "   ╰─ i64(42)\n",
+              "╰─ 'global' → i64(42)\n",
               path_to_file,
               3),
           error_backtrace("#0 foo @ path/to/test.whisker <line:3, col:3>\n"
@@ -2023,8 +2022,7 @@ TEST_F(RenderTest, partial_derived_context_no_leak) {
               "#0 map (size=0)\n"
               "\n"
               "#1 <global scope> (size=1)\n"
-              "╰─ 'global'\n"
-              "   ╰─ i64(42)\n",
+              "╰─ 'global' → i64(42)\n",
               path_to_file,
               6),
           error_backtrace("#0 path/to/test.whisker <line:6, col:3>\n")));

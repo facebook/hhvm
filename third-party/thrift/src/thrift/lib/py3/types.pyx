@@ -772,11 +772,6 @@ cdef translate_cpp_enum_to_python(object EnumClass, int value):
 cdef _is_python_structured(obj):
     return isinstance(obj, (_fbthrift_python_StructOrUnion, _fbthrift_python_GeneratedError))
 
-def _is_python_enum(obj):
-    return (
-        isinstance(obj, _fbthrift_python_Enum) and
-        obj.__class__.__module__.endswith(".thrift_enums")
-    )
 
 def _from_python_or_raise(thrift_value, field_name, py3_type):
     if _is_python_structured(thrift_value):

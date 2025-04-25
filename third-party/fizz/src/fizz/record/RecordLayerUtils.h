@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <fizz/crypto/aead/Aead.h>
 #include <fizz/record/Types.h>
 #include <folly/io/Cursor.h>
 
@@ -13,6 +14,10 @@ namespace fizz {
  */
 class RecordLayerUtils {
  public:
+  // Constants needed for record layer operations
+  static constexpr size_t kEncryptedHeaderSize =
+      sizeof(ContentType) + sizeof(ProtocolVersion) + sizeof(uint16_t);
+
   /**
    * Extract and remove the content type from decrypted data.
    * Returns an Optional ContentType and modifies the input buffer
@@ -20,6 +25,19 @@ class RecordLayerUtils {
    */
   static folly::Optional<ContentType> parseAndRemoveContentType(
       std::unique_ptr<folly::IOBuf>& decryptedBuf);
+
+  /**
+   * Write an encrypted record with the given parameters.
+   * This function handles encrypting the data and assembling the final TLS
+   * record.
+   */
+  static std::unique_ptr<folly::IOBuf> writeEncryptedRecord(
+      std::unique_ptr<folly::IOBuf> plaintext,
+      Aead* aead,
+      folly::IOBuf* header,
+      uint64_t seqNum,
+      bool useAdditionalData,
+      Aead::AeadOptions options);
 };
 
 } // namespace fizz

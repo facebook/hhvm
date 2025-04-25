@@ -33,4 +33,35 @@ inline folly::Optional<ContentType> RecordLayerUtils::parseAndRemoveContentType(
   return contentType;
 }
 
+inline std::unique_ptr<folly::IOBuf> RecordLayerUtils::writeEncryptedRecord(
+    std::unique_ptr<folly::IOBuf> plaintext,
+    Aead* aead,
+    folly::IOBuf* header,
+    uint64_t seqNum,
+    bool useAdditionalData,
+    Aead::AeadOptions options) {
+  // Encrypt the data
+  auto cipherText = aead->encrypt(
+      std::move(plaintext),
+      useAdditionalData ? header : nullptr,
+      seqNum,
+      options);
+
+  // Construct the final record
+  std::unique_ptr<folly::IOBuf> record;
+  if (!cipherText->isShared() &&
+      cipherText->headroom() >= kEncryptedHeaderSize) {
+    // Prepend the header to the ciphertext
+    cipherText->prepend(kEncryptedHeaderSize);
+    memcpy(cipherText->writableData(), header->data(), header->length());
+    record = std::move(cipherText);
+  } else {
+    // Create a new buffer for the header
+    record = folly::IOBuf::copyBuffer(header->data(), header->length());
+    record->prependChain(std::move(cipherText));
+  }
+
+  return record;
+}
+
 } // namespace fizz

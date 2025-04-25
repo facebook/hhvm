@@ -160,9 +160,9 @@ TLSContent EncryptedWriteRecordLayer::write(
   folly::IOBufQueue queue;
   queue.append(std::move(msg.fragment));
   std::unique_ptr<folly::IOBuf> outBuf;
-  std::array<uint8_t, kEncryptedHeaderSize> headerBuf;
+  std::array<uint8_t, RecordLayerUtils::kEncryptedHeaderSize> headerBuf{};
   auto header = folly::IOBuf::wrapBufferAsValue(folly::range(headerBuf));
-  aead_->setEncryptedBufferHeadroom(kEncryptedHeaderSize);
+  aead_->setEncryptedBufferHeadroom(RecordLayerUtils::kEncryptedHeaderSize);
   while (!queue.empty()) {
     Buf dataBuf;
     uint16_t paddingSize;
@@ -205,28 +205,18 @@ TLSContent EncryptedWriteRecordLayer::write(
         dataBuf->computeChainDataLength() + aead_->getCipherOverhead();
     appender.writeBE<uint16_t>(ciphertextLength);
 
-    auto cipherText = aead_->encrypt(
+    auto recordBuf = RecordLayerUtils::writeEncryptedRecord(
         std::move(dataBuf),
-        useAdditionalData_ ? &header : nullptr,
+        aead_.get(),
+        &header,
         seqNum_++,
+        useAdditionalData_,
         options);
 
-    std::unique_ptr<folly::IOBuf> record;
-    if (!cipherText->isShared() &&
-        cipherText->headroom() >= kEncryptedHeaderSize) {
-      // prepend and then write it in
-      cipherText->prepend(kEncryptedHeaderSize);
-      memcpy(cipherText->writableData(), header.data(), header.length());
-      record = std::move(cipherText);
-    } else {
-      record = folly::IOBuf::copyBuffer(header.data(), header.length());
-      record->prependChain(std::move(cipherText));
-    }
-
     if (!outBuf) {
-      outBuf = std::move(record);
+      outBuf = std::move(recordBuf);
     } else {
-      outBuf->prependChain(std::move(record));
+      outBuf->prependChain(std::move(recordBuf));
     }
   }
 

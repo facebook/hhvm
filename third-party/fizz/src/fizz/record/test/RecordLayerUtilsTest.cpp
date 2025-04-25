@@ -3,7 +3,9 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/crypto/aead/test/Mocks.h>
 #include <fizz/record/RecordLayerUtils.h>
+
 #include <folly/String.h>
 
 using namespace folly;
@@ -99,6 +101,43 @@ TEST_F(RecordLayerUtilsTest, TestParseAndRemoveContentTypeChained) {
   EXPECT_TRUE(maybeContentType.has_value());
   EXPECT_EQ(*maybeContentType, ContentType::handshake);
   expectSame(buf, "abcdef");
+}
+
+TEST_F(RecordLayerUtilsTest, TestWriteEncryptedRecord) {
+  MockAead aead;
+
+  auto plaintext = folly::IOBuf::create(10);
+  plaintext->append(10);
+  memset(plaintext->writableData(), 'X', plaintext->length());
+
+  std::array<uint8_t, RecordLayerUtils::kEncryptedHeaderSize> headerBuf{};
+  auto header = folly::IOBuf::wrapBufferAsValue(folly::range(headerBuf));
+
+  auto ciphertext = folly::IOBuf::create(10);
+  ciphertext->append(10);
+  memset(ciphertext->writableData(), 'Y', ciphertext->length());
+
+  // Set up expectation for the encrypt method - return our prepared ciphertext
+  EXPECT_CALL(aead, _encrypt(_, _, 42, _))
+      .WillOnce(Invoke([&ciphertext](
+                           std::unique_ptr<IOBuf>&,
+                           const IOBuf*,
+                           uint64_t,
+                           Aead::AeadOptions) { return ciphertext->clone(); }));
+
+  auto result = RecordLayerUtils::writeEncryptedRecord(
+      std::move(plaintext),
+      &aead,
+      &header,
+      42, // seqNum
+      true, // useAdditionalData
+      Aead::AeadOptions());
+
+  // Verify result is not null
+  EXPECT_TRUE(result != nullptr);
+
+  // Verify result contains some data
+  EXPECT_FALSE(result->empty());
 }
 
 } // namespace test

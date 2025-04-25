@@ -461,10 +461,6 @@ size_t writeExHeaders(uint8_t* headerBuf,
  * @param priority The priority depedency information to update the stream with.
  * @return The number of bytes written to writeBuf.
  */
-size_t writePriority(folly::IOBufQueue& writeBuf,
-                     uint32_t stream,
-                     PriorityUpdate priority) noexcept;
-
 size_t writeRFC9218Priority(folly::IOBufQueue& writeBuf,
                             uint32_t stream,
                             std::string& priority);

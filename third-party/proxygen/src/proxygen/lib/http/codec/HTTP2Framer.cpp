@@ -795,21 +795,6 @@ size_t writeExHeaders(uint8_t* header,
   return kFrameHeaderSize + frameLen;
 }
 
-size_t writePriority(IOBufQueue& queue,
-                     uint32_t stream,
-                     PriorityUpdate priority) noexcept {
-  DCHECK_NE(0, stream);
-  const auto frameLen = writeFrameHeader(queue,
-                                         kFramePrioritySize,
-                                         FrameType::PRIORITY,
-                                         0,
-                                         stream,
-                                         kNoPadding,
-                                         priority,
-                                         nullptr);
-  return kFrameHeaderSize + frameLen;
-}
-
 size_t writeRFC9218Priority(IOBufQueue& queue,
                             uint32_t stream,
                             std::string& priority) {

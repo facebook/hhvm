@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package thrift
+package format
 
 import (
 	"bytes"
 	"io"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -38,22 +37,22 @@ type Serializer struct {
 
 // newBinarySerializer creates a new serializer using the binary format
 func newBinarySerializer(readWriter types.ReadWriteSizer) *Serializer {
-	return &Serializer{format: format.NewBinaryFormat(readWriter)}
+	return &Serializer{format: NewBinaryFormat(readWriter)}
 }
 
 // newCompactSerializer creates a new serializer using the compact format
 func newCompactSerializer(readWriter types.ReadWriteSizer) *Serializer {
-	return &Serializer{format: format.NewCompactFormat(readWriter)}
+	return &Serializer{format: NewCompactFormat(readWriter)}
 }
 
 // newCompactJSONSerializer creates a new serializer using the CompactJSON format
 func newCompactJSONSerializer(readWriter io.ReadWriter) *Serializer {
-	return &Serializer{format: format.NewCompactJSONFormat(readWriter)}
+	return &Serializer{format: NewCompactJSONFormat(readWriter)}
 }
 
 // newSimpleJSONSerializer creates a new serializer using the SimpleJSON format
 func newSimpleJSONSerializer(readWriter io.ReadWriter) *Serializer {
-	return &Serializer{format: format.NewSimpleJSONFormat(readWriter)}
+	return &Serializer{format: NewSimpleJSONFormat(readWriter)}
 }
 
 // EncodeCompact serializes msg using the compact format
@@ -111,22 +110,22 @@ type Deserializer struct {
 
 // newBinaryDeserializer creates a new deserializer using the binary format
 func newBinaryDeserializer(readWriter types.ReadWriteSizer) *Deserializer {
-	return &Deserializer{format: format.NewBinaryFormat(readWriter)}
+	return &Deserializer{format: NewBinaryFormat(readWriter)}
 }
 
 // newCompactDeserializer creates a new deserializer using the compact format
 func newCompactDeserializer(readWriter types.ReadWriteSizer) *Deserializer {
-	return &Deserializer{format: format.NewCompactFormat(readWriter)}
+	return &Deserializer{format: NewCompactFormat(readWriter)}
 }
 
 // newCompactJSONDeserializer creates a new deserializer using the JSON format
 func newCompactJSONDeserializer(readWriter io.ReadWriter) *Deserializer {
-	return &Deserializer{format: format.NewCompactJSONFormat(readWriter)}
+	return &Deserializer{format: NewCompactJSONFormat(readWriter)}
 }
 
 // newSimpleJSONDeserializer creates a new deserializer using the simple JSON format
 func newSimpleJSONDeserializer(readWriter io.ReadWriter) *Deserializer {
-	return &Deserializer{format: format.NewSimpleJSONFormat(readWriter)}
+	return &Deserializer{format: NewSimpleJSONFormat(readWriter)}
 }
 
 // DecodeCompact deserializes a compact format message

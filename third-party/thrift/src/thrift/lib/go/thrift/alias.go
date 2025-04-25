@@ -136,3 +136,35 @@ func NewBinaryFormatOptions(readWriter types.ReadWriteSizer, strictRead, strictW
 func NewSimpleJSONFormat(readWriter io.ReadWriter) types.Format {
 	return format.NewSimpleJSONFormat(readWriter)
 }
+
+func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
+	return format.EncodeCompact(msg)
+}
+
+func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
+	return format.EncodeBinary(msg)
+}
+
+func EncodeCompactJSON(msg types.WritableStruct) ([]byte, error) {
+	return format.EncodeCompactJSON(msg)
+}
+
+func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
+	return format.EncodeSimpleJSON(msg)
+}
+
+func DecodeCompact(data []byte, msg types.ReadableStruct) error {
+	return format.DecodeCompact(data, msg)
+}
+
+func DecodeBinary(data []byte, msg types.ReadableStruct) error {
+	return format.DecodeBinary(data, msg)
+}
+
+func DecodeCompactJSON(data []byte, msg types.ReadableStruct) error {
+	return format.DecodeCompactJSON(data, msg)
+}
+
+func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
+	return format.DecodeSimpleJSON(data, msg)
+}

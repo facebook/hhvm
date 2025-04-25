@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package format
 
 import (
 	"bytes"
@@ -65,10 +65,10 @@ func TestBasicSerDes(t *testing.T) {
 // Dummy struct for TestErrorSerDes
 type errSerDesStruct struct{}
 
-func (s *errSerDesStruct) Write(Encoder) error {
+func (s *errSerDesStruct) Write(types.Encoder) error {
 	return fmt.Errorf("dummy error")
 }
-func (s *errSerDesStruct) Read(Decoder) error {
+func (s *errSerDesStruct) Read(types.Decoder) error {
 	return fmt.Errorf("dummy error")
 }
 

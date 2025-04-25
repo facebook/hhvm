@@ -629,6 +629,8 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
     } else {
       stats.responseWireSizeBytes =
           payload->metadataAndDataSize() - payload->metadataSize();
+      stats.responseMetadataAndPayloadSizeBytes =
+          payload->metadataAndDataSize();
 
       response = guardedClient_.client->getPayloadSerializer()
                      ->unpack<FirstResponsePayload>(

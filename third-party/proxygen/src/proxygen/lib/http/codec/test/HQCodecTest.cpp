@@ -889,7 +889,7 @@ struct FrameAllowedParams {
 
 std::string frameParamsToTestName(
     const testing::TestParamInfo<FrameAllowedParams>& info) {
-  std::string testName = "";
+  std::string testName;
   switch (info.param.codecType) {
     case CodecType::CONTROL_UPSTREAM:
       testName = "UpstreamControl";

@@ -25,7 +25,7 @@ static const std::string hq = "hq";
 static const std::string h3 = "h3";
 static const std::string http_binary = "bhttp";
 static const std::string tunnel_lite = "lite";
-static const std::string empty = "";
+static const std::string empty;
 } // namespace
 
 extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr) {

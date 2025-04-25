@@ -416,7 +416,7 @@ TEST(HTTP1xCodecTest, TestGetRequestChunkedResponse) {
   string resp1("Hello");
   auto body1 = folly::IOBuf::copyBuffer(resp1);
 
-  string resp2("");
+  string resp2;
   auto body2 = folly::IOBuf::copyBuffer(resp2);
 
   codec.generateBody(

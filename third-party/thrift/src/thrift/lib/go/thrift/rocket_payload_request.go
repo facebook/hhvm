@@ -215,7 +215,6 @@ func maybeDecompress(data []byte, compression rpcmetadata.CompressionAlgorithm) 
 		rpcmetadata.CompressionAlgorithm_ZLIB_MORE:
 		return decompressZlib(data)
 	default:
-		// Unknown/unsupported compression algorithm
-		return data, nil
+		return nil, errors.New("unknown or unsupported compression algorithm")
 	}
 }

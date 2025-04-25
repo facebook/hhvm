@@ -29,7 +29,6 @@ func TestRequestRPCMetadata(t *testing.T) {
 	wantName := "test123"
 	wantType := types.CALL
 	wantProto := types.ProtocolIDCompact
-	wantZstd := false
 	wantOther := map[string]string{"header": "1"}
 	data, err := encodeRequestPayload(wantName, wantProto, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, wantOther, rpcmetadata.CompressionAlgorithm_NONE, nil)
 	require.NoError(t, err)
@@ -38,7 +37,6 @@ func TestRequestRPCMetadata(t *testing.T) {
 	require.Equal(t, wantName, got.Name())
 	require.Equal(t, wantType, got.TypeID())
 	require.Equal(t, wantProto, got.ProtoID())
-	require.Equal(t, wantZstd, got.Zstd())
 	require.Equal(t, wantOther, got.Headers())
 
 	payloadNoMetadata := payload.New([]byte("data_bytes"), nil /* metadata bytes */)

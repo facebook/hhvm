@@ -174,7 +174,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
-		return encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
+		return encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.GetCompressionForResponse(), protocol.Bytes())
 	}
 	if s.pipeliningEnabled {
 		return mono.FromFunc(workItem)

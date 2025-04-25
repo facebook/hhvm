@@ -128,8 +128,12 @@ func (r *requestPayload) ProtoID() types.ProtocolID {
 	return r.protoID
 }
 
-func (r *requestPayload) Zstd() bool {
-	return r.metadata != nil && r.metadata.GetCompression() == rpcmetadata.CompressionAlgorithm_ZSTD
+func (r *requestPayload) GetCompressionForResponse() rpcmetadata.CompressionAlgorithm {
+	if r.metadata != nil {
+		compressionConfig := r.metadata.GetCompressionConfig()
+		return compressionAlgorithmFromCompressionConfig(compressionConfig)
+	}
+	return rpcmetadata.CompressionAlgorithm_NONE
 }
 
 func (r *requestPayload) Headers() map[string]string {
@@ -179,6 +183,52 @@ func rpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {
 		return types.ONEWAY, nil
 	}
 	return 0, fmt.Errorf("unsupported RpcKind %v", kind)
+}
+
+func compressionAlgorithmFromCompressionConfig(compressionConfig *rpcmetadata.CompressionConfig) rpcmetadata.CompressionAlgorithm {
+	if compressionConfig == nil {
+		return rpcmetadata.CompressionAlgorithm_NONE
+	}
+
+	compression := rpcmetadata.CompressionAlgorithm_NONE
+	codecConfig := compressionConfig.GetCodecConfig()
+	if zlibConfig := codecConfig.GetZlibConfig(); zlibConfig != nil {
+		switch zlibConfig.GetLevelPreset() {
+		case rpcmetadata.ZlibCompressionLevelPreset_DEFAULT:
+			compression = rpcmetadata.CompressionAlgorithm_ZLIB
+		case rpcmetadata.ZlibCompressionLevelPreset_LESS:
+			compression = rpcmetadata.CompressionAlgorithm_ZLIB_LESS
+		case rpcmetadata.ZlibCompressionLevelPreset_MORE:
+			compression = rpcmetadata.CompressionAlgorithm_ZLIB_MORE
+		default:
+			compression = rpcmetadata.CompressionAlgorithm_ZLIB
+		}
+	} else if zstdConfig := codecConfig.GetZstdConfig(); zstdConfig != nil {
+		switch zstdConfig.GetLevelPreset() {
+		case rpcmetadata.ZstdCompressionLevelPreset_DEFAULT:
+			compression = rpcmetadata.CompressionAlgorithm_ZSTD
+		case rpcmetadata.ZstdCompressionLevelPreset_LESS:
+			compression = rpcmetadata.CompressionAlgorithm_ZSTD_LESS
+		case rpcmetadata.ZstdCompressionLevelPreset_MORE:
+			compression = rpcmetadata.CompressionAlgorithm_ZSTD_MORE
+		default:
+			compression = rpcmetadata.CompressionAlgorithm_ZSTD
+		}
+	} else if lz4Config := codecConfig.GetLz4Config(); lz4Config != nil {
+		switch lz4Config.GetLevelPreset() {
+		case rpcmetadata.Lz4CompressionLevelPreset_DEFAULT:
+			compression = rpcmetadata.CompressionAlgorithm_LZ4
+		case rpcmetadata.Lz4CompressionLevelPreset_LESS:
+			compression = rpcmetadata.CompressionAlgorithm_LZ4_LESS
+		case rpcmetadata.Lz4CompressionLevelPreset_MORE:
+			compression = rpcmetadata.CompressionAlgorithm_LZ4_MORE
+		default:
+			compression = rpcmetadata.CompressionAlgorithm_LZ4
+		}
+	} else if customConfig := codecConfig.GetCustomConfig(); customConfig != nil {
+		compression = rpcmetadata.CompressionAlgorithm_CUSTOM
+	}
+	return compression
 }
 
 func maybeCompress(data []byte, compression rpcmetadata.CompressionAlgorithm) ([]byte, error) {

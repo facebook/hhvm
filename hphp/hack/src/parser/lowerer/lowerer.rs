@@ -2666,6 +2666,7 @@ fn p_anonymous_function<'a>(
         fun,
         use_,
         closure_class_name: None,
+        is_expr_tree_virtual_expr: false,
     }))
 }
 

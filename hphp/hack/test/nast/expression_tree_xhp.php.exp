@@ -80,7 +80,8 @@
                                                    f_user_attributes = []; 
                                                    f_external = false; 
                                                    f_doc_comment = None };
-                                                 ef_use = []; ef_closure_class_name = None })))
+                                                 ef_use = []; ef_closure_class_name = None; 
+                                                 ef_is_expr_tree_virtual_expr = false })))
                                           ])));
                                  (Anormal
                                     ((), [4:19-58],

@@ -185,6 +185,7 @@ pub fn desugar(
                 fun: typing_fun_,
                 use_,
                 closure_class_name: None,
+                is_expr_tree_virtual_expr: is_nested,
             }),
         )
     };

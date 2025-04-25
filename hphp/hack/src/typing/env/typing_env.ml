@@ -2037,22 +2037,13 @@ let update_ity_reason t ity ~f =
   | LoclType lty -> LoclType (update_reason t lty ~f)
   | ConstraintType cty -> ConstraintType (update_cty_reason t cty ~f)
 
-let inside_expr_tree env ~macro_variables expr_tree_hint =
+let inside_expr_tree env expr_tree_hint =
   let outer_locals =
     match next_cont_opt env with
     | None -> LID.Map.empty
     | Some cont -> cont.LEnvC.local_types
   in
-  let env =
-    match macro_variables with
-    | None -> env
-    | Some locals -> set_locals env locals
-  in
-  {
-    env with
-    in_expr_tree = Some { dsl = expr_tree_hint; outer_locals };
-    in_macro_splice = None;
-  }
+  { env with in_expr_tree = Some { dsl = expr_tree_hint; outer_locals } }
 
 let outside_expr_tree env ~macro_variables =
   let (env, macro_locals) =
@@ -2085,18 +2076,9 @@ let outside_expr_tree env ~macro_variables =
 
 let with_inside_expr_tree env expr_tree_hint f =
   let old_in_expr_tree = env.in_expr_tree in
-  let old_in_macro_splice = env.in_macro_splice in
-  let env =
-    inside_expr_tree env ~macro_variables:old_in_macro_splice expr_tree_hint
-  in
+  let env = inside_expr_tree env expr_tree_hint in
   let (env, r1, r2) = f env in
-  let env =
-    {
-      env with
-      in_expr_tree = old_in_expr_tree;
-      in_macro_splice = old_in_macro_splice;
-    }
-  in
+  let env = { env with in_expr_tree = old_in_expr_tree } in
   (env, r1, r2)
 
 let with_outside_expr_tree env ~macro_variables f =

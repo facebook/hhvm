@@ -868,6 +868,11 @@ and ('ex, 'en) efun = {
   ef_fun: ('ex, 'en) fun_;
   ef_use: 'ex capture_lid list;
   ef_closure_class_name: string option;
+  ef_is_expr_tree_virtual_expr: bool;
+      (** An expression tree desugars into an expression containing an efun for
+      the virtualized expression. We need some special type checking support for
+      this case.
+      *)
 }
 
 (**

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<10232706440a7ddc6c2581c8b3532a0b>>
+// @generated SignedSource<<152a120fcb5b4c4151ab00e66a6b024f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -746,7 +746,8 @@ impl<P: Params> NodeMut<P> for Efun<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         self.fun.accept(c, v)?;
         self.use_.accept(c, v)?;
-        self.closure_class_name.accept(c, v)
+        self.closure_class_name.accept(c, v)?;
+        self.is_expr_tree_virtual_expr.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for EmitId {

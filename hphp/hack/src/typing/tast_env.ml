@@ -85,7 +85,7 @@ let get_class_or_typedef env x : class_or_typedef_result Decl_entry.t =
 
 let is_in_expr_tree = Typing_env.is_in_expr_tree
 
-let inside_expr_tree = Typing_env.inside_expr_tree ~macro_variables:None
+let inside_expr_tree = Typing_env.inside_expr_tree
 
 let outside_expr_tree = Typing_env.outside_expr_tree ~macro_variables:None
 

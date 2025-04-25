@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<979ddd193a103de61dfc388188dd379d>>
+// @generated SignedSource<<3ec2ee24a6d1f105984078594c1d19e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1504,6 +1504,10 @@ pub struct Efun<Ex, En> {
     pub fun: Fun_<Ex, En>,
     pub use_: Vec<CaptureLid<Ex>>,
     pub closure_class_name: Option<String>,
+    /// An expression tree desugars into an expression containing an efun for
+    /// the virtualized expression. We need some special type checking support for
+    /// this case.
+    pub is_expr_tree_virtual_expr: bool,
 }
 
 /// Naming has two phases and the annotation helps to indicate the phase.

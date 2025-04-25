@@ -70,7 +70,8 @@ Errors:
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None };
-                          ef_use = [((int), ([18:26-28], $y))]; ef_closure_class_name = None }))
+                          ef_use = [((int), ([18:26-28], $y))]; ef_closure_class_name = None; 
+                          ef_is_expr_tree_virtual_expr = false }))
                     )))));
             ([21:3-14],
              (Expr

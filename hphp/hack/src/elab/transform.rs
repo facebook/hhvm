@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<78e54770192e3c8d65138eb0af4f9e23>>
+// @generated SignedSource<<1461ddacd4604948138376e3172e5b2c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1122,6 +1122,7 @@ impl Transform for Efun {
                 fun: ref mut __binding_0,
                 use_: ref mut __binding_1,
                 closure_class_name: ref mut __binding_2,
+                is_expr_tree_virtual_expr: ref mut __binding_3,
             } => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1129,7 +1130,10 @@ impl Transform for Efun {
                 {
                     __binding_1.transform(env, &mut pass.clone())
                 }
-                { __binding_2.transform(env, &mut pass.clone()) }
+                {
+                    __binding_2.transform(env, &mut pass.clone())
+                }
+                { __binding_3.transform(env, &mut pass.clone()) }
             }
         }
     }

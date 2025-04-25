@@ -195,7 +195,8 @@
                                                                     f_doc_comment = None };
                                                                     ef_use =
                                                                     [((), ([4:3-13], $0fp0)); ((), ([4:3-13], $0fp1)); ((), ([4:3-13], $0fp2)); ((), ([4:3-13], $0fp3)); ((), ([4:3-13], $0fp4))];
-                                                                    ef_closure_class_name = None })))
+                                                                    ef_closure_class_name = None; 
+                                                                    ef_is_expr_tree_virtual_expr = false })))
                                                                 ])));
                                                        (Anormal
                                                           ((), [5:5-11:4],

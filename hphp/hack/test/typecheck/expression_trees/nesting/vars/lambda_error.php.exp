@@ -1,0 +1,28 @@
+ERROR: File "lambda_error.php", line 29, characters 25-26:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 30, characters 25-26:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 31, characters 41-42:
+Variable `$y` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 32, characters 36-37:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+  File "lambda_error.php", line 32, characters 14-15:
+  Did you mean `$y` instead?
+ERROR: File "lambda_error.php", line 32, characters 41-42:
+Variable `$y` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 33, characters 45-46:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 34, characters 41-42:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 35, characters 44-45:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 36, characters 45-46:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 37, characters 45-46:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 43, characters 22-23:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 50, characters 35-36:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "lambda_error.php", line 55, characters 27-28:
+Variable `$y` is undefined, or not always defined. (Naming[2050])

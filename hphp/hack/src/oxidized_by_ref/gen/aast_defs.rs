@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ea0b78aa9bbf34116cf35c128180dc9>>
+// @generated SignedSource<<ddc776cec14040805c51753e5314699a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1943,6 +1943,10 @@ pub struct Efun<'a, Ex, En> {
     pub use_: &'a [&'a CaptureLid<'a, Ex>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub closure_class_name: Option<&'a str>,
+    /// An expression tree desugars into an expression containing an efun for
+    /// the virtualized expression. We need some special type checking support for
+    /// this case.
+    pub is_expr_tree_virtual_expr: bool,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Efun<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Efun<'arena, Ex, En>);

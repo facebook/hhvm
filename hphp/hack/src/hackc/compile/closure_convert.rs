@@ -799,6 +799,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
             fun: fd,
             use_: vec![],
             closure_class_name: None,
+            is_expr_tree_virtual_expr: false,
         }),
     );
     let fun_handle = hack_expr!(
@@ -1363,6 +1364,7 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
             fun: fd,
             use_: use_vars,
             closure_class_name: Some(closure_class_name),
+            is_expr_tree_virtual_expr: false,
         };
         Ok(Expr_::mk_efun(efun))
     }

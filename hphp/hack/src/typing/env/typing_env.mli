@@ -220,11 +220,7 @@ val with_outside_expr_tree :
   (env -> Aast.class_name option -> env * 'a * 'b) ->
   env * 'a * 'b * (Pos.t * locl_ty) Local_id.Map.t option
 
-val inside_expr_tree :
-  env ->
-  macro_variables:Typing_local_types.t option ->
-  Aast_defs.class_name ->
-  env
+val inside_expr_tree : env -> Aast_defs.class_name -> env
 
 val outside_expr_tree : env -> macro_variables:Aast_defs.lid list option -> env
 

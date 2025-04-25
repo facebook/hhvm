@@ -958,6 +958,7 @@ let stash_conts_for_closure
     env
     p
     ~should_invalidate_fakes
+    ~is_expr_tree_virtual_expr
     ~is_anon
     (captured : Typing_local_types.local Aast.capture_lid list)
     f =
@@ -980,9 +981,15 @@ let stash_conts_for_closure
   in
   let init =
     Option.map (Env.next_cont_opt env) ~f:(fun next_cont ->
+        let extended_env =
+          match env.in_macro_splice with
+          | Some macro_splice_vars when is_expr_tree_virtual_expr ->
+            Env.set_locals env macro_splice_vars
+          | _ -> env
+        in
         let initial_locals =
           if is_anon then
-            Env.get_locals env captured
+            Env.get_locals extended_env captured
           else
             next_cont.Typing_per_cont_env.local_types
         in
@@ -4781,12 +4788,17 @@ end = struct
       let env = upcast env p expr_ty hint_ty in
       make_result env p (Aast.Upcast (te, hint)) hint_ty
     | Efun
-        { ef_fun = f; ef_use = idl; ef_closure_class_name = closure_class_name }
-      ->
+        {
+          ef_fun = f;
+          ef_use = idl;
+          ef_closure_class_name = closure_class_name;
+          ef_is_expr_tree_virtual_expr = is_expr_tree_virtual_expr;
+        } ->
       Lambda.lambda
         ~should_invalidate_fakes:(not ctxt.Context.immediately_called_lambda)
         ~is_anon:true
         ~closure_class_name
+        ~is_expr_tree_virtual_expr
         ~expected
         p
         env
@@ -4797,6 +4809,7 @@ end = struct
         ~should_invalidate_fakes:(not ctxt.Context.immediately_called_lambda)
         ~is_anon:false
         ~closure_class_name:None
+        ~is_expr_tree_virtual_expr:false
         ~expected
         p
         env
@@ -9007,6 +9020,7 @@ and Lambda : sig
     should_invalidate_fakes:bool ->
     is_anon:bool ->
     closure_class_name:byte_string option ->
+    is_expr_tree_virtual_expr:bool ->
     expected:ExpectedTy.t option ->
     pos ->
     env ->
@@ -9405,13 +9419,14 @@ end = struct
       ?ret_ty
       ~supportdyn
       ~closure_class_name
+      ~is_expr_tree_virtual_expr
       ~should_invalidate_fakes
       env
       lambda_pos
       decl_ft
       f
       ft
-      idl
+      used_ids
       is_anon =
     let type_closure f =
       (* Wrap the function f so that it can freely clobber function-specific
@@ -9430,8 +9445,9 @@ end = struct
               env
               lambda_pos
               ~should_invalidate_fakes
+              ~is_expr_tree_virtual_expr
               ~is_anon
-              idl
+              used_ids
               (fun env ->
                 let (env, res) = f env in
                 let escaping = Typing_escape.escaping_from_snapshot snap env in
@@ -9523,7 +9539,7 @@ end = struct
     let env =
       if support_dynamic_type then
         (* quiet to avoid duplicate error about capturing an undefined variable *)
-        let locals = Env.get_locals ~quiet:true env idl in
+        let locals = Env.get_locals ~quiet:true env used_ids in
         let like_locals =
           Local_id.Map.map
             (fun local ->
@@ -9753,8 +9769,9 @@ end = struct
       }
     in
     let ty = mk (Reason.witness lambda_pos, Tfun ft) in
-    let idl_ty =
-      List.map idl ~f:(fun (local, lid) -> (local.Typing_local_types.ty, lid))
+    let used_ids_ty =
+      List.map used_ids ~f:(fun (local, lid) ->
+          (local.Typing_local_types.ty, lid))
     in
     let (env, te) =
       Typing_helpers.make_simplify_typed_expr
@@ -9765,11 +9782,12 @@ end = struct
           Aast.Efun
             {
               ef_fun = tfun_;
-              ef_use = idl_ty;
+              ef_use = used_ids_ty;
               ef_closure_class_name = closure_class_name;
+              ef_is_expr_tree_virtual_expr = is_expr_tree_virtual_expr;
             }
         else
-          Aast.Lfun (tfun_, idl_ty))
+          Aast.Lfun (tfun_, used_ids_ty))
     in
     let env = Env.set_tyvar_variance env ty in
     (env, (te, ft, support_dynamic_type))
@@ -9778,11 +9796,12 @@ end = struct
       ~should_invalidate_fakes
       ~is_anon
       ~closure_class_name
+      ~is_expr_tree_virtual_expr
       ~expected
       p
       env
       f
-      idl =
+      used_ids =
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Twildcard instead. *)
     let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
@@ -9818,8 +9837,8 @@ end = struct
           declared_decl_ft)
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    let idl =
-      List.map idl ~f:(fun ((), ((_, name) as id)) ->
+    let used_ids =
+      List.map used_ids ~f:(fun ((), ((_, name) as id)) ->
           (* Check that none of the explicit capture variables are from a using clause *)
           check_escaping_var env id;
 
@@ -9836,13 +9855,14 @@ end = struct
           ~should_invalidate_fakes
           ~supportdyn
           ~closure_class_name
+          ~is_expr_tree_virtual_expr
           ?ret_ty
           env
           p
           declared_decl_ft
           f
           ft
-          idl
+          used_ids
           is_anon
       in
       let ty = mk (Reason.witness p, Tfun ft) in

@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/hash/hash_sha.h"
+#include "hphp/runtime/ext/hash/hash_util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

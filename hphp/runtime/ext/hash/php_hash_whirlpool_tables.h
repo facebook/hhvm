@@ -17,8 +17,11 @@
 
 /* $Id: php_hash_whirlpool_tables.h,v 1.1.2.3.2.1 2007/01/01 09:36:01 sebastian Exp $ */
 
-#ifndef PHP_HASH_WHIRLPOOL_TABLES_H
-#define PHP_HASH_WHIRLPOOL_TABLES_H
+#pragma once
+
+#include "hphp/runtime/ext/hash/hash_util.h"
+
+#include <cstdint>
 
 namespace HPHP {
 
@@ -575,8 +578,6 @@ const uint64_t C7[256] = {
 };
 
 }
-
-#endif
 
 /*
  * Local variables:

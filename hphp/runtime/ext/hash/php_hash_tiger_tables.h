@@ -17,6 +17,12 @@
 
 /* $Id: php_hash_tiger_tables.h,v 1.2.2.3.2.1 2007/01/01 09:36:01 sebastian Exp $ */
 
+#pragma once
+
+#include "hphp/runtime/ext/hash/hash_util.h"
+
+#include <cstdint>
+
 #define t1 (table)
 #define t2 (table+256)
 #define t3 (table+256*2)

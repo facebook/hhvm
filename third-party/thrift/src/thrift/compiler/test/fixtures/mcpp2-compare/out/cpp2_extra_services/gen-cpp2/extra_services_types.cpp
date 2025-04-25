@@ -275,10 +275,12 @@ template void containerStruct2::readNoXfer<>(apache::thrift::BinaryProtocolReade
 template uint32_t containerStruct2::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t containerStruct2::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void containerStruct2::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t containerStruct2::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t containerStruct2::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+#endif
 template void containerStruct2::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t containerStruct2::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t containerStruct2::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;

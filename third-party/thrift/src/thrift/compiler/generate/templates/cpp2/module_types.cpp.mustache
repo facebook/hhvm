@@ -177,10 +177,12 @@ template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::Binar
 template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+#endif
 {{#program:json?}}
 template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;

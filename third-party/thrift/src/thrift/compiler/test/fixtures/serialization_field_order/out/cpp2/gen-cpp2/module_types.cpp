@@ -118,10 +118,12 @@ template void Foo::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Foo::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Foo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Foo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void Foo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Foo::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+#endif
 
 
 } // namespace cpp2
@@ -231,10 +233,12 @@ template void Foo2::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Foo2::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Foo2::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Foo2::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void Foo2::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Foo2::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Foo2::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t Foo2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+#endif
 
 
 } // namespace cpp2

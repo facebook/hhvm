@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <vector>
 #include <iomanip>
 
 #include "hphp/tools/tc-print/offline-code.h"

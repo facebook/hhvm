@@ -17,18 +17,14 @@
 #include "hphp/runtime/base/type-structure.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/string-hash-set.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 

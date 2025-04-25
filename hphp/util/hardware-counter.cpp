@@ -20,22 +20,18 @@
 
 #include <folly/ScopeGuard.h>
 
-#include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 #define _GNU_SOURCE 1
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <assert.h>
 #include <sys/ioctl.h>
 #include <asm/unistd.h>
-#include <sys/prctl.h>
 #include <linux/perf_event.h>
 
 #include <folly/String.h>

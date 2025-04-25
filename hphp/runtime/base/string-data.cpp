@@ -21,17 +21,10 @@
 
 #include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/safe-cast.h"
 
-#include "hphp/runtime/base/apc-handle-defs.h"
-#include "hphp/runtime/base/apc-string.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include "hphp/runtime/vm/unit-emitter.h"
 

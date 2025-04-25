@@ -23,7 +23,6 @@
 #include "hphp/runtime/server/static-content-cache.h"
 
 #include <sys/types.h>
-#include <tuple>
 
 namespace HPHP {
 

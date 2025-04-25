@@ -16,18 +16,14 @@
 */
 
 #include "hphp/runtime/ext/std/ext_std_misc.h"
-#include <limits>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-pack.h"
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/ext/std/ext_std_options.h"
@@ -39,7 +35,6 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/configs/hacklang.h"

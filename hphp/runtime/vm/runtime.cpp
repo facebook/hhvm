@@ -14,20 +14,12 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/implicit-context.h"
-#include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/ext/core/ext_core_closure.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/conv-10.h"

@@ -14,18 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/vanilla-sort.h"
 #include "hphp/runtime/base/sort-helpers.h"
-#include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/coeffects.h"
 
 #include <folly/ScopeGuard.h>

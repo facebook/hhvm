@@ -13,7 +13,6 @@
  */
 
 #include <math.h>
-#include <string.h>
 #include <stdlib.h>
 #include "gd.h"
 

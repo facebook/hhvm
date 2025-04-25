@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/monotype-dict-x64.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"

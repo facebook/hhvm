@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/analysis.h"
 
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
@@ -33,7 +32,6 @@
 #include <folly/MapUtil.h>
 
 #include <algorithm>
-#include <vector>
 
 #include "hphp/runtime/vm/jit/irgen.h"
 

@@ -14,26 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/runtime-compiler.h"
-#include "hphp/runtime/vm/unit.h"
-
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/unit-cache.h"
-
-#include "hphp/system/systemlib.h"
-
-#include "hphp/util/build-info.h"
-#include "hphp/util/logger.h"
 
 #include <folly/portability/Libgen.h>
-
-#include <string>
 
 namespace HPHP {
 

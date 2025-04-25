@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/implicit-context.h"
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
-#include "hphp/runtime/ext/hh/ext_implicit_context.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/memo-cache.h"

@@ -16,18 +16,9 @@
 
 #include "hphp/runtime/vm/unit-parser.h"
 
-#include <cinttypes>
-#include <condition_variable>
-#include <fstream>
-#include <iterator>
 #include <memory>
-#include <mutex>
-#include <signal.h>
-#include <sstream>
-#include <stdio.h>
 #include <string>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 #include <folly/compression/Zstd.h>
 #include <folly/json/DynamicConverter.h>
@@ -39,31 +30,20 @@
 #include "hphp/hack/src/hackc/hhbc-unit.h"
 #include "hphp/hack/src/parser/ffi_bridge/parser_ffi.rs.h"
 #include "hphp/runtime/base/autoload-map.h"
-#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/runtime/vm/hackc-translator.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-gen-helpers.h"
-#include "hphp/util/atomic-vector.h"
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/configs/hacklang.h"
-#include "hphp/util/configs/jit.h"
-#include "hphp/util/embedded-data.h"
-#include "hphp/util/gzip.h"
-#include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/sha1.h"
-#include "hphp/util/struct-log.h"
-#include "hphp/util/timer.h"
 #include "hphp/zend/zend-string.h"
-#include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
 

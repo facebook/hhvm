@@ -16,16 +16,12 @@
 */
 #include "hphp/runtime/ext/server/ext_server.h"
 
-#include <folly/Conv.h>
-
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
-#include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/util/boot-stats.h"
 

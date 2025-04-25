@@ -19,8 +19,6 @@
 #include <cstdint>
 #include <limits>
 
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -28,12 +26,8 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/heap-graph.h"
-#include "hphp/runtime/server/http-server.h"
 
-#include "hphp/util/alloc.h"
 #include "hphp/util/configs/gc.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/process.h"
 #include "hphp/util/ptr-map.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"

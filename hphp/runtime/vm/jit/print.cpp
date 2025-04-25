@@ -19,7 +19,6 @@
 #include <folly/json/dynamic.h>
 #include <folly/json/json.h>
 
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -27,29 +26,18 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/disasm.h"
-#include "hphp/util/struct-log.h"
 #include "hphp/util/text-color.h"
-#include "hphp/util/text-util.h"
 
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/array-access-profile.h"
-#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/cls-cns-profile.h"
-#include "hphp/runtime/vm/jit/decref-profile.h"
-#include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/meth-profile.h"
-#include "hphp/runtime/vm/jit/switch-profile.h"
-#include "hphp/runtime/vm/jit/type-profile.h"
 
 #include "hphp/vixl/a64/disasm-a64.h"
 

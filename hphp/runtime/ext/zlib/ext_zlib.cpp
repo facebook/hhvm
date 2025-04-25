@@ -30,7 +30,6 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/gzip.h"
-#include "hphp/util/logger.h"
 #include <folly/String.h>
 #include <memory>
 #include <algorithm>

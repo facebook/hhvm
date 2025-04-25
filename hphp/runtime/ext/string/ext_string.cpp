@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"

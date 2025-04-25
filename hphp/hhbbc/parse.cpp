@@ -15,7 +15,6 @@
 */
 #include "hphp/hhbbc/parse.h"
 
-#include <thread>
 #include <unordered_map>
 #include <map>
 

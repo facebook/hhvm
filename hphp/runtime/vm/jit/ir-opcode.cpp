@@ -16,15 +16,7 @@
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
-#include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"

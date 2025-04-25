@@ -22,7 +22,6 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <iomanip>
 #include <cinttypes>
 #include <filesystem>
 
@@ -108,7 +107,6 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unwind.h"
-#include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"

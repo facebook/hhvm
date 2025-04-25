@@ -20,8 +20,6 @@
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/vanilla-vec.h"
@@ -31,7 +29,6 @@
 #include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/func-order.h"
@@ -40,16 +37,13 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
-#include "hphp/util/abi-cxx.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP::jit {

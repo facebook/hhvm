@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/pipe.h"
@@ -46,7 +45,6 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/user-info.h"
 

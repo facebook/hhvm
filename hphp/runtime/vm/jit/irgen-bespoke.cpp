@@ -36,7 +36,6 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
-#include "hphp/util/tiny-vector.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit { namespace irgen {

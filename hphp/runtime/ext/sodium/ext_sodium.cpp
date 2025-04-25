@@ -24,8 +24,6 @@
 #include <sodium.h>
 #include <usdt/usdt.h>
 
-#include <limits>
-
 namespace HPHP {
 
 namespace {

@@ -31,7 +31,6 @@
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/url/ext_url.h"
 
 #define FORMAT_IPV4  4
 #define FORMAT_IPV6  6

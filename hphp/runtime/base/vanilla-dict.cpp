@@ -19,35 +19,24 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/variable-serializer.h"
 
-#include "hphp/runtime/vm/member-operations.h"
-
-#include "hphp/util/alloc.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 
 #include <folly/CPortability.h>
 #include <folly/portability/Constexpr.h>
 
 #include <algorithm>
-#include <utility>
 
 #include "hphp/runtime/base/vanilla-dict-defs.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 namespace HPHP {
 

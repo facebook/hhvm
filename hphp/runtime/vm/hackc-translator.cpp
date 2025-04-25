@@ -18,8 +18,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/as.h"
-#include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/opcodes.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -27,7 +25,6 @@
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"
-#include "hphp/zend/zend-string.h"
 
 #include <folly/Range.h>
 

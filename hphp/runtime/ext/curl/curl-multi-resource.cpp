@@ -3,7 +3,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
-#include <curl/easy.h>
 #include <curl/multi.h>
 
 namespace {

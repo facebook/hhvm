@@ -25,7 +25,6 @@
 #include <folly/container/F14Set.h>
 #include <folly/portability/Unistd.h>
 
-#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 

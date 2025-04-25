@@ -17,22 +17,15 @@
 #include "hphp/runtime/base/type-array.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/vanilla-dict-defs.h"
-#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-qsort.h"
-#include "hphp/runtime/base/zend-string.h"
-
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/zend/zend-string.h"
 
 #include <unicode/coll.h> // icu
 #include <vector>

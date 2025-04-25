@@ -17,33 +17,23 @@
 #include "hphp/runtime/vm/func-emitter.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/coeffects-config.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/ext/extension.h"
 
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
-#include "hphp/runtime/vm/runtime.h"
-
-#include "hphp/runtime/vm/jit/types.h"
-
-#include "hphp/runtime/vm/verifier/cfg.h"
-
 #include "hphp/system/systemlib.h"
 
-#include "hphp/util/atomic-vector.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/file.h"
-#include "hphp/util/trace.h"
-#include <iterator>
 
 namespace HPHP {
 

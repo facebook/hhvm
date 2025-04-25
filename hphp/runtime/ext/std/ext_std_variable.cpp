@@ -16,7 +16,6 @@
 */
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
-#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
@@ -24,15 +23,11 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
-#include "hphp/runtime/vm/jit/translator-inline.h"
-
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
-#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/server/http-protocol.h"
 
 #include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/hphp-config.h"
 #include "hphp/util/logger.h"
 
 #include <folly/Likely.h>

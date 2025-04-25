@@ -21,7 +21,6 @@
 #include <utility>
 #include <variant>
 #include <folly/ScopeGuard.h>
-#include <folly/Hash.h>
 
 #include "hphp/util/bitset-utils.h"
 #include "hphp/util/configs/hhir.h"

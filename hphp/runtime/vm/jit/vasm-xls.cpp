@@ -16,10 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
-#include "hphp/runtime/base/stats.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -36,7 +33,6 @@
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <folly/Format.h>
 

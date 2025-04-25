@@ -16,21 +16,17 @@
 
 #include "hphp/runtime/base/concurrent-shared-store.h"
 
-#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include "hphp/util/logger.h"
-#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 #include <atomic>
 #include <mutex>
-#include <set>
 #include <string>
 #include <vector>
 

@@ -20,7 +20,6 @@
 
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include <curl/multi.h>
 #include <folly/portability/OpenSSL.h>
 
 #define PHP_CURL_STDOUT 0

@@ -12,9 +12,7 @@
 #include "cs_config.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
-#include "neo_misc.h"
 #include "neo_rand.h"
 
 static int RandomInit = 0;

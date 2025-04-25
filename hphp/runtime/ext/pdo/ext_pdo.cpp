@@ -30,8 +30,6 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 
 #include "hphp/runtime/ext/extension.h"

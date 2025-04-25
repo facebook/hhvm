@@ -24,8 +24,6 @@
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
 #include "hphp/runtime/ext/pdo_mysql/pdo_mysql.h"
 #endif
-#include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {

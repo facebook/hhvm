@@ -15,9 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/opt.h"
 
-#include <boost/dynamic_bitset.hpp>
-#include <sstream>
-
 #include "hphp/util/bitset-utils.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"

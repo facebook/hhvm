@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -30,11 +29,8 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
 #include "hphp/runtime/server/static-content-cache.h"
-#include "hphp/runtime/server/virtual-host.h"
 
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/process.h"
 
 #include <folly/String.h>
 #include <folly/portability/Fcntl.h>

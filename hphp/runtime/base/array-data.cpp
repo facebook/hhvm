@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/base/array-data.h"
 
-#include <vector>
 #include <array>
 #include <tbb/concurrent_unordered_set.h>
 
@@ -24,23 +23,17 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/memory-stats.h"
-#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/exception.h"
-
-#include "hphp/zend/zend-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

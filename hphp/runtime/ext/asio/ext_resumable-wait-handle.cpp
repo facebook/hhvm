@@ -18,10 +18,8 @@
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
-#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"

@@ -18,14 +18,12 @@
 #include <algorithm>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #include <folly/Conv.h>
 #include <folly/portability/Fcntl.h>
 
 #include "hphp/runtime/base/file.h"
 
-#include "hphp/util/alloc.h"
 #include "hphp/util/conv-10.h"
 
 namespace HPHP {

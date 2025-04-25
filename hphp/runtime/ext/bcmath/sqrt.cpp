@@ -36,7 +36,6 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
 
 #include <folly/ScopeGuard.h>
 

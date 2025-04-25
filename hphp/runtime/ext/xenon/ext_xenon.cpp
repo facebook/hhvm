@@ -16,28 +16,20 @@
 */
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
-#include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/xbox-server.h"
 
 #include "hphp/util/configs/xenon.h"
-#include "hphp/util/thread-local.h"
 #include "hphp/util/rds-local.h"
-#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 #include <chrono>
-#include "hphp/runtime/server/xbox-server.h"
-#include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/server/http-server.h"
-#include "hphp/runtime/server/cli-server.h"
-#include <time.h>
 
 #include <folly/Random.h>
 

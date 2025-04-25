@@ -30,11 +30,7 @@
 *************************************************************************/
 
 #include "config.h"
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
 #include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
 
@@ -109,4 +105,3 @@ bc_str2num (bc_num *num, char *str, int scale TSRMLS_DC)
   if (bc_is_zero (*num))
     (*num)->n_sign = PLUS;
 }
-

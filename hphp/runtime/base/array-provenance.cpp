@@ -16,30 +16,19 @@
 
 #include "hphp/runtime/base/array-provenance.h"
 
-#include "hphp/runtime/base/apc-array.h"
-#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/req-hash-set.h"
-#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/bytecode.h"
 
-#include "hphp/util/stack-trace.h"
 #include "hphp/util/rds-local.h"
-#include "hphp/util/type-scan.h"
-#include "hphp/util/type-traits.h"
 
 #include <folly/AtomicHashMap.h>
 #include <folly/Format.h>
 #include <folly/SharedMutex.h>
-#include <tbb/concurrent_hash_map.h>
 
 #include <sys/mman.h>
 #include <type_traits>

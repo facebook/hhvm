@@ -27,7 +27,6 @@
 #include "hphp/runtime/ext/thrift/type_wrapper.h"
 #include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/hash-map.h"
 
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/Portability.h>

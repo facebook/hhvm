@@ -17,10 +17,7 @@
 
 #include "hphp/runtime/ext/asio/asio-session.h"
 
-#include <limits>
 #include <algorithm>
-
-#include <folly/String.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"

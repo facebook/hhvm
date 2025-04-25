@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"

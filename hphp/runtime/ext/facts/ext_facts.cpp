@@ -19,9 +19,7 @@
 #include <chrono>
 #include <filesystem>
 #include <functional>
-#include <iomanip>
 #include <mutex>
-#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -34,7 +32,6 @@
 
 #include <watchman/cppclient/WatchmanClient.h>
 
-#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/autoload-map.h"
@@ -43,12 +40,8 @@
 #include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/watchman-connection.h"
-#include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/facts/config.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
@@ -69,8 +62,6 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/user-info.h"
-#include "hphp/zend/zend-string.h"
 
 TRACE_SET_MOD(facts);
 

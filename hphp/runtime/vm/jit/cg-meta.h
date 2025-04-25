@@ -108,6 +108,11 @@ struct CGMeta {
   std::set<TCA> veneerAddrs;
 
   /*
+   * Native calls.  Maps addresses in the JIT code cache to the target function being called.
+   */
+  jit::fast_map<TCA, TCA> nativeCalls;
+
+  /*
    * All the alignment constraints on each code address.
    */
   std::multimap<TCA,std::pair<Alignment,AlignContext>> alignments;

@@ -721,7 +721,13 @@ void Vgen<X64Asm>::emit(const call& i) {
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const calls& i) {
-  emitSmashableCall(a.code(), env.meta, i.target);
+  auto addr = emitSmashableCall(a.code(), env.meta, i.target);
+  (void)addr;
+#ifdef __roar__
+  // Track the native call so we can register them with ROAR after the code is
+  // relocated into its final place in the code cache.
+  env.meta.nativeCalls[addr] = i.target;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

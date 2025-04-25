@@ -336,6 +336,16 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
   updatedCP.swap(meta.codePointers);
 
+  decltype(meta.nativeCalls) updatedNC;
+  for (auto& nc : meta.nativeCalls) {
+    if (auto adjusted = rel.adjustedAddressAfter(nc.first)) {
+      updatedNC[adjusted] = nc.second;
+    } else {
+      updatedNC[nc.first] = nc.second;
+    }
+  }
+  updatedNC.swap(meta.nativeCalls);
+
   if (asmInfo) {
     assertx(asmInfo->validate());
     rel.fixupRanges(asmInfo, AreaIndex::Main);

@@ -30,6 +30,9 @@ namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg);
 
+extern "C" __attribute__((weak))
+int __roar_api_flag_safe_function_call_site(void*, void*);
+
 namespace {
 
 std::atomic<IFrameID> s_nextFrameKey;
@@ -276,6 +279,20 @@ void CGMeta::process_only(
   }
   trapReasons.clear();
 
+#ifdef __roar__
+  if (__roar_api_flag_safe_function_call_site) {
+    for (auto const& nc : nativeCalls) {
+      const int retval = __roar_api_flag_safe_function_call_site(nc.first, nc.second);
+
+      if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
+        Trace::ftraceRelease("ROAR: registering native call @ {} to {}, "
+                             "__roar_api_flag_safe_function_call_site returned = {}\n",
+                             nc.first, nc.second, retval);
+      }
+    }
+  }
+#endif
+
   process_literals();
 
   if (inProgressTailBranches) {
@@ -304,6 +321,7 @@ void CGMeta::clear() {
   bcMap.clear();
   smashableBinds.clear();
   smashableCallData.clear();
+  nativeCalls.clear();
 }
 
 bool CGMeta::empty() const {
@@ -326,7 +344,8 @@ bool CGMeta::empty() const {
     inProgressTailJumps.empty() &&
     bcMap.empty() &&
     smashableBinds.empty() &&
-    smashableCallData.empty();
+    smashableCallData.empty() &&
+    nativeCalls.empty();
 }
 
 }

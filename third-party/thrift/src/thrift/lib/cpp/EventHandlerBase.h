@@ -26,8 +26,7 @@
 
 #include <thrift/lib/cpp/ContextStack.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class EventHandlerBase {
  public:
@@ -115,7 +114,6 @@ class TClientBase : public EventHandlerBase {
   getHandlers();
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_EVENTHANDLERBASE_H_

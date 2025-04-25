@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/detail/EventHandlerRuntime.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 const char* stripServiceNamePrefix(
@@ -652,5 +651,4 @@ ContextStackUnsafeAPI::getInterceptorFrameworkMetadata(
 }
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -23,8 +23,7 @@ namespace folly {
 class IOBuf;
 }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Structure representing a serialized message, encoded with the given
@@ -36,5 +35,4 @@ struct SerializedMessage {
   folly::StringPiece methodName;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

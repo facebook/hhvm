@@ -21,8 +21,7 @@
 
 #include <folly/String.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 TOutput GlobalOutput;
 
@@ -71,5 +70,4 @@ TLibraryException::TLibraryException(const char* message, int errnoValue) {
   message_ = std::string(message) + ": " + TOutput::strerror_s(errnoValue);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

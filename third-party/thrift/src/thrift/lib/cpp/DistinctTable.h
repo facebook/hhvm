@@ -20,8 +20,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <class T>
 struct BaseDistinctTablePolicy {
@@ -98,5 +97,4 @@ class DistinctTable {
   Index indexes_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 #include <thrift/lib/cpp/server/TConnectionContext.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * A processor is a generic object that acts upon two streams of data, one
@@ -114,7 +113,6 @@ class ReleaseHandler {
   std::shared_ptr<HandlerFactory_> handlerFactory_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_TPROCESSOR_H_

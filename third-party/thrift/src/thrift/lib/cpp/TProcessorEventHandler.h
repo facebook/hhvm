@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp/server/TConnectionContext.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace details {
 enum class STREAM_ENDING_TYPES {
   COMPLETE = 0,
@@ -243,5 +242,4 @@ class TProcessorEventHandlerNoUserExnCallbacks : public TProcessorEventHandler {
       const folly::exception_wrapper& /*ew_*/) final {}
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

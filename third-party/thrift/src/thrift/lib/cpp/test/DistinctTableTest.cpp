@@ -19,8 +19,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/DistinctTable.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <class T>
 struct AllSamePolicy : BaseDistinctTablePolicy<T> {
@@ -79,5 +78,4 @@ TEST(DistinctTable, ByteIndexPolicy) {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

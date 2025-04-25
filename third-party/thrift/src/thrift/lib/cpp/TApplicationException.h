@@ -21,8 +21,7 @@
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace protocol {
 class TProtocol;
@@ -341,7 +340,6 @@ struct FOLLY_EXPORT AppQuotaExceededException : TApplicationException {
   const std::string tenantId_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef _THRIFT_TAPPLICATIONEXCEPTION_H_

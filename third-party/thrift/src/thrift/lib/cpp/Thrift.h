@@ -49,8 +49,7 @@
 
 #include <thrift/lib/cpp/TLogging.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Specialization fwd-decl in _types.h.
@@ -230,7 +229,6 @@ class ServiceHandler;
 template <class ServiceTag>
 class Client;
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_THRIFT_H_

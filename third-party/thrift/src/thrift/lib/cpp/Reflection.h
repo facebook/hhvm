@@ -22,9 +22,7 @@
 
 #include <thrift/lib/thrift/gen-cpp2/reflection_types.h>
 
-namespace apache {
-namespace thrift {
-namespace reflection {
+namespace apache::thrift::reflection {
 
 namespace detail {
 const size_t kTypeBits = 5;
@@ -46,8 +44,6 @@ inline bool isBaseType(Type type) {
   return (type <= Type::TYPE_DOUBLE) || (type == Type::TYPE_FLOAT);
 }
 
-} // namespace reflection
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::reflection
 
 #endif /* THRIFT_LIB_CPP_REFLECTION_H_ */

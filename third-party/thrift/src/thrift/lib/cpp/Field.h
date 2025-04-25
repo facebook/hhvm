@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp2/type/Id.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace type {
 // Forward declare to avoid circular dep with thrift/lib/thrift/id.thrift.
 enum class FieldId : ::std::int16_t;
@@ -40,5 +39,4 @@ struct FieldContext {
   Struct& object;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

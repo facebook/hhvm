@@ -19,8 +19,7 @@
 
 #include <glog/logging.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using byte = uint8_t;
 
@@ -63,7 +62,6 @@ class RelativePtr {
   T& operator*() const { return *get(); }
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_RELATIVEPTR_H_

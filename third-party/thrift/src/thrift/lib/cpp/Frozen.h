@@ -64,8 +64,8 @@
  * See below for details on Frozen<T> and Freezer<T>, and for more information
  * see 'Thrift/Frozen' on the wiki.
  */
-namespace apache {
-namespace thrift {
+
+namespace apache::thrift {
 
 /**
  * Frozen<T> - This is simply a canonical type name for naming the frozen
@@ -932,7 +932,6 @@ std::unique_ptr<const FrozenRange<char>, FrozenTypeDeleter> inline freezeStr(
   return freeze(str);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_LIB_CPP_FROZEN_H_

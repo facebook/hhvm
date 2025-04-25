@@ -752,12 +752,12 @@ def _fbthrift__filter_kwargs(kwargs, tuple field_names):
         if val is None and key not in field_names:
             bad_kwargs.append(key)
 
-    for bad in bad_kwargs:
+    for bad_key in bad_kwargs:
         warnings.warn(
-            f"Discarding unexpected kwarg set to None: {bad}",
+            f"Discarding unexpected kwarg set to None: {bad_key}",
             RuntimeWarning,
         )
-        kwargs.pop(key)
+        kwargs.pop(bad_key)
 
     return kwargs
 

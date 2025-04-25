@@ -662,12 +662,14 @@ class NumericalConversionsTests(unittest.TestCase):
         if is_auto_migrated():
             with self.assertRaises(TypeError):
                 # pyre-ignore[28]: simulating customer clowntown
-                numerical(bad_kwarg=None)
+                numerical(float_val=1.0, bad_kwarg=None, int_val=2)
         else:
             # pyre-ignore[28]: simulating customer clowntown
-            n = numerical(bad_kwarg=None)
+            n = numerical(float_val=1.0, bad_kwarg=None, int_val=2)
             # thrift-py3 ignores
             self.assertIsInstance(n, numerical)
+            self.assertEqual(n.float_val, 1.0)
+            self.assertEqual(n.int_val, 2)
 
 
 class TestSubclass(OptionalFile):

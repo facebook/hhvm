@@ -43,16 +43,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::cpp
   TType::T_BYTE,
   TType::T_BYTE,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::cpp2::Limits>::storage_names = { {
-  "__fbthrift_field_max_i64_field"sv,
-  "__fbthrift_field_min_i64_field"sv,
-  "__fbthrift_field_max_i32_field"sv,
-  "__fbthrift_field_min_i32_field"sv,
-  "__fbthrift_field_max_i16_field"sv,
-  "__fbthrift_field_min_i16_field"sv,
-  "__fbthrift_field_max_byte_field"sv,
-  "__fbthrift_field_min_byte_field"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::cpp2::Limits>::isset_indexes = { {
   0,
   1,

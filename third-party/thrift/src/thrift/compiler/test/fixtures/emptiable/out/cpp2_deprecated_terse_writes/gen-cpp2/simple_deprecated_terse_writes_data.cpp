@@ -19,8 +19,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thr
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::storage_names = { {
-}};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::isset_indexes = { {
 }};
 
@@ -72,22 +70,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::storage_names = { {
-  "__fbthrift_field_bool_field"sv,
-  "__fbthrift_field_byte_field"sv,
-  "__fbthrift_field_short_field"sv,
-  "__fbthrift_field_int_field"sv,
-  "__fbthrift_field_long_field"sv,
-  "__fbthrift_field_float_field"sv,
-  "__fbthrift_field_double_field"sv,
-  "__fbthrift_field_string_field"sv,
-  "__fbthrift_field_binary_field"sv,
-  "__fbthrift_field_enum_field"sv,
-  "__fbthrift_field_list_field"sv,
-  "__fbthrift_field_set_field"sv,
-  "__fbthrift_field_map_field"sv,
-  "__fbthrift_field_struct_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::isset_indexes = { {
   0,
@@ -154,22 +136,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::storage_names = { {
-  "__fbthrift_field_bool_field"sv,
-  "__fbthrift_field_byte_field"sv,
-  "__fbthrift_field_short_field"sv,
-  "__fbthrift_field_int_field"sv,
-  "__fbthrift_field_long_field"sv,
-  "__fbthrift_field_float_field"sv,
-  "__fbthrift_field_double_field"sv,
-  "__fbthrift_field_string_field"sv,
-  "__fbthrift_field_binary_field"sv,
-  "__fbthrift_field_enum_field"sv,
-  "__fbthrift_field_list_field"sv,
-  "__fbthrift_field_set_field"sv,
-  "__fbthrift_field_map_field"sv,
-  "__fbthrift_field_struct_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::isset_indexes = { {
   0,

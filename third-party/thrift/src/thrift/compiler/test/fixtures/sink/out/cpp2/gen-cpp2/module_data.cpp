@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Initi
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::InitialResponse>::storage_names = { {
-  "__fbthrift_field_content"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::InitialResponse>::isset_indexes = { {
   0,
 }};
@@ -38,9 +35,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Final
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_types = { {
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::FinalResponse>::storage_names = { {
-  "__fbthrift_field_content"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::FinalResponse>::isset_indexes = { {
   0,
@@ -56,9 +50,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkP
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::SinkPayload>::storage_names = { {
-  "__fbthrift_field_content"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::SinkPayload>::isset_indexes = { {
   0,
 }};
@@ -72,9 +63,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Compa
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_types = { {
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::storage_names = { {
-  "__fbthrift_field_sink"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::isset_indexes = { {
   0,
@@ -90,9 +78,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Initi
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialException>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::InitialException>::storage_names = { {
-  "__fbthrift_field_reason"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::InitialException>::isset_indexes = { {
   0,
 }};
@@ -107,9 +92,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkE
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException1>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::SinkException1>::storage_names = { {
-  "__fbthrift_field_reason"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::SinkException1>::isset_indexes = { {
   0,
 }};
@@ -123,9 +105,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkE
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException2>::fields_types = { {
   TType::T_I64,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::SinkException2>::storage_names = { {
-  "__fbthrift_field_reason"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::SinkException2>::isset_indexes = { {
   0,

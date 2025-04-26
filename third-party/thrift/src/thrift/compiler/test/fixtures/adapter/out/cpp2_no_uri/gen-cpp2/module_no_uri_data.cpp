@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::RefUn
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::RefUnion>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::RefUnion>::storage_names = { {
-  "field1"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::RefUnion>::isset_indexes = { {
   -1,
 }};

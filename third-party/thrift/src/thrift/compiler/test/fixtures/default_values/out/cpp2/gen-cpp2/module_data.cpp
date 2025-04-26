@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::t
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::storage_names = { {
-  "__fbthrift_field_int_value"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::isset_indexes = { {
   0,
 }};
@@ -53,14 +50,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::fac
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::storage_names = { {
-  "__fbthrift_field_unqualified_integer"sv,
-  "__fbthrift_field_optional_integer"sv,
-  "__fbthrift_field_required_integer"sv,
-  "__fbthrift_field_unqualified_struct"sv,
-  "__fbthrift_field_optional_struct"sv,
-  "__fbthrift_field_required_struct"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::isset_indexes = { {
   0,
@@ -95,14 +84,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::fac
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::storage_names = { {
-  "__fbthrift_field_unqualified_integer"sv,
-  "__fbthrift_field_optional_integer"sv,
-  "__fbthrift_field_required_integer"sv,
-  "__fbthrift_field_unqualified_struct"sv,
-  "__fbthrift_field_optional_struct"sv,
-  "__fbthrift_field_required_struct"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::isset_indexes = { {
   0,

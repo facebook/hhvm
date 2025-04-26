@@ -87,7 +87,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::MyStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -103,7 +102,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::MyDataItem>
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -119,7 +117,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::TransitiveD
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -135,7 +132,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::detail::Dou
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -151,7 +147,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::StringPair>
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -167,7 +162,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::VapidStruct
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -183,7 +177,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::PrimitiveSt
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -199,7 +192,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::AdaptedFiel
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -215,7 +207,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::ListStruct>
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -231,7 +222,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::SetStruct> 
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -247,7 +237,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::MapStruct> 
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -263,7 +252,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::ComposeStru
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -279,7 +267,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::Shallot> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -295,7 +282,6 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::SomeBinary>
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

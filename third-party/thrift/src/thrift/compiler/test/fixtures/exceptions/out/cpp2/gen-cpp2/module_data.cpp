@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Fiery
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::Fiery>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::Fiery>::storage_names = { {
-  "__fbthrift_field_message"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Fiery>::isset_indexes = { {
   -1,
 }};
@@ -38,9 +35,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::Serio
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::Serious>::fields_types = { {
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::Serious>::storage_names = { {
-  "__fbthrift_field_sonnet"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Serious>::isset_indexes = { {
   0,
@@ -58,10 +52,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::Compl
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::ComplexFieldNames>::fields_types = { {
   TType::T_STRING,
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::ComplexFieldNames>::storage_names = { {
-  "__fbthrift_field_error_message"sv,
-  "__fbthrift_field_internal_error_message"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::ComplexFieldNames>::isset_indexes = { {
   0,
@@ -81,10 +71,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::CustomFieldNames>::storage_names = { {
-  "__fbthrift_field_error_message"sv,
-  "__fbthrift_field_internal_error_message"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::CustomFieldNames>::isset_indexes = { {
   0,
   1,
@@ -102,10 +88,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::Excep
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::ExceptionWithPrimitiveField>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::ExceptionWithPrimitiveField>::storage_names = { {
-  "__fbthrift_field_message"sv,
-  "__fbthrift_field_error_code"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::ExceptionWithPrimitiveField>::isset_indexes = { {
   0,
@@ -125,10 +107,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::ExceptionWithStructuredAnnotation>::storage_names = { {
-  "__fbthrift_field_message_field"sv,
-  "__fbthrift_field_error_code"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::ExceptionWithStructuredAnnotation>::isset_indexes = { {
   0,
   1,
@@ -140,8 +118,6 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cp
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::Banal>::fields_ids = { {
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::Banal>::fields_types = { {
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::Banal>::storage_names = { {
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::Banal>::isset_indexes = { {
 }};

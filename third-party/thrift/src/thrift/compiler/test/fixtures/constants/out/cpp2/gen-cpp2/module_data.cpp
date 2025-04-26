@@ -34,13 +34,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::cpp
   TType::T_DOUBLE,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::cpp2::Internship>::storage_names = { {
-  "__fbthrift_field_weeks"sv,
-  "__fbthrift_field_title"sv,
-  "__fbthrift_field_employer"sv,
-  "__fbthrift_field_compensation"sv,
-  "__fbthrift_field_school"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::cpp2::Internship>::isset_indexes = { {
   -1,
   0,
@@ -62,10 +55,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::Range>::storage_names = { {
-  "__fbthrift_field_min"sv,
-  "__fbthrift_field_max"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::Range>::isset_indexes = { {
   -1,
   -1,
@@ -83,10 +72,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::struc
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::struct1>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::struct1>::storage_names = { {
-  "__fbthrift_field_a"sv,
-  "__fbthrift_field_b"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::struct1>::isset_indexes = { {
   0,
@@ -112,12 +97,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::struct2>::storage_names = { {
-  "__fbthrift_field_a"sv,
-  "__fbthrift_field_b"sv,
-  "__fbthrift_field_c"sv,
-  "__fbthrift_field_d"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::struct2>::isset_indexes = { {
   0,
   1,
@@ -141,11 +120,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::cpp
   TType::T_I32,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::cpp2::struct3>::storage_names = { {
-  "__fbthrift_field_a"sv,
-  "__fbthrift_field_b"sv,
-  "__fbthrift_field_c"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::struct3>::isset_indexes = { {
   0,
   1,
@@ -168,11 +142,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::cpp
   TType::T_DOUBLE,
   TType::T_BYTE,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::cpp2::struct4>::storage_names = { {
-  "__fbthrift_field_a"sv,
-  "__fbthrift_field_b"sv,
-  "__fbthrift_field_c"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::struct4>::isset_indexes = { {
   0,
   1,
@@ -191,10 +160,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::union
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::union1>::fields_types = { {
   TType::T_I32,
   TType::T_DOUBLE,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::union1>::storage_names = { {
-  "i"sv,
-  "d"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::union1>::isset_indexes = { {
   0,
@@ -219,12 +184,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_DOUBLE,
   TType::T_STRUCT,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::union2>::storage_names = { {
-  "i"sv,
-  "d"sv,
-  "s"sv,
-  "u"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::union2>::isset_indexes = { {
   0,

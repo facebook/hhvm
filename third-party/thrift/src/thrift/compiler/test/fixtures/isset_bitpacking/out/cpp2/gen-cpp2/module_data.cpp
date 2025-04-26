@@ -31,12 +31,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_DOUBLE,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::Default>::storage_names = { {
-  "__fbthrift_field_field1"sv,
-  "__fbthrift_field_field2"sv,
-  "__fbthrift_field_field3"sv,
-  "__fbthrift_field_field4"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::Default>::isset_indexes = { {
   0,
   1,
@@ -62,12 +56,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_I32,
   TType::T_STRING,
   TType::T_DOUBLE,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::NonAtomic>::storage_names = { {
-  "__fbthrift_field_field1"sv,
-  "__fbthrift_field_field2"sv,
-  "__fbthrift_field_field3"sv,
-  "__fbthrift_field_field4"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::NonAtomic>::isset_indexes = { {
   0,
@@ -95,12 +83,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_DOUBLE,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::Atomic>::storage_names = { {
-  "__fbthrift_field_field1"sv,
-  "__fbthrift_field_field2"sv,
-  "__fbthrift_field_field3"sv,
-  "__fbthrift_field_field4"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::Atomic>::isset_indexes = { {
   0,
   1,
@@ -126,12 +108,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_I32,
   TType::T_STRING,
   TType::T_DOUBLE,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::AtomicFoo>::storage_names = { {
-  "__fbthrift_field_field1"sv,
-  "__fbthrift_field_field2"sv,
-  "__fbthrift_field_field3"sv,
-  "__fbthrift_field_field4"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::AtomicFoo>::isset_indexes = { {
   0,

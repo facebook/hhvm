@@ -58,21 +58,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::ap
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::storage_names = { {
-  "__fbthrift_field_bool_field"sv,
-  "__fbthrift_field_byte_field"sv,
-  "__fbthrift_field_short_field"sv,
-  "__fbthrift_field_int_field"sv,
-  "__fbthrift_field_long_field"sv,
-  "__fbthrift_field_float_field"sv,
-  "__fbthrift_field_double_field"sv,
-  "__fbthrift_field_string_field"sv,
-  "__fbthrift_field_binary_field"sv,
-  "__fbthrift_field_enum_field"sv,
-  "__fbthrift_field_list_field"sv,
-  "__fbthrift_field_set_field"sv,
-  "__fbthrift_field_map_field"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::isset_indexes = { {
   0,
   1,

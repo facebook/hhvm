@@ -34,13 +34,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::tes
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::storage_names = { {
-  "__fbthrift_field_fieldA"sv,
-  "__fbthrift_field_fieldB"sv,
-  "__fbthrift_field_fieldC"sv,
-  "__fbthrift_field_fieldD"sv,
-  "__fbthrift_field_fieldE"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::isset_indexes = { {
   0,
   1,
@@ -80,16 +73,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::tes
   TType::T_MAP,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::storage_names = { {
-  "__fbthrift_field_fieldA"sv,
-  "__fbthrift_field_fieldB"sv,
-  "__fbthrift_field_fieldC"sv,
-  "__fbthrift_field_fieldD"sv,
-  "__fbthrift_field_fieldE"sv,
-  "__fbthrift_field_fieldF"sv,
-  "__fbthrift_field_fieldG"sv,
-  "__fbthrift_field_fieldH"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::isset_indexes = { {
   0,
   1,
@@ -113,10 +96,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtu
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::storage_names = { {
-  "fieldA"sv,
-  "fieldB"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::isset_indexes = { {
   0,

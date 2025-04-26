@@ -34,13 +34,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::tes
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::python_capi::TemplateLists>::storage_names = { {
-  "__fbthrift_field_std_string"sv,
-  "__fbthrift_field_deque_string"sv,
-  "__fbthrift_field_small_vector_iobuf"sv,
-  "__fbthrift_field_nested_small_vector"sv,
-  "__fbthrift_field_small_vector_tensor"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::python_capi::TemplateLists>::isset_indexes = { {
   0,
   1,
@@ -76,15 +69,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_SET,
   TType::T_SET,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::storage_names = { {
-  "__fbthrift_field_std_set"sv,
-  "__fbthrift_field_std_unordered"sv,
-  "__fbthrift_field_folly_fast"sv,
-  "__fbthrift_field_folly_node"sv,
-  "__fbthrift_field_folly_value"sv,
-  "__fbthrift_field_folly_vector"sv,
-  "__fbthrift_field_folly_sorted_vector"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateSets>::isset_indexes = { {
   0,
@@ -124,15 +108,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_MAP,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateMaps>::storage_names = { {
-  "__fbthrift_field_std_map"sv,
-  "__fbthrift_field_std_unordered"sv,
-  "__fbthrift_field_folly_fast"sv,
-  "__fbthrift_field_folly_node"sv,
-  "__fbthrift_field_folly_value"sv,
-  "__fbthrift_field_folly_vector"sv,
-  "__fbthrift_field_folly_sorted_vector"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::TemplateMaps>::isset_indexes = { {
   0,
   1,
@@ -156,10 +131,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::tes
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::TWrapped>::storage_names = { {
-  "__fbthrift_field_fieldA"sv,
-  "__fbthrift_field_fieldB"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::TWrapped>::isset_indexes = { {
   0,
   1,
@@ -175,9 +146,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtu
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::fields_types = { {
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::storage_names = { {
-  "__fbthrift_field_lst"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionA>::isset_indexes = { {
   0,
 }};
@@ -192,9 +160,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtu
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::fields_types = { {
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::storage_names = { {
-  "__fbthrift_field_lst"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionB>::isset_indexes = { {
   0,
 }};
@@ -208,9 +173,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtu
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::fields_types = { {
   TType::T_LIST,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::storage_names = { {
-  "__fbthrift_field_lst"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::IndirectionC>::isset_indexes = { {
   0,

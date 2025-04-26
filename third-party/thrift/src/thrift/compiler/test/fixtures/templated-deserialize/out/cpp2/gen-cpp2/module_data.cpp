@@ -25,10 +25,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_BOOL,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SmallStruct>::storage_names = { {
-  "__fbthrift_field_small_A"sv,
-  "__fbthrift_field_small_B"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SmallStruct>::isset_indexes = { {
   0,
   1,
@@ -97,27 +93,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 19> TStructDataStorage<::cp
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 19> TStructDataStorage<::cpp2::containerStruct>::storage_names = { {
-  "__fbthrift_field_fieldA"sv,
-  "__fbthrift_field_fieldB"sv,
-  "__fbthrift_field_fieldC"sv,
-  "__fbthrift_field_fieldD"sv,
-  "__fbthrift_field_fieldE"sv,
-  "__fbthrift_field_fieldF"sv,
-  "__fbthrift_field_fieldG"sv,
-  "__fbthrift_field_fieldH"sv,
-  "__fbthrift_field_fieldI"sv,
-  "__fbthrift_field_fieldJ"sv,
-  "__fbthrift_field_fieldK"sv,
-  "__fbthrift_field_fieldL"sv,
-  "__fbthrift_field_fieldM"sv,
-  "__fbthrift_field_fieldQ"sv,
-  "__fbthrift_field_fieldR"sv,
-  "__fbthrift_field_fieldS"sv,
-  "__fbthrift_field_fieldT"sv,
-  "__fbthrift_field_fieldU"sv,
-  "__fbthrift_field_fieldX"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 19> TStructDataStorage<::cpp2::containerStruct>::isset_indexes = { {
   0,

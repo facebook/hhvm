@@ -25,10 +25,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::tes
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::storage_names = { {
-  "__fbthrift_field_myEnum"sv,
-  "__fbthrift_field_myBigEnum"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::isset_indexes = { {
   0,
   1,

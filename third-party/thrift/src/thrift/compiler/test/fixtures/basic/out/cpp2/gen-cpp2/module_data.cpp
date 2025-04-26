@@ -46,17 +46,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::storage_names = { {
-  "__fbthrift_field_MyIntField"sv,
-  "__fbthrift_field_MyStringField"sv,
-  "__fbthrift_field_MyDataField"sv,
-  "__fbthrift_field_myEnum"sv,
-  "__fbthrift_field_oneway"sv,
-  "__fbthrift_field_readonly"sv,
-  "__fbthrift_field_idempotent"sv,
-  "__fbthrift_field_floatSet"sv,
-  "__fbthrift_field_no_hack_codegen_field"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::isset_indexes = { {
   0,
   1,
@@ -85,11 +74,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::basic::Containers>::storage_names = { {
-  "__fbthrift_field_I32List"sv,
-  "__fbthrift_field_StringSet"sv,
-  "__fbthrift_field_StringToI64Map"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::basic::Containers>::isset_indexes = { {
   0,
   1,
@@ -102,8 +86,6 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::te
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = { {
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = { {
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::storage_names = { {
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = { {
 }};
@@ -126,12 +108,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_SET,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::storage_names = { {
-  "myEnum"sv,
-  "myStruct"sv,
-  "myDataItem"sv,
-  "floatSet"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::isset_indexes = { {
   0,
@@ -159,12 +135,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyException>::storage_names = { {
-  "__fbthrift_field_MyIntField"sv,
-  "__fbthrift_field_MyStringField"sv,
-  "__fbthrift_field_myStruct"sv,
-  "__fbthrift_field_myUnion"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyException>::isset_indexes = { {
   0,
   1,
@@ -191,12 +161,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::storage_names = { {
-  "__fbthrift_field_MyIntField"sv,
-  "__fbthrift_field_MyStringField"sv,
-  "__fbthrift_field_myStruct"sv,
-  "__fbthrift_field_myUnion"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::isset_indexes = { {
   0,
   1,
@@ -214,9 +178,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtu
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::storage_names = { {
-  "__fbthrift_field_reserved_field"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::isset_indexes = { {
   0,
 }};
@@ -230,9 +191,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtu
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_types = { {
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::storage_names = { {
-  "reserved_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::isset_indexes = { {
   0,

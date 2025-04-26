@@ -37,14 +37,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::som
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::some::ns::ModuleA>::storage_names = { {
-  "__fbthrift_field_i32Field"sv,
-  "__fbthrift_field_strField"sv,
-  "__fbthrift_field_listField"sv,
-  "__fbthrift_field_mapField"sv,
-  "__fbthrift_field_inclAField"sv,
-  "__fbthrift_field_inclBField"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::some::ns::ModuleA>::isset_indexes = { {
   0,
   1,
@@ -67,10 +59,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::som
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::some::ns::ModuleB>::storage_names = { {
-  "__fbthrift_field_i32Field"sv,
-  "__fbthrift_field_inclEnumB"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::ns::ModuleB>::isset_indexes = { {
   0,
   1,
@@ -85,9 +73,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::some::ns::d
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_types = { {
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::storage_names = { {
-  "__fbthrift_field_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::isset_indexes = { {
   0,
@@ -114,13 +99,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::som
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::some::ns::CppRef>::storage_names = { {
-  "__fbthrift_field_shared_field"sv,
-  "__fbthrift_field_shared_const_field"sv,
-  "__fbthrift_field_opt_shared_field"sv,
-  "__fbthrift_field_opt_shared_const_field"sv,
-  "__fbthrift_field_boxed_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::some::ns::CppRef>::isset_indexes = { {
   -1,

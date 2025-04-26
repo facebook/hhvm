@@ -31,12 +31,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_I32,
   TType::T_SET,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::storage_names = { {
-  "__fbthrift_field_reasonable"sv,
-  "__fbthrift_field_fine"sv,
-  "__fbthrift_field_questionable"sv,
-  "__fbthrift_field_tags"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::isset_indexes = { {
   0,
   1,
@@ -62,12 +56,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::storage_names = { {
-  "__fbthrift_field_me2_3"sv,
-  "__fbthrift_field_me3_n3"sv,
-  "__fbthrift_field_me1_t1"sv,
-  "__fbthrift_field_me1_t2"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::isset_indexes = { {
   0,

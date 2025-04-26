@@ -31,12 +31,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_DOUBLE,
   TType::T_DOUBLE,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::Color>::storage_names = { {
-  "__fbthrift_field_red"sv,
-  "__fbthrift_field_green"sv,
-  "__fbthrift_field_blue"sv,
-  "__fbthrift_field_alpha"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::Color>::isset_indexes = { {
   0,
   1,
@@ -65,13 +59,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_STRING,
   TType::T_BOOL,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::cpp2::Vehicle>::storage_names = { {
-  "__fbthrift_field_color"sv,
-  "__fbthrift_field_licensePlate"sv,
-  "__fbthrift_field_description"sv,
-  "__fbthrift_field_name"sv,
-  "__fbthrift_field_hasAC"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>::isset_indexes = { {
   0,
@@ -117,18 +104,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::cp
   TType::T_MAP,
   TType::T_I32,
   TType::T_LIST,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::cpp2::Person>::storage_names = { {
-  "__fbthrift_field_id"sv,
-  "__fbthrift_field_name"sv,
-  "__fbthrift_field_age"sv,
-  "__fbthrift_field_address"sv,
-  "__fbthrift_field_favoriteColor"sv,
-  "__fbthrift_field_friends"sv,
-  "__fbthrift_field_bestFriend"sv,
-  "__fbthrift_field_petNames"sv,
-  "__fbthrift_field_afraidOfAnimal"sv,
-  "__fbthrift_field_vehicles"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::cpp2::Person>::isset_indexes = { {
   0,

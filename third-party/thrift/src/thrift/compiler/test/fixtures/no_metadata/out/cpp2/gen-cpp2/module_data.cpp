@@ -31,12 +31,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_STRUCT,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::MyStruct>::storage_names = { {
-  "__fbthrift_field_MyIntField"sv,
-  "__fbthrift_field_MyStringField"sv,
-  "__fbthrift_field_MyDataField"sv,
-  "__fbthrift_field_myEnum"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = { {
   0,
   1,
@@ -50,8 +44,6 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cp
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids = { {
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_types = { {
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::MyDataItem>::storage_names = { {
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = { {
 }};
@@ -71,11 +63,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::cpp
   TType::T_I32,
   TType::T_STRUCT,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::cpp2::MyUnion>::storage_names = { {
-  "myEnum"sv,
-  "myStruct"sv,
-  "myDataItem"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = { {
   0,

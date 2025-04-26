@@ -19,8 +19,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::Empty
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::Empty>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::Empty>::storage_names = { {
-}};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::Empty>::isset_indexes = { {
 }};
 
@@ -30,8 +28,6 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cp
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::Nada>::fields_ids = { {
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::Nada>::fields_types = { {
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::Nada>::storage_names = { {
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::Nada>::isset_indexes = { {
 }};

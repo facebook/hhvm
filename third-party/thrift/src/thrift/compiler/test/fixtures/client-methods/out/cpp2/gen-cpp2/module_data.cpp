@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::EchoR
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::EchoRequest>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::EchoRequest>::storage_names = { {
-  "__fbthrift_field_text"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::EchoRequest>::isset_indexes = { {
   0,
 }};
@@ -38,9 +35,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::EchoR
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::EchoResponse>::fields_types = { {
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::cpp2::EchoResponse>::storage_names = { {
-  "__fbthrift_field_text"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::EchoResponse>::isset_indexes = { {
   0,

@@ -19,8 +19,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::t
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::storage_names = { {
-}};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::isset_indexes = { {
 }};
 
@@ -54,16 +52,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::fac
   TType::T_BOOL,
   TType::T_LIST,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>::storage_names = { {
-  "__fbthrift_field_unqualified_int_field"sv,
-  "__fbthrift_field_unqualified_bool_field"sv,
-  "__fbthrift_field_unqualified_list_field"sv,
-  "__fbthrift_field_unqualified_struct_field"sv,
-  "__fbthrift_field_optional_int_field"sv,
-  "__fbthrift_field_optional_bool_field"sv,
-  "__fbthrift_field_optional_list_field"sv,
-  "__fbthrift_field_optional_struct_field"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>::isset_indexes = { {
   0,

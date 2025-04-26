@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::a::differen
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::a::different::ns::AStruct>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::a::different::ns::AStruct>::storage_names = { {
-  "__fbthrift_field_FieldA"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::a::different::ns::AStruct>::isset_indexes = { {
   0,
 }};
@@ -38,9 +35,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::a::differen
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::a::different::ns::AStructB>::fields_types = { {
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::a::different::ns::AStructB>::storage_names = { {
-  "__fbthrift_field_FieldA"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::a::different::ns::AStructB>::isset_indexes = { {
   -1,

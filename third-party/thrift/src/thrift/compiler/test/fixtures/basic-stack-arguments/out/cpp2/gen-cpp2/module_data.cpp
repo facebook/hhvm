@@ -25,10 +25,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp
   TType::T_I64,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::MyStruct>::storage_names = { {
-  "__fbthrift_field_MyIntField"sv,
-  "__fbthrift_field_MyStringField"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = { {
   0,
   1,

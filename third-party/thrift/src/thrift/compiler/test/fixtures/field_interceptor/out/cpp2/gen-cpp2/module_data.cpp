@@ -37,14 +37,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::fac
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::storage_names = { {
-  "__fbthrift_field_access_field"sv,
-  "__fbthrift_field_access_shared_field"sv,
-  "__fbthrift_field_access_optional_shared_field"sv,
-  "__fbthrift_field_access_shared_const_field"sv,
-  "__fbthrift_field_access_optional_shared_const_field"sv,
-  "__fbthrift_field_access_optional_boxed_field"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::isset_indexes = { {
   0,
   -1,

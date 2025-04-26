@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::names
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::namespace_from_package::module::Foo>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::namespace_from_package::module::Foo>::storage_names = { {
-  "__fbthrift_field_MyInt"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::namespace_from_package::module::Foo>::isset_indexes = { {
   0,
 }};

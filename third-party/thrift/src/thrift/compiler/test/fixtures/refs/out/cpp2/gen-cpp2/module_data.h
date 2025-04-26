@@ -73,7 +73,6 @@ template <> struct TStructDataStorage<::cpp2::MyUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -89,7 +88,6 @@ template <> struct TStructDataStorage<::cpp2::NonTriviallyDestructibleUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -105,7 +103,6 @@ template <> struct TStructDataStorage<::cpp2::MyField> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -121,7 +118,6 @@ template <> struct TStructDataStorage<::cpp2::MyStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -137,7 +133,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithUnion> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -153,7 +148,6 @@ template <> struct TStructDataStorage<::cpp2::RecursiveStruct> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -169,7 +163,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithContainers> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -185,7 +178,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithSharedConst> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -201,7 +193,6 @@ template <> struct TStructDataStorage<::cpp2::Empty> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -217,7 +208,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithRef> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -233,7 +223,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithBox> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -249,7 +238,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithInternBox> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -265,7 +253,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithTerseInternBox> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -281,7 +268,6 @@ template <> struct TStructDataStorage<::cpp2::AdaptedStructWithInternBox> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -297,7 +283,6 @@ template <> struct TStructDataStorage<::cpp2::AdaptedStructWithTerseInternBox> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -313,7 +298,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithRefTypeUnique> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -329,7 +313,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithRefTypeShared> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -345,7 +328,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithRefTypeSharedConst> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -361,7 +343,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMo
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
@@ -377,7 +358,6 @@ template <> struct TStructDataStorage<::cpp2::StructWithString> {
   // The following fields describe internal storage metadata, and are private to
   // prevent user logic from accessing them, but they can be inspected by
   // debuggers.
-  static const std::array<std::string_view, fields_size> storage_names;
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };

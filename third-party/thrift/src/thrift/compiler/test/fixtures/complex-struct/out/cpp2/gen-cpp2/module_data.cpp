@@ -31,12 +31,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_STRING,
   TType::T_FLOAT,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp>::storage_names = { {
-  "__fbthrift_field_myLongField"sv,
-  "__fbthrift_field_MyByteField"sv,
-  "__fbthrift_field_myStringField"sv,
-  "__fbthrift_field_myFloatField"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp>::isset_indexes = { {
   0,
   1,
@@ -56,10 +50,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::MyStr
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::MyStructMapFloatThrowExp>::fields_types = { {
   TType::T_I64,
   TType::T_MAP,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::MyStructMapFloatThrowExp>::storage_names = { {
-  "__fbthrift_field_myLongField"sv,
-  "__fbthrift_field_mapListOfFloats"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::MyStructMapFloatThrowExp>::isset_indexes = { {
   0,
@@ -157,36 +147,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 28> TStructDataStorage<::cp
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 28> TStructDataStorage<::cpp2::MyStruct>::storage_names = { {
-  "__fbthrift_field_MyIntField"sv,
-  "__fbthrift_field_MyStringField"sv,
-  "__fbthrift_field_MyDataField"sv,
-  "__fbthrift_field_myEnum"sv,
-  "__fbthrift_field_MyBoolField"sv,
-  "__fbthrift_field_MyByteField"sv,
-  "__fbthrift_field_MyShortField"sv,
-  "__fbthrift_field_MyLongField"sv,
-  "__fbthrift_field_MyDoubleField"sv,
-  "__fbthrift_field_lDouble"sv,
-  "__fbthrift_field_lShort"sv,
-  "__fbthrift_field_lInteger"sv,
-  "__fbthrift_field_lLong"sv,
-  "__fbthrift_field_lString"sv,
-  "__fbthrift_field_lBool"sv,
-  "__fbthrift_field_lByte"sv,
-  "__fbthrift_field_mShortString"sv,
-  "__fbthrift_field_mIntegerString"sv,
-  "__fbthrift_field_mStringMyStruct"sv,
-  "__fbthrift_field_mStringBool"sv,
-  "__fbthrift_field_mIntegerInteger"sv,
-  "__fbthrift_field_mIntegerBool"sv,
-  "__fbthrift_field_sShort"sv,
-  "__fbthrift_field_sMyStruct"sv,
-  "__fbthrift_field_sLong"sv,
-  "__fbthrift_field_sString"sv,
-  "__fbthrift_field_sByte"sv,
-  "__fbthrift_field_mListList"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = { {
   0,
   1,
@@ -230,10 +190,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::Simpl
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::SimpleStruct>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::SimpleStruct>::storage_names = { {
-  "__fbthrift_field_age"sv,
-  "__fbthrift_field_name"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SimpleStruct>::isset_indexes = { {
   0,
@@ -313,30 +269,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 22> TStructDataStorage<::cp
   TType::T_MAP,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::cpp2::defaultStruct>::storage_names = { {
-  "__fbthrift_field_myLongDFset"sv,
-  "__fbthrift_field_myLongDF"sv,
-  "__fbthrift_field_portDFset"sv,
-  "__fbthrift_field_portNum"sv,
-  "__fbthrift_field_myBinaryDFset"sv,
-  "__fbthrift_field_myBinary"sv,
-  "__fbthrift_field_myByteDFSet"sv,
-  "__fbthrift_field_myByte"sv,
-  "__fbthrift_field_myDoubleDFset"sv,
-  "__fbthrift_field_myDoubleDFZero"sv,
-  "__fbthrift_field_myDouble"sv,
-  "__fbthrift_field_field3"sv,
-  "__fbthrift_field_myList"sv,
-  "__fbthrift_field_mySet"sv,
-  "__fbthrift_field_simpleStruct"sv,
-  "__fbthrift_field_listStructDFset"sv,
-  "__fbthrift_field_myUnion"sv,
-  "__fbthrift_field_listUnionDFset"sv,
-  "__fbthrift_field_mapNestlistStructDfSet"sv,
-  "__fbthrift_field_mapJavaTypeDFset"sv,
-  "__fbthrift_field_emptyMap"sv,
-  "__fbthrift_field_enumMapDFset"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 22> TStructDataStorage<::cpp2::defaultStruct>::isset_indexes = { {
   0,
   1,
@@ -396,17 +328,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::cpp
   TType::T_LIST,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::cpp2::MyStructTypeDef>::storage_names = { {
-  "__fbthrift_field_myLongField"sv,
-  "__fbthrift_field_myLongTypeDef"sv,
-  "__fbthrift_field_myStringField"sv,
-  "__fbthrift_field_myStringTypedef"sv,
-  "__fbthrift_field_myMapField"sv,
-  "__fbthrift_field_myMapTypedef"sv,
-  "__fbthrift_field_myListField"sv,
-  "__fbthrift_field_myListTypedef"sv,
-  "__fbthrift_field_myMapListOfTypeDef"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::MyStructTypeDef>::isset_indexes = { {
   0,
   1,
@@ -425,8 +346,6 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cp
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids = { {
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_types = { {
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::MyDataItem>::storage_names = { {
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = { {
 }};
@@ -456,14 +375,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::cpp
   TType::T_I64,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::cpp2::MyUnion>::storage_names = { {
-  "myEnum"sv,
-  "myStruct"sv,
-  "myDataItem"sv,
-  "complexNestedStruct"sv,
-  "longValue"sv,
-  "intValue"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = { {
   0,
   1,
@@ -491,12 +402,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_LIST,
   TType::T_STRUCT,
   TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp>::storage_names = { {
-  "myEnum"sv,
-  "setFloat"sv,
-  "myDataItem"sv,
-  "complexNestedStruct"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp>::isset_indexes = { {
   0,
@@ -566,26 +471,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 18> TStructDataStorage<::cp
   TType::T_MAP,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::storage_names = { {
-  "__fbthrift_field_setOfSetOfInt"sv,
-  "__fbthrift_field_listofListOfListOfListOfEnum"sv,
-  "__fbthrift_field_listOfListOfMyStruct"sv,
-  "__fbthrift_field_setOfListOfListOfLong"sv,
-  "__fbthrift_field_setOfSetOfsetOfLong"sv,
-  "__fbthrift_field_mapStructListOfListOfLong"sv,
-  "__fbthrift_field_mKeyStructValInt"sv,
-  "__fbthrift_field_listOfMapKeyIntValInt"sv,
-  "__fbthrift_field_listOfMapKeyStrValList"sv,
-  "__fbthrift_field_mapKeySetValLong"sv,
-  "__fbthrift_field_mapKeyListValLong"sv,
-  "__fbthrift_field_mapKeyMapValMap"sv,
-  "__fbthrift_field_mapKeySetValMap"sv,
-  "__fbthrift_field_NestedMaps"sv,
-  "__fbthrift_field_mapKeyIntValList"sv,
-  "__fbthrift_field_mapKeyIntValSet"sv,
-  "__fbthrift_field_mapKeySetValInt"sv,
-  "__fbthrift_field_mapKeyListValSet"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::isset_indexes = { {
   0,
   1,
@@ -626,12 +511,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::TypeRemapped>::storage_names = { {
-  "__fbthrift_field_lsMap"sv,
-  "__fbthrift_field_ioMap"sv,
-  "__fbthrift_field_BigInteger"sv,
-  "__fbthrift_field_binaryTestBuffer"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::TypeRemapped>::isset_indexes = { {
   0,
   1,
@@ -645,8 +524,6 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cp
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::emptyXcep>::fields_ids = { {
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::emptyXcep>::fields_types = { {
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::cpp2::emptyXcep>::storage_names = { {
 }};
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::emptyXcep>::isset_indexes = { {
 }};
@@ -663,10 +540,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::reqXc
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::reqXcep>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::reqXcep>::storage_names = { {
-  "__fbthrift_field_message"sv,
-  "__fbthrift_field_errorCode"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::reqXcep>::isset_indexes = { {
   -1,
@@ -685,10 +558,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::optXc
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::optXcep>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::optXcep>::storage_names = { {
-  "__fbthrift_field_message"sv,
-  "__fbthrift_field_errorCode"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::optXcep>::isset_indexes = { {
   0,
@@ -719,14 +588,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::cpp
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_MAP,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::cpp2::complexException>::storage_names = { {
-  "__fbthrift_field_message"sv,
-  "__fbthrift_field_listStrings"sv,
-  "__fbthrift_field_errorEnum"sv,
-  "__fbthrift_field_unionError"sv,
-  "__fbthrift_field_structError"sv,
-  "__fbthrift_field_lsMap"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::cpp2::complexException>::isset_indexes = { {
   0,
@@ -854,45 +715,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 37> TStructDataStorage<::cp
   TType::T_MAP,
   TType::T_MAP,
   TType::T_MAP,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 37> TStructDataStorage<::cpp2::Containers>::storage_names = { {
-  "__fbthrift_field_struct_list"sv,
-  "__fbthrift_field_union_list"sv,
-  "__fbthrift_field_enum_list"sv,
-  "__fbthrift_field_struct_set"sv,
-  "__fbthrift_field_union_set"sv,
-  "__fbthrift_field_enum_set"sv,
-  "__fbthrift_field_struct_map"sv,
-  "__fbthrift_field_union_map"sv,
-  "__fbthrift_field_enum_map"sv,
-  "__fbthrift_field_struct_map_2"sv,
-  "__fbthrift_field_union_map_2"sv,
-  "__fbthrift_field_enum_map_2"sv,
-  "__fbthrift_field_list_map"sv,
-  "__fbthrift_field_list_map_2"sv,
-  "__fbthrift_field_set_map"sv,
-  "__fbthrift_field_set_map_2"sv,
-  "__fbthrift_field_map_map"sv,
-  "__fbthrift_field_map_map_2"sv,
-  "__fbthrift_field_list_list_i32"sv,
-  "__fbthrift_field_list_list_struct"sv,
-  "__fbthrift_field_list_set_i32"sv,
-  "__fbthrift_field_list_set_struct"sv,
-  "__fbthrift_field_list_map_i32_i32"sv,
-  "__fbthrift_field_list_map_i32_struct"sv,
-  "__fbthrift_field_list_map_struct_i32"sv,
-  "__fbthrift_field_set_list_i32"sv,
-  "__fbthrift_field_set_list_struct"sv,
-  "__fbthrift_field_set_set_i32"sv,
-  "__fbthrift_field_set_set_struct"sv,
-  "__fbthrift_field_set_map_i32_i32"sv,
-  "__fbthrift_field_set_map_i32_struct"sv,
-  "__fbthrift_field_set_map_struct_i32"sv,
-  "__fbthrift_field_map_i32_map_i32_i32"sv,
-  "__fbthrift_field_map_i32_map_struct_i32"sv,
-  "__fbthrift_field_map_i32_map_i32_struct"sv,
-  "__fbthrift_field_map_i32_map_list_i32_i32"sv,
-  "__fbthrift_field_map_i32_map_list_struct_i32"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 37> TStructDataStorage<::cpp2::Containers>::isset_indexes = { {
   0,

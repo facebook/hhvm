@@ -31,12 +31,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp
   TType::T_I64,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::BasicTypes>::storage_names = { {
-  "__fbthrift_field_first"sv,
-  "__fbthrift_field_second"sv,
-  "__fbthrift_field_third"sv,
-  "__fbthrift_field_isTrue"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::BasicTypes>::isset_indexes = { {
   -1,
   0,

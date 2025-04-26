@@ -31,12 +31,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::python_capi::SerializedStruct>::storage_names = { {
-  "__fbthrift_field_s"sv,
-  "__fbthrift_field_i"sv,
-  "__fbthrift_field_os"sv,
-  "__fbthrift_field_rs"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::python_capi::SerializedStruct>::isset_indexes = { {
   0,
   1,
@@ -56,10 +50,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtu
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::SerializedUnion>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::SerializedUnion>::storage_names = { {
-  "s"sv,
-  "i"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::SerializedUnion>::isset_indexes = { {
   0,
@@ -81,11 +71,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::tes
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::python_capi::SerializedError>::storage_names = { {
-  "__fbthrift_field_msg"sv,
-  "__fbthrift_field_os"sv,
-  "__fbthrift_field_rs"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::python_capi::SerializedError>::isset_indexes = { {
   0,
@@ -112,12 +97,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::tes
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::python_capi::MarshalStruct>::storage_names = { {
-  "__fbthrift_field_s"sv,
-  "__fbthrift_field_i"sv,
-  "__fbthrift_field_os"sv,
-  "__fbthrift_field_rs"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::python_capi::MarshalStruct>::isset_indexes = { {
   0,
   1,
@@ -137,10 +116,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtu
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::MarshalUnion>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::MarshalUnion>::storage_names = { {
-  "s"sv,
-  "i"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::MarshalUnion>::isset_indexes = { {
   0,
@@ -162,11 +137,6 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::tes
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
-}};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::python_capi::MarshalError>::storage_names = { {
-  "__fbthrift_field_msg"sv,
-  "__fbthrift_field_os"sv,
-  "__fbthrift_field_rs"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::python_capi::MarshalError>::isset_indexes = { {
   0,

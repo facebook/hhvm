@@ -22,9 +22,6 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::n
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::storage_names = { {
-  "__fbthrift_field_fieldA"sv,
-}};
 THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::isset_indexes = { {
   0,
 }};

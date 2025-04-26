@@ -252,6 +252,22 @@ void HTTPTransaction::onIngressHeadersComplete(
   if (transportCallback_) {
     transportCallback_->headerBytesReceived(msg->getIngressHeaderSize());
   }
+
+  if (txnObserverContainer_.hasObserversForEvent<
+          HTTPTransactionObserverInterface::Events::TxnBytes>()) {
+    const auto e =
+        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+            .setTimestamp(proxygen::SteadyClock::now())
+            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
+                         REQUEST_HEADERS_COMPLETE)
+            .build();
+    txnObserverContainer_.invokeInterfaceMethod<
+        HTTPTransactionObserverInterface::Events::TxnBytes>(
+        [&e](auto observer, auto observed) {
+          observer->onBytesEvent(observed, e);
+        });
+  }
+
   updateIngressCompressionInfo(transport_.getCodec().getCompressionInfo());
   if (mustQueueIngress()) {
     checkCreateDeferredIngress();

@@ -50,6 +50,10 @@
 #include <thrift/lib/cpp/TLogging.h>
 
 namespace apache::thrift {
+namespace detail {
+std::string* makeCheckEqErrorMessage(
+    intmax_t v1, intmax_t v2, const char* s1, const char* s2, const char* name);
+}
 
 /**
  * Specialization fwd-decl in _types.h.
@@ -230,5 +234,31 @@ template <class ServiceTag>
 class Client;
 
 } // namespace apache::thrift
+
+namespace google {
+// Handling `CHECK_EQ(v1, v2)` for thrift enums. This is needed from migrating
+// Thrift union's type to the scoped enum.
+//
+// TODO(ytj): Remove this once we added `std::ostream operator<<` on thrift's
+// scoped enum.
+//
+// Note: We return a `std::string*` since this is what glog accepts. glog won't
+// delete the returned pointer though it doesn't matter since when v1 != v2, the
+// process is already about to crash.
+template <
+    class Enum,
+    decltype(apache::thrift::TEnumTraits<Enum>::size)* = nullptr>
+std::string* Check_EQImpl(Enum v1, Enum v2, const char* names) {
+  if (FOLLY_LIKELY(v1 == v2)) {
+    return nullptr;
+  }
+  return apache::thrift::detail::makeCheckEqErrorMessage(
+      static_cast<intmax_t>(v1),
+      static_cast<intmax_t>(v2),
+      apache::thrift::TEnumTraits<Enum>::findName(v1),
+      apache::thrift::TEnumTraits<Enum>::findName(v2),
+      names);
+}
+} // namespace google
 
 #endif // #ifndef THRIFT_THRIFT_H_

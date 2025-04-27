@@ -18,10 +18,25 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <sstream>
 
 #include <folly/String.h>
 
 namespace apache::thrift {
+namespace detail {
+std::string* makeCheckEqErrorMessage(
+    intmax_t v1,
+    intmax_t v2,
+    const char* s1,
+    const char* s2,
+    const char* name) {
+  auto n1 = (s1 ? std::string(s1) : std::to_string(v1));
+  auto n2 = (s2 ? std::string(s2) : std::to_string(v2));
+  std::ostringstream ss;
+  ss << name << " (" << n1 << " vs. " << n2 << ")";
+  return new std::string(ss.str());
+}
+} // namespace detail
 
 TOutput GlobalOutput;
 

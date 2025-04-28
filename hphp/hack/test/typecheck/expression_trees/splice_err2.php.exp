@@ -4,5 +4,11 @@ Invalid argument (Typing[4110])
   Expected `ExampleInt`
   File "expr_tree.php", line 92, characters 40-52:
   But got `ExampleString`
+  File "expr_tree.php", line 72, characters 47-52:
+    via this generic `TInfer`
   File "expr_tree.php", line 37, characters 44-49:
     via this generic `TInfer`
+  File "expr_tree.php", line 76, characters 96-101:
+    via this generic `TInfer`
+  File "expr_tree.php", line 435, characters 73-73:
+    via this generic `T`

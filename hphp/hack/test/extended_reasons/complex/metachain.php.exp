@@ -110,6 +110,35 @@ File metachain.php, line 7, character 10 - line 10, character 3:
 12 |   //$user_prompt = $foo[1];
 13 |   $s = shape(
 
+and flows into this expression
+
+File metachain.php, line 7, character 3 - line 7, character 6:
+
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
+ 6 | ): Awaitable<void> {
+ 7 |   »$foo« = await genX(
+ 8 |     // ReproMetaChain::fromValue(shape()) instead of $val
+ 9 |     $val->then($obj),
+10 |   );
+11 |   list($_, $user_prompt) = $foo;
+12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
+
+via an assignment
+
+which itself flows into this expression
+
+File metachain.php, line 11, character 28 - line 11, character 31:
+
+  9 |     $val->then($obj),
+ 10 |   );
+ 11 |   list($_, $user_prompt) = »$foo«;
+ 12 |   //$user_prompt = $foo[1];
+ 13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
+
+as the type of the local variable
+
 The supertype comes from this hint
 
 File metachain.php, line 22, character 17 - line 22, character 22:
@@ -172,6 +201,35 @@ File metachain.php, line 7, character 10 - line 10, character 3:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 13 |   $s = shape(
+
+and flows into this expression
+
+File metachain.php, line 7, character 3 - line 7, character 6:
+
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
+ 6 | ): Awaitable<void> {
+ 7 |   »$foo« = await genX(
+ 8 |     // ReproMetaChain::fromValue(shape()) instead of $val
+ 9 |     $val->then($obj),
+10 |   );
+11 |   list($_, $user_prompt) = $foo;
+12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
+
+via an assignment
+
+which itself flows into this expression
+
+File metachain.php, line 11, character 28 - line 11, character 31:
+
+  9 |     $val->then($obj),
+ 10 |   );
+ 11 |   list($_, $user_prompt) = »$foo«;
+ 12 |   //$user_prompt = $foo[1];
+ 13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
+
+as the type of the local variable
 
 The supertype comes from this expression
 

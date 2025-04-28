@@ -32,6 +32,18 @@ File class_expr_string.php, line 5, character 7 - line 5, character 7:
  8 | function test(): int {
  9 |   $gc = generic_string(C::class);
 
+  via this generic T
+
+File class_expr_string.php, line 6, character 45 - line 6, character 45:
+
+ 3 | <<file:__EnableUnstableFeatures('class_type')>>
+ 4 | 
+ 5 | class C {}
+ 6 | function generic_string<T as string>(T $t): »T« { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_string(C::class);
+
 Here's why:
 
 
@@ -132,12 +144,12 @@ File class_expr_string.php, line 9, character 9 - line 9, character 22:
 
 and flows into this hint
 
-File class_expr_string.php, line 6, character 38 - line 6, character 38:
+File class_expr_string.php, line 6, character 45 - line 6, character 45:
 
  3 | <<file:__EnableUnstableFeatures('class_type')>>
  4 | 
  5 | class C {}
- 6 | function generic_string<T as string>(»T« $t): T { return $t; }
+ 6 | function generic_string<T as string>(T $t): »T« { return $t; }
  7 | 
  8 | function test(): int {
  9 |   $gc = generic_string(C::class);

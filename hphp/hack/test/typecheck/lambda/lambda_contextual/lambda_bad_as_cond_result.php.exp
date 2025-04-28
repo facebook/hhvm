@@ -6,6 +6,8 @@ No instance method `missing_method` in `MyClass` (Typing[4053])
   This is why I think it is an object of type MyClass
   File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
   This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
+  File "lambda_bad_as_cond_result.php", line 11, characters 49-49:
+    via this generic `T`
   File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
   Declaration of `MyClass` is here
 ERROR: File "lambda_bad_as_cond_result.php", line 36, characters 17-39:
@@ -16,5 +18,7 @@ No instance method `another_missing_methodO` in `MyClass` (Typing[4053])
   This is why I think it is an object of type MyClass
   File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
   This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
+  File "lambda_bad_as_cond_result.php", line 11, characters 49-49:
+    via this generic `T`
   File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
   Declaration of `MyClass` is here

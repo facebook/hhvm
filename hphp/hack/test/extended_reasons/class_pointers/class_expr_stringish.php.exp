@@ -32,6 +32,18 @@ File class_expr_stringish.php, line 5, character 7 - line 5, character 7:
  8 | function test(): int {
  9 |   $gc = generic_stringish(C::class);
 
+  via this generic T
+
+File class_expr_stringish.php, line 6, character 51 - line 6, character 51:
+
+ 3 | <<file:__EnableUnstableFeatures('class_type')>>
+ 4 | 
+ 5 | class C {}
+ 6 | function generic_stringish<T as Stringish>(T $t): »T« { return $t; }
+ 7 | 
+ 8 | function test(): int {
+ 9 |   $gc = generic_stringish(C::class);
+
 Here's why:
 
 
@@ -132,12 +144,12 @@ File class_expr_stringish.php, line 9, character 9 - line 9, character 25:
 
 and flows into this hint
 
-File class_expr_stringish.php, line 6, character 44 - line 6, character 44:
+File class_expr_stringish.php, line 6, character 51 - line 6, character 51:
 
  3 | <<file:__EnableUnstableFeatures('class_type')>>
  4 | 
  5 | class C {}
- 6 | function generic_stringish<T as Stringish>(»T« $t): T { return $t; }
+ 6 | function generic_stringish<T as Stringish>(T $t): »T« { return $t; }
  7 | 
  8 | function test(): int {
  9 |   $gc = generic_stringish(C::class);

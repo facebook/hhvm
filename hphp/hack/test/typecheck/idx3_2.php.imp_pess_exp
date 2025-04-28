@@ -10,3 +10,5 @@ Invalid return type (Typing[4110])
     via this generic `Tv`
   File "collections/interfaces.hhi", line 845, characters 26-27:
     via this generic `Tv`
+  File "idx.hhi", line 34, characters 8-9:
+    via this generic `Tv` because the type of this return is implicitly a like-type due to unenforced generic parameter

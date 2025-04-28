@@ -1,6 +1,6 @@
 ERROR: File "exact.php", line 6, characters 3-14:
 Invalid index type for this keyset (Typing[4449])
-  File "exact.php", line 3, characters 7-7:
-  This is a class pointer for C; implicitly defined constant `::class` is a reference to class `C`
+  File "exact.php", line 5, characters 8-23:
+  This is a class pointer for C
   File "exact.php", line 6, characters 6-13:
   It is incompatible with a classname string for C

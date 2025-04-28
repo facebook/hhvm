@@ -31,6 +31,16 @@ File class_hint_stringish.php, line 8, character 15 - line 8, character 22:
 10 |   return $gc;
 11 | }
 
+  via this generic T
+
+File class_hint_stringish.php, line 6, character 51 - line 6, character 51:
+
+ 5 | class C {}
+ 6 | function generic_stringish<T as Stringish>(T $t): »T« { return $t; }
+ 7 | 
+ 8 | function test(class<C> $c): int {
+ 9 |   $gc = generic_stringish($c);
+
 Here's why:
 
 
@@ -129,10 +139,10 @@ File class_hint_stringish.php, line 9, character 9 - line 9, character 25:
 
 and flows into this hint
 
-File class_hint_stringish.php, line 6, character 44 - line 6, character 44:
+File class_hint_stringish.php, line 6, character 51 - line 6, character 51:
 
  5 | class C {}
- 6 | function generic_stringish<T as Stringish>(»T« $t): T { return $t; }
+ 6 | function generic_stringish<T as Stringish>(T $t): »T« { return $t; }
  7 | 
  8 | function test(class<C> $c): int {
  9 |   $gc = generic_stringish($c);

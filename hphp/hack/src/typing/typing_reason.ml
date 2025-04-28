@@ -1991,238 +1991,268 @@ let pos_or_decl_to_json pos_or_decl =
   else
     Pos_or_decl.json pos_or_decl
 
-let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
- fun t acc ->
-  match t with
-  | No_reason -> Hh_json.(JSON_Object [("No_reason", JSON_Array [])]) :: acc
-  | Missing_field ->
-    Hh_json.(JSON_Object [("Missing_field", JSON_Array [])]) :: acc
-  | Invalid -> Hh_json.(JSON_Object [("Invalid", JSON_Array [])]) :: acc
-  | From_witness_locl witness ->
-    Hh_json.(
-      JSON_Object
-        [("From_witness_locl", JSON_Array [witness_locl_to_json witness])])
-    :: acc
-  | From_witness_decl witness ->
-    Hh_json.(
-      JSON_Object
-        [("From_witness_decl", JSON_Array [witness_decl_to_json witness])])
-    :: acc
-  | Idx (pos, r) ->
-    Hh_json.(JSON_Object [("Idx", JSON_Array [pos_to_json pos; to_json r])])
-    :: acc
-  | Arith_ret_float (pos, r, arg_pos) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Arith_ret_float",
-            JSON_Array
-              [pos_to_json pos; to_json r; arg_position_to_json arg_pos] );
-        ])
-    :: acc
-  | Arith_ret_num (pos, r, arg_pos) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Arith_ret_num",
-            JSON_Array
-              [pos_to_json pos; to_json r; arg_position_to_json arg_pos] );
-        ])
-    :: acc
-  | Lost_info (str, r, blame) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Lost_info",
-            JSON_Array [JSON_String str; to_json r; blame_to_json blame] );
-        ])
-    :: acc
-  | Format (pos, str, r) ->
-    Hh_json.(
-      JSON_Object
-        [("Format", JSON_Array [pos_to_json pos; JSON_String str; to_json r])])
-    :: acc
-  | Instantiate (r1, str, r2) ->
-    Hh_json.(
-      JSON_Object
-        [("Instantiate", JSON_Array [to_json r1; JSON_String str; to_json r2])])
-    :: acc
-  | Typeconst (r1, (pos_or_decl, str), lazy_str, r2) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Typeconst",
-            JSON_Array
-              [
-                to_json r1;
+let rec to_json_help : type a. a t_ -> int option -> Hh_json.json * int option =
+ fun t fuel_opt ->
+  if Option.value_map fuel_opt ~default:false ~f:(fun fuel -> fuel <= 0) then
+    (Hh_json.JSON_Object [], fuel_opt)
+  else begin
+    let fuel_opt = Option.map fuel_opt ~f:(fun fuel -> fuel - 1) in
+    match t with
+    | No_reason ->
+      (Hh_json.(JSON_Object [("No_reason", JSON_Array [])]), fuel_opt)
+    | Missing_field ->
+      (Hh_json.(JSON_Object [("Missing_field", JSON_Array [])]), fuel_opt)
+    | Invalid -> (Hh_json.(JSON_Object [("Invalid", JSON_Array [])]), fuel_opt)
+    | From_witness_locl witness ->
+      ( Hh_json.(
+          JSON_Object
+            [("From_witness_locl", JSON_Array [witness_locl_to_json witness])]),
+        fuel_opt )
+    | From_witness_decl witness ->
+      ( Hh_json.(
+          JSON_Object
+            [("From_witness_decl", JSON_Array [witness_decl_to_json witness])]),
+        fuel_opt )
+    | Idx (pos, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(JSON_Object [("Idx", JSON_Array [pos_to_json pos; r])]),
+        fuel_opt )
+    | Arith_ret_float (pos, r, arg_pos) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Arith_ret_float",
+                JSON_Array [pos_to_json pos; r; arg_position_to_json arg_pos] );
+            ]),
+        fuel_opt )
+    | Arith_ret_num (pos, r, arg_pos) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Arith_ret_num",
+                JSON_Array [pos_to_json pos; r; arg_position_to_json arg_pos] );
+            ]),
+        fuel_opt )
+    | Lost_info (str, r, blame) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ("Lost_info", JSON_Array [JSON_String str; r; blame_to_json blame]);
+            ]),
+        fuel_opt )
+    | Format (pos, str, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [("Format", JSON_Array [pos_to_json pos; JSON_String str; r])]),
+        fuel_opt )
+    | Instantiate (r1, str, r2) ->
+      let (r1, fuel_opt) = to_json_help r1 fuel_opt in
+      let (r2, fuel_opt) = to_json_help r2 fuel_opt in
+      ( Hh_json.(
+          JSON_Object [("Instantiate", JSON_Array [r1; JSON_String str; r2])]),
+        fuel_opt )
+    | Typeconst (r1, (pos_or_decl, str), lazy_str, r2) ->
+      let (r1, fuel_opt) = to_json_help r1 fuel_opt in
+      let (r2, fuel_opt) = to_json_help r2 fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Typeconst",
+                JSON_Array
+                  [
+                    r1;
+                    JSON_Object
+                      [
+                        ( "Tuple2",
+                          JSON_Array
+                            [Pos_or_decl.json pos_or_decl; JSON_String str] );
+                      ];
+                    JSON_String (Lazy.force lazy_str);
+                    r2;
+                  ] );
+            ]),
+        fuel_opt )
+    | Type_access (r, xs) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      let (xs, fuel_opt) =
+        List.fold_left
+          xs
+          ~init:([], fuel_opt)
+          ~f:(fun (acc, fuel_opt) (r, lazy_str) ->
+            let (r, fuel_opt) = to_json_help r fuel_opt in
+            let json =
+              Hh_json.(
                 JSON_Object
                   [
-                    ( "Tuple2",
-                      JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str]
-                    );
-                  ];
-                JSON_String (Lazy.force lazy_str);
-                to_json r2;
-              ] );
-        ])
-    :: acc
-  | Type_access (r, xs) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Type_access",
-            JSON_Array
-              [
-                to_json r;
+                    ("Tuple2", JSON_Array [r; JSON_String (Lazy.force lazy_str)]);
+                  ])
+            in
+            (json :: acc, fuel_opt))
+      in
+      ( Hh_json.(
+          JSON_Object
+            [("Type_access", JSON_Array [r; JSON_Array (List.rev xs)])]),
+        fuel_opt )
+    | Expr_dep_type (r, pos_or_decl, expr_dep_type_reason) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Expr_dep_type",
                 JSON_Array
-                  (List.map xs ~f:(fun (r, lazy_str) ->
-                       JSON_Object
-                         [
-                           ( "Tuple2",
-                             JSON_Array
-                               [to_json r; JSON_String (Lazy.force lazy_str)] );
-                         ]));
-              ] );
-        ])
-    :: acc
-  | Expr_dep_type (r, pos_or_decl, expr_dep_type_reason) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Expr_dep_type",
-            JSON_Array
-              [
-                to_json r;
-                Pos_or_decl.json pos_or_decl;
-                expr_dep_type_reason_to_json expr_dep_type_reason;
-              ] );
-        ])
-    :: acc
-  | Lambda_param (pos, r) ->
-    Hh_json.(
-      JSON_Object [("Lambda_param", JSON_Array [pos_to_json pos; to_json r])])
-    :: acc
-  | Dynamic_coercion r ->
-    Hh_json.(JSON_Object [("Dynamic_coercion", JSON_Array [to_json r])]) :: acc
-  | Dynamic_partial_enforcement (pos_or_decl, str, r) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Dynamic_partial_enforcement",
-            JSON_Array
-              [Pos_or_decl.json pos_or_decl; JSON_String str; to_json r] );
-        ])
-    :: acc
-  | Rigid_tvar_escape (pos, str1, str2, r) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Rigid_tvar_escape",
-            JSON_Array
-              [pos_to_json pos; JSON_String str1; JSON_String str2; to_json r]
-          );
-        ])
-    :: acc
-  | Opaque_type_from_module (pos_or_decl, str, r) ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Opaque_type_from_module",
-            JSON_Array
-              [Pos_or_decl.json pos_or_decl; JSON_String str; to_json r] );
-        ])
-    :: acc
-  | SDT_call (pos_or_decl, r) ->
-    Hh_json.(
-      JSON_Object
-        [("SDT_call", JSON_Array [Pos_or_decl.json pos_or_decl; to_json r])])
-    :: acc
-  | Like_call (pos_or_decl, r) ->
-    Hh_json.(
-      JSON_Object
-        [("Like_call", JSON_Array [Pos_or_decl.json pos_or_decl; to_json r])])
-    :: acc
-  | Flow { from; kind; into } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Flow",
-            JSON_Object
-              [
-                ("from", to_json from);
-                ("kind", flow_kind_to_json kind);
-                ("into", to_json into);
-              ] );
-        ])
-    :: acc
-  | Lower_bound { bound; of_ } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Lower_bound",
-            JSON_Object [("bound", to_json bound); ("of", to_json of_)] );
-        ])
-    :: acc
-  | Solved { solution; of_; in_ } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Solved",
-            JSON_Object
-              [
-                ("solution", to_json solution);
-                ("of_", string_ (Tvid.show of_));
-                ("in_", to_json in_);
-              ] );
-        ])
-    :: acc
-  | Axiom { prev; axiom; next } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Axiom",
-            JSON_Object
-              [
-                ("prev", to_json prev);
-                ("axiom", axiom_to_json axiom);
-                ("next", to_json next);
-              ] );
-        ])
-    :: acc
-  | Def (def, r) ->
-    Hh_json.(
-      JSON_Object [("Def", JSON_Array [pos_or_decl_to_json def; to_json r])])
-    :: acc
-  | Prj_both { sub_prj; prj; sub; super } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Prj_both",
-            JSON_Object
-              [
-                ("sub_prj", to_json sub_prj);
-                ("prj", prj_symm_to_json prj);
-                ("sub", to_json sub);
-                ("super", to_json super);
-              ] );
-        ])
-    :: acc
-  | Prj_one { part; prj; whole } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Prj_one",
-            JSON_Object
-              [
-                ("part", to_json part);
-                ("prj", prj_asymm_to_json prj);
-                ("whole", to_json whole);
-              ] );
-        ])
-    :: acc
+                  [
+                    r;
+                    Pos_or_decl.json pos_or_decl;
+                    expr_dep_type_reason_to_json expr_dep_type_reason;
+                  ] );
+            ]),
+        fuel_opt )
+    | Lambda_param (pos, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(JSON_Object [("Lambda_param", JSON_Array [pos_to_json pos; r])]),
+        fuel_opt )
+    | Dynamic_coercion r ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      (Hh_json.(JSON_Object [("Dynamic_coercion", JSON_Array [r])]), fuel_opt)
+    | Dynamic_partial_enforcement (pos_or_decl, str, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Dynamic_partial_enforcement",
+                JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str; r] );
+            ]),
+        fuel_opt )
+    | Rigid_tvar_escape (pos, str1, str2, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Rigid_tvar_escape",
+                JSON_Array
+                  [pos_to_json pos; JSON_String str1; JSON_String str2; r] );
+            ]),
+        fuel_opt )
+    | Opaque_type_from_module (pos_or_decl, str, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Opaque_type_from_module",
+                JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String str; r] );
+            ]),
+        fuel_opt )
+    | SDT_call (pos_or_decl, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [("SDT_call", JSON_Array [Pos_or_decl.json pos_or_decl; r])]),
+        fuel_opt )
+    | Like_call (pos_or_decl, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [("Like_call", JSON_Array [Pos_or_decl.json pos_or_decl; r])]),
+        fuel_opt )
+    | Flow { from; kind; into } ->
+      let (from, fuel_opt) = to_json_help from fuel_opt in
+      let (into, fuel_opt) = to_json_help into fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Flow",
+                JSON_Object
+                  [
+                    ("from", from);
+                    ("kind", flow_kind_to_json kind);
+                    ("into", into);
+                  ] );
+            ]),
+        fuel_opt )
+    | Lower_bound { bound; of_ } ->
+      let (bound, fuel_opt) = to_json_help bound fuel_opt in
+      let (of_, fuel_opt) = to_json_help of_ fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [("Lower_bound", JSON_Object [("bound", bound); ("of", of_)])]),
+        fuel_opt )
+    | Solved { solution; of_; in_ } ->
+      let (in_, fuel_opt) = to_json_help in_ fuel_opt in
+      let (solution, fuel_opt) = to_json_help solution fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Solved",
+                JSON_Object
+                  [
+                    ("solution", solution);
+                    ("of_", string_ (Tvid.show of_));
+                    ("in_", in_);
+                  ] );
+            ]),
+        fuel_opt )
+    | Axiom { prev; axiom; next } ->
+      let (next, fuel_opt) = to_json_help next fuel_opt in
+      let (prev, fuel_opt) = to_json_help prev fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Axiom",
+                JSON_Object
+                  [
+                    ("prev", prev);
+                    ("axiom", axiom_to_json axiom);
+                    ("next", next);
+                  ] );
+            ]),
+        fuel_opt )
+    | Def (def, r) ->
+      let (r, fuel_opt) = to_json_help r fuel_opt in
+      ( Hh_json.(JSON_Object [("Def", JSON_Array [pos_or_decl_to_json def; r])]),
+        fuel_opt )
+    | Prj_both { sub_prj; prj; sub; super } ->
+      let (sub_prj, fuel_opt) = to_json_help sub_prj fuel_opt in
+      let (sub, fuel_opt) = to_json_help sub fuel_opt in
+      let (super, fuel_opt) = to_json_help super fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Prj_both",
+                JSON_Object
+                  [
+                    ("sub_prj", sub_prj);
+                    ("prj", prj_symm_to_json prj);
+                    ("sub", sub);
+                    ("super", super);
+                  ] );
+            ]),
+        fuel_opt )
+    | Prj_one { part; prj; whole } ->
+      let (part, fuel_opt) = to_json_help part fuel_opt in
+      let (whole, fuel_opt) = to_json_help whole fuel_opt in
+      ( Hh_json.(
+          JSON_Object
+            [
+              ( "Prj_one",
+                JSON_Object
+                  [
+                    ("part", part);
+                    ("prj", prj_asymm_to_json prj);
+                    ("whole", whole);
+                  ] );
+            ]),
+        fuel_opt )
+  end
 
-and to_json : type a. a t_ -> Hh_json.json =
- (fun t -> Hh_json.JSON_Array (List.rev @@ to_json_help t []))
+let to_json : type a. a t_ -> Hh_json.json =
+ (fun t -> fst (to_json_help t (Some 20)))
+
+let to_json_full : type a. a t_ -> Hh_json.json =
+ (fun t -> fst (to_json_help t None))
 
 let to_pos : type ph. ph t_ -> Pos_or_decl.t = (fun r -> to_raw_pos r)
 

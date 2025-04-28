@@ -87,6 +87,8 @@ type t = locl_phase t_ [@@deriving show]
 
 val to_json : 'a t_ -> Hh_json.json
 
+val to_json_full : 'a t_ -> Hh_json.json
+
 val debug_reason : sub:locl_phase t_ -> super:locl_phase t_ -> 'a Explanation.t
 
 val debug_derivation :

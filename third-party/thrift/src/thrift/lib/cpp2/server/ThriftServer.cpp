@@ -2063,7 +2063,7 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
     // from maxRequests and synced to concurrencyLimit instead, the service
     // might encounter a behavioral change.
     folly::call_once(serviceMightRelyOnSyncedMaxRequestsFlag_, [this]() {
-      LOG(WARNING) << "Service might rely on synced max requests.";
+      XLOG(DBG) << "Service might rely on synced max requests.";
       THRIFT_SERVER_EVENT(serviceMightRelyOnSyncedMaxRequests).log(*this);
     });
 
@@ -2078,7 +2078,7 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
         // migrated before completely decoupling maxRequests from
         // concurrencyLimit.
         folly::call_once(serviceReliesOnSyncedMaxRequestsFlag_, [this]() {
-          LOG(WARNING) << "Service relies on synced max requests.";
+          XLOG(DBG) << "Service relies on synced max requests.";
           THRIFT_SERVER_EVENT(serviceReliesOnSyncedMaxRequests).log(*this);
         });
       }
@@ -2139,7 +2139,7 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
     // maxQps and synced to executionRate instead, the service might encounter a
     // behavioral change.
     folly::call_once(serviceMightRelyOnSyncedMaxQpsFlag_, [this]() {
-      LOG(WARNING) << "Service might rely on synced max qps.";
+      XLOG(DBG) << "Service might rely on synced max qps.";
       THRIFT_SERVER_EVENT(serviceMightRelyOnSyncedMaxQps).log(*this);
     });
 
@@ -2153,7 +2153,7 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
         // is the kind of case that absolutely must be migrated before
         // completely decoupling maxQps from qpsLimit.
         folly::call_once(serviceReliesOnSyncedMaxRequestsFlag_, [this]() {
-          LOG(WARNING) << "Service relies on synced max qps.";
+          XLOG(DBG) << "Service relies on synced max qps.";
           THRIFT_SERVER_EVENT(serviceReliesOnSyncedMaxQps).log(*this);
         });
       }

@@ -184,14 +184,15 @@ OptionalTypeRef SGWrapper::findType(const Uri& uri) const {
   return {};
 }
 
-OptionalTypeRef SGWrapper::findTypeInAny(const type::TypeStruct& type) const {
+OptionalTypeRef SGWrapper::findTypeInAny(const type::Type& type) const {
   const type::TypeUri* uri = nullptr;
-  switch (auto t = type.name()->getType()) {
+  const auto& name = *type.toThrift().name();
+  switch (auto t = name.getType()) {
     case type::TypeName::Type::structType:
-      uri = &*type.name()->structType_ref();
+      uri = &*name.structType_ref();
       break;
     case type::TypeName::Type::unionType:
-      uri = &*type.name()->unionType_ref();
+      uri = &*name.unionType_ref();
       break;
     default:
       return {};
@@ -333,7 +334,7 @@ scope DebugTree<type::AnyStruct>::operator()(
     // NOLINTNEXTLINE(facebook-hte-DetailCall)
     auto value = protocol::detail::parseValueFromAny(any);
     ret.make_child() =
-        debugTree(value, graph, graph.findTypeInAny(any.type()->toThrift()));
+        debugTree(value, graph, graph.findTypeInAny(*any.type()));
   } catch (std::exception&) {
     ret.make_child() =
         debugTree(*any.data(), graph, TypeRef::of(Primitive::BINARY));
@@ -676,8 +677,7 @@ scope DebugTree<op::AnyPatch>::operator()(
     void patchIfTypeIs(
         const type::Type& type, const protocol::DynamicPatch& patch) {
       auto node = scope::make_root("{}", "type: " + type.debugString());
-      node.make_child() =
-          debugTree(patch, graph, graph.findTypeInAny(type.toThrift()));
+      node.make_child() = debugTree(patch, graph, graph.findTypeInAny(type));
       addCombinableOp(
           "patchIfTypeIs",
           protocol::asValueStruct<type::infer_tag<type::Type>>(type),

@@ -83,6 +83,11 @@ TEST(DebugTreeTest, MyStruct) {
         });
   });
 
+  EXPECT_EQ(
+      to_string(debugTree(v, getGraph(), Uri{apache::thrift::uri<MyStruct>()})),
+      to_string(debugTree(
+          v, getGraph(), type::Type::get<type::struct_t<MyStruct>>())));
+
   expectEq(debugTree(v, getGraph(), Uri{apache::thrift::uri<MyStruct>()}), R"(
     Definition(kind=Struct, name='MyStruct', program='DebugTree.thrift')
     ├─ boolVal
@@ -361,6 +366,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
                       ╰─ append
                          ╰─ ;
     )");
+
   expectEq(debugTree(dynPatch, getGraph()), R"(
     DynamicStructPatch
     ├─ ensure

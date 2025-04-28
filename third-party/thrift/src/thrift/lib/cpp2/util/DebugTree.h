@@ -47,7 +47,7 @@ class SGWrapper {
   /* implicit */ SGWrapper(const SyntaxGraph& graph) : graph_(graph) {}
   decltype(auto) programs() const { return graph_.programs(); }
   OptionalTypeRef findType(const Uri& uri) const;
-  OptionalTypeRef findTypeInAny(const type::TypeStruct&) const;
+  OptionalTypeRef findTypeInAny(const type::Type& type) const;
 
  private:
   const SyntaxGraph& graph_;
@@ -89,8 +89,13 @@ scope debugTree(const T& t, const SGWrapper& graph, const Uri& uri) {
 }
 
 template <class T>
+scope debugTree(const T& t, const SGWrapper& graph, const type::Type& type) {
+  return debugTree(t, graph, graph.findTypeInAny(type));
+}
+
+template <class T>
 scope debugTree(const T& t, const SGWrapper& graph) {
-  return debugTree(t, graph, {});
+  return debugTree(t, graph, OptionalTypeRef{});
 }
 
 template <>

@@ -158,7 +158,6 @@ struct ProxygenServer : Server, folly::AsyncTimeout {
   int getLibEventConnectionCount() override;
   uint32_t getPendingTransportsCount();
   bool enableSSL(int port) override;
-  bool enableSSLWithPlainText() override;
   
   void setMaxThreadCount(int max) {
     return m_dispatcher.setMaxThreadCount(max);

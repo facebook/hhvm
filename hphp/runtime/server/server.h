@@ -304,13 +304,6 @@ public:
    */
   virtual bool enableSSL(int port) = 0;
 
-  /**
-   * To enable SSL in addition to plaintext of the current server.
-   */
-  virtual bool enableSSLWithPlainText() {
-    return false;
-  }
-
   virtual DispatcherStats getDispatcherStats() = 0;
 
 protected:

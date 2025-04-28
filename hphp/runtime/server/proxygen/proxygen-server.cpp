@@ -810,16 +810,6 @@ bool ProxygenServer::enableSSL(int port) {
   return true;
 }
 
-bool ProxygenServer::enableSSLWithPlainText() {
-  m_httpConfig->strictSSL = false;
-  m_httpConfig->sslContextConfigs.emplace_back(
-      createContextConfig({
-        Cfg::Server::SSLCertificateFile,
-        Cfg::Server::SSLCertificateKeyFile}, true));
-  m_httpConfig->allowInsecureConnectionsOnSecureServer = true;
-  return true;
-}
-
 wangle::SSLContextConfig ProxygenServer::createContextConfig(
     const CertKeyPair& path,
     bool isDefault) {

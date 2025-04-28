@@ -218,61 +218,43 @@ scope DebugTree<protocol::ValueList>::operator()(
     const protocol::ValueList& v,
     const SGWrapper& graph,
     const OptionalTypeRef& typeref) {
-  auto msg = scope::make_root("<List>");
+  auto node = scope::make_root("<List>");
   for (auto& i : v) {
-    msg.make_child() = debugTree(i, graph, getListElem(typeref));
+    node.make_child() = debugTree(i, graph, getListElem(typeref));
   }
-  return msg;
+  return node;
 }
 
 scope DebugTree<protocol::ValueSet>::operator()(
     const protocol::ValueSet& set,
     const SGWrapper& graph,
     const OptionalTypeRef& typeref) {
-  std::vector<const protocol::Value*> keys;
-  for (const auto& k : set) {
-    keys.push_back(&k);
+  using ValueRef = std::reference_wrapper<const protocol::Value>;
+  std::set<ValueRef, std::less<>> sorted(set.begin(), set.end());
+  auto node = scope::make_root("<Set>");
+  for (const auto& i : sorted) {
+    node.make_child() = debugTree(i.get(), graph, getSetElem(typeref));
   }
-
-  // always output keys in order
-  std::sort(keys.begin(), keys.end(), [](auto* lhs, auto* rhs) {
-    return *lhs < *rhs;
-  });
-
-  auto msg = scope::make_root("<Set>");
-  for (auto& k : keys) {
-    msg.make_child() = debugTree(*k, graph, getSetElem(typeref));
-  }
-  return msg;
+  return node;
 }
 
 scope DebugTree<protocol::ValueMap>::operator()(
     const protocol::ValueMap& map,
     const SGWrapper& graph,
     const OptionalTypeRef& typeref) {
-  std::vector<const protocol::Value*> keys;
-  for (const auto& [k, _] : map) {
-    keys.push_back(&k);
+  using ValueRef = std::reference_wrapper<const protocol::Value>;
+  std::map<ValueRef, ValueRef, std::less<>> sorted(map.begin(), map.end());
+  std::size_t i = 0;
+  auto node = scope::make_root("<Map>");
+  for (const auto& [k, v] : sorted) {
+    node.make_child("Key #{}", i).make_child() =
+        debugTree(k.get(), graph, getMapKey(typeref));
+    node.make_child("Value #{}", i).make_child() =
+        debugTree(v.get(), graph, getMapValue(typeref));
+    i += 1;
   }
 
-  // always output keys in order
-  std::sort(keys.begin(), keys.end(), [](auto* lhs, auto* rhs) {
-    return *lhs < *rhs;
-  });
-
-  auto msg = scope::make_root("<Map>");
-  for (size_t i = 0; i < keys.size(); ++i) {
-    auto key = scope::make_root("Key #{}", i);
-    const auto& k = *keys[i];
-    key.make_child() = debugTree(k, graph, getMapKey(typeref));
-
-    auto value = scope::make_root("Value #{}", i);
-    value.make_child() = debugTree(map.at(k), graph, getMapValue(typeref));
-    msg.make_child() = std::move(key);
-    msg.make_child() = std::move(value);
-  }
-
-  return msg;
+  return node;
 }
 
 scope DebugTree<protocol::Value>::operator()(

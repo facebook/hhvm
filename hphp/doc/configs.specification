@@ -1384,10 +1384,15 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Whether to remove the existence of the REQUEST superglobal
 
-- bool Eval.FastMethodIntercept = false, UNKNOWN, postprocess
+- bool Eval.FastMethodIntercept = false, fzn, postprocess
 
   Enables the non-surprise flag based implementation of
   fb_intercept2
+
+- bool Eval.FastMethodInterceptNoAsyncOpt = false, fzn, postprocess
+
+  Unconditionally disable the async scheduler optimization when
+  FastMethodIntercept is set.
 
 - bool Eval.LogHttpServerSignalSource = true, UNKNOWN
 

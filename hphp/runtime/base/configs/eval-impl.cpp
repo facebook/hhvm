@@ -138,6 +138,11 @@ void EvalLoader::FastMethodInterceptPostProcess(bool& val) {
   if (arch() == Arch::ARM) val = false;
 }
 
+void EvalLoader::FastMethodInterceptNoAsyncOptPostProcess(bool& val) {
+  // FastMethodInterceptNoAsyncOptPostProcess requires FastMethodIntercept
+  if (!Eval::FastMethodIntercept) val = false;
+}
+
 std::string EvalLoader::PackagesTomlFileNameDefault() {
   return "PACKAGES.toml";
 }

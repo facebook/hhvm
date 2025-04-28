@@ -482,7 +482,11 @@ TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet,
     irlower::emitCheckSurpriseFlags(v, rvmsp(), slowPath);
 
     // The return event hook cleared the surprise, continue on the fast path.
-    v << jmpi{asyncFuncRet, vm_regs_with_sp() | rarg(0) | rarg(1)};
+    if (LIKELY(!Cfg::Eval::FastMethodInterceptNoAsyncOpt)) {
+      v << jmpi{asyncFuncRet, vm_regs_with_sp() | rarg(0) | rarg(1)};
+    } else {
+      v << jmp{slowPath};
+    }
 
     // Slow path.
     v = slowPath;

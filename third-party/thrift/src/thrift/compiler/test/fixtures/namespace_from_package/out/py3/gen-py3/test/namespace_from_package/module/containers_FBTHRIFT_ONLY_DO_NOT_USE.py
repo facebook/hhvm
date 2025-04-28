@@ -19,6 +19,7 @@ from collections.abc import Mapping, Sequence, Set
 _fbthrift__module_name__ = "test.namespace_from_package.module.types"
 
 import test.namespace_from_package.module.types as _test_namespace_from_package_module_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(

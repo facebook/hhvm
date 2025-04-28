@@ -19,6 +19,7 @@ from collections.abc import Mapping, Sequence, Set
 _fbthrift__module_name__ = "module_structs.types"
 
 import module_structs.types as _module_structs_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(

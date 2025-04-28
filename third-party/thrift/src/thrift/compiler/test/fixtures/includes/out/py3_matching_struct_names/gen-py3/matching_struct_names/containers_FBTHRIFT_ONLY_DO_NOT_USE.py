@@ -20,6 +20,7 @@ _fbthrift__module_name__ = "matching_struct_names.types"
 
 import matching_struct_names.types as _matching_struct_names_types
 import module.types as _module_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(
@@ -64,6 +65,16 @@ class List__MyStruct(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__MyStruct()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "List__MyStruct":
+        _items = [
+            _ensure_py3_or_raise(item, "item", _matching_struct_names_types.MyStruct)
+            for item in python_list
+        ]
+        return List__MyStruct(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 Sequence.register(List__MyStruct)
 
@@ -110,6 +121,16 @@ class List__List__MyStruct(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__List__MyStruct()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "List__List__MyStruct":
+        _items = [
+            _matching_struct_names_types.List__MyStruct.from_python(item)
+            for item in python_list
+        ]
+        return List__List__MyStruct(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 Sequence.register(List__List__MyStruct)
 
@@ -152,6 +173,16 @@ class List__module_MyStruct(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__module_MyStruct()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "List__module_MyStruct":
+        _items = [
+            _ensure_py3_or_raise(item, "item", _module_types.MyStruct)
+            for item in python_list
+        ]
+        return List__module_MyStruct(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 Sequence.register(List__module_MyStruct)
 
@@ -198,6 +229,16 @@ class List__List__module_MyStruct(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__List__module_MyStruct()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "List__List__module_MyStruct":
+        _items = [
+            _matching_struct_names_types.List__module_MyStruct.from_python(item)
+            for item in python_list
+        ]
+        return List__List__module_MyStruct(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 Sequence.register(List__List__module_MyStruct)
 

@@ -25,11 +25,16 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 import b.types as _b_types
 import c.types as _c_types
 
 import a.types as _a_types
+from a.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__c_C,
+    List__List__c_C,
+)
 
 
 @__cython.auto_pickle(False)
@@ -55,6 +60,7 @@ cdef class __A_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_a_cbindings.cA](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__List__c_C)
         deref(self._struct_cpp_obj).b_ref().assign(_a_types.List__List__c_C__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -62,5 +68,6 @@ cdef class __A_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_a_cbindings.cA](deref(self._struct_cpp_obj), 1)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__c_C)
         deref(self._struct_cpp_obj).other_ref().assign(_a_types.List__c_C__make_instance(_fbthrift_value))
 

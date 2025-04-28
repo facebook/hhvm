@@ -25,9 +25,17 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+from test.fixtures.basic.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    Set__float,
+    List__i32,
+    Set__string,
+    Map__string_i64,
+    Map__string_List__i32,
+)
 
 
 @__cython.auto_pickle(False)

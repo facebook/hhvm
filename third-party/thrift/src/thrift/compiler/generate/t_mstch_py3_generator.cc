@@ -98,6 +98,22 @@ bool type_needs_convert(const t_type* type) {
       type->is_container() || type->is_float();
 }
 
+bool container_needs_convert(const t_type* type) {
+  const t_type* true_type = type->get_true_type();
+
+  if (const t_map* map_type = dynamic_cast<const t_map*>(true_type)) {
+    return container_needs_convert(map_type->get_key_type()) ||
+        container_needs_convert(map_type->get_val_type());
+  } else if (const t_list* list_type = dynamic_cast<const t_list*>(true_type)) {
+    return container_needs_convert(list_type->get_elem_type());
+  } else if (const t_set* set_type = dynamic_cast<const t_set*>(true_type)) {
+    return container_needs_convert(set_type->get_elem_type());
+  } else if (true_type->is_struct_or_union() || true_type->is_exception()) {
+    return true;
+  }
+  return false;
+}
+
 std::string get_cpp_template(const t_type& type) {
   if (const auto* val = type.find_unstructured_annotation_or_null(
           {"cpp.template", "cpp2.template"})) {
@@ -669,6 +685,8 @@ class py3_mstch_type : public mstch_type {
             {"type:customBinaryType?", &py3_mstch_type::isCustomBinaryType},
             {"type:simple?", &py3_mstch_type::isSimple},
             {"type:needs_convert?", &py3_mstch_type::needs_convert},
+            {"type:is_container_of_struct?",
+             &py3_mstch_type::is_container_of_struct},
             {"type:elem_needs_convert?",
              &py3_mstch_type::element_needs_convert},
             {"type:key_needs_convert?", &py3_mstch_type::map_key_needs_convert},
@@ -778,8 +796,12 @@ class py3_mstch_type : public mstch_type {
   // fields
   mstch::node needs_convert() { return type_needs_convert(type_); }
 
-  // type:list_elem_type etc. is defined in mstch_objects, so the returned type
-  // node doesn't define type:needs_convert
+  mstch::node is_container_of_struct() {
+    return type_->is_container() && container_needs_convert(type_);
+  }
+
+  // type:list_elem_type etc. is defined in mstch_objects, so the returned
+  // type node doesn't define type:needs_convert
   mstch::node element_needs_convert() {
     if (type_->is_list()) {
       return type_needs_convert(get_list_elem_type(*type_));
@@ -1269,8 +1291,8 @@ class py3_mstch_const_value : public mstch_const_value {
   /*
    * Use this function (instead of the version used by C++) to render unicode
    * strings, i.e., normal python strings "".
-   * For binary bytes b"", use string_value, which has octal escapes for unicode
-   * characters.
+   * For binary bytes b"", use string_value, which has octal escapes for
+   * unicode characters.
    */
   mstch::node unicode_value() {
     if (type_ != cv::CV_STRING) {

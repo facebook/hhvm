@@ -25,10 +25,17 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 import module.types as _module_types
 
 import matching_struct_names.types as _matching_struct_names_types
+from matching_struct_names.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__MyStruct,
+    List__List__MyStruct,
+    List__module_MyStruct,
+    List__List__module_MyStruct,
+)
 
 
 @__cython.auto_pickle(False)
@@ -83,6 +90,7 @@ cdef class __Combo_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__List__MyStruct)
         deref(self._struct_cpp_obj).listOfOurMyStructLists_ref().assign(_matching_struct_names_types.List__List__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -90,6 +98,7 @@ cdef class __Combo_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 1)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__module_MyStruct)
         deref(self._struct_cpp_obj).theirMyStructList_ref().assign(_matching_struct_names_types.List__module_MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -97,6 +106,7 @@ cdef class __Combo_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 2)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__MyStruct)
         deref(self._struct_cpp_obj).ourMyStructList_ref().assign(_matching_struct_names_types.List__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
@@ -104,5 +114,6 @@ cdef class __Combo_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 3)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__List__module_MyStruct)
         deref(self._struct_cpp_obj).listOfTheirMyStructList_ref().assign(_matching_struct_names_types.List__List__module_MyStruct__make_instance(_fbthrift_value))
 

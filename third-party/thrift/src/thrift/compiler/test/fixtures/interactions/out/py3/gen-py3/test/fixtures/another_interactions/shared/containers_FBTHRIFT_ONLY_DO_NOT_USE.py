@@ -19,6 +19,7 @@ from collections.abc import Mapping, Sequence, Set
 _fbthrift__module_name__ = "test.fixtures.another_interactions.shared.types"
 
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(

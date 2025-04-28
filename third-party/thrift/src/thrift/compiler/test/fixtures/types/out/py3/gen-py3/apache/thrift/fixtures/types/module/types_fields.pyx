@@ -25,10 +25,34 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
+from apache.thrift.fixtures.types.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    std_unordered_map__Map__i32_string,
+    List__i64,
+    Map__binary_i64,
+    List__i32,
+    std_list__List__i32,
+    std_deque__List__i32,
+    folly_fbvector__List__i32,
+    folly_small_vector__List__i32,
+    folly_sorted_vector_set__Set__i32,
+    Map__i32_string,
+    std_list_int32_t__List__i32,
+    Map__string_i32,
+    List__std_unordered_map__Map__i32_string,
+    Map__i32_IncompleteMapDep,
+    std_unordered_map__Map__i32_CompleteMapDep,
+    _std_list__List__IncompleteListDep,
+    folly_small_vector__List__CompleteListDep,
+    List__AdaptedListDep,
+    List__DependentAdaptedListDep,
+    Set__i32,
+    Map__i32_i32,
+)
 
 
 @__cython.auto_pickle(False)
@@ -790,6 +814,7 @@ cdef class __IncompleteMap_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, Map__i32_IncompleteMapDep)
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.Map__i32_IncompleteMapDep__make_instance(_fbthrift_value))
 
 
@@ -832,6 +857,7 @@ cdef class __CompleteMap_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cCompleteMap](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, std_unordered_map__Map__i32_CompleteMapDep)
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_CompleteMapDep__make_instance(_fbthrift_value))
 
 
@@ -874,6 +900,7 @@ cdef class __IncompleteList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cIncompleteList](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, _std_list__List__IncompleteListDep)
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types._std_list__List__IncompleteListDep__make_instance(_fbthrift_value))
 
 
@@ -916,6 +943,7 @@ cdef class __CompleteList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cCompleteList](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, folly_small_vector__List__CompleteListDep)
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.folly_small_vector__List__CompleteListDep__make_instance(_fbthrift_value))
 
 
@@ -958,6 +986,7 @@ cdef class __AdaptedList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAdaptedList](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__AdaptedListDep)
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.List__AdaptedListDep__make_instance(_fbthrift_value))
 
 
@@ -983,6 +1012,7 @@ cdef class __DependentAdaptedList_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedList](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__DependentAdaptedListDep)
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.List__DependentAdaptedListDep__make_instance(_fbthrift_value))
 
 

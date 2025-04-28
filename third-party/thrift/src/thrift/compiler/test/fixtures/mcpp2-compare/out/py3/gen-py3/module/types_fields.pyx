@@ -25,10 +25,66 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 import includes.types as _includes_types
 
 import module.types as _module_types
+from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    Map__string_i64,
+    Map__Empty_MyStruct,
+    List__Map__Empty_MyStruct,
+    List__List__Map__Empty_MyStruct,
+    List__List__List__Map__Empty_MyStruct,
+    List__MyEnumA,
+    Set__MyStruct,
+    List__ComplexUnion,
+    List__string,
+    Set__List__string,
+    Set__List__List__Map__Empty_MyStruct,
+    Map__i32_List__string,
+    List__bool,
+    List__i32,
+    List__List__i32,
+    List__List__List__i32,
+    List__List__List__List__i32,
+    Set__List__i32,
+    Set__string,
+    List__Set__string,
+    Map__List__Set__string_string,
+    Map__Set__List__i32_Map__List__Set__string_string,
+    List__binary,
+    Map__MyEnumA_string,
+    Set__i64,
+    Map__string_i32,
+    List__SimpleUnion,
+    Set__SimpleUnion,
+    List__Set__SimpleUnion,
+    Map__string_bool,
+    Set__i32,
+    Map__string_Map__string_i32,
+    Map__string_Map__string_Map__string_i32,
+    List__Set__i32,
+    Map__string_List__i32,
+    Set__bool,
+    Set__Set__bool,
+    Set__Set__Set__bool,
+    folly_small_vector_int64_t_8__List__i64,
+    folly_sorted_vector_set_std_string__Set__string,
+    FakeMap__Map__i64_double,
+    std_unordered_map_std_string_containerStruct__Map__string_containerStruct,
+    std_list__List__i32,
+    std_deque__List__string,
+    folly_sorted_vector_set__Set__string,
+    folly_sorted_vector_map__Map__i64_string,
+    Map__string_folly_IOBuf__binary,
+    Map__string_std_unique_ptr_folly_IOBuf__binary,
+    Map__i32_string,
+    List__Map__string_i32,
+    Map__i16_string,
+    List__Map__i16_string,
+    List__MyStruct,
+)
 
 
 @__cython.auto_pickle(False)
@@ -357,6 +413,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnException](deref(self._struct_cpp_obj), 11)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, Set__MyStruct)
         deref(self._struct_cpp_obj).a_set_struct_ref().assign(_module_types.Set__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_12(self, _fbthrift_value) except *:
@@ -364,6 +421,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnException](deref(self._struct_cpp_obj), 12)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__SimpleUnion)
         deref(self._struct_cpp_obj).a_union_list_ref().assign(_module_types.List__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_13(self, _fbthrift_value) except *:
@@ -371,6 +429,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnException](deref(self._struct_cpp_obj), 13)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, Set__SimpleUnion)
         deref(self._struct_cpp_obj).union_typedef_ref().assign(_module_types.Set__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_14(self, _fbthrift_value) except *:
@@ -378,6 +437,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnException](deref(self._struct_cpp_obj), 14)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__Set__SimpleUnion)
         deref(self._struct_cpp_obj).a_union_typedef_list_ref().assign(_module_types.List__Set__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_15(self, _fbthrift_value) except *:
@@ -686,6 +746,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 22)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__Map__Empty_MyStruct)
         deref(self._struct_cpp_obj).fieldO_ref().assign(_module_types.List__Map__Empty_MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_23(self, _fbthrift_value) except *:
@@ -693,6 +754,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 23)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__List__List__Map__Empty_MyStruct)
         deref(self._struct_cpp_obj).fieldP_ref().assign(_module_types.List__List__List__Map__Empty_MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_24(self, _fbthrift_value) except *:
@@ -786,6 +848,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 34)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, Set__MyStruct)
         deref(self._struct_cpp_obj).fieldW_ref().assign(_module_types.Set__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_35(self, _fbthrift_value) except *:
@@ -820,6 +883,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 38)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__ComplexUnion)
         deref(self._struct_cpp_obj).fieldY_ref().assign(_module_types.List__ComplexUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_39(self, _fbthrift_value) except *:
@@ -827,6 +891,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 39)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, Set__SimpleUnion)
         deref(self._struct_cpp_obj).fieldZ_ref().assign(_module_types.Set__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_40(self, _fbthrift_value) except *:
@@ -834,6 +899,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 40)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__Set__SimpleUnion)
         deref(self._struct_cpp_obj).fieldAA_ref().assign(_module_types.List__Set__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_41(self, _fbthrift_value) except *:
@@ -1168,6 +1234,7 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 23)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, std_unordered_map_std_string_containerStruct__Map__string_containerStruct)
         deref(self._struct_cpp_obj).map_struct_type_ref().assign(_module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_24(self, _fbthrift_value) except *:

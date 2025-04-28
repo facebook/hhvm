@@ -124,6 +124,27 @@ class {{type:flat_name}}(thrift.py3.types.List):
         )
 
 {{/program:inplace_migrate?}}
+{{^program:inplace_migrate?}}
+{{#type:is_container_of_struct?}}
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "{{type:flat_name}}":
+    {{#type:list_elem_type}}
+        _items = [
+            {{#type:is_container_of_struct?}}
+            {{> types/python_type}}.from_python(item)
+            {{/type:is_container_of_struct?}}
+            {{^type:is_container_of_struct?}}
+            _ensure_py3_or_raise(item, "item", {{> types/python_is_instance_type}})
+            {{/type:is_container_of_struct?}}
+            for item in python_list
+        ]
+    {{/type:list_elem_type}}
+        return {{type:flat_name}}(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+{{/type:is_container_of_struct?}}
+{{/program:inplace_migrate?}}
 
 Sequence.register({{type:flat_name}})
 
@@ -218,6 +239,27 @@ class {{type:flat_name}}(thrift.py3.types.Set):
             private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
         )
 
+{{/program:inplace_migrate?}}
+{{^program:inplace_migrate?}}
+{{#type:is_container_of_struct?}}
+    @staticmethod
+    def from_python(python_set: thrift.python.types.Set) -> "{{type:flat_name}}":
+    {{#type:set_elem_type}}
+        _items = frozenset(
+            {{#type:is_container_of_struct?}}
+            {{> types/python_type}}.from_python(item)
+            {{/type:is_container_of_struct?}}
+            {{^type:is_container_of_struct?}}
+            _ensure_py3_or_raise(item, "item", {{> types/python_is_instance_type}})
+            {{/type:is_container_of_struct?}}
+            for item in python_set
+        )
+    {{/type:set_elem_type}}
+        return {{type:flat_name}}(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
+        )
+{{/type:is_container_of_struct?}}
 {{/program:inplace_migrate?}}
 
 Set.register({{type:flat_name}})
@@ -348,6 +390,54 @@ class {{type:flat_name}}(thrift.py3.types.Map):
             private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
         )
 
+{{/program:inplace_migrate?}}
+{{^program:inplace_migrate?}}
+{{#type:is_container_of_struct?}}
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> "{{type:flat_name}}":
+    {{#type:key_type}}
+    {{#type:is_container_of_struct?}}
+        _keys = (
+            {{> types/python_type}}.from_python(key)
+            for key in python_map.keys()
+        )
+    {{/type:is_container_of_struct?}}
+    {{^type:is_container_of_struct?}}
+    {{#type:struct?}}
+        _keys = (
+            _ensure_py3_or_raise(key, "key", {{> types/python_is_instance_type}})
+            for key in python_map.keys()
+        )
+    {{/type:struct?}}
+    {{^type:struct?}}
+        _keys = python_map.keys()
+    {{/type:struct?}}
+    {{/type:is_container_of_struct?}}
+    {{/type:key_type}}
+    {{#type:value_type}}
+    {{#type:is_container_of_struct?}}
+        _values = (
+            {{> types/python_type}}.from_python(value)
+            for value in python_map.values()
+        )
+    {{/type:is_container_of_struct?}}
+    {{^type:is_container_of_struct?}}
+    {{#type:struct?}}
+        _values = (
+            _ensure_py3_or_raise(value, "value", {{> types/python_is_instance_type}})
+            for value in python_map.values()
+        )
+    {{/type:struct?}}
+    {{^type:struct?}}
+        _values = python_map.values()
+    {{/type:struct?}}
+    {{/type:is_container_of_struct?}}
+    {{/type:value_type}}
+        return {{type:flat_name}}(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+{{/type:is_container_of_struct?}}
 {{/program:inplace_migrate?}}
 
 Mapping.register({{type:flat_name}})

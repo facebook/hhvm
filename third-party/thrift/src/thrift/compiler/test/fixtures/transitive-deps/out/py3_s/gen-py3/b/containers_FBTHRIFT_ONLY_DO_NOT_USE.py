@@ -20,6 +20,7 @@ _fbthrift__module_name__ = "b.types"
 
 import b.types as _b_types
 import c.types as _c_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(
@@ -64,6 +65,16 @@ class List__c_C(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__c_C()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "List__c_C":
+        _items = [
+            _ensure_py3_or_raise(item, "item", _c_types.C)
+            for item in python_list
+        ]
+        return List__c_C(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 Sequence.register(List__c_C)
 

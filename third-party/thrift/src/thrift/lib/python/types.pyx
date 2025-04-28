@@ -638,7 +638,7 @@ cdef class ListTypeInfo(TypeInfoBase):
         try:
             value_len = len(values)
         except TypeError:
-            try: 
+            try:
                 warnings.warn(
                     f"list type should be a Sequence with length, got {type(values)}",
                     RuntimeWarning,

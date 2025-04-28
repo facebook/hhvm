@@ -41,6 +41,7 @@ from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 {{/program:structs?}}
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
@@ -49,6 +50,13 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeN
 {{/program:includeNamespaces}}
 
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+{{#program:hasContainerTypes}}
+from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+{{#program:containerTypes}}
+    {{type:flat_name}},
+{{/program:containerTypes}}
+)
+{{/program:hasContainerTypes}}
 
 {{#program:filtered_structs}}
 {{^struct:union?}}
@@ -98,6 +106,9 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
         {{/type:integer?}}
         {{/type:enum?}}
         {{/type:container?}}
+        {{#type:is_container_of_struct?}}
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, {{type:flat_name}})
+        {{/type:is_container_of_struct?}}
         {{#field:has_ref_accessor?}}
         deref(self._struct_cpp_obj).{{field:py_name}}_ref().assign({{> types/cython_field_value_for_assignment}})
         {{/field:has_ref_accessor?}}

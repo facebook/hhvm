@@ -29,3 +29,42 @@ union nested_pickle_union {
   1: easy_pickle c;
   2: i32 i32_val;
 }
+
+exception nested_pickle_exception {
+  1: easy_pickle c;
+  2: i32 i32_val;
+}
+
+struct struct_container {
+  1: list<easy_pickle> list_easy;
+  # @lint-ignore THRIFTCHECKS
+  2: set<easy_pickle> set_easy;
+  # @lint-ignore THRIFTCHECKS
+  3: map<easy_pickle, easy_pickle> map_easy_easy;
+  4: list<list<easy_pickle>> list_list_easy;
+  # @lint-ignore THRIFTCHECKS
+  5: list<set<easy_pickle>> list_set_easy;
+  # @lint-ignore THRIFTCHECKS
+  6: list<map<easy_pickle, easy_pickle>> list_map_easy_easy;
+  7: list<map<string, easy_pickle>> list_map_str_easy;
+  # @lint-ignore THRIFTCHECKS
+  8: list<map<easy_pickle, string>> list_map_easy_str;
+  # @lint-ignore THRIFTCHECKS
+  9: list<map<easy_pickle, list<string>>> list_map_easy_list_str;
+}
+
+union union_container {
+  1: list<easy_pickle> list_easy;
+  # @lint-ignore THRIFTCHECKS
+  2: set<easy_pickle> set_easy;
+  # @lint-ignore THRIFTCHECKS
+  3: map<easy_pickle, easy_pickle> map_easy_easy;
+}
+
+exception exception_container {
+  1: list<easy_pickle> list_easy;
+  # @lint-ignore THRIFTCHECKS
+  2: set<easy_pickle> set_easy;
+  # @lint-ignore THRIFTCHECKS
+  3: map<easy_pickle, easy_pickle> map_easy_easy;
+}

@@ -25,9 +25,17 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 
 import module.types as _module_types
+from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__RecursiveStruct,
+    List__i32,
+    Set__i32,
+    Map__i32_i32,
+    List__i64,
+)
 
 
 @__cython.auto_pickle(False)
@@ -256,6 +264,7 @@ cdef class __RecursiveStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cRecursiveStruct](deref(self._struct_cpp_obj), 0)
             return
+        _fbthrift_value = _ensure_py3_container_or_raise(_fbthrift_value, List__RecursiveStruct)
         deref(self._struct_cpp_obj).mes_ref().assign(_module_types.List__RecursiveStruct__make_instance(_fbthrift_value))
 
 

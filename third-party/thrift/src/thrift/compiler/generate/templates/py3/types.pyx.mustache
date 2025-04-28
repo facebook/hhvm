@@ -74,7 +74,7 @@ from thrift.py3.types cimport (
     deref_const as __deref_const,
     {{/program:inplace_migrate?}}
 )
-from thrift.py3.types cimport _ensure_py3_or_raise
+from thrift.py3.types cimport _ensure_py3_or_raise, _ensure_py3_container_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -304,6 +304,10 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 
         {{/type:struct?}}
         {{/type:container?}}
+        {{#type:is_container_of_struct?}}
+        {{field:py_name}} = _ensure_py3_container_or_raise({{field:py_name}}, {{type:flat_name}})
+
+        {{/type:is_container_of_struct?}}
         {{/field:type}}
         {{/struct:py3_fields}}
         self.{{> types/cpp_obj}} = __to_shared_ptr(cmove({{struct:name}}._make_instance(

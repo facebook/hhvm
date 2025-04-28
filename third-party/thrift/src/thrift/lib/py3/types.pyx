@@ -773,7 +773,7 @@ cdef _is_python_structured(obj):
     return isinstance(obj, (_fbthrift_python_StructOrUnion, _fbthrift_python_GeneratedError))
 
 
-def _from_python_or_raise(thrift_value, field_name, py3_type):
+cpdef _from_python_or_raise(thrift_value, str field_name, py3_type):
     if _is_python_structured(thrift_value):
         thrift_value = thrift_value._to_py3()
         if not isinstance(thrift_value, py3_type):
@@ -785,7 +785,12 @@ def _from_python_or_raise(thrift_value, field_name, py3_type):
     else:
         raise TypeError(f'{field_name} is not a {py3_type !r}.')
 
-cdef _ensure_py3_or_raise(thrift_value, str field_name, py3_type):
+cpdef _ensure_py3_or_raise(thrift_value, str field_name, py3_type):
     if thrift_value is None or isinstance(thrift_value, py3_type):
         return thrift_value
     return _from_python_or_raise(thrift_value, field_name, py3_type)
+
+cpdef _ensure_py3_container_or_raise(thrift_value, py3_container_type):
+    if thrift_value is None or isinstance(thrift_value, py3_container_type):
+        return thrift_value
+    return py3_container_type.from_python(thrift_value)

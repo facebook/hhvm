@@ -106,7 +106,9 @@ cdef class StructFieldsSetter:
 
 cdef translate_cpp_enum_to_python(object EnumClass, int value)
 
-cdef _ensure_py3_or_raise(object thrift_value, str field_name, object py3_type)
+cpdef _ensure_py3_or_raise(object thrift_value, str field_name, object py3_type)
+cpdef _ensure_py3_container_or_raise(object thrift_value, object py3_container_type)
+cpdef _from_python_or_raise(object thrift_value, str field_name, object py3_type)
 
 
 # For cpp.type'd binary values we need a "string" that cython doesn't think

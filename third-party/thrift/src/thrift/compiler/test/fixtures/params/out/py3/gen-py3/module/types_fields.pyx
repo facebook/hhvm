@@ -23,7 +23,20 @@ from thrift.py3.types cimport (
 )
 
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 
 import module.types as _module_types
+from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__i32,
+    Map__i32_List__i32,
+    Set__i32,
+    Map__i32_Set__i32,
+    Map__i32_i32,
+    List__Map__i32_i32,
+    List__Set__i32,
+    Map__i32_Map__i32_Set__i32,
+    List__Map__i32_Map__i32_Set__i32,
+    List__List__Map__i32_Map__i32_Set__i32,
+)
 

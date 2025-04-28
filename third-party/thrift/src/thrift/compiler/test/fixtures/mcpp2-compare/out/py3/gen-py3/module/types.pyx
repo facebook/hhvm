@@ -37,7 +37,7 @@ from thrift.py3.types cimport (
     make_const_shared,
     constant_shared_ptr,
 )
-from thrift.py3.types cimport _ensure_py3_or_raise
+from thrift.py3.types cimport _ensure_py3_or_raise, _ensure_py3_container_or_raise
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
 import folly.iobuf as _fbthrift_iobuf
@@ -899,9 +899,17 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
         a_struct = _ensure_py3_or_raise(a_struct, "a_struct", MyStruct)
 
+        a_set_struct = _ensure_py3_container_or_raise(a_set_struct, Set__MyStruct)
+
         a_union = _ensure_py3_or_raise(a_union, "a_union", SimpleUnion)
 
         opt_a_union = _ensure_py3_or_raise(opt_a_union, "opt_a_union", SimpleUnion)
+
+        a_union_list = _ensure_py3_container_or_raise(a_union_list, List__SimpleUnion)
+
+        a_union_typedef = _ensure_py3_container_or_raise(a_union_typedef, Set__SimpleUnion)
+
+        a_union_typedef_list = _ensure_py3_container_or_raise(a_union_typedef_list, List__Set__SimpleUnion)
 
         ref_field = _ensure_py3_or_raise(ref_field, "ref_field", MyStruct)
 

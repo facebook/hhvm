@@ -23,8 +23,12 @@ from thrift.py3.types cimport (
 )
 
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 import c.types as _c_types
 
 import b.types as _b_types
+from b.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    List__c_C,
+)
 

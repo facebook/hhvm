@@ -23,7 +23,12 @@ from thrift.py3.types cimport (
 )
 
 from thrift.py3.types import _from_python_or_raise
+from thrift.py3.types cimport _ensure_py3_container_or_raise
 
 
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+from apache.thrift.fixtures.types.included.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    std_unordered_map__Map__i32_string,
+    List__std_unordered_map__Map__i32_string,
+)
 

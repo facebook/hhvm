@@ -21,6 +21,7 @@ _fbthrift__module_name__ = "module2.types"
 import module2.types as _module2_types
 import module0.types as _module0_types
 import module1.types as _module1_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(

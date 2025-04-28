@@ -19,6 +19,7 @@ from collections.abc import Mapping, Sequence, Set
 _fbthrift__module_name__ = "module.types"
 
 import module.types as _module_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(
@@ -63,6 +64,16 @@ class List__RecursiveStruct(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__RecursiveStruct()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "List__RecursiveStruct":
+        _items = [
+            _ensure_py3_or_raise(item, "item", _module_types.RecursiveStruct)
+            for item in python_list
+        ]
+        return List__RecursiveStruct(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 Sequence.register(List__RecursiveStruct)
 

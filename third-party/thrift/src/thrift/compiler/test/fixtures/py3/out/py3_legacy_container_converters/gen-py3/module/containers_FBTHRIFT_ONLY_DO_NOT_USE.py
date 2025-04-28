@@ -19,6 +19,7 @@ from collections.abc import Mapping, Sequence, Set
 _fbthrift__module_name__ = "module.types"
 
 import module.types as _module_types
+from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(
@@ -233,6 +234,16 @@ class List__SimpleStruct(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__SimpleStruct()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> "List__SimpleStruct":
+        _items = [
+            _ensure_py3_or_raise(item, "item", _module_types.SimpleStruct)
+            for item in python_list
+        ]
+        return List__SimpleStruct(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 Sequence.register(List__SimpleStruct)
 
@@ -424,6 +435,17 @@ class Map__string_SimpleStruct(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__string_SimpleStruct()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> "Map__string_SimpleStruct":
+        _keys = python_map.keys()
+        _values = (
+            _ensure_py3_or_raise(value, "value", _module_types.SimpleStruct)
+            for value in python_map.values()
+        )
+        return Map__string_SimpleStruct(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
 
 Mapping.register(Map__string_SimpleStruct)
 __all__.append('Map__string_SimpleStruct')
@@ -724,6 +746,17 @@ class Map__string_List__SimpleStruct(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__string_List__SimpleStruct()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> "Map__string_List__SimpleStruct":
+        _keys = python_map.keys()
+        _values = (
+            _module_types.List__SimpleStruct.from_python(value)
+            for value in python_map.values()
+        )
+        return Map__string_List__SimpleStruct(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
 
 Mapping.register(Map__string_List__SimpleStruct)
 __all__.append('Map__string_List__SimpleStruct')

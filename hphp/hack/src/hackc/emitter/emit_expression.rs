@@ -767,34 +767,76 @@ fn emit_string2<'a, 'd>(
     pos: &Pos,
     es: &[ast::Expr],
 ) -> Result<InstrSeq> {
-    if es.is_empty() {
-        Err(Error::unrecoverable(
-            "String2 with zero araguments is impossible",
-        ))
-    } else if es.len() == 1 {
-        Ok(InstrSeq::gather(vec![
+    match es.len() {
+        0 => Err(Error::unrecoverable(
+            "String2 with zero arguments is impossible",
+        )),
+        1 => Ok(InstrSeq::gather(vec![
             emit_expr(e, env, &es[0])?,
             emit_pos(pos),
             instr::cast_string(),
-        ]))
-    } else {
-        Ok(InstrSeq::gather(vec![
+        ])),
+        2 => Ok(InstrSeq::gather(vec![
             emit_two_exprs(e, env, &es[0].1, &es[0], &es[1])?,
             emit_pos(pos),
             instr::concat(),
-            InstrSeq::gather(
-                es[2..]
-                    .iter()
-                    .map(|expr| {
-                        Ok(InstrSeq::gather(vec![
-                            emit_expr(e, env, expr)?,
-                            emit_pos(pos),
-                            instr::concat(),
-                        ]))
-                    })
-                    .collect::<Result<_>>()?,
-            ),
-        ]))
+        ])),
+        len => {
+            // concatN supports up to 4
+            // Push one, then push chunks of 3 and concatN(4)
+            let mut idx = 1;
+            let mut all_instrs = vec![InstrSeq::gather(vec![
+                emit_expr(e, env, &es[0])?,
+                emit_pos(pos),
+            ])];
+            while len - idx >= 3 {
+                let instrs = InstrSeq::gather(
+                    es[idx..idx + 3]
+                        .iter()
+                        .map(|expr| {
+                            Ok(InstrSeq::gather(vec![
+                                emit_expr(e, env, expr)?,
+                                emit_pos(pos),
+                            ]))
+                        })
+                        .collect::<Result<_>>()?,
+                );
+                all_instrs.push(InstrSeq::gather(vec![instrs, instr::concat_n(4)]));
+                idx += 3;
+            }
+            // if there's just one left, push it onto the stack + concat,
+            // else just drain the remaining + concatN
+            let remaining = len - idx;
+            match remaining {
+                0 => {} // all done
+                1 => all_instrs.push(InstrSeq::gather(vec![
+                    emit_expr(e, env, &es[idx])?,
+                    emit_pos(pos),
+                    instr::concat(),
+                ])),
+                2 => {
+                    let instrs = InstrSeq::gather(
+                        es[idx..idx + 2]
+                            .iter()
+                            .map(|expr| {
+                                Ok(InstrSeq::gather(vec![
+                                    emit_expr(e, env, expr)?,
+                                    emit_pos(pos),
+                                ]))
+                            })
+                            .collect::<Result<_>>()?,
+                    );
+                    let size = 3; // our base string plus the 2 remaining to process
+                    all_instrs.push(InstrSeq::gather(vec![instrs, instr::concat_n(size)]));
+                }
+                len => {
+                    return Err(Error::unrecoverable(
+                        format! {"Somehow have {len} leftover items after concatN optimization in string interpolation"},
+                    ));
+                }
+            }
+            Ok(InstrSeq::gather(all_instrs))
+        }
     }
 }
 

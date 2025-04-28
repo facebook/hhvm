@@ -1377,27 +1377,24 @@ OPTBLD_INLINE void iopConcat() {
 }
 
 OPTBLD_INLINE void iopConcatN(uint32_t n) {
+  if (n == 2) return iopConcat();
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
-  auto const s1 = toStringWithNotice(tvAsCVarRef(*c1));
+  auto const c3 = vmStack().indC(2);
 
-  if (n == 2) {
-    auto const s2 = toStringWithNotice(tvAsVariant(*c2));
-    tvAsVariant(*c2) = concat(s2, s1);
-    assertx(c2->m_data.pstr->checkCount());
-  } else if (n == 3) {
-    auto const c3 = vmStack().indC(2);
+  if (n == 3) {
     auto const s3 = toStringWithNotice(tvAsVariant(*c3));
     auto const s2 = toStringWithNotice(tvAsCVarRef(*c2));
+    auto const s1 = toStringWithNotice(tvAsCVarRef(*c1));
     tvAsVariant(*c3) = concat3(s3, s2, s1);
     assertx(c3->m_data.pstr->checkCount());
   } else {
     assertx(n == 4);
-    auto const c3 = vmStack().indC(2);
     auto const c4 = vmStack().indC(3);
     auto const s4 = toStringWithNotice(tvAsVariant(*c4));
     auto const s3 = toStringWithNotice(tvAsCVarRef(*c3));
     auto const s2 = toStringWithNotice(tvAsCVarRef(*c2));
+    auto const s1 = toStringWithNotice(tvAsCVarRef(*c1));
     tvAsVariant(*c4) = concat4(s4, s3, s2, s1);
     assertx(c4->m_data.pstr->checkCount());
   }

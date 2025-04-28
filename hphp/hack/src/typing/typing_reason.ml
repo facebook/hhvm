@@ -3591,9 +3591,7 @@ module Derivation = struct
     | From_witness_locl (Type_variable (_, id))
     | From_witness_locl (Type_variable_generics (_, _, _, id))
     | From_witness_locl (Type_variable_error (_, id)) ->
-      Option.value_map ~default:t ~f:(fun solution ->
-          solved id ~solution ~in_:t)
-      @@ Tvid.Map.find_opt id solutions
+      Option.value ~default:t @@ Tvid.Map.find_opt id solutions
     | Flow { from; into; kind } ->
       Flow
         {
@@ -3678,10 +3676,103 @@ module Derivation = struct
     | Like_call _ ->
       t
 
+  (** Bottom up traversal of a reason applying available solutions in order to
+      eliminate type variable associated and [Solved] reasons  *)
+  let rec resolve t ~depth ~solutions =
+    if depth <= 0 then
+      t
+    else begin
+      match t with
+      (* Substitute a tvar for its solution *)
+      | From_witness_locl (Type_variable (_, id))
+      | From_witness_locl (Type_variable_generics (_, _, _, id))
+      | From_witness_locl (Type_variable_error (_, id)) ->
+        Option.value ~default:t @@ Tvid.Map.find_opt id solutions
+      | From_witness_locl witness -> From_witness_locl witness
+      | From_witness_decl witness -> From_witness_decl witness
+      | Solved { solution; of_; in_ } ->
+        let depth = depth - 1 in
+        let solution = resolve solution ~depth ~solutions in
+        let solutions = Tvid.Map.add of_ solution solutions in
+        resolve in_ ~solutions ~depth
+      | Type_access (r, l) ->
+        Type_access
+          ( resolve r ~solutions ~depth,
+            List.map l ~f:(fun (r, x) -> (resolve r ~solutions ~depth, x)) )
+      | Typeconst (r1, x, s, r2) ->
+        Typeconst
+          (resolve r1 ~solutions ~depth, x, s, resolve r2 ~solutions ~depth)
+      | Arith_ret_float (x, r, z) ->
+        Arith_ret_float (x, resolve r ~solutions ~depth, z)
+      | Arith_ret_num (x, r, z) ->
+        Arith_ret_num (x, resolve r ~solutions ~depth, z)
+      | Lost_info (x, r, z) -> Lost_info (x, resolve r ~solutions ~depth, z)
+      | Format (x, y, r) -> Format (x, y, resolve r ~solutions ~depth)
+      | Instantiate (r1, x, r2) ->
+        Instantiate
+          (resolve r1 ~solutions ~depth, x, resolve r2 ~solutions ~depth)
+      | Expr_dep_type (r, y, z) ->
+        Expr_dep_type (resolve r ~solutions ~depth, y, z)
+      | Lambda_param (x, r) -> Lambda_param (x, resolve r ~solutions ~depth)
+      | Dynamic_coercion r -> Dynamic_coercion (resolve r ~solutions ~depth)
+      | Dynamic_partial_enforcement (x, y, r) ->
+        Dynamic_partial_enforcement (x, y, resolve r ~solutions ~depth)
+      | Rigid_tvar_escape (x, y, z, r) ->
+        Rigid_tvar_escape (x, y, z, resolve r ~solutions ~depth)
+      | Opaque_type_from_module (x, y, r) ->
+        Opaque_type_from_module (x, y, resolve r ~solutions ~depth)
+      | SDT_call (x, r) -> SDT_call (x, resolve r ~solutions ~depth)
+      | Like_call (x, r) -> Like_call (x, resolve r ~solutions ~depth)
+      | No_reason -> No_reason
+      | Invalid -> Invalid
+      | Missing_field -> Missing_field
+      | Idx (x, y) -> Idx (x, y)
+      | Flow { from; kind; into } ->
+        Flow
+          {
+            from = resolve from ~solutions ~depth;
+            kind;
+            into = resolve into ~solutions ~depth;
+          }
+      | Axiom { prev; axiom; next } ->
+        Axiom
+          {
+            prev = resolve prev ~solutions ~depth;
+            axiom;
+            next = resolve next ~solutions ~depth;
+          }
+      | Lower_bound { bound; of_ } ->
+        Lower_bound
+          {
+            bound = resolve bound ~solutions ~depth;
+            of_ = resolve of_ ~solutions ~depth;
+          }
+      | Def (def, t) -> Def (def, resolve t ~solutions ~depth)
+      | Prj_both { sub_prj; prj; sub; super } ->
+        Prj_both
+          {
+            sub_prj = resolve sub_prj ~solutions ~depth;
+            prj;
+            sub = resolve sub ~solutions ~depth;
+            super = resolve super ~solutions ~depth;
+          }
+      | Prj_one { part; prj; whole } ->
+        Prj_one
+          {
+            part = resolve part ~solutions ~depth;
+            prj;
+            whole = resolve whole ~solutions ~depth;
+          }
+    end
+
   (** Reasons are constructed by keeping track of preceeding subtype propositions
       during subtype constraint simplification. We reach a child subtype proposition
       either through a projection into a type constructor or using some user-declared
-      axiom. We can convert this to a list of derivation steps for each subtype constraint.
+      axiom.
+
+      We can convert this to a list of derivation steps for each subtype constraint along
+      with the term-level steps through which an expression was given its type.
+
       Since we also apply transitivity during constraint simplification, each reason may
       actually contain multiple subtype derivations. We reach a new derivation either
       because a upper- or lower-bound was added to a type variable and a new constraint
@@ -3693,10 +3784,12 @@ module Derivation = struct
       match (sub, super) with
       (* -- Accumulate solutions -- *)
       | (Solved { solution; of_; in_ }, _) ->
-        let solutions = Tvid.Map.add of_ (extract_first solution) solutions in
+        let solution = extract_first @@ resolve solution ~solutions ~depth:20 in
+        let solutions = Tvid.Map.add of_ solution solutions in
         aux (in_, super) ~deriv ~solutions
       | (_, Solved { solution; of_; in_ }) ->
-        let solutions = Tvid.Map.add of_ (extract_first solution) solutions in
+        let solution = extract_first @@ resolve solution ~solutions ~depth:20 in
+        let solutions = Tvid.Map.add of_ solution solutions in
         aux (sub, in_) ~deriv ~solutions
       (* -- Transitive constraints -- *)
       | ( Lower_bound
@@ -3811,7 +3904,6 @@ module Derivation = struct
         | Main
         | Upper
         | Lower
-        | Solution
         | Step of int
       [@@deriving eq]
 
@@ -3819,7 +3911,6 @@ module Derivation = struct
         | Main -> "Main"
         | Upper -> "Upper"
         | Lower -> "Lower"
-        | Solution -> "Solution"
         | Step n -> Format.sprintf "Step %d" (n + 1)
 
       type t = elem list [@@deriving eq]
@@ -3941,8 +4032,6 @@ module Derivation = struct
       let enter_upper t = enter t Derivation_path.Upper
 
       let enter_lower t = enter t Derivation_path.Lower
-
-      let enter_solution t = enter t Derivation_path.Solution
 
       let enter_step t n = enter t @@ Derivation_path.Step n
 
@@ -4166,8 +4255,7 @@ module Derivation = struct
           | Config.Ends -> extract_last into
         in
         explain_flow (from, into, kind) ~st ~cfg ~ctxt
-      | Solved { solution; in_; _ } ->
-        explain_solved ~solution ~in_ ~st ~cfg ~ctxt
+      | Solved { in_; _ } -> explain_reason in_ ~st ~cfg ~ctxt
       | Missing_field ->
         (* This needs to be special cased in [explain_step] *)
         ([Explanation.Witness_no_pos "missing field"], st)
@@ -4347,17 +4435,6 @@ module Derivation = struct
       let expl_into = prefix :: with_suffix expl_into ~suffix in
       (expl_from @ expl_into, st)
 
-    and explain_solved ~solution ~in_ ~st ~cfg ~ctxt =
-      let (expl_in, st) = explain_reason in_ ~st ~cfg ~ctxt in
-      let (expl_solution, st) =
-        explain_reason solution ~st ~cfg ~ctxt:Context.(enter_solution ctxt)
-      in
-      let prefix =
-        Explanation.Prefix { prefix = "which I solved to this"; sep = " " }
-      in
-      let expl_solution = prefix :: expl_solution in
-      (expl_in @ expl_solution, st)
-
     and explain_instantiate (r1, nm, r2) ~st ~cfg ~ctxt =
       explain_flow (r1, r2, Flow_instantiate nm) ~st ~cfg ~ctxt
 
@@ -4427,8 +4504,8 @@ module Derivation = struct
 end
 
 let explain ~sub ~super ~complexity =
-  Explanation.derivation
-    Derivation.(explain (of_reason ~sub ~super) ~complexity)
+  let deriv = Derivation.of_reason ~sub ~super in
+  Explanation.derivation Derivation.(explain deriv ~complexity)
 
 let debug_reason ~sub ~super =
   let json =

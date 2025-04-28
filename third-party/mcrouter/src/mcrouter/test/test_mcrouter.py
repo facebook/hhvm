@@ -108,7 +108,7 @@ class TestPoolServerErrors(McrouterTestCase):
 
     def test_pool_server_errors(self):
         mcr = self.add_mcrouter(self.config, "/a/a/")
-        self.assertIsNone(mcr.get("test"))
+        self.assertIn("SERVER_ERROR", mcr.get("test"))
 
         stats = mcr.stats("servers")
         self.assertEqual(2, len(stats))

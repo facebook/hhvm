@@ -8,7 +8,7 @@
     "type": "PoolRoute",
     "pool": "A",
     "slow_warmup": {
-      "failoverTarget": "ErrorRoute",
+      "failoverTarget": "NullRoute",
       "settings": {
         "enable_threshold": 0.7,
         "disable_threshold": 0.9

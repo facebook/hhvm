@@ -710,7 +710,7 @@ class TestBasicFailoverLeastFailures(McrouterTestCase):
 
         # Main child #1 fails, as do 2 and 3. No request to 4 since
         # max_tries = 3
-        self.assertEqual(mcr.get("key"), None)
+        self.assertIn("SERVER_ERROR AsyncSocketException", mcr.get("key"))
 
         # Now 4 has least errors.
         self.assertEqual(mcr.get("key"), "value")
@@ -804,9 +804,9 @@ class TestMcrouterBasicL1L2(McrouterTestCase):
         # terminate l1 pool as well
         self.l1.terminate()
         # we should get nothing back
-        self.assertFalse(mcr.get("key1"))
-        self.assertFalse(mcr.gat(0, "key1"))
-        self.assertFalse(mcr.gats(0, "key1"))
+        self.assertIn("SERVER_ERROR", mcr.get("key1"))
+        self.assertIn("SERVER_ERROR", mcr.gat(0, "key1"))
+        self.assertIn("SERVER_ERROR", mcr.gats(0, "key1"))
 
     def test_l1_l2_get_ncache(self):
         mcr = self.get_mcrouter(self.config_ncache)
@@ -980,7 +980,7 @@ class TestMcrouterBasicL1L2SizeSplit(McrouterTestCase):
 
         self.l2.terminate()
         self.assertEqual(self.l1.get("key"), "")
-        self.assertFalse(mcr.get("key"))
+        self.assertIn("SERVER_ERROR Server unavailable", mcr.get("key"))
 
     def test_l1_l2_cas(self):
         """

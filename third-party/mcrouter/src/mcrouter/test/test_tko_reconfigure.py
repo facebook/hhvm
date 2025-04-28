@@ -28,7 +28,7 @@ class TestTkoReconfigure(McrouterTestCase):
 
     def test_tko_reconfigure(self):
         # server a is in 'fast' state
-        self.assertIsNone(self.mcrouter.get("hit"))
+        self.assertIn("SERVER_ERROR", self.mcrouter.get("hit"))
         self.assertEqual(
             self.mcrouter.stats("suspect_servers"),
             {"127.0.0.1:12345": "status:tko num_failures:2"},

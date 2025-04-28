@@ -22,7 +22,6 @@ class TestPoolStats(McrouterTestCase):
     extra_args = [
         "--pool-stats-config-file=./mcrouter/test/test_poolstats_config.json",
         "--timeouts-until-tko=50",
-        "--disable-miss-on-get-errors",
         "--num-proxies=4",
     ]
     stat_prefix = "libmcrouter.mcrouter.0."

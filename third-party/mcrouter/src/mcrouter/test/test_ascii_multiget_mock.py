@@ -12,7 +12,7 @@ from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 class TestMcrouterAsciiMultigetSanityMock(McrouterTestCase):
     config = "./mcrouter/test/mcrouter_test_basic_1_1_1.json"
-    extra_args = ["--disable-miss-on-get-errors"]
+    extra_args = []
 
     def setUp(self):
         self.add_server(MockMemcached(), logical_port=12345)

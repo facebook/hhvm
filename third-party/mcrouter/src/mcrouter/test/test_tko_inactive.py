@@ -31,6 +31,6 @@ class TestTkoInactive(McrouterTestCase):
         self.mcrouter = self.add_mcrouter(self.config, extra_args=self.extra_args)
 
     def test_tko_inactive(self):
-        self.assertIsNone(self.mcrouter.get("hit"))
+        self.assertIn("SERVER_ERROR", self.mcrouter.get("hit"))
         time.sleep(3)
         self.assertTrue(self.mcrouter.is_alive())

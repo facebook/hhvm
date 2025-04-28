@@ -22,7 +22,7 @@ class TestAsciiError(McrouterTestCase):
 
     def test_ascii_error(self):
         resp = self.mcrouter.get("test_error")
-        self.assertEqual(None, resp)
+        self.assertEqual("SERVER_ERROR ERROR reply received from server.", resp)
 
 
 class ExtraValueServer(MockServer):
@@ -73,7 +73,9 @@ class TestAsciiExtraData(McrouterTestCase):
         self.assertEqual("testValue", resp)
         # Send another get, that will fail because of TKO.
         resp = self.mcrouter.get("test")
-        self.assertEqual(None, resp)
+        self.assertEqual(
+            "SERVER_ERROR Server unavailable. Reason: mc_res_connect_error", resp
+        )
         # Allow mcrouter some time to recover.
         time.sleep(1)
         # Send another get request that should succeed.

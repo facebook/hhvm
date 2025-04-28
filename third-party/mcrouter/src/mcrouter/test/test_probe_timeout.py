@@ -30,7 +30,7 @@ class TestProbeTimeout(McrouterTestCase):
 
         # send first request and initiate tko
         resp = mcrouter.get("key")
-        self.assertEqual(resp, None)
+        self.assertIn("SERVER_ERROR", resp)
 
         # wait for the probe to be sent
         time.sleep(0.15)

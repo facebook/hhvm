@@ -55,7 +55,6 @@ class TestDeterministicFailoverAllSleepServers(McrouterTestCase):
     mcrouter_server_extra_args = []
     extra_args = [
         "--timeouts-until-tko=1",
-        "--disable-miss-on-get-errors",
         "--num-proxies=1",
     ]
 
@@ -106,7 +105,6 @@ class TestDeterministicFailoverAllSleepServersSamePool(McrouterTestCase):
     mcrouter_server_extra_args = []
     extra_args = [
         "--timeouts-until-tko=1",
-        "--disable-miss-on-get-errors",
         "--num-proxies=1",
     ]
 
@@ -163,7 +161,6 @@ class TestDeterministicFailoverAllSleepServersSharedConfig(McrouterTestCase):
     mcrouter_server_extra_args = []
     extra_args = [
         "--timeouts-until-tko=1",
-        "--disable-miss-on-get-errors",
         "--route-prefix=/Route/A/",
         "--num-proxies=1",
     ]
@@ -219,7 +216,6 @@ class TestDeterministicFailoverAllSleepServersFailureDomains(McrouterTestCase):
     mcrouter_server_extra_args = []
     extra_args = [
         "--timeouts-until-tko=1",
-        "--disable-miss-on-get-errors",
         "--route-prefix=/Route/A/",
         "--num-proxies=1",
     ]
@@ -279,7 +275,6 @@ class TestDeterministicFailoverSmallerFailoverPool(McrouterTestCase):
     mcrouter_server_extra_args = []
     extra_args = [
         "--timeouts-until-tko=1",
-        "--disable-miss-on-get-errors",
         "--num-proxies=1",
     ]
 

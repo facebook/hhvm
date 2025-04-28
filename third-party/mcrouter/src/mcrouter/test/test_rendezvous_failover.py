@@ -46,7 +46,6 @@ class TestRendezvousFailoverAllSleepServers(McrouterTestCase):
     mcrouter_server_extra_args = []
     extra_args = [
         "--timeouts-until-tko=1",
-        "--disable-miss-on-get-errors",
         "--num-proxies=1",
     ]
 

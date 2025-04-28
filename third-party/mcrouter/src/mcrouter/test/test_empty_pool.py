@@ -20,4 +20,6 @@ class TestEmptyPool(McrouterTestCase):
         # Start a mcrouter without route handles
         key = "foo"
         mcrouter_w_rh = self.get_mcrouter()
-        self.assertIsNone(mcrouter_w_rh.get(key))
+        self.assertIn(
+            "SERVER_ERROR HashRoute with empty children", mcrouter_w_rh.get(key)
+        )

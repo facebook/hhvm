@@ -75,21 +75,7 @@ class TestMcrouterForwardedErrors(McrouterTestCase):
             self.server.setError(error)
             mcrouter = self.add_mcrouter(self.config)
             res = mcrouter.issue_command(cmd)
-            self.assertEqual("END\r\n", res)
-            mcrouter.terminate()
-
-    def test_server_replied_server_error_for_get_with_no_miss_on_error(self):
-        # With --disable-miss-on-get-errors, errors should be forwarded
-        # to client
-        cmd = self.get_cmd
-        self.server.setExpectedBytes(len(cmd))
-        for error in self.server_errors:
-            self.server.setError(error)
-            mcrouter = self.add_mcrouter(
-                self.config, extra_args=["--disable-miss-on-get-errors"]
-            )
-            res = mcrouter.issue_command(cmd)
-            self.assertEqual(error + "\r\n", res)
+            self.assertIn("SERVER_ERROR", res)
             mcrouter.terminate()
 
     def test_server_replied_server_error_for_gat(self):
@@ -100,21 +86,7 @@ class TestMcrouterForwardedErrors(McrouterTestCase):
             self.server.setError(error)
             mcrouter = self.add_mcrouter(self.config)
             res = mcrouter.issue_command(cmd)
-            self.assertEqual("END\r\n", res)
-            mcrouter.terminate()
-
-    def test_server_replied_server_error_for_gat_with_no_miss_on_error(self):
-        # With --disable-miss-on-get-errors, errors should be forwarded
-        # to client. gat command should behave as get on output.
-        cmd = self.gat_cmd
-        self.server.setExpectedBytes(len(cmd))
-        for error in self.server_errors:
-            self.server.setError(error)
-            mcrouter = self.add_mcrouter(
-                self.config, extra_args=["--disable-miss-on-get-errors"]
-            )
-            res = mcrouter.issue_command(cmd)
-            self.assertEqual(error + "\r\n", res)
+            self.assertIn("SERVER_ERROR", res)
             mcrouter.terminate()
 
     def test_server_replied_server_error_for_append(self):
@@ -186,21 +158,7 @@ class TestMcrouterForwardedErrors(McrouterTestCase):
             self.server.setError(error)
             mcrouter = self.add_mcrouter(self.config)
             res = mcrouter.issue_command(cmd)
-            self.assertEqual("END\r\n", res)
-            mcrouter.terminate()
-
-    def test_server_replied_client_error_for_get_with_no_miss_on_error(self):
-        # With --disable-miss-on-get-errors, errors should be forwarded
-        # to client
-        cmd = self.get_cmd
-        self.server.setExpectedBytes(len(cmd))
-        for error in self.client_errors:
-            self.server.setError(error)
-            mcrouter = self.add_mcrouter(
-                self.config, extra_args=["--disable-miss-on-get-errors"]
-            )
-            res = mcrouter.issue_command(cmd)
-            self.assertEqual(error + "\r\n", res)
+            self.assertIn("CLIENT_ERROR", res)
             mcrouter.terminate()
 
     def test_server_replied_client_error_for_gat(self):
@@ -210,20 +168,6 @@ class TestMcrouterForwardedErrors(McrouterTestCase):
         for error in self.client_errors:
             self.server.setError(error)
             mcrouter = self.add_mcrouter(self.config)
-            res = mcrouter.issue_command(cmd)
-            self.assertEqual("END\r\n", res)
-            mcrouter.terminate()
-
-    def test_server_replied_client_error_for_gat_with_no_miss_on_error(self):
-        # With --disable-miss-on-get-errors, errors should be forwarded
-        # to client. gat command should behave as get on output
-        cmd = self.gat_cmd
-        self.server.setExpectedBytes(len(cmd))
-        for error in self.client_errors:
-            self.server.setError(error)
-            mcrouter = self.add_mcrouter(
-                self.config, extra_args=["--disable-miss-on-get-errors"]
-            )
             res = mcrouter.issue_command(cmd)
             self.assertEqual(error + "\r\n", res)
             mcrouter.terminate()
@@ -277,12 +221,12 @@ class TestMcrouterGeneratedErrors(McrouterTestCase):
     def test_timeout_get(self):
         mcrouter = self.getMcrouter(SleepServer())
         res = mcrouter.issue_command(self.get_cmd)
-        self.assertEqual("END\r\n", res)
+        self.assertIn("SERVER_ERROR", res)
 
     def test_timeout_gat(self):
         mcrouter = self.getMcrouter(SleepServer())
         res = mcrouter.issue_command(self.gat_cmd)
-        self.assertEqual("END\r\n", res)
+        self.assertIn("SERVER_ERROR", res)
 
     def test_timeout_delete(self):
         mcrouter = self.getMcrouter(SleepServer())
@@ -305,12 +249,26 @@ class TestMcrouterGeneratedErrors(McrouterTestCase):
     def test_connection_error_get(self):
         mcrouter = self.getMcrouter(ConnectionErrorServer())
         res = mcrouter.issue_command(self.get_cmd)
-        self.assertEqual("END\r\n", res)
+        print(res)
+        self.assertTrue(
+            re.match(
+                "SERVER_ERROR (connection error|remote error"
+                "|Failed to read|AsyncSocketException)",
+                res,
+            )
+        )
 
     def test_connection_error_gat(self):
         mcrouter = self.getMcrouter(ConnectionErrorServer())
         res = mcrouter.issue_command(self.gat_cmd)
-        self.assertEqual("END\r\n", res)
+        print(res)
+        self.assertTrue(
+            re.match(
+                "SERVER_ERROR (connection error|remote error"
+                "|Failed to read|AsyncSocketException)",
+                res,
+            )
+        )
 
     def test_connection_error_delete(self):
         mcrouter = self.getMcrouter(ConnectionErrorServer())
@@ -328,13 +286,13 @@ class TestMcrouterGeneratedErrors(McrouterTestCase):
         mcrouter = self.getMcrouter(SleepServer(), args=["--timeouts-until-tko", "1"])
         res = mcrouter.issue_command(self.set_cmd)
         res = mcrouter.issue_command(self.get_cmd)
-        self.assertEqual("END\r\n", res)
+        self.assertIn("SERVER_ERROR", res)
 
     def test_tko_gat(self):
         mcrouter = self.getMcrouter(SleepServer(), args=["--timeouts-until-tko", "1"])
         res = mcrouter.issue_command(self.set_cmd)
         res = mcrouter.issue_command(self.gat_cmd)
-        self.assertEqual("END\r\n", res)
+        self.assertIn("SERVER_ERROR", res)
 
     def test_tko_delete(self):
         mcrouter = self.getMcrouter(SleepServer(), args=["--timeouts-until-tko", "1"])
@@ -403,9 +361,7 @@ class TestMcrouterParseError(McrouterTestCase):
 
     # Test that server properly handles parsing errors.
     def test_parse_error(self):
-        mcrouter = self.get_mcrouter(
-            SleepServer(), ["--disable-miss-on-get-errors", "--server-timeout", "3000"]
-        )
+        mcrouter = self.get_mcrouter(SleepServer(), ["--server-timeout", "3000"])
         port = mcrouter.getport()
         addr = ("localhost", port)
         sock = self.connect(addr)

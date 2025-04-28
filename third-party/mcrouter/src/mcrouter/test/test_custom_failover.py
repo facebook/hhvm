@@ -30,7 +30,7 @@ class TestCustomFailover(McrouterTestCase):
         self.mc1.terminate()
 
         self.assertTrue(self.mc2.set("key", "value1"))
-        self.assertEqual(self.mcr.get("key"), None)
+        self.assertIn("SERVER_ERROR", self.mcr.get("key"))
 
 
 class TestCustomFailoverOverride(McrouterTestCase):

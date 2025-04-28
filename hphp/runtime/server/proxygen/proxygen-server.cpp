@@ -355,8 +355,7 @@ void ProxygenServer::start(bool beginAccepting) {
     m_httpAcceptors[i] = std::move(acceptor);
   }
 
-  if (m_httpConfig->isSSL() || m_httpsConfig->isSSL()) {
-
+  if (m_httpsConfig->isSSL()) {
     if (!Cfg::Server::SSLCertificateDir.empty()) {
       m_filePoller = std::make_unique<wangle::FilePoller>(
           kPollInterval);
@@ -408,8 +407,7 @@ void ProxygenServer::start(bool beginAccepting) {
     }
   }
 
-  if (!Cfg::Server::SSLTicketSeedFile.empty() &&
-      (!m_httpsAcceptors.empty() || m_httpConfig->isSSL())) {
+  if (!Cfg::Server::SSLTicketSeedFile.empty() && !m_httpsAcceptors.empty()) {
     // setup ticket seed watcher
     const auto& ticketPath = Cfg::Server::SSLTicketSeedFile;
     auto seeds = wangle::TLSCredProcessor::processTLSTickets(ticketPath);
@@ -778,9 +776,6 @@ void ProxygenServer::resetSSLContextConfigs(
         if (m_httpsAcceptors[i] && m_httpsConfig->isSSL()) {
           m_httpsAcceptors[i]->resetSSLContextConfigs(configs);
         }
-        if (m_httpAcceptors[i] && m_httpConfig->isSSL()) {
-          m_httpAcceptors[i]->resetSSLContextConfigs(configs);
-        }
     });
   }
 }
@@ -791,10 +786,6 @@ void ProxygenServer::updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
     evb->runInEventBaseThread([seeds = seeds, this, i] {
         if (m_httpsAcceptors[i]) {
           m_httpsAcceptors[i]->setTLSTicketSecrets(
-              seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
-        }
-        if (m_httpAcceptors[i] && m_httpConfig->isSSL()) {
-          m_httpAcceptors[i]->setTLSTicketSecrets(
               seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
         }
     });

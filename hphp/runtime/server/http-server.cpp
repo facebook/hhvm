@@ -195,10 +195,6 @@ HttpServer::HttpServer() {
     m_pageServer->enableSSL(Cfg::Server::SSLPort);
   }
 
-  if (Cfg::Server::EnableSSLWithPlainText) {
-    m_pageServer->enableSSLWithPlainText();
-  }
-
   ServerOptions admin_options(Cfg::AdminServer::IP,
                               Cfg::AdminServer::Port,
                               Cfg::AdminServer::ThreadCount);

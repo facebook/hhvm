@@ -150,7 +150,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Server.SSLTicketSeedFile = "", UNKNOWN
 - bool Server.TLSDisableTLS1_2 = false, UNKNOWN
 - std::string Server.TLSClientCipherSpec = "", UNKNOWN
-- bool Server.EnableSSLWithPlainText = false, UNKNOWN
 - int Server.SSLClientAuthLevel = 0, UNKNOWN, postprocess
 
   Level of TLS client auth. Valid values are

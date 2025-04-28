@@ -482,6 +482,10 @@ void Hdf::set(const char *value) {
   CheckNeoError(hdf_set_value(getRaw(), nullptr, (char*)value));
 }
 
+void Hdf::set(const char *name, const char *value) {
+  CheckNeoError(hdf_set_value(getRaw(), (char*)name, (char*)value));
+}
+
 void Hdf::set(int64_t value) {
   char buf[24];
   snprintf(buf, sizeof(buf), "%lld", (long long)value);

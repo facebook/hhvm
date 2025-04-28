@@ -169,6 +169,12 @@ struct Hdf {
   void set(uint64_t value);
   void set(double value);
 
+  /**
+  * Set a sub-node's value. If the sub-node doesn't exist, it will be created.
+  */
+  void set(const char *name, const char *value);
+  void set(const std::string &name, const std::string &value){ set(name.c_str(), value.c_str());}
+
   Hdf &operator=(const char *value) { set(value); return *this;}
   Hdf &operator=(const std::string &value) { set(value); return *this;}
   Hdf &operator=(bool   value) { set(value); return *this;}

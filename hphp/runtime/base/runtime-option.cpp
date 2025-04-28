@@ -643,6 +643,11 @@ int64_t RuntimeOption::SocketDefaultTimeout = 60;
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
+std::map<std::string, std::string>& RuntimeOption::GetMetadata() {
+  static std::map<std::string, std::string> Metadata;
+  return Metadata;
+}
+
 const std::string& RuntimeOption::GetServerPrimaryIPv4() {
    static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
    return serverPrimaryIPv4;
@@ -1071,6 +1076,7 @@ void logTierOverwriteInputs() {
   log_entry.setStr("cpu", RuntimeOption::TierOverwriteInputs["cpu"]);
   log_entry.setStr("tiers", RuntimeOption::TierOverwriteInputs["tiers"]);
   log_entry.setStr("tags", RuntimeOption::TierOverwriteInputs["tags"]);
+  log_entry.setStr("config_file_name", RuntimeOption::GetMetadata()["ConfigFileName"]);
   StructuredLog::log("hhvm_config_hdf_logs", log_entry);
 }
 
@@ -1087,6 +1093,9 @@ void RuntimeOption::Load(
   // Intialize the memory manager here because various settings and
   // initializations that we do here need it
   tl_heap.getCheck();
+
+  // Store the config file name for logging.
+  Config::Bind(GetMetadata(), ini, config, "Metadata");
 
   // Get the ini (-d) and hdf (-v) strings, which may override some
   // of options that were set from config files. We also do these

@@ -101,6 +101,9 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   LoadRootHdf(ini, config, "IncludeRoots", RuntimeOption::IncludeRoots);
 
+  // Add this here too to avoid lint errors about unvisited node when RuntimeOption::Load() only loads config["Runtime"].
+  Config::Bind(RuntimeOption::GetMetadata(), ini, config, "Metadata");
+
   Config::Bind(PackageExcludeDirs, ini, config, "PackageExcludeDirs");
   Config::Bind(PackageExcludeFiles, ini, config, "PackageExcludeFiles");
   Config::Bind(PackageExcludePatterns, ini, config, "PackageExcludePatterns");

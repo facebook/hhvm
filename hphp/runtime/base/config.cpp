@@ -160,6 +160,9 @@ void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,
     // TODO(#5151773): Have a non-invasive warning if HDF file does not end
     // .hdf
     Config::ParseHdfFile(filename, hdf);
+    // Store the filename in the hdf object.
+    const std::string node_name = "Metadata.ConfigFileName";
+    hdf.set(node_name, filename);
   }
 }
 

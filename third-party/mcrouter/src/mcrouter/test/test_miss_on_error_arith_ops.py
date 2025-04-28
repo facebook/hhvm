@@ -20,8 +20,8 @@ class TestMissOnErrorArithOps(McrouterTestCase):
     def test_behaviour(self):
         key = "foo:test:key:1234"
         self.assertIsNone(self.mcrouter.set(key, 2))
-        self.assertIsNone(self.mcrouter.incr(key, 2))
-        self.assertIsNone(self.mcrouter.decr(key, 2))
+        self.assertIn("SERVER_ERROR", self.mcrouter.incr(key, 2))
+        self.assertIn("SERVER_ERROR", self.mcrouter.decr(key, 2))
 
 
 class TestDisableMissOnErrorArithOps(McrouterTestCase):
@@ -31,7 +31,7 @@ class TestDisableMissOnErrorArithOps(McrouterTestCase):
 
     def setUp(self):
         self.mc = self.add_server(CustomErrorServer(error_message=self.error))
-        extra_args = ["--disable-miss-on-arith-errors"]
+        extra_args = []
         self.mcrouter = self.add_mcrouter(self.config, extra_args=extra_args)
 
     def test_incr_error(self):

@@ -747,9 +747,7 @@ struct CompactReader {
     void readStructSlow(const Object& dest,
                         const StructSpec& spec,
                         int16_t fieldNum,
-                        TType fieldType,
-                        StrictUnionChecker& strictUnionChecker 
-                      ) {
+                        TType fieldType) {
       INC_TPC(thrift_read_slow);
       while (fieldType != T_STOP) {
         bool readComplete = false;
@@ -770,7 +768,6 @@ struct CompactReader {
                 StrNR(fieldSpec->name), fieldValue, dest->getClassName());
             }
             if (fieldSpec->isUnion) {
-              strictUnionChecker.markFieldFound();
               dest->o_set(s__type, Variant(fieldNum), dest->getClassName());
             }
           }
@@ -793,7 +790,6 @@ struct CompactReader {
 
       SpecHolder specHolder;
       auto const& spec = specHolder.getSpec(cls);
-      StrictUnionChecker strictUnionChecker{spec.isStrictUnion};
       Object dest = spec.newObject(cls);
       spec.clearTerseFields(cls, dest);
 
@@ -805,7 +801,7 @@ struct CompactReader {
       auto const& fields = spec.fields;
       const size_t numFields = fields.size();
       if (cls->numDeclProperties() < numFields) {
-        readStructSlow(dest, spec, fieldNum, fieldType, strictUnionChecker);
+        readStructSlow(dest, spec, fieldNum, fieldType);
         return dest;
       }
       auto objProp = dest->props();
@@ -818,16 +814,15 @@ struct CompactReader {
         if (slot == numFields ||
             prop[slot].name != fields[slot].name ||
             !typesAreCompatible(fieldType, fields[slot].type)) {
-          readStructSlow(dest, spec, fieldNum, fieldType, strictUnionChecker);
+          readStructSlow(dest, spec, fieldNum, fieldType);
           return dest;
         }
         if (fields[slot].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
-            strictUnionChecker.markFieldFound();
             auto index = cls->propSlotToIndex(numFields);
             tvSetInt(fieldNum, objProp->at(index));
           } else {
-            readStructSlow(dest, spec, fieldNum, fieldType, strictUnionChecker);
+            readStructSlow(dest, spec, fieldNum, fieldType);
             return dest;
           }
         }

@@ -283,20 +283,10 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
 
 // The returned reference is valid at least while this SpecHolder is alive.
 const StructSpec& SpecHolder::getSpec(const Class* cls) {
-  bool isStrictUnion{false};
-  String interfaceName{"IThriftStrictUnion"};
-  auto interface = Class::load(interfaceName.get());
-  if (interface != nullptr) {
-    if (cls->classof(interface)) {
-      isStrictUnion = true;
-    }
-  }
-
   auto const cacheable = classHasPersistentRDS(cls);
   if (!cacheable) {
     const auto spec = get_tspec(cls);
     m_tempSpec = compileSpec(spec, nullptr);
-    m_tempSpec.isStrictUnion = isStrictUnion;
     return m_tempSpec;
   }
 
@@ -311,7 +301,6 @@ const StructSpec& SpecHolder::getSpec(const Class* cls) {
     assertx(specSlot);
     auto compiled =
       std::make_unique<StructSpec>(compileSpec(spec, cls));
-    compiled->isStrictUnion = isStrictUnion;
     void* expected = nullptr;
     if (specSlot->compare_exchange_strong(
           expected, (void*)compiled.get(),
@@ -321,7 +310,6 @@ const StructSpec& SpecHolder::getSpec(const Class* cls) {
     return *static_cast<StructSpec*>(expected);
   } else {
     m_tempSpec = compileSpec(spec, nullptr);
-    m_tempSpec.isStrictUnion = isStrictUnion;
     return m_tempSpec;
   }
 }

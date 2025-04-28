@@ -63,7 +63,6 @@ struct StructSpec {
   FixedVector<FieldSpec> fields;
   const Func* withDefaultValuesFunc;
   Optional<const Func*> clearTerseFieldsFunc;
-  bool isStrictUnion{false};
 
   Object newObject(Class* cls) const;
   void clearTerseFields(Class* cls, const Object& obj) const;

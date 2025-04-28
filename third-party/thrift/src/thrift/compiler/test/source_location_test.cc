@@ -152,7 +152,7 @@ TEST(SourceLocationTest, ignore_file_system) {
   std::ofstream(file_name) << text;
   auto guard = folly::makeGuard([&] { fs::remove(file); });
 
-  auto sm = source_manager({.read_from_file_system = false});
+  auto sm = source_manager(nullptr /* backend */);
   EXPECT_FALSE(sm.get_file(file_name));
   sm.add_virtual_file(file_name, text);
 

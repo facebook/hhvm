@@ -20,6 +20,7 @@
 #include <fmt/core.h>
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cerrno>
 #include <cstring>
@@ -81,7 +82,52 @@ std::vector<uint_least32_t> get_line_offsets(std::string_view sv) {
   return line_offsets;
 }
 
+class default_source_manager_backend final : public source_manager_backend {
+ public:
+  std::optional<std::vector<char>> read_file(std::string_view path) final {
+    std::string abs_path;
+    if constexpr (detail::platform_is_windows()) {
+      // Without the "\\?\" prefix, path in Windows can not exceed 260
+      // characters.
+      // https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+      constexpr auto unc_prefix = R"(\\?\)";
+      if (path.substr(0, std::strlen(unc_prefix)) != unc_prefix) {
+        abs_path = unc_prefix + std::filesystem::absolute(path).string();
+        path = abs_path;
+      }
+    } else {
+      // This ensures that the path is NUL-terminated, which is required by the
+      // fopen call that follows.
+      abs_path = path;
+      path = abs_path;
+    }
+
+    // Read the file.
+    auto f = file(path.data(), "rb");
+    if (!f) {
+      return {};
+    }
+    std::array<char, 4096> buffer;
+    auto text = std::vector<char>();
+    for (;;) {
+      auto result = f.read(buffer.data(), buffer.size());
+      if (result.count == 0) {
+        if (result.error_code == 0) {
+          break;
+        }
+        return {};
+      }
+      text.insert(text.end(), buffer.data(), buffer.data() + result.count);
+    }
+    text.push_back('\0');
+    return text;
+  }
+};
+
 } // namespace
+
+source_manager::source_manager()
+    : backend_(std::make_unique<default_source_manager_backend>()) {}
 
 source source_manager::add_source(
     std::string_view file_name, std::vector<char> text) {
@@ -115,46 +161,19 @@ std::optional<source> source_manager::get_file(std::string_view file_name) {
     path = file_name;
   }
 
-  if (auto source = file_source_map_.find(std::string(path));
+  if (auto source = file_source_map_.find(path);
       source != file_source_map_.end()) {
     return source->second;
   }
 
-  if (!options_.read_from_file_system) {
-    return {};
+  if (backend_ == nullptr) {
+    return std::nullopt;
   }
-
-  std::string absPath;
-  if (detail::platform_is_windows()) {
-    // Without the "\\?\" prefix, path in Windows can not exceed 260 characters.
-    // https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
-    constexpr auto kPrefix = R"(\\?\)";
-    if (path.substr(0, std::strlen(kPrefix)) != kPrefix) {
-      absPath = kPrefix + std::filesystem::absolute(path).string();
-      path = absPath;
-    }
+  std::optional<std::vector<char>> text = backend_->read_file(path);
+  if (!text.has_value()) {
+    return std::nullopt;
   }
-
-  // Read the file.
-  auto f = file(path.data(), "rb");
-  if (!f) {
-    return {};
-  }
-  char buffer[4096];
-  auto text = std::vector<char>();
-  for (;;) {
-    auto result = f.read(buffer, sizeof(buffer));
-    if (result.count == 0) {
-      if (result.error_code == 0) {
-        break;
-      }
-      return {};
-    }
-    text.insert(text.end(), buffer, buffer + result.count);
-  }
-  text.push_back('\0');
-
-  auto source = add_source(file_name, std::move(text));
+  auto source = add_source(file_name, std::move(text).value());
   file_source_map_.emplace(file_name, source);
   return source;
 }

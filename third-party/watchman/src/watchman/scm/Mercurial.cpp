@@ -180,11 +180,7 @@ w_string Mercurial::mergeBaseWith(
                    "-r",
                    revset,
                    "--config",
-                   "ui.autopullcommits=false",
-                   "--config",
-                   "extensions.megarepo=!"}, // disable "megarepo" extension
-                                             // because it does not respect the
-                                             // ui.autopullcommits flag
+                   "ui.autopullcommits=false"},
                   makeHgOptions(requestId),
                   "query for the merge base");
             }

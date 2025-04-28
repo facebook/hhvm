@@ -23,8 +23,7 @@
 using example::chatroom::EchoAsyncClient;
 using example::chatroom::EchoHandler;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class EchoTest : public testing::Test {
  public:
@@ -45,5 +44,4 @@ TEST_F(EchoTest, Example) {
   EXPECT_EQ(echo, response);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

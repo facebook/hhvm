@@ -26,8 +26,7 @@ using example::chatroom::GetMessagesRequest;
 using example::chatroom::GetMessagesResponse;
 using example::chatroom::SendMessageRequest;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ChatRoomTest : public testing::Test {
  public:
@@ -63,5 +62,4 @@ TEST_F(ChatRoomTest, Example) {
   EXPECT_EQ(response.messages()->size(), 2);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

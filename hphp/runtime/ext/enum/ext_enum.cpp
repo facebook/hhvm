@@ -137,7 +137,7 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   } else {
     // If the value is present, but the enum has no base type, return the value
     // as specified, undoing any int-like string conversion we did on it.
-    return value;
+    if (res.isInteger()) return value;
   }
 
   return res;

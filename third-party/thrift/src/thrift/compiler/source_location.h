@@ -146,6 +146,9 @@ class source_manager {
   using options = detail::source_manager_options;
   explicit source_manager(options opts = {}) : options_(opts) {}
 
+  source_manager(source_manager&&) noexcept = default;
+  source_manager& operator=(source_manager&&) noexcept = default;
+
   // Loads a file and returns a source object representing its content.
   // The file can be a real file (unless read_from_file_system is set to false),
   // or a virtual one previously registered with add_virtual_file.

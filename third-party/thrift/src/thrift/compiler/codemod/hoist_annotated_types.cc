@@ -356,7 +356,7 @@ class hoist_annotated_types {
   };
   std::map<std::string, typedef_info> typedefs_;
   codemod::file_manager fm_;
-  source_manager sm_;
+  source_manager& sm_;
   t_program& prog_;
 };
 } // namespace

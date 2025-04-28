@@ -18,7 +18,6 @@
 
 #include <stddef.h>
 #include <set>
-#include <stdexcept>
 #include <unordered_set>
 
 #include <folly/FileUtil.h>
@@ -130,7 +129,7 @@ class file_manager {
   void expand_over_whitespaces(
       size_t& begin_offset, size_t& end_offset, bool one_sided) const noexcept;
 
-  source_manager source_mgr_;
+  source_manager& source_mgr_;
   const t_program* program_;
   std::string old_content_;
   std::set<replacement> replacements_;

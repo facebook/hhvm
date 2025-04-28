@@ -585,7 +585,7 @@ class structure_annotations {
 
  private:
   codemod::file_manager fm_;
-  source_manager sm_;
+  source_manager& sm_;
   t_program& prog_;
 };
 } // namespace

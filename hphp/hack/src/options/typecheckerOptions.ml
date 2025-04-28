@@ -304,6 +304,9 @@ let set_package_info t package_info =
 let package_v2_support_multifile_tests t =
   t.GlobalOptions.po.ParserOptions.package_v2_support_multifile_tests
 
+let package_v2_allow_typedef_violations t =
+  t.GlobalOptions.tco_package_v2_allow_typedef_violations
+
 let package_v2_allow_classconst_violations t =
   t.GlobalOptions.tco_package_v2_allow_classconst_violations
 

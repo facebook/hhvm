@@ -593,6 +593,8 @@ val is_package_loaded : env -> string -> bool
 
 val package_v2 : env -> bool
 
+val package_v2_allow_typedef_violations : env -> bool
+
 val package_v2_allow_classconst_violations : env -> bool
 
 val package_v2_allow_reifiable_tconst_violations : env -> bool

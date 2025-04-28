@@ -134,6 +134,7 @@ impl Default for GlobalOptions {
             tco_strict_switch: false,
             tco_allowed_files_for_ignore_readonly: vec![],
             tco_package_v2_exclude_patterns: vec![String::from(".*/__tests__/.*")],
+            tco_package_v2_allow_typedef_violations: true,
             tco_package_v2_allow_classconst_violations: true,
             tco_package_v2_allow_reifiable_tconst_violations: true,
             tco_package_v2_allow_all_tconst_violations: true,

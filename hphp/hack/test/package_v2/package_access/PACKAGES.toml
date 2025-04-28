@@ -6,7 +6,7 @@ include_paths=["//"]
 [packages.pkg2]
 include_paths=[
     "//cross_package_access_internal1_foo.php",
-    "//illegal_cross_package_basic_foo.php",
+    "//cross_package_basic_foo.php",
 ]
 includes = ["pkg1"]
 

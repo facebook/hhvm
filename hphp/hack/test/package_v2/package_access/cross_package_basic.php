@@ -2,7 +2,7 @@
 <?hh
 new module bar {}
 
-//// illegal_cross_package_basic_foo.php
+//// cross_package_basic_foo.php
 <?hh
 // package pkg2
 type TFoo = int;
@@ -12,7 +12,7 @@ type TFoo = int;
 // package pkg1
 module bar;
 
-type TBar = TFoo; // error
+type TBar = TFoo; // error when `package_v2_allow_typedef_violations` is turned off
 newtype NBar1 = TFoo; // ok
 newtype NBar2 as TFoo = int; // ok
 module newtype NBar3 = TFoo; // ok

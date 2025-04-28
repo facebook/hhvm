@@ -183,6 +183,7 @@ type t = {
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_v2_exclude_patterns: string list;
+  tco_package_v2_allow_typedef_violations: bool;
   tco_package_v2_allow_classconst_violations: bool;
   tco_package_v2_allow_reifiable_tconst_violations: bool;
   tco_package_v2_allow_all_tconst_violations: bool;
@@ -299,6 +300,7 @@ let default =
     tco_allowed_files_for_ignore_readonly = [];
     tco_package_v2_exclude_patterns =
       [{|.*/__tests__/.*|}; {|.*/flib/intern/makehaste/.*|}];
+    tco_package_v2_allow_typedef_violations = true;
     tco_package_v2_allow_classconst_violations = true;
     tco_package_v2_allow_reifiable_tconst_violations = true;
     tco_package_v2_allow_all_tconst_violations = true;
@@ -412,6 +414,7 @@ let set
     ?tco_strict_switch
     ?tco_allowed_files_for_ignore_readonly
     ?tco_package_v2_exclude_patterns
+    ?tco_package_v2_allow_typedef_violations
     ?tco_package_v2_allow_classconst_violations
     ?tco_package_v2_allow_reifiable_tconst_violations
     ?tco_package_v2_allow_all_tconst_violations
@@ -686,6 +689,10 @@ let set
       setting
         tco_package_v2_exclude_patterns
         options.tco_package_v2_exclude_patterns;
+    tco_package_v2_allow_typedef_violations =
+      setting
+        tco_package_v2_allow_typedef_violations
+        options.tco_package_v2_allow_typedef_violations;
     tco_package_v2_allow_classconst_violations =
       setting
         tco_package_v2_allow_classconst_violations

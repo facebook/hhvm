@@ -567,7 +567,13 @@ let typedef tenv (t : (_, _) typedef) =
        if its type params satisfy the constraints of any tapply it
        references. *)
     | SimpleTypeDef { tvh_vis = Transparent; tvh_hint } ->
-      (true, `Yes "transparent type alias", t_tparams, [(tvh_hint, [])])
+      let should_check_package_boundary =
+        if Env.package_v2_allow_typedef_violations tenv then
+          `No
+        else
+          `Yes "transparent type alias"
+      in
+      (true, should_check_package_boundary, t_tparams, [(tvh_hint, [])])
     | SimpleTypeDef { tvh_vis = _; tvh_hint } ->
       (false, `No, [], [(tvh_hint, [])])
     | CaseType (variant, variants) ->

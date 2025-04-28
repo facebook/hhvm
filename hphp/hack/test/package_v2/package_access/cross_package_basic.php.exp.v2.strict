@@ -1,0 +1,29 @@
+error: Typing[4472] Cannot access a transparent type alias defined in package pkg2 from package pkg1 [1]
+-> TFoo is defined in cross_package_basic.php--cross_package_basic_foo.php [2]
+-> cross_package_basic.php--cross_package_basic_foo.php belongs to package pkg2 by this package config assignment [3]
+-> cross_package_basic.php--bar.php is in package pkg1 by this package config assignment [4]
+-> And package pkg1 does not include package pkg2 [4]
+
+cross_package_basic.php--bar.php:5:13
+    3 | module bar;
+    4 | 
+[1] 5 | type TBar = TFoo; // error when `package_v2_allow_typedef_violations` is turned off
+    6 | newtype NBar1 = TFoo; // ok
+    7 | newtype NBar2 as TFoo = int; // ok
+
+cross_package_basic.php--cross_package_basic_foo.php:3:6
+    1 | <?hh
+    2 | // package pkg2
+[2] 3 | type TFoo = int;
+
+PACKAGES.toml:6:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+[3] 6 | [packages.pkg2]
+    7 | include_paths=[
+    8 |     "//cross_package_access_internal1_foo.php",
+
+1 error found

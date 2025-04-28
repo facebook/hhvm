@@ -656,6 +656,9 @@ let is_package_loaded env package = SSet.mem package env.loaded_packages
 
 let package_v2 env = TypecheckerOptions.package_v2 @@ get_tcopt env
 
+let package_v2_allow_typedef_violations env =
+  TypecheckerOptions.package_v2_allow_typedef_violations @@ get_tcopt env
+
 let package_v2_allow_classconst_violations env =
   TypecheckerOptions.package_v2_allow_classconst_violations @@ get_tcopt env
 

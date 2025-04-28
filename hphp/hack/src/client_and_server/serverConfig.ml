@@ -479,6 +479,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_strict_switch:(bool_opt "strict_switch" config)
     ?tco_allowed_files_for_ignore_readonly:
       (string_list_opt "allowed_files_for_ignore_readonly" config)
+    ?tco_package_v2_allow_typedef_violations:
+      (bool_opt "package_v2_allow_typedef_violations" config)
     ?tco_package_v2_allow_classconst_violations:
       (bool_opt "package_v2_allow_classconst_violations" config)
     ?tco_package_v2_allow_reifiable_tconst_violations:

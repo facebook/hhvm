@@ -56,21 +56,12 @@
 namespace apache::thrift {
 
 struct CursorWriteOpts {
-  size_t minGrowth;
-  size_t maxGrowth;
-  bool padBuffer;
-  size_t padSize;
-  ExternalBufferSharing sharing;
+  size_t minGrowth = (1 << 14) - 16;
+  size_t maxGrowth = (1 << 14) - 16;
+  bool padBuffer = false;
+  size_t padSize = 128;
+  ExternalBufferSharing sharing = ExternalBufferSharing::SHARE_EXTERNAL_BUFFER;
 };
-
-constexpr CursorWriteOpts defaultCursorWriteOpts() {
-  return CursorWriteOpts{
-      (1 << 14) - 16,
-      (1 << 14) - 16,
-      false,
-      128,
-      ExternalBufferSharing::SHARE_EXTERNAL_BUFFER};
-}
 
 /**
  * Manages the lifetime of a Thrift object being used with cursor
@@ -124,8 +115,7 @@ class CursorSerializationWrapper {
    */
   /* implicit */ CursorSerializationWrapper(
       const T& t, ExternalBufferSharing sharing = COPY_EXTERNAL_BUFFER) {
-    auto opts = defaultCursorWriteOpts();
-    opts.sharing = sharing;
+    CursorWriteOpts opts{.sharing = sharing};
     t.write(writer(opts));
     serializedData_ = queue_.move();
     done();
@@ -186,7 +176,7 @@ class CursorSerializationWrapper {
   }
 
   StructuredCursorWriter<Tag> beginWrite() {
-    return beginWriteWithOpts(defaultCursorWriteOpts());
+    return beginWriteWithOpts(CursorWriteOpts{});
   }
 
   void endWrite(StructuredCursorWriter<Tag>&& writer) {

@@ -269,6 +269,7 @@ void reportJitMaturity() {
   constexpr uint64_t kMaxMaturityBeforeRTA = 70;
   auto const beforeRetranslateAll =
     mcgen::retranslateAllPending() || isJitSerializing();
+
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
   const size_t hotSize = beforeRetranslateAll ? 0 : getOptMainUsage();
@@ -291,8 +292,15 @@ void reportJitMaturity() {
              static_cast<size_t>(profSize * Cfg::Jit::MaturityProfWeight));
   auto const fullSize = Cfg::Jit::MatureSize;
 
+  // If running under ROAR, limit JIT maturity before ROAR finishes its warmup.
+  constexpr uint64_t kMaxMaturityBeforeROARWarmup = 70;
+  auto const beforeROARWarmup = __roar_api_pending_warmups &&
+                                __roar_api_pending_warmups() != 0;
+
   int64_t maturity = before;
-  if (beforeRetranslateAll) {
+  if (beforeROARWarmup) {
+    maturity = std::min(kMaxMaturityBeforeROARWarmup, codeSize * 100 / fullSize);
+  } else if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
   } else if (liveSize >= Cfg::Jit::MaxLiveMainUsage ||
              code().main().used() >= Cfg::CodeCache::AMaxUsage ||

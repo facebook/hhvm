@@ -26,6 +26,10 @@ std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::Service
   ret->definitions = { {"\x0d\x05\x1d\xbc\xb2\xd5\x1d\x8f\x95\x45\xbb\x51\xfa\xcf\x0f\xfe", 16} };
   return ret;
 }
+
+std::vector<folly::not_null<const apache::thrift::schema::ServiceNode*>> apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::getServiceSchemaNodes() {
+  return {&apache::thrift::SchemaRegistry::get().getNode<::cpp2::PrimitivesService>()};
+}
 #endif
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::getServiceRequestInfoMap() const {

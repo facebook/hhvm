@@ -131,13 +131,13 @@ class PrimitiveTypeIdWrapper final {
 template <typename PrimitiveTagStruct>
 class PrimitiveTypeIdAdapter final {
  private:
-  using NativeType = PrimitiveTagStruct;
+  using DefaultType = PrimitiveTagStruct;
   using AdaptedType = PrimitiveTypeIdWrapper<PrimitiveTagStruct>;
 
  public:
   template <typename U>
-  static NativeType toThrift(U&&) {
-    return NativeType{};
+  static DefaultType toThrift(U&&) {
+    return DefaultType{};
   }
 
   template <typename U>

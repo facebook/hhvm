@@ -16,6 +16,7 @@
 
 #include <glog/logging.h>
 
+#include <fmt/core.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
@@ -51,11 +52,11 @@ TEST_P(CompatibilityTest, Write) {
 
 TEST_P(CompatibilityTest, Read) {
   auto test = GetParam();
-  auto path = folly::to<std::string>(
-      "thrift/lib/cpp2/frozen/test/compatibility/", *test.name());
+  auto path =
+      fmt::format("{}/{}", getenv("THRIFT_COMPATIBILITY_DIR"), *test.name());
 
   try {
-    auto root = mapFrozen<Root>(folly::File(filePath(*test.name()).c_str()));
+    auto root = mapFrozen<Root>(folly::File(path));
     EXPECT_FALSE(*test.fails());
     EXPECT_EQ(*test.root(), root.thaw());
   } catch (const std::exception&) {

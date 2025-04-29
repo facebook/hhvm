@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/compress/QPACKCodec.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 class QPACKDecoderCodec : public HQUnidirectionalCodec {
 
@@ -53,4 +53,4 @@ class QPACKDecoderCodec : public HQUnidirectionalCodec {
   Callback& callback_;
 };
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

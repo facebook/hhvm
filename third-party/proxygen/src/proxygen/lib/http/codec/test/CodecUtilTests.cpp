@@ -12,7 +12,7 @@
 
 using std::string;
 
-namespace proxygen { namespace test {
+namespace proxygen::test {
 
 folly::ByteRange input(const char *str) {
   return folly::ByteRange(reinterpret_cast<const uint8_t *>(str), strlen(str));
@@ -185,4 +185,4 @@ TEST(CodecUtil, hasGzipAndDeflate) {
       CodecUtil::hasGzipAndDeflate("gzip; q=.00001, deflate", gzip, deflate));
 }
 
-}} // namespace proxygen::test
+} // namespace proxygen::test

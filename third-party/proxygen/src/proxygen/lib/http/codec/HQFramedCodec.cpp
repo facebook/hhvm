@@ -17,7 +17,7 @@
 
 #include <iomanip>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 using namespace folly::io;
 using namespace folly;
@@ -185,4 +185,4 @@ bool HQFramedCodec::checkConnectionError(ParseResult err,
   return false;
 }
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

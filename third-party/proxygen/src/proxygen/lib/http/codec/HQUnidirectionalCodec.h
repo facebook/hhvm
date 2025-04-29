@@ -15,7 +15,7 @@
 #include <proxygen/lib/http/codec/HQFramer.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 using StreamTypeType = std::underlying_type<UnidirectionalStreamType>::type;
 std::ostream& operator<<(std::ostream& os, UnidirectionalStreamType type);
@@ -103,7 +103,7 @@ class HQUnidirectionalCodec {
   StreamDirection streamDir_;
 };
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq
 
 namespace std {
 template <>

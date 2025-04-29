@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
-namespace proxygen { namespace http2 {
+namespace proxygen::http2 {
 
 const uint32_t kFrameHeaderSize = 9;
 
@@ -42,4 +42,4 @@ const std::string kProtocolExperimentalString("h2-fb");
 const std::string kProtocolCleartextString("h2c");
 const std::string kProtocolSettingsHeader("HTTP2-Settings");
 
-}} // namespace proxygen::http2
+} // namespace proxygen::http2

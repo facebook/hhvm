@@ -10,7 +10,7 @@
 
 #include <folly/Overload.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 const quic::StreamId kSessionStreamId = std::numeric_limits<uint64_t>::max();
 
@@ -129,4 +129,4 @@ folly::Optional<proxygen::SettingsId> hqToHttpSettingsId(hq::SettingId id) {
   return folly::none;
 }
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

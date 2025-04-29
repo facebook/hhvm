@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/http/codec/HQUnidirectionalCodec.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 std::ostream& operator<<(std::ostream& os, UnidirectionalStreamType type) {
   switch (type) {
@@ -46,4 +46,4 @@ std::ostream& operator<<(std::ostream& os, StreamDirection direction) {
   return os;
 }
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

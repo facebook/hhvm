@@ -17,7 +17,7 @@
 #include <proxygen/lib/http/codec/HTTPSettings.h>
 #include <quic/codec/Types.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 // stream ID used for session-level callbacks from the codec
 extern const quic::StreamId kSessionStreamId;
@@ -56,4 +56,4 @@ folly::Optional<hq::SettingId> httpToHqSettingsId(proxygen::SettingsId id);
 
 folly::Optional<proxygen::SettingsId> hqToHttpSettingsId(hq::SettingId id);
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

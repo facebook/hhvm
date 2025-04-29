@@ -26,7 +26,7 @@ uint64_t drainingId(proxygen::TransportDirection dir) {
 
 } // namespace
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 using namespace folly::io;
 
@@ -289,4 +289,4 @@ size_t HQControlCodec::generatePushPriority(folly::IOBufQueue& writeBuf,
   return *writeRet;
 }
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

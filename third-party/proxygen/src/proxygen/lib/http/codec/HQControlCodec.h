@@ -18,7 +18,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Assume.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 class HQControlCodec
     : public HQUnidirectionalCodec
@@ -163,4 +163,4 @@ class HQControlCodec
   HTTPSettings& settings_;
 };
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

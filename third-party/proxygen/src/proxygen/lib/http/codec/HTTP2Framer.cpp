@@ -14,7 +14,7 @@
 using namespace folly::io;
 using namespace folly;
 
-namespace proxygen { namespace http2 {
+namespace proxygen::http2 {
 
 const uint8_t kMinExperimentalFrameType = 0xf0;
 const Padding kNoPadding = folly::none;
@@ -975,4 +975,4 @@ const char* getFrameTypeString(FrameType type) {
   LOG(FATAL) << "Unreachable";
   return "";
 }
-}} // namespace proxygen::http2
+} // namespace proxygen::http2

@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/codec/HQStreamCodec.h>
 #include <proxygen/lib/http/codec/compress/QPACKCodec.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 class HQMultiCodec : public HQControlCodec {
 
@@ -296,4 +296,4 @@ class HQMultiCodec : public HQControlCodec {
   bool debugLevel_{false};
 };
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

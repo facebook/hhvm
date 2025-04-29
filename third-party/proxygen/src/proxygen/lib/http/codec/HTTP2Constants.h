@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/codec/ErrorCode.h>
 #include <string>
 
-namespace proxygen { namespace http2 {
+namespace proxygen::http2 {
 
 extern const uint32_t kFrameHeaderSize;
 extern const uint32_t kFrameHeadersBaseMaxSize;
@@ -49,4 +49,4 @@ extern const std::string kProtocolExperimentalString;
 extern const std::string kProtocolCleartextString;
 extern const std::string kProtocolSettingsHeader;
 
-}} // namespace proxygen::http2
+} // namespace proxygen::http2

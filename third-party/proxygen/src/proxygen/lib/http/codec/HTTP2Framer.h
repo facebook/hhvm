@@ -21,7 +21,7 @@
 
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
-namespace proxygen { namespace http2 {
+namespace proxygen::http2 {
 
 //////// Constants ////////
 
@@ -668,4 +668,4 @@ uint8_t calculatePreHeaderBlockSize(bool hasAssocStream,
                                     bool hasPriority,
                                     bool hasPadding);
 
-}} // namespace proxygen::http2
+} // namespace proxygen::http2

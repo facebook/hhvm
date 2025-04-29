@@ -17,7 +17,7 @@
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/compress/QPACKCodec.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 using namespace folly;
 using namespace folly::io;
@@ -436,4 +436,4 @@ CompressionInfo HQStreamCodec::getCompressionInfo() const {
   return headerCodec_.getCompressionInfo();
 }
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

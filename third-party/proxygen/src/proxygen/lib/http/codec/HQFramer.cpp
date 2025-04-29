@@ -17,7 +17,7 @@
 using namespace folly::io;
 using namespace folly;
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 bool isGreaseId(uint64_t id) {
   if (id < 0x21 || id > quic::kEightByteLimit) {
@@ -461,4 +461,4 @@ WriteResult writeWTStreamPreface(folly::IOBufQueue& writeBuf,
   return prefaceSize;
 }
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

@@ -13,7 +13,7 @@
 
 #include <folly/lang/Assume.h>
 
-namespace proxygen { namespace hq {
+namespace proxygen::hq {
 
 /*
  * HQFramedCodec encapsulates the core logic for interfacing with the HQ Framer,
@@ -379,4 +379,4 @@ class HQFramedCodec : public HTTPCodec {
   folly::Function<void()> resumeHook_;
 };
 
-}} // namespace proxygen::hq
+} // namespace proxygen::hq

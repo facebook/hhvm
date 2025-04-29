@@ -87,6 +87,10 @@ TEST(CacheTest, future) {
         [](folly::Try<int>&&) -> int { throw std::runtime_error("bleet"); });
   };
 
+  auto inlineFailGetter = [](int) -> folly::Future<int> {
+    throw std::runtime_error("bleet");
+  };
+
   // Queue up a get via a getter that will succeed
   auto f = cache.get(0, okGetter, now);
   EXPECT_FALSE(f.isReady()) << "future didn't finish yet";
@@ -111,12 +115,18 @@ TEST(CacheTest, future) {
   cache.clear();
   std::vector<folly::Future<std::shared_ptr<const Node>>> futures;
   for (size_t i = 1; i < 7; ++i) {
-    futures.emplace_back(
-        cache.get(i, failGetter, now + std::chrono::milliseconds(i)));
+    if (i % 2 == 0) {
+      futures.emplace_back(
+          cache.get(i, failGetter, now + std::chrono::milliseconds(i)));
+    } else {
+      futures.emplace_back(
+          cache.get(i, inlineFailGetter, now + std::chrono::milliseconds(i)));
+    }
   }
 
   auto drained = exec.drain();
-  EXPECT_EQ(drained, 13) << "should be 13 things pending, but have " << drained;
+  // 3 keys will not need executors because they'll fail inline immediately.
+  EXPECT_EQ(drained, 4) << "should be 4 things pending, but have " << drained;
 
   // Let them make progress
   exec.drain();

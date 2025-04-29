@@ -431,67 +431,71 @@ class LRUCache {
     // simple callback that executes immediately in our context;
     // if that were to then try to operate on the cache, it would
     // deadlock.
-    getter(key).thenTry([node, this, now](folly::Try<ValueType>&& result) {
-      // We're going to steal the promises so that we can fulfil
-      // them outside of the lock
-      std::unique_ptr<typename NodeType::PromiseList> promises;
-      {
-        auto state = state_.wlock();
-        node->value_ = std::move(result);
+    folly::makeFuture()
+        .thenValue([getter = std::forward<Func>(getter), key](folly::Unit&&) {
+          return getter(key);
+        })
+        .thenTry([node, this, now](folly::Try<ValueType>&& result) {
+          // We're going to steal the promises so that we can fulfil
+          // them outside of the lock
+          std::unique_ptr<typename NodeType::PromiseList> promises;
+          {
+            auto state = state_.wlock();
+            node->value_ = std::move(result);
 
-        if (whichQ(node.get(), state) != &state->lookupOrder) {
-          // Should never happen...
-          abort();
-        }
+            if (whichQ(node.get(), state) != &state->lookupOrder) {
+              // Should never happen...
+              abort();
+            }
 
-        ++state->stats.cacheStore;
+            ++state->stats.cacheStore;
 
-        // We're no longer looking this up; we'll put it in the
-        // correct bucket just before we release the lock below.
-        state->lookupOrder.remove(node.get());
+            // We're no longer looking this up; we'll put it in the
+            // correct bucket just before we release the lock below.
+            state->lookupOrder.remove(node.get());
 
-        // We only need a TTL for errors
-        if (node->value_.hasException()) {
-          // Note that we don't account for the time it takes to
-          // arrive at the error condition in this TTL.  This
-          // is semi-deliberate; the for the sake of testing we
-          // are passing `now` through from outside.
-          node->deadline_ = now + errorTTL_;
-        }
+            // We only need a TTL for errors
+            if (node->value_.hasException()) {
+              // Note that we don't account for the time it takes to
+              // arrive at the error condition in this TTL.  This
+              // is semi-deliberate; the for the sake of testing we
+              // are passing `now` through from outside.
+              node->deadline_ = now + errorTTL_;
+            }
 
-        // Steal the promises; we will fulfill them below
-        // after we've released the lock.
-        std::swap(promises, node->promises_);
+            // Steal the promises; we will fulfill them below
+            // after we've released the lock.
+            std::swap(promises, node->promises_);
 
-        if (whichQ(node.get(), state) == &state->lookupOrder) {
-          // Should never happen...
-          abort();
-        }
+            if (whichQ(node.get(), state) == &state->lookupOrder) {
+              // Should never happen...
+              abort();
+            }
 
-        // Now that the promises have been stolen, insert into
-        // the appropriate queue.
-        whichQ(node.get(), state)->insertTail(node.get());
+            // Now that the promises have been stolen, insert into
+            // the appropriate queue.
+            whichQ(node.get(), state)->insertTail(node.get());
 
-        // If we were saturated at the start of the query, we may
-        // not have been able to make room and may have taken on
-        // more requests than the cache limits allow.  Now that we're
-        // done we should be able to free up some of those entries,
-        // so take a stab at that now.
-        while (state->map.size() > maxItems_) {
-          if (!evictOne(state, now, true)) {
-            // We were not able to evict anything, so stop
-            // trying.  We'll be over our cache size limit,
-            // but there's not much more we can do.
-            break;
+            // If we were saturated at the start of the query, we may
+            // not have been able to make room and may have taken on
+            // more requests than the cache limits allow.  Now that we're
+            // done we should be able to free up some of those entries,
+            // so take a stab at that now.
+            while (state->map.size() > maxItems_) {
+              if (!evictOne(state, now, true)) {
+                // We were not able to evict anything, so stop
+                // trying.  We'll be over our cache size limit,
+                // but there's not much more we can do.
+                break;
+              }
+            }
           }
-        }
-      }
 
-      // Wake up all waiters
-      for (auto& p : *promises) {
-        p.setValue(node);
-      }
-    });
+          // Wake up all waiters
+          for (auto& p : *promises) {
+            p.setValue(node);
+          }
+        });
 
     return std::move(future).within(fetchTimeout_);
   }

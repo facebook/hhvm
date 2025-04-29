@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <new>
 #include <typeinfo>
 #include <utility>
 
@@ -53,7 +54,7 @@ class VTableImpl final : public VTable {
 
  private:
   static T& value(std::byte* storage) noexcept {
-    return *reinterpret_cast<T*>(storage);
+    return *std::launder(reinterpret_cast<T*>(storage));
   }
 };
 
@@ -157,7 +158,7 @@ class TypeErasedValue final {
     FOLLY_SAFE_DCHECK(
         holds_alternative<T>(),
         "Tried to call value_unchecked() on TypeErasedValue with incompatible type");
-    return *reinterpret_cast<const T*>(storage_);
+    return *std::launder(reinterpret_cast<const T*>(storage_));
   }
 
   template <class T>
@@ -166,7 +167,7 @@ class TypeErasedValue final {
     FOLLY_SAFE_DCHECK(
         holds_alternative<T>(),
         "Tried to call value_unchecked() on TypeErasedValue with incompatible type");
-    return *reinterpret_cast<T*>(storage_);
+    return *std::launder(reinterpret_cast<T*>(storage_));
   }
 
  public:

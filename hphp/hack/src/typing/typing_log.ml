@@ -715,12 +715,8 @@ let log_types p env items =
       go items)
 
 let log_function
-    (type res)
-    p
-    ~function_name
-    ~arguments
-    ~(result : res -> string option)
-    (f : unit -> res) : res =
+    p ~function_name ~arguments ~(result : 'a -> string option) (f : unit -> 'a)
+    : 'a =
   log_pos_or_decl p @@ fun () ->
   indentEnv ~color:(Normal Yellow) function_name @@ fun () ->
   List.iter arguments ~f:print_key_value;

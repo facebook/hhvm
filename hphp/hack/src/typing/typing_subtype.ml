@@ -396,7 +396,48 @@ module Subtype_env = struct
   let get_check_rank { check_rank; _ } = check_rank
 end
 
-module Logging = struct
+module Logging : sig
+  val log_subtype :
+    this_ty:Typing_defs.locl_ty option ->
+    function_name:string ->
+    Typing_env_types.env ->
+    Typing_defs.locl_ty ->
+    Typing_defs.locl_ty ->
+    (unit -> 'a) ->
+    'a
+
+  val log_subtype_i :
+    this_ty:Typing_defs.locl_ty option ->
+    function_name:string ->
+    Typing_env_types.env ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    (unit -> 'a) ->
+    'a
+
+  val log_subtype_prop :
+    Typing_env_types.env ->
+    Typing_defs.locl_ty ->
+    Typing_defs.locl_ty ->
+    this_ty:Typing_defs.locl_ty option ->
+    function_name:string ->
+    (unit -> Typing_env_types.env * TL.subtype_prop) ->
+    Typing_env_types.env * TL.subtype_prop
+
+  val should_log_subtype :
+    Typing_env_types.env ->
+    level:Core__Int.t ->
+    Typing_defs.locl_ty ->
+    Typing_defs.locl_ty ->
+    bool
+
+  val should_log_subtype_i :
+    Typing_env_types.env ->
+    level:Core__Int.t ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    bool
+end = struct
   (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
    * and add to the accumulated constraints in `constraints` any necessary and
    * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
@@ -427,7 +468,7 @@ module Logging = struct
    *)
 
   let log_subtype_i_
-      ~(this_ty : locl_ty option) ~function_name ~result env ty_sub ty_super =
+      ~(this_ty : locl_ty option) ~function_name ~result env ty_sub ty_super f =
     Typing_log.log_function
       (Reason.to_pos (reason ty_sub))
       ~function_name
@@ -441,13 +482,27 @@ module Logging = struct
             | Some ty -> Typing_print.debug env ty );
         ]
       ~result
+      f
 
-  let log_subtype_i_prop =
-    log_subtype_i_ ~result:(fun (env, prop) ->
+  let log_subtype_i_prop ~this_ty ~function_name env ty_sub ty_super f =
+    log_subtype_i_
+      ~this_ty
+      ~function_name
+      ~result:(fun (env, prop) ->
         Some (TL.print (Typing_print.debug_i env) prop))
+      env
+      ty_sub
+      ty_super
+      f
 
-  let log_subtype_prop env ty_sub ty_super =
-    log_subtype_i_prop env (LoclType ty_sub) (LoclType ty_super)
+  let log_subtype_prop env ty_sub ty_super ~this_ty ~function_name f =
+    log_subtype_i_prop
+      env
+      (LoclType ty_sub)
+      (LoclType ty_super)
+      ~this_ty
+      ~function_name
+      f
 
   let should_log_subtype_i env ~level ty_sub ty_super =
     let level =
@@ -461,18 +516,28 @@ module Logging = struct
     in
     Typing_log.should_log env ~category:"sub" ~level
 
-  let log_subtype_i = log_subtype_i_ ~result:(fun _ -> None)
+  let log_subtype_i
+      ~(this_ty : locl_ty option) ~function_name env ty_sub ty_super f =
+    log_subtype_i_
+      ~result:(fun _ -> None)
+      ~this_ty
+      ~function_name
+      env
+      ty_sub
+      ty_super
+      f
 
   let should_log_subtype env ~level ty_sub ty_super =
     should_log_subtype_i env ~level (LoclType ty_sub) (LoclType ty_super)
 
-  let log_subtype ~this_ty ~function_name env ty_sub ty_super =
+  let log_subtype ~this_ty ~function_name env ty_sub ty_super f =
     log_subtype_i
       ~this_ty
       ~function_name
       env
       (LoclType ty_sub)
       (LoclType ty_super)
+      f
 end
 
 module Subtype_negation = struct

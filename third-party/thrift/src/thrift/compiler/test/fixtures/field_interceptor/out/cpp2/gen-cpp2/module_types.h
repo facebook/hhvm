@@ -90,7 +90,11 @@ class InterceptedFields final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 6;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::access_field,
     ::apache::thrift::ident::access_shared_field,
     ::apache::thrift::ident::access_optional_shared_field,
@@ -98,8 +102,6 @@ class InterceptedFields final  {
     ::apache::thrift::ident::access_optional_shared_const_field,
     ::apache::thrift::ident::access_optional_boxed_field
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i32_t,
@@ -110,17 +112,9 @@ class InterceptedFields final  {
     ::apache::thrift::type::i32_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 6;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

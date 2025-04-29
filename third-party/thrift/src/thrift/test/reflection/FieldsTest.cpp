@@ -92,10 +92,6 @@ template <
     class TypeTag,
     class FieldTag>
 void checkField(const char* identName) {
-  if constexpr (Ordinal::value != Ordinal{}) {
-    static_assert(
-        std::is_same_v<Id, private_access::field_id<Struct, Ordinal>>);
-  }
   static_assert(
       std::is_same_v<TypeTag, private_access::type_tag<Struct, Ordinal>>);
   static_assert(std::is_same_v<Ident, private_access::ident<Struct, Ordinal>>);

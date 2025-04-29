@@ -206,29 +206,23 @@ class SmallStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::small_A,
     ::apache::thrift::ident::small_B
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::i32_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -403,7 +397,11 @@ class containerStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 19;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,17,18,19,20,21,23};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::fieldB,
     ::apache::thrift::ident::fieldC,
@@ -424,8 +422,6 @@ class containerStruct final  {
     ::apache::thrift::ident::fieldU,
     ::apache::thrift::ident::fieldX
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,17,18,19,20,21,23};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
@@ -449,17 +445,9 @@ class containerStruct final  {
     ::apache::thrift::type::struct_t<::cpp2::SmallStruct>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 19;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

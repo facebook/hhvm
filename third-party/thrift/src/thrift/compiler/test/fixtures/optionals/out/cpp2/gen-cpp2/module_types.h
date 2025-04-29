@@ -182,7 +182,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "PersonID", "kind": "typedef" } */
-typedef ::std::int64_t PersonID;
+using PersonID = ::std::int64_t;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "Color", "kind": "struct" } */
 class Color final  {
@@ -199,14 +199,16 @@ class Color final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 4;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::red,
     ::apache::thrift::ident::green,
     ::apache::thrift::ident::blue,
     ::apache::thrift::ident::alpha
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::double_t,
@@ -215,17 +217,9 @@ class Color final  {
     ::apache::thrift::type::double_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 4;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -494,15 +488,17 @@ class Vehicle final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 5;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::color,
     ::apache::thrift::ident::licensePlate,
     ::apache::thrift::ident::description,
     ::apache::thrift::ident::name,
     ::apache::thrift::ident::hasAC
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::struct_t<::cpp2::Color>,
@@ -512,17 +508,9 @@ class Vehicle final  {
     ::apache::thrift::type::bool_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 5;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -879,7 +867,11 @@ class Person final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 10;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::id,
     ::apache::thrift::ident::name,
     ::apache::thrift::ident::age,
@@ -891,8 +883,6 @@ class Person final  {
     ::apache::thrift::ident::afraidOfAnimal,
     ::apache::thrift::ident::vehicles
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i64_t,
@@ -907,17 +897,9 @@ class Person final  {
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::Vehicle>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 10;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

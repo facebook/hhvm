@@ -30,9 +30,9 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "name": "IncludesIncluded", "kind": "typedef" } */
-typedef ::cpp2::Included IncludesIncluded;
+using IncludesIncluded = ::cpp2::Included;
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "name": "IncludesTransitiveFoo", "kind": "typedef" } */
-typedef ::cpp2::TransitiveFoo IncludesTransitiveFoo;
+using IncludesTransitiveFoo = ::cpp2::TransitiveFoo;
 
 } // namespace cpp2
 

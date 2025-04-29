@@ -136,25 +136,19 @@ class MyDataItem final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
-  >;
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0};
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+  >;
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 0;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -233,14 +227,16 @@ class MyStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 4;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::MyIntField,
     ::apache::thrift::ident::MyStringField,
     ::apache::thrift::ident::MyDataField,
     ::apache::thrift::ident::myEnum
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i64_t,
@@ -249,17 +245,9 @@ class MyStruct final  {
     ::apache::thrift::type::enum_t<::cpp2::MyEnum>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 4;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -546,13 +534,15 @@ class MyUnion final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 3;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::myEnum,
     ::apache::thrift::ident::myStruct,
     ::apache::thrift::ident::myDataItem
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
@@ -560,17 +550,9 @@ class MyUnion final  {
     ::apache::thrift::type::struct_t<::cpp2::MyDataItem>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 3;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

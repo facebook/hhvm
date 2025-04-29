@@ -16,17 +16,120 @@
 
 #pragma once
 
-#include <stdexcept>
+#include <memory>
+#include <optional>
+#include <type_traits>
+
 #include <folly/CPortability.h>
 #include <folly/Overload.h>
 #include <folly/Traits.h>
 #include <thrift/lib/cpp/Field.h>
-#include <thrift/lib/cpp2/op/detail/Get.h>
+#include <thrift/lib/cpp2/FieldRef.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
+#include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
 namespace apache::thrift::op {
+namespace detail {
+
+using pa = ::apache::thrift::detail::st::private_access;
+
+template <typename Id, typename T, typename Enable = void>
+struct Get;
+
+template <typename Id, typename Tag>
+struct get_ordinal_impl {
+  // TODO(ytj): To reduce build time, only check whether Id is reflection
+  // metadata if we couldn't find Id.
+  static_assert(type::is_id_v<Id>, "");
+  using type = pa::ordinal<type::native_type<Tag>, Id>;
+};
+
+template <type::Ordinal Ord, typename Tag>
+struct get_ordinal_impl<std::integral_constant<type::Ordinal, Ord>, Tag> {
+  static_assert(
+      folly::to_underlying(Ord) <=
+          pa::__fbthrift_field_size_v<type::native_type<Tag>>,
+      "Ordinal cannot be larger than the number of fields");
+
+  // Id is an ordinal, return itself.
+  using type = type::ordinal_tag<Ord>;
+};
+
+template <typename TypeTag, typename Struct, int16_t Id, typename Tag>
+struct get_ordinal_impl<type::field<TypeTag, FieldContext<Struct, Id>>, Tag>
+    : get_ordinal_impl<field_id<Id>, Tag> {};
+
+template <size_t... I, typename F>
+constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>);
+
+template <typename F, size_t I = 0>
+using ord_result_t =
+    decltype(std::declval<F>()(type::detail::pos_to_ordinal<I>{}));
+
+template <size_t... I, typename F>
+ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>);
+
+struct GetValueOrNull {
+  template <typename T>
+  auto* operator()(field_ref<T&> ref) const {
+    return &ref.value();
+  }
+  template <typename T>
+  auto* operator()(required_field_ref<T&> ref) const {
+    return &ref.value();
+  }
+  template <typename T>
+  auto* operator()(optional_field_ref<T&> ref) const {
+    return ref.has_value() ? &ref.value() : nullptr;
+  }
+  template <typename T>
+  auto* operator()(optional_boxed_field_ref<T&> ref) const {
+    return ref.has_value() ? &ref.value() : nullptr;
+  }
+  template <typename T>
+  auto* operator()(terse_field_ref<T&> ref) const {
+    return &ref.value();
+  }
+  template <typename T>
+  auto* operator()(union_field_ref<T&> ref) const {
+    return ref.has_value() ? &ref.value() : nullptr;
+  }
+  template <typename T>
+  auto* operator()(terse_intern_boxed_field_ref<T&> ref) const {
+    return &ref.value();
+  }
+  template <typename T>
+  auto* operator()(intern_boxed_field_ref<T&> ref) const {
+    return &ref.value();
+  }
+
+  template <typename T>
+  T* operator()(std::optional<T>& opt) const {
+    return opt ? &opt.value() : nullptr;
+  }
+  template <typename T>
+  const T* operator()(const std::optional<T>& opt) const {
+    return opt ? &opt.value() : nullptr;
+  }
+
+  template <typename T, typename Deleter>
+  T* operator()(const std::unique_ptr<T, Deleter>&& ptr) const = delete;
+  template <typename T, typename Deleter>
+  T* operator()(const std::unique_ptr<T, Deleter>& ptr) const {
+    return ptr ? ptr.get() : nullptr;
+  }
+  template <typename T>
+  T* operator()(const std::shared_ptr<T>&& ptr) const = delete;
+  template <typename T>
+  T* operator()(const std::shared_ptr<T>& ptr) const {
+    return ptr ? ptr.get() : nullptr;
+  }
+};
+
+} // namespace detail
 
 /// Resolves to the number of definitions contained in Thrift class
 template <typename T>
@@ -34,7 +137,7 @@ inline constexpr std::size_t size_v = detail::pa::__fbthrift_field_size_v<T>;
 
 template <typename T, typename Id>
 using get_ordinal =
-    typename detail::GetOrdinalImpl<Id, type::infer_tag<T>>::type;
+    typename detail::get_ordinal_impl<Id, type::infer_tag<T>>::type;
 
 /// Gets the ordinal, for example:
 ///
@@ -65,19 +168,20 @@ std::enable_if_t<size_v<T> == 0, bool> find_by_ordinal(F&&) {
 }
 
 template <typename T, typename Id>
-using get_field_id = folly::conditional_t<
-    get_ordinal<T, Id>::value == type::Ordinal{},
-    type::field_id<0>,
-    detail::pa::field_id<T, get_ordinal<T, Id>>>;
+using get_field_id = type::field_id<
+    get_ordinal<T, Id>::value == type::Ordinal()
+        ? 0
+        : detail::pa::__fbthrift_field_ids<T>()[static_cast<size_t>(
+              get_ordinal<T, Id>::value)]>;
 
 /// Gets the field id, for example:
 ///
-/// * using FieldId = get_field_id<MyS, ident::foo>
-///   // Resolves to field id assigned to the field "foo" in MyS.
+///   using FieldId = get_field_id<MyStruct, apache::thrift::ident::foo>;
+///   // Resolves to the id of the field `foo` in `MyStruct`.
 template <typename T, typename Id>
 inline constexpr FieldId get_field_id_v = get_field_id<T, Id>::value;
 
-/// Calls the given function with each field_id<{id}> in Thrift class.
+/// Calls the given function with each field_id<{id}> in a Thrift struct.
 template <typename T, typename F>
 void for_each_field_id(F&& f) {
   for_each_ordinal<T>([&](auto ord) { f(get_field_id<T, decltype(ord)>{}); });
@@ -178,27 +282,6 @@ using get_field_ref =
 
 // Implementation details.
 namespace detail {
-template <typename Id, typename Tag>
-struct GetOrdinalImpl {
-  // TODO(ytj): To reduce build time, only check whether Id is reflection
-  // metadata if we couldn't find Id.
-  static_assert(type::is_id_v<Id>, "");
-  using type = detail::pa::ordinal<type::native_type<Tag>, Id>;
-};
-
-template <type::Ordinal Ord, typename Tag>
-struct GetOrdinalImpl<std::integral_constant<type::Ordinal, Ord>, Tag> {
-  static_assert(
-      folly::to_underlying(Ord) <= size_v<type::native_type<Tag>>,
-      "Ordinal cannot be larger than the number of definitions");
-
-  // Id is an ordinal, return itself
-  using type = type::ordinal_tag<Ord>;
-};
-
-template <typename TypeTag, typename Struct, int16_t Id, typename Tag>
-struct GetOrdinalImpl<type::field<TypeTag, FieldContext<Struct, Id>>, Tag>
-    : GetOrdinalImpl<field_id<Id>, Tag> {};
 
 template <size_t... I, typename F>
 constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {

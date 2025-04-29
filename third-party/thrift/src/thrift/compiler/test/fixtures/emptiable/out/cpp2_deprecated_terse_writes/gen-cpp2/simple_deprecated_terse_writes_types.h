@@ -241,25 +241,19 @@ class MyStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "simple_deprecated_terse_writes";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
-  >;
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0};
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+  >;
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 0;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -338,7 +332,11 @@ class EmptiableStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "simple_deprecated_terse_writes";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 14;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::bool_field,
     ::apache::thrift::ident::byte_field,
     ::apache::thrift::ident::short_field,
@@ -354,8 +352,6 @@ class EmptiableStruct final  {
     ::apache::thrift::ident::map_field,
     ::apache::thrift::ident::struct_field
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
@@ -374,17 +370,9 @@ class EmptiableStruct final  {
     ::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1169,7 +1157,11 @@ class NotEmptiableStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "simple_deprecated_terse_writes";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 14;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::bool_field,
     ::apache::thrift::ident::byte_field,
     ::apache::thrift::ident::short_field,
@@ -1185,8 +1177,6 @@ class NotEmptiableStruct final  {
     ::apache::thrift::ident::map_field,
     ::apache::thrift::ident::struct_field
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
@@ -1205,17 +1195,9 @@ class NotEmptiableStruct final  {
     ::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

@@ -34,8 +34,25 @@
 namespace apache::thrift {
 
 namespace detail {
+
 template <typename Tag>
 struct invoke_reffer;
+
+template <class List, FieldOrdinal>
+struct at_impl {
+  static_assert(sizeof(List) < 0, "");
+};
+
+template <class... Args, FieldOrdinal Ord>
+struct at_impl<folly::tag_t<Args...>, Ord> {
+  using type =
+      folly::type_pack_element_t<folly::to_underlying(Ord), void, Args...>;
+};
+
+// Similar to mp_at in boost mp11, but Ordinal based
+template <class List, FieldOrdinal Ord>
+using at = typename at_impl<List, Ord>::type;
+
 } // namespace detail
 
 template <typename Tag>
@@ -130,26 +147,25 @@ struct struct_private_access {
       clear_terse_fields_fn, __fbthrift_clear_terse_fields);
   FOLLY_CREATE_MEMBER_INVOKER(empty_fn, __fbthrift_is_empty);
 
-  template <typename T, typename Ord>
-  static typename T::template __fbthrift_ident<Ord> __fbthrift_ident();
-
-  template <typename T, typename Ord>
-  using ident = decltype(__fbthrift_ident<T, Ord>());
-
   template <typename T>
   static constexpr const int16_t* __fbthrift_field_ids() {
     return T::__fbthrift_reflection_field_ids;
   }
 
-  template <typename T, typename Ord>
-  using field_id = type::field_id<
-      __fbthrift_field_ids<T>()[static_cast<size_t>(Ord::value)]>;
+  // This function is used to workaround a bug in clang 18 and older:
+  // https://github.com/llvm/llvm-project/issues/66604.
+  // See https://www.godbolt.org/z/n3fbbEd9v.
+  template <typename T>
+  static typename T::__fbthrift_reflection_idents idents();
 
   template <typename T, typename Ord>
-  static typename T::template __fbthrift_type_tag<Ord> __fbthrift_type_tag();
+  using ident = detail::at<decltype(idents<T>()), Ord::value>;
+
+  template <typename T>
+  static typename T::__fbthrift_reflection_type_tags type_tags();
 
   template <typename T, typename Ord>
-  using type_tag = decltype(__fbthrift_type_tag<T, Ord>());
+  using type_tag = detail::at<decltype(type_tags<T>()), Ord::value>;
 
   template <typename T, typename U>
   static typename T::template __fbthrift_ordinal<U> __fbthrift_ordinal();

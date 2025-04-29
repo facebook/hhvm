@@ -188,21 +188,6 @@ using DeserializationMutex = std::shared_timed_mutex; // C++14
 
 } // namespace st
 
-template <class List, FieldOrdinal>
-struct at_impl {
-  static_assert(sizeof(List) < 0, "");
-};
-
-template <class... Args, FieldOrdinal Ord>
-struct at_impl<folly::tag_t<Args...>, Ord> {
-  using type =
-      folly::type_pack_element_t<folly::to_underlying(Ord), void, Args...>;
-};
-
-// Similar to mp_at in boost mp11, but Ordinal based
-template <class List, FieldOrdinal Ord>
-using at = typename at_impl<List, Ord>::type;
-
 // Similar to std::find, but returns ordinal
 template <class T>
 FOLLY_CONSTEVAL type::Ordinal findOrdinal(

@@ -464,9 +464,9 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "IOBufPtr", "kind": "typedef" } */
-typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
+using IOBufPtr = std::unique_ptr<folly::IOBuf>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
-typedef folly::IOBuf IOBuf;
+using IOBuf = folly::IOBuf;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "SimpleStruct", "kind": "struct" } */
 class SimpleStruct final  {
@@ -483,7 +483,11 @@ class SimpleStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 12;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,9,8,10,11,12};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::is_on,
     ::apache::thrift::ident::tiny_int,
     ::apache::thrift::ident::small_int,
@@ -497,8 +501,6 @@ class SimpleStruct final  {
     ::apache::thrift::ident::opt_default_str,
     ::apache::thrift::ident::opt_default_enum
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,9,8,10,11,12};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
@@ -515,17 +517,9 @@ class SimpleStruct final  {
     ::apache::thrift::type::enum_t<::py3::simple::AnEnum>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 12;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1175,9 +1169,9 @@ unsigned long SimpleStruct::read(Protocol_* iprot) {
 }
 
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedTypeDef", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<Adapter, ::py3::simple::SimpleStruct> AdaptedTypeDef;
+using AdaptedTypeDef = ::apache::thrift::adapt_detail::adapted_t<Adapter, ::py3::simple::SimpleStruct>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "HiddenTypeDef", "kind": "typedef" } */
-typedef ::py3::simple::SimpleStruct HiddenTypeDef;
+using HiddenTypeDef = ::py3::simple::SimpleStruct;
 
 namespace detail {
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedUnion", "kind": "union" } */
@@ -1195,27 +1189,21 @@ class AdaptedUnion final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::best
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i16_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1386,45 +1374,45 @@ unsigned long AdaptedUnion::read(Protocol_* iprot) {
 using AdaptedUnion = ::apache::thrift::adapt_detail::adapted_t<Adapter, ::py3::simple::detail::AdaptedUnion>;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "ImplicitlyHiddenTypeDef", "kind": "typedef" } */
-typedef ::py3::simple::AdaptedUnion ImplicitlyHiddenTypeDef;
+using ImplicitlyHiddenTypeDef = ::py3::simple::AdaptedUnion;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "foo_bar", "kind": "typedef" } */
-typedef foo::Bar foo_bar;
+using foo_bar = foo::Bar;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomBool", "kind": "typedef" } */
-typedef ::MyType CustomBool;
+using CustomBool = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomInteger", "kind": "typedef" } */
-typedef ::MyType CustomInteger;
+using CustomInteger = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomDouble", "kind": "typedef" } */
-typedef ::MyType CustomDouble;
+using CustomDouble = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomString", "kind": "typedef" } */
-typedef ::MyType CustomString;
+using CustomString = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomBinary", "kind": "typedef" } */
-typedef ::MyType CustomBinary;
+using CustomBinary = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomList", "kind": "typedef" } */
-typedef ::MyType CustomList;
+using CustomList = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomSet", "kind": "typedef" } */
-typedef ::MyType CustomSet;
+using CustomSet = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomMap", "kind": "typedef" } */
-typedef ::MyType CustomMap;
+using CustomMap = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "CustomStruct", "kind": "typedef" } */
-typedef ::MyType CustomStruct;
+using CustomStruct = ::MyType;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedBool", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, bool> AdaptedBool;
+using AdaptedBool = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, bool>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedInteger", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::int64_t> AdaptedInteger;
+using AdaptedInteger = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::int64_t>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedDouble", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, double> AdaptedDouble;
+using AdaptedDouble = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, double>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedString", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::string> AdaptedString;
+using AdaptedString = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::string>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedBinary", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::string> AdaptedBinary;
+using AdaptedBinary = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::string>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedList", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::vector<::std::int32_t>> AdaptedList;
+using AdaptedList = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::vector<::std::int32_t>>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedSet", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::set<::std::int32_t>> AdaptedSet;
+using AdaptedSet = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::set<::std::int32_t>>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedMap", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::map<::std::int32_t, ::std::int32_t>> AdaptedMap;
+using AdaptedMap = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::std::map<::std::int32_t, ::std::int32_t>>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "AdaptedStruct", "kind": "typedef" } */
-typedef ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::py3::simple::SimpleStruct> AdaptedStruct;
+using AdaptedStruct = ::apache::thrift::adapt_detail::adapted_t<::MyAdapter, ::py3::simple::SimpleStruct>;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "SimpleException", "kind": "exception" } */
 class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
@@ -1441,27 +1429,21 @@ class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::err_code
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i16_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1600,27 +1582,21 @@ class OptionalRefStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::optional_blob
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1758,13 +1734,15 @@ class HiddenTypeFieldsStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 3;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::field1,
     ::apache::thrift::ident::field2,
     ::apache::thrift::ident::field3
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>,
@@ -1772,17 +1750,9 @@ class HiddenTypeFieldsStruct final  {
     ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 3;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -2010,27 +1980,21 @@ class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::test
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i16_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -2169,7 +2133,11 @@ class ComplexStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 9;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::structOne,
     ::apache::thrift::ident::structTwo,
     ::apache::thrift::ident::an_integer,
@@ -2180,8 +2148,6 @@ class ComplexStruct final  {
     ::apache::thrift::ident::cdef,
     ::apache::thrift::ident::bytes_with_cpp_type
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>,
@@ -2195,17 +2161,9 @@ class ComplexStruct final  {
     ::apache::thrift::type::cpp_type<foo::Bar, ::apache::thrift::type::binary_t>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -2778,27 +2736,21 @@ class BinaryUnion final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::iobuf_val
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -3000,27 +2952,21 @@ class BinaryUnionStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::u
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::union_t<::py3::simple::BinaryUnion>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -3151,7 +3097,11 @@ class CustomFields final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 9;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::bool_field,
     ::apache::thrift::ident::integer_field,
     ::apache::thrift::ident::double_field,
@@ -3162,8 +3112,6 @@ class CustomFields final  {
     ::apache::thrift::ident::map_field,
     ::apache::thrift::ident::struct_field
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::bool_t>,
@@ -3177,17 +3125,9 @@ class CustomFields final  {
     ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -3740,7 +3680,11 @@ class CustomTypedefFields final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 9;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::bool_field,
     ::apache::thrift::ident::integer_field,
     ::apache::thrift::ident::double_field,
@@ -3751,8 +3695,6 @@ class CustomTypedefFields final  {
     ::apache::thrift::ident::map_field,
     ::apache::thrift::ident::struct_field
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::bool_t>,
@@ -3766,17 +3708,9 @@ class CustomTypedefFields final  {
     ::apache::thrift::type::cpp_type<::MyType, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -4329,7 +4263,11 @@ class AdaptedTypedefFields final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 9;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::bool_field,
     ::apache::thrift::ident::integer_field,
     ::apache::thrift::ident::double_field,
@@ -4340,8 +4278,6 @@ class AdaptedTypedefFields final  {
     ::apache::thrift::ident::map_field,
     ::apache::thrift::ident::struct_field
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::adapted<::MyAdapter, ::apache::thrift::type::bool_t>,
@@ -4355,17 +4291,9 @@ class AdaptedTypedefFields final  {
     ::apache::thrift::type::adapted<::MyAdapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

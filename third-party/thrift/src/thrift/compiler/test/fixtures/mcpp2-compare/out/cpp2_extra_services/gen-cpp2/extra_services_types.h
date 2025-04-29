@@ -119,7 +119,11 @@ class containerStruct2 final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "extra_services";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 13;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,101,201,2,102,202,3,103,203,4,5,105,205};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::req_fieldA,
     ::apache::thrift::ident::opt_fieldA,
@@ -134,8 +138,6 @@ class containerStruct2 final  {
     ::apache::thrift::ident::req_fieldE,
     ::apache::thrift::ident::opt_fieldE
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,101,201,2,102,202,3,103,203,4,5,105,205};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
@@ -153,17 +155,9 @@ class containerStruct2 final  {
     ::apache::thrift::type::string_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 13;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

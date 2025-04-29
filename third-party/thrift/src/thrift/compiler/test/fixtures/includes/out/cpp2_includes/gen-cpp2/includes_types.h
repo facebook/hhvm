@@ -49,9 +49,9 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "IncludedInt64", "kind": "typedef" } */
-typedef ::std::int64_t IncludedInt64;
+using IncludedInt64 = ::std::int64_t;
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "TransitiveFoo", "kind": "typedef" } */
-typedef ::cpp2::Foo TransitiveFoo;
+using TransitiveFoo = ::cpp2::Foo;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "Included", "kind": "struct" } */
 class Included final  {
@@ -68,29 +68,23 @@ class Included final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "includes";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::MyIntField,
     ::apache::thrift::ident::MyTransitiveField
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i64_t,
     ::apache::thrift::type::struct_t<::cpp2::Foo>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

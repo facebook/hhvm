@@ -172,19 +172,19 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "IOBuf", "kind": "typedef" } */
-typedef folly::IOBuf IOBuf;
+using IOBuf = folly::IOBuf;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "small_vector_iobuf", "kind": "typedef" } */
-typedef folly::small_vector<::test::fixtures::python_capi::IOBuf> small_vector_iobuf;
+using small_vector_iobuf = folly::small_vector<::test::fixtures::python_capi::IOBuf>;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "fbvector_string", "kind": "typedef" } */
-typedef folly::fbvector<::std::string> fbvector_string;
+using fbvector_string = folly::fbvector<::std::string>;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "fbvector_fbvector_string", "kind": "typedef" } */
-typedef folly::fbvector<::test::fixtures::python_capi::fbvector_string> fbvector_fbvector_string;
+using fbvector_fbvector_string = folly::fbvector<::test::fixtures::python_capi::fbvector_string>;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "ListOfWrapped", "kind": "typedef" } */
-typedef ::std::vector<::test::fixtures::python_capi::TWrapped> ListOfWrapped;
+using ListOfWrapped = ::std::vector<::test::fixtures::python_capi::TWrapped>;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "VecOfWrapped", "kind": "typedef" } */
-typedef std::vector<::test::fixtures::python_capi::TWrapped> VecOfWrapped;
+using VecOfWrapped = std::vector<::test::fixtures::python_capi::TWrapped>;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "ListOfWrappedAlias", "kind": "typedef" } */
-typedef ::test::fixtures::python_capi::ListOfWrapped ListOfWrappedAlias;
+using ListOfWrappedAlias = ::test::fixtures::python_capi::ListOfWrapped;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "TemplateLists", "kind": "struct" } */
 class TemplateLists final  {
@@ -202,15 +202,17 @@ class TemplateLists final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "containers";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 5;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::std_string,
     ::apache::thrift::ident::deque_string,
     ::apache::thrift::ident::small_vector_iobuf,
     ::apache::thrift::ident::nested_small_vector,
     ::apache::thrift::ident::small_vector_tensor
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<std::vector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>,
@@ -220,17 +222,9 @@ class TemplateLists final  {
     ::apache::thrift::type::cpp_type<folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<folly::fbvector<::test::fixtures::python_capi::fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<folly::fbvector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>>>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 5;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -583,7 +577,11 @@ class TemplateSets final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "containers";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 7;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::std_set,
     ::apache::thrift::ident::std_unordered,
     ::apache::thrift::ident::folly_fast,
@@ -592,8 +590,6 @@ class TemplateSets final  {
     ::apache::thrift::ident::folly_vector,
     ::apache::thrift::ident::folly_sorted_vector
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<std::set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
@@ -605,17 +601,9 @@ class TemplateSets final  {
     ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 7;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1077,7 +1065,11 @@ class TemplateMaps final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "containers";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 7;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::std_map,
     ::apache::thrift::ident::std_unordered,
     ::apache::thrift::ident::folly_fast,
@@ -1086,8 +1078,6 @@ class TemplateMaps final  {
     ::apache::thrift::ident::folly_vector,
     ::apache::thrift::ident::folly_sorted_vector
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<std::map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>,
@@ -1099,17 +1089,9 @@ class TemplateMaps final  {
     ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 7;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1571,29 +1553,23 @@ class TWrapped final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "containers";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::fieldB
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::binary_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1793,27 +1769,21 @@ class IndirectionA final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "containers";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::lst
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -1951,27 +1921,21 @@ class IndirectionB final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "containers";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::lst
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<std::vector<::test::fixtures::python_capi::TWrapped>, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )
@@ -2109,27 +2073,21 @@ class IndirectionC final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "containers";
   }
-  using __fbthrift_reflection_ident_list = folly::tag_t<
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::lst
   >;
-
-  static constexpr const std::int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template <typename T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template <typename T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
   template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
     ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_idents,
                                               __fbthrift_reflection_type_tags>(
       __fbthrift_reflection_field_ids
     )

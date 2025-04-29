@@ -386,23 +386,46 @@ void chomp_last_char(std::string* data, char c) {
   }
 }
 
+/**
+ * This implementation of source_manager_backend builds on top of the
+ * template_map that is populated from the "templates" directory during a build
+ * step.
+ */
+class template_source_manager_backend final : public source_manager_backend {
+ public:
+  using templates_map = std::map<std::string, std::string, std::less<>>;
+
+  std::optional<std::vector<char>> read_file(std::string_view path) final {
+    auto found = templates_by_path_.find(path);
+    if (found == templates_by_path_.end()) {
+      return std::nullopt;
+    }
+    const auto& [_, source_code] = *found;
+    std::vector<char> result;
+    result.reserve(source_code.size() + 1);
+    result.insert(result.end(), source_code.begin(), source_code.end());
+    result.push_back('\0');
+    return result;
+  }
+
+  explicit template_source_manager_backend(
+      const templates_map& templates_by_path)
+      : templates_by_path_(templates_by_path) {}
+
+ private:
+  const templates_map& templates_by_path_;
+};
+
 } // namespace
 
-/**
- * This implementation of whisker's source resolver builds on top of the
- * template_map that already used by mstch. This allows template names to
- * remain the same (albeit exact file names are not recoverable).
- *
- * When a new partial is requested, we lazily parse the corresponding entry
- * in the template_map and cache the parsed AST.
- */
 class t_whisker_generator::whisker_source_parser
     : public whisker::source_resolver {
  public:
   explicit whisker_source_parser(
       const templates_map& templates_by_path, std::string template_prefix)
-      : templates_by_path_(templates_by_path),
-        template_prefix_(std::move(template_prefix)) {}
+      : template_prefix_(std::move(template_prefix)),
+        src_manager_(std::make_unique<template_source_manager_backend>(
+            templates_by_path)) {}
 
   resolve_import_result resolve_import(
       std::string_view combined_path,
@@ -420,12 +443,11 @@ class t_whisker_generator::whisker_source_parser
       return &cached->second.value();
     }
 
-    auto source_code = templates_by_path_.find(path);
-    if (source_code == templates_by_path_.end()) {
+    std::optional<source> source_code = src_manager_.get_file(path);
+    if (!source_code.has_value()) {
       return nullptr;
     }
-    auto src = src_manager_.add_virtual_file(path, source_code->second);
-    auto ast = whisker::parse(src, diags);
+    auto ast = whisker::parse(*source_code, diags);
     auto [result, inserted] =
         cached_asts_.insert({std::move(path), std::move(ast)});
     assert(inserted);
@@ -467,7 +489,6 @@ class t_whisker_generator::whisker_source_parser
         "{}/{}", template_prefix, fmt::join(start, macro_path.end(), "/"));
   }
 
-  const std::map<std::string, std::string, std::less<>>& templates_by_path_;
   std::string template_prefix_;
   whisker::source_manager src_manager_;
   std::unordered_map<std::string, std::optional<whisker::ast::root>>

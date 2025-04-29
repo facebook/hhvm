@@ -1,1 +1,1 @@
-Fatal error: This function requires the defaults, leak_safe_shallow, or leak_safe_local context to be memoized using #MakeICInaccessible in %s on line 3
+Fatal error: functions that can neither directly nor indirectly call a function requiring [zoned] do not need to and cannot pass arguments to __Memoize or __MemoizeLSB in %s/hphp/test/slow/coeffects/memo-make-inaccessible-parsing-bad.php on line 3

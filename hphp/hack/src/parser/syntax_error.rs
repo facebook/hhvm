@@ -1072,18 +1072,6 @@ pub fn policy_sharded_memoized_without_policied(kind: &str) -> Error {
     ))
 }
 
-pub fn memoize_make_ic_inaccessible_without_defaults(kind: &str, is_special_case: bool) -> Error {
-    let context = if is_special_case {
-        "#NotKeyedByICAndLeakIC__DO_NOT_USE"
-    } else {
-        "#MakeICInaccessible"
-    };
-    Cow::Owned(format!(
-        "This {} requires the defaults, leak_safe_shallow, or leak_safe_local context to be memoized using {}",
-        kind, context
-    ))
-}
-
 pub fn memoize_category_without_implicit_policy_capability(kind: &str) -> Error {
     Cow::Owned(format!(
         "{}s that can neither directly nor indirectly call a function requiring [zoned] do not need to and cannot pass arguments to __Memoize or __MemoizeLSB",

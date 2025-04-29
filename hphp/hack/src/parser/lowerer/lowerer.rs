@@ -3826,17 +3826,6 @@ fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> boo
     }
 }
 
-fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
-        context_hints.iter().any(|hint| match &*hint.1 {
-            ast::Hint_::Happly(ast::Id(_, id), _) => needles.iter().any(|&context| id == context),
-            _ => false,
-        })
-    } else {
-        true
-    }
-}
-
 fn contexts_cannot_access_ic(haystack: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = haystack {
         context_hints.iter().all(|hint| match &*hint.1 {
@@ -5796,34 +5785,7 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    if let Some(u) = user_attributes.iter().find(|u| {
-        is_memoize_attribute_with_flavor(u, Some(sn::memoize_option::MAKE_IC_INACCESSSIBLE))
-            || is_memoize_attribute_with_flavor(
-                u,
-                Some(sn::memoize_option::IC_INACCESSSIBLE_SPECIAL_CASE),
-            )
-    }) {
-        if !has_any_context(
-            contexts,
-            vec![
-                sn::coeffects::DEFAULTS,
-                sn::coeffects::LEAK_SAFE_LOCAL,
-                sn::coeffects::LEAK_SAFE_SHALLOW,
-            ],
-        ) {
-            raise_parsing_error_pos(
-                &u.name.0,
-                env,
-                &syntax_error::memoize_make_ic_inaccessible_without_defaults(
-                    kind,
-                    is_memoize_attribute_with_flavor(
-                        u,
-                        Some(sn::memoize_option::IC_INACCESSSIBLE_SPECIAL_CASE),
-                    ),
-                ),
-            )
-        }
-    }
+
     if let Some(u) = user_attributes
         .iter()
         .find(|u| sn::user_attributes::is_memoized(&u.name.1))

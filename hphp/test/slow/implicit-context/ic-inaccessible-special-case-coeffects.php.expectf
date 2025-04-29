@@ -1,2 +1,1 @@
-
-Fatal error: This function requires the defaults, leak_safe_shallow, or leak_safe_local context to be memoized using #NotKeyedByICAndLeakIC__DO_NOT_USE in %s/hphp/test/slow/implicit-context/ic-inaccessible-special-case-coeffects.php on line 4
+Fatal error: functions that can neither directly nor indirectly call a function requiring [zoned] do not need to and cannot pass arguments to __Memoize or __MemoizeLSB in %s/hphp/test/slow/implicit-context/ic-inaccessible-special-case-coeffects.php on line 4

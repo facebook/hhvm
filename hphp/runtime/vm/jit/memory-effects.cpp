@@ -617,6 +617,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyType:
   case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:

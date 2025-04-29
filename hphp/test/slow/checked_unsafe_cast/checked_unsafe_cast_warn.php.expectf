@@ -1,0 +1,15 @@
+Warning: Runtime type-check: Expected float, got int in %s
+
+Warning: Runtime type-check: Expected HH\vec<int>, got HH\Vector in %s
+
+Warning: Runtime type-check: Expected E, got int in %s
+
+Warning: Runtime type-check: Expected int at [0], got string in %s
+
+Warning: Runtime type-check: Expected string at ["a"][1], got bool in %s
+
+Warning: Runtime type-check: Expected int, got string in %s
+
+Warning: Runtime type-check: Expected string, got int in %s
+
+Warning: Runtime type-check: Expected G<int>, got G<string> in %s

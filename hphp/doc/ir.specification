@@ -2215,6 +2215,11 @@ ReqBindJmp and CallFuncEntry.
   Raises a catchable type hint error if the reified generics of S0 does not
   match the type structure given on S1.
 
+| VerifyType<func>, ND, S(Cell) S(Dict) S(Cls|Nullptr), LA
+
+  Warns or raises a catchable type hint error if value S0 does not
+  match the type structure given on S1.
+
 | ThrowUninitLoc<localId>, ND, S(Str), T
 
   Throws an UndefinedVariableException on an uninitialized local variable.

@@ -229,6 +229,7 @@ namespace HPHP {
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
+  O(VerifyTypeTS,    NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SelfCls,         NA,               NOV,             ONE(CV),    NF) \
   O(ParentCls,       NA,               NOV,             ONE(CV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(CV),    NF) \

@@ -852,6 +852,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::VerifyParamTypeTS(_, _, _), _)
         | (Hhbc::VerifyRetTypeC(_, _), _)
         | (Hhbc::VerifyRetTypeTS(_, _), _)
+        | (Hhbc::VerifyTypeTS(_, _), _)
         | (Hhbc::WHResult(_, _), _)
         | (Hhbc::Yield(_, _), _)
         | (Hhbc::YieldK(_, _), _) => {}

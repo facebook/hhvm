@@ -123,6 +123,11 @@ void VerifyReifiedReturnTypeImpl(TypedValue value,
                                  const Class* ctx,
                                  const Func* func);
 
+void VerifyTypeImpl(TypedValue value,
+                    ArrayData* ts,
+                    const Class* ctx,
+                    const Func* func);
+
 void raise_error_sd(const StringData* sd);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);

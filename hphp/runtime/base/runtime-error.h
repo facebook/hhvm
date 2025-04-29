@@ -127,6 +127,7 @@ void raise_param_type_warning(
 [[noreturn]] void raise_typehint_error(const std::string& msg);
 void raise_typehint_error_without_first_frame(const std::string& msg);
 void raise_reified_typehint_error(const std::string& msg, bool warn);
+void raise_inline_typehint_error(std::string& givenType, std::string& expectedType, std::string& errorKey);
 
 /*
  * raise_return_typehint_error() is the same as raise_recoverable_error(),

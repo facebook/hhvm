@@ -13,6 +13,7 @@ use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
 use naming_special_names_rust as sn;
 use oxidized::aast;
+use oxidized::aast_defs::HintFun;
 use oxidized::aast_defs::TupleInfo;
 use oxidized::ast_defs::Id;
 use oxidized::pos::Pos;
@@ -226,10 +227,26 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
                     field_map,
                 })
             }
-            h_ @ Hint_::Hfun(_)
-            | h_ @ Hint_::Haccess(_, _)
-            | h_ @ Hint_::Hrefinement(_, _)
-            | h_ @ Hint_::Hwildcard => h_,
+            Hint_::Hfun(HintFun {
+                is_readonly,
+                tparams,
+                param_tys,
+                param_info,
+                variadic_ty,
+                ctxs,
+                return_ty,
+                is_readonly_return,
+            }) => Hint_::Hfun(HintFun {
+                is_readonly,
+                tparams,
+                param_tys: param_tys.into_iter().map(|h| rec(env, h)).collect(),
+                param_info,
+                variadic_ty: variadic_ty.map(|h| rec(env, h)),
+                ctxs,
+                return_ty: rec(env, return_ty),
+                is_readonly_return,
+            }),
+            h_ @ Hint_::Haccess(_, _) | h_ @ Hint_::Hrefinement(_, _) | h_ @ Hint_::Hwildcard => h_,
             Hint_::Hmixed
             | Hint_::Hnonnull
             | Hint_::Habstr(_, _)

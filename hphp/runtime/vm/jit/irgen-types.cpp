@@ -1674,6 +1674,15 @@ void emitVerifyRetTypeTS(IRGS& env) {
   }
 }
 
+void emitVerifyTypeTS(IRGS& env) {
+  if (!topC(env)->isA(TDict)) return interpOne(env);
+  auto const ts = topC(env);
+  auto const cell = topC(env, BCSPRelOffset{1});
+  auto const funcData = FuncData { curFunc(env) };
+  gen(env, VerifyType, funcData, cell, ts, ldCtxCls(env));
+  popDecRef(env);
+}
+
 void emitVerifyRetNonNullC(IRGS& env) {
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }

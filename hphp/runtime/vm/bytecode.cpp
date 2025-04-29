@@ -30,8 +30,6 @@
 #include <folly/portability/SysMman.h>
 
 #include "hphp/util/configs/debugger.h"
-#include "hphp/util/configs/errorhandling.h"
-#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
@@ -1663,7 +1661,8 @@ ArrayData* resolveAndVerifyTypeStructureHelper(
 
 ALWAYS_INLINE Array maybeResolveAndErrorOnTypeStructure(
   TypeStructResolveOp op,
-  bool suppress
+  bool suppress,
+  bool isOrAsOp
 ) {
   auto const a = vmStack().topC();
   isValidTSType(*a, true);
@@ -1671,12 +1670,14 @@ ALWAYS_INLINE Array maybeResolveAndErrorOnTypeStructure(
 
   if (op == TypeStructResolveOp::Resolve) {
     auto const result = resolveAndVerifyTypeStructureHelper(1, vmStack().topC(),
-                                                            suppress, true);
+                                                            suppress, isOrAsOp);
     if (arr == result) return ArrNR(arr);
     return Array::attach(result);
 
   }
-  errorOnIsAsExpressionInvalidTypes(ArrNR(arr), false);
+  if (isOrAsOp) {
+    errorOnIsAsExpressionInvalidTypes(ArrNR(arr), false);
+  }
   return ArrNR(arr);
 }
 
@@ -1690,7 +1691,7 @@ inline void checkThis(ActRec* fp) {
 
 OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op, TypeStructEnforceKind kind) {
   auto const c = vmStack().indC(1);
-  auto const ts = maybeResolveAndErrorOnTypeStructure(op, true);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(op, true, true);
   bool b;
   switch (kind) {
   case TypeStructEnforceKind::Deep:
@@ -1711,7 +1712,7 @@ OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op, TypeStructEnforceKin
 OPTBLD_INLINE void iopThrowAsTypeStructException(AsTypeStructExceptionKind kind) {
   auto const c = vmStack().indC(1);
   auto const ts =
-    maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, false);
+    maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, false, true);
   std::string givenType, expectedType, errorKey;
   if (!checkTypeStructureMatchesTV(ts, *c,
                                    givenType, expectedType, errorKey)) {
@@ -4731,6 +4732,17 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
         describe_actual_type(cell)
       ), warn
     );
+  }
+  vmStack().popC();
+}
+
+// Verify that the type of an expression matches a type structure
+OPTBLD_INLINE void iopVerifyTypeTS() {
+  auto const cell = vmStack().indC(1);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, true, false);
+  std::string givenType, expectedType, errorKey;
+  if (!checkForVerifyTypeStructureMatchesTV(ts, *cell, givenType, expectedType, errorKey)) {
+    raise_inline_typehint_error(givenType, expectedType, errorKey);
   }
   vmStack().popC();
 }

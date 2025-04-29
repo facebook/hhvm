@@ -569,6 +569,7 @@ pub enum Hhbc {
     VerifyParamTypeTS(ValueId, LocalId, LocId),
     VerifyRetTypeC(ValueId, LocId),
     VerifyRetTypeTS([ValueId; 2], LocId),
+    VerifyTypeTS([ValueId; 2], LocId),
     WHResult(ValueId, LocId),
     Yield(ValueId, LocId),
     YieldK([ValueId; 2], LocId),

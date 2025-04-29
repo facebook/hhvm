@@ -1301,6 +1301,14 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
                 FmtVid(func, ops[1], verbose)
             )?;
         }
+        Hhbc::VerifyTypeTS(ops, _) => {
+            write!(
+                w,
+                "verify_type_ts {}, {}",
+                FmtVid(func, ops[0], verbose),
+                FmtVid(func, ops[1], verbose)
+            )?;
+        }
         Hhbc::WHResult(vid, _) => {
             write!(w, "wh_result {}", FmtVid(func, vid, verbose))?;
         }

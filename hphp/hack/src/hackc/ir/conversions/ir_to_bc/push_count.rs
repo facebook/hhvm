@@ -185,6 +185,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::VerifyParamType(..)
             | Hhbc::VerifyRetTypeC(..)
             | Hhbc::VerifyRetTypeTS(..)
+            | Hhbc::VerifyTypeTS(..)
             | Hhbc::WHResult(..)
             | Hhbc::Yield(..)
             | Hhbc::YieldK(..) => 1,

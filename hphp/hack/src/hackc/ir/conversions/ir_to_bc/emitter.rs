@@ -613,6 +613,7 @@ impl<'b> InstrEmitter<'b> {
             }
             Hhbc::VerifyRetTypeC(..) => Opcode::VerifyRetTypeC,
             Hhbc::VerifyRetTypeTS(..) => Opcode::VerifyRetTypeTS,
+            Hhbc::VerifyTypeTS(..) => Opcode::VerifyTypeTS,
             Hhbc::WHResult(..) => Opcode::WHResult,
             Hhbc::Yield(..) => Opcode::Yield,
             Hhbc::YieldK(..) => Opcode::YieldK,

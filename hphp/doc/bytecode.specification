@@ -2946,6 +2946,15 @@ VerifyRetTypeTS [C C]  ->  [C]
   an error is raised. This instruction also verifies the reified generic type
   parameters of $2.
 
+VerifyTypeTS [C C]  ->  [C]
+
+  VerifyTypeTS pops a type structure from the stack and checks whether
+  $2 is compatible with this type structure, checking tuples and shape elements,
+  and enum values, in contrast to other Verify instructions that only do
+  shallow checking. In case of a mismatch, a warning is issued. If the popped cell
+  is not a type structure, an error is raised. This instruction also verifies
+  the reified generic type parameters of $2.
+
 SelfCls                  []  ->  [C:Class]
 
   Push a class that refers to the class in which the current function is

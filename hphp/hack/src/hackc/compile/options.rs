@@ -24,6 +24,7 @@ pub struct CompilerFlags {
     pub constant_folding: bool,
     pub optimize_null_checks: bool,
     pub relabel: bool,
+    pub checked_unsafe_cast: bool,
 }
 
 impl Default for CompilerFlags {
@@ -32,6 +33,7 @@ impl Default for CompilerFlags {
             constant_folding: true,
             optimize_null_checks: false,
             relabel: true,
+            checked_unsafe_cast: false,
         }
     }
 }

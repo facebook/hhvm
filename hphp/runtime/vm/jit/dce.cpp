@@ -524,6 +524,7 @@ bool canDCE(const IRInstruction& inst) {
   case VerifyParamFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyType:
   case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:

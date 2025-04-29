@@ -1,0 +1,2 @@
+-vHack.Lang.CheckedUnsafeCast=true
+-vErrorHandling.ThrowExceptionOnInlineTypeError=true

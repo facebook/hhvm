@@ -71,6 +71,7 @@ IMPL_OPCODE_CALL(VerifyParamCallable)
 IMPL_OPCODE_CALL(VerifyRetCallable)
 IMPL_OPCODE_CALL(VerifyReifiedLocalType)
 IMPL_OPCODE_CALL(VerifyReifiedReturnType)
+IMPL_OPCODE_CALL(VerifyType)
 
 void cgVerifyParamCls(IRLS& env, const IRInstruction* inst) {
   implVerifyType(env, inst);

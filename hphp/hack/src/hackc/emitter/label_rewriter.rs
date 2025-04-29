@@ -383,6 +383,7 @@ where
             | Opcode::VerifyRetNonNullC
             | Opcode::VerifyRetTypeC
             | Opcode::VerifyRetTypeTS
+            | Opcode::VerifyTypeTS
             | Opcode::WHResult
             | Opcode::YieldK
             | Opcode::Yield,

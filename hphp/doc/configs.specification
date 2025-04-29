@@ -391,6 +391,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - int ErrorHandling.MaxSerializedStringSize = 64 * 1024 * 1024, UNKNOWN
 - bool ErrorHandling.CallUserHandlerOnFatals = false, UNKNOWN
 - bool ErrorHandling.ThrowExceptionOnBadMethodCall = true, UNKNOWN
+- bool ErrorHandling.ThrowExceptionOnInlineTypeError = false, UNKNOWN
 - bool ErrorHandling.LogNativeStackOnOOM = false, UNKNOWN
 - int64_t ErrorHandling.NoticeFrequency = 1, UNKNOWN
 - int64_t ErrorHandling.WarningFrequency = 1, UNKNOWN
@@ -1501,6 +1502,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Disables PHP's constant function
   Valid values are 0 => enabled (default), 1 => warning, 2 => error
+
+- bool Hack.Lang.CheckedUnsafeCast = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
+
+  Semantics of UNSAFE_CAST. If set, warn when target type doesn't match runtime type.
 
 # GC (Eval.)
 

@@ -262,6 +262,7 @@ impl LocalInfo {
             | Opcode::VerifyRetNonNullC
             | Opcode::VerifyRetTypeC
             | Opcode::VerifyRetTypeTS
+            | Opcode::VerifyTypeTS
             | Opcode::WHResult
             | Opcode::Yield
             | Opcode::YieldK => LocalInfo::None,

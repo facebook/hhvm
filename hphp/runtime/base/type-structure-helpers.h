@@ -106,6 +106,13 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts);
  */
 bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1);
 
+bool checkForVerifyTypeStructureMatchesTV(
+  const Array& ts,
+  TypedValue c1,
+  std::string& givenType,
+  std::string& expectedType,
+  std::string& errorKey);
+
 /*
  * In addition to regular checkTypeStructureMatchesTV, also populates the
  * error paths

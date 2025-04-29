@@ -91,6 +91,7 @@ use crate::emit_adata;
 use crate::emit_class::REIFIED_PROP_NAME;
 use crate::emit_fatal;
 use crate::emit_type_constant;
+use crate::reified_generics_helpers as reified;
 
 #[derive(Debug)]
 pub struct EmitJmpResult {
@@ -3576,6 +3577,20 @@ fn emit_call_expr(
                 is,
             ]))
         }
+        (Expr_::Id(id), args, None)
+            if id.1 == pseudo_functions::UNSAFE_CAST
+                && !args.is_empty()
+                && targs.len() == 2
+                && e.options().hhbc.checked_unsafe_cast =>
+        {
+            let target_type = &targs[1].1;
+            emit_checked_unsafe_cast(
+                e,
+                env,
+                error::expect_normal_paramkind(&args[0])?,
+                target_type,
+            )
+        }
         (_, _, _) => {
             let instrs = emit_call(
                 e,
@@ -5065,6 +5080,27 @@ fn emit_pipe<'a, 'd>(
             instr::empty(),
         ))
     })
+}
+
+fn emit_checked_unsafe_cast<'a, 'd>(
+    e: &mut Emitter<'d>,
+    env: &Env<'a>,
+    expr: &ast::Expr,
+    hint: &ast::Hint,
+) -> Result<InstrSeq> {
+    let hint = reified::remove_erased_generics(env, hint.clone());
+    let verify_instrs = InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        get_type_structure_for_hint(
+            e,
+            &[],
+            &IndexSet::new(),
+            TypeRefinementInHint::Allowed,
+            &hint,
+        )?,
+        instr::verify_type_ts(),
+    ]);
+    Ok(verify_instrs)
 }
 
 fn emit_as<'a, 'd>(

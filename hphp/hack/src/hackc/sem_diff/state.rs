@@ -1303,7 +1303,8 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::VerifyParamTypeTS(..)
             | Opcode::VerifyRetNonNullC
             | Opcode::VerifyRetTypeC
-            | Opcode::VerifyRetTypeTS,
+            | Opcode::VerifyRetTypeTS
+            | Opcode::VerifyTypeTS,
         ) => true,
 
         // Other Opcodes
@@ -1639,6 +1640,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::VerifyRetNonNullC
         | Opcode::VerifyRetTypeC
         | Opcode::VerifyRetTypeTS
+        | Opcode::VerifyTypeTS
         | Opcode::WHResult
         | Opcode::Yield
         | Opcode::YieldK => opcode.clone(),

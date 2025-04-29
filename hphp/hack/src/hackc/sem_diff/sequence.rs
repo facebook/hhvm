@@ -362,7 +362,8 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::VerifyParamTypeTS(..)
             | Opcode::VerifyRetNonNullC
             | Opcode::VerifyRetTypeC
-            | Opcode::VerifyRetTypeTS,
+            | Opcode::VerifyRetTypeTS
+            | Opcode::VerifyTypeTS,
         ) => false,
 
         NodeInstr::Opcode(

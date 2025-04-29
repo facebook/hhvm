@@ -482,6 +482,18 @@ impl LowerInstrs<'_> {
         Instr::copy(obj)
     }
 
+    fn verify_type_ts(
+        &self,
+        builder: &mut FuncBuilder,
+        obj: ValueId,
+        ts: ValueId,
+        loc: LocId,
+    ) -> Instr {
+        let builtin = hack::Hhbc::VerifyTypeTS;
+        builder.emit_hhbc_builtin(builtin, &[obj, ts], loc);
+        Instr::copy(obj)
+    }
+
     fn emit_special_cls_ref(
         &mut self,
         builder: &mut FuncBuilder,
@@ -761,6 +773,9 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
                 self.verify_ret_type_ts(builder, obj, ts, loc)
+            }
+            Instr::Hhbc(Hhbc::VerifyTypeTS([obj, ts], loc)) => {
+                self.verify_type_ts(builder, obj, ts, loc)
             }
             Instr::Hhbc(Hhbc::IterFree(id, loc)) => {
                 let lid = iter_var_name(id);

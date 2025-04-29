@@ -255,6 +255,8 @@ pub(crate) enum Hhbc {
     ThrowNonExhaustiveSwitch,
     #[decl(fn hhbc_verify_param_type_ts(obj: *HackMixed, ts: *HackMixed) -> void)]
     VerifyParamTypeTS,
+    #[decl(fn hhbc_verify_type_ts(obj: *HackMixed, ts: *HackMixed) -> void)]
+    VerifyTypeTS,
     #[decl(fn hhbc_wh_result(obj: *HackMixed) -> *HackMixed)]
     WHResult,
 }

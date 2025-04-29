@@ -1477,6 +1477,7 @@ impl FunctionParser<'_> {
             "verify_param_type_ts" => parse_instr!(tok, I::Hhbc(Hhbc::VerifyParamTypeTS(p0, p1, loc)), <p0:self.vid> "," <p1:self.lid>),
             "verify_ret_type_c" => I::Hhbc(H::VerifyRetTypeC(self.vid(tok)?, loc)),
             "verify_ret_type_ts" => I::Hhbc(H::VerifyRetTypeTS(self.vid2(tok)?, loc)),
+            "verify_type_ts" => I::Hhbc(H::VerifyTypeTS(self.vid2(tok)?, loc)),
             "wh_result" => I::Hhbc(H::WHResult(self.vid(tok)?, loc)),
             "yield" => self.parse_yield(tok, loc)?,
             _ => {

@@ -336,6 +336,17 @@ void VerifyReifiedReturnTypeImpl(TypedValue value, ArrayData* ts,
   );
 }
 
+void VerifyTypeImpl(TypedValue value, ArrayData* ts,
+                                 const Class* ctx, const Func* func) {
+  req::vector<Array> tsList;
+  std::string givenType, expectedType, errorKey;
+  auto resolved_ts = resolveAndVerifyTypeStructure<false>(
+    ArrNR(ts), func->cls(), ctx, tsList, true);
+  if (!checkForVerifyTypeStructureMatchesTV(resolved_ts, value, givenType, expectedType, errorKey)) {
+    raise_inline_typehint_error(givenType, expectedType, errorKey);
+  }
+}
+
 namespace {
 
 ALWAYS_INLINE

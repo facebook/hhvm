@@ -5474,6 +5474,36 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
   verifyRetImpl(env, env.ctx.func->retTypeConstraints, true, true);
 }
 
+void in(ISS& env, const bc::VerifyTypeTS& /*op*/) {
+  auto const a = topC(env);
+  if (!a.couldBe(BDict)) {
+    unreachable(env);
+    popC(env);
+    return;
+  }
+
+  if (auto const inputTS = tv(a)) {
+    if (!isValidTSType(*inputTS, false)) {
+      unreachable(env);
+      popC(env);
+      return;
+    }
+    auto const resolvedTS =
+      resolve_type_structure(env, inputTS->m_data.parr).sarray();
+    if (resolvedTS && resolvedTS != inputTS->m_data.parr) {
+      reduce(env, bc::PopC {});
+      reduce(env, bc::Dict { resolvedTS });
+      reduce(env, bc::VerifyTypeTS {});
+      return;
+    }
+  }
+  auto stackT = topC(env, 1);
+  auto const stackEquiv = topStkEquiv(env, 1);
+  popC(env);
+  popC(env);
+  push(env, std::move(stackT), stackEquiv);
+}
+
 void in(ISS& env, const bc::VerifyRetNonNullC&) {
   auto stackT = topC(env);
   if (!stackT.couldBe(BInitNull)) return reduce(env);

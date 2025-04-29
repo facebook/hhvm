@@ -317,6 +317,8 @@ static const struct {
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyRetTypeTS,
                    {StackTop2,        Stack1,       OutUnknown      }},
+  { OpVerifyTypeTS,
+                   {StackTop2,        Stack1,       OutSameAsInput2 }},
   { OpVerifyRetNonNullC,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyOutType,

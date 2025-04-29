@@ -1096,6 +1096,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::VerifyRetNonNullC => todo!(),
         Opcode::VerifyRetTypeC => simple!(Hhbc::VerifyRetTypeC),
         Opcode::VerifyRetTypeTS => simple!(Hhbc::VerifyRetTypeTS),
+        Opcode::VerifyTypeTS => simple!(Hhbc::VerifyTypeTS),
         Opcode::WHResult => simple!(Hhbc::WHResult),
         Opcode::Yield => simple!(Hhbc::Yield),
         Opcode::YieldK => simple!(Hhbc::YieldK),

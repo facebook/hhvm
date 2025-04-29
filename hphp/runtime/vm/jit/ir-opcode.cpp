@@ -464,6 +464,7 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyPropFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyType:
   case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:

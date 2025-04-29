@@ -114,6 +114,18 @@ void raise_reified_typehint_error(const std::string& msg, bool warn) {
   raise_warning_unsampled(msg);
 }
 
+void raise_inline_typehint_error(std::string& givenType, std::string& expectedType, std::string& errorKey) {
+  std::string msg;
+  if (errorKey.empty()) {
+    msg = folly::sformat("Runtime type-check: Expected {}, got {}", expectedType, givenType);
+  } else {
+    msg = folly::sformat("Runtime type-check: Expected {} at {}, got {}",
+      expectedType, errorKey, givenType);
+  }
+  if (Cfg::ErrorHandling::ThrowExceptionOnInlineTypeError) return raise_typehint_error(msg);
+  raise_warning_unsampled(msg);
+}
+
 void raise_return_typehint_error(const std::string& msg) {
   if (Cfg::PHP7::EngineExceptions) {
     VMRegAnchor _;

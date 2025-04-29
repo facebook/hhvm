@@ -3290,6 +3290,7 @@ X(VerifyRetFail,                FuncParamWithTCData);
 X(VerifyRetFailHard,            FuncParamWithTCData);
 X(VerifyReifiedLocalType,       FuncParamData);
 X(VerifyReifiedReturnType,      FuncData);
+X(VerifyType,                   FuncData);
 X(VerifyProp,                   TypeConstraintData);
 X(VerifyPropCls,                TypeConstraintData);
 X(VerifyPropCoerce,             TypeConstraintData);

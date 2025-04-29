@@ -20,7 +20,7 @@ namespace thrift {
 template <class Writer>
 void TestUnionThrift::serialize(Writer&& writer) const {
   writer.writeStructBegin();
-  switch (getType()) {
+  switch (int(getType())) {
     case 1: {
       writer.writeFieldAlways(1 /* field id */, *a_ref());
       break;
@@ -42,7 +42,7 @@ void TestUnionThrift::serialize(Writer&& writer) const {
 
 template <class V>
 void TestUnionThrift::visitFields(V&& v) {
-  switch (getType()) {
+  switch (int(getType())) {
     case 1:
       v.visitField(1, "a", *a_ref());
       break;
@@ -59,7 +59,7 @@ void TestUnionThrift::visitFields(V&& v) {
 
 template <class V>
 void TestUnionThrift::visitFields(V&& v) const {
-  switch (getType()) {
+  switch (int(getType())) {
     case 1:
       v.visitField(1, "a", *a_ref());
       break;

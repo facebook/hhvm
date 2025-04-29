@@ -431,7 +431,7 @@ void TestOptionalBool::visitFields(V&& v) const {
 template <class Writer>
 void TestUnion::serialize(Writer&& writer) const {
   writer.writeStructBegin();
-  switch (getType()) {
+  switch (int(getType())) {
     case 1: {
       writer.writeFieldAlways(1 /* field id */, *a_ref());
       break;
@@ -453,7 +453,7 @@ void TestUnion::serialize(Writer&& writer) const {
 
 template <class V>
 void TestUnion::visitFields(V&& v) {
-  switch (getType()) {
+  switch (int(getType())) {
     case 1:
       v.visitField(1, "a", *a_ref());
       break;
@@ -470,7 +470,7 @@ void TestUnion::visitFields(V&& v) {
 
 template <class V>
 void TestUnion::visitFields(V&& v) const {
-  switch (getType()) {
+  switch (int(getType())) {
     case 1:
       v.visitField(1, "a", *a_ref());
       break;

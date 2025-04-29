@@ -39,10 +39,6 @@ std::optional<apache::thrift::schema::DefinitionsSchema> {{> service_common/serv
 {{/program:has_schema?}}
 {{/program}}
 }
-
-std::vector<folly::not_null<const apache::thrift::schema::ServiceNode*>> {{> service_common/service_class_name}}::getServiceSchemaNodes() {
-  return {&apache::thrift::SchemaRegistry::get().getNode<{{service:qualified_name}}>()};
-}
 #endif
 {{/service:has_service_schema}}
 

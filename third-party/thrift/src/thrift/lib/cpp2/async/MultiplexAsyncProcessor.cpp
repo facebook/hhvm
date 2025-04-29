@@ -424,17 +424,6 @@ MultiplexAsyncProcessorFactory::getServiceSchema() {
       std::make_move_iterator(allKeys.end()));
   return result;
 }
-
-std::vector<folly::not_null<const schema::ServiceNode*>>
-MultiplexAsyncProcessorFactory::getServiceSchemaNodes() {
-  std::vector<folly::not_null<const schema::ServiceNode*>> result;
-  result.reserve(processorFactories_.size());
-  for (auto& processorFactory : processorFactories_) {
-    auto nodes = processorFactory->getServiceSchemaNodes();
-    result.insert(result.end(), nodes.begin(), nodes.end());
-  }
-  return result;
-}
 #endif
 
 std::unique_ptr<AsyncProcessor> MultiplexAsyncProcessorFactory::getProcessor() {

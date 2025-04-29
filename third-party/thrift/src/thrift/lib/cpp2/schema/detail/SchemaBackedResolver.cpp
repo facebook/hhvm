@@ -262,7 +262,7 @@ FieldNode::PresenceQualifier presenceOf(const type::FieldQualifier& qualifier) {
     case type::FieldQualifier::Fill:
       return FieldNode::PresenceQualifier::UNQUALIFIED;
     case type::FieldQualifier::Optional:
-      return FieldNode::PresenceQualifier::OPTIONAL_;
+      return FieldNode::PresenceQualifier::OPTIONAL;
     default:
       folly::throw_exception<InvalidSyntaxGraphError>(
           fmt::format("Unknown FieldQualifier '{}'", enumNameSafe(qualifier)));

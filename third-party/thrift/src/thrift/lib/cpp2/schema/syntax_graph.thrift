@@ -18,8 +18,6 @@ namespace cpp2 apache.thrift.schema
 namespace rust syntax_graph
 namespace py3 apache.thrift.schema
 
-include "thrift/annotation/cpp.thrift"
-
 enum Primitive {
   BOOL = 1,
   BYTE = 2,
@@ -34,6 +32,5 @@ enum Primitive {
 
 enum FieldPresenceQualifier {
   UNQUALIFIED = 1,
-  @cpp.Name{value = "OPTIONAL_"}
   OPTIONAL = 2,
 }

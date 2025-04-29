@@ -20,7 +20,6 @@
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
-#include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/server/ResourcePoolHandle.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -66,16 +65,6 @@ class AsyncProcessorFactory {
    * like GraphiQL.
    */
   virtual std::optional<schema::DefinitionsSchema> getServiceSchema() {
-    return {};
-  }
-
-  /**
-   * Returns descriptors of the services that this AsyncProcessorFactory serves.
-   * Generated handler types will return a single-element vector.
-   * Multiple elements are only expected from MultiplexAsyncProcessor.
-   */
-  virtual std::vector<folly::not_null<const schema::ServiceNode*>>
-  getServiceSchemaNodes() {
     return {};
   }
 #endif

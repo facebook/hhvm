@@ -196,7 +196,7 @@ TEST_F(ServiceSchemaTest, Struct) {
   EXPECT_EQ(s.fields()[0].customDefault()->as_i32(), 10);
 
   EXPECT_EQ(s.fields()[1].id(), FieldId{2});
-  EXPECT_EQ(s.fields()[1].presence(), FieldNode::PresenceQualifier::OPTIONAL_);
+  EXPECT_EQ(s.fields()[1].presence(), FieldNode::PresenceQualifier::OPTIONAL);
   EXPECT_EQ(
       &s.fields()[1].type().asEnum(),
       &program->definitionsByName().at("TestEnum")->asEnum());
@@ -608,32 +608,6 @@ TEST_F(ServiceSchemaTest, LookupByDefinitionKeys) {
         detail::lookUpDefinition(syntaxGraph, definitionKey);
     EXPECT_TRUE(definition.isService());
   }
-}
-
-TEST_F(ServiceSchemaTest, getServiceSchemaNodes) {
-  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
-  std::vector<type::DefinitionKey> serviceDefinitionKeys =
-      definitionKeysFor<test::TestService>();
-
-  ASSERT_EQ(serviceDefinitionKeys.size(), 1);
-
-  const auto* dynamicService =
-      &detail::lookUpDefinition(syntaxGraph, serviceDefinitionKeys.back())
-           .asService();
-
-  const auto staticServiceNodes =
-      apache::thrift::ServiceHandler<test::TestService>()
-          .getServiceSchemaNodes();
-  ASSERT_EQ(staticServiceNodes.size(), 1);
-
-  const auto* staticService = staticServiceNodes.back().unwrap();
-
-  // static service uses the global registry while dynamic service has its own
-  // SyntaxGraph instance.
-  EXPECT_NE(dynamicService, staticService);
-
-  EXPECT_EQ(
-      dynamicService->definition().name(), staticService->definition().name());
 }
 
 TEST(SyntaxGraphTest, getDefinitionNode) {

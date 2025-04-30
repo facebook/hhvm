@@ -18,7 +18,19 @@
 
 namespace apache::thrift::detail {
 
-THRIFT_PLUGGABLE_FUNC_REGISTER(
+/*
+
+ContextPropClientInterceptor will be widely installed to all Meta services,
+and defines an implementation for initializeInterceptorFrameworkMetadataStorage.
+Unfortunately, Cinder tests in Meta are commonly compiled in
+@mode/dev may load C++ libraries dynamically in different orders and may defer
+loading some libraries until they are used. Thrift pluggable functions expects
+that all libraries are loaded immediately before any functions in the program
+are called. We relax this requirement by allowing the function be registered
+late.
+
+*/
+THRIFT_PLUGGABLE_FUNC_REGISTER_ALLOW_LATE_OVERRIDE(
     InterceptorFrameworkMetadataStorage,
     initializeInterceptorFrameworkMetadataStorage) {
   return InterceptorFrameworkMetadataStorage{};
@@ -30,7 +42,13 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     InterceptorFrameworkMetadataStorage&,
     const RpcOptions&) {}
 
-THRIFT_PLUGGABLE_FUNC_REGISTER(
+/*
+
+ContextPropClientInterceptor (WDL) will also define an implementation for
+serializeFrameworkMetadata.
+
+*/
+THRIFT_PLUGGABLE_FUNC_REGISTER_ALLOW_LATE_OVERRIDE(
     std::unique_ptr<folly::IOBuf>,
     serializeFrameworkMetadata,
     InterceptorFrameworkMetadataStorage&& /* unused */) {

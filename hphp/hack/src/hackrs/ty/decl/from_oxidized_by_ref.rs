@@ -199,8 +199,7 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             }
             typing_defs_core::Ty_::Taccess(taccess_type) => Taccess(Box::new(taccess_type.into())),
             typing_defs_core::Ty_::TclassPtr(class_type) => TclassPtr(class_type.into()),
-            typing_defs_core::Ty_::TunappliedAlias(_)
-            | typing_defs_core::Ty_::Tnewtype(_)
+            typing_defs_core::Ty_::Tnewtype(_)
             | typing_defs_core::Ty_::Tdependent(_)
             | typing_defs_core::Ty_::Tclass(_)
             | typing_defs_core::Ty_::Tneg(_)

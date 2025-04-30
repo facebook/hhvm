@@ -389,8 +389,6 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
     | ((_, Tfun ft1), (_, Tfun ft2)) ->
       let (env, ft) = union_funs ~approx_cancel_neg env ft1 ft2 in
       (env, Some (mk (r, Tfun ft)))
-    | ((_, Tunapplied_alias _), _) ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ((_, Tneg (_, IsTag (ClassTag c1))), (_, Tclass ((_, c2), Exact, [])))
     | ((_, Tclass ((_, c2), Exact, [])), (_, Tneg (_, IsTag (ClassTag c1))))
       when String.equal c1 c2 ->

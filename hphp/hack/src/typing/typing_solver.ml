@@ -185,7 +185,6 @@ let rec freshen_inside_ty env ty :
   | Taccess (ty, ids) ->
     let (env, ty) = freshen_ty env ty in
     Some (env, mk (r, Taccess (ty, ids)))
-  | Tunapplied_alias _ -> default ()
   | Tclass_ptr ty ->
     let (env, ty) = freshen_ty env ty in
     (* TODO(T199606542) Matches classname but does it actually make sense

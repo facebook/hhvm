@@ -104,8 +104,6 @@ let rec strip_ty ty =
           s_fields = shape_fields;
         }
     | Taccess _ -> ty
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Tlabel _
     | Tneg _ ->
       ty

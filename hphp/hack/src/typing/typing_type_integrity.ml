@@ -28,7 +28,6 @@ module Locl_Inst = struct
           Tclass (n, exact, existing_args @ args)
         | Tnewtype (n, existing_args, bound) ->
           Tnewtype (n, existing_args @ args, bound)
-        | Tunapplied_alias _ -> failwith "not implemented"
         | Tgeneric (n, existing_args) ->
           (* Same here *)
           Tgeneric (n, existing_args @ args)
@@ -137,7 +136,6 @@ module Locl_Inst = struct
           (* TODO(shapes) instantiate s_unknown_value *)
           s_fields = fdm;
         }
-    | Tunapplied_alias _ -> failwith "this shouldn't be here"
     | Tdependent (dep, ty) ->
       let ty = instantiate subst ty in
       Tdependent (dep, ty)

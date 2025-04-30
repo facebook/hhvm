@@ -130,7 +130,6 @@ let check_invalid_recursive_case_type
     | Tdynamic
     | Tvar _
     | Tclass _
-    | Tunapplied_alias _
     | Tany _ ->
       false
     | Tunion tyl

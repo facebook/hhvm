@@ -64,8 +64,6 @@ let rec is_stringish env ty =
     false
   | Tclass_ptr _ ->
     TypecheckerOptions.allow_class_string_cast (Env.get_tcopt env)
-  | Tunapplied_alias _ ->
-    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
 let handler =
   object

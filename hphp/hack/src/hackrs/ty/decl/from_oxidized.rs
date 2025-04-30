@@ -111,7 +111,7 @@ impl<P: Pos> From<o::typing_defs::UserAttribute> for ty::UserAttribute<P> {
         Self {
             name: attr.name.into(),
             params: slice(attr.params),
-            raw_val: attr.raw_val.map(Into::into),
+            raw_val: attr.raw_val,
         }
     }
 }
@@ -216,8 +216,7 @@ impl<R: Reason> From<o::typing_defs::Ty> for Ty<R> {
             }
             typing_defs_core::Ty_::Taccess(taccess_type) => Taccess(Box::new(taccess_type.into())),
             typing_defs_core::Ty_::TclassPtr(class_type) => TclassPtr(class_type.into()),
-            typing_defs_core::Ty_::TunappliedAlias(_)
-            | typing_defs_core::Ty_::Tnewtype(_, _, _)
+            typing_defs_core::Ty_::Tnewtype(_, _, _)
             | typing_defs_core::Ty_::Tdependent(_, _)
             | typing_defs_core::Ty_::Tclass(_, _, _)
             | typing_defs_core::Ty_::Tneg(_)
@@ -307,7 +306,7 @@ impl<R: Reason> From<o::typing_defs_core::FunParam> for ty::FunParam<R, Ty<R>> {
             name: fp.name.map(Into::into),
             ty: fp.type_.into(),
             flags: fp.flags,
-            def_value: fp.def_value.map(Into::into),
+            def_value: fp.def_value,
         }
     }
 }
@@ -383,7 +382,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowClassConst> for shallow::Shall
             name: scc.name.into(),
             ty: scc.type_.into(),
             refs: slice(scc.refs),
-            value: scc.value.map(Into::into),
+            value: scc.value,
         }
     }
 }
@@ -409,7 +408,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowMethod> for shallow::ShallowMe
             deprecated: sm.deprecated.map(Into::into),
             attributes: slice(sm.attributes),
             flags: oxidized_by_ref::method_flags::MethodFlags::from_bits_truncate(sm.flags.bits()),
-            sort_text: sm.sort_text.map(Into::into),
+            sort_text: sm.sort_text,
         }
     }
 }
@@ -494,7 +493,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ClassDecl> for shallow::ShallowClass<
             methods: slice(methods),
             user_attributes: slice(user_attributes),
             enum_type: enum_type.map(Into::into),
-            docs_url: docs_url.map(Into::into),
+            docs_url,
             package,
         }
     }
@@ -529,7 +528,7 @@ impl<R: Reason> From<o::shallow_decl_defs::TypedefDecl> for shallow::TypedefDecl
             is_ctx: x.is_ctx,
             attributes: slice(x.attributes),
             internal: x.internal,
-            docs_url: x.docs_url.map(Into::into),
+            docs_url: x.docs_url,
             package: x.package,
         }
     }
@@ -563,7 +562,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ConstDecl> for shallow::ConstDecl<R> 
         Self {
             pos: x.pos.into(),
             ty: x.type_.into(),
-            value: x.value.map(Into::into),
+            value: x.value,
         }
     }
 }
@@ -609,7 +608,7 @@ impl From<o::decl_defs::Element> for folded::FoldedElement {
             origin: x.origin.into(),
             visibility: x.visibility.into(),
             deprecated: x.deprecated.map(Into::into),
-            sort_text: x.sort_text.map(Into::into),
+            sort_text: x.sort_text,
             overlapping_tparams: x.overlapping_tparams.map(map_k),
         }
     }

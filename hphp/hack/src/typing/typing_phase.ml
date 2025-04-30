@@ -431,8 +431,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
               id
               targs
               (Decl_entry.to_option class_info)
-          | (_ :: _, Tnewtype (id, [], _))
-          | (_ :: _, Tunapplied_alias id) ->
+          | (_ :: _, Tnewtype (id, [], _)) ->
             localize_typedef_instantiation
               ~ety_env
               env

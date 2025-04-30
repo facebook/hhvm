@@ -67,7 +67,6 @@ let expand_ty ?var_hook ?pos env ty =
           mk (p, Tvar v))
       (* TODO(T36532263) see if that needs updating *)
       | (_, Taccess _) -> ety
-      | (_, Tunapplied_alias _) -> ety
       | (p, Tclass_ptr ty) -> mk (p, Tclass_ptr (exp_ty ty))
     in
     ety

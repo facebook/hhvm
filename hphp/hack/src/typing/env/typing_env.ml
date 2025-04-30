@@ -1681,7 +1681,6 @@ and get_tyvars_i env (ty : internal_type) =
       ( env,
         Tvid.Set.union positive1 positive2,
         Tvid.Set.union negative1 negative2 )
-    | Tunapplied_alias _ -> (env, Tvid.Set.empty, Tvid.Set.empty)
     | Tlabel _name -> (env, Tvid.Set.empty, Tvid.Set.empty)
     | Taccess (ty, _ids) -> get_tyvars env ty
     | Tclass_ptr ty -> get_tyvars env ty)

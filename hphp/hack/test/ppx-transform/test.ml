@@ -602,7 +602,6 @@ module Typing_defs_core = struct
     | Tclass_ptr : 'phase ty -> 'phase ty_
     | Tvar : (Tvid.t[@transform.opaque]) -> locl_phase ty_
     | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
-    | Tunapplied_alias : string -> locl_phase ty_
     | Tdependent :
         (dependent_type[@transform.opaque]) * locl_ty
         -> locl_phase ty_

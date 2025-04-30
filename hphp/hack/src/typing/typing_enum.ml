@@ -155,7 +155,6 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tintersection _
     | Tvec_or_dict _
     | Taccess _
-    | Tunapplied_alias _
     | Tdependent _
     | Tlabel _
     | Tneg _ ->

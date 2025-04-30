@@ -411,8 +411,6 @@ val class_elt_is_private_not_lsb : class_elt -> bool
 
 val class_elt_is_private_or_protected_not_lsb : class_elt -> bool
 
-val error_Tunapplied_alias_in_illegal_context : unit -> 'a
-
 val is_typeconst_type_abstract : typeconst_type -> bool
 
 val is_arraykey : locl_ty -> bool

@@ -584,8 +584,6 @@ let rec expand ctx env root =
           ~on_error:ctx.ety_env.on_error
       in
       ((env, err, cycles), Exact ty)
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Taccess _
     | Tnonnull
     | Tprim _

@@ -59,8 +59,6 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
     | Tdynamic ->
       (* Awaiting a dynamic results in a new dynamic *)
       ((env, e1), MakeType.dynamic r)
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Tany _
     | Tvec_or_dict _
     | Tnonnull
@@ -88,8 +86,6 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
         match get_node e_opt_ty with
         | Tany _ -> mk (r, Typing_defs.make_tany ())
         | Tdynamic -> MakeType.dynamic r
-        | Tunapplied_alias _ ->
-          Typing_defs.error_Tunapplied_alias_in_illegal_context ()
         | Tnonnull
         | Tvec_or_dict _
         | Tprim _

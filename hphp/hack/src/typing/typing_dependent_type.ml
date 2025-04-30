@@ -148,8 +148,6 @@ module ExprDepTy = struct
       | (r, Toption ty) ->
         let (env, ty) = make ~seen env ty in
         (env, mk (r, Toption ty))
-      | (_, Tunapplied_alias _) ->
-        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | (r, Tnewtype (n, p, ty)) ->
         let (env, ty) = make ~seen env ty in
         (env, mk (r, Tnewtype (n, p, ty)))

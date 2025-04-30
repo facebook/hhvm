@@ -140,7 +140,6 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
   | (p, Tdynamic) -> obj @@ kind p "dynamic"
   | (p, Tgeneric (s, tyargs)) ->
     obj @@ kind p "generic" @ is_array true @ name s @ args tyargs
-  | (p, Tunapplied_alias s) -> obj @@ kind p "unapplied_alias" @ name s
   | (_, Tnewtype (s, _, ty))
     when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
     from_type env ~show_like_ty ty
@@ -371,17 +370,6 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
       | "enum" ->
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
         aux_as json ~keytrace >>= fun as_ty -> ty (Tnewtype (name, [], as_ty))
-      | "unapplied_alias" ->
-        get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
-        begin
-          match Decl_provider.get_typedef ctx name with
-          | Decl_entry.Found _typedef -> ty (Tunapplied_alias name)
-          | Decl_entry.DoesNotExist
-          | Decl_entry.NotYetAvailable ->
-            deserialization_error
-              ~message:("Unknown type alias: " ^ name)
-              ~keytrace:name_keytrace
-        end
       | "newtype" ->
         get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
         begin

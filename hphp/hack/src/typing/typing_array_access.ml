@@ -903,8 +903,6 @@ let rec array_get
           in
           (env, (res_ty, Error (ty1, ty_keyedcontainer), Ok ty2))
       end
-      | Tunapplied_alias _ ->
-        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Tnonnull
       | Tprim _
       | Tfun _
@@ -1096,8 +1094,6 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         got_dynamic ()
       | (_, Tdynamic) -> (env, (ty1, Ok ty1, Ok ty2))
-      | (_, Tunapplied_alias _) ->
-        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | (_, Tprim Tnull)
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
@@ -1530,8 +1526,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
            we applied an implicit upcast to dynamic
         *)
         (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
-      | Tunapplied_alias _ ->
-        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Toption _
       | Tnonnull
       | Tprim _

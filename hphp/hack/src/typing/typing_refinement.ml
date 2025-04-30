@@ -109,7 +109,6 @@ module TyPredicate = struct
     | Taccess _ -> Result.Error "access"
     | Tvar _ -> Result.Error "tvar"
     | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)
-    | Tunapplied_alias _ -> Result.Error "unapplied_alias"
     | Tdependent _ -> Result.Error "dependent"
     | Tneg _ -> Result.Error "neg"
     | Tlabel _ -> Result.Error "label"
@@ -503,8 +502,7 @@ and split_ty
     | Tvar _
     | Tany _
     | Tdynamic
-    | Taccess _
-    | Tunapplied_alias _ ->
+    | Taccess _ ->
       (env, TyPartition.mk_span ~env ~predicate ty)
     | Tclass_ptr _ ->
       (* TODO: need a bespoke DataType to model KindOfClass *)

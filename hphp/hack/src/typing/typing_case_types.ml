@@ -811,8 +811,6 @@ end = struct
         let trail = trail_f (get_reason as_ty) name in
         cycle_handler ~env ~trail as_ty
     end
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Tclass ((_, cls), _, _) ->
       Class.to_datatypes
         ~safe_for_are_disjoint:ctx.safe_for_are_disjoint

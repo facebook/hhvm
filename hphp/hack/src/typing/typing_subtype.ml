@@ -984,7 +984,6 @@ end = struct
     | Toption _
     | Tvar _
     | Taccess _
-    | Tunapplied_alias _
     | Tneg _
     | Tintersection _ ->
       false
@@ -3206,10 +3205,9 @@ end = struct
     (* -- Rewrite: x <: ?supportdyn<t> ---> x <: supportdyn<?t> *)
     | ( ( _,
           ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
-          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
-          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _
-          | Tclass_ptr _ ) ),
+          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tgeneric _
+          | Tnewtype _ | Tdependent _ | Tclass _ | Tneg _ | Tunion _
+          | Tintersection _ | Tvar _ | Tclass_ptr _ ) ),
         (r_super, Toption ty_inner) )
       when expands_to_supportdyn ty_inner ~env ->
       let (env, ty_inner) = Env.expand_type env ty_inner in
@@ -3330,8 +3328,8 @@ end = struct
     | ( ( r_sub,
           ( Tany _ | Tnonnull | Tdynamic | Tprim _ | Tvar _ | Tfun _ | Ttuple _
           | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _ | Taccess _
-          | Tnewtype _ | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _
-          | Tlabel _ | Tclass_ptr _ ) ),
+          | Tnewtype _ | Tdependent _ | Tclass _ | Tneg _ | Tlabel _
+          | Tclass_ptr _ ) ),
         (r_super, Tvar var_super_id) ) -> begin
       (* Ensure that higher-ranked type parameters don't escape their scope *)
       let tvar_rank = Env.rank_of_tvar env var_super_id in
@@ -3411,8 +3409,8 @@ end = struct
     | ( ( _r_sub,
           ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tvar _ | Tfun _
           | Ttuple _ | Tshape _ | Tgeneric _ | Tintersection _ | Tvec_or_dict _
-          | Taccess _ | Tnewtype _ | Tunapplied_alias _ | Tdependent _
-          | Tclass _ | Tneg _ | Tlabel _ | Tclass_ptr _ ) ),
+          | Taccess _ | Tnewtype _ | Tdependent _ | Tclass _ | Tneg _ | Tlabel _
+          | Tclass_ptr _ ) ),
         (r_super, Tintersection tyl) ) ->
       (* t <: (t1 & ... & tn)
        *   if and only if
@@ -3545,8 +3543,7 @@ end = struct
         (LoclType ty_super)
     | ( ( _,
           ( Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _ | Ttuple _
-          | Tshape _ | Tvec_or_dict _ | Taccess _ | Tunapplied_alias _
-          | Tclass _ | Tneg _ ) ),
+          | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _ | Tneg _ ) ),
         (_, Tunion []) ) ->
       invalid env ~fail
     (* -- C-Union-R --------------------------------------------------------- *)
@@ -3741,8 +3738,7 @@ end = struct
       | ( _,
           ( Tany _ | Tprim _ | Tnonnull | Tdynamic | Tfun _ | Ttuple _
           | Tshape _ | Tgeneric _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
-          | Tunapplied_alias _ | Tdependent _ | Tclass _ | Tneg _ | Tlabel _
-          | Tclass_ptr _ ) ) ->
+          | Tdependent _ | Tclass _ | Tneg _ | Tlabel _ | Tclass_ptr _ ) ) ->
         simplify_sub_union
           ~subtype_env
           ~sub_supportdyn
@@ -3757,9 +3753,9 @@ end = struct
     (* `Toption(Tnonnull)` encodes mixed, which is our top type *)
     | ( ( _,
           ( Tany _ | Tnonnull | Toption _ | Tdynamic | Tprim _ | Tfun _
-          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _
-          | Tunapplied_alias _ | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Tneg _ | Tunion _ | Tintersection _ | Tvar _ ) ),
+          | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tgeneric _
+          | Tnewtype _ | Tdependent _ | Tclass _ | Tneg _ | Tunion _
+          | Tintersection _ | Tvar _ ) ),
         (_, Toption ty_inner) )
       when expands_to_nonnull ty_inner ~env ->
       valid env
@@ -3875,8 +3871,6 @@ end = struct
               ~fail
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:{ super_like; super_supportdyn = false; ty_super }
-    | ((_, Tunapplied_alias _), (_, Toption _)) ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ( ( _r_sub,
           ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
           | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ | Tlabel _
@@ -3969,7 +3963,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
           | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
           | Tvec_or_dict _ | Ttuple _ | Tshape _ | Tdynamic | Tneg _ | Tfun _
-          | Tvar _ | Tunapplied_alias _ | Tlabel _ | Tclass_ptr _ ) ),
+          | Tvar _ | Tlabel _ | Tclass_ptr _ ) ),
         (_, Tdependent _) ) ->
       default_subtype
         ~subtype_env
@@ -4037,9 +4031,9 @@ end = struct
         env
     | ( ( _,
           ( Tany _ | Toption _ | Tnonnull | Tdynamic | Tprim _ | Tfun _
-          | Ttuple _ | Tshape _ | Tintersection _ | Tunapplied_alias _
-          | Tvec_or_dict _ | Taccess _ | Tnewtype _ | Tdependent _ | Tclass _
-          | Tneg _ | Tgeneric _ | Tlabel _ | Tclass_ptr _ ) ),
+          | Ttuple _ | Tshape _ | Tintersection _ | Tvec_or_dict _ | Taccess _
+          | Tnewtype _ | Tdependent _ | Tclass _ | Tneg _ | Tgeneric _
+          | Tlabel _ | Tclass_ptr _ ) ),
         (_, Tgeneric _) )
       when subtype_env.Subtype_env.require_completeness ->
       mk_issubtype_prop
@@ -4050,9 +4044,9 @@ end = struct
         (LoclType ty_super)
     | ( ( _r_sub,
           ( Tany _ | Toption _ | Tnonnull | Tdynamic | Tprim _ | Tfun _
-          | Ttuple _ | Tshape _ | Tintersection _ | Tunapplied_alias _
-          | Tvec_or_dict _ | Taccess _ | Tnewtype _ | Tdependent _ | Tclass _
-          | Tneg _ | Tgeneric _ | Tlabel _ | Tclass_ptr _ ) ),
+          | Ttuple _ | Tshape _ | Tintersection _ | Tvec_or_dict _ | Taccess _
+          | Tnewtype _ | Tdependent _ | Tclass _ | Tneg _ | Tgeneric _
+          | Tlabel _ | Tclass_ptr _ ) ),
         (r_super, Tgeneric (name_super, _tyargs_super)) ) ->
       (* If we've seen this type parameter before then we must have gone
        * round a cycle so we fail
@@ -4160,8 +4154,7 @@ end = struct
     | ( ( _,
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tdynamic
           | Tprim Aast.(Tvoid | Tnull)
-          | Tvar _ | Tgeneric _ | Tnewtype _ | Tunapplied_alias _ | Tdependent _
-            ) ),
+          | Tvar _ | Tgeneric _ | Tnewtype _ | Tdependent _ ) ),
         (_, Tnonnull) ) ->
       default_subtype
         ~subtype_env
@@ -4235,7 +4228,6 @@ end = struct
         | (_, (Tdynamic | Tprim Ast_defs.Tnull)) -> valid env
         | (_, Tnonnull)
         | (_, Tvar _)
-        | (_, Tunapplied_alias _)
         | (_, Tnewtype _)
         | (_, Tdependent _)
         | (_, Taccess _)
@@ -4577,8 +4569,8 @@ end = struct
     | ( ( _,
           ( Tany _ | Tdynamic | Tunion _ | Toption _ | Tintersection _
           | Tdependent _ | Taccess _ | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _
-          | Tshape _ | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _
-          | Tunapplied_alias _ | Tvar _ | Tlabel _ | Tclass_ptr _ ) ),
+          | Tshape _ | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _ | Tvar _
+          | Tlabel _ | Tclass_ptr _ ) ),
         (_, Tprim _) ) ->
       default_subtype
         ~subtype_env
@@ -4683,8 +4675,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
           | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
           | Tvec_or_dict _ | Ttuple _ | Tshape _ | Tdynamic | Tneg _
-          | Tdependent _ | Tvar _ | Tunapplied_alias _ | Tlabel _ | Tclass_ptr _
-            ) ),
+          | Tdependent _ | Tvar _ | Tlabel _ | Tclass_ptr _ ) ),
         (_, Tfun _) ) ->
       default_subtype
         ~subtype_env
@@ -4912,7 +4903,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tfun _
           | Tgeneric _ | Taccess _ | Tprim _ | Tnonnull | Tclass _
           | Tvec_or_dict _ | Ttuple _ | Tdynamic | Tneg _ | Tdependent _
-          | Tvar _ | Tunapplied_alias _ | Tlabel _ | Tclass_ptr _ ) ),
+          | Tvar _ | Tlabel _ | Tclass_ptr _ ) ),
         (_, Tshape _) ) ->
       default_subtype
         ~subtype_env
@@ -5005,7 +4996,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tfun _
           | Tgeneric _ | Taccess _ | Tprim _ | Tnonnull | Tclass _ | Ttuple _
           | Tshape _ | Tnewtype _ | Tdynamic | Tneg _ | Tdependent _ | Tvar _
-          | Tunapplied_alias _ | Tlabel _ | Tclass_ptr _ ) ),
+          | Tlabel _ | Tclass_ptr _ ) ),
         (_, Tvec_or_dict _) ) ->
       default_subtype
         ~subtype_env
@@ -5210,7 +5201,7 @@ end = struct
               Aast.(
                 ( Tnull | Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource
                 | Tnoreturn ))
-          | Tunapplied_alias _ | Tvar _ | Tlabel _ | Tclass_ptr _ ) ) -> begin
+          | Tvar _ | Tlabel _ | Tclass_ptr _ ) ) -> begin
         match
           Subtype_env.check_infinite_recursion
             subtype_env
@@ -5326,18 +5317,6 @@ end = struct
               env)
       end
     end
-    (* -- C-unapplied-alias-R --------------------------------------------------- *)
-    | (_, (_, Tunapplied_alias n_sup)) ->
-      (match deref ty_sub with
-      | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
-      | _ ->
-        default_subtype
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~lhs:{ sub_supportdyn; ty_sub }
-          ~rhs:{ super_supportdyn; super_like; ty_super }
-          env)
     (* -- C-Neg-R ----------------------------------------------------------- *)
     | (_, (r_super, Tneg (r_pred, IsTag (ClassTag c_super)))) -> begin
       match deref ty_sub with
@@ -5639,7 +5618,7 @@ end = struct
           ( Tany _ | Tdynamic | Tunion _ | Toption _ | Tintersection _
           | Tdependent _ | Taccess _ | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _
           | Tshape _ | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _ | Tprim _
-          | Tunapplied_alias _ | Tvar _ | Tclass_ptr _ ) ),
+          | Tvar _ | Tclass_ptr _ ) ),
         (_, Tlabel _) ) ->
       default_subtype
         ~subtype_env
@@ -5660,7 +5639,7 @@ end = struct
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
           | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
           | Tvec_or_dict _ | Ttuple _ | Tshape _ | Tdynamic | Tneg _
-          | Tdependent _ | Tvar _ | Tunapplied_alias _ | Tlabel _ | Tfun _ ) ),
+          | Tdependent _ | Tvar _ | Tlabel _ | Tfun _ ) ),
         (_, Tclass_ptr _) ) ->
       default_subtype
         ~subtype_env
@@ -6116,7 +6095,7 @@ end = struct
       | ( ( _,
             ( Tany _ | Tnonnull | Toption _ | Tprim _ | Tfun _ | Tshape _
             | Tvec_or_dict _ | Taccess _ | Tclass _ | Tneg _ | Tlabel _
-            | Tunapplied_alias _ | Tclass_ptr _ ) ),
+            | Tclass_ptr _ ) ),
           ListDestructure ) ->
         let ty_sub_descr =
           lazy (Typing_print.full_strip_ns ~hide_internals:true env ty_sub)
@@ -6407,8 +6386,7 @@ end = struct
       | (_, Ttuple _)
       | (_, Tshape _)
       | (_, Taccess _)
-      | (_, Tlabel _)
-      | (_, Tunapplied_alias _) ->
+      | (_, Tlabel _) ->
         invalid ~fail env
       | (_, Tclass_ptr _) ->
         (* TODO(T199606542) confirm CanTraverse behavior for class pointers *)
@@ -6657,7 +6635,7 @@ end = struct
     | ( _,
         ( Tany _ | Tdynamic | Tnonnull | Toption _ | Tprim _ | Tneg _ | Tfun _
         | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tnewtype _
-        | Tlabel _ | Tunapplied_alias _ ) ) ->
+        | Tlabel _ ) ) ->
       invalid ~fail env
     | (_, Tclass_ptr _) ->
       (* TODO(T199606542) Confirm if class pointers appear in HasTypeMember positions *)
@@ -6930,8 +6908,7 @@ end = struct
     | ( _,
         ( Toption _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tfun _ | Ttuple _
         | Tshape _ | Tgeneric _ | Tdependent _ | Tvec_or_dict _ | Taccess _
-        | Tunapplied_alias _ | Tclass _ | Tneg _ | Tlabel _ | Tclass_ptr _ ) )
-      ->
+        | Tclass _ | Tneg _ | Tlabel _ | Tclass_ptr _ ) ) ->
       typing_obj_get
         ~subtype_env
         ~this_ty
@@ -7183,8 +7160,7 @@ end = struct
         env
     | ( _,
         ( Toption _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tfun _ | Ttuple _
-        | Tshape _ | Tvec_or_dict _ | Taccess _ | Tunapplied_alias _ | Tneg _
-        | Tlabel _ ) ) ->
+        | Tshape _ | Tvec_or_dict _ | Taccess _ | Tneg _ | Tlabel _ ) ) ->
       invalid ~fail env
     | (_, Tclass_ptr _) ->
       (* TODO(T199606542) Check if this can be used to improve inference for $c::FOO *)
@@ -7882,9 +7858,9 @@ end = struct
     | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
       valid env
     | ( _,
-        ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull | Tunapplied_alias _
-        | Tfun _ | Ttuple _ | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _
-        | Tlabel _ | Tclass_ptr _ ) ) ->
+        ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull | Tfun _ | Ttuple _
+        | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _ | Tlabel _
+        | Tclass_ptr _ ) ) ->
       let ( ||| ) = ( ||| ) ~fail in
       mk_prop
         ~subtype_env
@@ -9776,8 +9752,8 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
   let (env, ty1) = Env.expand_type env ty1 in
   let (env, ty2) = Env.expand_type env ty2 in
   match (get_node ty1, get_node ty2) with
-  | (_, (Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _))
-  | ((Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _), _) ->
+  | (_, (Tany _ | Tdynamic | Taccess _))
+  | ((Tany _ | Tdynamic | Taccess _), _) ->
     false
   | (Tshape _, Tshape _) ->
     (* This could be more precise, e.g., if we have two closed shapes with different fields.

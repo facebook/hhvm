@@ -382,14 +382,6 @@ and _ ty_ =
 
         The second parameter is the list of type arguments to the type.
        *)
-  | Tunapplied_alias : string -> locl_phase ty_
-      (** This represents a type alias that lacks necessary type arguments. Given
-           type Foo<T1,T2> = ...
-         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-         further type arguments. In particular, Tunappliedalias always stands for
-         a higher-kinded type. It is never used for an alias like
-           type Foo2 = ...
-         that simply doesn't require type arguments. *)
   | Tdependent : (dependent_type[@transform.opaque]) * locl_ty -> locl_phase ty_
       (** see dependent_type *)
   | Tclass :

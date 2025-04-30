@@ -126,7 +126,7 @@ let derive_instantiation
         ( Tany _ | Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
         | Tshape _ | Tgeneric _ | Tunion _ | Tintersection _ | Tvec_or_dict _
         | Taccess _ | Tclass_ptr _ | Tvar _ | Tnewtype _ | Tclass _
-        | Tunapplied_alias _ | Tdependent _ | Tneg _ | Tlabel _ ) ) ->
+        | Tdependent _ | Tneg _ | Tlabel _ ) ) ->
       (env, subst_acc)
   and derive_instantiation_list utyl ityl (env, subst_acc) =
     let ulen = List.length utyl in

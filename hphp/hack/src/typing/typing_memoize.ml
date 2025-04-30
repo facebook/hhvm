@@ -151,8 +151,6 @@ let check_param : env -> Nast.fun_param -> unit =
                  tfty
                  []
                  None)
-        | Tunapplied_alias _ ->
-          Typing_defs.error_Tunapplied_alias_in_illegal_context ()
         | Taccess _ -> ()
         | Tfun _
         | Ttuple { t_extra = Tsplat _; _ }

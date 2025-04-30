@@ -452,7 +452,6 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tdependent _
   | Tgeneric _
   | Tclass _
-  | Tunapplied_alias _
   | Tvec_or_dict _
   | Tlabel _
   | Taccess _
@@ -560,8 +559,7 @@ let rec is_denotable ty =
   | Tany _
   | Tvar _
   | Tdependent _
-  | Tlabel _
-  | Tunapplied_alias _ ->
+  | Tlabel _ ->
     false
 
 and tuple_extra_is_denotable e =
@@ -702,16 +700,6 @@ let class_elt_is_private_or_protected_not_lsb elt =
   | Vpublic
   | Vinternal _ ->
     false
-
-(** Tunapplied_alias is a locl phase constructor that always stands for a higher-kinded type.
-  We use this function in cases where Tunapplied_alias appears in a context where we expect
-  a fully applied type, rather than a type constructor. Seeing Tunapplied_alias in such a context
-  always indicates a kinding error, which means that during localization, we should have
-  created Terr rather than Tunapplied_alias. Hence, this is an *internal* error, because
-  something went wrong during localization. Kind mismatches in code are reported to users
-  elsewhere. *)
-let error_Tunapplied_alias_in_illegal_context () =
-  failwith "Found Tunapplied_alias in a context where it must not occur"
 
 let is_typeconst_type_abstract tc =
   match tc.ttc_kind with

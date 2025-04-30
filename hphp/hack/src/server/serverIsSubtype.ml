@@ -75,8 +75,6 @@ let rec validate_free_type env locl_ty =
   | Tnonnull
   | Tdynamic
   | Tprim _
-  (* json_to_locl_ty already validates the name for unapplied_alias *)
-  | Tunapplied_alias _
   | Tany _ ->
     []
   | Tvec_or_dict (kty, vty) ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<155e60abc8e82755105c239d5af5b525>>
+// @generated SignedSource<<54de4bb25300d7e1ab58c8fc9db68c72>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -792,15 +792,6 @@ pub enum Ty_ {
     ///
     /// The second parameter is the list of type arguments to the type.
     Tnewtype(String, Vec<Ty>, Ty),
-    /// This represents a type alias that lacks necessary type arguments. Given
-    /// type Foo<T1,T2> = ...
-    /// Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-    /// further type arguments. In particular, Tunappliedalias always stands for
-    /// a higher-kinded type. It is never used for an alias like
-    /// type Foo2 = ...
-    /// that simply doesn't require type arguments.
-    #[rust_to_ocaml(name = "Tunapplied_alias")]
-    TunappliedAlias(String),
     /// see dependent_type
     Tdependent(DependentType, Ty),
     /// An instance of a class or interface, ty list are the arguments

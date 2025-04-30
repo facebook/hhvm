@@ -408,14 +408,6 @@ and _ ty_ =
 
         The second parameter is the list of type arguments to the type.
        *)
-  | Tunapplied_alias : string -> locl_phase ty_
-      (** This represents a type alias that lacks necessary type arguments. Given
-           type Foo<T1,T2> = ...
-         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-         further type arguments. In particular, Tunappliedalias always stands for
-         a higher-kinded type. It is never used for an alias like
-           type Foo2 = ...
-         that simply doesn't require type arguments. *)
   | Tdependent : (dependent_type[@transform.opaque]) * locl_ty -> locl_phase ty_
       (** see dependent_type *)
   | Tclass :
@@ -620,10 +612,6 @@ module Pp = struct
       Format.fprintf fmt ",@ ";
       pp_list pp_ty fmt a1;
       Format.fprintf fmt "@,)@])"
-    | Tunapplied_alias a0 ->
-      Format.fprintf fmt "(@[<2>Tunappliedalias@ ";
-      Format.fprintf fmt "%S" a0;
-      Format.fprintf fmt "@])"
     | Taccess a0 ->
       Format.fprintf fmt "(@[<2>Taccess@ ";
       pp_taccess_type fmt a0;
@@ -939,7 +927,6 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tvec_or_dict _ -> 25
   | Tclass_ptr _ -> 26
   (* only locl constructors *)
-  | Tunapplied_alias _ -> 200
   | Tnewtype _ -> 201
   | Tdependent _ -> 202
   | Tclass _ -> 204
@@ -1044,7 +1031,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     end
     | (Tshape s1, Tshape s2) -> shape_type_compare s1 s2
     | (Tvar v1, Tvar v2) -> Tvid.compare v1 v2
-    | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
     | (Taccess (ty1, id1), Taccess (ty2, id2)) -> begin
       match ty_compare ty1 ty2 with
       | 0 -> String.compare (snd id1) (snd id2)
@@ -1057,9 +1043,8 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tclass_ptr ty1, Tclass_ptr ty2) -> ty_compare ty1 ty2
     | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
         | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
-        | Tclass _ | Tshape _ | Tvar _ | Tunapplied_alias _ | Tnonnull
-        | Tdynamic | Taccess _ | Tany _ | Tneg _ | Trefinement _ | Tlabel _
-        | Tclass_ptr _ ),
+        | Tclass _ | Tshape _ | Tvar _ | Tnonnull | Tdynamic | Taccess _
+        | Tany _ | Tneg _ | Trefinement _ | Tlabel _ | Tclass_ptr _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :
@@ -1763,9 +1748,8 @@ module Locl_subst = struct
             ( id,
               apply_exact exact ~subst ~combine_reasons,
               List.map tys ~f:(apply_ty ~subst ~combine_reasons) ) )
-    | ( _,
-        ( Tvar _ | Tunapplied_alias _ | Tany _ | Tnonnull | Tdynamic | Tprim _
-        | Tlabel _ | Tneg _ ) ) ->
+    | (_, (Tvar _ | Tany _ | Tnonnull | Tdynamic | Tprim _ | Tlabel _ | Tneg _))
+      ->
       ty
 
   and apply_tuple { t_required; t_extra } ~subst ~combine_reasons =

@@ -187,8 +187,6 @@ let rec truthiness env ty =
   | Tvec_or_dict _ ->
     (* TODO(T69768816) determine which variant is correct for vec_or_dict *)
     Unknown
-  | Tunapplied_alias _ ->
-    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | Tclass_ptr _ ->
     (* TODO(T199606542) Check if (non-null) class pointers are ever falsy *)
     Unknown
@@ -261,7 +259,6 @@ let rec find_sketchy_types env acc ty =
   | Tshape _
   | Tvar _
   | Tvec_or_dict _
-  | Tunapplied_alias _
   | Taccess _
   | Tlabel _
   | Tneg _ ->

@@ -1043,7 +1043,6 @@ module Full = struct
       end
       | _ -> (fuel, to_doc s)
     end
-    | Tunapplied_alias s
     | Tnewtype (s, [], _)
     | Tgeneric (s, []) ->
       (fuel, to_doc s)
@@ -1701,12 +1700,6 @@ module ErrorString = struct
       in
       (fuel, prefix ^ ty_str)
     | Tshape _ -> (fuel, "a shape")
-    | Tunapplied_alias _ ->
-      (* FIXME it seems like this function is only for
-         fully-applied types? Tunapplied_alias should only appear
-         in a type argument position then, which inst below
-         prints with a different function (namely Full.locl_ty) *)
-      failwith "Tunapplied_alias is not a type"
     | Taccess (_ty, _id) -> (fuel, "a type constant")
     | Tlabel name -> (fuel, Printf.sprintf "a label (#%s)" name)
     | Tneg predicate ->

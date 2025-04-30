@@ -10546,8 +10546,6 @@ end = struct
           in
           let (env, ty) = Env.fresh_type_error env p in
           ((env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both), (ty, Ok ty))
-        | (_, Tunapplied_alias _) ->
-          Typing_defs.error_Tunapplied_alias_in_illegal_context ()
         (* We allow a call through a string in dynamic check mode, as string <:D dynamic *)
         | (r, Tprim Tstring) when Tast.is_under_dynamic_assumptions env.checked
           ->
@@ -12393,8 +12391,6 @@ end = struct
                 (env, Some ty_mismatch)
             in
             (env, (member_ty, tal), rval_err)))
-    | (_, Tunapplied_alias _) ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ( _,
         ( Tvar _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
         | Ttuple _ | Tshape _ | Taccess _ | Tneg _ | Tlabel _ | Tclass_ptr _ )

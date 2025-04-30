@@ -391,7 +391,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tshape s -> this#on_tshape acc r s
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
-      | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
       | Taccess (ty, ids) -> this#on_taccess acc r (ty, ids)
       | Tneg tneg -> this#on_neg_type acc r tneg
       | Tlabel name -> this#on_tlabel acc r name

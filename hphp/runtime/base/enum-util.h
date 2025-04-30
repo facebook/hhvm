@@ -22,9 +22,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Determine if the input is a value of the given enum.
+ * If the input is a value of the given enum, return the converted value.
+ * Value is not ref-counted; caller is responsible for inc-ref-ing it.
  */
-bool enumHasValue(const Class* cls, TypedValue value);
+Optional<TypedValue> maybeEnumValue(const Class* cls, TypedValue value);
 
 /**
  * Determine if the input is a string that can be coerced into an integer.

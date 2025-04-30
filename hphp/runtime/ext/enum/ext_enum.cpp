@@ -103,33 +103,17 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
 }
 
 static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, TypedValue tv) {
-  return enumHasValue(self_, tv);
+  return maybeEnumValue(self_, tv).has_value();
 }
 
 static TypedValue HHVM_STATIC_METHOD(BuiltinEnum, coerce, TypedValue tv) {
-  if (UNLIKELY(!tvIsInt(tv) && !tvIsString(tv) &&
-               !tvIsClass(tv) && !tvIsLazyClass(tv))) {
+  auto res_opt = maybeEnumValue(self_, tv);
+  if (!res_opt) {
     return make_tv<KindOfNull>();
   }
 
-  auto res = tv;
-
-  // Manually do int-like string conversion. This is to ensure the lookup
-  // succeeds below (since the values array does int-like string key conversion
-  // when created, even if its a dict).
-  int64_t num;
-  if (tvIsString(tv) && val(tv).pstr->isStrictlyInteger(num)) {
-    res = make_tv<KindOfInt64>(num);
-  } else if (tvIsClass(tv)) {
-    res = make_tv<KindOfPersistentString>(val(tv).pclass->name());
-  } else if (tvIsLazyClass(tv)) {
-    res = make_tv<KindOfPersistentString>(val(tv).plazyclass.name());
-  }
-
-  auto values = EnumCache::getValuesBuiltin(self_);
-  if (!values->names.exists(res)) {
-    res = make_tv<KindOfNull>();
-  } else if (auto base = self_->enumBaseTy().underlyingDataType()) {
+  auto res = *res_opt;
+  if (auto base = self_->enumBaseTy().underlyingDataType()) {
     if (isStringType(*base) && tvIsInt(res)) {
       return make_tv<KindOfString>(buildStringData(val(res).num));
     }

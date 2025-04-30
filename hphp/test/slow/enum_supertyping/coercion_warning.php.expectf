@@ -1,3 +1,7 @@
-Warning: Implicitly coercing string to int in callsite: enumHasValue in %s/coercion_warning.php on line 18
+Warning: Implicitly coercing string to int in callsite: maybeEnumValue in %s/coercion_warning.php on line 18
 
-Warning: Implicitly coercing string to int in callsite: enumHasValue in %s/coercion_warning.php on line 19
+Warning: Implicitly coercing string to int in callsite: maybeEnumValue in %s/coercion_warning.php on line 19
+
+Warning: Implicitly coercing string to int in callsite: maybeEnumValue in %s/coercion_warning.php on line 23
+
+Warning: Implicitly coercing string to int in callsite: maybeEnumValue in %s/coercion_warning.php on line 24

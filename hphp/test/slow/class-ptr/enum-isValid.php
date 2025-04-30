@@ -7,32 +7,16 @@ enum E : classname<C> {
   C = nameof C;
 }
 
-const dict<arraykey, string> D = dict[
-  E::C => "exists",
-  42 => "does not exist",
-];
-
-function g(classname<C> $c): void {
-  echo "passed classname\n";
-}
-
-function f(?arraykey $a): void {
-  if ($a !== null) {
-    g($a);
-  }
-  echo D[$a ?? 42]."\n";
-}
-
 function ex(): void {
   $ss = nameof C;
   $s = __hhvm_intrinsics\launder_value($ss)."";
   $lc = C::class;
   $c = HH\classname_to_class($lc);
 
-  f(E::coerce($ss));
-  f(E::coerce($s));
-  f(E::coerce($lc));
-  f(E::coerce($c));
+  var_dump(E::isValid($ss));
+  var_dump(E::isValid($s));
+  var_dump(E::isValid($lc));
+  var_dump(E::isValid($c));
 }
 
 function noex(): void {
@@ -41,10 +25,10 @@ function noex(): void {
   $lc = D::class;
   $c = HH\classname_to_class($lc);
 
-  f(E::coerce($ss));
-  f(E::coerce($s));
-  f(E::coerce($lc));
-  f(E::coerce($c));
+  var_dump(E::isValid($ss));
+  var_dump(E::isValid($s));
+  var_dump(E::isValid($lc));
+  var_dump(E::isValid($c));
 }
 
 

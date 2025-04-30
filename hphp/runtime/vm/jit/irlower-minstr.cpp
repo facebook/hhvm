@@ -40,12 +40,9 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/irlower-bespoke.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/util/immed.h"
-#include "hphp/util/stack-trace.h"
-#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
 // This file does ugly things with macros so include last.

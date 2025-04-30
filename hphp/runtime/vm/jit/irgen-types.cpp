@@ -21,8 +21,6 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/hhbc-shared.h"
-#include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"

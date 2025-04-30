@@ -24,9 +24,7 @@
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP::jit {
 

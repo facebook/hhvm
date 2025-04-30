@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/tv-refcount.h"
 
 namespace {
 bool isTypedValueRefcounted(const HPHP::TypedValue& tv) {

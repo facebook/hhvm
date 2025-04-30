@@ -22,8 +22,6 @@
 #include <folly/Hash.h>
 #include <folly/Format.h>
 
-#include "hphp/util/safe-cast.h"
-
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"

@@ -20,10 +20,6 @@
 
 #include "hphp/util/configs/hhir.h"
 
-#include <algorithm>
-#include <cstring>
-#include <sstream>
-
 namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////

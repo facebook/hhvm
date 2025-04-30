@@ -21,8 +21,6 @@
 #include <folly/Bits.h>
 #include <folly/Format.h>
 
-#include <utility>
-
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////
 

@@ -33,8 +33,6 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
-#include "hphp/runtime/vm/jit/irgen-types.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/configs/jit.h"

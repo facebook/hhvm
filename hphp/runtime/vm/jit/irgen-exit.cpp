@@ -19,8 +19,6 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
-#include "hphp/runtime/vm/hhbc-codec.h"
-
 namespace HPHP::jit::irgen {
 
 namespace {

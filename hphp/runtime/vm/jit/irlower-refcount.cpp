@@ -17,13 +17,10 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/jit/types.h"

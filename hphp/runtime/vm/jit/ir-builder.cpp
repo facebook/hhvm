@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
 
-#include <algorithm>
 #include <utility>
 
 #include <folly/ScopeGuard.h>
@@ -25,7 +24,6 @@
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -35,7 +33,6 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/simplify.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP::jit::irgen {
 

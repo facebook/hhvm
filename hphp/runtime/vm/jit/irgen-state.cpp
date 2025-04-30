@@ -18,7 +18,6 @@
 #include <sstream>
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
-#include "hphp/runtime/vm/resumable.h"
 
 namespace HPHP::jit::irgen {
 

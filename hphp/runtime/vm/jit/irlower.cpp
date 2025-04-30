@@ -42,8 +42,6 @@
 #include <folly/Format.h>
 #include <folly/Range.h>
 
-#include <sstream>
-
 namespace HPHP::jit::irlower {
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -16,22 +16,15 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/prologue-flags.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/unit.h"
 

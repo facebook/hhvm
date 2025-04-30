@@ -22,8 +22,6 @@
 
 #include <folly/Format.h>
 
-#include <cassert>
-#include <cmath>
 #include <string>
 #include <sstream>
 

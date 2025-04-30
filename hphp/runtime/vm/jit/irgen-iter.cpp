@@ -14,16 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
-
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-
-#include "hphp/util/struct-log.h"
 
 namespace HPHP::jit::irgen {
 

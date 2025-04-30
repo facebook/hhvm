@@ -16,14 +16,10 @@
 
 #include "hphp/runtime/vm/jit/enter-tc.h"
 
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/jit-resume-addr.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
-
-#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/rds-local.h"

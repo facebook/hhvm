@@ -19,9 +19,7 @@
 
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/vm/native-prop-handler.h"
 
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -39,7 +37,6 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
-#include "hphp/runtime/vm/module.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -48,8 +45,6 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/struct-log.h"
-
-#include <sstream>
 
 namespace HPHP::jit::irgen {
 

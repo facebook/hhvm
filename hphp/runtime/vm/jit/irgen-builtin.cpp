@@ -22,12 +22,9 @@
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/isame-log.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -47,14 +44,9 @@
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-set.h"
-#include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/configs/hhir.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP::jit::irgen {

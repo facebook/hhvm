@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/call-spec.h"
 
-#include "hphp/runtime/base/bespoke-array.h"
-
 #include "hphp/runtime/vm/jit/arg-group.h"
 
 #include "hphp/util/abi-cxx.h"

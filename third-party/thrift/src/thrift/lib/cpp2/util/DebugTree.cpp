@@ -303,7 +303,9 @@ scope DebugTree<protocol::Object>::operator()(
     ids.emplace(FieldId{field.first});
   }
 
-  const auto* node = ifStructured(type);
+  OptionalTypeRef trueType = type ? type->trueType() : type;
+
+  const auto* node = ifStructured(trueType);
   auto ret = scope::make_root(
       "{}", node ? toDebugString(node->definition()) : "<UNKNOWN STRUCT>");
   for (auto id : ids) {

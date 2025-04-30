@@ -82,8 +82,7 @@ struct SharedPtr {
 }
 
 struct StructWithTypedef {
-  // TODO(dokwon): Fix debugTree with typedef
-  // 1: MyDef field;
+  1: MyDef field;
   2: list<MyDef> list_field;
   3: set<MyDef> set_field;
   4: map<i32, MyDef> map_field;

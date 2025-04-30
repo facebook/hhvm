@@ -480,6 +480,7 @@ TEST(DebugTreeTest, StructWithTypedef) {
   d.field() = 42;
 
   StructWithTypedef s;
+  s.field() = d;
   s.list_field() = {d};
   s.set_field() = {d};
   s.map_field() = {{42, d}};
@@ -490,6 +491,10 @@ TEST(DebugTreeTest, StructWithTypedef) {
       debugTree(v, getGraph(), Uri{apache::thrift::uri<StructWithTypedef>()}),
       R"(
     Definition(kind=Struct, name='StructWithTypedef', program='DebugTree.thrift')
+    ├─ field
+    │  ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+    │     ╰─ field
+    │        ╰─ 42
     ├─ list_field
     │  ╰─ <List>
     │     ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
@@ -512,6 +517,10 @@ TEST(DebugTreeTest, StructWithTypedef) {
 
   expectEq(debugTree(v, getGraph()), R"(
     <UNKNOWN STRUCT>
+    ├─ FieldId(1)
+    │  ╰─ <UNKNOWN STRUCT>
+    │     ╰─ FieldId(1)
+    │        ╰─ 42
     ├─ FieldId(2)
     │  ╰─ <List>
     │     ╰─ <UNKNOWN STRUCT>

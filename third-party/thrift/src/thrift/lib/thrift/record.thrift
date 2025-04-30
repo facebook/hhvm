@@ -48,7 +48,7 @@ namespace cpp2 apache.thrift.dynamic
 @cpp.Adapter{
   underlyingName = "SerializableRecordUnion",
   adaptedType = "::apache::thrift::dynamic::detail::SerializableRecord",
-  name = "::apache::thrift::dynamic::detail::SerializableRecordAdapter",
+  name = "::apache::thrift::dynamic::detail::SerializableRecordAdapter<>",
 }
 union SerializableRecord {
   1: bool boolDatum;

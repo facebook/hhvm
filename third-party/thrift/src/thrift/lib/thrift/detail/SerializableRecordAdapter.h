@@ -81,7 +81,56 @@ void ensureValidFloatOrThrow(T datum) {
 template <typename>
 class SerializableRecordWrapper;
 using SerializableRecord = SerializableRecordWrapper<SerializableRecordUnion>;
-using SerializableRecordAdapter = InlineAdapter<SerializableRecord>;
+
+template <typename T = SerializableRecord>
+class SerializableRecordAdapter : public InlineAdapter<T> {
+  // SerializableRecord is incomplete at this point. We only use templates
+  // to delay instantiation until the struct is defined.
+  static_assert(std::is_same_v<T, SerializableRecord>);
+
+ public:
+  template <typename U>
+  static T fromThrift(U&& value) {
+    static_assert(std::is_rvalue_reference_v<U&&>);
+    // NOTE: The constructors below perform validation on the input data. It may
+    // throw exceptions.
+    switch (value.getType()) {
+      case U::Type::boolDatum:
+        return T(typename T::Bool(*value.boolDatum_ref()));
+      case U::Type::int8Datum:
+        return T(typename T::Int8(*value.int8Datum_ref()));
+      case U::Type::int16Datum:
+        return T(typename T::Int16(*value.int16Datum_ref()));
+      case U::Type::int32Datum:
+        return T(typename T::Int32(*value.int32Datum_ref()));
+      case U::Type::int64Datum:
+        return T(typename T::Int64(*value.int64Datum_ref()));
+      case U::Type::float32Datum:
+        return T(typename T::Float32(*value.float32Datum_ref()));
+      case U::Type::float64Datum:
+        return T(typename T::Float64(*value.float64Datum_ref()));
+      case U::Type::textDatum:
+        return T(typename T::Text(std::move(*value.textDatum_ref())));
+      case U::Type::byteArrayDatum:
+        // union_field_ref::value() elides the unique_ptr, which we need here.
+        return T(typename T::ByteArray(value.move_byteArrayDatum()));
+      case U::Type::fieldSetDatum:
+        return T(typename T::FieldSet(std::move(*value.fieldSetDatum_ref())));
+      case U::Type::listDatum:
+        return T(typename T::List(std::move(*value.listDatum_ref())));
+      case U::Type::setDatum:
+        return T(typename T::Set(std::move(*value.setDatum_ref())));
+      case U::Type::mapDatum:
+        return T(typename T::Map(std::move(*value.mapDatum_ref())));
+      case U::Type::__EMPTY__:
+        folly::throw_exception<std::invalid_argument>(
+            "SerializableRecord cannot be empty");
+      default:
+        break;
+    }
+    folly::assume_unreachable();
+  }
+};
 
 class SerializableRecordHasher {
  public:
@@ -142,6 +191,11 @@ class SerializableRecordWrapper final
 
  public:
   using Base::Base;
+  // The underlying data should be validated by the adapter by using the other
+  // constructors.
+  /* implicit */ SerializableRecordWrapper(const SerializableRecordUnion&) =
+      delete;
+  /* implicit */ SerializableRecordWrapper(SerializableRecordUnion&&) = delete;
 
   using Bool = PrimitiveDatum<bool>;
   using Int8 = PrimitiveDatum<std::int8_t>;
@@ -216,17 +270,6 @@ class SerializableRecordWrapper final
   }
   static Text text(std::string_view str) { return Text(str); }
 
-  /**
-   * Returns true if the underlying data is the empty union.
-   *
-   * An empty Record is an invalid Record — most operations will fail. However,
-   * empty Records may be created as a result of deserialization so it should be
-   * considered as part of input sanitization.
-   */
-  bool empty() const noexcept {
-    return this->data_.getType() == T::Type::__EMPTY__;
-  }
-
   enum class Kind {
     BOOL = T::Type::boolDatum,
     INT8 = T::Type::int8Datum,
@@ -244,17 +287,8 @@ class SerializableRecordWrapper final
   };
   /**
    * Produces the current variant alternative.
-   *
-   * Pre-conditions:
-   *   - empty() == false, else throws `std::runtime_error`
    */
-  Kind kind() const {
-    if (empty()) {
-      folly::throw_exception<std::runtime_error>(
-          "tried to access empty SerializableRecord");
-    }
-    return static_cast<Kind>(this->data_.getType());
-  }
+  Kind kind() const { return static_cast<Kind>(this->data_.getType()); }
 
   bool isBool() const { return kind() == Kind::BOOL; }
   bool isInt8() const { return kind() == Kind::INT8; }
@@ -396,9 +430,6 @@ class SerializableRecordWrapper final
   /**
    * An `std::visit`-like API for pattern-matching on the active variant
    * alternative of the underlying definition.
-   *
-   * Pre-conditions:
-   *   - empty() == false
    */
   template <typename... F>
   decltype(auto) visit(F&&... visitors) const {

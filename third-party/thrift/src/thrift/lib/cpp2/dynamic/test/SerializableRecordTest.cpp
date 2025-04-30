@@ -404,4 +404,38 @@ TEST(SerializableRecordTest, InvalidFloat) {
   });
 }
 
+TEST(SerializableRecordTest, InvalidDatumSerde) {
+  const auto decode = [](SerializableRecordUnion&& raw) {
+    return detail::SerializableRecordAdapter<>::fromThrift(std::move(raw));
+  };
+
+  EXPECT_NO_THROW({
+    SerializableRecordUnion raw;
+    raw.float64Datum_ref() = 0.0;
+    decode(std::move(raw));
+  });
+
+  EXPECT_THROW(
+      {
+        SerializableRecordUnion raw;
+        raw.float64Datum_ref() = -0.0;
+        decode(std::move(raw));
+      },
+      std::invalid_argument);
+  EXPECT_THROW(
+      {
+        SerializableRecordUnion raw;
+        raw.float32Datum_ref() = std::numeric_limits<float>::quiet_NaN();
+        decode(std::move(raw));
+      },
+      std::invalid_argument);
+  EXPECT_THROW(
+      {
+        SerializableRecordUnion raw;
+        raw.textDatum_ref() = "\xFF\xFE\xFD";
+        decode(std::move(raw));
+      },
+      std::invalid_argument);
+}
+
 } // namespace apache::thrift::dynamic

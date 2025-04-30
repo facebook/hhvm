@@ -15,27 +15,17 @@
 */
 #include "hphp/runtime/server/access-log.h"
 
-#include <sstream>
 #include <string>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
 
-#include <signal.h>
 #include <time.h>
 #include <stdio.h>
 
-#include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/server/log-writer.h"
-#include "hphp/runtime/server/server-note.h"
-#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/request-uri.h"
-#include "hphp/util/process.h"
-#include "hphp/util/atomic.h"
-#include "hphp/util/compatibility.h"
-#include "hphp/util/hardware-counter.h"
-#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

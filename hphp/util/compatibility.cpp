@@ -16,11 +16,8 @@
 
 #include "hphp/util/compatibility.h"
 
-#include "hphp/util/assertions.h"
-
 #include <string>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 
 #include <folly/portability/Fcntl.h>

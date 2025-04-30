@@ -18,15 +18,12 @@
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -37,12 +34,8 @@
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
-#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/ext/hh/ext_hh.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
@@ -55,21 +48,16 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/unwind.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
-#include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/portability.h"
 #include "hphp/util/service-data.h"
-#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 

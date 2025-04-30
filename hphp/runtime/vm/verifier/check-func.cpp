@@ -20,21 +20,15 @@
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
 
-#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
-#include "hphp/runtime/base/vanilla-dict.h"
 
 #include "hphp/runtime/ext/extension.h"
 
-#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 
 #include <folly/Range.h>
-
-#include <boost/dynamic_bitset.hpp>
 
 #include <cstdio>
 #include <iomanip>

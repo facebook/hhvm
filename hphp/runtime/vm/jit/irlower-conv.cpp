@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
@@ -29,7 +28,6 @@
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"

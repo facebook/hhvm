@@ -20,16 +20,10 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
-#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/directory.h"
-#include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
-
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/util/string-vsnprintf.h"

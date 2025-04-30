@@ -45,7 +45,6 @@
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -60,8 +59,6 @@
 #include "hphp/util/text-util.h"
 
 #include <limits>
-#include <sstream>
-#include <type_traits>
 
 namespace HPHP::jit {
 

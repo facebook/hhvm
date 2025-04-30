@@ -21,31 +21,23 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 
 #include "hphp/runtime/debugger/debugger.h"
 
 #include "hphp/runtime/ext/core/ext_core_closure.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 
-#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/type-constraint.h"
-#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/system/systemlib.h"
 
-#include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/string-vsnprintf.h"

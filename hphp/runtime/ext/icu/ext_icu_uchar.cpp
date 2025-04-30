@@ -2,7 +2,6 @@
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include <unicode/uchar.h>
 

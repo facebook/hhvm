@@ -16,7 +16,6 @@
 #include "hphp/hhbbc/type-system.h"
 
 #include <type_traits>
-#include <cmath>
 #include <algorithm>
 #include <iterator>
 #include <vector>
@@ -26,12 +25,10 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
-#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/hhbbc/class-util.h"

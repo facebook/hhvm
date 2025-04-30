@@ -23,7 +23,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <mutex>
 
 #include <folly/portability/SysMman.h>
 

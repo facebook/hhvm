@@ -16,21 +16,15 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/trans-db.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/runtime/base/program-functions.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
-#include "hphp/util/bump-mapper.h"
 #include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hugetlb.h"
-#include "hphp/util/managed-arena.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 

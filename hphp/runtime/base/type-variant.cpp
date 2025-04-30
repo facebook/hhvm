@@ -20,33 +20,22 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/zend-string.h"
 
-#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/low-ptr.h"
 
-#include <limits>
 #include <utility>
-#include <vector>
 
 namespace HPHP {
 

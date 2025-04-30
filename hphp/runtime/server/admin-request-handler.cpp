@@ -17,7 +17,6 @@
 #include "hphp/runtime/server/admin-request-handler.h"
 
 #include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/http-client.h"
@@ -35,10 +34,8 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -46,7 +43,6 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/server/http-request-handler.h"
@@ -62,15 +58,16 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/stats.h"
 #include "hphp/util/hphp-config.h"
-#include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/managed-arena.h"
-#include "hphp/util/mutex.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
-#include "hphp/util/timer.h"
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+#include "hphp/util/hugetlb.h"
+#include "hphp/util/managed-arena.h"
+#endif
 
 #ifdef ENABLE_EXTENSION_MYSQL
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
@@ -84,7 +81,6 @@
 #include <folly/portability/Unistd.h>
 
 #include <cstdio>
-#include <fstream>
 #include <string>
 #include <sstream>
 #include <iomanip>

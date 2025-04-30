@@ -27,7 +27,6 @@
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/configs/configs.h"
-#include "hphp/runtime/base/configs/repo-global-data-generated.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
@@ -43,16 +42,11 @@
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/util/async-func.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/current-executable.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
-#include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/process.h"
-#include "hphp/util/process-exec.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
@@ -65,7 +59,6 @@
 #include <sys/types.h>
 #ifndef _MSC_VER
 #include <sys/wait.h>
-#include <dlfcn.h>
 #endif
 
 #include <boost/algorithm/string/replace.hpp>

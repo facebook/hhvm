@@ -16,7 +16,6 @@
 #include "hphp/util/alloc.h"
 
 #include <atomic>
-#include <mutex>
 
 #include <errno.h>
 #include <signal.h>

@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
@@ -45,16 +44,12 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/util/check-size.h"
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/configs/hhir.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 
@@ -64,7 +59,6 @@
 #include <folly/synchronization/EventCount.h>
 
 #include <algorithm>
-#include <iostream>
 
 TRACE_SET_MOD(class_load);
 

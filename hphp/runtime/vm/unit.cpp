@@ -21,9 +21,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
-#include <iomanip>
 #include <map>
-#include <ostream>
 #include <sstream>
 #include <vector>
 
@@ -37,13 +35,11 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/compilation-flags.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/server.h"
-#include "hphp/util/functional.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/struct-log.h"
@@ -51,17 +47,13 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -73,13 +65,10 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/preclass.h"
@@ -89,14 +78,10 @@
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/server/memory-stats.h"
-#include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/server/ext_server.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 

@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/irgen.h"
 
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"

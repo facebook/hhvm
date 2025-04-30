@@ -33,25 +33,16 @@
  */
 
 #include <array>
-#include <set>
-#include <unordered_map>
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/ext/core/ext_core_closure.h"
-#include "hphp/runtime/ext/datetime/ext_datetime.h"
-#include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/util/alloc.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
-#include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {

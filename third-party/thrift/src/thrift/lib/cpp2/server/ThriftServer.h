@@ -2814,7 +2814,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         AttributeSource::OVERRIDE);
   }
 
-  [[deprecated("Use addPreprocess instead")]] void setIsOverloaded(
+  [[deprecated("Use addPreprocessFunc instead")]] void setIsOverloaded(
       IsOverloadedFunc isOverloaded) {
     THRIFT_SERVER_EVENT(call.setIsOverloaded).log(*this);
     isOverloaded_ = std::move(isOverloaded);
@@ -2825,7 +2825,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // Do not try to access ThreadManager in this function as
   // ThreadManagers are being deprecated from thrift server
   // e.g. don't call getThreadManager() inside this
-  [[deprecated("Use addPreprocess instead")]] void setPreprocess(
+  [[deprecated("Use addPreprocessFunc instead")]] void setPreprocess(
       PreprocessFunc preprocess) {
     THRIFT_SERVER_EVENT(call.setPreprocess).log(*this);
 

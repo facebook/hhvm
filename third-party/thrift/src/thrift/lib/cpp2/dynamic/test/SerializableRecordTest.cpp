@@ -153,6 +153,14 @@ TEST(SerializableRecordTest, ByteArray) {
   EXPECT_EQ(toDebugString(r), "ByteArray(\"aGVsbG8=\")\n");
 }
 
+TEST(SerializableRecordTest, TestKind) {
+  SerializableRecord r = SerializableRecord::Int64(42);
+  EXPECT_THAT(
+      [&] { r.asType<SerializableRecord::Int32>(); },
+      testing::ThrowsMessage<std::runtime_error>(
+          testing::HasSubstr("int64Datum")));
+}
+
 TEST(SerializableRecordTest, CopyAndMove) {
   SerializableRecord original = SerializableRecord(makeByteArray("hello"));
   SerializableRecord copy = original;

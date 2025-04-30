@@ -47,7 +47,8 @@ namespace detail {
 
 bool areByteArraysEqual(const type::ByteBuffer&, const type::ByteBuffer&);
 
-[[noreturn]] void throwSerializableRecordAccessInactiveKind();
+[[noreturn]] void throwSerializableRecordAccessInactiveKind(
+    std::string_view actualKind);
 
 /**
  * The adapted type for SerializableRecord — a concrete, machine-readable,
@@ -434,7 +435,7 @@ class SerializableRecordWrapper final
   const V& asType() const {
     return visit(
         [](const V& value) -> const V& { return value; },
-        [](const auto&) -> const V& {
+        [&](const auto&) -> const V& {
           throwSerializableRecordAccessInactiveKind();
         });
   }
@@ -497,6 +498,12 @@ class SerializableRecordWrapper final
   template <typename V>
   friend bool operator!=(const V& lhs, const SerializableRecordWrapper& rhs) {
     return !(lhs == rhs);
+  }
+
+ private:
+  [[noreturn]] void throwSerializableRecordAccessInactiveKind() const {
+    detail::throwSerializableRecordAccessInactiveKind(
+        util::enumNameSafe(this->data_.getType()));
   }
 };
 

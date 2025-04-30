@@ -27,9 +27,11 @@ bool areByteArraysEqual(
   return folly::IOBufEqualTo{}(lhs, rhs);
 }
 
-[[noreturn]] void throwSerializableRecordAccessInactiveKind() {
-  folly::throw_exception<std::runtime_error>(
-      "tried to access SerializableRecord with inactive kind");
+[[noreturn]] void throwSerializableRecordAccessInactiveKind(
+    std::string_view actualKind) {
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "tried to access SerializableRecord with inactive kind, actual kind was: {}",
+      actualKind));
 }
 
 std::size_t SerializableRecordHasher::operator()(

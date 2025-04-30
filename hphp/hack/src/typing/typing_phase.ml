@@ -989,68 +989,15 @@ and localize_with_kind
     (env * Typing_error.t option * Type_expansions.cycle_reporter list)
     * locl_ty =
   let expected_kind = snd expected_named_kind in
-  let (r, dty_) = deref dty in
-  let r = Typing_reason.localize r in
   let arity = KindDefs.Simple.get_arity expected_kind in
   if Int.( = ) arity 0 then
     (* Not higher-kinded *)
     localize ~ety_env env dty
   else
-    match dty_ with
-    | Tapply (((_pos, name) as id), []) -> begin
-      match Env.get_class_or_typedef env name with
-      | Decl_entry.Found (Env.ClassResult class_info) ->
-        let tparams = Cls.tparams class_info in
-        let classish_kind =
-          KindDefs.Simple.type_with_params_to_simple_kind tparams
-        in
-        if
-          TIntegrity.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
-        then
-          ((env, None, []), mk (r, Tclass (id, nonexact, [])))
-        else
-          let (env, ty) = Env.fresh_type_error env Pos.none in
-          ((env, None, []), ty)
-      | Decl_entry.Found (Env.TypedefResult typedef) ->
-        if Env.is_typedef_visible env ~name typedef then
-          ((env, None, []), mk (r, Tunapplied_alias name))
-        else
-          (* The bound is unused until the newtype is fully applied *)
-          let (env, ty) = Env.fresh_type_error env Pos.none in
-          ((env, None, []), mk (r, Tnewtype (name, [], ty)))
-      | Decl_entry.NotYetAvailable
-      | Decl_entry.DoesNotExist ->
-        (* We are expected to localize a higher-kinded type, but are given an unknown class name.
-              Not much we can do. *)
-        let (env, ty) = Env.fresh_type_error env Pos.none in
-        ((env, None, []), ty)
-    end
-    | Tgeneric (name, []) -> begin
-      match Env.get_pos_and_kind_of_generic env name with
-      | Some (_, gen_kind) ->
-        if
-          TIntegrity.Simple.is_subkind
-            env
-            ~sub:(KindDefs.Simple.from_full_kind gen_kind)
-            ~sup:expected_kind
-        then
-          ((env, None, []), mk (r, Tgeneric (name, [])))
-        else
-          let (env, ty) = Env.fresh_type_error env Pos.none in
-          ((env, None, []), ty)
-      | None ->
-        (* FIXME: Ideally, we would like to fail here, but sometimes we see type
-           parameters without an entry in the environment. *)
-        ((env, None, []), mk (r, Tgeneric (name, [])))
-    end
-    | Tgeneric (_, _targs)
-    | Tapply (_, _targs) ->
-      let (env, ty) = Env.fresh_type_error env Pos.none in
-      ((env, None, []), ty)
-    | Tany _ -> ((env, None, []), mk (r, make_tany ()))
-    | _dty_ ->
-      let (env, ty) = Env.fresh_type_error env Pos.none in
-      ((env, None, []), ty)
+    (* TODO(T222659258) Remove this whole function *)
+    (* Higher-kinded types implementation is being removed. We will always generate an error during naming*)
+    let (env, ty) = Env.fresh_type_error env Pos.none in
+    ((env, None, []), ty)
 
 and localize_cstr_ty ~ety_env env ty tp_name =
   let (env, ty) = localize ~ety_env env ty in

@@ -1891,13 +1891,6 @@ TEST_F(HTTP2CodecTest, BadRFC9218Priority) {
   EXPECT_EQ(callbacks_.incremental, 1);
 }
 
-TEST_F(HTTP2CodecTest, CircularHeaderPriority) {
-  HTTPMessage req = getGetRequest();
-  req.setHTTP2Priority(HTTPMessage::HTTP2Priority(1, false, 7));
-  auto id = upstreamCodec_.createStream();
-  upstreamCodec_.generateHeader(output_, id, req, true /* eom */);
-}
-
 class DummyQueue : public HTTPCodec::PriorityQueue {
  public:
   DummyQueue() {

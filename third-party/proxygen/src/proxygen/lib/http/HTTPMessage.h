@@ -757,7 +757,6 @@ class HTTPMessage {
 
   void setPriority(int8_t pri) {
     pri_ = normalizePriority(pri);
-    h2Pri_ = folly::none;
   }
   uint8_t getPriority() const {
     return pri_;
@@ -781,10 +780,6 @@ class HTTPMessage {
   void setHTTPPriority(HTTPPriority httpPriority);
 
   using HTTP2Priority = std::tuple<uint64_t, bool, uint8_t>;
-
-  void setHTTP2Priority(const HTTP2Priority& h2Pri) {
-    h2Pri_ = h2Pri;
-  }
 
   /**
    * get and setter for transaction sequence number
@@ -1130,7 +1125,6 @@ class HTTPMessage {
   const std::string* protoStr_;
   std::unique_ptr<std::string> upgradeProtocol_;
   uint8_t pri_;
-  folly::Optional<HTTP2Priority> h2Pri_;
 
   std::pair<uint8_t, uint8_t> version_;
   mutable bool parsedCookies_ : 1;

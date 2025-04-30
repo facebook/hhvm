@@ -501,15 +501,12 @@ class MockHTTPPushHandler
 
   void sendPushHeaders(const std::string& path,
                        const std::string& host,
-                       uint32_t content_length,
-                       http2::PriorityUpdate pri) {
+                       uint32_t content_length) {
     HTTPMessage push;
     push.setURL(path);
     push.getHeaders().set(HTTP_HEADER_HOST, host);
     push.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH,
                           folly::to<std::string>(content_length));
-    push.setHTTP2Priority(
-        std::make_tuple(pri.streamDependency, pri.exclusive, pri.weight));
     txn_->sendHeaders(push);
   }
 };

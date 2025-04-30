@@ -290,8 +290,7 @@ TEST_F(MockCodecDownstreamTest, ServerPush) {
   EXPECT_CALL(handler, _onHeadersComplete(_))
       .WillOnce(Invoke([&](std::shared_ptr<HTTPMessage>) {
         pushTxn = handler.txn_->newPushedTransaction(&pushHandler);
-        pushHandler.sendPushHeaders(
-            "/foo", "www.foo.com", 100, handler.txn_->getPriority());
+        pushHandler.sendPushHeaders("/foo", "www.foo.com", 100);
         pushHandler.sendBody(100);
         pushTxn->sendEOM();
         eventBase_.loopOnce(); // flush the push txn's body
@@ -347,15 +346,13 @@ TEST_F(MockCodecDownstreamTest, ServerPushAfterGoaway) {
         // Initiate server push transactions.
         pushTxn = handler.txn_->newPushedTransaction(&pushHandler1);
         CHECK_EQ(pushTxn->getID(), HTTPCodec::StreamID(2));
-        pushHandler1.sendPushHeaders(
-            "/foo", "www.foo.com", 100, handler.txn_->getPriority());
+        pushHandler1.sendPushHeaders("/foo", "www.foo.com", 100);
         pushHandler1.sendBody(100);
         pushTxn->sendEOM();
         // Initiate the second push transaction which will be aborted
         pushTxn = handler.txn_->newPushedTransaction(&pushHandler2);
         CHECK_EQ(pushTxn->getID(), HTTPCodec::StreamID(4));
-        pushHandler2.sendPushHeaders(
-            "/foo", "www.foo.com", 100, handler.txn_->getPriority());
+        pushHandler2.sendPushHeaders("/foo", "www.foo.com", 100);
         pushHandler2.sendBody(100);
         pushTxn->sendEOM();
       }));
@@ -426,14 +423,12 @@ TEST_F(MockCodecDownstreamTest, ServerPushAbort) {
         // Initiate server push transactions
         pushTxn1 = handler.txn_->newPushedTransaction(&pushHandler1);
         CHECK_EQ(pushTxn1->getID(), HTTPCodec::StreamID(2));
-        pushHandler1.sendPushHeaders(
-            "/foo", "www.foo.com", 100, handler.txn_->getPriority());
+        pushHandler1.sendPushHeaders("/foo", "www.foo.com", 100);
         pushHandler1.sendBody(100);
 
         pushTxn2 = handler.txn_->newPushedTransaction(&pushHandler2);
         CHECK_EQ(pushTxn2->getID(), HTTPCodec::StreamID(4));
-        pushHandler2.sendPushHeaders(
-            "/bar", "www.bar.com", 200, handler.txn_->getPriority());
+        pushHandler2.sendPushHeaders("/bar", "www.bar.com", 200);
         pushHandler2.sendBody(200);
         pushTxn2->sendEOM();
       }));
@@ -497,14 +492,12 @@ TEST_F(MockCodecDownstreamTest, ServerPushAbortAssoc) {
         // Initiate server push transactions
         auto pushTxn = handler.txn_->newPushedTransaction(&pushHandler1);
         CHECK_EQ(pushTxn->getID(), HTTPCodec::StreamID(2));
-        pushHandler1.sendPushHeaders(
-            "/foo", "www.foo.com", 100, handler.txn_->getPriority());
+        pushHandler1.sendPushHeaders("/foo", "www.foo.com", 100);
         pushHandler1.sendBody(100);
 
         pushTxn = handler.txn_->newPushedTransaction(&pushHandler2);
         CHECK_EQ(pushTxn->getID(), HTTPCodec::StreamID(4));
-        pushHandler2.sendPushHeaders(
-            "/foo", "www.foo.com", 100, handler.txn_->getPriority());
+        pushHandler2.sendPushHeaders("/foo", "www.foo.com", 100);
         pushHandler2.sendBody(100);
       }));
 
@@ -566,9 +559,7 @@ TEST_F(MockCodecDownstreamTest, ServerPushClientMessage) {
   EXPECT_CALL(handler, _onHeadersComplete(_))
       .WillOnce(Invoke([&](std::shared_ptr<HTTPMessage> msg) {
         pushTxn = handler.txn_->newPushedTransaction(&pushHandler);
-        auto pri = handler.txn_->getPriority();
-        msg->setHTTP2Priority(
-            std::make_tuple(pri.streamDependency, pri.exclusive, pri.weight));
+        // auto pri = handler.txn_->getPriority();
       }));
   EXPECT_CALL(pushHandler, _setTransaction(_))
       .WillOnce(Invoke(
@@ -1153,8 +1144,7 @@ TEST_F(MockCodecDownstreamTest, ShutdownThenSendPushHeaders) {
         httpSession_->notifyPendingShutdown();
         // we should be able to process new requests
         EXPECT_TRUE(codec_->isReusable());
-        pushHandler.sendPushHeaders(
-            "/foo", "www.foo.com", 0, handler.txn_->getPriority());
+        pushHandler.sendPushHeaders("/foo", "www.foo.com", 0);
         // we should* still* be able to process new requests
         EXPECT_TRUE(codec_->isReusable());
         pushTxn->sendEOM();

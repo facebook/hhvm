@@ -2785,4 +2785,18 @@ bool ThriftServer::notifyCPUConcurrencyControllerOnRequestLoadShed(
   return cpuConcurrencyControllerPtr != nullptr &&
       cpuConcurrencyControllerPtr->requestShed(method);
 }
+
+const std::vector<std::string> ThriftServer::getInstalledServerModuleNames()
+    const noexcept {
+  std::vector<std::string> moduleNames;
+  if (processedServiceDescription_) {
+    std::transform(
+        processedServiceDescription_->modules.modules.begin(),
+        processedServiceDescription_->modules.modules.end(),
+        std::back_inserter(moduleNames),
+        [](const auto& moduleInfo) { return moduleInfo.name; });
+  }
+  return moduleNames;
+}
+
 } // namespace apache::thrift

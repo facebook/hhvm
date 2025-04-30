@@ -3912,6 +3912,34 @@ TEST(ThriftServer, AddModuleAfterSetupThreadManager) {
   }
 }
 
+TEST(ThriftServer, GetInstalledServerModulesNames) {
+  {
+    ScopedServerInterfaceThread runner(
+        std::make_shared<apache::thrift::ServiceHandler<TestService>>(),
+        "::1",
+        0,
+        [](auto& ts) {
+          class TestModule : public apache::thrift::ServerModule {
+           public:
+            std::string getName() const override { return "TestModule"; }
+          };
+          ts.addModule(std::make_unique<TestModule>());
+        });
+
+    auto moduleList = runner.getThriftServer().getInstalledServerModuleNames();
+    EXPECT_EQ(moduleList.size(), 1);
+    EXPECT_EQ(moduleList[0], "TestModule");
+  }
+  {
+    ScopedServerInterfaceThread runner(
+        std::make_shared<apache::thrift::ServiceHandler<TestService>>(),
+        "::1",
+        0);
+    auto moduleList = runner.getThriftServer().getInstalledServerModuleNames();
+    EXPECT_EQ(moduleList.size(), 0);
+  }
+}
+
 TEST(ThriftServer, GetSetMaxRequests) {
   auto getExecutionLimitRequests = [](const ThriftServer& server) {
     return server.resourcePoolSet()

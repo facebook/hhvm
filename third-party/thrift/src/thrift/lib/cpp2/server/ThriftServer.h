@@ -2263,6 +2263,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     return false;
   }
 
+  const std::vector<std::string> getInstalledServerModuleNames() const noexcept;
+
  private:
   /**
    * Collects service handlers of the current service of a specific type.

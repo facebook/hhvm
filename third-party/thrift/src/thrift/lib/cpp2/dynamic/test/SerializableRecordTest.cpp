@@ -19,6 +19,7 @@
 
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 
+#include <limits>
 #include <type_traits>
 
 namespace apache::thrift::dynamic {
@@ -344,6 +345,63 @@ TEST(SerializableRecordTest, ComplexNestedRecords) {
       level2Map.at(SerializableRecord::Text("key2")).asFieldSet();
   EXPECT_EQ(key2FieldSet.size(), 1);
   EXPECT_EQ(key2FieldSet.at(FieldId(3)), makeByteArray("nested"));
+}
+
+TEST(SerializableRecordTest, InvalidUTF8Text) {
+  EXPECT_THROW(
+      { SerializableRecord r = SerializableRecord::text("\xFF\xFE\xFD"); },
+      std::invalid_argument);
+}
+
+TEST(SerializableRecordTest, InvalidFloat) {
+  using FloatLimits = std::numeric_limits<float>;
+  using DoubleLimits = std::numeric_limits<double>;
+
+  // NaN is invalid.
+  EXPECT_THROW(
+      {
+        SerializableRecord r =
+            SerializableRecord::Float32(FloatLimits::quiet_NaN());
+      },
+      std::invalid_argument);
+  EXPECT_THROW(
+      {
+        SerializableRecord r =
+            SerializableRecord::Float64(DoubleLimits::quiet_NaN());
+      },
+      std::invalid_argument);
+
+  // Negative zero is invalid.
+  EXPECT_THROW(
+      { SerializableRecord r = SerializableRecord::Float32(-0.0f); },
+      std::invalid_argument);
+  EXPECT_THROW(
+      { SerializableRecord r = SerializableRecord::Float64(-0.0); },
+      std::invalid_argument);
+
+  // Positive zero is valid.
+  EXPECT_NO_THROW(
+      { SerializableRecord r = SerializableRecord::Float32(0.0f); });
+  EXPECT_NO_THROW({ SerializableRecord r = SerializableRecord::Float64(0.0); });
+
+  // Infinity is valid.
+  EXPECT_NO_THROW({
+    SerializableRecord r = SerializableRecord::Float32(FloatLimits::infinity());
+  });
+  EXPECT_NO_THROW({
+    SerializableRecord r =
+        SerializableRecord::Float64(DoubleLimits::infinity());
+  });
+
+  // -Infinity is valid.
+  EXPECT_NO_THROW({
+    SerializableRecord r =
+        SerializableRecord::Float32(-FloatLimits::infinity());
+  });
+  EXPECT_NO_THROW({
+    SerializableRecord r =
+        SerializableRecord::Float64(-DoubleLimits::infinity());
+  });
 }
 
 } // namespace apache::thrift::dynamic

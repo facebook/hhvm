@@ -34,6 +34,56 @@ bool areByteArraysEqual(
       actualKind));
 }
 
+// Adapted from:
+//   http://www.zedwood.com/article/cpp-is-valid-utf8-string-function
+void ensureUTF8OrThrow(std::string_view string) {
+  const auto onError = [&]() -> void {
+    folly::throw_exception<std::invalid_argument>(
+        fmt::format("UTF-8 validation failed for '{}'", string));
+  };
+  const auto charAt = [&](std::size_t i) -> unsigned char {
+    return static_cast<unsigned char>(string[i]);
+  };
+
+  for (std::size_t i = 0; i < string.length();) {
+    const auto c = charAt(i);
+    // Determine the number of bytes in the UTF-8 sequence
+    std::size_t n = 0;
+    if (c <= 0x7f) {
+      n = 1; // 0bbbbbbb
+    } else if ((c & 0xE0) == 0xC0) {
+      n = 2; // 110bbbbb
+    } else if ((c & 0xF0) == 0xE0) {
+      n = 3; // 1110bbbb
+    } else if ((c & 0xF8) == 0xF0) {
+      n = 4; // 11110bbb
+    } else {
+      onError();
+      return;
+    }
+    // Check for invalid sequences
+    if (n > 1 && (c & (0xFF << (8 - n))) == (0xFF << (8 - n))) {
+      onError();
+      return;
+    }
+    // Check for U+D800 to U+DFFF
+    if (n == 3 && c == 0xed && i + 1 < string.length() &&
+        (charAt(i + 1) & 0xa0) == 0xa0) {
+      onError();
+      return;
+    }
+    // Verify the rest of the sequence
+    for (std::size_t j = 1; j < n; ++j) {
+      if (i + j >= string.length() || (charAt(i + j) & 0xC0) != 0x80) {
+        onError();
+        return;
+      }
+    }
+    // Move to the next sequence
+    i += n;
+  }
+}
+
 std::size_t SerializableRecordHasher::operator()(
     const SerializableRecord& record) const noexcept {
   if (record.empty()) {

@@ -27,8 +27,10 @@
 #include <folly/container/F14Set.h>
 #include <folly/lang/Exception.h>
 
+#include <cmath>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -49,6 +51,23 @@ bool areByteArraysEqual(const type::ByteBuffer&, const type::ByteBuffer&);
 
 [[noreturn]] void throwSerializableRecordAccessInactiveKind(
     std::string_view actualKind);
+
+/**
+ * If the input string is not valid UTF-8, then throws `std::invalid_argument`.
+ */
+void ensureUTF8OrThrow(std::string_view);
+
+template <typename T, std::enable_if_t<std::is_floating_point_v<T>>* = nullptr>
+void ensureValidFloatOrThrow(T datum) {
+  if (std::isnan(datum)) {
+    folly::throw_exception<std::invalid_argument>(
+        "NaN is not a valid Thrift datum");
+  }
+  if (datum == T(0) && std::signbit(datum)) {
+    folly::throw_exception<std::invalid_argument>(
+        "-0.0 is not a valid Thrift datum");
+  }
+}
 
 /**
  * The adapted type for SerializableRecord — a concrete, machine-readable,
@@ -156,13 +175,16 @@ class SerializableRecordWrapper final
   /* implicit */ SerializableRecordWrapper(Int64 datum) noexcept {
     this->data_.int64Datum_ref() = datum;
   }
-  /* implicit */ SerializableRecordWrapper(Float32 datum) noexcept {
+  /* implicit */ SerializableRecordWrapper(Float32 datum) {
+    detail::ensureValidFloatOrThrow(float(datum));
     this->data_.float32Datum_ref() = datum;
   }
-  /* implicit */ SerializableRecordWrapper(Float64 datum) noexcept {
+  /* implicit */ SerializableRecordWrapper(Float64 datum) {
+    detail::ensureValidFloatOrThrow(double(datum));
     this->data_.float64Datum_ref() = datum;
   }
-  /* implicit */ SerializableRecordWrapper(std::string datum) noexcept {
+  /* implicit */ SerializableRecordWrapper(Text datum) {
+    detail::ensureUTF8OrThrow(datum);
     this->data_.textDatum_ref() = std::move(datum);
   }
   /* implicit */ SerializableRecordWrapper(ByteArray datum) noexcept {

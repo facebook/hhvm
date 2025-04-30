@@ -10,8 +10,6 @@ javafoundations/scripts/create-idea-project \
 //thrift/lib/java/benchmarks:benchmarks \
 //thrift/lib/java/common:common \
 //thrift/lib/java/common:common-test \
-//thrift/lib/java/guice:guice \
-//thrift/lib/java/guice:guice-test \
 //thrift/lib/java/runtime:runtime \
 //thrift/lib/java/runtime:runtime-test \
 //thrift/lib/java/example/ping:ping-lib \

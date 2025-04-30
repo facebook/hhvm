@@ -18,6 +18,8 @@
 
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 
+#ifdef THRIFT_SCHEMA_AVAILABLE
+
 #include <folly/CppAttributes.h>
 #include <folly/Overload.h>
 #include <folly/Traits.h>
@@ -42,11 +44,8 @@
 #include <variant>
 #include <vector>
 
-#include <thrift/shared/tree_printer.h>
-
 #include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
-
-#ifdef THRIFT_SCHEMA_AVAILABLE
+#include <thrift/shared/tree_printer.h>
 
 namespace apache::thrift::schema {
 

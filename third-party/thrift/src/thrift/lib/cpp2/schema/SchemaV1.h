@@ -16,7 +16,9 @@
 
 #pragma once
 
-#if __has_include(<thrift/lib/thrift/gen-cpp2/schema_types.h>)
+#include <folly/Portability.h>
+
+#if __has_include(<thrift/lib/thrift/gen-cpp2/schema_types.h>) && !defined(_WIN32)
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 #define THRIFT_SCHEMA_AVAILABLE
 

@@ -20,6 +20,7 @@
 #include <stack>
 
 #include <folly/FBVector.h>
+#include <folly/Portability.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Bits.h>
@@ -73,6 +74,14 @@ class CompactProtocolWriter : public detail::ProtocolBase {
 
   static constexpr bool kHasIndexSupport() { return true; }
 
+  static constexpr bool kSupportsArithmeticVectors() {
+#if FOLLY_ARM_FEATURE_NEON_SVE_BRIDGE
+    return true;
+#else
+    return false;
+#endif
+  }
+
   /**
    * The IOBufQueue itself is managed by the caller.
    * It must exist for the life of the CompactProtocol as well,
@@ -113,6 +122,8 @@ class CompactProtocolWriter : public detail::ProtocolBase {
   uint32_t writeI16(int16_t i16);
   uint32_t writeI32(int32_t i32);
   uint32_t writeI64(int64_t i64);
+  template <typename T>
+  size_t writeArithmeticVector(const T* inputPtr, size_t numElements);
   uint32_t writeDouble(double dub);
   uint32_t writeFloat(float flt);
   uint32_t writeString(folly::StringPiece str);

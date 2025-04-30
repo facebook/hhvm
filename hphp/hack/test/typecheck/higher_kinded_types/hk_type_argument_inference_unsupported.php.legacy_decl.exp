@@ -1,6 +1,0 @@
-File "hk_type_argument_inference_unsupported.php", line 8, characters 10-10:
-You are supplying _ where a higher-kinded type is expected. We cannot infer higher-kinded type arguments at this time, please state the actual type. (Typing[4456])
-File "hk_type_argument_inference_unsupported.php", line 12, characters 3-6:
-You left out the type arguments here such that they may be inferred. However, a higher-kinded type is expected in place of the generic parameter T2, meaning that the type arguments cannot be inferred. Please provide the type arguments explicitly. (Typing[4456])
-  File "hk_type_argument_inference_unsupported.php", line 4, characters 19-20:
-  the generic parameter T2 was declared to be higher-kinded here.

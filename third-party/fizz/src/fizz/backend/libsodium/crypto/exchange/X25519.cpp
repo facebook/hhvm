@@ -15,27 +15,6 @@ using namespace folly;
 
 namespace fizz::libsodium {
 
-void X25519KeyExchange::setKeyPair(
-    std::unique_ptr<folly::IOBuf> gotPrivKey,
-    std::unique_ptr<folly::IOBuf> gotPubKey) {
-  std::array<uint8_t, kCurve25519PrivBytes> privKey;
-  auto privKeyRange = gotPrivKey->coalesce();
-  std::copy(
-      privKeyRange.begin(),
-      privKeyRange.begin() + kCurve25519PrivBytes,
-      privKey.begin());
-
-  std::array<uint8_t, kCurve25519PubBytes> pubKey;
-  auto pubKeyRange = gotPubKey->coalesce();
-  std::copy(
-      pubKeyRange.begin(),
-      pubKeyRange.begin() + kCurve25519PubBytes,
-      pubKey.begin());
-
-  privKey_ = privKey;
-  pubKey_ = pubKey;
-}
-
 void X25519KeyExchange::setPrivateKey(
     std::unique_ptr<folly::IOBuf> gotPrivKey) {
   if (!gotPrivKey ||

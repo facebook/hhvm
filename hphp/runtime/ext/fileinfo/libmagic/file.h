@@ -33,7 +33,7 @@
 #ifndef __file_h__
 #define __file_h__
 
-#include "compat.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/compat.h"
 
 #include "hphp/util/hphp-config.h"
 

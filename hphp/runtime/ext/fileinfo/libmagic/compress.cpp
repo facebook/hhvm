@@ -34,13 +34,13 @@
  */
 #include "hphp/util/hphp-config.h"
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef lint
 FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 #endif
 
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>

@@ -42,7 +42,6 @@
 #include "hphp/util/sha1.h"
 
 #include "hphp/zend/zend-string.h"
-#include "unit-emitter.h"
 
 #include <stdexcept>
 #include <folly/Likely.h>

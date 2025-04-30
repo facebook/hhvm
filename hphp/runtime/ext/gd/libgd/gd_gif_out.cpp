@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 /* Code drawn from ppmtogif.c, from the pbmplus package
 **
@@ -766,5 +766,3 @@ static int gifPutWord(int w, gdIOCtx *out)
   gdPutC((w >> 8) & 0xFF, out);
   return 0;
 }
-
-

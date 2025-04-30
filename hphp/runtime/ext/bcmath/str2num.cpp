@@ -29,10 +29,10 @@
 
 *************************************************************************/
 
-#include "config.h"
+#include "hphp/runtime/ext/bcmath/config.h"
 #include <ctype.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/ext/bcmath/private.h"
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 

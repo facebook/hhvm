@@ -29,9 +29,9 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/config.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/ext/bcmath/private.h"
 
 /* In some places we need to check if the number is negative. */
 

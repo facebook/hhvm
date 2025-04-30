@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
  */
 
-#include "ext_gmp.h"
+#include "hphp/runtime/ext/gmp/ext_gmp.h"
 
 #include <cstdlib>
 #include <float.h>

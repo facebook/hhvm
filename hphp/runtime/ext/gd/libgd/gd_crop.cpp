@@ -19,7 +19,7 @@
  *  (end code)
  **/
 
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/config.h"
-#include "mysql.h"
+#include <mysql.h>
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR

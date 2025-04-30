@@ -56,8 +56,8 @@ TODO:
 #include <cstring>
 #include <cmath>
 
-#include "gd.h"
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 using std::abs;
 

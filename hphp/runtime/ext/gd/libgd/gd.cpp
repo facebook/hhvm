@@ -1,10 +1,10 @@
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
 
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 #include "hphp/runtime/base/memory-manager.h"
 

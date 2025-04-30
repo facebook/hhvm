@@ -29,8 +29,8 @@
  * print.c - debugging printout routines
  */
 
-#include "file.h"
-#include "cdf.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/cdf.h"
 
 #ifndef lint
 FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")

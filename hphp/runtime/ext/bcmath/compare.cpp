@@ -29,14 +29,9 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/config.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/ext/bcmath/private.h"
 
 
 /* Compare two bc numbers.  Return value is 0 if equal, -1 if N1 is less

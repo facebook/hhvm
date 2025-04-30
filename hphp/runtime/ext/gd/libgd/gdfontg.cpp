@@ -11,7 +11,7 @@
  */
 
 
-#include "gdfontg.h"
+#include "hphp/runtime/ext/gd/libgd/gdfontg.h"
 
 static const char gdFontGiantData[] =
 {

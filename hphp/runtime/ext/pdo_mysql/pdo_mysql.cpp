@@ -23,7 +23,7 @@
 
 #include "hphp/util/network.h"
 
-#include "mysql.h"
+#include <mysql.h>
 
 #include <memory>
 

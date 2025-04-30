@@ -1,5 +1,5 @@
-#include "gd.h"
-#include "gd_intern.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd_intern.h"
 
 
 /**
@@ -99,5 +99,3 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
     old_y2 = my2;
   }
 }
-
-

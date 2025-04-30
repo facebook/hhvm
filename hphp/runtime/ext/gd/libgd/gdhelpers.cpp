@@ -1,5 +1,5 @@
-#include "gd.h"
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 #include <stdlib.h>
 #include <string.h>
 

@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "wbmp.h"
-#include "gd.h"
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/wbmp.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 #ifdef NOTDEF
 #define __TEST      /* Compile with main function */

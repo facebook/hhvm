@@ -146,5 +146,4 @@ IR_OPCODES
 
 }}
 
-#include "irlower-internal-inl.h"
-
+#include "hphp/runtime/vm/jit/irlower-internal-inl.h"

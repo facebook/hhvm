@@ -14,7 +14,7 @@
  | license@php.net so we can mail you a copy immediately.               |
  +----------------------------------------------------------------------+
  */
-#include "ext_gettext.h"
+#include "hphp/runtime/ext/gettext/ext_gettext.h"
 
 #include <stdio.h>
 

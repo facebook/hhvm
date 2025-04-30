@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -44,4 +44,3 @@ gdImagePtr gdImageCreateFromPngSource(gdSourcePtr /*inSource*/) {
   return NULL;
 }
 #endif /* HAVE_LIBPNG */
-

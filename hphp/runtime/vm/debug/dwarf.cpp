@@ -16,12 +16,10 @@
 #include "hphp/runtime/vm/debug/dwarf.h"
 
 #include <stdio.h>
-#include "debug.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/runtime/vm/debug/elfwriter.h"
 

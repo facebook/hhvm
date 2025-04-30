@@ -14,7 +14,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 /* Use this for commenting out debug-print statements. */
 /* Just use the first '#define' to allow all the prints... */

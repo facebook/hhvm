@@ -1,4 +1,4 @@
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 void gdImageFlipVertical(gdImagePtr im)
 {
@@ -69,5 +69,3 @@ void gdImageFlipBoth(gdImagePtr im)
   gdImageFlipVertical(im);
   gdImageFlipHorizontal(im);
 }
-
-

@@ -30,9 +30,9 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "jitprofiling.h"
+#include "hphp/runtime/vm/jit/vtune/jitprofiling.h"
 
-#include "ittnotify_config.h"
+#include "hphp/runtime/vm/jit/vtune/ittnotify_config.h"
 
 #if ITT_PLATFORM==ITT_PLATFORM_WIN
 #include <windows.h>

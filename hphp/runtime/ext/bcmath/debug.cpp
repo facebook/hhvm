@@ -30,8 +30,8 @@
 *************************************************************************/
 
 #include <stdio.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/ext/bcmath/private.h"
 
 /* pn prints the number NUM in base 10. */
 

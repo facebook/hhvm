@@ -27,10 +27,10 @@
 #include <limits.h>
 #include <string.h>
 
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 /* TBB: move this up so include files are not brought in */
 /* JCE: arrange HAVE_LIBJPEG so that it can be set in gd.h */
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 #undef HAVE_STDLIB_H
 
 /* 1.8.1: remove dependency on jinclude.h */

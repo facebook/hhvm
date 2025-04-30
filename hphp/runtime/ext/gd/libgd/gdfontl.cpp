@@ -12,7 +12,7 @@
  */
 
 
-#include "gdfontl.h"
+#include "hphp/runtime/ext/gd/libgd/gdfontl.h"
 
 static const char gdFontLargeData[] =
 {

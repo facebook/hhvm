@@ -8,7 +8,7 @@
    *
  */
 #include <limits.h>
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 int overflow2(int a, int b)
 {

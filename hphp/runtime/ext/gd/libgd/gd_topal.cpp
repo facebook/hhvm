@@ -50,8 +50,8 @@
  */
 
 #include <string.h>
-#include "gd.h"
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 /* (Re)define some defines known by libjpeg */
 #define QUANT_2PASS_SUPPORTED

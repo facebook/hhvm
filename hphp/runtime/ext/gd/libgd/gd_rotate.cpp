@@ -1,6 +1,6 @@
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
-#include "gd_intern.h"
+#include "hphp/runtime/ext/gd/libgd/gd_intern.h"
 #include <math.h>
 
 /*

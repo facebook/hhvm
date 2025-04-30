@@ -29,9 +29,9 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/config.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/ext/bcmath/private.h"
 
 /* Convert a number NUM to a long.  The function returns only the integer
    part of the number.  For numbers that are too large to represent as

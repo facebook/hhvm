@@ -29,15 +29,11 @@
 
 *************************************************************************/
 
-#include "config.h"
+#include "hphp/runtime/ext/bcmath/config.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/ext/bcmath/private.h"
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
-
 
 /* Here is the full add routine that takes care of negative numbers.
    N1 is added to N2 and the result placed into RESULT.  SCALE_MIN

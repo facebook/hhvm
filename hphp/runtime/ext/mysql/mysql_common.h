@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/ext/extension.h"
 
-#include "mysql.h"
+#include <mysql.h>
 
 #include "squangle/mysql_client/SSLOptionsProviderBase.h"
 
@@ -469,4 +469,3 @@ const char *php_mysql_get_field_name(int field_type);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

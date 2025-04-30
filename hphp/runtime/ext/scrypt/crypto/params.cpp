@@ -52,9 +52,9 @@
 #define HAVE_SYSINFO
 #endif
 
-#include "params.h" // nolint
+#include "hphp/runtime/ext/scrypt/crypto/params.h" // nolint
 
-#include "crypto_scrypt.h"
+#include "hphp/runtime/ext/scrypt/crypto/crypto_scrypt.h"
 
 static int memtouse(size_t, double, size_t *);
 static int scryptenc_cpuperf(double * opps);

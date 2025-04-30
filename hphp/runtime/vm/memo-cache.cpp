@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "memo-cache.h"
+#include "hphp/runtime/vm/memo-cache.h"
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-refcount.h"

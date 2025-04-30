@@ -29,14 +29,14 @@
  * apprentice - make one pass through /etc/magic, learning its secrets.
  */
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef  lint
 FILE_RCSID("@(#)$File: apprentice.c,v 1.191 2013/02/26 21:02:48 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
-#include "patchlevel.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/patchlevel.h"
 #include <stdlib.h>
 
 #if defined(__hpux) && !defined(HAVE_STRTOULL)
@@ -148,7 +148,7 @@ private struct {
   { NULL, 0, NULL }
 };
 
-#include "data_file.inc"
+#include "hphp/runtime/ext/fileinfo/libmagic/data_file.inc"
 
 struct type_tbl_s {
   const char name[16];

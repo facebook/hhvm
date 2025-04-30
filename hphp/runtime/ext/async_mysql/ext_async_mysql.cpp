@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "ext_async_mysql.h"
+#include "hphp/runtime/ext/async_mysql/ext_async_mysql.h"
 
 #include <algorithm>
 #include <memory>
@@ -27,7 +27,6 @@
 
 #include "squangle/mysql_client/Connection.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"

@@ -475,4 +475,62 @@ TEST(DebugTreeTest, AnyPatch) {
     )");
 }
 
+TEST(DebugTreeTest, StructWithTypedef) {
+  Def d;
+  d.field() = 42;
+
+  StructWithTypedef s;
+  s.list_field() = {d};
+  s.set_field() = {d};
+  s.map_field() = {{42, d}};
+
+  auto v = protocol::asValueStruct<type::struct_t<StructWithTypedef>>(s);
+
+  expectEq(
+      debugTree(v, getGraph(), Uri{apache::thrift::uri<StructWithTypedef>()}),
+      R"(
+    Definition(kind=Struct, name='StructWithTypedef', program='DebugTree.thrift')
+    ├─ list_field
+    │  ╰─ <List>
+    │     ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+    │        ╰─ field
+    │           ╰─ 42
+    ├─ set_field
+    │  ╰─ <Set>
+    │     ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+    │        ╰─ field
+    │           ╰─ 42
+    ╰─ map_field
+       ╰─ <Map>
+          ├─ Key #0
+          │  ╰─ 42
+          ╰─ Value #0
+             ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+                ╰─ field
+                   ╰─ 42
+    )");
+
+  expectEq(debugTree(v, getGraph()), R"(
+    <UNKNOWN STRUCT>
+    ├─ FieldId(2)
+    │  ╰─ <List>
+    │     ╰─ <UNKNOWN STRUCT>
+    │        ╰─ FieldId(1)
+    │           ╰─ 42
+    ├─ FieldId(3)
+    │  ╰─ <Set>
+    │     ╰─ <UNKNOWN STRUCT>
+    │        ╰─ FieldId(1)
+    │           ╰─ 42
+    ╰─ FieldId(4)
+       ╰─ <Map>
+          ├─ Key #0
+          │  ╰─ 42
+          ╰─ Value #0
+             ╰─ <UNKNOWN STRUCT>
+                ╰─ FieldId(1)
+                   ╰─ 42
+   )");
+}
+
 } // namespace apache::thrift::detail

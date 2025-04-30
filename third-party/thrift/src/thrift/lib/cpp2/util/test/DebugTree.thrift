@@ -28,6 +28,8 @@ struct Def {
   1: i32 field;
 }
 
+typedef Def MyDef
+
 struct MyData {
   1: string data1;
   2: i32 data2;
@@ -77,4 +79,12 @@ struct SharedPtr {
   1: optional string shared_field;
   2: optional i32 field2;
   3: optional i32 field3;
+}
+
+struct StructWithTypedef {
+  // TODO(dokwon): Fix debugTree with typedef
+  // 1: MyDef field;
+  2: list<MyDef> list_field;
+  3: set<MyDef> set_field;
+  4: map<i32, MyDef> map_field;
 }

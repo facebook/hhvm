@@ -169,7 +169,7 @@ class YourUnion final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 0;
+  static constexpr std::size_t __fbthrift_num_fields = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 
@@ -305,7 +305,7 @@ class YourStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
+  static constexpr std::size_t __fbthrift_num_fields = 9;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,2,1,3,4,5,6,7,8,9};
 
@@ -898,7 +898,7 @@ class MyStructNestedAnnotation final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
+  static constexpr std::size_t __fbthrift_num_fields = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
@@ -1054,7 +1054,7 @@ class FOLLY_EXPORT YourException : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 0;
+  static constexpr std::size_t __fbthrift_num_fields = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 
@@ -1160,7 +1160,7 @@ class SecretStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
+  static constexpr std::size_t __fbthrift_num_fields = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 

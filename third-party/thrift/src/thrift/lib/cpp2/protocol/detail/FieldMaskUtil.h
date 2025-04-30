@@ -52,7 +52,7 @@ template <typename T>
 bool validate_mask(MaskRef ref) {
   // Get the field ids in the thrift struct type.
   std::unordered_set<FieldId> ids;
-  ids.reserve(op::size_v<T>);
+  ids.reserve(op::num_fields<T>);
   op::for_each_ordinal<T>(
       [&](auto ord) { ids.insert(op::get_field_id<T, decltype(ord)>()); });
   const FieldIdToMask& map = ref.mask.includes_ref()

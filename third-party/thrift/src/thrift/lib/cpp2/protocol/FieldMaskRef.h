@@ -181,7 +181,7 @@ class MaskRef {
     if (auto includes = mask.includes_ref()) {
       return includes->size();
     } else {
-      return op::size_v<T> - mask.excludes_ref()->size();
+      return op::num_fields<T> - mask.excludes_ref()->size();
     }
   }
 

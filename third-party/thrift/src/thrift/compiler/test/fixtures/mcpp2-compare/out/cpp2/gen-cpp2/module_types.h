@@ -1158,7 +1158,7 @@ class Empty final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 0;
+  static constexpr std::size_t __fbthrift_num_fields = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 
@@ -1249,7 +1249,7 @@ class ASimpleStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
+  static constexpr std::size_t __fbthrift_num_fields = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
@@ -1391,7 +1391,7 @@ class ASimpleStructNoexcept final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
+  static constexpr std::size_t __fbthrift_num_fields = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
@@ -1533,7 +1533,7 @@ class MyStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 11;
+  static constexpr std::size_t __fbthrift_num_fields = 11;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11};
 
@@ -2213,7 +2213,7 @@ class SimpleUnion  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
+  static constexpr std::size_t __fbthrift_num_fields = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,7,2};
 
@@ -2500,7 +2500,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 17;
+  static constexpr std::size_t __fbthrift_num_fields = 17;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,101,2,102,3,4,5,105,6,7,8,9,10,11,19,20,21};
 
@@ -3509,7 +3509,7 @@ class ComplexUnion final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 28;
+  static constexpr std::size_t __fbthrift_num_fields = 28;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,201,3,203,4,6,7,8,9,10,11,211,12,13,14,15,16,216,17,18,19,20,21,23,24,25,26,27};
 
@@ -5894,7 +5894,7 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 3;
+  static constexpr std::size_t __fbthrift_num_fields = 3;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,101,2};
 
@@ -6155,7 +6155,7 @@ class containerStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 44;
+  static constexpr std::size_t __fbthrift_num_fields = 44;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,101,201,2,102,202,3,103,203,4,5,105,205,6,7,8,9,10,11,12,13,14,15,16,17,18,118,218,19,21,22,23,123,223,24,25,125,225,26,27,28,30,31,32};
 
@@ -7859,7 +7859,7 @@ class MyIncludedStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 4;
+  static constexpr std::size_t __fbthrift_num_fields = 4;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};
 
@@ -8164,7 +8164,7 @@ class AnnotatedStruct  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 37;
+  static constexpr std::size_t __fbthrift_num_fields = 37;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,38,39,40};
 
@@ -9474,7 +9474,7 @@ class ComplexContainerStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
+  static constexpr std::size_t __fbthrift_num_fields = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
@@ -9680,7 +9680,7 @@ class FloatStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
+  static constexpr std::size_t __fbthrift_num_fields = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
@@ -9871,7 +9871,7 @@ class FloatUnion final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 2;
+  static constexpr std::size_t __fbthrift_num_fields = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
@@ -10136,7 +10136,7 @@ class AllRequiredNoExceptMoveCtrStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
+  static constexpr std::size_t __fbthrift_num_fields = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
 

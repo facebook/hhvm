@@ -156,7 +156,7 @@ namespace {
 bool maybeTypeStruct(const protocol::Value& value) {
   // Add static_assert to make sure this function is updated when we changed
   // Thrift.Any's schema in the future.
-  static_assert(op::size_v<type::TypeStruct> == 2);
+  static_assert(op::num_fields<type::TypeStruct> == 2);
 
   // Make sure field id matches
   static_assert(
@@ -189,7 +189,7 @@ bool maybeTypeStruct(const protocol::Value& value) {
 bool maybeAny(const protocol::Object& obj) {
   // Add static_assert to make sure this function is updated when we changed
   // Thrift.Any's schema in the future.
-  static_assert(op::size_v<type::AnyStruct> == 3);
+  static_assert(op::num_fields<type::AnyStruct> == 3);
 
   // Make sure field id matches
   static_assert(op::get_field_id_v<type::AnyStruct, ident::type> == FieldId{1});

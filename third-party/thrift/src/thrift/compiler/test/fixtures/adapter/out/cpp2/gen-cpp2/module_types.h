@@ -523,8 +523,6 @@ template<> struct std::hash<::facebook::thrift::test::ThriftAdaptedEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::Color>;
-
 template <> struct TEnumTraits<::facebook::thrift::test::Color> {
   using type = ::facebook::thrift::test::Color;
 
@@ -552,8 +550,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::Color> {
   static constexpr type min() { return type::UNKNOWN; }
   static constexpr type max() { return type::BLUE; }
 };
-
-template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>;
 
 template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
   using type = ::facebook::thrift::test::ThriftAdaptedEnum;

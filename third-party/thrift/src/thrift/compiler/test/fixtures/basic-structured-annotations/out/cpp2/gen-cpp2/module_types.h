@@ -114,8 +114,6 @@ template<> struct std::hash<::test::fixtures::basic-structured-annotations::MyEn
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>;
-
 template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum> {
   using type = ::test::fixtures::basic-structured-annotations::MyEnum;
 

@@ -40,8 +40,6 @@ template<> struct std::hash<::{{program:qualified_namespace}}::{{enum:self.cpp_n
 namespace apache::thrift {
 {{#program:enums}}
 
-template <> struct TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>;
-
 template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {
   using type = ::{{program:qualified_namespace}}::{{enum:self.cpp_name}};
 

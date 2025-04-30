@@ -170,8 +170,6 @@ template<> struct std::hash<::test::fixtures::basic::HackEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::basic::MyEnum>;
-
 template <> struct TEnumTraits<::test::fixtures::basic::MyEnum> {
   using type = ::test::fixtures::basic::MyEnum;
 
@@ -199,8 +197,6 @@ template <> struct TEnumTraits<::test::fixtures::basic::MyEnum> {
   static constexpr type min() { return type::MyValue1; }
   static constexpr type max() { return type::MyValue2; }
 };
-
-template <> struct TEnumDataStorage<::test::fixtures::basic::HackEnum>;
 
 template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
   using type = ::test::fixtures::basic::HackEnum;

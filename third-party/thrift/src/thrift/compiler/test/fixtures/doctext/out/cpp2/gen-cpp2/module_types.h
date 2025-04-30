@@ -51,8 +51,6 @@ template<> struct std::hash<::cpp2::B> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::cpp2::B>;
-
 template <> struct TEnumTraits<::cpp2::B> {
   using type = ::cpp2::B;
 

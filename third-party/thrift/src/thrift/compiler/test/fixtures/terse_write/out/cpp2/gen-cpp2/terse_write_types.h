@@ -352,8 +352,6 @@ template<> struct std::hash<::facebook::thrift::test::terse_write::MyEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>;
-
 template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyEnum> {
   using type = ::facebook::thrift::test::terse_write::MyEnum;
 

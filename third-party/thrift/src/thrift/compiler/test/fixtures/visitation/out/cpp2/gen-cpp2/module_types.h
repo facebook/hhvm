@@ -862,8 +862,6 @@ template<> struct std::hash<::test_cpp2::cpp_reflection::enum_with_special_names
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>;
-
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum1> {
   using type = ::test_cpp2::cpp_reflection::enum1;
 
@@ -891,8 +889,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum1> {
   static constexpr type min() { return type::field0; }
   static constexpr type max() { return type::field2; }
 };
-
-template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>;
 
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
   using type = ::test_cpp2::cpp_reflection::enum2;
@@ -922,8 +918,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
   static constexpr type max() { return type::field2_2; }
 };
 
-template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>;
-
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
   using type = ::test_cpp2::cpp_reflection::enum3;
 
@@ -951,8 +945,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
   static constexpr type min() { return type::field0_3; }
   static constexpr type max() { return type::field1_3; }
 };
-
-template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>;
 
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names> {
   using type = ::test_cpp2::cpp_reflection::enum_with_special_names;

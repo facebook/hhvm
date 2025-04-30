@@ -107,8 +107,6 @@ template<> struct std::hash<::test::fixtures::tablebased::ExampleEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>;
-
 template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
   using type = ::test::fixtures::tablebased::ExampleEnum;
 

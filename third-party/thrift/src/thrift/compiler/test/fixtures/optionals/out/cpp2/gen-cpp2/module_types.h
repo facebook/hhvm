@@ -128,8 +128,6 @@ template<> struct std::hash<::cpp2::Animal> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::cpp2::Animal>;
-
 template <> struct TEnumTraits<::cpp2::Animal> {
   using type = ::cpp2::Animal;
 

@@ -83,8 +83,6 @@ template<> struct std::hash<::test::fixtures::enumstrict::MyBigEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>;
-
 template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
   using type = ::test::fixtures::enumstrict::EmptyEnum;
 
@@ -110,8 +108,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
     return ret.data();
   }
 };
-
-template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>;
 
 template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
   using type = ::test::fixtures::enumstrict::MyEnum;
@@ -141,8 +137,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
   static constexpr type max() { return type::TWO; }
 };
 
-template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>;
-
 template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
   using type = ::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum;
 
@@ -170,8 +164,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefau
   static constexpr type min() { return type::ZERO; }
   static constexpr type max() { return type::TWO; }
 };
-
-template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>;
 
 template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
   using type = ::test::fixtures::enumstrict::MyBigEnum;

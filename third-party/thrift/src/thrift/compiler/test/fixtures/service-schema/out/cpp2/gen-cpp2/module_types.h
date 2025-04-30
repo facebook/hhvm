@@ -44,8 +44,6 @@ template<> struct std::hash<::cpp2::Result> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::cpp2::Result>;
-
 template <> struct TEnumTraits<::cpp2::Result> {
   using type = ::cpp2::Result;
 

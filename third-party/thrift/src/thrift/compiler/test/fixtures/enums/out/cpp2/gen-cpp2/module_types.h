@@ -197,8 +197,6 @@ template<> struct std::hash<::test::fixtures::enums::MyBitmaskEnum2> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::enums::Metasyntactic>;
-
 template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   using type = ::test::fixtures::enums::Metasyntactic;
 
@@ -226,8 +224,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   static constexpr type min() { return type::FOO; }
   static constexpr type max() { return type::BAX; }
 };
-
-template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum1>;
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
   using type = ::test::fixtures::enums::MyEnum1;
@@ -257,8 +253,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
   static constexpr type max() { return type::ME1_6; }
 };
 
-template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum2>;
-
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
   using type = ::test::fixtures::enums::MyEnum2;
 
@@ -286,8 +280,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
   static constexpr type min() { return type::ME2_0; }
   static constexpr type max() { return type::ME2_2; }
 };
-
-template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum3>;
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
   using type = ::test::fixtures::enums::MyEnum3;
@@ -317,8 +309,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
   static constexpr type max() { return type::ME3_10; }
 };
 
-template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum4>;
-
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   using type = ::test::fixtures::enums::MyEnum4;
 
@@ -347,8 +337,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   static constexpr type max() { return type::ME4_C; }
 };
 
-template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>;
-
 template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   using type = ::test::fixtures::enums::MyBitmaskEnum1;
 
@@ -376,8 +364,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   static constexpr type min() { return type::ONE; }
   static constexpr type max() { return type::FOUR; }
 };
-
-template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>;
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
   using type = ::test::fixtures::enums::MyBitmaskEnum2;

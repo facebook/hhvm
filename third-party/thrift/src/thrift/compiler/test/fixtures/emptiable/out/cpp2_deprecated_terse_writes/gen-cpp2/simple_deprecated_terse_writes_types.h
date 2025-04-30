@@ -172,8 +172,6 @@ template<> struct std::hash<::apache::thrift::test::MyEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::apache::thrift::test::MyEnum>;
-
 template <> struct TEnumTraits<::apache::thrift::test::MyEnum> {
   using type = ::apache::thrift::test::MyEnum;
 

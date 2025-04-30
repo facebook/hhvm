@@ -103,8 +103,6 @@ template<> struct std::hash<::some::ns::EnumB> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::some::ns::EnumB>;
-
 template <> struct TEnumTraits<::some::ns::EnumB> {
   using type = ::some::ns::EnumB;
 

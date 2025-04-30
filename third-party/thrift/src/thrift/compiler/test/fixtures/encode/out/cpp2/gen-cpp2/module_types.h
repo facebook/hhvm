@@ -112,8 +112,6 @@ template<> struct std::hash<::facebook::thrift::test::Enum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::Enum>;
-
 template <> struct TEnumTraits<::facebook::thrift::test::Enum> {
   using type = ::facebook::thrift::test::Enum;
 

@@ -82,8 +82,6 @@ template<> struct std::hash<::cpp2::MyEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::cpp2::MyEnum>;
-
 template <> struct TEnumTraits<::cpp2::MyEnum> {
   using type = ::cpp2::MyEnum;
 

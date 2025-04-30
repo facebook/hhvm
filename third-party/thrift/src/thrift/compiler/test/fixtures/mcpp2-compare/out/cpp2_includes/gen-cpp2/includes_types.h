@@ -43,8 +43,6 @@ template<> struct std::hash<::a::different::ns::AnEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::a::different::ns::AnEnum>;
-
 template <> struct TEnumTraits<::a::different::ns::AnEnum> {
   using type = ::a::different::ns::AnEnum;
 

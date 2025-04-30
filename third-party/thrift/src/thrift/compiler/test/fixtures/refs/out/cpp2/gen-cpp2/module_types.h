@@ -325,8 +325,6 @@ template<> struct std::hash<::cpp2::TypedEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::cpp2::MyEnum>;
-
 template <> struct TEnumTraits<::cpp2::MyEnum> {
   using type = ::cpp2::MyEnum;
 
@@ -354,8 +352,6 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
   static constexpr type min() { return type::Zero; }
   static constexpr type max() { return type::One; }
 };
-
-template <> struct TEnumDataStorage<::cpp2::TypedEnum>;
 
 template <> struct TEnumTraits<::cpp2::TypedEnum> {
   using type = ::cpp2::TypedEnum;

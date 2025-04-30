@@ -448,8 +448,6 @@ template<> struct std::hash<::test::fixtures::python_capi::NormalDecentEnum> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::python_capi::MyEnum>;
-
 template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
   using type = ::test::fixtures::python_capi::MyEnum;
 
@@ -477,8 +475,6 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
   static constexpr type min() { return type::MyValue1; }
   static constexpr type max() { return type::MyValue2; }
 };
-
-template <> struct TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>;
 
 template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> {
   using type = ::test::fixtures::python_capi::NormalDecentEnum;

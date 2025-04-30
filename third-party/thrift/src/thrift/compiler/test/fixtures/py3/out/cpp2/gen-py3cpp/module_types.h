@@ -339,8 +339,6 @@ template<> struct std::hash<::py3::simple::Flags> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::py3::simple::AnEnum>;
-
 template <> struct TEnumTraits<::py3::simple::AnEnum> {
   using type = ::py3::simple::AnEnum;
 
@@ -369,8 +367,6 @@ template <> struct TEnumTraits<::py3::simple::AnEnum> {
   static constexpr type max() { return type::FOUR; }
 };
 
-template <> struct TEnumDataStorage<::py3::simple::AnEnumRenamed>;
-
 template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   using type = ::py3::simple::AnEnumRenamed;
 
@@ -398,8 +394,6 @@ template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   static constexpr type min() { return type::name; }
   static constexpr type max() { return type::normal; }
 };
-
-template <> struct TEnumDataStorage<::py3::simple::Flags>;
 
 template <> struct TEnumTraits<::py3::simple::Flags> {
   using type = ::py3::simple::Flags;

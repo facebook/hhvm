@@ -65,8 +65,6 @@ template<> struct std::hash<::facebook::ns::qwerty::AnEnumE> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>;
-
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumA> {
   using type = ::facebook::ns::qwerty::AnEnumA;
 
@@ -94,8 +92,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumA> {
   static constexpr type min() { return type::FIELDA; }
   static constexpr type max() { return type::FIELDA; }
 };
-
-template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>;
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
   using type = ::facebook::ns::qwerty::AnEnumB;
@@ -125,8 +121,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
   static constexpr type max() { return type::FIELDB; }
 };
 
-template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>;
-
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumC> {
   using type = ::facebook::ns::qwerty::AnEnumC;
 
@@ -155,8 +149,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumC> {
   static constexpr type max() { return type::FIELDC; }
 };
 
-template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>;
-
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
   using type = ::facebook::ns::qwerty::AnEnumD;
 
@@ -184,8 +176,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
   static constexpr type min() { return type::FIELDD; }
   static constexpr type max() { return type::FIELDD; }
 };
-
-template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>;
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
   using type = ::facebook::ns::qwerty::AnEnumE;

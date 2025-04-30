@@ -176,8 +176,6 @@ template<> struct std::hash<::cpp2::Company> :
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::cpp2::EmptyEnum>;
-
 template <> struct TEnumTraits<::cpp2::EmptyEnum> {
   using type = ::cpp2::EmptyEnum;
 
@@ -203,8 +201,6 @@ template <> struct TEnumTraits<::cpp2::EmptyEnum> {
     return ret.data();
   }
 };
-
-template <> struct TEnumDataStorage<::cpp2::City>;
 
 template <> struct TEnumTraits<::cpp2::City> {
   using type = ::cpp2::City;
@@ -233,8 +229,6 @@ template <> struct TEnumTraits<::cpp2::City> {
   static constexpr type min() { return type::NYC; }
   static constexpr type max() { return type::LON; }
 };
-
-template <> struct TEnumDataStorage<::cpp2::Company>;
 
 template <> struct TEnumTraits<::cpp2::Company> {
   using type = ::cpp2::Company;

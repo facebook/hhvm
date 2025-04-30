@@ -102,44 +102,45 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   return values->names;
 }
 
-static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {
-  return enumHasValue(self_, value.asTypedValue());
+static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, TypedValue tv) {
+  return enumHasValue(self_, tv);
 }
 
-static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
-  if (UNLIKELY(!value.isInteger() && !value.isString() &&
-               !value.isClass() && !value.isLazyClass())) {
-    return init_null();
+static TypedValue HHVM_STATIC_METHOD(BuiltinEnum, coerce, TypedValue tv) {
+  if (UNLIKELY(!tvIsInt(tv) && !tvIsString(tv) &&
+               !tvIsClass(tv) && !tvIsLazyClass(tv))) {
+    return make_tv<KindOfNull>();
   }
 
-  auto res = value;
+  auto res = tv;
 
   // Manually do int-like string conversion. This is to ensure the lookup
   // succeeds below (since the values array does int-like string key conversion
   // when created, even if its a dict).
   int64_t num;
-  if (value.isString() &&
-      value.getStringData()->isStrictlyInteger(num)) {
-    res = Variant(num);
-  } else if (value.isClass()) {
-    res = VarNR{value.toClassVal()->name()};
-  } else if (value.isLazyClass()) {
-    res = VarNR{value.toLazyClassVal().name()};
+  if (tvIsString(tv) && val(tv).pstr->isStrictlyInteger(num)) {
+    res = make_tv<KindOfInt64>(num);
+  } else if (tvIsClass(tv)) {
+    res = make_tv<KindOfPersistentString>(val(tv).pclass->name());
+  } else if (tvIsLazyClass(tv)) {
+    res = make_tv<KindOfPersistentString>(val(tv).plazyclass.name());
   }
 
   auto values = EnumCache::getValuesBuiltin(self_);
   if (!values->names.exists(res)) {
-    res = init_null();
+    res = make_tv<KindOfNull>();
   } else if (auto base = self_->enumBaseTy().underlyingDataType()) {
-    if (isStringType(*base) && res.isInteger()) {
-      res = Variant(res.toString());
+    if (isStringType(*base) && tvIsInt(res)) {
+      return make_tv<KindOfString>(buildStringData(val(res).num));
     }
-  } else {
+  } else if (tvIsInt(res)) {
     // If the value is present, but the enum has no base type, return the value
     // as specified, undoing any int-like string conversion we did on it.
-    if (res.isInteger()) return value;
+    tvIncRefGen(tv);
+    return tv;
   }
 
+  tvIncRefGen(res);
   return res;
 }
 

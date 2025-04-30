@@ -22,11 +22,10 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool enumHasValue(const Class* cls, const TypedValue* cell) {
+bool enumHasValue(const Class* cls, TypedValue cell) {
   assertx(isEnum(cls));
-  auto const type = cell->m_type;
-  if (UNLIKELY(type != KindOfInt64 && !isStringType(type) &&
-               !isClassType(type) && !isLazyClassType(type))) {
+  if (UNLIKELY(!tvIsInt(cell) && !tvIsString(cell) &&
+               !tvIsClass(cell) && !tvIsLazyClass(cell))) {
     return false;
   }
   auto const values = EnumCache::getValuesBuiltin(cls);
@@ -36,13 +35,13 @@ bool enumHasValue(const Class* cls, const TypedValue* cell) {
   if (isCoercibleToInteger(cell, num, "enumHasValue")) {
     return values->names.exists(num);
   }
-  auto const val = tvClassToString(*cell);
+  auto const val = tvClassToString(cell);
 
   return values->names.exists(val);
 }
 
-bool isCoercibleToInteger(const TypedValue *cell, int64_t &num, const char* callsite) {
-  if (!tvIsString(cell) || !cell->m_data.pstr->isStrictlyInteger(num)) {
+bool isCoercibleToInteger(TypedValue cell, int64_t &num, const char* callsite) {
+  if (!tvIsString(cell) || !val(cell).pstr->isStrictlyInteger(num)) {
     return false;
   }
 

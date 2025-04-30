@@ -24,12 +24,12 @@ namespace HPHP {
 /**
  * Determine if the input is a value of the given enum.
  */
-bool enumHasValue(const Class* cls, const TypedValue* value);
+bool enumHasValue(const Class* cls, TypedValue value);
 
 /**
  * Determine if the input is a string that can be coerced into an integer.
  */
-bool isCoercibleToInteger(const TypedValue *cell, int64_t &num, const char* callsite);
+bool isCoercibleToInteger(TypedValue cell, int64_t &num, const char* callsite);
 
 ///////////////////////////////////////////////////////////////////////////////
 

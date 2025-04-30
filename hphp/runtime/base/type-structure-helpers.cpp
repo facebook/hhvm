@@ -720,7 +720,7 @@ bool checkTypeStructureMatchesTVImpl(
         if (dt) return equivDataTypes(*dt, type);
         return isIntType(type) || isStringType(type);
       }
-      return cls && enumHasValue(cls, &c1);
+      return cls && enumHasValue(cls, c1);
     }
 
     case TypeStructure::Kind::T_trait:

@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
+#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>

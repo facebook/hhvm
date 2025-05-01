@@ -610,6 +610,32 @@ TEST_F(ServiceSchemaTest, LookupByDefinitionKeys) {
   }
 }
 
+TEST_F(ServiceSchemaTest, getServiceSchemaNodes) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  std::vector<type::DefinitionKey> serviceDefinitionKeys =
+      definitionKeysFor<test::TestService>();
+
+  ASSERT_EQ(serviceDefinitionKeys.size(), 1);
+
+  const auto* dynamicService =
+      &detail::lookUpDefinition(syntaxGraph, serviceDefinitionKeys.back())
+           .asService();
+
+  const auto staticServiceNodes =
+      apache::thrift::ServiceHandler<test::TestService>()
+          .getServiceSchemaNodes();
+  ASSERT_EQ(staticServiceNodes.size(), 1);
+
+  const auto* staticService = staticServiceNodes.back().unwrap();
+
+  // static service uses the global registry while dynamic service has its own
+  // SyntaxGraph instance.
+  EXPECT_NE(dynamicService, staticService);
+
+  EXPECT_EQ(
+      dynamicService->definition().name(), staticService->definition().name());
+}
+
 TEST(SyntaxGraphTest, getDefinitionNode) {
   auto& registry = SchemaRegistry::get();
 

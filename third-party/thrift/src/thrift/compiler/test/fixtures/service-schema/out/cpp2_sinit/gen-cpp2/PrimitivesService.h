@@ -45,6 +45,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   CreateMethodMetadataResult createMethodMetadata() override;
   #if defined(THRIFT_SCHEMA_AVAILABLE)
   std::optional<schema::DefinitionsSchema> getServiceSchema() override;
+  std::vector<folly::not_null<const schema::ServiceNode*>> getServiceSchemaNodes() override;
   #endif
   bool isThriftGenerated() const override final { return true; }
  private:

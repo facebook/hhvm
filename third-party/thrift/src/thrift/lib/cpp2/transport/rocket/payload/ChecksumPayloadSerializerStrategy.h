@@ -56,6 +56,8 @@ class ChecksumPayloadSerializerStrategy final
         recordChecksumCalculated_(std::move(options.recordChecksumCalculated)) {
   }
 
+  bool supportsChecksum() { return true; }
+
   template <class T>
   FOLLY_ERASE folly::Try<T> unpackAsCompressed(
       Payload&& payload, bool decodeMetadataUsingBinary) {

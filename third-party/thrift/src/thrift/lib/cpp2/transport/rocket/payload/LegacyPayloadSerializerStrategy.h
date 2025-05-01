@@ -29,6 +29,8 @@ class LegacyPayloadSerializerStrategy final
  public:
   LegacyPayloadSerializerStrategy() : PayloadSerializerStrategy(*this) {}
 
+  bool supportsChecksum() { return false; }
+
   template <class T>
   FOLLY_ERASE folly::Try<T> unpackAsCompressed(
       rocket::Payload&& payload, bool decodeMetadataUsingBinary) {

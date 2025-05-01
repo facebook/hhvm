@@ -526,8 +526,18 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto& metadata = requestPayloadTry->metadata;
 
   ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm::NONE;
-  if (auto checksum = metadata.checksum()) {
-    checksumAlgorithm = *checksum->algorithm();
+  if (connection.getPayloadSerializer()->supportsChecksum()) {
+    if (auto checksum = metadata.checksum()) {
+      checksumAlgorithm = *checksum->algorithm();
+    }
+  } else if (
+      metadata.checksum().has_value() &&
+      metadata.checksum()->algorithm().value() != ChecksumAlgorithm::NONE) {
+    LOG_FIRST_N(WARNING, 10)
+        << "Checksum is not supported, but checksum on the client was set";
+    Checksum c;
+    c.algorithm() = ChecksumAlgorithm::NONE;
+    metadata.checksum() = c;
   }
 
   // Extract FDs as early as possible to avoid holding them open if the

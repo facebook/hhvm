@@ -31,6 +31,8 @@ namespace apache::thrift::rocket {
 template <typename Child>
 class PayloadSerializerStrategy {
  public:
+  bool supportsChecksum() { return child_.supportsChecksum(); }
+
   template <class T>
   FOLLY_ALWAYS_INLINE folly::Try<T> unpackAsCompressed(
       Payload&& payload, bool decodeMetadataUsingBinary) {

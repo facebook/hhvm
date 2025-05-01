@@ -31,6 +31,8 @@ class DefaultPayloadSerializerStrategy final
  public:
   DefaultPayloadSerializerStrategy() : PayloadSerializerStrategy(*this) {}
 
+  bool supportsChecksum() { return false; }
+
   template <class T>
   folly::Try<T> unpackAsCompressed(
       rocket::Payload&& payload, bool decodeMetadataUsingBinary) {

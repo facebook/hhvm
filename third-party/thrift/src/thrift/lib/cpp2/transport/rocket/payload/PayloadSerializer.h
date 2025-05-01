@@ -107,6 +107,38 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
           DefaultPayloadSerializerStrategy>>
       strategy_;
 
+  /**
+   * Visits the strategy and calls the delegate function with the strategy as
+   * the parameter. Done manually instead of using std::visit for performance.
+   */
+  template <typename DelegateFunc>
+  FOLLY_ALWAYS_INLINE decltype(auto) visit(DelegateFunc&& delegate) {
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      auto& strategy = std::get<DefaultPayloadSerializerStrategy>(strategy_);
+      return delegate(strategy);
+    } else if (std::holds_alternative<LegacyPayloadSerializerStrategy>(
+                   strategy_)) {
+      auto& strategy = std::get<LegacyPayloadSerializerStrategy>(strategy_);
+      return delegate(strategy);
+    } else if (std::holds_alternative<ChecksumPayloadSerializerStrategy<
+                   DefaultPayloadSerializerStrategy>>(strategy_)) {
+      auto& strategy = std::get<
+          ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>>(
+          strategy_);
+      return delegate(strategy);
+    } else if (std::holds_alternative<ChecksumPayloadSerializerStrategy<
+                   LegacyPayloadSerializerStrategy>>(strategy_)) {
+      auto& strategy = std::get<
+          ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>>(
+          strategy_);
+      return delegate(strategy);
+    } else {
+      auto& strategy = std::get<CustomCompressionPayloadSerializerStrategy<
+          DefaultPayloadSerializerStrategy>>(strategy_);
+      return delegate(strategy);
+    }
+  }
+
  public:
   template <
       typename Strategy,
@@ -169,6 +201,10 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
   }
 
   Ptr getNonOwningPtr() { return Ptr(*this); }
+
+  bool supportsChecksum() {
+    return visit([&](auto& strategy) { return strategy.supportsChecksum(); });
+  }
 
   template <class T>
   folly::Try<T> unpackAsCompressed(
@@ -258,38 +294,6 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
 
  private:
   static PayloadSerializerHolder& getPayloadSerializerHolder();
-
-  /**
-   * Visits the strategy and calls the delegate function with the strategy as
-   * the parameter. Done manually instead of using std::visit for performance.
-   */
-  template <typename DelegateFunc>
-  FOLLY_ALWAYS_INLINE decltype(auto) visit(DelegateFunc&& delegate) {
-    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
-      auto& strategy = std::get<DefaultPayloadSerializerStrategy>(strategy_);
-      return delegate(strategy);
-    } else if (std::holds_alternative<LegacyPayloadSerializerStrategy>(
-                   strategy_)) {
-      auto& strategy = std::get<LegacyPayloadSerializerStrategy>(strategy_);
-      return delegate(strategy);
-    } else if (std::holds_alternative<ChecksumPayloadSerializerStrategy<
-                   DefaultPayloadSerializerStrategy>>(strategy_)) {
-      auto& strategy = std::get<
-          ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>>(
-          strategy_);
-      return delegate(strategy);
-    } else if (std::holds_alternative<ChecksumPayloadSerializerStrategy<
-                   LegacyPayloadSerializerStrategy>>(strategy_)) {
-      auto& strategy = std::get<
-          ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>>(
-          strategy_);
-      return delegate(strategy);
-    } else {
-      auto& strategy = std::get<CustomCompressionPayloadSerializerStrategy<
-          DefaultPayloadSerializerStrategy>>(strategy_);
-      return delegate(strategy);
-    }
-  }
 
  public:
   std::unique_ptr<folly::IOBuf> compressBuffer(

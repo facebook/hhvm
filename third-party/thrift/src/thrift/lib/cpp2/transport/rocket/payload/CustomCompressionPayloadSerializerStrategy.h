@@ -53,6 +53,8 @@ class CustomCompressionPayloadSerializerStrategy final
     }
   }
 
+  bool supportsChecksum() { return delegate_.supportsChecksum(); }
+
   template <class T>
   FOLLY_ERASE folly::Try<T> unpackAsCompressed(
       Payload&& payload, bool decodeMetadataUsingBinary) {

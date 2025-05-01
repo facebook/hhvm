@@ -144,7 +144,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyService;
-  module_MyService.name() = "module.MyService";
+  module_MyService.name() = "MyService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_foo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_interact,
@@ -158,8 +158,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyService", std::move(module_MyService));
-  context.service_name() = "module.MyService";
+  metadata.services()->emplace("MyService", std::move(module_MyService));
+  context.service_name() = "MyService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -217,7 +217,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen(:
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_Factories;
-  module_Factories.name() = "module.Factories";
+  module_Factories.name() = "Factories";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_foo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interact,
@@ -231,8 +231,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.Factories", std::move(module_Factories));
-  context.service_name() = "module.Factories";
+  metadata.services()->emplace("Factories", std::move(module_Factories));
+  context.service_name() = "Factories";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -259,7 +259,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen(::a
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_Perform;
-  module_Perform.name() = "module.Perform";
+  module_Perform.name() = "Perform";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen_foo,
   };
@@ -270,8 +270,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.Perform", std::move(module_Perform));
-  context.service_name() = "module.Perform";
+  metadata.services()->emplace("Perform", std::move(module_Perform));
+  context.service_name() = "Perform";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -298,7 +298,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_InteractWithShared;
-  module_InteractWithShared.name() = "module.InteractWithShared";
+  module_InteractWithShared.name() = "InteractWithShared";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::gen_do_some_similar_things,
   };
@@ -309,8 +309,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.InteractWithShared", std::move(module_InteractWithShared));
-  context.service_name() = "module.InteractWithShared";
+  metadata.services()->emplace("InteractWithShared", std::move(module_InteractWithShared));
+  context.service_name() = "InteractWithShared";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -344,7 +344,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>>::gen(
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_BoxService;
-  module_BoxService.name() = "module.BoxService";
+  module_BoxService.name() = "BoxService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>>::gen_getABoxSession,
   };
@@ -355,8 +355,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.BoxService", std::move(module_BoxService));
-  context.service_name() = "module.BoxService";
+  metadata.services()->emplace("BoxService", std::move(module_BoxService));
+  context.service_name() = "BoxService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

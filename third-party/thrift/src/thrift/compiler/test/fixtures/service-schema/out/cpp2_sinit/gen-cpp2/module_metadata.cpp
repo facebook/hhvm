@@ -147,7 +147,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_PrimitivesService;
-  module_PrimitivesService.name() = "module.PrimitivesService";
+  module_PrimitivesService.name() = "PrimitivesService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws,
@@ -160,8 +160,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.PrimitivesService", std::move(module_PrimitivesService));
-  context.service_name() = "module.PrimitivesService";
+  metadata.services()->emplace("PrimitivesService", std::move(module_PrimitivesService));
+  context.service_name() = "PrimitivesService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

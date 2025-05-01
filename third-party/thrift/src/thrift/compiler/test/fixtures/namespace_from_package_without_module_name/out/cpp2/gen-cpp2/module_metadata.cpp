@@ -78,7 +78,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_TestService;
-  module_TestService.name() = "module.TestService";
+  module_TestService.name() = "test.dev/namespace_from_package_without_module_name/TestService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::gen_init,
   };
@@ -89,8 +89,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.TestService", std::move(module_TestService));
-  context.service_name() = "module.TestService";
+  metadata.services()->emplace("test.dev/namespace_from_package_without_module_name/TestService", std::move(module_TestService));
+  context.service_name() = "test.dev/namespace_from_package_without_module_name/TestService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

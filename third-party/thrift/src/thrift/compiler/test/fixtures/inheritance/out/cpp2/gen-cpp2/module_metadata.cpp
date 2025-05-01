@@ -48,7 +48,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen(::ap
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyRoot;
-  module_MyRoot.name() = "module.MyRoot";
+  module_MyRoot.name() = "MyRoot";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen_do_root,
   };
@@ -59,8 +59,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyRoot", std::move(module_MyRoot));
-  context.service_name() = "module.MyRoot";
+  metadata.services()->emplace("MyRoot", std::move(module_MyRoot));
+  context.service_name() = "MyRoot";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -87,7 +87,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen(::ap
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyNode;
-  module_MyNode.name() = "module.MyNode";
+  module_MyNode.name() = "MyNode";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen_do_mid,
   };
@@ -97,11 +97,11 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_MyNode.parent() = "module.MyRoot";
+  module_MyNode.parent() = "MyRoot";
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyNode", std::move(module_MyNode));
-  context.service_name() = "module.MyNode";
+  metadata.services()->emplace("MyNode", std::move(module_MyNode));
+  context.service_name() = "MyNode";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -128,7 +128,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen(::ap
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyLeaf;
-  module_MyLeaf.name() = "module.MyLeaf";
+  module_MyLeaf.name() = "MyLeaf";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen_do_leaf,
   };
@@ -138,11 +138,11 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_MyLeaf.parent() = "module.MyNode";
+  module_MyLeaf.parent() = "MyNode";
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyLeaf", std::move(module_MyLeaf));
-  context.service_name() = "module.MyLeaf";
+  metadata.services()->emplace("MyLeaf", std::move(module_MyLeaf));
+  context.service_name() = "MyLeaf";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

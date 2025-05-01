@@ -170,7 +170,7 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen(::apache::t
 
 const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService {{service:metadata_name}};
-  {{service:metadata_name}}.name() = "{{program:name}}.{{service:name}}";
+  {{service:metadata_name}}.name() = "{{service:thrift_uri_or_service_name}}";
 {{#service:functions?}}
   static const ThriftFunctionGenerator functions[] = {
 {{#service:functions}}{{^function:starts_interaction?}}
@@ -185,7 +185,7 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
   auto selfIndex = services.size();
   services.emplace_back();
 {{#service:extends?}}
-  {{service:metadata_name}}.parent() = "{{#service:extends}}{{service:program_name}}.{{service:name}}{{/service:extends}}";
+  {{service:metadata_name}}.parent() = "{{#service:extends}}{{service:thrift_uri_or_service_name}}{{/service:extends}}";
 {{#service:extends}}
   ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse(metadata, services);
 {{/service:extends}}
@@ -196,8 +196,8 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
 {{/structured_annotation:const_struct?}}
 {{/service:structured_annotations}}
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("{{program:name}}.{{service:name}}", std::move({{service:metadata_name}}));
-  context.service_name() = "{{program:name}}.{{service:name}}";
+  metadata.services()->emplace("{{service:thrift_uri_or_service_name}}", std::move({{service:metadata_name}}));
+  context.service_name() = "{{service:thrift_uri_or_service_name}}";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "{{program:name}}";
   context.module() = std::move(module);

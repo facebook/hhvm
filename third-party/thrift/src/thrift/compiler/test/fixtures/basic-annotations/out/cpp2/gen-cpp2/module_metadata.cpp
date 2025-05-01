@@ -273,7 +273,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyService;
-  module_MyService.name() = "module.MyService";
+  module_MyService.name() = "MyService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getRandomData,
@@ -290,8 +290,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyService", std::move(module_MyService));
-  context.service_name() = "module.MyService";
+  metadata.services()->emplace("MyService", std::move(module_MyService));
+  context.service_name() = "MyService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -328,7 +328,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyServicePrioParent;
-  module_MyServicePrioParent.name() = "module.MyServicePrioParent";
+  module_MyServicePrioParent.name() = "MyServicePrioParent";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_pong,
@@ -340,8 +340,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyServicePrioParent", std::move(module_MyServicePrioParent));
-  context.service_name() = "module.MyServicePrioParent";
+  metadata.services()->emplace("MyServicePrioParent", std::move(module_MyServicePrioParent));
+  context.service_name() = "MyServicePrioParent";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -369,7 +369,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyServicePrioChild;
-  module_MyServicePrioChild.name() = "module.MyServicePrioChild";
+  module_MyServicePrioChild.name() = "MyServicePrioChild";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>>::gen_pang,
   };
@@ -379,11 +379,11 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_MyServicePrioChild.parent() = "module.MyServicePrioParent";
+  module_MyServicePrioChild.parent() = "MyServicePrioParent";
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyServicePrioChild", std::move(module_MyServicePrioChild));
-  context.service_name() = "module.MyServicePrioChild";
+  metadata.services()->emplace("MyServicePrioChild", std::move(module_MyServicePrioChild));
+  context.service_name() = "MyServicePrioChild";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -410,7 +410,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_BadService;
-  module_BadService.name() = "module.BadService";
+  module_BadService.name() = "BadService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen_bar,
   };
@@ -422,8 +422,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   module_BadService.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("GoodService") } }).cv_struct_ref());
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.BadService", std::move(module_BadService));
-  context.service_name() = "module.BadService";
+  metadata.services()->emplace("BadService", std::move(module_BadService));
+  context.service_name() = "BadService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -468,7 +468,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_FooBarBazService;
-  module_FooBarBazService.name() = "module.FooBarBazService";
+  module_FooBarBazService.name() = "FooBarBazService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_foo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_bar,
@@ -481,8 +481,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.FooBarBazService", std::move(module_FooBarBazService));
-  context.service_name() = "module.FooBarBazService";
+  metadata.services()->emplace("FooBarBazService", std::move(module_FooBarBazService));
+  context.service_name() = "FooBarBazService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

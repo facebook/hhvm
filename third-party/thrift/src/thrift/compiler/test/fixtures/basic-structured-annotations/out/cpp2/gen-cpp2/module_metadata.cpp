@@ -305,7 +305,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-st
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyService;
-  module_MyService.name() = "module.MyService";
+  module_MyService.name() = "test.dev/fixtures/basic-structured-annotations/MyService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen_first,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen_second,
@@ -318,8 +318,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   module_MyService.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(3) } }).cv_struct_ref());
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.MyService", std::move(module_MyService));
-  context.service_name() = "module.MyService";
+  metadata.services()->emplace("test.dev/fixtures/basic-structured-annotations/MyService", std::move(module_MyService));
+  context.service_name() = "test.dev/fixtures/basic-structured-annotations/MyService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

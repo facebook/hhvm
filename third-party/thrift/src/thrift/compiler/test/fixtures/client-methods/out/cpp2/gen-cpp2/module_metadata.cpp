@@ -116,7 +116,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnService;
-  module_HeaderClientMethodsAnnotationOnService.name() = "module.HeaderClientMethodsAnnotationOnService";
+  module_HeaderClientMethodsAnnotationOnService.name() = "HeaderClientMethodsAnnotationOnService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo_2,
@@ -129,8 +129,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   module_HeaderClientMethodsAnnotationOnService.structured_annotations()->push_back(*cvStruct("cpp.GenerateDeprecatedHeaderClientMethods", {  }).cv_struct_ref());
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.HeaderClientMethodsAnnotationOnService", std::move(module_HeaderClientMethodsAnnotationOnService));
-  context.service_name() = "module.HeaderClientMethodsAnnotationOnService";
+  metadata.services()->emplace("HeaderClientMethodsAnnotationOnService", std::move(module_HeaderClientMethodsAnnotationOnService));
+  context.service_name() = "HeaderClientMethodsAnnotationOnService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -180,7 +180,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnFunction;
-  module_HeaderClientMethodsAnnotationOnFunction.name() = "module.HeaderClientMethodsAnnotationOnFunction";
+  module_HeaderClientMethodsAnnotationOnFunction.name() = "HeaderClientMethodsAnnotationOnFunction";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2,
@@ -192,8 +192,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("module.HeaderClientMethodsAnnotationOnFunction", std::move(module_HeaderClientMethodsAnnotationOnFunction));
-  context.service_name() = "module.HeaderClientMethodsAnnotationOnFunction";
+  metadata.services()->emplace("HeaderClientMethodsAnnotationOnFunction", std::move(module_HeaderClientMethodsAnnotationOnFunction));
+  context.service_name() = "HeaderClientMethodsAnnotationOnFunction";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

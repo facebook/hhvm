@@ -9744,6 +9744,17 @@ let is_sub_type_ignore_generic_params env ty1 ty2 =
     (LoclType ty2)
   = Some true
 
+let is_sub_type_opt_ignore_generic_params env ty1 ty2 =
+  Subtype_ask.is_sub_type_alt_i
+  (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
+    ~require_completeness:true
+    ~no_top_bottom:true
+    ~coerce:None
+    ~sub_supportdyn:None
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+
 (* -- can_sub_type entry point ---------------------------------------------- *)
 let can_sub_type env ty1 ty2 =
   let ( <> ) a b = not (Option.equal Bool.equal a b) in
@@ -9978,6 +9989,8 @@ let set_fun_refs () =
   TUtils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
   TUtils.is_sub_type_ignore_generic_params_ref :=
     is_sub_type_ignore_generic_params;
+  TUtils.is_sub_type_opt_ignore_generic_params_ref :=
+    is_sub_type_opt_ignore_generic_params;
   TUtils.is_type_disjoint_ref := is_type_disjoint;
   TUtils.can_sub_type_ref := can_sub_type
 

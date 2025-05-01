@@ -79,6 +79,8 @@ let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
 
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 
+type is_sub_type_opt_type = env -> locl_ty -> locl_ty -> bool option
+
 let (is_sub_type_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type")
 
@@ -105,6 +107,12 @@ let (is_sub_type_ignore_generic_params_ref : is_sub_type_type ref) =
 
 let is_sub_type_ignore_generic_params x =
   !is_sub_type_ignore_generic_params_ref x
+
+let (is_sub_type_opt_ignore_generic_params_ref : is_sub_type_opt_type ref) =
+  ref (not_implemented "is_sub_type_opt_ignore_generic_params")
+
+let is_sub_type_opt_ignore_generic_params x =
+  !is_sub_type_opt_ignore_generic_params_ref x
 
 type add_constraint =
   env ->

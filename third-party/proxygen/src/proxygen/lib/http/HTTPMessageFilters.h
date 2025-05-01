@@ -80,6 +80,10 @@ class HTTPMessageFilter
     nextTransactionHandler_->onError(error);
   }
 
+  void onInvariantViolation(const HTTPException& error) noexcept final {
+    nextTransactionHandler_->onInvariantViolation(error);
+  }
+
   // These HTTPTransaction::Handler callbacks cannot be overrwritten
   void setTransaction(HTTPTransaction* txn) noexcept final {
     nextTransactionHandler_->setTransaction(txn);

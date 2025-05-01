@@ -1149,7 +1149,7 @@ string t_py_generator::render_string(const string& value) {
 
   std::ostringstream out;
   // If string contains multiple lines, then wrap it in triple quotes """
-  std::string wrap(escaped.find("\n") == std::string::npos ? "\"" : R"(""")");
+  std::string wrap(escaped.find('\n') == std::string::npos ? "\"" : R"(""")");
   out << wrap << escaped << wrap;
   return out.str();
 }

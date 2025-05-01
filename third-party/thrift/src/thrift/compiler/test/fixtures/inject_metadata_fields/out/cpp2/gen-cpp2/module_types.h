@@ -101,7 +101,7 @@ class Fields final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 1;
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,100};
 
@@ -256,7 +256,7 @@ class FieldsInjectedToEmptyStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 1;
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,-1100};
 
@@ -411,7 +411,7 @@ class FieldsInjectedToStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 2;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,-1100};
 
@@ -626,7 +626,7 @@ class FieldsInjectedWithIncludedStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 4;
+  static constexpr std::size_t __fbthrift_field_size_v = 4;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,-1100,-1101,-1102};
 

@@ -185,7 +185,7 @@ struct pretty_print_impl<apache::thrift::type::struct_t<T>>
       using Id = decltype(id);
       using Tag = apache::thrift::op::get_type_tag<T, Id>;
 
-      constexpr auto size = apache::thrift::op::num_fields<T>;
+      constexpr auto size = apache::thrift::op::size_v<T>;
       constexpr auto index =
           folly::to_underlying(apache::thrift::op::get_ordinal_v<T, Id>);
 

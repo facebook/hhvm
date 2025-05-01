@@ -49,7 +49,7 @@ void init() {
       [&]<class Ord>(Ord) { op::get<Ord>(subStruct) = subSubStruct; });
 
   for (int i = 0; i < N; ++i) {
-    constexpr size_t size = op::num_fields<MyStruct>;
+    constexpr size_t size = op::size_v<MyStruct>;
     op::for_each_ordinal<MyStruct>([&]<class Ord>(Ord) {
       if (folly::to_underlying(Ord::value) == size) {
         // Make the last field different
@@ -69,7 +69,7 @@ void init() {
     diffSubSubStructs[i].subsubfield_7() = i % 2 == 0;
 
     op::for_each_ordinal<SubStruct>([&]<class Ord>(Ord) {
-      if (folly::to_underlying(Ord::value) == op::num_fields<SubStruct>) {
+      if (folly::to_underlying(Ord::value) == op::size_v<SubStruct>) {
         // Make the last field different
         op::get<Ord>(diffSubStructs[i]) = diffSubSubStructs[i];
       } else {
@@ -78,7 +78,7 @@ void init() {
     });
 
     op::for_each_ordinal<MyNestedStruct>([&]<class Ord>(Ord) {
-      if (folly::to_underlying(Ord::value) == op::num_fields<MyNestedStruct>) {
+      if (folly::to_underlying(Ord::value) == op::size_v<MyNestedStruct>) {
         // Make the last field different
         op::get<Ord>(nestedStructs[i]) = diffSubStructs[i];
       } else {

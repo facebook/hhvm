@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp2/TypeClass.h>
 
+#include <initializer_list>
 #include <utility>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
@@ -147,27 +148,33 @@ struct struct_private_access {
   FOLLY_CREATE_MEMBER_INVOKER(empty_fn, __fbthrift_is_empty);
 
   template <typename T>
-  static constexpr auto num_fields = T::__fbthrift_num_fields;
-
-  template <typename T>
-  static constexpr const int16_t* field_ids() {
+  static constexpr const int16_t* __fbthrift_field_ids() {
     return T::__fbthrift_reflection_field_ids;
   }
 
-  // This is a function and not an alias to workaround a bug in clang 18 and
-  // older: https://github.com/llvm/llvm-project/issues/66604.
+  // This function is used to workaround a bug in clang 18 and older:
+  // https://github.com/llvm/llvm-project/issues/66604.
   // See https://www.godbolt.org/z/n3fbbEd9v.
   template <typename T>
   static typename T::__fbthrift_reflection_idents idents();
 
+  template <typename T, typename Ord>
+  using ident = detail::at<decltype(idents<T>()), Ord::value>;
+
   template <typename T>
   static typename T::__fbthrift_reflection_type_tags type_tags();
+
+  template <typename T, typename Ord>
+  using type_tag = detail::at<decltype(type_tags<T>()), Ord::value>;
 
   template <typename T, typename U>
   static typename T::template __fbthrift_ordinal<U> __fbthrift_ordinal();
 
   template <typename T, typename U>
   using ordinal = decltype(__fbthrift_ordinal<T, U>());
+
+  template <typename T>
+  static constexpr auto __fbthrift_field_size_v = T::__fbthrift_field_size_v;
 
   template <typename T, typename... Args>
   static constexpr std::string_view __fbthrift_get_module_name() {

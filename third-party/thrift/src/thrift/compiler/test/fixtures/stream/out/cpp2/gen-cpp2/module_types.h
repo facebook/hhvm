@@ -55,7 +55,7 @@ class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 0;
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 
@@ -158,7 +158,7 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 0;
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 
@@ -261,7 +261,7 @@ class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 0;
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 

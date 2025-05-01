@@ -32,7 +32,7 @@ namespace apache::thrift::op::detail {
 
 template <typename T, typename Tag = type::infer_tag<T>>
 struct StructuredOp : BaseOp<Tag> {
-  using NameList = std::array<std::string, op::num_fields<T>>;
+  using NameList = std::array<std::string, op::size_v<T>>;
   using size_type = typename NameList::size_type;
   using Base = BaseOp<Tag>;
   using Base::check_found;
@@ -108,7 +108,7 @@ struct StructuredOp : BaseOp<Tag> {
   }
 
   static Ptr next(T& self, IterType type, size_type& itr) {
-    if (itr == op::num_fields<T>) {
+    if (itr == op::size_v<T>) {
       return {};
     }
 
@@ -171,7 +171,7 @@ struct StructuredOp : BaseOp<Tag> {
     return result;
   }
 
-  static size_t size(const void*) { return op::num_fields<T>; }
+  static size_t size(const void*) { return op::size_v<T>; }
 };
 
 template <typename T>

@@ -210,7 +210,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
     [[maybe_unused]] const {{struct:cpp_name}}& val) {
   {{^struct:union?}}
-  StrongRef fbthrift_data(createStructTuple({{struct:num_fields}}));
+  StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
   {{#struct:fields}}
   StrongRef _fbthrift__{{field:name}}(
     Constructor<{{field:marshal_type}}>{}

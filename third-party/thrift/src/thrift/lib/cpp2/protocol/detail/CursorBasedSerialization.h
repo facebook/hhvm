@@ -271,8 +271,8 @@ struct DefaultValueWriter {
     constexpr bool operator<(const Field& other) const { return id < other.id; }
   };
 
-  static constexpr std::array<Field, op::num_fields<T>> fields = [] {
-    std::array<Field, op::num_fields<T>> fields;
+  static constexpr std::array<Field, op::size_v<T>> fields = [] {
+    std::array<Field, op::size_v<T>> fields;
     op::for_each_ordinal<T>([&](auto ord) {
       using Ord = decltype(ord);
       using Id = op::get_field_id<T, Ord>;

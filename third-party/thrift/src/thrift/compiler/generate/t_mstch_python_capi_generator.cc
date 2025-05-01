@@ -466,7 +466,7 @@ class python_capi_mstch_struct : public mstch_struct {
             {"struct:marshal_capi?", &python_capi_mstch_struct::marshal_capi},
             {"struct:cpp_name", &python_capi_mstch_struct::cpp_name},
             {"struct:cpp_adapter?", &python_capi_mstch_struct::cpp_adapter},
-            {"struct:num_fields", &python_capi_mstch_struct::num_fields},
+            {"struct:fields_size", &python_capi_mstch_struct::fields_size},
             {"struct:tuple_positions",
              &python_capi_mstch_struct::tuple_positions},
         });
@@ -619,7 +619,7 @@ class python_capi_mstch_struct : public mstch_struct {
     return cpp_resolver_.get_underlying_namespaced_name(*struct_);
   }
 
-  mstch::node num_fields() { return struct_->fields().size(); }
+  mstch::node fields_size() { return struct_->fields().size(); }
 
  private:
   cpp_name_resolver cpp_resolver_;

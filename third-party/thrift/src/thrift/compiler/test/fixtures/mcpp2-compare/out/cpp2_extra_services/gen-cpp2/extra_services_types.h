@@ -119,7 +119,7 @@ class containerStruct2 final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "extra_services";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 13;
+  static constexpr std::size_t __fbthrift_field_size_v = 13;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,101,201,2,102,202,3,103,203,4,5,105,205};
 

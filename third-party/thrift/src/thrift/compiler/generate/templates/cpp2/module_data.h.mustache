@@ -62,7 +62,7 @@ template <> struct TEnumDataStorage<{{struct:cpp_fullname}}::Type> {
 {{#program:structs}}
 
 template <> struct TStructDataStorage<{{struct:cpp_fullname}}> {
-  static constexpr const std::size_t fields_size = {{struct:num_fields}};
+  static constexpr const std::size_t fields_size = {{struct:fields_size}};
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

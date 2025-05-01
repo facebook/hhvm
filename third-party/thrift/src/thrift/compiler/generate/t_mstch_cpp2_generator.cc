@@ -1339,7 +1339,7 @@ class cpp_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:num_fields", &cpp_mstch_struct::num_fields},
+            {"struct:fields_size", &cpp_mstch_struct::fields_size},
             {"struct:explicitly_constructed_fields",
              &cpp_mstch_struct::explicitly_constructed_fields},
             {"struct:fields_in_key_order",
@@ -1409,7 +1409,7 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::is_trivially_destructible},
         });
   }
-  mstch::node num_fields() { return struct_->fields().size(); }
+  mstch::node fields_size() { return struct_->fields().size(); }
   mstch::node explicitly_constructed_fields() {
     // Filter fields according to the following criteria:
     // Get all enums

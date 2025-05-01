@@ -109,7 +109,7 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 1;
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
@@ -273,7 +273,7 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 1;
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
 
@@ -437,7 +437,7 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 2;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
@@ -663,7 +663,7 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 2;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
@@ -889,7 +889,7 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 2;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
@@ -1103,7 +1103,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 2;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2};
 
@@ -1317,7 +1317,7 @@ class FOLLY_EXPORT Banal : public virtual apache::thrift::TException {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "module";
   }
-  static constexpr std::size_t __fbthrift_num_fields = 0;
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 

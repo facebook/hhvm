@@ -20,9 +20,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 template <class T>
 class FrameLengthParserStrategy {
@@ -63,8 +61,6 @@ class FrameLengthParserStrategy {
   folly::io::Cursor cursor_{readBufQueue_.front()};
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket
 
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/FrameLengthParserStrategy-inl.h>

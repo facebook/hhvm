@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/test/TestUtils.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/test/server/ThriftServerTestUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>

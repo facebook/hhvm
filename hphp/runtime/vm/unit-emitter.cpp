@@ -16,22 +16,15 @@
 
 #include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/system/systemlib.h"
-
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
 
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/func.h"
@@ -45,12 +38,10 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/check.h"
 
-#include "hphp/util/alloc.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/read-only-arena.h"
 #include "hphp/util/sha1.h"
 #include "hphp/util/trace.h"
 

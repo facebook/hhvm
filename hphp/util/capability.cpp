@@ -20,7 +20,6 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/user-info.h"
 #include <folly/String.h>
-#include <linux/types.h>
 #include <sys/capability.h>
 #include <sys/prctl.h>
 #include <sys/types.h>

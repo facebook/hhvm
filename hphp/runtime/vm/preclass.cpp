@@ -27,7 +27,6 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include <ostream>
-#include <sstream>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

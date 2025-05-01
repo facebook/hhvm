@@ -19,11 +19,9 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/module.h"
-#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/object-data.h"

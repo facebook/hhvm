@@ -17,7 +17,6 @@
 
 #include "hphp/zend/zend-string.h"
 
-#include <cinttypes>
 #include <cstdlib>
 
 #include <folly/ssl/OpenSSLHash.h>

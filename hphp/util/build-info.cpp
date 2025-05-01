@@ -25,7 +25,6 @@
 #include <cstdlib>
 #include <mutex>
 #include <string>
-#include <sys/types.h>
 #include <unistd.h>
 
 namespace HPHP {

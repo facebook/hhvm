@@ -17,8 +17,6 @@
 #include "hphp/runtime/vm/repo-file.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
 
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
@@ -26,17 +24,8 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/blob-writer.h"
-#include "hphp/util/build-info.h"
-#include "hphp/util/lock-free-ptr-wrapper.h"
-
-#include "hphp/zend/zend-string.h"
 
 #include <folly/String.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <tuple>
 
 TRACE_SET_MOD(repo_file)
 

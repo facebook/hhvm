@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/lazy-class.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/strings.h"
 
 #include "hphp/util/configs/eval.h"
 

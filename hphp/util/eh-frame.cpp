@@ -19,8 +19,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/trace.h"
 
-#include <folly/ScopeGuard.h>
-
 #include <cstring>
 #include <limits>
 #include <memory>

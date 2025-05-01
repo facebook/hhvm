@@ -17,8 +17,6 @@
 #include "hphp/runtime/vm/rfunc-data.h"
 
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 namespace HPHP {
 

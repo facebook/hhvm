@@ -26,14 +26,10 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
 
-#include "hphp/runtime/ext/string/ext_string.h"
-
 #include "hphp/runtime/vm/as.h"
-#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/runtime/vm/jit/tc.h"
 

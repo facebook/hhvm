@@ -15,8 +15,6 @@
 */
 
 #include "hphp/runtime/vm/verifier/cfg.h"
-#include "hphp/runtime/vm/verifier/util.h"
-#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
 namespace Verifier {

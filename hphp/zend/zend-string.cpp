@@ -17,8 +17,6 @@
 
 #include "hphp/zend/zend-string.h"
 
-#include <cinttypes>
-
 #include "hphp/util/assertions.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/lock.h"

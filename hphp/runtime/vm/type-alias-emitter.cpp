@@ -21,9 +21,6 @@
 
 #include "hphp/util/blob-encoder.h"
 
-#include <limits>
-#include <sstream>
-
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////

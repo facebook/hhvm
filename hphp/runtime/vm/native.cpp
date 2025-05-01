@@ -16,17 +16,12 @@
 
 #include "hphp/runtime/vm/native.h"
 
-#include <folly/Random.h>
-
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/util/configs/php7.h"
 
 namespace HPHP::Native {
 

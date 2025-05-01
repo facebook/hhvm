@@ -23,7 +23,6 @@
 #include <hphp/system/systemlib.h>
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"

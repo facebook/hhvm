@@ -254,7 +254,7 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
     int sequenceId = buffer.readInt();
 
     // read header size
-    int headerSize = buffer.readShort() << 2;
+    int headerSize = buffer.readUnsignedShort() << 2;
     ByteBuf messageHeader = buffer.readSlice(headerSize);
 
     // read protocol id

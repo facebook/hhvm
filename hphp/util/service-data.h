@@ -111,6 +111,8 @@ enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
  */
 ExportedCounter* createCounter(const std::string& name);
 
+ExportedCounter* getCounterIfExists(const std::string& name);
+
 /*
  * Callback-based counters
  *

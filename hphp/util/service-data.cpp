@@ -228,6 +228,14 @@ Value* getOrCreateWithArgs(tbb::concurrent_unordered_map<Key, Value*>& map,
 }
 
 struct Impl {
+  ExportedCounter* getCounterIfExists(const std::string& name) {
+    ExportedCounter* ret = nullptr;
+    if (concurrentMapGet(m_counterMap, name, ret)) {
+      return ret;
+    }
+    return nullptr;
+  }
+
   ExportedCounter* createCounter(const std::string& name) {
     return getOrCreateWithArgs(m_counterMap, name);
   }
@@ -493,6 +501,10 @@ UNUSED const Impl& s_dummy = getServiceDataInstance();
 
 ExportedCounter* createCounter(const std::string& name) {
   return getServiceDataInstance().createCounter(name);
+}
+
+ExportedCounter* getCounterIfExists(const std::string& name) {
+  return getServiceDataInstance().getCounterIfExists(name);
 }
 
 CounterHandle registerCounterCallback(CounterFunc func, bool expensive) {

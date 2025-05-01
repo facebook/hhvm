@@ -250,7 +250,7 @@ and type_tag =
   | NumTag
   | ResourceTag
   | NullTag
-  | ClassTag of Ast_defs.id_
+  | ClassTag of Ast_defs.id_ * locl_ty list
 
 and shape_field_predicate = {
   (* T196048813 *)
@@ -859,9 +859,11 @@ module Pp = struct
     | NumTag -> Format.pp_print_string fmt "NumTag"
     | ResourceTag -> Format.pp_print_string fmt "ResourceTag"
     | NullTag -> Format.pp_print_string fmt "NullTag"
-    | ClassTag id ->
+    | ClassTag (id, args) ->
       Format.fprintf fmt "(@[<2>ClassTag (@,";
       Format.pp_print_string fmt id;
+      Format.fprintf fmt ",@ ";
+      pp_list pp_ty fmt args;
       Format.fprintf fmt "@,))@]"
 
   and pp_type_predicate fmt predicate = pp_type_predicate_ fmt (snd predicate)
@@ -1280,7 +1282,11 @@ and compare_type_tag tag1 tag2 =
   | (ResourceTag, ResourceTag)
   | (NullTag, NullTag) ->
     0
-  | (ClassTag id1, ClassTag id2) -> String.compare id1 id2
+  | (ClassTag (id1, args1), ClassTag (id2, args2)) -> begin
+    match String.compare id1 id2 with
+    | 0 -> tyl_compare ~sort:false args1 args2
+    | n -> n
+  end
   | _ -> type_tag_con_ordinal tag1 - type_tag_con_ordinal tag2
 
 and compare_tuple_predicate tp1 tp2 =

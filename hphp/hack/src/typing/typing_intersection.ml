@@ -88,11 +88,41 @@ let negate_type env r ty ~approx =
       | Some predicate -> MkType.neg r predicate
       | None -> approximated (* void, noreturn *)
     end
-    | Tneg (r, IsTag (ClassTag c)) when Utils.class_has_no_params env c ->
+    | Tneg (r, IsTag (ClassTag (c, []))) when Utils.class_has_no_params env c ->
       MkType.class_type r c []
     | Tneg predicate -> Typing_refinement.TyPredicate.to_ty predicate
     | Tnonnull -> MkType.null r
-    | Tclass ((_, c), Nonexact _, _) -> MkType.neg r (r, IsTag (ClassTag c))
+    | Tclass ((_, c), Nonexact _, args) ->
+      let tparams =
+        match Env.get_class env c with
+        | Decl_entry.Found cls -> Folded_class.tparams cls
+        | _ -> []
+      in
+      let is_fresh_generic ty =
+        match get_node ty with
+        | Tgeneric name -> Env.is_fresh_generic_parameter name
+        | _ -> false
+      in
+      let rec is_all_filled_reified tparams args =
+        match (tparams, args) with
+        | ([], []) -> true
+        | (tparam :: tparams, arg :: args)
+          when (not (Aast.is_erased tparam.tp_reified))
+               && not (is_fresh_generic arg) ->
+          is_all_filled_reified tparams args
+        (* too few args counts as unfilled, too many args is malformed, but treat that like the tparam is erased *)
+        | _ -> false
+      in
+      MkType.neg
+        r
+        ( r,
+          IsTag
+            (ClassTag
+               ( c,
+                 if is_all_filled_reified tparams args then
+                   args
+                 else
+                   [] )) )
     | _ -> approximated
   in
   (env, neg_ty)

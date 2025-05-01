@@ -5323,14 +5323,16 @@ end = struct
       end
     end
     (* -- C-Neg-R ----------------------------------------------------------- *)
-    | (_, (r_super, Tneg (r_pred, IsTag (ClassTag c_super)))) -> begin
+    | (_, (r_super, Tneg (r_pred, IsTag (ClassTag (c_super, c_super_args))))) ->
+    begin
       match deref ty_sub with
-      | (_, Tneg (_, IsTag (ClassTag c_sub))) ->
+      | (_, Tneg (_, IsTag (ClassTag (c_sub, c_sub_args))))
+        when List.is_empty c_sub_args ->
         if TUtils.is_sub_class_refl env c_super c_sub then
           valid env
         else
           invalid ~fail env
-      | (_, Tclass ((_, c_sub), _, _)) ->
+      | (_, Tclass ((_, c_sub), _, _)) when List.is_empty c_super_args ->
         if Subtype_negation.is_class_disjoint env c_sub c_super then
           valid env
         else
@@ -5350,7 +5352,10 @@ end = struct
             {
               super_like;
               super_supportdyn = false;
-              ty_super = mk (r_super, Tneg (r_pred, IsTag (ClassTag c_super)));
+              ty_super =
+                mk
+                  ( r_super,
+                    Tneg (r_pred, IsTag (ClassTag (c_super, c_super_args))) );
             }
           env
     end
@@ -9846,8 +9851,8 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     is_sub_type_for_union_help env ty2 (MakeType.null Reason.none)
   | (_, Tnonnull) ->
     is_sub_type_for_union_help env ty1 (MakeType.null Reason.none)
-  | (Tneg (_, IsTag (ClassTag c1)), Tclass ((_, c2), _, _tyl))
-  | (Tclass ((_, c2), _, _tyl), Tneg (_, IsTag (ClassTag c1))) ->
+  | (Tneg (_, IsTag (ClassTag (c1, []))), Tclass ((_, c2), _, _tyl))
+  | (Tclass ((_, c2), _, _tyl), Tneg (_, IsTag (ClassTag (c1, [])))) ->
     (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
        o notin (complement (Union tyl'. c1<tyl'>)), which is just that
        c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then

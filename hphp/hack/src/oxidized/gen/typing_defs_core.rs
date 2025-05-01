@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebaf2c8c8cd94c83a555c08aa3b1481f>>
+// @generated SignedSource<<ccc05a110553401f2ca5a43378e3cdee>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -523,7 +523,7 @@ pub enum TypeTag {
     NumTag,
     ResourceTag,
     NullTag,
-    ClassTag(ast_defs::Id_),
+    ClassTag(ast_defs::Id_, Vec<Ty>),
 }
 
 #[derive(

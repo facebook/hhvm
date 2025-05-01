@@ -87,7 +87,7 @@ module TyPredicate = struct
         match Env.get_class env name with
         | Decl_entry.Found class_info ->
           if List.is_empty (Folded_class.tparams class_info) then
-            Result.Ok (IsTag (ClassTag name))
+            Result.Ok (IsTag (ClassTag (name, [])))
           else
             Result.Error "malformed class with generics"
         | Decl_entry.DoesNotExist
@@ -126,7 +126,7 @@ module TyPredicate = struct
       | NumTag -> Typing_make_type.num reason
       | ResourceTag -> Typing_make_type.resource reason
       | NullTag -> Typing_make_type.null reason
-      | ClassTag id -> Typing_make_type.class_type reason id []
+      | ClassTag (id, tyargs) -> Typing_make_type.class_type reason id tyargs
     in
     match predicate with
     | (reason, IsTag tag) -> tag_to_ty reason tag
@@ -187,7 +187,8 @@ module TyPartition = struct
     (* Given a value `v` of type `C<T>` and a predicate `is D`, search for a class
        `K<TC>` and `K<TD>` respectively, it must hold that `K<TC> = K<TD>`
     *)
-    | (ClassTy (((_, name) as posid), exact, tyargs), IsTag (ClassTag id)) ->
+    | (ClassTy (((_, name) as posid), exact, tyargs), IsTag (ClassTag (id, _)))
+      ->
       let open Option.Let_syntax in
       (* let* cls1 = Decl_entry.to_option (Env.get_class env id1) in *)
       let* class_info = Decl_entry.to_option (Env.get_class env id) in

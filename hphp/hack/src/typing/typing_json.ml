@@ -166,7 +166,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
   | (p, Tprim tp) ->
     obj @@ kind p "primitive" @ name (Aast_defs.string_of_tprim tp)
   | (p, Tneg predicate) ->
-    let tag_json tag =
+    let rec tag_json tag =
       match tag with
       | BoolTag -> name "isbool"
       | IntTag -> name "isint"
@@ -176,9 +176,12 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
       | NumTag -> name "isnum"
       | ResourceTag -> name "isresource"
       | NullTag -> name "isnull"
-      | ClassTag s -> name s
-    in
-    let rec predicate_json predicate =
+      | ClassTag (s, args) ->
+        let args_json =
+          List.map args ~f:(fun ty -> from_type env ~show_like_ty ty)
+        in
+        name s @ [("args", JSON_Array args_json)]
+    and predicate_json predicate =
       match snd predicate with
       | IsTag tag -> tag_json tag
       | IsTupleOf { tp_required } ->

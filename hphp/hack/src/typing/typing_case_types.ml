@@ -654,7 +654,8 @@ end = struct
       | NumTag -> (env, Set.of_list ~reason [IntData; FloatData])
       | ResourceTag -> (env, Set.singleton ~reason ResourceData)
       | NullTag -> (env, Set.singleton ~reason NullData)
-      | ClassTag id -> Class.to_datatypes ~safe_for_are_disjoint ~trail env id
+      | ClassTag (id, _) ->
+        Class.to_datatypes ~safe_for_are_disjoint ~trail env id
     in
     match snd predicate with
     | IsTag tag -> from_tag tag
@@ -1045,7 +1046,7 @@ module AtomicDataTypes = struct
     | NumTag -> of_ty env (Primitive Aast.Tnum)
     | ResourceTag -> of_ty env (Primitive Aast.Tresource)
     | NullTag -> of_ty env (Primitive Aast.Tnull)
-    | ClassTag id -> of_ty env (Class id)
+    | ClassTag (id, _) -> of_ty env (Class id)
 
   let complement dt = DataType.Set.diff mixed dt
 

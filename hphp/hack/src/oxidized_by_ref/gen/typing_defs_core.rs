@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<238d38c288b26d508ac481e94a59c513>>
+// @generated SignedSource<<a1b5331abe3da1337534e42c804dcb4b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -500,7 +500,8 @@ pub enum TypeTag<'a> {
     ResourceTag,
     NullTag,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    ClassTag(&'a ast_defs::Id_<'a>),
+    #[rust_to_ocaml(inline_tuple)]
+    ClassTag(&'a (&'a ast_defs::Id_<'a>, &'a [&'a Ty<'a>])),
 }
 impl<'a> TrivialDrop for TypeTag<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypeTag<'arena>);

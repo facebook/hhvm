@@ -960,7 +960,8 @@ module Full = struct
         (fuel, Concat [text "?"; d])
     end
     | Tprim x -> (fuel, tprim x)
-    | Tneg predicate -> type_predicate ~fuel ~negate:true to_doc predicate
+    | Tneg predicate ->
+      type_predicate ~fuel ~negate:true ~hide_internals to_doc st penv predicate
     | Tvar n ->
       let (_, ety) =
         Typing_inference_env.expand_type
@@ -1210,53 +1211,70 @@ module Full = struct
       let (fuel, ty_doc) = k ~fuel ty in
       (fuel, Concat [text "class<"; ty_doc; text ">"])
 
-  and type_predicate ~fuel ~negate to_doc predicate =
-    let tag_doc tag =
+  and type_predicate ~fuel ~negate ~hide_internals to_doc st penv predicate =
+    let k ~fuel lty = locl_ty ~fuel ~hide_internals to_doc st penv lty in
+    let tag_doc fuel tag =
       match tag with
-      | BoolTag -> text "bool"
-      | IntTag -> text "int"
-      | StringTag -> text "string"
-      | ArraykeyTag -> text "arraykey"
-      | FloatTag -> text "float"
-      | NumTag -> text "num"
-      | ResourceTag -> text "resource"
-      | NullTag -> text "null"
-      | ClassTag s -> to_doc s
+      | BoolTag -> (fuel, text "bool")
+      | IntTag -> (fuel, text "int")
+      | StringTag -> (fuel, text "string")
+      | ArraykeyTag -> (fuel, text "arraykey")
+      | FloatTag -> (fuel, text "float")
+      | NumTag -> (fuel, text "num")
+      | ResourceTag -> (fuel, text "resource")
+      | NullTag -> (fuel, text "null")
+      | ClassTag (s, tyl) ->
+        let (fuel, targs_doc) =
+          if List.is_empty tyl then
+            (fuel, Nothing)
+          else
+            list ~fuel "<" k tyl ">"
+        in
+        (fuel, to_doc s ^^ targs_doc)
     in
-    let rec predicate_doc predicate =
+    let rec predicate_doc fuel predicate =
       match snd predicate with
-      | IsTag tag -> tag_doc tag
+      | IsTag tag -> tag_doc fuel tag
       | IsTupleOf { tp_required } ->
-        let texts = List.map tp_required ~f:predicate_doc in
-        Concat
-          ([text "("] @ List.intersperse texts ~sep:(text ", ") @ [text ")"])
+        let (fuel, texts) =
+          List.fold_map ~init:fuel tp_required ~f:predicate_doc
+        in
+        ( fuel,
+          Concat
+            ([text "("] @ List.intersperse texts ~sep:(text ", ") @ [text ")"])
+        )
       | IsShapeOf { sp_fields } ->
-        let texts =
-          List.map
+        let (fuel, texts) =
+          List.fold_map
+            ~init:fuel
             (TShapeMap.elements sp_fields)
-            ~f:(fun (key, { sfp_predicate }) ->
+            ~f:(fun fuel (key, { sfp_predicate }) ->
               let key_delim =
                 match key with
                 | Typing_defs.TSFlit_str _ -> text "'"
                 | _ -> Nothing
               in
-              Concat
-                [
-                  key_delim;
-                  text_strip_ns @@ Typing_defs.TShapeField.name key;
-                  key_delim;
-                  Space;
-                  text "=>";
-                  Space;
-                  predicate_doc sfp_predicate;
-                ])
+              let (fuel, pdoc) = predicate_doc fuel sfp_predicate in
+              ( fuel,
+                Concat
+                  [
+                    key_delim;
+                    text_strip_ns @@ Typing_defs.TShapeField.name key;
+                    key_delim;
+                    Space;
+                    text "=>";
+                    Space;
+                    pdoc;
+                  ] ))
         in
-        Concat
-          ([text "shape("]
-          @ List.intersperse texts ~sep:(text ", ")
-          @ [text ")"])
+        ( fuel,
+          Concat
+            ([text "shape("]
+            @ List.intersperse texts ~sep:(text ", ")
+            @ [text ")"]) )
       (* TODO: T196048813 optional, open, fuel? *)
     in
+    let (fuel, pdoc) = predicate_doc fuel predicate in
     let doc =
       Concat
         [
@@ -1266,7 +1284,7 @@ module Full = struct
             "not "
           else
             "is ");
-          predicate_doc predicate;
+          pdoc;
         ]
     in
     (fuel, doc)
@@ -1304,7 +1322,14 @@ module Full = struct
     | Tcan_traverse ct -> tcan_traverse ~fuel k ct
     | Ttype_switch { predicate; ty_true; ty_false } ->
       let (fuel, predicate_doc) =
-        type_predicate ~fuel ~negate:false to_doc predicate
+        type_predicate
+          ~fuel
+          ~negate:false
+          ~hide_internals
+          to_doc
+          st
+          penv
+          predicate
       in
       let (fuel, ty_true_doc) = k ~fuel ty_true in
       let (fuel, ty_false_doc) = k ~fuel ty_false in
@@ -1705,7 +1730,7 @@ module ErrorString = struct
         | NumTag -> "a num"
         | ResourceTag -> "a resource"
         | NullTag -> "null"
-        | ClassTag s -> "a " ^ strip_ns s
+        | ClassTag (s, _) -> "a " ^ strip_ns s
       in
       let rec str predicate =
         match predicate with

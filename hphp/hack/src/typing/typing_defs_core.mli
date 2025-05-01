@@ -218,7 +218,7 @@ and type_tag =
   | NumTag
   | ResourceTag
   | NullTag
-  | ClassTag of Ast_defs.id_
+  | ClassTag of Ast_defs.id_ * locl_ty list
 
 and shape_field_predicate = {
   (* T196048813 *)

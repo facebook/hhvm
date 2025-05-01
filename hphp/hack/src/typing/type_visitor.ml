@@ -344,7 +344,9 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_neg_type acc r neg_ty =
       let on_tag acc tag =
         match tag with
-        | ClassTag c -> this#on_tclass acc r (Reason.to_pos r, c) nonexact []
+        | ClassTag (c, args) ->
+          let acc = this#on_tclass acc r (Reason.to_pos r, c) nonexact [] in
+          this#on_tlist acc r args
         | ArraykeyTag
         | BoolTag
         | IntTag

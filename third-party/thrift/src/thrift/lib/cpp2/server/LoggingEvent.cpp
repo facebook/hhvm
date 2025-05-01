@@ -65,7 +65,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     isCertIPMismatch,
     const ConnectionLoggingContext&,
     const folly::AsyncTransportCertificate*) {
-  return CertIPResult::SKIPPED;
+  return CertIPResult::SKIPPED_OTHER;
 }
 } // namespace detail
 

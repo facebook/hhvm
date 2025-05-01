@@ -43,8 +43,22 @@ void maybeLogTlsPeerCertEvent(
   DCHECK(context.getWorker() && context.getWorker()->getServer());
   auto ret = detail::isCertIPMismatch(context, cert);
   switch (ret) {
-    case CertIPResult::SKIPPED:
-      THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped).log(context);
+    case CertIPResult::SKIPPED_OTHER:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped_other).log(context);
+      return;
+    case CertIPResult::SKIPPED_TLS_TUNNEL:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped_tls_tunnel).log(context);
+      return;
+    case CertIPResult::SKIPPED_EXTENSION_NOT_PRESENT:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped_extension_not_present)
+          .log(context);
+      return;
+    case CertIPResult::SKIPPED_LOCALHOST:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped_localhost).log(context);
+      return;
+    case CertIPResult::SKIPPED_LOCALHOST_IPONLY:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped_localhost_iponly)
+          .log(context);
       return;
     case CertIPResult::MATCHED_ENFORCED:
       THRIFT_CONNECTION_EVENT(tls.cert_ip_match_enforced).log(context);
@@ -54,8 +68,6 @@ void maybeLogTlsPeerCertEvent(
       return;
     case CertIPResult::MISMATCHED:
       THRIFT_CONNECTION_EVENT(tls.cert_ip_mismatch).log(context);
-      return;
-    default:
       return;
   }
 }

@@ -113,6 +113,9 @@ AccessPoint::AccessPoint(
   isV6_ = ip.isV6();
 }
 
+AccessPoint::AccessPoint(std::string_view serviceName)
+    : serviceName_(serviceName), protocol_(mc_thrift_protocol) {}
+
 std::shared_ptr<AccessPoint> AccessPoint::create(
     folly::StringPiece apString,
     mc_protocol_t defaultProtocol,

@@ -45,6 +45,9 @@ struct ConnectionOptions {
             std::nullopt,
             serviceIdOverride)) {}
 
+  explicit ConnectionOptions(std::string_view serviceName)
+      : accessPoint(std::make_shared<AccessPoint>(serviceName)) {}
+
   explicit ConnectionOptions(std::shared_ptr<const AccessPoint> ap)
       : accessPoint(std::move(ap)) {}
 

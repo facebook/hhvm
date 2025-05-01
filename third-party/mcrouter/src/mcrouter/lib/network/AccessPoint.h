@@ -48,7 +48,7 @@ static_assert(
 struct AccessPoint {
   static const AccessPoint& defaultAp();
 
-  explicit AccessPoint(
+  AccessPoint(
       folly::StringPiece host = "",
       uint16_t port = 0,
       mc_protocol_t protocol = mc_unknown_protocol,
@@ -66,6 +66,8 @@ struct AccessPoint {
       mc_protocol_t protocol = mc_unknown_protocol,
       std::optional<uint16_t> taskId = std::nullopt,
       std::optional<std::string> serviceIdOverride = std::nullopt);
+
+  explicit AccessPoint(std::string_view serviceName);
 
   /**
    * @param apString accepts host:port, host:port:protocol and
@@ -92,6 +94,10 @@ struct AccessPoint {
       uint32_t failureDomain = 0,
       std::optional<uint16_t> taskId = std::nullopt,
       std::optional<std::string> serviceIdOverride = std::nullopt);
+
+  std::string_view getServiceName() const {
+    return serviceName_;
+  }
 
   const std::string& getHost() const {
     return host_;
@@ -162,6 +168,7 @@ struct AccessPoint {
   }
 
  private:
+  std::string serviceName_;
   std::string host_;
   uint64_t hash_{0};
   uint16_t port_;

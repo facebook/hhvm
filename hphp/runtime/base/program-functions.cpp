@@ -2511,6 +2511,10 @@ void cli_client_init() {
   InitFiniNode::ThreadInit();
   hphp_memory_cleanup();
   g_context.getCheck();
+  if (!registrationComplete) {
+    folly::SingletonVault::singleton()->registrationComplete();
+    registrationComplete = true;
+  }
   AsioSession::Init();
   Socket::clearLastError();
   RI().onSessionInit(RequestId::allocate());

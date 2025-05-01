@@ -62,7 +62,7 @@ namespace HPHP::jit {
 
 namespace layout {
 
-TRACE_SET_MOD(layout);
+TRACE_SET_MOD(layout)
 
 ///////////////////////////////////////////////////////////////////////////////
 

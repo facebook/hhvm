@@ -3218,13 +3218,13 @@ static void dom_document_version_write(const Object& obj,
   }                                                                     \
 /**/
 
-DOCPROP_READ_WRITE(stricterror,        strict_error_checking );
-DOCPROP_READ_WRITE(formatoutput,       format_output         );
-DOCPROP_READ_WRITE(validateonparse,    validate_on_parse     );
-DOCPROP_READ_WRITE(resolveexternals,   resolve_externals     );
-DOCPROP_READ_WRITE(preservewhitespace, preserve_whitespace   );
-DOCPROP_READ_WRITE(recover,            recover               );
-DOCPROP_READ_WRITE(substituteentities, substitue_entities    );
+DOCPROP_READ_WRITE(stricterror,        strict_error_checking )
+DOCPROP_READ_WRITE(formatoutput,       format_output         )
+DOCPROP_READ_WRITE(validateonparse,    validate_on_parse     )
+DOCPROP_READ_WRITE(resolveexternals,   resolve_externals     )
+DOCPROP_READ_WRITE(preservewhitespace, preserve_whitespace   )
+DOCPROP_READ_WRITE(recover,            recover               )
+DOCPROP_READ_WRITE(substituteentities, substitue_entities    )
 
 static Variant dom_document_document_uri_read(const Object& obj) {
   CHECK_DOC(docp);

@@ -143,7 +143,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_store);
+TRACE_SET_MOD(hhir_store)
 
 namespace {
 
@@ -496,7 +496,7 @@ void store(Local& env, AliasClass acls) {
   mayStore(env, acls);
   auto const canon = canonicalize(acls);
   mustStoreSet(env, env.global.ainfo.expand(canon));
-};
+}
 
 void kill(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);

@@ -54,7 +54,7 @@ struct XmlParser : SweepableResourceData {
   XmlParser() {}
   ~XmlParser() override;
   void cleanupImpl();
-  CLASSNAME_IS("xml");
+  CLASSNAME_IS("xml")
   const String& o_getClassNameHook() const override;
 
   int case_folding{0};

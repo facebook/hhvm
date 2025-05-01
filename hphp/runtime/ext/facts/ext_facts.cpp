@@ -63,7 +63,7 @@
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(facts);
+TRACE_SET_MOD(facts)
 
 namespace fs = std::filesystem;
 

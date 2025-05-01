@@ -23,7 +23,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdDown::help(DebuggerClient &client) {
   client.helpTitle("Down Command");

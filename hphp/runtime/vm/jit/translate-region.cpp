@@ -51,7 +51,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-TRACE_SET_MOD(trans);
+TRACE_SET_MOD(trans)
 
 namespace HPHP::jit {
 

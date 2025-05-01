@@ -27,7 +27,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_alias);
+TRACE_SET_MOD(hhir_alias)
 
 namespace {
 
@@ -95,7 +95,7 @@ Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   meta.index = ret.locations.size() - 1;
   always_assert(meta.index < kMaxTrackedALocs);
   return meta.index;
-};
+}
 
 // Expand a location into a set of locations that may alias it. This
 // is for locals where the location may contain a discrete set of

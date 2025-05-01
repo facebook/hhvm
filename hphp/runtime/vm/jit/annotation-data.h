@@ -40,7 +40,7 @@ struct AnnotationData {
       , caller(caller)
       , callee(callee)
       , reason(reason)
-    {};
+    {}
 
     std::string getDecision() const {
       return wasInlined ? "DoInline" : "NoInline";
@@ -81,7 +81,7 @@ struct AnnotationData {
                                        decision.getAnnotationStr());
     }
     return inliningAnnotations;
-  };
+  }
 
   Annotations getAllAnnotations() const {
     auto allAnnotations = getInliningAnnotations();
@@ -108,4 +108,3 @@ struct AnnotationData {
 };
 
 } // namespace HPHP::jit
-

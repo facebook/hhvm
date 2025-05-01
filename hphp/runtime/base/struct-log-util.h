@@ -34,9 +34,8 @@ void logSerDes(const char* format,
                const char* op,
                const String& serialized,
                const Variant& value);
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

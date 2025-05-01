@@ -57,7 +57,7 @@ struct InvalidSetMException : std::runtime_error {
 
   ~InvalidSetMException() noexcept override {}
 
-  const TypedValue& tv() const { return m_tv; };
+  const TypedValue& tv() const { return m_tv; }
 
  private:
   /* m_tv will contain a TypedValue with a reference destined for the

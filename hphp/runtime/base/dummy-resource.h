@@ -31,8 +31,8 @@ namespace HPHP {
  * first to make that work.
  */
 struct DummyResource : ResourceData {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource);
-  CLASSNAME_IS("Unknown");
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource)
+  CLASSNAME_IS("Unknown")
   DummyResource();
   String m_class_name;
   const String& o_getClassNameHook() const override;
@@ -42,4 +42,3 @@ struct DummyResource : ResourceData {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

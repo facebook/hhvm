@@ -113,10 +113,10 @@ struct ProxygenTransport final
 
   const std::string& getServerAddr() override {
     return m_localAddr;
-  };
+  }
   uint16_t getServerPort() override {
     return m_localPort;
-  };
+  }
 
   /**
    * Request URI.
@@ -263,7 +263,7 @@ struct ProxygenTransport final
         m_clientTxn->getTransport()
             .getUnderlyingTransport()
             ->getPeerCertificate());
-  };
+  }
 
   proxygen::HTTPTransaction* getTransaction() noexcept {
     Lock lock(this);
@@ -284,9 +284,9 @@ struct ProxygenTransport final
 
   void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override;
 
-  void onChunkHeader(size_t /*length*/) noexcept override{};
+  void onChunkHeader(size_t /*length*/) noexcept override{}
 
-  void onChunkComplete() noexcept override {};
+  void onChunkComplete() noexcept override {}
 
   void onTrailers(
     std::unique_ptr<proxygen::HTTPHeaders> /*trailers*/) noexcept override {

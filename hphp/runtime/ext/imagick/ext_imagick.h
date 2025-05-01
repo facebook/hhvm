@@ -115,7 +115,7 @@ template<typename Wand>
 struct WandResource : SweepableResourceData {
 
 private:
-  DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
+  DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>)
 
 public:
   explicit WandResource(Wand* wand, bool owner = true) :
@@ -126,7 +126,7 @@ public:
     clear();
   }
 
-  CLASSNAME_IS("WandResource");
+  CLASSNAME_IS("WandResource")
   const String& o_getClassNameHook() const override {
     return classnameof();
   }

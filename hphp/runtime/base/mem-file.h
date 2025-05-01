@@ -27,7 +27,7 @@ namespace HPHP {
  * memory based files.
  */
 struct MemFile : File {
-  DECLARE_RESOURCE_ALLOCATION(MemFile);
+  DECLARE_RESOURCE_ALLOCATION(MemFile)
 
   explicit MemFile(const String& wrapper_type = null_string,
                    const String& stream_type = empty_string_ref);
@@ -36,7 +36,7 @@ struct MemFile : File {
           const String& stream_type = empty_string_ref);
   ~MemFile() override;
 
-  CLASSNAME_IS("MemFile");
+  CLASSNAME_IS("MemFile")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

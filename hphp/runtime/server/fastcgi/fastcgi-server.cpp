@@ -56,7 +56,7 @@ void FastCGIAcceptor::onNewConnection(
   // NB: ~ManagedConnection will call removeConnection() before the session
   //     destroys itself.
   Acceptor::addConnection(session);
-};
+}
 
 void FastCGIAcceptor::onConnectionsDrained() {
   m_server->onConnectionsDrained();

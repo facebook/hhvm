@@ -44,7 +44,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 // Returns true and fills "locals" with types of the function's locals if this
 // op is an Await in "tail position" (whose results are immediately returned).

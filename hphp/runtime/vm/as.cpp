@@ -101,7 +101,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/zend/zend-string.h"
 
-TRACE_SET_MOD(hhas);
+TRACE_SET_MOD(hhas)
 
 namespace HPHP {
 

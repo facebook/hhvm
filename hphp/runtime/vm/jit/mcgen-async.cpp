@@ -40,7 +40,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-TRACE_SET_MOD(async_jit);
+TRACE_SET_MOD(async_jit)
 
 namespace HPHP::jit::mcgen {
 

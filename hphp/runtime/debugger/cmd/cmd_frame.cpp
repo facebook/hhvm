@@ -23,7 +23,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdFrame::help(DebuggerClient &client) {
   client.helpTitle("Frame Command");

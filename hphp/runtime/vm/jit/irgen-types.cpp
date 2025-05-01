@@ -891,7 +891,7 @@ SSATmp* check_nullable(IRGS& env, SSATmp* res, SSATmp* var) {
     [&] { return gen(env, IsType, TNull, var); },
     [&] { return cns(env, true); }
   );
-};
+}
 
 void chain_is_type(IRGS& env, SSATmp* c, bool nullable, Type ty) {
   always_assert(false);
@@ -918,7 +918,7 @@ void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
       push(env, cns(env, true));
     }
   );
-};
+}
 
 /*
  * This function tries to emit is type struct operations without resolving

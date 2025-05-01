@@ -30,7 +30,7 @@
 
 namespace HPHP::jit::irgen {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 void surpriseCheck(IRGS& env) {
   auto const exit = makeExitSlow(env);

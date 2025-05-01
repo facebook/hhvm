@@ -39,7 +39,7 @@ struct c_ResumableWaitHandle :
     SystemLib::ClassLoader<"HH\\ResumableWaitHandle"> {
   using SystemLib::ClassLoader<"HH\\ResumableWaitHandle">::classof;
   using SystemLib::ClassLoader<"HH\\ResumableWaitHandle">::className;
-  WAITHANDLE_DTOR(ResumableWaitHandle);
+  WAITHANDLE_DTOR(ResumableWaitHandle)
 
   explicit c_ResumableWaitHandle(Class* cls, HeaderKind kind,
                                  type_scan::Index tyindex) noexcept

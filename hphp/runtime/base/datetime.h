@@ -33,7 +33,7 @@ namespace HPHP {
  * into this one single class.
  */
 struct DateTime final : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(DateTime);
+  DECLARE_RESOURCE_ALLOCATION(DateTime)
 
   /**
    * Different RFC/ISO date/time formats for toString(DateFormat).
@@ -230,7 +230,7 @@ public:
   explicit DateTime(int64_t timestamp, bool utc = false); // from a timestamp
   explicit DateTime(int64_t timestamp, req::ptr<TimeZone> tz);
 
-  CLASSNAME_IS("DateTime");
+  CLASSNAME_IS("DateTime")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

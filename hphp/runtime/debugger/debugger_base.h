@@ -63,7 +63,7 @@ struct DebuggerServerLostException : DebuggerClientException {};
 
 // Both client- and server-side exceptions
 struct DebuggerException : Exception {
-  EXCEPTION_COMMON_IMPL(DebuggerException);
+  EXCEPTION_COMMON_IMPL(DebuggerException)
 };
 
 // Exception thrown in two cases:
@@ -80,7 +80,7 @@ struct DebuggerClientExitException : DebuggerException {
   const char* what() const noexcept override {
     return "Debugger client has just quit, request (if any) terminated.";
   }
-  EXCEPTION_COMMON_IMPL(DebuggerClientExitException);
+  EXCEPTION_COMMON_IMPL(DebuggerClientExitException)
 };
 
 // Exception thrown when a DebuggerClientExitException occurs specifically
@@ -99,7 +99,7 @@ struct DebuggerRestartException : DebuggerException {
   const char* what() const noexcept override {
     return "Debugger restarting program or aborting web request.";
   }
-  EXCEPTION_COMMON_IMPL(DebuggerRestartException);
+  EXCEPTION_COMMON_IMPL(DebuggerRestartException)
 
   std::shared_ptr<std::vector<std::string>> m_args;
 };
@@ -240,4 +240,3 @@ struct DebuggerUsageLogger {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

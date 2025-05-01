@@ -31,7 +31,7 @@
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 
-TRACE_SET_MOD(watchman);
+TRACE_SET_MOD(watchman)
 
 namespace HPHP {
 

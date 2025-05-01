@@ -35,7 +35,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(strobelight);
+TRACE_SET_MOD(strobelight)
 
 namespace {
 

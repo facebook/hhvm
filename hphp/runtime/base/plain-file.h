@@ -27,7 +27,7 @@ namespace HPHP {
  * A file system file that's nothing but ordinary. A simple FILE* wrapper.
  */
 struct PlainFile : File {
-  DECLARE_RESOURCE_ALLOCATION(PlainFile);
+  DECLARE_RESOURCE_ALLOCATION(PlainFile)
 
   explicit PlainFile(FILE *stream = nullptr,
                      bool nonblocking = false,

@@ -28,7 +28,7 @@ namespace HPHP {
 // BZ2File class
 
 struct BZ2File : File {
-  DECLARE_RESOURCE_ALLOCATION(BZ2File);
+  DECLARE_RESOURCE_ALLOCATION(BZ2File)
 
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }

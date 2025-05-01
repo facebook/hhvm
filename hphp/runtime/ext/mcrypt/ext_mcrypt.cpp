@@ -51,7 +51,7 @@ struct MCrypt : SweepableResourceData {
     }
   }
 
-  CLASSNAME_IS("mcrypt");
+  CLASSNAME_IS("mcrypt")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

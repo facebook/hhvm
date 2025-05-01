@@ -33,7 +33,7 @@ namespace HPHP {
 
 namespace {
 
-TRACE_SET_MOD(bespoke);
+TRACE_SET_MOD(bespoke)
 
 using namespace bespoke;
 using jit::ArrayLayout;

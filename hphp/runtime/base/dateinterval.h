@@ -35,7 +35,7 @@ using DateIntervalPtr = std::shared_ptr<timelib_rel_time>;
  * Handles all date interval related functions.
  */
 struct DateInterval : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(DateInterval);
+  DECLARE_RESOURCE_ALLOCATION(DateInterval)
   static const StaticString& classnameof() {
     static const StaticString result("DateInterval");
     return result;

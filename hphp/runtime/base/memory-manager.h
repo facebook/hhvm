@@ -1051,7 +1051,7 @@ private:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  TRACE_SET_MOD(mm);
+  TRACE_SET_MOD(mm)
 
   static auto constexpr kNoNextGC = std::numeric_limits<int64_t>::max();
   static auto constexpr kNoNextSample = std::numeric_limits<int64_t>::max();
@@ -1127,7 +1127,7 @@ struct RequestLocalGCData {
 };
 
 extern RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
-extern DECLARE_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
+extern DECLARE_RDS_LOCAL_HOTVALUE(bool, t_eager_gc)
 
 void gather_alloc_stack(bool skipTop = false);
 void reset_alloc_sampling();

@@ -36,7 +36,7 @@ extern "C" void __deregister_frame(const void*);
 
 namespace HPHP {
 
-TRACE_SET_MOD(ehframe);
+TRACE_SET_MOD(ehframe)
 
 ///////////////////////////////////////////////////////////////////////////////
 

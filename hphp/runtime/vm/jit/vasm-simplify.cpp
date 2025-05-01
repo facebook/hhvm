@@ -32,7 +32,7 @@
 
 #include <utility>
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 
@@ -1564,7 +1564,7 @@ bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
 }
 
 struct regWidth {
-  explicit regWidth(Vreg r) { givenReg = r; };
+  explicit regWidth(Vreg r) { givenReg = r; }
   template<class T> void imm (T) {}
   template<class T> void def (T) {}
   template<class T> void use (T) {}

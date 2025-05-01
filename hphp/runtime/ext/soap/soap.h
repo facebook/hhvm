@@ -165,7 +165,7 @@ struct soapClass {
 };
 
 struct soapHeader : ResourceData {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader)
 
   CLASSNAME_IS("soapHeader")
   const String& o_getClassNameHook() const override {

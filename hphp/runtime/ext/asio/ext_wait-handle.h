@@ -77,7 +77,7 @@ T* wait_handle(const ObjectData* obj) {
 }
 
 struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
-  WAITHANDLE_DTOR(Awaitable);
+  WAITHANDLE_DTOR(Awaitable)
 
   enum class Kind : uint8_t {
     Static,

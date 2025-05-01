@@ -89,10 +89,10 @@ struct AsioContext final {
 
   req::vector<c_SleepWaitHandle*>& getSleepEvents() {
     return m_sleepEvents;
-  };
+  }
   req::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
     return m_externalThreadEvents;
-  };
+  }
 
   void runUntil(c_WaitableWaitHandle* wait_handle);
 

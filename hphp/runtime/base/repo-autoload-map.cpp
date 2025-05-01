@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/util/assertions.h"
 
-TRACE_SET_MOD(repo_autoload);
+TRACE_SET_MOD(repo_autoload)
 
 namespace fs = std::filesystem;
 

@@ -198,7 +198,7 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *    Then, the best choice is to use this macro to make sure the object
  *    is always collected during request shutdown time:
  *
- *       DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T);
+ *       DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)
  *
  *    This object doesn't participate in sweep(), as object allocator doesn't
  *    have any callback installed.
@@ -219,7 +219,7 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *    When deriving from SweepableResourceData, either "new" or "NEW" can
  *    be used, but we prefer people use NEW with these macros:
  *
- *       DECLARE_RESOURCE_ALLOCATION(T);
+ *       DECLARE_RESOURCE_ALLOCATION(T)
  *       IMPLEMENT_RESOURCE_ALLOCATION(T);
  *
  * 3. If a ResourceData is a mix of request allocated data members and globally
@@ -243,7 +243,7 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *       HANDLE ptr; // raw pointers that need to be free-d somehow
  *       String str; // request-allocated objects are fine
  *
- *       DECLARE_RESOURCE_ALLOCATION(T);
+ *       DECLARE_RESOURCE_ALLOCATION(T)
  *    };
  *    void MixedRequestAllocated::sweep() {
  *       delete stdstr;

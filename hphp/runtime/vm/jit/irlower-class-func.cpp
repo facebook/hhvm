@@ -38,7 +38,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -120,7 +120,7 @@ void cgLdObjInvoke(IRLS& env, const IRInstruction* inst) {
   emitLdLowPtr(v, cls[Class::invokeOff()], dst, sizeof(LowPtr<Func>));
 }
 
-IMPL_OPCODE_CALL(HasToString);
+IMPL_OPCODE_CALL(HasToString)
 
 void cgLdFuncVecLen(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();

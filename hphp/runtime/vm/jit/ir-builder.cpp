@@ -38,7 +38,7 @@ namespace HPHP::jit::irgen {
 
 namespace {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 using Trace::Indent;
 
 ///////////////////////////////////////////////////////////////////////////////

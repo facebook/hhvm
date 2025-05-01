@@ -46,7 +46,7 @@ namespace TS = TypeStructure;
 
 namespace {
 
-TRACE_SET_MOD(hhbbc_index);
+TRACE_SET_MOD(hhbbc_index)
 
 // Whether the kind represents a type-structure which is inherently
 // resolved. We don't need to look at those at all.

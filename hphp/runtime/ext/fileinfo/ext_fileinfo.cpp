@@ -263,7 +263,7 @@ struct fileinfoExtension final : Extension {
 } s_fileinfo_extension;
 
 // Uncomment for non-bundled module
-//HHVM_GET_MODULE(fileinfo);
+//HHVM_GET_MODULE(fileinfo)
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

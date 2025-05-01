@@ -389,7 +389,7 @@ CONTAINER_CONFIG_BODY(ConfigSetC, SetC)
 CONTAINER_CONFIG_BODY(ConfigFlatSet, FlatSet)
 CONTAINER_CONFIG_BODY(ConfigIMap, IMap)
 CONTAINER_CONFIG_BODY(ConfigIFastMap, IFastMap)
-CONTAINER_CONFIG_BODY(ConfigFastSet, FastSet);
+CONTAINER_CONFIG_BODY(ConfigFastSet, FastSet)
 
 // No `ini` binding yet. Hdf still takes precedence but will be removed
 // once we have made all options ini-aware. All new settings should

@@ -26,7 +26,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////

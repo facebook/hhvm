@@ -17,7 +17,7 @@ struct PairIterator;
 }
 
 struct c_Pair : c_Collection, SystemLib::ClassLoader<"HH\\Pair"> {
-  DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
+  DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair)
 
   static ObjectData* instanceCtor(Class* /*cls*/) {
     SystemLib::throwInvalidOperationExceptionObject(

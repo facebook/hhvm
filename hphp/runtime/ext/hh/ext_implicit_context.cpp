@@ -239,7 +239,7 @@ Object initEmptyContext() {
   context->m_memoKey = kAgnosticMemoKey;
   context->m_memoAgnosticIC = obj.get();
   return obj;
-};
+}
 
 bool HHVM_FUNCTION(has_key, TypedValue key) {
   assertx(*ImplicitContext::activeCtx);

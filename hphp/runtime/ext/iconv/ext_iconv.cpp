@@ -1967,13 +1967,13 @@ HHVM_FUNCTION(ob_iconv_handler, const String& contents, int64_t /*status*/) {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef _LIBICONV_VERSION
-const char* iconv_impl() { return "libiconv"; };
+const char* iconv_impl() { return "libiconv"; }
 std::string iconv_version() {
   return folly::sformat("{}.{}",
                         _LIBICONV_VERSION >> 8, _LIBICONV_VERSION & 255);
 }
 #else
-const char* iconv_impl() { return "glibc"; };
+const char* iconv_impl() { return "glibc"; }
 #ifdef __GLIBC__
 std::string iconv_version() {
   return folly::sformat("{}.{}",

@@ -60,7 +60,7 @@ namespace coro = folly::coro;
 
 namespace HHBBC {
 
-TRACE_SET_MOD(hhbbc);
+TRACE_SET_MOD(hhbbc)
 
 //////////////////////////////////////////////////////////////////////
 

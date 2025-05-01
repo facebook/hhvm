@@ -24,7 +24,7 @@
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 #define NF     0
 #define PRc    ProducesRC

@@ -198,12 +198,12 @@ void updateStackOffsetsExtraImpl(T* extra, int32_t delta) {
   }
 }
 
-MAKE_DISPATCHER(HashDispatcher, size_t, hashExtraImpl);
-MAKE_DISPATCHER(StableHashDispatcher, size_t, stableHashExtraImpl);
-MAKE_DISPATCHER(EqualsDispatcher, bool, equalsExtraImpl);
-MAKE_DISPATCHER(CloneDispatcher, IRExtraData*, cloneExtraImpl);
-MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
-MAKE_DISPATCHER(UpdateStackOffsetsDispatcher, void, updateStackOffsetsExtraImpl);
+MAKE_DISPATCHER(HashDispatcher, size_t, hashExtraImpl)
+MAKE_DISPATCHER(StableHashDispatcher, size_t, stableHashExtraImpl)
+MAKE_DISPATCHER(EqualsDispatcher, bool, equalsExtraImpl)
+MAKE_DISPATCHER(CloneDispatcher, IRExtraData*, cloneExtraImpl)
+MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl)
+MAKE_DISPATCHER(UpdateStackOffsetsDispatcher, void, updateStackOffsetsExtraImpl)
 
 }
 

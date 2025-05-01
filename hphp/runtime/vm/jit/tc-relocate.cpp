@@ -31,7 +31,7 @@
 
 namespace HPHP::jit::tc {
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 void relocateTranslation(
   const IRUnit* unit,

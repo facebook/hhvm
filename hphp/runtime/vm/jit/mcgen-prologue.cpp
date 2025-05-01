@@ -32,7 +32,7 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 /*
  * Given a callee and a number of args, match up to the callee's

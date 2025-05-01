@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 
-TRACE_SET_MOD(vfs);
+TRACE_SET_MOD(vfs)
 
 namespace HPHP {
 

@@ -32,7 +32,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 

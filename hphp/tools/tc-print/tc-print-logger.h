@@ -21,7 +21,7 @@
 namespace HPHP {
 
 struct TCPrintLogger {
-  virtual ~TCPrintLogger() {};
+  virtual ~TCPrintLogger() {}
   // Standard printing (usually to std::cout).
   virtual void printGeneric(const char* format, ...) = 0;
   // Printing of the collected bytecode at the start of translations.

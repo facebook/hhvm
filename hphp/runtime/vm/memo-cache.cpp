@@ -632,7 +632,7 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
-  };
+  }
 
   static constexpr std::bitset<1> makeBitset() {
     std::bitset<1> b;
@@ -1002,7 +1002,7 @@ struct Name##Builder<M,                                                 \
       } else {                                                          \
         return FromTypes<N-1, IsStr..., false>::get(types, count);      \
       }                                                                 \
-    };                                                                  \
+    }                                                                   \
   };                                                                    \
                                                                         \
   template <bool... IsStr>                                              \
@@ -1040,10 +1040,10 @@ template <> struct Name##Builder<0> {                                   \
 };
 
 // Actually create the builders
-O(MemoCacheGetter, MemoCacheGet, memoCacheGet);
-O(MemoCacheSetter, MemoCacheSet, memoCacheSet);
-O(SharedMemoCacheGetter, MemoCacheGetShared, memoCacheGetShared);
-O(SharedMemoCacheSetter, MemoCacheSetShared, memoCacheSetShared);
+O(MemoCacheGetter, MemoCacheGet, memoCacheGet)
+O(MemoCacheSetter, MemoCacheSet, memoCacheSet)
+O(SharedMemoCacheGetter, MemoCacheGetShared, memoCacheGetShared)
+O(SharedMemoCacheSetter, MemoCacheSetShared, memoCacheSetShared)
 
 #undef O
 

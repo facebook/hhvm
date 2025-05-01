@@ -30,7 +30,7 @@
 
 #include <type_traits>
 
-TRACE_SET_MOD(vasm_block_count);
+TRACE_SET_MOD(vasm_block_count)
 
 namespace HPHP { namespace jit {
 

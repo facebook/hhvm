@@ -31,7 +31,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(runtime);
+TRACE_SET_MOD(runtime)
 
 /**
  * print_string will decRef the string

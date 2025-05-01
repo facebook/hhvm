@@ -20,7 +20,7 @@ namespace HPHP::Eval {
 
 //////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 // See if the given name matches the function's name.
 static bool matchFunctionName(std::string name, const Func* f) {

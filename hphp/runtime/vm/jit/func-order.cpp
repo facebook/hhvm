@@ -35,7 +35,7 @@
 
 #include <vector>
 
-TRACE_SET_MOD(funcorder);
+TRACE_SET_MOD(funcorder)
 
 namespace HPHP::jit::FuncOrder {
 

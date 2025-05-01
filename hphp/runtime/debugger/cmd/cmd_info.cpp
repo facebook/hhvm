@@ -34,7 +34,7 @@ namespace HPHP::Eval {
 
 using std::string;
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 const StaticString
   s_params("params"),

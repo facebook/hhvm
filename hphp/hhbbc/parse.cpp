@@ -56,7 +56,7 @@
 
 namespace HPHP::HHBBC {
 
-TRACE_SET_MOD(hhbbc_parse);
+TRACE_SET_MOD(hhbbc_parse)
 
 namespace {
 

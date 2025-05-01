@@ -240,7 +240,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 
 struct c_Map : BaseMap, SystemLib::ClassLoader<"HH\\Map"> {
-  DECLARE_COLLECTIONS_CLASS(Map);
+  DECLARE_COLLECTIONS_CLASS(Map)
 
   explicit c_Map()
     : BaseMap(c_Map::classof(), HeaderKind::Map) { }

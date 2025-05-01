@@ -55,7 +55,7 @@ namespace HPHP::HHBBC {
 
 namespace {
 
-TRACE_SET_MOD(hhbbc_stats);
+TRACE_SET_MOD(hhbbc_stats)
 
 //////////////////////////////////////////////////////////////////////
 

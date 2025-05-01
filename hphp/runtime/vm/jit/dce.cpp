@@ -38,7 +38,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_dce);
+TRACE_SET_MOD(hhir_dce)
 
 bool canDCE(const IRInstruction& inst) {
   switch (inst.op()) {

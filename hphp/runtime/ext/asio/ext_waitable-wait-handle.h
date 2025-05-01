@@ -39,7 +39,7 @@ struct c_WaitableWaitHandle :
     SystemLib::ClassLoader<"HH\\WaitableWaitHandle"> {
   using SystemLib::ClassLoader<"HH\\WaitableWaitHandle">::classof;
   using SystemLib::ClassLoader<"HH\\WaitableWaitHandle">::className;
-  WAITHANDLE_DTOR(WaitableWaitHandle);
+  WAITHANDLE_DTOR(WaitableWaitHandle)
 
   explicit c_WaitableWaitHandle(Class*, HeaderKind, type_scan::Index) noexcept;
   ~c_WaitableWaitHandle();

@@ -477,7 +477,7 @@ public:
 
 /* describes a column */
 struct PDOColumn : ResourceData {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(PDOColumn);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(PDOColumn)
   PDOColumn();
   ~PDOColumn();
 
@@ -497,7 +497,7 @@ public:
 
 /* describes a bound parameter */
 struct PDOBoundParam final : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(PDOBoundParam);
+  DECLARE_RESOURCE_ALLOCATION(PDOBoundParam)
   PDOBoundParam();
   ~PDOBoundParam();
 
@@ -531,7 +531,7 @@ using sp_pdo = req::ptr<c_pdo>;
  */
 struct PDOStatement : SweepableResourceData {
 
-  DECLARE_RESOURCE_ALLOCATION(PDOStatement);
+  DECLARE_RESOURCE_ALLOCATION(PDOStatement)
 
   enum SupportedMethod {
     MethodExecuter,

@@ -226,7 +226,7 @@ struct MySQLResource : SweepableResourceData {
   }
 
   CLASSNAME_IS("mysql link")
-  DECLARE_RESOURCE_ALLOCATION(MySQLResource);
+  DECLARE_RESOURCE_ALLOCATION(MySQLResource)
 
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -274,7 +274,7 @@ struct MySQLFieldInfo {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MySQLResult : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(MySQLResult);
+  DECLARE_RESOURCE_ALLOCATION(MySQLResult)
 
   explicit MySQLResult(MYSQL_RES *res, bool localized = false);
   ~MySQLResult() override;
@@ -356,7 +356,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MySQLStmt : public SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(MySQLStmt);
+  DECLARE_RESOURCE_ALLOCATION(MySQLStmt)
 
   explicit MySQLStmt(MYSQL *mysql);
   ~MySQLStmt() override;

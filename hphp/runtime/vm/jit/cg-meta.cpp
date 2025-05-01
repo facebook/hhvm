@@ -26,7 +26,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 extern "C" __attribute__((weak))
 int __roar_api_flag_safe_function_call_site(void*, void*);

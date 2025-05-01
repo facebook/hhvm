@@ -42,7 +42,7 @@
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(region);
+TRACE_SET_MOD(region)
 
 using InterpSet = hphp_hash_set<SrcKey, SrcKey::Hasher>;
 

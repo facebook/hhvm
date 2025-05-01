@@ -752,7 +752,7 @@ std::string RuntimeOption::getTraceOutputFile() {
 using std::string;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
-EVALFLAGS();
+EVALFLAGS()
 #undef F
 hphp_string_map<TypedValue> RuntimeOption::ConstantFunctions;
 

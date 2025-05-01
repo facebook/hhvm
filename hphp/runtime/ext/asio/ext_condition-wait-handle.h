@@ -35,7 +35,7 @@ struct c_ConditionWaitHandle final :
     SystemLib::ClassLoader<"HH\\ConditionWaitHandle"> {
   using SystemLib::ClassLoader<"HH\\ConditionWaitHandle">::classof;
   using SystemLib::ClassLoader<"HH\\ConditionWaitHandle">::className;
-  WAITHANDLE_DTOR(ConditionWaitHandle);
+  WAITHANDLE_DTOR(ConditionWaitHandle)
 
   explicit c_ConditionWaitHandle()
     : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,

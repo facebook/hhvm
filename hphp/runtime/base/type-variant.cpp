@@ -256,10 +256,10 @@ IMPLEMENT_SET(const StaticString&,
   }
 
 IMPLEMENT_PTR_SET(StringData, pstr,
-                  v->isRefCounted() ? KindOfString : KindOfPersistentString);
+                  v->isRefCounted() ? KindOfString : KindOfPersistentString)
 IMPLEMENT_PTR_SET(ArrayData, parr,
                   v->isRefCounted() ?
-                  v->toDataType() : v->toPersistentDataType());
+                  v->toDataType() : v->toPersistentDataType())
 IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
 IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
 
@@ -291,7 +291,7 @@ IMPLEMENT_STEAL(StringData, pstr,
                 v->isRefCounted() ? KindOfString : KindOfPersistentString)
 IMPLEMENT_STEAL(ArrayData, parr,
                 v->isRefCounted() ?
-                v->toDataType() : v->toPersistentDataType());
+                v->toDataType() : v->toPersistentDataType())
 IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
 IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
 

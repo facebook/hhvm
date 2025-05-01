@@ -120,7 +120,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(bcinterp);
+TRACE_SET_MOD(bcinterp)
 
 using jit::JitResumeAddr;
 using jit::TCA;

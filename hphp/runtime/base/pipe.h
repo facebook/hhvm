@@ -25,7 +25,7 @@ namespace HPHP {
  * Wrapper around popen/pclose.
  */
 struct Pipe : PlainFile {
-  DECLARE_RESOURCE_ALLOCATION(Pipe);
+  DECLARE_RESOURCE_ALLOCATION(Pipe)
 
   Pipe();
   virtual ~Pipe();

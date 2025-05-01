@@ -84,7 +84,7 @@ namespace HPHP::jit::tc {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(reusetc);
+TRACE_SET_MOD(reusetc)
 
 namespace {
 struct FuncInfo {

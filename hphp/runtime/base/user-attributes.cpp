@@ -26,7 +26,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(stats);
+TRACE_SET_MOD(stats)
 
 // Somehow the visibility attribute is important for shared-library builds.
 UserAttributeMap::Map UserAttributeMap::s_empty_map EXTERNALLY_VISIBLE;

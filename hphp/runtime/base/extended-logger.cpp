@@ -54,10 +54,10 @@ bool ExtendedLogger::EnabledByDefault = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_LOGLEVEL(Error);
-IMPLEMENT_LOGLEVEL(Warning);
-IMPLEMENT_LOGLEVEL(Info);
-IMPLEMENT_LOGLEVEL(Verbose);
+IMPLEMENT_LOGLEVEL(Error)
+IMPLEMENT_LOGLEVEL(Warning)
+IMPLEMENT_LOGLEVEL(Info)
+IMPLEMENT_LOGLEVEL(Verbose)
 
 ///////////////////////////////////////////////////////////////////////////////
 

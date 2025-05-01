@@ -38,7 +38,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(tprefix);
+TRACE_SET_MOD(tprefix)
 
 namespace Trace {
 

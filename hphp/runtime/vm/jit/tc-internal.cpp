@@ -61,7 +61,7 @@ extern "C" _Unwind_Reason_Code
 __gxx_personality_v0(int, _Unwind_Action, uint64_t, _Unwind_Exception*,
                      _Unwind_Context*);
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::tc {
 

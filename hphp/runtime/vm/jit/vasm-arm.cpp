@@ -90,7 +90,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1160,18 +1160,18 @@ void Vgen::emit(const vasm_opc& i) {                  \
   }                                                   \
 }
 
-Y(orbi, Orr, W, i.s0.ub(), wzr);
-Y(orwi, Orr, W, i.s0.uw(), xzr);
-Y(orli, Orr, W, i.s0.l(), xzr);
-Y(orqi, Orr, X, i.s0.q(), xzr);
-Y(orq, Orr, X, X(i.s0), xzr);
-Y(xorb, Eor, W, W(i.s0), wzr);
-Y(xorbi, Eor, W, i.s0.ub(), wzr);
-Y(xorw, Eor, W, W(i.s0), wzr);
-Y(xorwi, Eor, W, i.s0.uw(), wzr);
-Y(xorl, Eor, W, W(i.s0), wzr);
-Y(xorq, Eor, X, X(i.s0), xzr);
-Y(xorqi, Eor, X, i.s0.q(), xzr);
+Y(orbi, Orr, W, i.s0.ub(), wzr)
+Y(orwi, Orr, W, i.s0.uw(), xzr)
+Y(orli, Orr, W, i.s0.l(), xzr)
+Y(orqi, Orr, X, i.s0.q(), xzr)
+Y(orq, Orr, X, X(i.s0), xzr)
+Y(xorb, Eor, W, W(i.s0), wzr)
+Y(xorbi, Eor, W, i.s0.ub(), wzr)
+Y(xorw, Eor, W, W(i.s0), wzr)
+Y(xorwi, Eor, W, i.s0.uw(), wzr)
+Y(xorl, Eor, W, W(i.s0), wzr)
+Y(xorq, Eor, X, X(i.s0), xzr)
+Y(xorqi, Eor, X, i.s0.q(), xzr)
 
 #undef Y
 

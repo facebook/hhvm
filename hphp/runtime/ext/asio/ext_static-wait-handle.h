@@ -37,7 +37,7 @@ struct c_StaticWaitHandle final :
     SystemLib::ClassLoader<"HH\\StaticWaitHandle"> {
   using SystemLib::ClassLoader<"HH\\StaticWaitHandle">::classof;
   using SystemLib::ClassLoader<"HH\\StaticWaitHandle">::className;
-  WAITHANDLE_DTOR(StaticWaitHandle);
+  WAITHANDLE_DTOR(StaticWaitHandle)
 
   explicit c_StaticWaitHandle()
     : c_Awaitable(c_StaticWaitHandle::classof(),

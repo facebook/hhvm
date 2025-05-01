@@ -40,7 +40,7 @@
  * In a source file, select the compilation unit's module by calling the
  * TRACE_SET_MOD macro. E.g.,
  *
- *   TRACE_SET_MOD(mcg);
+ *   TRACE_SET_MOD(mcg)
  *
  *   ...
  *   TRACE(0, "See this for any trace-enabled build: %d\n", foo);

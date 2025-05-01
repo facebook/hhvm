@@ -39,7 +39,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace {
 

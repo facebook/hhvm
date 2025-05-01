@@ -37,7 +37,7 @@ using folly::SharedMutex;
 
 namespace HPHP {
 
-TRACE_SET_MOD(apc);
+TRACE_SET_MOD(apc)
 
 //////////////////////////////////////////////////////////////////////
 

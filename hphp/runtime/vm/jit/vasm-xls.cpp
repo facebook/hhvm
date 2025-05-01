@@ -44,7 +44,7 @@
 //  - #3098685 Optimize lifetime splitting
 //  - #3098739 new features now possible with XLS
 
-TRACE_SET_MOD(xls);
+TRACE_SET_MOD(xls)
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 CmdFlowControl::~CmdFlowControl() {
   // Remove any location filter that may have been setup.

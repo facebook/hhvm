@@ -120,7 +120,7 @@ struct MemcachedData {
       serializer(q_Memcached$$SERIALIZER_PHP),
       rescode(MEMCACHED_SUCCESS) {
       memcached_create(&memcached);
-    };
+    }
     ~Impl() {
       memcached_free(&memcached);
     }

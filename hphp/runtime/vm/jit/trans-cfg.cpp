@@ -24,7 +24,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(pgo);
+TRACE_SET_MOD(pgo)
 
 TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData) {
   // In the case of profile serialization, the profile translations we

@@ -33,7 +33,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 int InterruptSite::getFileLen() const {
   TRACE(2, "InterruptSite::getFileLen\n");

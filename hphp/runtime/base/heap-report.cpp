@@ -23,7 +23,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/container-functions.h"
 
-TRACE_SET_MOD(heapreport);
+TRACE_SET_MOD(heapreport)
 
 namespace HPHP {
 namespace {

@@ -54,7 +54,7 @@ namespace HPHP::jit {
 
 namespace {
 
-TRACE_SET_MOD(hhir_load);
+TRACE_SET_MOD(hhir_load)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -722,7 +722,7 @@ void check_decref_eligible(
       auto const type = tloc->knownType <= TCell ? tloc->knownType : TCell;
       elems.push_back({index, type});
     }
-  };
+  }
 
 Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   if (env.global.unit.context().kind != TransKind::Optimize

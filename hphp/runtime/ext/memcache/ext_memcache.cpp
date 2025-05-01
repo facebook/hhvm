@@ -81,10 +81,10 @@ struct MemcacheData {
       memcached_behavior_set(&m_memcache, MEMCACHED_BEHAVIOR_HASH,
                              MEMCACHED_HASH_CRC);
     }
-  };
+  }
   ~MemcacheData() {
     memcached_free(&m_memcache);
-  };
+  }
 };
 
 static bool ini_on_update_hash_strategy(const std::string& value) {
@@ -759,7 +759,7 @@ HHVM_METHOD(Memcache, addserver, const String& host, int64_t port /* = 11211 */,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemcacheExtension final : Extension {
-    MemcacheExtension() : Extension("memcache", "3.0.8", NO_ONCALL_YET) {};
+    MemcacheExtension() : Extension("memcache", "3.0.8", NO_ONCALL_YET) {}
     void threadInit() override {
       *s_memcache_globals = new MEMCACHEGlobals;
       assertx(*s_memcache_globals);

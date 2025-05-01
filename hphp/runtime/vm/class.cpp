@@ -60,7 +60,7 @@
 
 #include <algorithm>
 
-TRACE_SET_MOD(class_load);
+TRACE_SET_MOD(class_load)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

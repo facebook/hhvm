@@ -36,7 +36,7 @@
 #include <memory>
 #include <optional>
 
-TRACE_SET_MOD(decl);
+TRACE_SET_MOD(decl)
 
 namespace HPHP {
 

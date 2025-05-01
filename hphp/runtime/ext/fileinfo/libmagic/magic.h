@@ -102,7 +102,7 @@ int magic_list(magic_t, const char *);
 int magic_errno(magic_t);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* _MAGIC_H */

@@ -67,7 +67,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbc);
+TRACE_SET_MOD(hhbc)
 const StaticString s_TrivialHHVMBuiltinWrapper("TrivialHHVMBuiltinWrapper");
 
 std::atomic<bool> Func::s_treadmill;

@@ -53,7 +53,7 @@
 
 namespace HPHP::HHBBC {
 
-TRACE_SET_MOD(hhbbc_dce);
+TRACE_SET_MOD(hhbbc_dce)
 
 //////////////////////////////////////////////////////////////////////
 

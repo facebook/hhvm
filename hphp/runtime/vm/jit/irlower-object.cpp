@@ -41,7 +41,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -168,7 +168,7 @@ void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
 
 IMPL_OPCODE_CALL(Clone)
 
-IMPL_OPCODE_CALL(FuncCred);
+IMPL_OPCODE_CALL(FuncCred)
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -23,7 +23,7 @@
 
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(vasm_phi);
+TRACE_SET_MOD(vasm_phi)
 
 namespace HPHP::jit {
 

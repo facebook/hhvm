@@ -192,7 +192,7 @@ struct ProxygenServer : Server, folly::AsyncTimeout {
 
      uint32_t getSampleRate() const override {
        return m_sample_rate_;
-     };
+     }
 
      void loopSample(int64_t busytime /* usec */, int64_t idletime) override;
 

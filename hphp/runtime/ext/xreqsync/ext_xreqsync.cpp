@@ -28,7 +28,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(xreqsync);
+TRACE_SET_MOD(xreqsync)
 
 template <typename T>
 XReqAsioEvent<T>::XReqAsioEvent() {}

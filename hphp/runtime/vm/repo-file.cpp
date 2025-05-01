@@ -38,7 +38,7 @@
 #include <fcntl.h>
 #include <tuple>
 
-TRACE_SET_MOD(repo_file);
+TRACE_SET_MOD(repo_file)
 
 namespace HPHP {
 

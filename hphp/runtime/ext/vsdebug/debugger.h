@@ -98,7 +98,7 @@ struct DebuggerCommandException : Exception {
     return m_message;
   }
 
-  EXCEPTION_COMMON_IMPL(DebuggerCommandException);
+  EXCEPTION_COMMON_IMPL(DebuggerCommandException)
 
 private:
   const char* m_message;

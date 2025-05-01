@@ -47,7 +47,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(unit_parse);
+TRACE_SET_MOD(unit_parse)
 
 UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
 

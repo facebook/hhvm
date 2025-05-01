@@ -58,7 +58,7 @@ struct SocketData : FileData {
  * TCP/UDP sockets.
  */
 struct Socket : File {
-  DECLARE_RESOURCE_ALLOCATION(Socket);
+  DECLARE_RESOURCE_ALLOCATION(Socket)
 
   ~Socket() override;
 
@@ -123,8 +123,8 @@ private:
 // This class provides exactly the same functionality as Socket but reports as a
 // class/resource of 'Socket' instead of 'stream'.
 struct ConcreteSocket final : Socket {
-  CLASSNAME_IS("Socket");
-  RESOURCENAME_IS("Socket");
+  CLASSNAME_IS("Socket")
+  RESOURCENAME_IS("Socket")
 
   explicit ConcreteSocket(bool nonblocking = true)
     : Socket(nonblocking)
@@ -159,4 +159,3 @@ struct StreamSocket final : Socket {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

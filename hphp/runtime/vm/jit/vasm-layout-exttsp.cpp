@@ -47,7 +47,7 @@ namespace HPHP::jit::layout {
 namespace {
 ////////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(layout);
+TRACE_SET_MOD(layout)
 
 // Algorithm-specific constants for the ext-tsp model.
 const double kForwardWeightCond = 0.1;

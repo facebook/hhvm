@@ -42,7 +42,7 @@ struct Array;
  * Handles all timezone related functions.
  */
 struct TimeZone : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(TimeZone);
+  DECLARE_RESOURCE_ALLOCATION(TimeZone)
 
   /**
    * Get/set current timezone that controls how local time is interpreted.

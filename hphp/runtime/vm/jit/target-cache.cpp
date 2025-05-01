@@ -47,7 +47,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(targetcache);
+TRACE_SET_MOD(targetcache)
 
 //////////////////////////////////////////////////////////////////////
 

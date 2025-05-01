@@ -97,7 +97,7 @@ struct Key : SweepableResourceData {
     if (m_key) EVP_PKEY_free(m_key);
   }
 
-  CLASSNAME_IS("OpenSSL key");
+  CLASSNAME_IS("OpenSSL key")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -287,7 +287,7 @@ public:
     X509_REQ_free(m_csr);
   }
 
-  CLASSNAME_IS("OpenSSL X.509 CSR");
+  CLASSNAME_IS("OpenSSL X.509 CSR")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

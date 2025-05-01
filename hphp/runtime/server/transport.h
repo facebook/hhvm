@@ -245,7 +245,7 @@ public:
   /**
    * Get transport params.
    */
-  virtual void getTransportParams(HeaderMap& /*serverParams*/){};
+  virtual void getTransportParams(HeaderMap& /*serverParams*/){}
 
   /**
    * Get a description of the type of transport.

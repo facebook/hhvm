@@ -38,10 +38,10 @@
 #include <vector>
 
 namespace HPHP {
-TRACE_SET_MOD(gc);
+TRACE_SET_MOD(gc)
 
 RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
-IMPLEMENT_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
+IMPLEMENT_RDS_LOCAL_HOTVALUE(bool, t_eager_gc)
 
 namespace {
 

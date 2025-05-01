@@ -117,7 +117,7 @@ nativeDataInfoCopy(ObjectData* /*dest*/, ObjectData* /*src*/) {}
 template<class T>
 void nativeDataInfoDestroy(ObjectData* obj) {
   data<T>(obj)->~T();
-};
+}
 
 template<class T>
 typename std::enable_if<!std::is_trivially_destructible<T>::value,
@@ -154,7 +154,7 @@ struct doSweep {
 template<class T>
 void callSweep(ObjectData* obj) {
   data<T>(obj)->sweep();
-};
+}
 
 template<class T>
 auto getNativeDataInfoSweep() -> void(*)(ObjectData*) {

@@ -180,7 +180,7 @@ way to determine how much progress the server made.
 #include <boost/uuid/uuid_generators.hpp>
 
 
-TRACE_SET_MOD(clisrv);
+TRACE_SET_MOD(clisrv)
 
 #include "hphp/runtime/server/cli-server-impl.h"
 

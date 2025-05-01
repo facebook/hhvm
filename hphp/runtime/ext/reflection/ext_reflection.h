@@ -30,7 +30,7 @@ struct Reflection {
 
 struct ReflectionFileHandle : SystemLib::ClassLoader<"ReflectionFile"> {
   ReflectionFileHandle(): m_unit(nullptr) {}
-  explicit ReflectionFileHandle(const Unit* unit): m_unit(unit) {};
+  explicit ReflectionFileHandle(const Unit* unit): m_unit(unit) {}
   ReflectionFileHandle(const ReflectionFileHandle&) = delete;
   ReflectionFileHandle& operator=(const ReflectionFileHandle& other) {
     m_unit = other.m_unit;
@@ -91,7 +91,7 @@ struct ReflectionModuleHandle : SystemLib::ClassLoader<"ReflectionModule"> {
 struct ReflectionFuncHandle :
     SystemLib::ClassLoader<"ReflectionFunctionAbstract"> {
   ReflectionFuncHandle(): m_func(nullptr) {}
-  explicit ReflectionFuncHandle(const Func* func): m_func(func) {};
+  explicit ReflectionFuncHandle(const Func* func): m_func(func) {}
   ReflectionFuncHandle(const ReflectionFuncHandle&) = delete;
   ReflectionFuncHandle& operator=(const ReflectionFuncHandle& other) {
     m_func = other.m_func;
@@ -121,7 +121,7 @@ struct ReflectionFuncHandle :
  * purposes of ReflectionClass. */
 struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   ReflectionClassHandle(): m_cls(nullptr) {}
-  explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {};
+  explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {}
   ReflectionClassHandle(const ReflectionClassHandle&) = delete;
   ReflectionClassHandle& operator=(const ReflectionClassHandle& that_) {
     m_cls = that_.m_cls;
@@ -165,7 +165,7 @@ struct ReflectionConstHandle :
     SystemLib::ClassLoader<"ReflectionTypeConstant"> {
   ReflectionConstHandle(): m_const(nullptr), m_cls(nullptr) {}
   explicit ReflectionConstHandle(const Class::Const* cns, const Class* cls):
-      m_const(cns), m_cls(cls) {};
+      m_const(cns), m_cls(cls) {}
 
   static ReflectionConstHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionConstHandle>(obj);
@@ -250,7 +250,7 @@ struct ReflectionPropHandle : SystemLib::ClassLoader<"ReflectionProperty"> {
 struct ReflectionTypeAliasHandle :
     SystemLib::ClassLoader<"ReflectionTypeAlias"> {
   ReflectionTypeAliasHandle(): m_req(nullptr) {}
-  explicit ReflectionTypeAliasHandle(const TypeAlias* req): m_req(req) {};
+  explicit ReflectionTypeAliasHandle(const TypeAlias* req): m_req(req) {}
 
   static ReflectionTypeAliasHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionTypeAliasHandle>(obj);

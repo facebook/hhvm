@@ -61,7 +61,7 @@ static zip* _zip_open(const String& filename, int _flags, int* zep) {
 }
 
 struct ZipStream : File {
-  DECLARE_RESOURCE_ALLOCATION(ZipStream);
+  DECLARE_RESOURCE_ALLOCATION(ZipStream)
 
   ZipStream(zip* z, const String& name)
   : File(false), m_zipFile(nullptr) {
@@ -149,9 +149,9 @@ struct ZipStreamWrapper final : Stream::Wrapper {
 };
 
 struct ZipDirectory : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(ZipDirectory);
+  DECLARE_RESOURCE_ALLOCATION(ZipDirectory)
 
-  CLASSNAME_IS("ZipDirectory");
+  CLASSNAME_IS("ZipDirectory")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -188,12 +188,12 @@ struct ZipDirectory : SweepableResourceData {
   int  m_numFiles;
   int  m_curIndex;
 };
-IMPLEMENT_RESOURCE_ALLOCATION(ZipDirectory);
+IMPLEMENT_RESOURCE_ALLOCATION(ZipDirectory)
 
 struct ZipEntry : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZipEntry);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZipEntry)
 
-  CLASSNAME_IS("ZipEntry");
+  CLASSNAME_IS("ZipEntry")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -1564,7 +1564,7 @@ struct zipExtension final : Extension {
 } s_zip_extension;
 
 // Uncomment for non-bundled module
-//HHVM_GET_MODULE(zip);
+//HHVM_GET_MODULE(zip)
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

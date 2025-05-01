@@ -1395,7 +1395,7 @@ namespace {
   SystemLib::throwInvalidArgumentExceptionObject(
     folly::sformat("Unable to find class: {}", cls)
   );
-};
+}
 
 Class* getClass(TypedValue cls) {
   switch (cls.m_type) {
@@ -1435,7 +1435,7 @@ Class* getClass(TypedValue cls) {
       );
   }
   not_reached();
-};
+}
 
 }
 

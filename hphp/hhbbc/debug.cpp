@@ -289,13 +289,13 @@ void dump_index(const std::string& dir,
 void state_after(const char* when,
                  const php::Unit& u,
                  const Index& index) {
-  TRACE_SET_MOD(hhbbc);
+  TRACE_SET_MOD(hhbbc)
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(u)};
   FTRACE(4, "{:-^70}\n{}{:-^70}\n", when, show(u, index), "");
 }
 
 void state_after(const char* when, const ParsedUnit& parsed) {
-  TRACE_SET_MOD(hhbbc);
+  TRACE_SET_MOD(hhbbc)
   Trace::Bump bumper{
     Trace::hhbbc,
     kSystemLibBump,

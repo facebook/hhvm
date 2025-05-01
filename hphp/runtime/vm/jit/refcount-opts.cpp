@@ -537,7 +537,7 @@ namespace HPHP { namespace jit {
 
 namespace {
 
-TRACE_SET_MOD(hhir_refcount);
+TRACE_SET_MOD(hhir_refcount)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -887,7 +887,7 @@ struct PreAdderInfo {
       }
       assertx(it != inst.block()->begin());
     }
-  };
+  }
   void setAvlAnt(Block::iterator iter, bool avl) {
     auto& inst = *iter;
     auto const id = penv.env.asetMap[inst.src(0)];

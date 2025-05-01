@@ -104,7 +104,7 @@ struct StackTraceTree::Node {
   uint64_t selfCount; // samples that happen precisely at this node
   StrToPNode children;
 
-  Node() : inclusiveCount(0), selfCount(0) {};
+  Node() : inclusiveCount(0), selfCount(0) {}
 
   ~Node() {
     Node::StrToPNode::iterator it;

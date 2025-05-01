@@ -30,7 +30,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(jittime);
+TRACE_SET_MOD(jittime)
 
 namespace HPHP { namespace jit {
 

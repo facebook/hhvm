@@ -47,7 +47,7 @@
 #include <folly/gen/Base.h>
 #include <folly/json/json.h>
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 extern "C" __attribute__((weak)) uint32_t __roar_api_pending_warmups();
 extern "C" __attribute__((weak)) int _roar_upcall_getWarmupStatus();
@@ -127,7 +127,7 @@ F(free_blocks)
 
 #define F(name) \
   static std::map<std::string, ServiceData::ExportedCounter*> s_ ## name ## _counters;
-FOREACH_ALLOC_FREE_COUNTER;
+FOREACH_ALLOC_FREE_COUNTER
 #undef F
 
 static InitFiniNode initCodeSizeCounters([] {

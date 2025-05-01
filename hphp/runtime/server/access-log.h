@@ -100,7 +100,7 @@ struct LogWriter {
   explicit LogWriter(LogChannel chan)
     : m_channel(chan)
   {}
-  virtual ~LogWriter() {};
+  virtual ~LogWriter() {}
   virtual void init(const std::string& username,
                     AccessLog::GetThreadDataFunc fn) = 0;
   virtual void write(Transport* transport, const VirtualHost* vhost) = 0;

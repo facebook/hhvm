@@ -67,7 +67,7 @@ using namespace HPHP::TextArt;
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 static boost::scoped_ptr<DebuggerClient> debugger_client;
 
@@ -1479,10 +1479,10 @@ void DebuggerClient::print(folly::StringPiece msg) {
     name(msg);                                                          \
   }                                                                     \
 
-IMPLEMENT_COLOR_OUTPUT(help,     stdout,  HelpColor);
-IMPLEMENT_COLOR_OUTPUT(info,     stdout,  InfoColor);
-IMPLEMENT_COLOR_OUTPUT(output,   stdout,  OutputColor);
-IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
+IMPLEMENT_COLOR_OUTPUT(help,     stdout,  HelpColor)
+IMPLEMENT_COLOR_OUTPUT(info,     stdout,  InfoColor)
+IMPLEMENT_COLOR_OUTPUT(output,   stdout,  OutputColor)
+IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor)
 
 #undef DWRITE
 #undef IMPLEMENT_COLOR_OUTPUT

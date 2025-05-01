@@ -24,7 +24,7 @@
 
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 // Resets the buffer, serializes this command into the buffer and then
 // flushes the buffer.

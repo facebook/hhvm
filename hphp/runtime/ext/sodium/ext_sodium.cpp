@@ -946,8 +946,8 @@ Array HHVM_FUNCTION(sodium_crypto_kx_##SIDE##_session_keys,\
 \
   return make_vec_array(rx, tx);\
 }
-DEFINE_KX_SESSION_KEYS_FUNC(client);
-DEFINE_KX_SESSION_KEYS_FUNC(server);
+DEFINE_KX_SESSION_KEYS_FUNC(client)
+DEFINE_KX_SESSION_KEYS_FUNC(server)
 
 const StaticString
   s_crypto_box_nonce_size(
@@ -1937,22 +1937,22 @@ String HHVM_FUNCTION(sodium_crypto_aead_##lowercase##_encrypt,\
   return ciphertext;\
 }
 
-HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(chacha20poly1305, CHACHA20POLY1305);
-HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(chacha20poly1305, CHACHA20POLY1305);
+HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(chacha20poly1305, CHACHA20POLY1305)
+HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(chacha20poly1305, CHACHA20POLY1305)
 
 bool HHVM_FUNCTION(sodium_crypto_aead_aes256gcm_is_available) {
   return crypto_aead_aes256gcm_is_available();
 }
-HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(aes256gcm, AES256GCM);
-HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(aes256gcm, AES256GCM);
+HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(aes256gcm, AES256GCM)
+HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(aes256gcm, AES256GCM)
 
-HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(chacha20poly1305_ietf, CHACHA20POLY1305_IETF);
-HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(chacha20poly1305_ietf, CHACHA20POLY1305_IETF);
+HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(chacha20poly1305_ietf, CHACHA20POLY1305_IETF)
+HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(chacha20poly1305_ietf, CHACHA20POLY1305_IETF)
 
 HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(xchacha20poly1305_ietf,
-                                  XCHACHA20POLY1305_IETF);
+                                  XCHACHA20POLY1305_IETF)
 HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(xchacha20poly1305_ietf,
-                                  XCHACHA20POLY1305_IETF);
+                                  XCHACHA20POLY1305_IETF)
 
 #define HHVM_REGISTER_AEAD_DEFINITIONS(lowercase, uppercase)\
     HHVM_RC_INT(\
@@ -2153,7 +2153,7 @@ bool HHVM_FUNCTION(sodium_crypto_core_ed25519_is_valid_point,
     reinterpret_cast<const unsigned char*>(y.data()));
   // libsodium docs: "returns 1 on success, and 0 if the checks didn't pass."
   return r == 1;
-};
+}
 
 String HHVM_FUNCTION(sodium_crypto_core_ed25519_add,
                      const String& x,

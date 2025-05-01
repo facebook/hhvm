@@ -26,7 +26,7 @@ namespace HPHP::jit::x64 {
 
 namespace {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 //////////////////////////////////////////////////////////////////////
 

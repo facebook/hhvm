@@ -24,7 +24,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 void CmdOut::help(DebuggerClient &client) {
   client.helpTitle("Out Command");

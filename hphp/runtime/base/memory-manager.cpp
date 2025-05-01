@@ -47,7 +47,7 @@ __thread bool tl_sweeping;
 THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 __thread size_t tl_heap_id; // thread's current heap instance id
 
-TRACE_SET_MOD(mm);
+TRACE_SET_MOD(mm)
 
 //////////////////////////////////////////////////////////////////////
 

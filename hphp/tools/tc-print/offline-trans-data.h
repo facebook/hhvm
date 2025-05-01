@@ -56,7 +56,7 @@ struct OfflineTransData {
 
   uint32_t getNumTrans() const {
     return nTranslations;
-  };
+  }
 
   uint32_t getNumFuncs() const {
     return funcIds.size();

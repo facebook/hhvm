@@ -23,7 +23,7 @@
 
 #include <queue>
 
-TRACE_SET_MOD(coeffects);
+TRACE_SET_MOD(coeffects)
 
 namespace HPHP {
 

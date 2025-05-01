@@ -54,7 +54,7 @@ namespace HPHP::jit {
 
 namespace {
 
-TRACE_SET_MOD(hhir_outline);
+TRACE_SET_MOD(hhir_outline)
 
 using Hash = uint64_t;
 

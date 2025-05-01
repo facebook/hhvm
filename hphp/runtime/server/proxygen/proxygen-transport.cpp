@@ -112,7 +112,7 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   void setTransaction(proxygen::HTTPTransaction* txn)
     noexcept override {
     m_pushTxn = txn;
-  };
+  }
 
   void detachTransaction() noexcept override {
     VLOG(5) << "detachTransaction PushTxnHandler=" << (uint64_t) this;

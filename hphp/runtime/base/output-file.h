@@ -25,14 +25,14 @@ namespace HPHP {
  * For php://output, a simple wrapper of g_context->out().
  */
 struct OutputFile : File {
-  DECLARE_RESOURCE_ALLOCATION(OutputFile);
+  DECLARE_RESOURCE_ALLOCATION(OutputFile)
 
   explicit OutputFile(const String& filename);
   virtual ~OutputFile();
 
   bool valid() const { return !isClosed(); }
 
-  CLASSNAME_IS("OutputFile");
+  CLASSNAME_IS("OutputFile")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -52,4 +52,3 @@ struct OutputFile : File {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -44,7 +44,7 @@
 
 #include <folly/FBVector.h>
 
-TRACE_SET_MOD(libxml);
+TRACE_SET_MOD(libxml)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

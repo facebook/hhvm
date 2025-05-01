@@ -263,7 +263,7 @@ struct XboxTask : SweepableResourceData {
 
   XboxTransport *getJob() { return m_job;}
 
-  CLASSNAME_IS("XboxTask");
+  CLASSNAME_IS("XboxTask")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

@@ -358,8 +358,8 @@ Object AllocDeploymentBoundaryViolationExceptionObject(const Variant& message) {
     return Object{get##name##Class()};                                  \
   }
 
-ALLOC_OBJECT_STUB(Directory);
-ALLOC_OBJECT_STUB(PDOException);
+ALLOC_OBJECT_STUB(Directory)
+ALLOC_OBJECT_STUB(PDOException)
 
 #undef ALLOC_OBJECT_STUB
 

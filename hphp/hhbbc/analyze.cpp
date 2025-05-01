@@ -45,7 +45,7 @@ namespace HPHP::HHBBC {
 
 namespace {
 
-TRACE_SET_MOD(hhbbc);
+TRACE_SET_MOD(hhbbc)
 
 struct KnownArgs {
   Type context;

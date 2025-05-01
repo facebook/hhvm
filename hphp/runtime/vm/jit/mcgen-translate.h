@@ -29,7 +29,7 @@ struct TransArgs;
 struct ProfDataSerializer;
 struct ProfDataDeserializer;
 
-namespace tc { struct TransMetaInfo; };
+namespace tc { struct TransMetaInfo; }
 
 namespace mcgen {
 

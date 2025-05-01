@@ -106,7 +106,7 @@ struct PDOMySqlResource : PDOResource {
 };
 
 struct PDOMySqlStatement : PDOStatement {
-  DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
+  DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement)
 
   PDOMySqlStatement(req::ptr<PDOMySqlResource>&& conn, MYSQL* server);
   ~PDOMySqlStatement() override;

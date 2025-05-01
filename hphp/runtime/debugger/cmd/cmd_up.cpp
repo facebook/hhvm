@@ -22,7 +22,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdUp::help(DebuggerClient &client) {
   client.helpTitle("Up Command");

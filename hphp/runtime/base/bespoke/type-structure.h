@@ -325,7 +325,7 @@ private:
 struct TSShape : TypeStructure {
   TSCHILDREN_METHODS(TSShape)
   static constexpr uint8_t kFieldsByte = kTSShapeFieldsByte;
-  ArrayData* fields() const { return m_fields; };
+  ArrayData* fields() const { return m_fields; }
   bool allowsUnknownFields() const { return m_allows_unknown_fields; }
 private:
   ArrayData* m_fields;

@@ -53,7 +53,7 @@
 
 namespace HPHP::HHBBC {
 
-TRACE_SET_MOD(hhbbc_emit);
+TRACE_SET_MOD(hhbbc_emit)
 
 namespace {
 
@@ -236,7 +236,7 @@ bool handleEquivalent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
   }
 
   return true;
-};
+}
 
 // The common parent P of eh1 and eh2 is the deepest region such that
 // eh1 and eh2 are both handle-equivalent to P or a child of P
@@ -253,7 +253,7 @@ ExnNodeId commonParent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
     eh2 = func.exnNodes[eh2].parent;
   }
   return eh1;
-};
+}
 
 const StaticString
   s_hhbbc_fail_verification("__hhvm_intrinsics\\hhbbc_fail_verification");

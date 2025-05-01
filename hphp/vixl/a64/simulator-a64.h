@@ -266,7 +266,7 @@ class Simulator : public DecoderVisitor {
   inline int64_t xname() { return xreg(N); }                  \
   inline void set_##wname(int32_t val) { set_wreg(N, val); }  \
   inline void set_##xname(int64_t val) { set_xreg(N, val); }
-  REG_ALIAS_ACCESSORS(30, wlr, lr);
+  REG_ALIAS_ACCESSORS(30, wlr, lr)
   #undef REG_ALIAS_ACCESSORS
 
   // The stack is a special case in aarch64.

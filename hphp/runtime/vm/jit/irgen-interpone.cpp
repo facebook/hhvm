@@ -27,7 +27,7 @@
 
 namespace HPHP::jit::irgen {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 namespace {
 

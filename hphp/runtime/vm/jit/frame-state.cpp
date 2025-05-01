@@ -32,7 +32,7 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-TRACE_SET_MOD(hhir_fsm);
+TRACE_SET_MOD(hhir_fsm)
 
 namespace HPHP::jit::irgen {
 

@@ -35,7 +35,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(runtime);
+TRACE_SET_MOD(runtime)
 
 std::aligned_storage<kEmptyKeysetSize, 16>::type s_theEmptyKeyset;
 

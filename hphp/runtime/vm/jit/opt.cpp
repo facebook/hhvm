@@ -183,7 +183,7 @@ bool lowerBespokes(IRUnit& unit) {
  * marked as hotter (i.e. more likely to execute) than any of its predecessors.
  */
 void fixBlockHints(IRUnit& unit) {
-  TRACE_SET_MOD(hhir_fixhint);
+  TRACE_SET_MOD(hhir_fixhint)
   bool changed = false;
   auto blocks = rpoSortCfg(unit);
   do {

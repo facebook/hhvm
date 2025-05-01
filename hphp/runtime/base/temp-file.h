@@ -26,7 +26,7 @@ namespace HPHP {
  * from the file system on close.
  */
 struct TempFile : PlainFile {
-  DECLARE_RESOURCE_ALLOCATION(TempFile);
+  DECLARE_RESOURCE_ALLOCATION(TempFile)
 
   explicit TempFile(bool autoDelete = true,
                     const String& wrapper_type = null_string,

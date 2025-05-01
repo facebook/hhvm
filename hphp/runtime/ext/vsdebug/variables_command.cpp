@@ -90,7 +90,7 @@ static bool isArrayObjectType(const std::string className) {
   // HH\Vector and HH\Map are special in that they are objects but their
   // children look like array indicies.
   return className == "HH\\Vector" || className == "HH\\Map";
-};
+}
 
 VariablesCommand::VariablesCommand(
   Debugger* debugger,

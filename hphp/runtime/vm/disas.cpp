@@ -42,7 +42,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(disas);
+TRACE_SET_MOD(disas)
 
 namespace {
 
@@ -234,7 +234,7 @@ std::string jmp_label(const FuncInfo& finfo, Offset tgt) {
   auto const it  = finfo.labels.find(tgt);
   always_assert(it != end(finfo.labels));
   return it->second;
-};
+}
 
 void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   auto const startPc = pc;

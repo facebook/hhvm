@@ -89,7 +89,7 @@ namespace HPHP { namespace jit {
 namespace {
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbc);
+TRACE_SET_MOD(hhbc)
 
 StaticString s_invoke("__invoke");
 
@@ -1367,7 +1367,7 @@ void renameFile(const std::string& src, const std::string& dst) {
                    src, dst, folly::errnoStr(errno));
   Logger::Error(msg);
   throw std::runtime_error(msg);
-};
+}
 
 std::string mangleFilenameForCreate(const std::string& name) {
   return name + ".part1";

@@ -31,7 +31,7 @@ namespace HPHP::Eval {
 
 using std::string;
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 const std::string &DSandboxInfo::id() const {
   TRACE(2, "DSandboxInfo::id\n");

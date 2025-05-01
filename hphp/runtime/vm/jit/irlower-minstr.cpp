@@ -50,7 +50,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -844,12 +844,12 @@ void cgCheckPtrIterTombstone(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(SetNewElem);
-IMPL_OPCODE_CALL(SetNewElemVec);
-IMPL_OPCODE_CALL(SetNewElemDict);
+IMPL_OPCODE_CALL(SetNewElem)
+IMPL_OPCODE_CALL(SetNewElemVec)
+IMPL_OPCODE_CALL(SetNewElemDict)
 
-IMPL_OPCODE_CALL(AddNewElemVec);
-IMPL_OPCODE_CALL(AddNewElemKeyset);
+IMPL_OPCODE_CALL(AddNewElemVec)
+IMPL_OPCODE_CALL(AddNewElemKeyset)
 
 template <TypedValue (*f)(ArrayData*)>
 void containerFirstLastHelper(IRLS& env, const IRInstruction* inst) {
@@ -1157,8 +1157,8 @@ void cgKeysetIdx(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 // Collections.
 
-IMPL_OPCODE_CALL(PairIsset);
-IMPL_OPCODE_CALL(VectorIsset);
+IMPL_OPCODE_CALL(PairIsset)
+IMPL_OPCODE_CALL(VectorIsset)
 
 void cgVectorSet(IRLS& env, const IRInstruction* inst) {
   auto const target = inst->src(1)->isA(TInt)

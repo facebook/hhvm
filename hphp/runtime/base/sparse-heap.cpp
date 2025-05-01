@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(mm);
+TRACE_SET_MOD(mm)
 
 std::atomic_bool SparseHeap::s_shutdown = false;
 

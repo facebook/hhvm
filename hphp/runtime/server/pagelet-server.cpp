@@ -385,7 +385,7 @@ struct PageletTask : SweepableResourceData {
 
   PageletTransport *getJob() { return m_job;}
 
-  CLASSNAME_IS("PageletTask");
+  CLASSNAME_IS("PageletTask")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

@@ -33,7 +33,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 // Always called from send and implements specific
 // logic for serializing a list command to send via Thrift.

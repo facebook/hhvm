@@ -30,7 +30,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(hackc_translate);
+TRACE_SET_MOD(hackc_translate)
 
 namespace {
 

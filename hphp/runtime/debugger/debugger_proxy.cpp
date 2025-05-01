@@ -41,7 +41,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 DebuggerProxy::DebuggerProxy(req::ptr<Socket> socket, bool local)
     : m_local(local),

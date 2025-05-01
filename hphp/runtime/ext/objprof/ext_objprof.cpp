@@ -58,7 +58,7 @@ size_t asio_object_size(const ObjectData*);
 
 namespace {
 
-TRACE_SET_MOD(objprof);
+TRACE_SET_MOD(objprof)
 
 ///////////////////////////////////////////////////////////////////////////////
 

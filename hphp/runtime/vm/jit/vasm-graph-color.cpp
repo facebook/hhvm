@@ -32,7 +32,7 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-TRACE_SET_MOD(vasm_graph_color);
+TRACE_SET_MOD(vasm_graph_color)
 
 namespace HPHP::jit {
 
@@ -1117,12 +1117,12 @@ const LoopInfo& loop_info(const State& state, Vlabel loop) {
   auto const it = state.loopInfo.find(loop);
   assertx(it != state.loopInfo.end());
   return it->second;
-};
+}
 LoopInfo& loop_info(State& state, Vlabel loop) {
   auto const it = state.loopInfo.find(loop);
   assertx(it != state.loopInfo.end());
   return it->second;
-};
+}
 
 // A block is a loop header if we have loop info for it (since loops are keyed
 // by their header).
@@ -1756,7 +1756,7 @@ size_t find_first_invalid_block_index(const Vblock& block) {
   auto i = block.code.size();
   while (i > 0 && !valid(block.code[i-1].op)) --i;
   return i;
-};
+}
 
 // Look for any blocks where all the successors of the block define
 // the same constant at the front. Hoist those definitions up into the

@@ -49,7 +49,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(runtime);
+TRACE_SET_MOD(runtime)
 
 using ClassConstraint = TypeConstraint::ClassConstraint;
 using UnionConstraint = TypeConstraint::UnionConstraint;
@@ -812,7 +812,7 @@ void bitName(std::string& out, T& value, T bit, const char* name, const char* se
     out.append(name);
     value = (T)(value & ~bit);
   }
-};
+}
 
 std::string showUnionTypeMask(UnionTypeMask mask) {
   std::string res;
@@ -832,7 +832,7 @@ std::string showUnionTypeMask(UnionTypeMask mask) {
   bitName(res, mask, TypeConstraint::kUnionTypeClass, "class");
   assertx(mask == 0);
   return res;
-};
+}
 
 std::string show(TypeConstraintFlags flags) {
   std::string res;

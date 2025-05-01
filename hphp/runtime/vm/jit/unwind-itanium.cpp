@@ -51,7 +51,7 @@
 #include <cxxabi.h>
 #include <unwind.h>
 
-TRACE_SET_MOD(unwind);
+TRACE_SET_MOD(unwind)
 
 namespace HPHP::jit {
 

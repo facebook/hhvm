@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 namespace {
 c_WaitableWaitHandle *objToWaitableWaitHandle(const Object& o) {

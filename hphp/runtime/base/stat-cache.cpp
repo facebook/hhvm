@@ -33,7 +33,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(stat);
+TRACE_SET_MOD(stat)
 
 static std::string statToString(const struct stat* buf) {
   std::ostringstream os;

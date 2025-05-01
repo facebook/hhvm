@@ -232,7 +232,7 @@ struct ChildProcess : SweepableResourceData {
   String command;
   Variant env;
 
-  CLASSNAME_IS("process");
+  CLASSNAME_IS("process")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

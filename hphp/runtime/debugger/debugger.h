@@ -189,7 +189,7 @@ private:
   DebuggerProxyPtr createProxy(req::ptr<Socket> socket, bool local);
   void removeProxy(DebuggerProxyPtr proxy);
   DebuggerProxyPtr findProxy(const StringData* sandboxId);
-  int countConnectedProxy() { return m_proxyMap.size(); } ;
+  int countConnectedProxy() { return m_proxyMap.size(); }
 
   void updateProxySandbox(DebuggerProxyPtr proxy,
                           const StringData* sandboxId);
@@ -225,4 +225,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -54,7 +54,7 @@ namespace HPHP {
 struct OutOfMemoryException : Exception {
   explicit OutOfMemoryException(size_t size)
     : Exception("Unable to allocate %zu bytes of memory", size) {}
-  EXCEPTION_COMMON_IMPL(OutOfMemoryException);
+  EXCEPTION_COMMON_IMPL(OutOfMemoryException)
 };
 
 ///////////////////////////////////////////////////////////////////////////////

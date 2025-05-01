@@ -23,8 +23,8 @@
 namespace HPHP {
 
 struct DummyResource2 : DummyResource {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource2);
-  CLASSNAME_IS("Unknown");
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource2)
+  CLASSNAME_IS("Unknown")
   DummyResource2() {}
   String m_class_name;
   const String& o_getClassNameHook() const override {

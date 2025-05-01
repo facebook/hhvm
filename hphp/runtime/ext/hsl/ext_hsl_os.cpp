@@ -665,8 +665,8 @@ void HHVM_FUNCTION(HSL_os_ ## fun, const Object& fd, const Object& hsl_sockaddr)
   ); \
 }
 
-IMPL(connect);
-IMPL(bind);
+IMPL(connect)
+IMPL(bind)
 
 #undef IMPL
 #undef EINVAL_ON_BAD_SOCKADDR_LEN

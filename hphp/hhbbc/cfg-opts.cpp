@@ -29,7 +29,7 @@
 
 namespace HPHP::HHBBC {
 
-TRACE_SET_MOD(hhbbc_cfg);
+TRACE_SET_MOD(hhbbc_cfg)
 
 //////////////////////////////////////////////////////////////////////
 

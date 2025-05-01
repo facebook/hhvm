@@ -2,7 +2,7 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator);
+UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator)
 
 typedef union {
   long    t1;

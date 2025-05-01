@@ -54,7 +54,7 @@ namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(ustubs);
+TRACE_SET_MOD(ustubs)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +170,7 @@ void unblockParents(Vout& v, Vreg firstBl) {
 namespace {
 constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
   return off - c_AsyncFunctionWaitHandle::arOff();
-};
+}
 } // namespace
 
 TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const UniqueStubs& us,

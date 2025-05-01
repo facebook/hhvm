@@ -25,7 +25,7 @@
 #include "hphp/util/configs/codecache.h"
 
 namespace HPHP {
-TRACE_SET_MOD(cti);
+TRACE_SET_MOD(cti)
 using jit::X64Assembler;
 using jit::TCA;
 using Verifier::funcInstrs;

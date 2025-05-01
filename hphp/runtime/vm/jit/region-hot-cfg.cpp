@@ -42,7 +42,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(pgo);
+TRACE_SET_MOD(pgo)
 
 namespace {
 

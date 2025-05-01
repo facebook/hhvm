@@ -32,7 +32,7 @@ namespace HPHP::PropertyProfile {
 
 namespace {
 
-TRACE_SET_MOD(prof_prop);
+TRACE_SET_MOD(prof_prop)
 
 // (class, prop)
 using ClassPropPair = std::pair<const StringData*, const StringData*>;

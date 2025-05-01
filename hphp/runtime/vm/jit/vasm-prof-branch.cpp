@@ -54,7 +54,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(prof_branch);
+TRACE_SET_MOD(prof_branch)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -328,7 +328,7 @@ VasmID vasm_id_for(Env& env, const Vinstr& inst, Vlabel b) {
     env.unit.blocks[b].area_idx,
     string_tag_for(inst)
   };
-};
+}
 
 /*
  * Pack the BranchID for the branch instruction that terminates `b'.

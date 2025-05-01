@@ -100,7 +100,7 @@ static struct RandomExtension final : Extension {
   }
 } s_random_extension;
 
-HHVM_GET_MODULE(random);
+HHVM_GET_MODULE(random)
 
 ///////////////////////////////////////////////////////////////////////////////
 }

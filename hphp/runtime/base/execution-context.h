@@ -221,7 +221,7 @@ public:
 
   struct StdoutHook {
     virtual void operator()(const char* s, int len) = 0;
-    virtual ~StdoutHook() {};
+    virtual ~StdoutHook() {}
   };
   void addStdoutHook(StdoutHook*);
   bool removeStdoutHook(StdoutHook*);

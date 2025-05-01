@@ -21,7 +21,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdAbort::help(DebuggerClient &client) {
   client.helpTitle("Abort Command");

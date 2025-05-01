@@ -39,7 +39,7 @@
 
 namespace HPHP {  namespace Treadmill {
 
-TRACE_SET_MOD(treadmill);
+TRACE_SET_MOD(treadmill)
 
 namespace {
 

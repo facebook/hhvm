@@ -28,7 +28,7 @@
 #include <folly/portability/SysMman.h>
 
 namespace HPHP::jit {
-TRACE_SET_MOD(txlease);
+TRACE_SET_MOD(txlease)
 
 namespace {
 /*

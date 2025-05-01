@@ -84,7 +84,7 @@ protected:
 private:
   AtomicGrowableVector<T,D>* next() const;
 
-  TRACE_SET_MOD(atomicvector);
+  TRACE_SET_MOD(atomicvector)
 };
 
 /*

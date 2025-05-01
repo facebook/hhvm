@@ -195,7 +195,7 @@ Outer:                                 | Inner:
 
 namespace HPHP::jit::irgen {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 RegionAndLazyUnit::RegionAndLazyUnit(
     SrcKey callerSk,

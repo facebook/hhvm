@@ -44,7 +44,7 @@ namespace HPHP::jit {
 
 namespace {
 
-TRACE_SET_MOD(vasm_copy);
+TRACE_SET_MOD(vasm_copy)
 
 ///////////////////////////////////////////////////////////////////////////////
 

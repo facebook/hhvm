@@ -74,7 +74,7 @@ namespace local {
 // How to use hot RDS local macros:
 //
 // In a header:
-// extern DECLARE_RDS_LOCAL_HOTVALUE(SomeType, rl_hotGlobal);
+// extern DECLARE_RDS_LOCAL_HOTVALUE(SomeType, rl_hotGlobal)
 //
 // In an implementation file:
 // IMPLEMENT_RDS_LOCAL_HOTVALUE(SomeType, rl_hotGlobal);

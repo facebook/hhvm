@@ -60,7 +60,7 @@ struct ExtendedException : Exception {
   ExtendedException& operator=(const ExtendedException& other);
   ExtendedException& operator=(ExtendedException&& other) noexcept;
 
-  EXCEPTION_COMMON_IMPL(ExtendedException);
+  EXCEPTION_COMMON_IMPL(ExtendedException)
 
   Array getBacktrace() const;
   void leakBacktrace() { m_btp.detach(); }
@@ -89,7 +89,7 @@ struct FatalErrorException : ExtendedException {
   FatalErrorException(const std::string&, const Array& backtrace,
                       bool isRecoverable = false);
 
-  EXCEPTION_COMMON_IMPL(FatalErrorException);
+  EXCEPTION_COMMON_IMPL(FatalErrorException)
 
   bool isRecoverable() const { return m_recoverable; }
 
@@ -112,21 +112,21 @@ struct ResourceExceededException : FatalErrorException {
   ResourceExceededException(const std::string& msg, const Array& backtrace)
     : FatalErrorException(msg, backtrace)
   {}
-  EXCEPTION_COMMON_IMPL(ResourceExceededException);
+  EXCEPTION_COMMON_IMPL(ResourceExceededException)
 };
 
 struct RequestTimeoutException : ResourceExceededException {
   RequestTimeoutException(const std::string& msg, const Array& backtrace)
     : ResourceExceededException(msg, backtrace)
   {}
-  EXCEPTION_COMMON_IMPL(RequestTimeoutException);
+  EXCEPTION_COMMON_IMPL(RequestTimeoutException)
 };
 
 struct RequestCPUTimeoutException : ResourceExceededException {
   RequestCPUTimeoutException(const std::string& msg, const Array& backtrace)
     : ResourceExceededException(msg, backtrace)
   {}
-  EXCEPTION_COMMON_IMPL(RequestCPUTimeoutException);
+  EXCEPTION_COMMON_IMPL(RequestCPUTimeoutException)
 };
 
 struct RequestMemoryExceededException : ResourceExceededException {
@@ -134,7 +134,7 @@ struct RequestMemoryExceededException : ResourceExceededException {
                                  const Array& backtrace)
     : ResourceExceededException(msg, backtrace)
   {}
-  EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
+  EXCEPTION_COMMON_IMPL(RequestMemoryExceededException)
 };
 
 struct RequestOOMKilledException : ResourceExceededException {
@@ -146,7 +146,7 @@ struct RequestOOMKilledException : ResourceExceededException {
     , m_usedBytes(usedBytes)
   {}
   const size_t m_usedBytes;
-  EXCEPTION_COMMON_IMPL(RequestOOMKilledException);
+  EXCEPTION_COMMON_IMPL(RequestOOMKilledException)
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ struct ExitException : ExtendedException {
   explicit ExitException(int exitCode) {
     *rl_exit_code = exitCode;
   }
-  EXCEPTION_COMMON_IMPL(ExitException);
+  EXCEPTION_COMMON_IMPL(ExitException)
 };
 
 struct PhpFileDoesNotExistException : ExtendedException {
@@ -168,7 +168,7 @@ struct PhpFileDoesNotExistException : ExtendedException {
       : ExtendedException("%s", msg) {
     assertx(empty_file);
   }
-  EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
+  EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException)
 };
 
 //////////////////////////////////////////////////////////////////////

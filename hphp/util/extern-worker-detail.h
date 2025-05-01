@@ -103,7 +103,7 @@ private:
   const char* m_msg;
   std::string m_str;
 
-  TRACE_SET_MOD(extern_worker);
+  TRACE_SET_MOD(extern_worker)
 };
 
 // Execute the given lambda, wrapping it with a Timer.

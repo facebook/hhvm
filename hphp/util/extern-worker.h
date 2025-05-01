@@ -292,7 +292,7 @@ private:
   static std::atomic<uint64_t> s_next;
   static std::atomic<uint64_t> s_active;
 
-  TRACE_SET_MOD(extern_worker);
+  TRACE_SET_MOD(extern_worker)
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -718,7 +718,7 @@ private:
   static const std::array<OutputType, 1> s_vecOutputType;
   static const std::array<OutputType, 1> s_optOutputType;
 
-  TRACE_SET_MOD(extern_worker);
+  TRACE_SET_MOD(extern_worker)
 };
 
 //////////////////////////////////////////////////////////////////////

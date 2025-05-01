@@ -54,7 +54,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 
-TRACE_SET_MOD(trans);
+TRACE_SET_MOD(trans)
 
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,7 +21,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 void CmdStep::help(DebuggerClient &client) {
   client.helpTitle("Step Command");

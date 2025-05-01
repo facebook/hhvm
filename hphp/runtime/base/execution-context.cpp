@@ -93,7 +93,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-TRACE_SET_MOD(bcinterp);
+TRACE_SET_MOD(bcinterp)
 
 rds::local::AliasedRDSLocal<ExecutionContext,
                             rds::local::Initialize::Explicitly,

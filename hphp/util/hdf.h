@@ -386,7 +386,7 @@ private:
 struct HdfException : Exception {
   HdfException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);
-  EXCEPTION_COMMON_IMPL(HdfException);
+  EXCEPTION_COMMON_IMPL(HdfException)
 };
 
 /**
@@ -397,7 +397,7 @@ struct HdfDataTypeException : HdfException {
     : HdfException("HDF node [%s]'s value \"%s\" is not %s",
                    hdf->getFullPath().c_str(), value, type) {
   }
-  EXCEPTION_COMMON_IMPL(HdfDataTypeException);
+  EXCEPTION_COMMON_IMPL(HdfDataTypeException)
 };
 
 /**
@@ -408,7 +408,7 @@ struct HdfDataValueException : HdfException {
     : HdfException("HDF node [%s]'s value \"%s\" is not expected %s",
                    hdf->getFullPath().c_str(), hdf->configGet(""), expected) {
   }
-  EXCEPTION_COMMON_IMPL(HdfDataValueException);
+  EXCEPTION_COMMON_IMPL(HdfDataValueException)
 };
 
 /**
@@ -418,7 +418,7 @@ struct HdfInvalidOperation : HdfException {
   explicit HdfInvalidOperation(const char *operation)
     : HdfException("Invalid operation: %s", operation) {
   }
-  EXCEPTION_COMMON_IMPL(HdfInvalidOperation);
+  EXCEPTION_COMMON_IMPL(HdfInvalidOperation)
 };
 
 ///////////////////////////////////////////////////////////////////////////////

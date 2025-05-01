@@ -26,7 +26,7 @@
 namespace HPHP::hfsort {
 namespace {
 
-TRACE_SET_MOD(hfsort);
+TRACE_SET_MOD(hfsort)
 
 #define HFTRACE(LEVEL, ...)                         \
   if (Trace::moduleEnabled(Trace::hfsort, LEVEL)) { \

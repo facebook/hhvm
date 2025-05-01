@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <cstdint>
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 

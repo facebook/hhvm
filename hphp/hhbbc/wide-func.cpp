@@ -32,7 +32,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbbc_mem);
+TRACE_SET_MOD(hhbbc_mem)
 
 using Buffer = CompressedBytecode;
 

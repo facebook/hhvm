@@ -113,7 +113,7 @@ struct Xenon final {
   static Xenon& getInstance(void) noexcept;
 
   Xenon() noexcept;
-  ~Xenon() noexcept {};
+  ~Xenon() noexcept {}
   Xenon(const Xenon&) = delete;
   void operator=(const Xenon&) = delete;
 

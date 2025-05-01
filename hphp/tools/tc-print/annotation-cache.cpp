@@ -91,7 +91,7 @@ const uint8_t* AnnotationCache::getIOBuf(const string& fileName) {
   auto const* data = buf->data();
   m_fileCache.emplace(fileName, std::move(buf));
   return data;
-};
+}
 
 Optional<folly::StringPiece>
 AnnotationCache::getValue(const FileInfo& fileInfo) {

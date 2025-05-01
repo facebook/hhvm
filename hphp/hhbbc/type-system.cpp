@@ -42,7 +42,7 @@
 
 namespace HPHP::HHBBC {
 
-TRACE_SET_MOD(hhbbc);
+TRACE_SET_MOD(hhbbc)
 
 #define X(y, ...) const Type T##y{B##y};
 HHBBC_TYPE_PREDEFINED(X)
@@ -3306,7 +3306,7 @@ Type demote_wait_handle(Type wh) {
   assertx(!is_specialized_wait_handle(t));
   assertx(is_specialized_obj(t));
   return t;
-};
+}
 
 Type sval(SString val) {
   assertx(val->isStatic());
@@ -5588,7 +5588,7 @@ Type loosen_string_staticness(Type t) {
   t.m_bits = bits;
   assertx(t.checkInvariants());
   return t;
-};
+}
 
 Type loosen_array_staticness(Type t) {
   auto bits = t.bits();

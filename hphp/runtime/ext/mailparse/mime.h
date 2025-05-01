@@ -40,7 +40,7 @@ struct MimePart : ResourceData {
   static bool ProcessLine(req::ptr<MimePart> workpart, const String& line);
 
 public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart)
 
   MimePart();
 

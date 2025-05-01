@@ -103,7 +103,7 @@ namespace HPHP {
 // stream context
 
 struct StreamContext final : ResourceData {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext)
 
   CLASSNAME_IS("stream-context")
   const String& o_getClassNameHook() const override { return classnameof(); }

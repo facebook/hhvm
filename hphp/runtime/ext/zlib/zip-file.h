@@ -27,7 +27,7 @@ namespace HPHP {
  * zlib based files.
  */
 struct ZipFile : File {
-  DECLARE_RESOURCE_ALLOCATION(ZipFile);
+  DECLARE_RESOURCE_ALLOCATION(ZipFile)
 
   ZipFile();
   virtual ~ZipFile();

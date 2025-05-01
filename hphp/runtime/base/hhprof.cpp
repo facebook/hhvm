@@ -33,7 +33,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(hhprof);
+TRACE_SET_MOD(hhprof)
 
 RDS_LOCAL(HHProf::Request, HHProf::Request::s_request);
 

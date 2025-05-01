@@ -81,7 +81,7 @@ struct XSLTProcessorData {
     if (m_registered_phpfunctions.empty()) {
       m_registered_phpfunctions = Array::CreateDict();
     }
-  };
+  }
 
   ~XSLTProcessorData() {
     sweep();
@@ -701,7 +701,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
 // extension
 
 struct XSLExtension final : Extension {
-    XSLExtension() : Extension("xsl", "0.1", NO_ONCALL_YET) {};
+    XSLExtension() : Extension("xsl", "0.1", NO_ONCALL_YET) {}
 
     void moduleInit() override {
       xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);

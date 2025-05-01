@@ -54,7 +54,7 @@
 
 #include <folly/system/ThreadName.h>
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::mcgen {
 

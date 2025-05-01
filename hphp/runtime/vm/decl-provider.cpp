@@ -28,7 +28,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(unit_parse);
+TRACE_SET_MOD(unit_parse)
 
 std::unique_ptr<HhvmDeclProvider>
 HhvmDeclProvider::create(AutoloadMap* map,

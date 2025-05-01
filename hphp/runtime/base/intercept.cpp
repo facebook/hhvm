@@ -35,7 +35,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(intercept);
+TRACE_SET_MOD(intercept)
 
 struct InterceptRequestData final : RequestEventHandler {
   InterceptRequestData() {}

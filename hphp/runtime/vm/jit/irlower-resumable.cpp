@@ -48,7 +48,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -250,7 +250,7 @@ namespace {
 
 constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
   return off - AFWH::arOff();
-};
+}
 
 /*
  * Check if obj is an Awaitable. Passes CC_BE on sf if it is.

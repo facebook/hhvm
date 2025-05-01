@@ -29,7 +29,7 @@ namespace HPHP {
 #define DELETE_WITH_LHS_VARIANT(name, rhs) \
 bool name(const Variant&, rhs) = delete;
 
-DELETE_WITH_LHS_VARIANT(same, int);
+DELETE_WITH_LHS_VARIANT(same, int)
 DELETE_WITH_LHS_VARIANT(same, const char*)
 DELETE_WITH_LHS_VARIANT(same, const String&)
 DELETE_WITH_LHS_VARIANT(same, const Array&)
@@ -135,11 +135,11 @@ std::enable_if_t< \
   Ret \
 > name(T, U) = delete;
 
-DELETE_IF_NOT_LHS_VARIANT(same);
-DELETE_IF_NOT_LHS_VARIANT(equal);
-DELETE_IF_NOT_LHS_VARIANT(less);
-DELETE_IF_NOT_LHS_VARIANT(more);
-DELETE_IF_NOT_LHS_VARIANT(compare);
+DELETE_IF_NOT_LHS_VARIANT(same)
+DELETE_IF_NOT_LHS_VARIANT(equal)
+DELETE_IF_NOT_LHS_VARIANT(less)
+DELETE_IF_NOT_LHS_VARIANT(more)
+DELETE_IF_NOT_LHS_VARIANT(compare)
 
 #undef DELETE_IF_NOT_LHS_VARIANT
 

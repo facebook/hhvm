@@ -62,7 +62,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(preg);
+TRACE_SET_MOD(preg)
 
 using jit::TCA;
 

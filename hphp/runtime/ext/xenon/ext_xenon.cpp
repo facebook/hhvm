@@ -35,7 +35,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(xenon);
+TRACE_SET_MOD(xenon)
 
 // Data that is kept per request and is only valid per request.
 // This structure gathers a php and async stack trace when log is called.

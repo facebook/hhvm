@@ -25,7 +25,7 @@
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(pgo);
+TRACE_SET_MOD(pgo)
 
 /**
  * Remove from pConds the elements that correspond to stack positions

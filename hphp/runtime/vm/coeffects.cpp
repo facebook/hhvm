@@ -28,7 +28,7 @@
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(coeffects);
+TRACE_SET_MOD(coeffects)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

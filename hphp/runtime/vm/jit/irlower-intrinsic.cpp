@@ -53,7 +53,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -224,8 +224,8 @@ void cgInterpOneCF(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(GetTime);
-IMPL_OPCODE_CALL(GetTimeNs);
+IMPL_OPCODE_CALL(GetTime)
+IMPL_OPCODE_CALL(GetTimeNs)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -970,7 +970,7 @@ void cgRBTraceMsg(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(IncCallCounter);
+IMPL_OPCODE_CALL(IncCallCounter)
 
 void cgIncStat(IRLS& env, const IRInstruction *inst) {
   auto const stat = Stats::StatCounter(inst->src(0)->intVal());

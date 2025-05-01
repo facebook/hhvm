@@ -81,7 +81,7 @@ private:
   void closeImpl(bool forSweep);
 
 public:
-  CLASSNAME_IS("ldap link");
+  CLASSNAME_IS("ldap link")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -169,7 +169,7 @@ struct LdapResult : SweepableResourceData {
     return data == nullptr;
   }
 
-  CLASSNAME_IS("ldap result");
+  CLASSNAME_IS("ldap result")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof();}
 
@@ -196,7 +196,7 @@ struct LdapResultEntry : SweepableResourceData {
     return data == nullptr || result->isInvalid();
   }
 
-  CLASSNAME_IS("ldap result entry");
+  CLASSNAME_IS("ldap result entry")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 

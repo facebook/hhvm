@@ -70,7 +70,7 @@ void recordInterceptTCA(FuncId func, TCA addr) {
   if (info.first > 0) {
     smashInterceptJcc(addr);
   }
-};
+}
 
 /**
  * Called by tc-recycle.

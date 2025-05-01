@@ -43,7 +43,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(unwind);
+TRACE_SET_MOD(unwind)
 using boost::implicit_cast;
 
 namespace {

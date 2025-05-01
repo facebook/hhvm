@@ -41,7 +41,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToBool
@@ -140,7 +140,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-IMPL_OPCODE_CALL(ConvTVToBool);
+IMPL_OPCODE_CALL(ConvTVToBool)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToInt
@@ -221,10 +221,10 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
     [&](Vout& /*v*/) { return d; });
 }
 
-IMPL_OPCODE_CALL(ConvStrToInt);
-IMPL_OPCODE_CALL(ConvObjToInt);
-IMPL_OPCODE_CALL(ConvResToInt);
-IMPL_OPCODE_CALL(ConvTVToInt);
+IMPL_OPCODE_CALL(ConvStrToInt)
+IMPL_OPCODE_CALL(ConvObjToInt)
+IMPL_OPCODE_CALL(ConvResToInt)
+IMPL_OPCODE_CALL(ConvTVToInt)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToDbl
@@ -256,34 +256,34 @@ void cgConvIntToDbl(IRLS& env, const IRInstruction* inst) {
   implConvBoolOrIntToDbl(env, inst);
 }
 
-IMPL_OPCODE_CALL(ConvStrToDbl);
-IMPL_OPCODE_CALL(ConvObjToDbl);
-IMPL_OPCODE_CALL(ConvResToDbl);
-IMPL_OPCODE_CALL(ConvTVToDbl);
+IMPL_OPCODE_CALL(ConvStrToDbl)
+IMPL_OPCODE_CALL(ConvObjToDbl)
+IMPL_OPCODE_CALL(ConvResToDbl)
+IMPL_OPCODE_CALL(ConvTVToDbl)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToStr
 
-IMPL_OPCODE_CALL(ConvIntToStr);
-IMPL_OPCODE_CALL(ConvDblToStr);
-IMPL_OPCODE_CALL(ConvObjToStr);
-IMPL_OPCODE_CALL(ConvTVToStr);
+IMPL_OPCODE_CALL(ConvIntToStr)
+IMPL_OPCODE_CALL(ConvDblToStr)
+IMPL_OPCODE_CALL(ConvObjToStr)
+IMPL_OPCODE_CALL(ConvTVToStr)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(ConvArrLikeToVArr);
-IMPL_OPCODE_CALL(ConvArrLikeToDArr);
-IMPL_OPCODE_CALL(ConvClsMethToVArr);
-IMPL_OPCODE_CALL(ConvClsMethToDArr);
+IMPL_OPCODE_CALL(ConvArrLikeToVArr)
+IMPL_OPCODE_CALL(ConvArrLikeToDArr)
+IMPL_OPCODE_CALL(ConvClsMethToVArr)
+IMPL_OPCODE_CALL(ConvClsMethToDArr)
 
-IMPL_OPCODE_CALL(ConvArrLikeToVec);
-IMPL_OPCODE_CALL(ConvObjToVec);
+IMPL_OPCODE_CALL(ConvArrLikeToVec)
+IMPL_OPCODE_CALL(ConvObjToVec)
 
-IMPL_OPCODE_CALL(ConvArrLikeToDict);
-IMPL_OPCODE_CALL(ConvObjToDict);
+IMPL_OPCODE_CALL(ConvArrLikeToDict)
+IMPL_OPCODE_CALL(ConvObjToDict)
 
-IMPL_OPCODE_CALL(ConvArrLikeToKeyset);
-IMPL_OPCODE_CALL(ConvObjToKeyset);
+IMPL_OPCODE_CALL(ConvArrLikeToKeyset)
+IMPL_OPCODE_CALL(ConvObjToKeyset)
 
 ///////////////////////////////////////////////////////////////////////////////
 

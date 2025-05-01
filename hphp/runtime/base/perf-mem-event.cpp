@@ -53,7 +53,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(perf_mem_event);
+TRACE_SET_MOD(perf_mem_event)
 
 using namespace jit;
 

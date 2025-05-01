@@ -23,7 +23,7 @@
 
 #include "hphp/util/configs/jit.h"
 
-TRACE_SET_MOD(fixup);
+TRACE_SET_MOD(fixup)
 
 namespace HPHP {
 

@@ -35,7 +35,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 using StepOutState = RequestInjectionData::StepOutState;
 

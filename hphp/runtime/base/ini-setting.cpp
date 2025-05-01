@@ -1183,7 +1183,7 @@ void IniSetting::RestoreUser(const String& name) {
       defaults.erase(it);
     }
   }
-};
+}
 
 bool IniSetting::ResetSystemDefault(const std::string& name) {
   auto it = s_system_settings.settings.find(name);

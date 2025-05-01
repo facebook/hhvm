@@ -30,7 +30,7 @@
 
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,

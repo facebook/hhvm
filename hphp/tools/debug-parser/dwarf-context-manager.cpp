@@ -12,7 +12,7 @@
 namespace debug_parser {
 
 namespace {
-TRACE_SET_MOD(trans);
+TRACE_SET_MOD(trans)
 }
 
 DWARFContextManager::DWARFContextManager(std::string filename) {

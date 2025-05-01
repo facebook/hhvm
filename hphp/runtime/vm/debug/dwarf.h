@@ -84,7 +84,7 @@ struct TCRange {
   }
   bool isAcold() const { return m_isAcold; }
   TCA begin() const { V(); return m_start; }
-  TCA end() const   { V(); return m_end; };
+  TCA end() const   { V(); return m_end; }
   uint32_t size() const   { V(); return m_end - m_start; }
 
   void extend(const TCA newEnd) {

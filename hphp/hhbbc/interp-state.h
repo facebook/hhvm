@@ -353,7 +353,7 @@ private:
 struct StateBase {
   StateBase() {
     initialized = unreachable = false;
-  };
+  }
   StateBase(const StateBase&) = default;
   StateBase(StateBase&&) = default;
   StateBase& operator=(const StateBase&) = default;

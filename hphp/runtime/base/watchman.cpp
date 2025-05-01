@@ -37,7 +37,7 @@
 namespace HPHP {
 namespace {
 
-TRACE_SET_MOD(watchman);
+TRACE_SET_MOD(watchman)
 
 WatchmanProfiler s_profiler = nullptr;
 

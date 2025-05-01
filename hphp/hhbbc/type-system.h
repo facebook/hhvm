@@ -180,8 +180,8 @@ struct Context;
 struct IIndex;
 struct Type;
 
-namespace res { struct Class; };
-namespace php { struct Class; };
+namespace res { struct Class; }
+namespace php { struct Class; }
 
 #define DATATAGS                                                \
   DT(Str, SString, sval)                                        \
@@ -1554,11 +1554,11 @@ Type unserialize_classes(const IIndex&, Type);
 
 //////////////////////////////////////////////////////////////////////
 
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DWaitHandle);
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePacked);
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePackedN);
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMap);
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMapN);
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DWaitHandle)
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePacked)
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePackedN)
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMap)
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMapN)
 
 //////////////////////////////////////////////////////////////////////
 

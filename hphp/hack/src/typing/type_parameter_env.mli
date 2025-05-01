@@ -45,11 +45,9 @@ val merge_env :
     'env * (Pos_or_decl.t * tparam_info) option) ->
   'env * t
 
-val get_lower_bounds :
-  t -> tparam_name -> Typing_defs.locl_ty list -> tparam_bounds
+val get_lower_bounds : t -> tparam_name -> tparam_bounds
 
-val get_upper_bounds :
-  t -> tparam_name -> Typing_defs.locl_ty list -> tparam_bounds
+val get_upper_bounds : t -> tparam_name -> tparam_bounds
 
 (** value > 0, indicates higher-kinded type parameter *)
 val get_arity : t -> tparam_name -> int

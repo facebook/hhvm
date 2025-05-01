@@ -425,8 +425,6 @@ let get_concrete_supertypes
         iter seen env acc tyl
       | Tdependent (_, ty) -> iter seen env (TySet.add ty acc) tyl
       | Tgeneric n ->
-        let targs = [] in
-        (* TODO(T222659258) Clean this up, no more targs on Tgeneric *)
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -434,7 +432,7 @@ let get_concrete_supertypes
             (SSet.add n seen)
             env
             acc
-            (TySet.elements (Env.get_upper_bounds env n targs) @ tyl)
+            (TySet.elements (Env.get_upper_bounds env n) @ tyl)
       | Tintersection tyl' -> iter seen env acc (tyl' @ tyl)
       | _ -> iter seen env (TySet.add ty acc) tyl)
   in
@@ -569,13 +567,11 @@ let get_base_type ?(expand_supportdyn = true) env ty =
     (* If we have an expression dependent type and it only has one super
        type, we can treat it similarly to AKdependent _, Some ty *)
     | Tgeneric n when DependentKind.is_generic_dep_ty n -> begin
-      let targs = [] in
-      (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
-      match TySet.elements (Env.get_upper_bounds env n targs) with
+      match TySet.elements (Env.get_upper_bounds env n) with
       | ty2 :: _ when ty_equal ty ty2 -> ty
       (* If it's exactly equal, then the base ty is just this one *)
       | ty :: _ ->
-        if TySet.mem ty (Env.get_lower_bounds env n targs) then
+        if TySet.mem ty (Env.get_lower_bounds env n) then
           ty
         else if SSet.mem n seen_generics then
           ty
@@ -651,7 +647,7 @@ let collect_enum_class_upper_bounds env name =
    * is to be found.
    *)
   let rec collect seen ok result name =
-    let upper_bounds = Env.get_upper_bounds env name [] in
+    let upper_bounds = Env.get_upper_bounds env name in
     TySet.fold
       (fun lty (seen, ok, result) ->
         match get_node lty with

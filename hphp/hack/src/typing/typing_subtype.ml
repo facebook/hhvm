@@ -953,9 +953,7 @@ end = struct
             (fun ty add_set ->
               match get_node ty with
               | Tgeneric name ->
-                let targs = [] in
-                (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
-                let gen_bounds = Env.get_lower_bounds env name targs in
+                let gen_bounds = Env.get_lower_bounds env name in
                 Typing_set.union add_set gen_bounds
               | _ -> add_set)
             new_set
@@ -1424,9 +1422,7 @@ end = struct
             let ty =
               match get_node ty with
               | Tgeneric name ->
-                let targs = [] in
-                (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
-                let bounds = Env.get_lower_bounds env name targs in
+                let bounds = Env.get_lower_bounds env name in
                 MakeType.union (get_reason ty) (Typing_set.elements bounds)
               | _ -> ty
             in
@@ -6592,9 +6588,7 @@ end = struct
     | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
       concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
     | (_r_sub, Tgeneric s) when String.equal s SN.Typehints.this ->
-      let ty_args = [] in
-      (* TODO(T222659258) Clean this up, ty_args gone from Tgeneric *)
-      let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s ty_args) in
+      let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s) in
       concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
     | (_, Tvar _) ->
       mk_issubtype_prop
@@ -7587,8 +7581,7 @@ end = struct
         in
 
         let upper_bounds =
-          Typing_set.elements
-            (Env.get_upper_bounds env generic_nm generic_ty_args)
+          Typing_set.elements (Env.get_upper_bounds env generic_nm)
         in
         (* TODO(mjt) We reverse bounds here to match the evaluation order
            of older code; not doing so triggers errors due to incompleteness *)
@@ -9121,13 +9114,10 @@ let decompose_subtype_add_bound
   | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
-    let targs = [] in
-
-    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
     let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
-    let tys = Env.get_upper_bounds env name_sub targs in
+    let tys = Env.get_upper_bounds env name_sub in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then
       env
@@ -9139,11 +9129,7 @@ let decompose_subtype_add_bound
         ty_super
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | (_, Tgeneric name_super) when not (phys_equal ty_sub ty_super) ->
-    let targs = [] in
-    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
-    (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
-       but the add_lower_bound call must be adapted *)
-    let tys = Env.get_lower_bounds env name_super targs in
+    let tys = Env.get_lower_bounds env name_super in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_sub tys then
       env
@@ -9203,12 +9189,8 @@ let decompose_subtype_add_bound_err
   | (_, Tany _) -> (env, None)
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
-    let targs = [] in
-    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
     let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
-    (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
-       but the add_upper_bound call must be adapted *)
-    let tys = Env.get_upper_bounds env name_sub targs in
+    let tys = Env.get_upper_bounds env name_sub in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then
       (env, None)
@@ -9221,11 +9203,7 @@ let decompose_subtype_add_bound_err
         None )
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | (_, Tgeneric name_super) when not (phys_equal ty_sub ty_super) ->
-    let targs = [] in
-    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
-    (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
-       but the add_lower_bound call must be adapted *)
-    let tys = Env.get_lower_bounds env name_super targs in
+    let tys = Env.get_lower_bounds env name_super in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_sub tys then
       (env, None)
@@ -9432,13 +9410,11 @@ let add_constraint
             ~init:env
             ~f:(fun env x ->
               List.fold_left
-                (* TODO(T70068435) always using [] as args for now *)
-                (Typing_set.elements (Env.get_lower_bounds env x []))
+                (Typing_set.elements (Env.get_lower_bounds env x))
                 ~init:env
                 ~f:(fun env ty_sub' ->
                   List.fold_left
-                    (* TODO(T70068435) always using [] as args for now *)
-                    (Typing_set.elements (Env.get_upper_bounds env x []))
+                    (Typing_set.elements (Env.get_upper_bounds env x))
                     ~init:env
                     ~f:(fun env ty_super' ->
                       decompose_subtype env ty_sub' ty_super' on_error)))
@@ -9494,11 +9470,11 @@ let add_constraint_err
             ~init:(env, err_opts)
             ~f:(fun (env, err_opts) x ->
               List.fold_left
-                (Typing_set.elements (Env.get_lower_bounds env x []))
+                (Typing_set.elements (Env.get_lower_bounds env x))
                 ~init:(env, err_opts)
                 ~f:(fun (env, err_opts) ty_sub' ->
                   List.fold_left
-                    (Typing_set.elements (Env.get_upper_bounds env x []))
+                    (Typing_set.elements (Env.get_upper_bounds env x))
                     ~init:(env, err_opts)
                     ~f:(fun (env, err_opts) ty_super' ->
                       let (env, err_opt) =

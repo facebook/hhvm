@@ -86,7 +86,7 @@ let tp_name class_name id = class_name ^ "::" ^ snd id
   creating is known to be equal to some other type *)
 let abstract_or_exact env id ({ name; _ } as abstr) =
   let tp_name = tp_name name id in
-  if not (TySet.is_empty (Env.get_equal_bounds env tp_name [])) then
+  if not (TySet.is_empty (Env.get_equal_bounds env tp_name)) then
     (* If the resulting abstract type is exactly equal to something,
        mark the result as exact.
        For example, if we have the following
@@ -471,8 +471,6 @@ let rec expand ctx env root =
              create_root_from_type_constant ctx env root cls ci)
     end
     | Tgeneric s ->
-      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
-      let tyargs = [] in
       let ctx =
         {
           ctx with
@@ -495,7 +493,7 @@ let rec expand ctx env root =
       in
       (* Ignore seen bounds to avoid infinite loops *)
       let upper_bounds =
-        let ub = Env.get_upper_bounds env s tyargs in
+        let ub = Env.get_upper_bounds env s in
         TySet.filter
           (fun ty ->
             (not (is_supportdyn_mixed ty))

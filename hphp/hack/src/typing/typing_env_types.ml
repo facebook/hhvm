@@ -154,22 +154,22 @@ let get_pos_and_kind_of_generic env name =
   | Some r -> Some r
   | None -> Type_parameter_env.get_with_pos name env.tpenv
 
-let get_lower_bounds env name tyargs =
+let get_lower_bounds env name =
   let tpenv = get_tpenv env in
-  let local = Type_parameter_env.get_lower_bounds tpenv name tyargs in
-  let global = Type_parameter_env.get_lower_bounds env.tpenv name tyargs in
+  let local = Type_parameter_env.get_lower_bounds tpenv name in
+  let global = Type_parameter_env.get_lower_bounds env.tpenv name in
   Typing_set.union local global
 
-let get_upper_bounds env name tyargs =
+let get_upper_bounds env name =
   let tpenv = get_tpenv env in
-  let local = Type_parameter_env.get_upper_bounds tpenv name tyargs in
-  let global = Type_parameter_env.get_upper_bounds env.tpenv name tyargs in
+  let local = Type_parameter_env.get_upper_bounds tpenv name in
+  let global = Type_parameter_env.get_upper_bounds env.tpenv name in
   Typing_set.union local global
 
 (* Get bounds that are both an upper and lower of a given generic *)
-let get_equal_bounds env name tyargs =
-  let lower = get_lower_bounds env name tyargs in
-  let upper = get_upper_bounds env name tyargs in
+let get_equal_bounds env name =
+  let lower = get_lower_bounds env name in
+  let upper = get_upper_bounds env name in
   Typing_set.inter lower upper
 
 let get_tparams_in_ty_and_acc env acc ty =

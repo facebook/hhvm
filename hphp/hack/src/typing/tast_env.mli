@@ -223,8 +223,7 @@ val localize_no_subst :
   during TAST checks, the Next continuation in the typing environment (which stores
   information about type parameters) is gone.
  *)
-val get_upper_bounds :
-  env -> string -> Typing_defs.locl_ty list -> Type_parameter_env.tparam_bounds
+val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
 (** Get the reification of the type parameter with the given name. *)
 val get_reified : env -> string -> Aast.reify_kind

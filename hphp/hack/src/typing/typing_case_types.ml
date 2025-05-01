@@ -700,11 +700,7 @@ end = struct
     | Tlabel _ -> (env, label_to_datatypes ~trail)
     | Tvar _ -> (env, mixed ~reason)
     | Tgeneric name ->
-      (* TODO(T222659258) Clean this up, tyl gone from Tgeneric *)
-      let tyl = [] in
-      let upper_bounds =
-        Env.get_upper_bounds env name tyl |> Typing_set.elements
-      in
+      let upper_bounds = Env.get_upper_bounds env name |> Typing_set.elements in
       let (env, sets) =
         List.fold_map
           ~init:env

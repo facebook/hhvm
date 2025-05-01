@@ -881,20 +881,14 @@ module Full = struct
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam (penv : Typing_env_types.env) tparam =
+    (* TODO(T222659258) clean this up. Remove  get_pos_and_kind_of_generic? *)
     let kind_opt = Typing_env_types.get_pos_and_kind_of_generic penv tparam in
     match kind_opt with
     | None -> []
-    | Some (_pos, kind) ->
-      (* Use the names of the parameters themselves to present bounds
-         depending on other parameters *)
-      let param_names = Type_parameter_env.get_parameter_names kind in
-      let params =
-        List.map param_names ~f:(fun name ->
-            Typing_make_type.generic Reason.none name)
-      in
-      let lower = Typing_env_types.get_lower_bounds penv tparam params in
-      let upper = Typing_env_types.get_upper_bounds penv tparam params in
-      let equ = Typing_env_types.get_equal_bounds penv tparam params in
+    | Some (_pos, _kind) ->
+      let lower = Typing_env_types.get_lower_bounds penv tparam in
+      let upper = Typing_env_types.get_upper_bounds penv tparam in
+      let equ = Typing_env_types.get_equal_bounds penv tparam in
       let upper =
         if show_supportdyn penv then
           upper

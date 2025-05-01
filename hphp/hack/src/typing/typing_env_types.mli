@@ -129,14 +129,11 @@ val get_tpenv : env -> Type_parameter_env.t
 val get_pos_and_kind_of_generic :
   env -> string -> (Pos_or_decl.t * Typing_kinding_defs.kind) option
 
-val get_lower_bounds :
-  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+val get_lower_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
-val get_upper_bounds :
-  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
-val get_equal_bounds :
-  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+val get_equal_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
 val get_tparams_in_ty_and_acc : env -> SSet.t -> locl_ty -> SSet.t
 

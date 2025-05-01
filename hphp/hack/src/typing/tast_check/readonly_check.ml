@@ -131,14 +131,12 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   (* Generic types can be treated similarly to an intersection type
      where we find the first prop that works from the upper bounds *)
   | Tgeneric name ->
-    let tyargs = [] in
-    (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
     (* Avoid circular generics with a set *)
     if SSet.mem name seen then
       []
     else
       let new_seen = SSet.add name seen in
-      let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+      let upper_bounds = Tast_env.get_upper_bounds env name in
       find_first_in_list ~seen:new_seen (Typing_set.elements upper_bounds)
       |> Option.value ~default:[]
   | Tdependent (_, ty) ->
@@ -242,14 +240,12 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
   | Tclass (_, _, tyl) when is_value_collection_ty env ty ->
     List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   | Tgeneric name ->
-    let tyargs = [] in
-    (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
     (* Avoid circular generics with a set *)
     if SSet.mem name seen then
       false
     else
       let new_seen = SSet.add name seen in
-      let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+      let upper_bounds = Tast_env.get_upper_bounds env name in
       Typing_set.exists (fun l -> is_safe_mut_ty env new_seen l) upper_bounds
   | _ ->
     (* Otherwise, check if there's any primitive type it could be *)

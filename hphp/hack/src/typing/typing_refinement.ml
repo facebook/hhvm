@@ -597,12 +597,8 @@ and split_ty
       when SSet.mem name expansions ->
       (env, TyPartition.mk_span ~env ~predicate ty)
     | Tgeneric name ->
-      let tyl = [] in
-      (* TODO(T222659258) Clean this up, tyl gone from Tgeneric *)
       let expansions = SSet.add name expansions in
-      let upper_bounds =
-        Env.get_upper_bounds env name tyl |> Typing_set.elements
-      in
+      let upper_bounds = Env.get_upper_bounds env name |> Typing_set.elements in
       let init = TyPartition.mk_span ~env ~predicate ty in
       split_intersection
         ~other_intersected_tys

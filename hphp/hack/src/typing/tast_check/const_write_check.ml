@@ -66,9 +66,7 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
         | _ -> ()
       end
       | Tgeneric name ->
-        let targs = [] in
-        (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
-        let upper_bounds = Env.get_upper_bounds env name targs in
+        let upper_bounds = Env.get_upper_bounds env name in
         let check_class bound =
           match get_node bound with
           | Tclass ((_, c), _, _) -> check_prop env c pid None
@@ -97,9 +95,7 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
         | Tdependent (_, bound) ->
           check_const_cty seen bound
         | Tgeneric name ->
-          let targs = [] in
-          (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
-          let upper_bounds = Env.get_upper_bounds env name targs in
+          let upper_bounds = Env.get_upper_bounds env name in
           let check_class cty seen = check_const_cty seen cty in
           Typing_set.fold check_class upper_bounds seen
         | _ -> seen

@@ -85,29 +85,15 @@ let merge_env env tpenv1 tpenv2 ~combine =
   in
   (env, { tparams; consistent = tpenv1.consistent || tpenv2.consistent })
 
-let get_lower_bounds tpenv name tyargs =
-  (* TODO(T70068435) For now, anything with tyargs cannot have bounds.
-     Eventually, we need to instantiate the parameters with the provided args.
-     We must support the case here that the number of provided tyargs does not
-     match the number of expected arguments for the named type parameter. In this
-     case, chop off superfluous argumnents and fill in Tany for missing ones. *)
-  match (get name tpenv, tyargs) with
-  | (_, _ :: _)
-  | (None, _) ->
-    empty_bounds
-  | (Some { lower_bounds; _ }, _) -> lower_bounds
+let get_lower_bounds tpenv name =
+  match get name tpenv with
+  | None -> empty_bounds
+  | Some { lower_bounds; _ } -> lower_bounds
 
-let get_upper_bounds tpenv name tyargs =
-  (* TODO(T70068435) For now, anything with tyargs cannot have bounds.
-     Eventually, we need to instantiate the parameters with the provided args.
-     We must support the case here that the number of provided tyargs does not
-     match the number of expected arguments for the named type parameter. In this
-     case, chop off superfluous argumnents and fill in Tany for missing ones. *)
-  match (get name tpenv, tyargs) with
-  | (_, _ :: _)
-  | (None, _) ->
-    empty_bounds
-  | (Some { upper_bounds; _ }, _) -> upper_bounds
+let get_upper_bounds tpenv name =
+  match get name tpenv with
+  | None -> empty_bounds
+  | Some { upper_bounds; _ } -> upper_bounds
 
 let get_arity tpenv name =
   match get name tpenv with
@@ -225,9 +211,7 @@ let add_upper_bound ?intersect env_tpenv name ty =
   match intersect with
   | None -> add_upper_bound_ env_tpenv name ty
   | Some intersect ->
-    let tyl =
-      intersect ty (TySet.elements (get_upper_bounds env_tpenv name []))
-    in
+    let tyl = intersect ty (TySet.elements (get_upper_bounds env_tpenv name)) in
     let add_generic ty tys =
       if is_generic_param ~elide_nullable:true ty name then
         tys
@@ -237,7 +221,7 @@ let add_upper_bound ?intersect env_tpenv name ty =
 
     let def_pos = get_pos env_tpenv name in
     let upper_bounds = List.fold_right ~init:TySet.empty ~f:add_generic tyl in
-    let lower_bounds = get_lower_bounds env_tpenv name [] in
+    let lower_bounds = get_lower_bounds env_tpenv name in
     let reified = get_reified env_tpenv name in
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
@@ -277,10 +261,10 @@ let add_lower_bound ?union env_tpenv name ty =
   match union with
   | None -> add_lower_bound_ env_tpenv name ty
   | Some union ->
-    let tyl = union ty (TySet.elements (get_lower_bounds env_tpenv name [])) in
+    let tyl = union ty (TySet.elements (get_lower_bounds env_tpenv name)) in
     let def_pos = get_pos env_tpenv name in
     let lower_bounds = List.fold_right ~init:TySet.empty ~f:TySet.add tyl in
-    let upper_bounds = get_upper_bounds env_tpenv name [] in
+    let upper_bounds = get_upper_bounds env_tpenv name in
     let reified = get_reified env_tpenv name in
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
@@ -322,14 +306,14 @@ let remove_lower_bound tpenv name bound =
 
 let remove tpenv name =
   let tparam = mk (Typing_reason.none, Tgeneric name) in
-  let lower_bounds = get_lower_bounds tpenv name [] in
+  let lower_bounds = get_lower_bounds tpenv name in
   let remove_from_upper_bounds_of ty tpenv =
     match get_node ty with
     | Tgeneric name -> remove_upper_bound tpenv name tparam
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_upper_bounds_of lower_bounds tpenv in
-  let upper_bounds = get_upper_bounds tpenv name [] in
+  let upper_bounds = get_upper_bounds tpenv name in
   let remove_from_lower_bounds_of ty tpenv =
     match get_node ty with
     | Tgeneric name -> remove_lower_bound tpenv name tparam

@@ -761,7 +761,7 @@ let go_quarantined
       match Typing_defs.get_node ty with
       | Typing_defs.Tgeneric name when String.equal name SN.Typehints.this ->
         let upper_bounds =
-          Tast_env.get_upper_bounds env SN.Typehints.this []
+          Tast_env.get_upper_bounds env SN.Typehints.this
           |> Typing_set.to_list
           |> List.map ~f:(Tast_env.print_ty env)
           |> String.concat ~sep:", "

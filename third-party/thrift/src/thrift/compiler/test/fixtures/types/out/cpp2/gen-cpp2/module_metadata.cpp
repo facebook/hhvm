@@ -846,7 +846,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_SomeService;
-  module_SomeService.name() = "apache.org/thrift/fixtures/types/SomeService";
+  module_SomeService.name() = "module.SomeService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_bounce_map,
     ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_binary_keyed_map,
@@ -858,8 +858,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("apache.org/thrift/fixtures/types/SomeService", std::move(module_SomeService));
-  context.service_name() = "apache.org/thrift/fixtures/types/SomeService";
+  metadata.services()->emplace("module.SomeService", std::move(module_SomeService));
+  context.service_name() = "module.SomeService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

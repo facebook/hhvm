@@ -1019,7 +1019,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_SimpleService;
-  module_SimpleService.name() = "SimpleService";
+  module_SimpleService.name() = "module.SimpleService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five,
@@ -1071,8 +1071,8 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("SimpleService", std::move(module_SimpleService));
-  context.service_name() = "SimpleService";
+  metadata.services()->emplace("module.SimpleService", std::move(module_SimpleService));
+  context.service_name() = "module.SimpleService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -1099,7 +1099,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_DerivedService;
-  module_DerivedService.name() = "DerivedService";
+  module_DerivedService.name() = "module.DerivedService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six,
   };
@@ -1109,11 +1109,11 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_DerivedService.parent() = "SimpleService";
+  module_DerivedService.parent() = "module.SimpleService";
   ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("DerivedService", std::move(module_DerivedService));
-  context.service_name() = "DerivedService";
+  metadata.services()->emplace("module.DerivedService", std::move(module_DerivedService));
+  context.service_name() = "module.DerivedService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);
@@ -1140,7 +1140,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_RederivedService;
-  module_RederivedService.name() = "RederivedService";
+  module_RederivedService.name() = "module.RederivedService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven,
   };
@@ -1150,11 +1150,11 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_RederivedService.parent() = "DerivedService";
+  module_RederivedService.parent() = "module.DerivedService";
   ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
-  metadata.services()->emplace("RederivedService", std::move(module_RederivedService));
-  context.service_name() = "RederivedService";
+  metadata.services()->emplace("module.RederivedService", std::move(module_RederivedService));
+  context.service_name() = "module.RederivedService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

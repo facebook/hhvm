@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	"testing"
@@ -30,9 +30,9 @@ func TestRequestRPCMetadata(t *testing.T) {
 	wantType := types.CALL
 	wantProto := types.ProtocolIDCompact
 	wantOther := map[string]string{"header": "1"}
-	data, err := encodeRequestPayload(wantName, wantProto, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, wantOther, rpcmetadata.CompressionAlgorithm_NONE, nil)
+	data, err := EncodeRequestPayload(wantName, wantProto, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, wantOther, rpcmetadata.CompressionAlgorithm_NONE, nil)
 	require.NoError(t, err)
-	got, err := decodeRequestPayload(data)
+	got, err := DecodeRequestPayload(data)
 	require.NoError(t, err)
 	require.Equal(t, wantName, got.Name())
 	require.Equal(t, wantType, got.TypeID())
@@ -40,6 +40,6 @@ func TestRequestRPCMetadata(t *testing.T) {
 	require.Equal(t, wantOther, got.Headers())
 
 	payloadNoMetadata := payload.New([]byte("data_bytes"), nil /* metadata bytes */)
-	_, err = decodeRequestPayload(payloadNoMetadata)
+	_, err = DecodeRequestPayload(payloadNoMetadata)
 	require.ErrorContains(t, err, "request payload is missing metadata")
 }

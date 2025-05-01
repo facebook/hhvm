@@ -105,10 +105,10 @@ func (s *rocketServer) responeScheduler() scheduler.Scheduler {
 }
 
 func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
-	if err := checkRequestSetupMetadata8(setup); err != nil {
+	if err := rocket.CheckRequestSetupMetadata8(setup); err != nil {
 		return nil, err
 	}
-	serverMetadataPush, err := encodeServerMetadataPush(s.zstdSupported)
+	serverMetadataPush, err := rocket.EncodeServerMetadataPush(s.zstdSupported)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func newRocketServerSocket(
 }
 
 func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
-	_, err := decodeClientMetadataPush(msg)
+	_, err := rocket.DecodeClientMetadataPush(msg)
 	if err != nil {
 		panic(err)
 	}
@@ -157,7 +157,7 @@ func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 }
 
 func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
-	request, err := decodeRequestPayload(msg)
+	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		return mono.Error(err)
 	}
@@ -174,7 +174,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
-		return encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.GetCompressionForResponse(), protocol.Bytes())
+		return rocket.EncodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.GetCompressionForResponse(), protocol.Bytes())
 	}
 	if s.pipeliningEnabled {
 		return mono.FromFunc(workItem)
@@ -187,7 +187,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 }
 
 func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
-	request, err := decodeRequestPayload(msg)
+	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		s.log("rocketServer fireAndForget decode request payload error: %v", err)
 		return
@@ -204,7 +204,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	}
 }
 
-func newProtocolBufferFromRequest(request *requestPayload) (*protocolBuffer, error) {
+func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {
 	if !request.HasMetadata() {
 		return nil, fmt.Errorf("expected metadata")
 	}

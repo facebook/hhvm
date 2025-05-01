@@ -23,6 +23,7 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	rsocket "github.com/rsocket/rsocket-go"
@@ -63,7 +64,7 @@ func (r *rsocketClient) SendSetup(_ context.Context) error {
 			return nil, nil
 		}
 
-		setupPayload, err := newRequestSetupPayloadVersion8()
+		setupPayload, err := rocket.NewRequestSetupPayloadVersion8()
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +76,7 @@ func (r *rsocketClient) SendSetup(_ context.Context) error {
 		// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
 		clientBuilder := rsocket.Connect().
 			KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1).
-			MetadataMimeType(RocketMetadataCompactMimeType).
+			MetadataMimeType(rocket.RocketMetadataCompactMimeType).
 			SetupPayload(setupPayload).
 			OnClose(func(error) {})
 
@@ -101,7 +102,7 @@ func (r *rsocketClient) SendSetup(_ context.Context) error {
 }
 
 func (r *rsocketClient) onServerMetadataPush(pay payload.Payload) {
-	metadata, err := decodeServerMetadataPush(pay)
+	metadata, err := rocket.DecodeServerMetadataPush(pay)
 	if err != nil {
 		panic(err)
 	}
@@ -137,7 +138,7 @@ func (r *rsocketClient) RequestResponse(
 	dataBytes []byte,
 ) (map[string]string, []byte, error) {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, headers, rpcmetadata.CompressionAlgorithm_NONE, dataBytes)
+	request, err := rocket.EncodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, headers, rpcmetadata.CompressionAlgorithm_NONE, dataBytes)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -146,7 +147,7 @@ func (r *rsocketClient) RequestResponse(
 	if err != nil {
 		return nil, nil, err
 	}
-	response, err := decodeResponsePayload(val)
+	response, err := rocket.DecodeResponsePayload(val)
 	if response != nil {
 		return response.Headers(), response.Data(), err
 	}
@@ -155,7 +156,7 @@ func (r *rsocketClient) RequestResponse(
 
 func (r *rsocketClient) FireAndForget(messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) error {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE, headers, rpcmetadata.CompressionAlgorithm_NONE, dataBytes)
+	request, err := rocket.EncodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE, headers, rpcmetadata.CompressionAlgorithm_NONE, dataBytes)
 	if err != nil {
 		return err
 	}

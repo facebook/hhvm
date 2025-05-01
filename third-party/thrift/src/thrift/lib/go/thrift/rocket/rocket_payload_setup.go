@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
@@ -28,7 +29,8 @@ import (
 // RocketMetadataCompactMimeType is the mime type for the rocket metadata
 const RocketMetadataCompactMimeType = "application/x-rocket-metadata+compact"
 
-func checkRequestSetupMetadata8(pay payload.Payload) error {
+// CheckRequestSetupMetadata8 checks if the payload is valid.
+func CheckRequestSetupMetadata8(pay payload.Payload) error {
 	pay = payload.Clone(pay)
 	metdataBytes, ok := pay.Metadata()
 	if !ok {
@@ -48,7 +50,7 @@ func checkRequestSetupMetadata8(pay payload.Payload) error {
 		return fmt.Errorf("expected key %d, got %d", rpcmetadata.KRocketProtocolKey, key)
 	}
 	req := rpcmetadata.RequestSetupMetadata{}
-	if err := DecodeCompact(metdataBytes[4:], &req); err != nil {
+	if err := format.DecodeCompact(metdataBytes[4:], &req); err != nil {
 		return err
 	}
 	minVersion := req.GetMinVersion()
@@ -78,14 +80,15 @@ func newRequestSetupMetadataVersion8Bytes() ([]byte, error) {
 	}
 	prefix := buf.Bytes()
 	// then write newRequestSetupMetadataVersion8
-	bytes, err := EncodeCompact(newRequestSetupMetadataVersion8())
+	bytes, err := format.EncodeCompact(newRequestSetupMetadataVersion8())
 	if err != nil {
 		return nil, err
 	}
 	return append(prefix, bytes...), nil
 }
 
-func newRequestSetupPayloadVersion8() (payload.Payload, error) {
+// NewRequestSetupPayloadVersion8 creates a new request setup payload.
+func NewRequestSetupPayloadVersion8() (payload.Payload, error) {
 	metadata, err := newRequestSetupMetadataVersion8Bytes()
 	if err != nil {
 		return nil, err

@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	"errors"
 	"fmt"
 	"maps"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
-type requestPayload struct {
+type RequestPayload struct {
 	metadata *rpcmetadata.RequestRpcMetadata
 	data     []byte
 	typeID   types.MessageType
 	protoID  types.ProtocolID
 }
 
-func encodeRequestPayload(
+// EncodeRequestPayload encodes a request payload.
+func EncodeRequestPayload(
 	name string,
 	protoID types.ProtocolID,
 	rpcKind rpcmetadata.RpcKind,
@@ -55,7 +57,7 @@ func encodeRequestPayload(
 		SetCompression(&compression).
 		SetOtherMetadata(headersCopy)
 
-	metadataBytes, err := EncodeCompact(metadata)
+	metadataBytes, err := format.EncodeCompact(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +69,8 @@ func encodeRequestPayload(
 	return pay, nil
 }
 
-func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
+// DecodeRequestPayload decodes a request payload.
+func DecodeRequestPayload(msg payload.Payload) (*RequestPayload, error) {
 	msg = payload.Clone(msg)
 
 	metadataBytes, ok := msg.Metadata()
@@ -76,7 +79,7 @@ func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 	}
 
 	metadata := &rpcmetadata.RequestRpcMetadata{}
-	err := DecodeCompact(metadataBytes, metadata)
+	err := format.DecodeCompact(metadataBytes, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +99,7 @@ func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 		return nil, fmt.Errorf("request payload decompression failed: %w", err)
 	}
 
-	res := &requestPayload{
+	res := &RequestPayload{
 		metadata: metadata,
 		typeID:   typeID,
 		protoID:  protoID,
@@ -105,30 +108,30 @@ func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 	return res, nil
 }
 
-func (r *requestPayload) Data() []byte {
+func (r *RequestPayload) Data() []byte {
 	return r.data
 }
 
-func (r *requestPayload) HasMetadata() bool {
+func (r *RequestPayload) HasMetadata() bool {
 	return r.metadata != nil
 }
 
-func (r *requestPayload) Name() string {
+func (r *RequestPayload) Name() string {
 	if r.metadata == nil {
 		return ""
 	}
 	return r.metadata.GetName()
 }
 
-func (r *requestPayload) TypeID() types.MessageType {
+func (r *RequestPayload) TypeID() types.MessageType {
 	return r.typeID
 }
 
-func (r *requestPayload) ProtoID() types.ProtocolID {
+func (r *RequestPayload) ProtoID() types.ProtocolID {
 	return r.protoID
 }
 
-func (r *requestPayload) GetCompressionForResponse() rpcmetadata.CompressionAlgorithm {
+func (r *RequestPayload) GetCompressionForResponse() rpcmetadata.CompressionAlgorithm {
 	if r.metadata != nil {
 		compressionConfig := r.metadata.GetCompressionConfig()
 		return compressionAlgorithmFromCompressionConfig(compressionConfig)
@@ -136,7 +139,7 @@ func (r *requestPayload) GetCompressionForResponse() rpcmetadata.CompressionAlgo
 	return rpcmetadata.CompressionAlgorithm_NONE
 }
 
-func (r *requestPayload) Headers() map[string]string {
+func (r *RequestPayload) Headers() map[string]string {
 	if r.metadata == nil {
 		return nil
 	}

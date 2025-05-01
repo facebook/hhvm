@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	"fmt"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
@@ -48,7 +49,8 @@ func (r *responsePayload) Error() error {
 	return nil
 }
 
-func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
+// DecodeResponsePayload decodes a response payload.
+func DecodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	msg = payload.Clone(msg)
 	if msg == nil {
 		return &responsePayload{metadata: &rpcmetadata.ResponseRpcMetadata{}, data: []byte{}}, nil
@@ -57,7 +59,7 @@ func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	var err error
 	metadataBytes, ok := msg.Metadata()
 	if ok {
-		if err := DecodeCompact(metadataBytes, res.metadata); err != nil {
+		if err := format.DecodeCompact(metadataBytes, res.metadata); err != nil {
 			return nil, err
 		}
 		res.data, err = maybeDecompress(res.data, res.metadata.GetCompression())
@@ -71,7 +73,8 @@ func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	return res, res.Error()
 }
 
-func encodeResponsePayload(
+// EncodeResponsePayload encodes a response payload.
+func EncodeResponsePayload(
 	name string,
 	messageType types.MessageType,
 	headers map[string]string,
@@ -86,7 +89,7 @@ func encodeResponsePayload(
 		excpetionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
 		metadata.SetPayloadMetadata(rpcmetadata.NewPayloadMetadata().SetExceptionMetadata(excpetionMetadata))
 	}
-	metadataBytes, err := EncodeCompact(metadata)
+	metadataBytes, err := format.EncodeCompact(metadata)
 	if err != nil {
 		return nil, err
 	}

@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewRocketException(t *testing.T) {
 	class := &rpcmetadata.ErrorClassification{
-		Kind:   Pointerize(rpcmetadata.ErrorKind_PERMANENT),
-		Blame:  Pointerize(rpcmetadata.ErrorBlame_CLIENT),
-		Safety: Pointerize(rpcmetadata.ErrorSafety_SAFE),
+		Kind:   types.Pointerize(rpcmetadata.ErrorKind_PERMANENT),
+		Blame:  types.Pointerize(rpcmetadata.ErrorBlame_CLIENT),
+		Safety: types.Pointerize(rpcmetadata.ErrorSafety_SAFE),
 	}
 	declaredException := &rpcmetadata.PayloadExceptionMetadataBase{
 		Metadata: &rpcmetadata.PayloadExceptionMetadata{
@@ -37,8 +38,8 @@ func TestNewRocketException(t *testing.T) {
 		},
 	}
 	err := newRocketException(declaredException)
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "DeclaredException")
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "DeclaredException")
 	appUnknownException := &rpcmetadata.PayloadExceptionMetadataBase{
 		Metadata: &rpcmetadata.PayloadExceptionMetadata{
 			AppUnknownException: &rpcmetadata.PayloadAppUnknownExceptionMetdata{
@@ -47,14 +48,14 @@ func TestNewRocketException(t *testing.T) {
 		},
 	}
 	err = newRocketException(appUnknownException)
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "AppUnknownException")
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "AppUnknownException")
 	appUnknownException2 := &rpcmetadata.PayloadExceptionMetadataBase{
 		Metadata: &rpcmetadata.PayloadExceptionMetadata{
 			AppUnknownException: &rpcmetadata.PayloadAppUnknownExceptionMetdata{},
 		},
 	}
 	err = newRocketException(appUnknownException2)
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "AppUnknownException")
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "AppUnknownException")
 }

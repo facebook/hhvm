@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	"fmt"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
-func decodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetadata, error) {
+// DecodeServerMetadataPush decodes the server metadata push.
+func DecodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetadata, error) {
 	msg = payload.Clone(msg)
 	// For documentation/reference see the CPP implementation
 	// https://www.internalfb.com/code/fbsource/[ec968d3ea0ab]/fbcode/thrift/lib/cpp2/transport/rocket/client/RocketClient.cpp?lines=181
@@ -32,7 +34,7 @@ func decodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetad
 		return nil, fmt.Errorf("no metadata in server metadata push")
 	}
 	result := &rpcmetadata.ServerPushMetadata{}
-	if err := DecodeCompact(metadataBytes, result); err != nil {
+	if err := format.DecodeCompact(metadataBytes, result); err != nil {
 		return nil, fmt.Errorf("unable to deserialize ServerPushMetadata: %w", err)
 	}
 	if err := validateServerPushMetadata(result); err != nil {
@@ -41,7 +43,8 @@ func decodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetad
 	return result, nil
 }
 
-func encodeServerMetadataPush(zstdSupported bool) (payload.Payload, error) {
+// EncodeServerMetadataPush encodes the server metadata push.
+func EncodeServerMetadataPush(zstdSupported bool) (payload.Payload, error) {
 	version := int32(8)
 	res := rpcmetadata.NewServerPushMetadata().
 		SetSetupResponse(
@@ -49,7 +52,7 @@ func encodeServerMetadataPush(zstdSupported bool) (payload.Payload, error) {
 				SetVersion(&version).
 				SetZstdSupported(&zstdSupported),
 		)
-	metadataBytes, err := EncodeCompact(res)
+	metadataBytes, err := format.EncodeCompact(res)
 	if err != nil {
 		return nil, fmt.Errorf("unable to serialize metadata push %w", err)
 	}
@@ -73,14 +76,15 @@ func validateServerPushMetadata(metadata *rpcmetadata.ServerPushMetadata) error 
 	return nil
 }
 
-func decodeClientMetadataPush(msg payload.Payload) (*rpcmetadata.ClientPushMetadata, error) {
+// DecodeClientMetadataPush decodes the client metadata push.
+func DecodeClientMetadataPush(msg payload.Payload) (*rpcmetadata.ClientPushMetadata, error) {
 	msg = payload.Clone(msg)
 	metadataBytes, ok := msg.Metadata()
 	if !ok {
 		panic("no metadata in client metadata push")
 	}
 	result := &rpcmetadata.ClientPushMetadata{}
-	if err := DecodeCompact(metadataBytes, result); err != nil {
+	if err := format.DecodeCompact(metadataBytes, result); err != nil {
 		return nil, fmt.Errorf("unable to deserialize ClientPushMetadata: %w", err)
 	}
 	if err := validateClientPushMetadata(result); err != nil {

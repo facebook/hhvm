@@ -828,7 +828,7 @@ let bounded_generic_fun_cases =
     ( ("bounded_generic_fun.php", 9, 5),
       [
         {
-          snippet = [Lsp.MarkedCode ("hack", "(C & T)
+          snippet = [Lsp.MarkedCode ("hack", "(T & C)
 where T as Base")];
           addendum = [];
           pos = pos_at (9, 5) (9, 6);

@@ -19,11 +19,38 @@ let strip_ns id =
 module Tag = struct
   type ctx = Typing_env_types.env
 
+  type generic =
+    | Reified of locl_ty
+    | Erased
+
+  (* Pad with Erased because for Foo<T>, Foo and Foo<_> should be the same;
+     It's also convenient to not check for arity mismatch and failwith *)
+  let rec zip_generics al bl =
+    match (al, bl) with
+    | ([], []) -> []
+    | (a :: al, b :: bl) -> (a, b) :: zip_generics al bl
+    | (a :: al, []) -> (a, Erased) :: zip_generics al bl
+    | ([], b :: bl) -> (Erased, b) :: zip_generics al bl
+
+  let equal_generic a b =
+    match (a, b) with
+    | (Erased, Erased) -> true
+    | (Reified a, Reified b) -> ty_equal a b
+    | _ -> false
+
   type class_kind =
-    | Class
-    | FinalClass
+    | Class of generic list
+    | FinalClass of generic list
     | Interface
-  [@@deriving eq]
+
+  let equal_class_kind a b =
+    match (a, b) with
+    | (Class a_generics, Class b_generics)
+    | (FinalClass a_generics, FinalClass b_generics) ->
+      let pairs = zip_generics a_generics b_generics in
+      List.for_all pairs ~f:(fun (a, b) -> equal_generic a b)
+    | (Interface, Interface) -> true
+    | _ -> false
 
   (** Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
   type t =
@@ -50,7 +77,21 @@ module Tag = struct
             the mixed type *)
   [@@deriving eq]
 
-  let describe = function
+  let describe_generics env generics =
+    match generics with
+    | _ :: _
+      when List.exists generics ~f:(fun g -> not @@ equal_generic g Erased) ->
+      "<"
+      ^ (String.concat ~sep:", "
+        @@ List.map generics ~f:(fun g ->
+               match g with
+               | Erased -> "_"
+               | Reified ty ->
+                 Typing_print.full_strip_ns ~hide_internals:true env ty))
+      ^ ">"
+    | _ -> ""
+
+  let describe env = function
     | DictData -> "dicts"
     | VecData -> "vecs"
     | TupleData -> "tuples"
@@ -63,14 +104,63 @@ module Tag = struct
     | FloatData -> "floats"
     | NullData -> "the value null"
     | ObjectData -> "objects"
-    | InstanceOf { name; kind = FinalClass } ->
-      Printf.sprintf "instances of the final class %s" @@ strip_ns name
-    | InstanceOf { name; kind = Class } ->
-      Printf.sprintf "instances of the class %s" @@ strip_ns name
+    | InstanceOf { name; kind = FinalClass generics } ->
+      Printf.sprintf
+        "instances of the final class %s%s"
+        (strip_ns name)
+        (describe_generics env generics)
+    | InstanceOf { name; kind = Class generics } ->
+      Printf.sprintf
+        "instances of the class %s%s"
+        (strip_ns name)
+        (describe_generics env generics)
     | InstanceOf { name; kind = Interface } ->
       Printf.sprintf "instances of the interface %s" @@ strip_ns name
     | LabelData -> "enum class labels"
     | BuiltInData -> "built-in values"
+
+  let has_reified kind =
+    match kind with
+    | Interface -> false
+    | Class generics
+    | FinalClass generics ->
+      List.exists generics ~f:(fun g ->
+          match g with
+          | Reified _ -> true
+          | Erased -> false)
+
+  (* Given [(T1a, T1b), (T2a, T2b)...],
+     what is the relationship between Foo<T1a, T2a, ...> and Foo<T1b, T2b, ...>
+  *)
+  let rec relation_generics env generic_pairs =
+    match generic_pairs with
+    | [] -> SetRelation.equivalent
+    | (Erased, Erased) :: generic_pairs -> relation_generics env generic_pairs
+    | (_, Erased) :: generic_pairs ->
+      SetRelation.(inter subset (relation_generics env generic_pairs))
+    | (Erased, Reified _) :: _ -> SetRelation.none
+    | (Reified left, Reified right) :: generic_pairs ->
+      let is_sub_left_right =
+        Typing_utils.is_sub_type_opt_ignore_generic_params env left right
+      in
+      let is_sub_right_left =
+        Typing_utils.is_sub_type_opt_ignore_generic_params env right left
+      in
+      begin
+        match (is_sub_left_right, is_sub_right_left) with
+        | (Some true, Some true) -> relation_generics env generic_pairs
+        | (Some false, _)
+        | (_, Some false) ->
+          SetRelation.disjoint
+        | _ -> SetRelation.none
+      end
+
+  let get_generics_from_kind kind =
+    match kind with
+    | Class generics
+    | FinalClass generics ->
+      generics
+    | Interface -> []
 
   let relation tag1 ~ctx:env tag2 =
     match (tag1, tag2) with
@@ -111,15 +201,33 @@ module Tag = struct
       Option.value ~default:SetRelation.none
       @@ let* cls1_instance_of_cls2 = is_instance_of cls1 cls2 in
          if cls1_instance_of_cls2 then
-           return SetRelation.subset
+           if has_reified kind2 then
+             (* TODO(T221435654)
+                if cls2 has reified generics and cls1 inherits cls2 but
+                cls1 != cls2, we would need to know *how* cls1 inherits from
+                cls2, i.e. what are the generics provided to cls2 in the
+                inheritting declaration(s) *)
+             return SetRelation.none
+           else
+             return SetRelation.subset
          else
            let* cls2_instance_of_cls1 = is_instance_of cls2 cls1 in
            if cls2_instance_of_cls1 then
-             return SetRelation.superset
+             if has_reified kind1 then
+               (* TODO(T221435654) see comment above *)
+               return SetRelation.none
+             else
+               return SetRelation.superset
+           else if String.equal cls1 cls2 then
+             return
+             @@ relation_generics env
+             @@ zip_generics
+                  (get_generics_from_kind kind1)
+                  (get_generics_from_kind kind2)
            else (
              match (kind1, kind2) with
-             | (FinalClass, _)
-             | (_, FinalClass) ->
+             | (FinalClass _, _)
+             | (_, FinalClass _) ->
                return SetRelation.disjoint
              | (Interface, _)
              | (_, Interface) ->
@@ -130,7 +238,7 @@ module Tag = struct
                  return SetRelation.disjoint
                else
                  return SetRelation.none
-             | (Class, Class) -> return SetRelation.disjoint
+             | (Class _, Class _) -> return SetRelation.disjoint
            )
     | _ -> SetRelation.disjoint
 
@@ -256,7 +364,7 @@ module TagWithReason = struct
     in
     let pos = Reason.to_pos (get_reason origin) in
     let prefix = f ty_str in
-    let tag_str = Tag.describe tag in
+    let tag_str = Tag.describe env tag in
     let subreason_str =
       match subreason with
       | NoSubreason -> ""
@@ -352,6 +460,7 @@ module DataType : sig
       trail:DataTypeReason.trail ->
       env ->
       string ->
+      locl_ty list ->
       env * t
   end
 end = struct
@@ -418,7 +527,7 @@ end = struct
     let open Tag in
     Set.of_list
       ~reason:DataTypeReason.(make NoSubreason trail)
-      [BuiltInData; InstanceOf { name = SN.Classes.cClosure; kind = Class }]
+      [BuiltInData; InstanceOf { name = SN.Classes.cClosure; kind = Class [] }]
 
   let nonnull_to_datatypes ~trail : t =
     Set.of_list
@@ -440,6 +549,7 @@ end = struct
       trail:DataTypeReason.trail ->
       env ->
       string ->
+      locl_ty list ->
       env * t
   end = struct
     (* Set of interfaces that contain non-object members *)
@@ -523,11 +633,28 @@ end = struct
     let special_interface_cache : Tag.t list String.Table.t =
       String.Table.create ()
 
+    let is_fresh_generic ty =
+      match get_node ty with
+      | Tgeneric name -> Env.is_fresh_generic_parameter name
+      | _ -> false
+
+    let rec get_generics tparams locl_tys =
+      match (tparams, locl_tys) with
+      | ([], _) -> []
+      | ( { tp_reified = Aast.SoftReified | Aast.Reified; _ } :: tparams,
+          locl_ty :: locl_tys )
+        when not (is_fresh_generic locl_ty) ->
+        Tag.Reified locl_ty :: get_generics tparams locl_tys
+      | (_ :: tparams, _ :: locl_tys)
+      | (_ :: tparams, locl_tys) ->
+        Tag.Erased :: get_generics tparams locl_tys
+
     let rec to_datatypes
         ~(safe_for_are_disjoint : bool)
         ~(trail : DataTypeReason.trail)
         (env : env)
-        (cls : string) : t =
+        (cls : string)
+        (args : locl_ty list) : t =
       let open Tag in
       let cycle_handler f = cycle_handler ~env ~f in
       let reason = DataTypeReason.(make NoSubreason trail) in
@@ -546,11 +673,15 @@ end = struct
              ~default:(Set.singleton ~reason ObjectData)
              ~f:(fun cls ->
                let open Ast_defs in
+               let tparams = Cls.tparams cls in
+               let generics = get_generics tparams args in
                match Cls.kind cls with
                | Cclass _ when Cls.final cls ->
-                 Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
+                 Set.singleton ~reason
+                 @@ InstanceOf { name; kind = FinalClass generics }
                | Cclass _ ->
-                 Set.singleton ~reason @@ InstanceOf { name; kind = Class }
+                 Set.singleton ~reason
+                 @@ InstanceOf { name; kind = Class generics }
                | Ctrait
                | Cinterface -> begin
                  let default ~reason =
@@ -589,7 +720,12 @@ end = struct
                                   ~safe_for_are_disjoint
                                   ~trail
                                   env
-                                  req_cls)
+                                  req_cls
+                                  (* TODO(T221435654)
+                                     you can require a specific generic class,
+                                     but for now, [] (all Erased) is sound but
+                                     incomplete *)
+                                  [])
                          reqs
                    | Some whitelist ->
                      let trail =
@@ -606,7 +742,9 @@ end = struct
                               ~safe_for_are_disjoint
                               ~trail
                               env
-                              whitelist_cls)
+                              whitelist_cls
+                              (* You cannot provide generics when sealing *)
+                              [])
                        whitelist
                        Set.empty
                      |> Set.inter (default ~reason)
@@ -615,8 +753,12 @@ end = struct
                | Cenum_class _ ->
                  Set.singleton ~reason ObjectData)
 
-    let to_datatypes ~safe_for_are_disjoint ~trail (env : env) (cls : string) :
-        env * t =
+    let to_datatypes
+        ~safe_for_are_disjoint
+        ~trail
+        (env : env)
+        (cls : string)
+        (args : locl_ty list) : env * t =
       if SSet.mem cls special_interfaces then
         let (env, tags) =
           match Hashtbl.find special_interface_cache cls with
@@ -633,10 +775,10 @@ end = struct
             ~reason:DataTypeReason.(make (SpecialInterface cls) trail)
             tags
         in
-        let set2 = to_datatypes ~safe_for_are_disjoint ~trail env cls in
+        let set2 = to_datatypes ~safe_for_are_disjoint ~trail env cls args in
         (env, Set.union set1 set2)
       else
-        (env, to_datatypes ~safe_for_are_disjoint ~trail env cls)
+        (env, to_datatypes ~safe_for_are_disjoint ~trail env cls args)
   end
 
   let fromPredicate
@@ -654,8 +796,8 @@ end = struct
       | NumTag -> (env, Set.of_list ~reason [IntData; FloatData])
       | ResourceTag -> (env, Set.singleton ~reason ResourceData)
       | NullTag -> (env, Set.singleton ~reason NullData)
-      | ClassTag (id, _) ->
-        Class.to_datatypes ~safe_for_are_disjoint ~trail env id
+      | ClassTag (id, args) ->
+        Class.to_datatypes ~safe_for_are_disjoint ~trail env id args
     in
     match snd predicate with
     | IsTag tag -> from_tag tag
@@ -810,12 +952,13 @@ end = struct
         let trail = trail_f (get_reason as_ty) name in
         cycle_handler ~env ~trail as_ty
     end
-    | Tclass ((_, cls), _, _) ->
+    | Tclass ((_, cls), _, args) ->
       Class.to_datatypes
         ~safe_for_are_disjoint:ctx.safe_for_are_disjoint
         ~trail
         env
         cls
+        args
     | Tneg predicate ->
       let (env, right) =
         fromPredicate
@@ -871,7 +1014,7 @@ let check_overlapping
         @ TagWithReason.to_message env right ~f
       in
       let secondary_why ~f =
-        let describe tag = Markdown_lite.md_bold @@ Tag.describe tag in
+        let describe tag = Markdown_lite.md_bold @@ Tag.describe env tag in
         let ty_str ty =
           Markdown_lite.md_codify
           @@ Typing_print.full_strip_ns_decl ~verbose_fun:false env ty
@@ -1008,7 +1151,7 @@ module AtomicDataTypes = struct
     | Tuple
     | Shape
     | Label
-    | Class of string
+    | Class of string * locl_ty list
 
   let trail = DataTypeReason.make_trail
 
@@ -1032,8 +1175,8 @@ module AtomicDataTypes = struct
     | Tuple -> (env, tuple)
     | Shape -> (env, shape)
     | Label -> (env, label)
-    | Class name ->
-      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
+    | Class (name, args) ->
+      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name args
 
   let of_tag ~safe_for_are_disjoint env tag : env * DataType.t =
     let of_ty = of_ty ~safe_for_are_disjoint in
@@ -1046,7 +1189,7 @@ module AtomicDataTypes = struct
     | NumTag -> of_ty env (Primitive Aast.Tnum)
     | ResourceTag -> of_ty env (Primitive Aast.Tresource)
     | NullTag -> of_ty env (Primitive Aast.Tnull)
-    | ClassTag (id, _) -> of_ty env (Class id)
+    | ClassTag (id, args) -> of_ty env (Class (id, args))
 
   let complement dt = DataType.Set.diff mixed dt
 

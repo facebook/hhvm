@@ -9,7 +9,7 @@ Invalid return type (Typing[4110])
   File "interface_disjoint.php", line 24, characters 26-32:
   Expected `nothing`
   File "interface_disjoint.php", line 25, characters 16-18:
-  But got `(not IC2 & IC1)` from this `is` expression test
+  But got `(IC1 & not IC2)` from this `is` expression test
 ERROR: File "interface_disjoint.php", line 27, characters 12-14:
 Invalid return type (Typing[4110])
   File "interface_disjoint.php", line 24, characters 26-32:
@@ -27,7 +27,7 @@ Invalid return type (Typing[4110])
   File "interface_disjoint.php", line 33, characters 26-32:
   Expected `nothing`
   File "interface_disjoint.php", line 34, characters 16-22:
-  But got `(not SealedI & IC1)` from this `is` expression test
+  But got `(IC1 & not SealedI)` from this `is` expression test
 ERROR: File "interface_disjoint.php", line 36, characters 12-14:
 Invalid return type (Typing[4110])
   File "interface_disjoint.php", line 33, characters 26-32:

@@ -7639,7 +7639,16 @@ end = struct
         in
         let (env, tyl_span) =
           List.map_env env tyll_span ~f:(fun env tyl ->
-              Inter.intersect_list env reason (refine :: tyl))
+              (* place the refinement last so that if we do a refinement like
+                 MyReifiedBox<this::T> & MyReifiedBox<int>
+                 we get MyReifiedBox<this::T> where T = int
+                 instead of MyReifiedBox<int>; the latter of which can cause
+                 errors if the refined local is expected to still be a
+                 MyReifiedBox<this::T> after the true branch;
+                 See "intersection_order_to_preserve_type_const_generic" test
+                 (T223013561)
+              *)
+              Inter.intersect_list env reason (tyl @ [refine]))
         in
         (env, tyl @ tyl_span)
       in

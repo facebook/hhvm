@@ -1,0 +1,50 @@
+WARN: File "T221435654.php", line 11, characters 14-38:
+This `is` check is always `true`. The expression on the left has type `(MyIntRefiedClass & not MyReifiedClass<string>)` which is a subtype of `MyReifiedClass<int>`. (Warn[12009])
+ERROR: File "T221435654.php", line 10, characters 5-37:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "T221435654.php", line 10, characters 26-32:
+  Expected `nothing`
+  File "T221435654.php", line 8, characters 44-59:
+  But got `MyIntRefiedClass`
+ERROR: File "T221435654.php", line 10, characters 5-37:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "T221435654.php", line 10, characters 26-32:
+  Expected `nothing`
+  File "T221435654.php", line 9, characters 13-34:
+  But got `(MyIntRefiedClass & MyReifiedClass<string>)` from this `is` expression test
+ERROR: File "T221435654.php", line 10, characters 5-37:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "T221435654.php", line 10, characters 26-32:
+  Expected `nothing`
+  File "T221435654.php", line 9, characters 13-34:
+  But got `MyReifiedClass<string>` from this `is` expression test
+ERROR: File "T221435654.php", line 10, characters 35-36:
+Invalid argument (Typing[4110])
+  File "T221435654.php", line 10, characters 26-32:
+  Expected `nothing`
+  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
+    via this generic `T`
+  File "T221435654.php", line 8, characters 44-59:
+  But got `MyIntRefiedClass`
+ERROR: File "T221435654.php", line 10, characters 35-36:
+Invalid argument (Typing[4110])
+  File "T221435654.php", line 10, characters 26-32:
+  Expected `nothing`
+  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
+    via this generic `T`
+  File "T221435654.php", line 9, characters 13-34:
+  But got `(MyIntRefiedClass & <expr#2> as MyReifiedClass<string>)` from this `is` expression test
+ERROR: File "T221435654.php", line 10, characters 35-36:
+Invalid argument (Typing[4110])
+  File "T221435654.php", line 10, characters 26-32:
+  Expected `nothing`
+  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
+    via this generic `T`
+  File "T221435654.php", line 9, characters 13-34:
+  But got `MyReifiedClass<string>` from this `is` expression test
+ERROR: File "T221435654.php", line 12, characters 5-46:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "T221435654.php", line 9, characters 13-34:
+  Expected `not MyReifiedClass<string>` from this `is` expression test
+  File "T221435654.php", line 12, characters 26-41:
+  But got `MyIntRefiedClass`

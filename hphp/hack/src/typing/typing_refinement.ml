@@ -26,6 +26,11 @@ let list_to_list_of_e_and_others xs =
   helper [] xs
 
 module TyPredicate = struct
+  let is_fresh_generic ty =
+    match get_node ty with
+    | Tgeneric name -> Env.is_fresh_generic_parameter name
+    | _ -> false
+
   let rec of_ty env (ty : locl_ty) =
     Result.map ~f:(fun pred -> (get_reason ty, pred))
     @@
@@ -82,19 +87,23 @@ module TyPredicate = struct
       end else
         Result.Error "open_shape"
     | Tclass (_, Exact, _) -> Result.Error "exact class"
-    | Tclass ((_, name), Nonexact _, args) ->
-      if List.is_empty args then
-        match Env.get_class env name with
-        | Decl_entry.Found class_info ->
-          if List.is_empty (Folded_class.tparams class_info) then
-            Result.Ok (IsTag (ClassTag (name, [])))
-          else
-            Result.Error "malformed class with generics"
-        | Decl_entry.DoesNotExist
-        | Decl_entry.NotYetAvailable ->
-          Result.Error "missing class"
-      else
-        Result.Error "class with generics"
+    | Tclass ((_, name), Nonexact _, args) -> begin
+      match Env.get_class env name with
+      | Decl_entry.Found class_info ->
+        let tparams = Folded_class.tparams class_info in
+        if not @@ Int.equal (List.length tparams) (List.length args) then
+          Result.Error "malformed class with generics"
+        else if
+          List.exists tparams ~f:(fun p -> Aast.is_erased p.tp_reified)
+          || List.exists args ~f:is_fresh_generic
+        then
+          Result.Error "class with erased generics"
+        else
+          Result.Ok (IsTag (ClassTag (name, args)))
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        Result.Error "missing class"
+    end
     | Tprim Aast.Tvoid -> Result.Error "void"
     | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
     | Tnonnull -> Result.Error "nonnull"
@@ -525,8 +534,9 @@ and split_ty
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Shape)
     | Tlabel _ ->
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Label)
-    | Tclass ((_, name), _, _) ->
-      partition_f DataType.(of_ty ~safe_for_are_disjoint:true env @@ Class name)
+    | Tclass ((_, name), _, args) ->
+      partition_f
+        DataType.(of_ty ~safe_for_are_disjoint:true env @@ Class (name, args))
     | Tneg (_, predicate) ->
       let (env, dty) =
         match predicate with

@@ -258,7 +258,7 @@ File refinment_is.php, line 7, character 32 - line 7, character 32:
  9 |     $z = $a;
 10 |   } else {
 
-But got (I & A) from this is expression test
+But got (A & I) from this is expression test
 
 File refinment_is.php, line 8, character 12 - line 8, character 12:
 

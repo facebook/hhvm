@@ -1,0 +1,6 @@
+ERROR: File "soft_reified.php", line 7, characters 11-34:
+Invalid case type declaration. More than one variant of `SoftReifiedCTNotDisjoint` could contain values with the same runtime tag (Typing[4475])
+  File "soft_reified.php", line 7, characters 38-53:
+  This is the type `SoftReified<int>`, which includes **instances of the final class SoftReified<int>**
+  File "soft_reified.php", line 7, characters 57-72:
+  It overlaps with `SoftReified<int>`, which also includes **instances of the final class SoftReified<int>**

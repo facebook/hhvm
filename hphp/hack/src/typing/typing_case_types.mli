@@ -105,7 +105,7 @@ module AtomicDataTypes : sig
     | Tuple
     | Shape
     | Label
-    | Class of string
+    | Class of string * locl_ty list
 
   (** When safe_for_are_disjoint is true, do not specially handle interfaces'
       sealed attribute or required ancestors.

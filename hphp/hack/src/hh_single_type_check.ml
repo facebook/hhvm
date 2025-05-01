@@ -311,7 +311,6 @@ let parse_options () =
   let disallow_non_annotated_memoize = ref false in
   let treat_non_annotated_memoize_as_kbic = ref false in
   let use_oxidized_by_ref_decls = ref true in
-  let use_oxidized_by_ref_decls2 = ref true in
   let options =
     [
       ( "--config",
@@ -768,10 +767,7 @@ let parse_options () =
         " Killswitch to interpret class<T> hint as class<T> type when true, classname<T> when false"
       );
       ( "--use-oxidized-by-ref-decls",
-        Arg.Bool
-          (fun x ->
-            use_oxidized_by_ref_decls := x;
-            use_oxidized_by_ref_decls2 := x),
+        Arg.Bool (fun x -> use_oxidized_by_ref_decls := x),
         " Use oxidized by ref for decling" );
     ]
   in
@@ -924,7 +920,6 @@ let parse_options () =
         treat_non_annotated_memoize_as_kbic =
           !treat_non_annotated_memoize_as_kbic;
         use_oxidized_by_ref_decls = !use_oxidized_by_ref_decls;
-        use_oxidized_by_ref_decls2 = !use_oxidized_by_ref_decls2;
       }
   in
 

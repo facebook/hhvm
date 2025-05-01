@@ -162,7 +162,7 @@ module Concurrent (Metadata : Metadata) = struct
     = "hh_concurrent_parse_step_obr_ffi"
 
   let start ~opts =
-    if opts.DeclParserOptions.use_oxidized_by_ref_decls2 then
+    if opts.DeclParserOptions.use_oxidized_by_ref_decls then
       start_obr ~opts
     else
       start ~opts

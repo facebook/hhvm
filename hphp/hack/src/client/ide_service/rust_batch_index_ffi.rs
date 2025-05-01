@@ -157,7 +157,7 @@ ocaml_ffi! {
                     Some(contents) => contents,
                     None => return (relpath, None),
                 };
-                if parser_options.use_oxidized_by_ref_decls2 {
+                if parser_options.use_oxidized_by_ref_decls {
                     let arena = Bump::new();
 
                     let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(

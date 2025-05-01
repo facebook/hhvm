@@ -415,7 +415,7 @@ let rec prefetch_loop
      or from any earlier [to_decl] from an earlier iteration. *)
   match
     Concurrent.enqueue_next_and_get_earlier_results
-      ~use_obr:(Provider_context.get_popt ctx).use_oxidized_by_ref_decls2
+      ~use_obr:(Provider_context.get_popt ctx).use_oxidized_by_ref_decls
       handle
       to_decl_by_path
   with

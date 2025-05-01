@@ -227,7 +227,7 @@ fn parse_file(
         relative_path::Prefix::Hhi => hhi_path.join(path.path()),
         prefix => panic!("Unexpected RelativePath prefix: {prefix}"),
     })?;
-    if opts.use_oxidized_by_ref_decls2 {
+    if opts.use_oxidized_by_ref_decls {
         let arena = bumpalo::Bump::new();
         let with_hashes = parse_file_with_hashes_obr(&text, &arena, opts, decl_opts, path.clone())?;
         let summary = names::FileSummary::new_obr(&with_hashes);
@@ -251,7 +251,7 @@ fn parse_file_with_addenda(
         relative_path::Prefix::Hhi => hhi_path.join(path.path()),
         prefix => panic!("Unexpected RelativePath prefix: {prefix}"),
     })?;
-    if opts.use_oxidized_by_ref_decls2 {
+    if opts.use_oxidized_by_ref_decls {
         let arena = bumpalo::Bump::new();
         let with_hashes = parse_file_with_hashes_obr(&text, &arena, opts, decl_opts, path.clone())?;
         let summary = names::FileSummary::new_obr(&with_hashes);

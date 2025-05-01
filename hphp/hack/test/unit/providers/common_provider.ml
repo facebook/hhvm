@@ -96,7 +96,6 @@ let run_test
         {
           tcopt.GlobalOptions.po with
           ParserOptions.use_oxidized_by_ref_decls = use_obr;
-          ParserOptions.use_oxidized_by_ref_decls2 = use_obr;
         };
       tcopt;
       local_memory;

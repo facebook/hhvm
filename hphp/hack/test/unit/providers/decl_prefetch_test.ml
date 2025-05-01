@@ -86,7 +86,7 @@ let concurrent_get_pfs ~ctx (paths : Relative_path.t list) :
     | Some earlier ->
       let next_earlier =
         Concurrent.enqueue_next_and_get_earlier_results
-          ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls2
+          ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls
           handle
           []
       in
@@ -97,7 +97,7 @@ let concurrent_get_pfs ~ctx (paths : Relative_path.t list) :
   in
   let earlier_opt =
     Concurrent.enqueue_next_and_get_earlier_results
-      ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls2
+      ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls
       handle
       paths
   in

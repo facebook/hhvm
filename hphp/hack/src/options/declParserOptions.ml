@@ -25,7 +25,6 @@ type t = {
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;
   use_oxidized_by_ref_decls: bool;
-  use_oxidized_by_ref_decls2: bool;
 }
 [@@deriving show]
 
@@ -51,5 +50,4 @@ let from_parser_options (popt : ParserOptions.t) =
     treat_non_annotated_memoize_as_kbic =
       popt.treat_non_annotated_memoize_as_kbic;
     use_oxidized_by_ref_decls = popt.use_oxidized_by_ref_decls;
-    use_oxidized_by_ref_decls2 = popt.use_oxidized_by_ref_decls2;
   }

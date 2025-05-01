@@ -16,28 +16,21 @@
 
 #include "hphp/runtime/vm/jit/translate-region.h"
 
-#include "hphp/util/arch.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/tracing.h"
-
-#include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
 #include "hphp/runtime/vm/bc-pattern.h"
 
-#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
-#include "hphp/runtime/vm/jit/irgen-sib.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/mcgen.h"

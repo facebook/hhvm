@@ -17,11 +17,8 @@
 
 #include <algorithm>
 #include <fstream>
-#include <functional>
 #include <exception>
-#include <sstream>
 #include <utility>
-#include <iostream>
 
 #include <folly/Memory.h>
 #include <folly/Conv.h>
@@ -31,12 +28,9 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP::jit {

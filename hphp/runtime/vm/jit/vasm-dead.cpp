@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <algorithm>

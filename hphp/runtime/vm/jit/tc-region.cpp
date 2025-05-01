@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -40,20 +39,15 @@
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
-#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
-#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
-#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/hardware-counter.h"
-#include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
-#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg)

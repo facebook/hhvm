@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/timer.h"
 

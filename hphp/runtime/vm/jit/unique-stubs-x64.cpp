@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/bytecode.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"

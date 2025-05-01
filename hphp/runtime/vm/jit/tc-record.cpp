@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/tc-region.h"
 
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -29,10 +28,6 @@
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 
 #include "hphp/util/configs/codecache.h"

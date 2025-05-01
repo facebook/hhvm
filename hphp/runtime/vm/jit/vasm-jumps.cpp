@@ -22,10 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <algorithm>
-#include <cstdint>
 
 TRACE_SET_MOD(vasm)
 

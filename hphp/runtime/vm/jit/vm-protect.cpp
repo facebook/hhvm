@@ -18,7 +18,6 @@
 
 #ifndef NDEBUG
 
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <folly/portability/SysMman.h>

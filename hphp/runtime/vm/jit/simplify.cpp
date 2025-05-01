@@ -39,8 +39,6 @@
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/ir-builder.h"
-#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
@@ -50,7 +48,6 @@
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/overflow.h"

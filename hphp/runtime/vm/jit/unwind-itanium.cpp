@@ -16,10 +16,7 @@
 
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -27,7 +24,6 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -39,13 +35,11 @@
 #include "hphp/util/dwarf-reg.h"
 #include "hphp/util/eh-frame.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/unwind-itanium.h"
 
 #include <folly/ScopeGuard.h>
 
-#include <memory>
 #include <typeinfo>
 
 #include <cxxabi.h>

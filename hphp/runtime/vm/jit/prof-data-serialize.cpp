@@ -52,7 +52,6 @@
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
@@ -73,11 +72,10 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
+#if USE_JEMALLOC_EXTENT_HOOKS
 #include "hphp/util/managed-arena.h"
-#include "hphp/util/match.h"
+#endif
 #include "hphp/util/numa.h"
-#include "hphp/util/process.h"
-#include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 
 #include <folly/portability/Unistd.h>

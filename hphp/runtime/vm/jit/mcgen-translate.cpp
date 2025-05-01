@@ -47,7 +47,9 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
+#if USE_JEMALLOC_EXTENT_HOOKS
 #include "hphp/util/managed-arena.h"
+#endif
 #include "hphp/util/trace.h"
 
 #include "hphp/zend/zend-strtod.h"

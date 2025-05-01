@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 
 #include <vector>
-#include <algorithm>
 
 #include <folly/MapUtil.h>
 
@@ -25,11 +24,8 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP::jit {

@@ -21,25 +21,20 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/base/type-structure.h"
-#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 
-#include <cassert>
 #include <limits>
 #include <mutex>
 #include <string>

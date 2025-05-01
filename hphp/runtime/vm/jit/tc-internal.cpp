@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
-#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/bespoke/layout.h"
@@ -36,7 +35,6 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc-intercept.h"
-#include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"

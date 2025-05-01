@@ -18,15 +18,10 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/configs/eval.h"
@@ -38,7 +33,6 @@
 #include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/MapUtil.h>
-#include <folly/gen/Base.h>
 
 #include <vector>
 

@@ -19,8 +19,6 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
-#include <folly/Format.h>
-
 #include <string>
 
 namespace HPHP::jit {

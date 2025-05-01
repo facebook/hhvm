@@ -31,8 +31,6 @@
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <folly/Format.h>
 
 #include <algorithm>

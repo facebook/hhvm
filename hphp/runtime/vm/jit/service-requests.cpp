@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -27,22 +26,15 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
-#include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
-#include "hphp/runtime/vm/resumable.h"
-#include "hphp/util/arch.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/trace.h"
-
-#include "hphp/vixl/a64/macro-assembler-a64.h"
-#include "hphp/vixl/a64/disasm-a64.h"
 
 namespace HPHP::jit::svcreq {
 

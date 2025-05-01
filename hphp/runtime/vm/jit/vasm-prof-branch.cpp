@@ -17,23 +17,18 @@
 #include "hphp/runtime/vm/jit/vasm-prof.h"
 
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -43,14 +38,11 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/struct-log.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <string>
-#include <vector>
 
 namespace HPHP::jit {
 

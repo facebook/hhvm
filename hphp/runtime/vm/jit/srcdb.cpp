@@ -16,19 +16,12 @@
 
 #include "hphp/runtime/vm/jit/srcdb.h"
 
-#include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/treadmill.h"
-
-#include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-#include <cstdarg>
 #include <cstdint>
 #include <string>
 

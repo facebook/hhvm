@@ -17,8 +17,6 @@
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/array-data-defs.h"
-#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/util/configs/hhir.h"

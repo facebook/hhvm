@@ -25,12 +25,8 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
-#include "hphp/runtime/base/vanilla-vec.h"
-
 #include "hphp/util/arch.h"
 #include "hphp/util/configs/hhir.h"
-
-#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP::jit {
 

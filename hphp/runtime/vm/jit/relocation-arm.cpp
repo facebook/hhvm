@@ -18,13 +18,9 @@
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/align-arm.h"
-#include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"

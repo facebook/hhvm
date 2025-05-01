@@ -21,8 +21,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <set>
-#include <unordered_map>
 
 /*
  * This module implements a code layout strategy for sorting a Vunit's blocks:

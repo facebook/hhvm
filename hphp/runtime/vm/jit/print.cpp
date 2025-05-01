@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/print.h"
 
 #include <folly/json/dynamic.h>
-#include <folly/json/json.h>
 
 #include <iostream>
 #include <sstream>

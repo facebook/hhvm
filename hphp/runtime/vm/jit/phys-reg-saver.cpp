@@ -21,8 +21,6 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
-#include "hphp/util/arch.h"
-
 namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////

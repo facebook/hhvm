@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP::jit {
 

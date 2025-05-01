@@ -16,10 +16,6 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 
-#include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
-
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 

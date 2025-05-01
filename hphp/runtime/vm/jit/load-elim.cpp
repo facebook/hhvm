@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include <cstdint>
-#include <algorithm>
 
 #include <utility>
 #include <variant>
@@ -32,7 +31,6 @@
 
 #include "hphp/runtime/base/perf-warning.h"
 
-#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/alias-analysis.h"

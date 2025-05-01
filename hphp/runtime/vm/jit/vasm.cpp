@@ -23,8 +23,6 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <algorithm>
 
 namespace HPHP::jit {

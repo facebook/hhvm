@@ -17,12 +17,10 @@
 #include "hphp/runtime/vm/jit/vasm-layout.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
@@ -30,7 +28,6 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <folly/MapUtil.h>
 
 #include <algorithm>

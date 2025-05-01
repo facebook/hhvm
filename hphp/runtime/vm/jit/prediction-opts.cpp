@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
-#include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
 #include <folly/Lazy.h>

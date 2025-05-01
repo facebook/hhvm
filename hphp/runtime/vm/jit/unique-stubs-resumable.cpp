@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/resumable.h"
 

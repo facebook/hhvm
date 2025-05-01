@@ -20,15 +20,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
-
-#include "hphp/runtime/vm/jit/translator-inline.h"
-
-#include "hphp/util/assertions.h"
 
 namespace HPHP::jit {
 

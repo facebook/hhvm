@@ -23,9 +23,7 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
@@ -37,12 +35,8 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
-#include "hphp/vixl/a64/decoder-a64.h"
-
-#include "hphp/util/arch.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"

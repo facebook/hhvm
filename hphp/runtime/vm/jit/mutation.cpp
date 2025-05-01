@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/mutation.h"
 
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"

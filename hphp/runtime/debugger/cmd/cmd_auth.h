@@ -43,7 +43,7 @@ protected:
 private:
   std::string m_token;
   std::string m_session;
-  std::string m_sandboxPath = "";
+  std::string m_sandboxPath;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

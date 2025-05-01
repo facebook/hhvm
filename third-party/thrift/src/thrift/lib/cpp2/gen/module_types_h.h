@@ -458,3 +458,6 @@ const Annotation* get_field_annotation() {
   return ret;
 }
 } // namespace apache::thrift
+
+// This macro breaks syntax_graph.thrift on Windows
+#undef OPTIONAL

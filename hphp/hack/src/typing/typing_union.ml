@@ -297,10 +297,9 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
           union_class_or_newtype ~approx_cancel_neg env id1 tyl1 tyl2
         in
         (env, Some (mk (r, Tclass ((p, id1), e, tyl))))
-    | ((_, Tgeneric (name1, [])), (_, Tgeneric (name2, [])))
-      when String.equal name1 name2 ->
-      (* TODO(T69551141) handle type arguments above and below properly *)
-      (env, Some (mk (r, Tgeneric (name1, []))))
+    | ((_, Tgeneric name1), (_, Tgeneric name2)) when String.equal name1 name2
+      ->
+      (env, Some (mk (r, Tgeneric name1)))
     | ((_, Tvec_or_dict (tk1, tv1)), (_, Tvec_or_dict (tk2, tv2))) ->
       let (env, tk) = union ~approx_cancel_neg env tk1 tk2 in
       let (env, tv) = union ~approx_cancel_neg env tv1 tv2 in

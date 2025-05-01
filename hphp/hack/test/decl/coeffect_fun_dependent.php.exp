@@ -21,8 +21,7 @@
                       ft_params = [];
                       ft_implicit_params =
                       { capability =
-                        (CapTy
-                           (Rhint ([3:25-26]), (Tgeneric ("T/[ctx $f]", []))))
+                        (CapTy (Rhint ([3:25-26]), (Tgeneric "T/[ctx $f]")))
                         };
                       ft_ret = (Rhint ([3:29-33]), (Tprim Tvoid));
                       ft_flags =
@@ -41,7 +40,7 @@
                ];
              ft_implicit_params =
              { capability =
-               (CapTy (Rhint ([3:39-45]), (Tgeneric ("T/[ctx $f]", [])))) };
+               (CapTy (Rhint ([3:39-45]), (Tgeneric "T/[ctx $f]"))) };
              ft_ret = (Rhint ([3:48-52]), (Tprim Tvoid));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
@@ -79,8 +78,7 @@
                            ft_implicit_params =
                            { capability =
                              (CapTy
-                                (Rhint ([5:33-34]),
-                                 (Tgeneric ("T/[ctx $f]", []))))
+                                (Rhint ([5:33-34]), (Tgeneric "T/[ctx $f]")))
                              };
                            ft_ret = (Rhint ([5:37-41]), (Tprim Tvoid));
                            ft_flags =
@@ -99,7 +97,7 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([5:47-53]), (Tgeneric ("T/[ctx $f]", [])))) };
+                (CapTy (Rhint ([5:47-53]), (Tgeneric "T/[ctx $f]"))) };
               ft_ret = (Rhint ([5:56-60]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
@@ -137,8 +135,7 @@
                            ft_implicit_params =
                            { capability =
                              (CapTy
-                                (Rhint ([7:31-32]),
-                                 (Tgeneric ("T/[ctx $f]", []))))
+                                (Rhint ([7:31-32]), (Tgeneric "T/[ctx $f]")))
                              };
                            ft_ret = (Rhint ([7:35-39]), (Tprim Tvoid));
                            ft_flags =
@@ -157,7 +154,7 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([7:45-51]), (Tgeneric ("T/[ctx $f]", [])))) };
+                (CapTy (Rhint ([7:45-51]), (Tgeneric "T/[ctx $f]"))) };
               ft_ret = (Rhint ([7:54-58]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
@@ -198,7 +195,7 @@
                                { capability =
                                  (CapTy
                                     (Rhint ([9:39-40]),
-                                     (Tgeneric ("T/[ctx $f]", []))))
+                                     (Tgeneric "T/[ctx $f]")))
                                  };
                                ft_ret = (Rhint ([9:43-47]), (Tprim Tvoid));
                                ft_flags =
@@ -220,7 +217,7 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([9:53-59]), (Tgeneric ("T/[ctx $f]", [])))) };
+                (CapTy (Rhint ([9:53-59]), (Tgeneric "T/[ctx $f]"))) };
               ft_ret = (Rhint ([9:62-66]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;

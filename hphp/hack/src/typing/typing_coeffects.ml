@@ -74,7 +74,7 @@ let rec validate_capability env pos ty =
           to_user_error
           @@ Illegal_context
                { pos; name = Typing_print.full_decl (Env.get_tcopt env) ty }))
-  | Tgeneric (name, []) when SN.Coeffects.is_generated_generic name -> ()
+  | Tgeneric name when SN.Coeffects.is_generated_generic name -> ()
   | Taccess (root, (_p, c)) ->
     let ((env, ty_err_opt), root) =
       Phase.localize_no_subst env ~ignore_errors:false root

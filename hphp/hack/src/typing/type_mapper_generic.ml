@@ -46,8 +46,7 @@ class type ['env] type_mapper_type =
 
     method on_tfun : 'env -> Reason.t -> locl_fun_type -> 'env * locl_ty
 
-    method on_tgeneric :
-      'env -> Reason.t -> string -> locl_ty list -> 'env * locl_ty
+    method on_tgeneric : 'env -> Reason.t -> string -> 'env * locl_ty
 
     method on_tnewtype :
       'env -> Reason.t -> string -> locl_ty list -> locl_ty -> 'env * locl_ty
@@ -99,7 +98,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tfun env r fun_type = (env, mk (r, Tfun fun_type))
 
-    method on_tgeneric env r name args = (env, mk (r, Tgeneric (name, args)))
+    method on_tgeneric env r name = (env, mk (r, Tgeneric name))
 
     method on_tnewtype env r name tyl ty =
       (env, mk (r, Tnewtype (name, tyl, ty)))
@@ -146,7 +145,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tintersection tyl -> this#on_tintersection env r tyl
       | Toption ty -> this#on_toption env r ty
       | Tfun fun_type -> this#on_tfun env r fun_type
-      | Tgeneric (x, args) -> this#on_tgeneric env r x args
+      | Tgeneric x -> this#on_tgeneric env r x
       | Tnewtype (x, tyl, ty) -> this#on_tnewtype env r x tyl ty
       | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
@@ -327,9 +326,7 @@ class ['env] deep_type_mapper =
       let (env, ty) = this#on_type env ty in
       (env, mk (r, Taccess (ty, id)))
 
-    method! on_tgeneric env r name args =
-      let (env, args) = this#on_locl_ty_list env args in
-      (env, mk (r, Tgeneric (name, args)))
+    method! on_tgeneric env r name = (env, mk (r, Tgeneric name))
 
     method private on_opt_type env x =
       match x with

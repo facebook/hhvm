@@ -1647,8 +1647,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 let reason =
                     self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
                 let ty_ = if self.is_type_param_in_scope(name) {
-                    // TODO (T69662957) must fill type args of Tgeneric
-                    Ty_::Tgeneric(self.alloc((name, &[])))
+                    Ty_::Tgeneric(self.alloc(name))
                 } else {
                     match name {
                         "nothing" => Ty_::Tunion(&[]),
@@ -2398,7 +2397,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
                 );
                 match self.tapply_should_be_tgeneric(ty.0, id) {
-                    Some(name) => Ty_::Tgeneric(self.alloc((name, converted_targs))),
+                    Some(name) => Ty_::Tgeneric(self.alloc(name)),
                     None => Ty_::Tapply(self.alloc((id, converted_targs))),
                 }
             }
@@ -2602,7 +2601,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     // hint Haccess is a flat list, whereas decl ty Taccess is a tree.
     fn taccess_root_is_generic(ty: &Ty<'_>) -> bool {
         match ty {
-            Ty(_, Ty_::Tgeneric((_, &[]))) => true,
+            Ty(_, Ty_::Tgeneric(_)) => true,
             Ty(_, Ty_::Taccess(&TaccessType(t, _))) => Self::taccess_root_is_generic(t),
             _ => false,
         }
@@ -2610,7 +2609,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
     fn ctx_generic_for_generic_taccess_inner(ty: &Ty<'_>, cst: &str) -> std::string::String {
         let left = match ty {
-            Ty(_, Ty_::Tgeneric((name, &[]))) => name.to_string(),
+            Ty(_, Ty_::Tgeneric(name)) => name.to_string(),
             Ty(_, Ty_::Taccess(&TaccessType(ty, cst))) => {
                 Self::ctx_generic_for_generic_taccess_inner(ty, cst.1)
             }
@@ -2657,7 +2656,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     user_attributes: &[],
                 });
                 tparams.push(tparam);
-                let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
+                let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc(name))));
                 let ft = self.alloc(FunType {
                     implicit_params: self.alloc(FunImplicitParams {
                         capability: CapTy(cap_ty),
@@ -2744,9 +2743,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 // If the type hint for this function parameter is a type
                 // parameter introduced in this function declaration, don't add
                 // a new type parameter.
-                Ty_::Tgeneric(&(type_name, _))
-                    if tparams.iter().any(|tp| tp.name.1 == type_name) =>
-                {
+                Ty_::Tgeneric(type_name) if tparams.iter().any(|tp| tp.name.1 == type_name) => {
                     ty.clone()
                 }
                 // Otherwise, if the parameter is `G $g`, create tparam
@@ -2763,7 +2760,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         self.alloc(Reason::FromWitnessDecl(
                             self.alloc(WitnessDecl::Hint(param_pos)),
                         )),
-                        Ty_::Tgeneric(self.alloc((id.1, &[]))),
+                        Ty_::Tgeneric(self.alloc(id.1)),
                     )
                 }
             };
@@ -2777,10 +2774,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 self.ctx_generic_for_dependent(name, cst.1),
             );
             tparams.push(tp(left_id, &[]));
-            let left = self.alloc(Ty(
-                context_reason,
-                Ty_::Tgeneric(self.alloc((left_id.1, &[]))),
-            ));
+            let left = self.alloc(Ty(context_reason, Ty_::Tgeneric(self.alloc(left_id.1))));
             where_constraints.push(self.alloc(WhereConstraint(
                 left,
                 ConstraintKind::ConstraintEq,
@@ -2845,10 +2839,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         self.ctx_generic_for_generic_taccess(t, cst.1),
                     );
                     tparams.push(tp(left_id, &[]));
-                    let left = self.alloc(Ty(
-                        context_ty.0,
-                        Ty_::Tgeneric(self.alloc((left_id.1, &[]))),
-                    ));
+                    let left = self.alloc(Ty(context_ty.0, Ty_::Tgeneric(self.alloc(left_id.1))));
                     where_constraints.push(self.alloc(WhereConstraint(
                         left,
                         ConstraintKind::ConstraintEq,
@@ -2873,17 +2864,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let context_tys = self.slice(context_tys.iter().copied().map(|ty| {
             let ty_ = match ty.1 {
                 Ty_::Tapply(((_, name), &[])) if name.starts_with('$') => {
-                    Ty_::Tgeneric(self.alloc((self.ctx_generic_for_fun(name), &[])))
+                    Ty_::Tgeneric(self.alloc(self.ctx_generic_for_fun(name)))
                 }
                 Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply(((_, name), &[]))), cst))
                     if name.starts_with('$') =>
                 {
                     let name = self.ctx_generic_for_dependent(name, cst.1);
-                    Ty_::Tgeneric(self.alloc((name, &[])))
+                    Ty_::Tgeneric(self.alloc(name))
                 }
                 Ty_::Taccess(&TaccessType(t, cst)) if Self::taccess_root_is_generic(t) => {
                     let name = self.ctx_generic_for_generic_taccess(t, cst.1);
-                    Ty_::Tgeneric(self.alloc((name, &[])))
+                    Ty_::Tgeneric(self.alloc(name))
                 }
                 _ => return ty,
             };
@@ -3630,12 +3621,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 match class_type.rsplit('\\').next() {
                     Some(name) if self.is_type_param_in_scope(name) => {
                         let pos = self.merge(pos, self.get_pos(type_arguments));
-                        let type_arguments = self.slice(
+                        let _type_arguments = self.slice(
                             type_arguments
                                 .iter()
                                 .filter_map(|&node| self.node_to_ty(node)),
                         );
-                        let ty_ = Ty_::Tgeneric(self.alloc((name, type_arguments)));
+                        // TODO(T222659258) Clean this up, Tgeneric cannot have type arguments anymore
+                        let ty_ = Ty_::Tgeneric(self.alloc(name));
                         self.hint_ty(pos, ty_)
                     }
                     _ => {

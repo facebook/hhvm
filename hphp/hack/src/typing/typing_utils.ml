@@ -424,7 +424,9 @@ let get_concrete_supertypes
         in
         iter seen env acc tyl
       | Tdependent (_, ty) -> iter seen env (TySet.add ty acc) tyl
-      | Tgeneric (n, targs) ->
+      | Tgeneric n ->
+        let targs = [] in
+        (* TODO(T222659258) Clean this up, no more targs on Tgeneric *)
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -566,7 +568,9 @@ let get_base_type ?(expand_supportdyn = true) env ty =
         MakeType.supportdyn r ty
     (* If we have an expression dependent type and it only has one super
        type, we can treat it similarly to AKdependent _, Some ty *)
-    | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n -> begin
+    | Tgeneric n when DependentKind.is_generic_dep_ty n -> begin
+      let targs = [] in
+      (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
       match TySet.elements (Env.get_upper_bounds env n targs) with
       | ty2 :: _ when ty_equal ty ty2 -> ty
       (* If it's exactly equal, then the base ty is just this one *)
@@ -662,7 +666,7 @@ let collect_enum_class_upper_bounds env name =
             mk (r, Tintersection [result; lty])
           in
           (seen, true, result)
-        | Tgeneric (name, _) when not (SSet.mem name seen) ->
+        | Tgeneric name when not (SSet.mem name seen) ->
           collect (SSet.add name seen) ok result name
         | _ -> (seen, ok, result))
       upper_bounds
@@ -802,7 +806,7 @@ let rec is_capability ty =
     true
   | Tintersection [] -> false
   | Tintersection tyl -> List.for_all ~f:is_capability tyl
-  | Tgeneric (s, []) when SN.Coeffects.is_generated_generic s -> true
+  | Tgeneric s when SN.Coeffects.is_generated_generic s -> true
   | _ -> false
 
 let is_capability_i ty =

@@ -44,6 +44,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
         ty: &Ty<R>,
         args: impl Iterator<Item = Ty<R>>,
     ) -> Ty<R> {
+        // TODO(T222659258) Remove this whole function, args is always empty now
         let ty_: &Ty_<R> = ty.node();
         let res_ty_ = match ty_ {
             Ty_::Tapply(params) => {
@@ -55,13 +56,9 @@ impl<'a, R: Reason> Substitution<'a, R> {
                     existing_args.iter().cloned().chain(args).collect(),
                 )))
             }
-            Ty_::Tgeneric(params) => {
+            Ty_::Tgeneric(name) => {
                 // Same here.
-                let (name, ref existing_args) = **params;
-                Ty_::Tgeneric(Box::new((
-                    name,
-                    existing_args.iter().cloned().chain(args).collect(),
-                )))
+                Ty_::Tgeneric(*name)
             }
             // We could insist on existing_args = [] here unless we want to
             // support partial application.
@@ -81,14 +78,10 @@ impl<'a, R: Reason> Substitution<'a, R> {
         let r = ty.reason().clone();
         let ty_: &Ty_<R> = ty.node();
         match ty_ {
-            Ty_::Tgeneric(params) => {
-                let (x, ref existing_args) = **params;
-                let args = existing_args.iter().map(|arg| self.instantiate(arg));
-                match self.subst.0.get(&x) {
-                    Some(x_ty) => self.merge_hk_type(r, x, x_ty, args),
-                    None => Ty::generic(r, x, args.collect()),
-                }
-            }
+            Ty_::Tgeneric(x) => match self.subst.0.get(x) {
+                Some(x_ty) => self.merge_hk_type(r, *x, x_ty, std::iter::empty()),
+                None => Ty::generic(r, *x),
+            },
             _ => Ty::new(r, self.instantiate_(ty_)),
         }
     }

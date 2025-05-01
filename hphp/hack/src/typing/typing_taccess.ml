@@ -470,7 +470,9 @@ let rec expand ctx env root =
              let ctx = { ctx with allow_abstract } in
              create_root_from_type_constant ctx env root cls ci)
     end
-    | Tgeneric (s, tyargs) ->
+    | Tgeneric s ->
+      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
+      let tyargs = [] in
       let ctx =
         {
           ctx with

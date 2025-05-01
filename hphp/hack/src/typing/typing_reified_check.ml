@@ -37,10 +37,7 @@ let validator =
       else
         this#invalid acc r "a wildcard"
 
-    method! on_tgeneric acc r t _tyargs =
-      (* Ignoring type aguments: If there were any, then this generic variable isn't allowed to be
-         reified anyway *)
-      (* TODO(T70069116) actually implement that check *)
+    method! on_tgeneric acc r t =
       match Env.get_reified acc.Type_validator.env t with
       | Nast.Erased -> this#invalid acc r "not reified"
       | Nast.SoftReified -> this#invalid acc r "soft reified"

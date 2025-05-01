@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5730776f85f3d931259215133151446b>>
+// @generated SignedSource<<238d38c288b26d508ac481e94a59c513>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -758,11 +758,9 @@ pub enum Ty_<'a> {
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
-    /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
-    /// type arguments.
+    /// Typing_phase.add_generic_parameters_and_constraints.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Tgeneric(&'a (&'a str, &'a [&'a Ty<'a>])),
+    Tgeneric(&'a str),
     /// Union type.
     /// The values that are members of this type are the union of the values
     /// that are members of the components of the union.

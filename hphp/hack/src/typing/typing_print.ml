@@ -803,7 +803,7 @@ module Full = struct
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
     | Tapply ((_, s), []) -> (fuel, to_doc s)
-    | Tgeneric (s, []) -> (fuel, to_doc s)
+    | Tgeneric s -> (fuel, to_doc s)
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
@@ -837,8 +837,7 @@ module Full = struct
       k ~fuel ty
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
-    | Tapply ((_, s), tyl)
-    | Tgeneric (s, tyl) ->
+    | Tapply ((_, s), tyl) ->
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in
       (fuel, generic_doc)
@@ -1029,7 +1028,7 @@ module Full = struct
         | _ -> class_doc
       in
       (fuel, class_doc)
-    | Tgeneric (s, []) when SN.Coeffects.is_generated_generic s -> begin
+    | Tgeneric s when SN.Coeffects.is_generated_generic s -> begin
       match String.get s 2 with
       | '[' ->
         (* has the form T/[...] *)
@@ -1044,14 +1043,13 @@ module Full = struct
       | _ -> (fuel, to_doc s)
     end
     | Tnewtype (s, [], _)
-    | Tgeneric (s, []) ->
+    | Tgeneric s ->
       (fuel, to_doc s)
     | Tnewtype (n, _, ty)
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv penv) ->
       k ~fuel ty
-    | Tnewtype (s, tyl, _)
-    | Tgeneric (s, tyl) ->
+    | Tnewtype (s, tyl, _) ->
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in
       (fuel, generic_doc)
@@ -1366,8 +1364,8 @@ module Full = struct
     let penv = Loclenv env in
     match (get_node typ, constraints) with
     | (_, []) -> (fuel, Nothing)
-    | (Tgeneric (tparam, []), [(tparam', ck, typ)])
-      when String.equal tparam tparam' ->
+    | (Tgeneric tparam, [(tparam', ck, typ)]) when String.equal tparam tparam'
+      ->
       tparam_constraint
         ~fuel
         ~ty:(locl_ty ~hide_internals)
@@ -1669,7 +1667,7 @@ module ErrorString = struct
     | Tprim tp -> (fuel, tprim tp)
     | Tvar _ -> (fuel, "some value")
     | Tfun _ -> (fuel, "a function")
-    | Tgeneric (s, _) when DependentKind.is_generic_dep_ty s ->
+    | Tgeneric s when DependentKind.is_generic_dep_ty s ->
       let (fuel, ty_str) = ety_to_string ety in
       (fuel, "the expression dependent type " ^ ty_str)
     | Tgeneric _ ->

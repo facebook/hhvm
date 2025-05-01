@@ -28,8 +28,7 @@ class type ['a] decl_type_visitor_type =
     method on_tvec_or_dict :
       'a -> decl_phase Reason.t_ -> decl_ty -> decl_ty -> 'a
 
-    method on_tgeneric :
-      'a -> decl_phase Reason.t_ -> string -> decl_ty list -> 'a
+    method on_tgeneric : 'a -> decl_phase Reason.t_ -> string -> 'a
 
     method on_toption : 'a -> decl_phase Reason.t_ -> decl_ty -> 'a
 
@@ -83,8 +82,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       let acc = this#on_type acc ty1 in
       this#on_type acc ty2
 
-    method on_tgeneric acc _ _ tyl =
-      List.fold_left tyl ~f:this#on_type ~init:acc
+    method on_tgeneric acc _ _ = acc
 
     method on_toption acc _ ty = this#on_type acc ty
 
@@ -180,7 +178,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tdynamic -> this#on_tdynamic acc r
       | Tthis -> this#on_tthis acc r
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
-      | Tgeneric (s, args) -> this#on_tgeneric acc r s args
+      | Tgeneric s -> this#on_tgeneric acc r s
       | Toption ty -> this#on_toption acc r ty
       | Tlike ty -> this#on_tlike acc r ty
       | Tprim prim -> this#on_tprim acc r prim
@@ -213,7 +211,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_tfun : 'a -> Reason.t -> locl_fun_type -> 'a
 
-    method on_tgeneric : 'a -> Reason.t -> string -> locl_ty list -> 'a
+    method on_tgeneric : 'a -> Reason.t -> string -> 'a
 
     method on_tnewtype :
       'a -> Reason.t -> string -> locl_ty list -> locl_ty -> 'a
@@ -285,8 +283,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       in
       this#on_type acc ft_ret
 
-    method on_tgeneric acc _ _ tyl =
-      List.fold_left tyl ~f:this#on_type ~init:acc
+    method on_tgeneric acc _ _ = acc
 
     method on_tnewtype acc _ _ tyl ty =
       let acc = List.fold_left tyl ~f:this#on_type ~init:acc in
@@ -382,7 +379,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tprim prim -> this#on_tprim acc r prim
       | Tvar id -> this#on_tvar acc r id
       | Tfun fty -> this#on_tfun acc r fty
-      | Tgeneric (x, args) -> this#on_tgeneric acc r x args
+      | Tgeneric x -> this#on_tgeneric acc r x
       | Tnewtype (x, tyl, ty) -> this#on_tnewtype acc r x tyl ty
       | Tdependent (x, ty) -> this#on_tdependent acc r x ty
       | Ttuple t -> this#on_ttuple acc r t

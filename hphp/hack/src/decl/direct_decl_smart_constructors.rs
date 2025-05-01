@@ -1521,8 +1521,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 let Id(pos, name) = self.expect_name(&node)?;
                 let reason = Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone()));
                 let ty_ = if self.is_type_param_in_scope(&name) {
-                    // TODO (T69662957) must fill type args of Tgeneric
-                    Ty_::Tgeneric(name, vec![])
+                    Ty_::Tgeneric(name)
                 } else {
                     match name.as_str() {
                         "nothing" => Ty_::Tunion(vec![]),
@@ -2264,7 +2263,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     .map(|targ| self.convert_tapply_to_tgeneric(targ))
                     .collect();
                 match self.tapply_should_be_tgeneric(&ty.0, &id) {
-                    Some(name) => Ty_::Tgeneric(name, converted_targs),
+                    Some(name) => Ty_::Tgeneric(name),
                     None => Ty_::Tapply(id, converted_targs),
                 }
             }
@@ -2379,7 +2378,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             | Ty_::Tany(_)
             | Ty_::Tclass(_, _, _)
             | Ty_::Tdynamic
-            | Ty_::Tgeneric(_, _)
+            | Ty_::Tgeneric(_)
             | Ty_::Tmixed
             | Ty_::Twildcard
             | Ty_::Tnonnull
@@ -2466,7 +2465,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
     // hint Haccess is a flat list, whereas decl ty Taccess is a tree.
     fn taccess_root_is_generic(ty: &Ty) -> bool {
         match ty {
-            Ty(_, box Ty_::Tgeneric(_, tys)) if tys.is_empty() => true,
+            Ty(_, box Ty_::Tgeneric(_)) => true,
             Ty(_, box Ty_::Taccess(TaccessType(t, _))) => Self::taccess_root_is_generic(t),
             _ => false,
         }
@@ -2474,7 +2473,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
 
     fn ctx_generic_for_generic_taccess_inner(ty: &Ty, cst: &str) -> String {
         let left = match ty {
-            Ty(_, box Ty_::Tgeneric(name, tys)) if tys.is_empty() => name.to_string(),
+            Ty(_, box Ty_::Tgeneric(name)) => name.to_string(),
             Ty(_, box Ty_::Taccess(TaccessType(ty, cst))) => {
                 Self::ctx_generic_for_generic_taccess_inner(ty, &cst.1)
             }
@@ -2515,7 +2514,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     user_attributes: vec![],
                 };
                 tparams.push(tparam);
-                let cap_ty = Ty(cap_ty.0, Box::new(Ty_::Tgeneric(name, vec![])));
+                let cap_ty = Ty(cap_ty.0, Box::new(Ty_::Tgeneric(name)));
                 let ft = FunType {
                     implicit_params: FunImplicitParams {
                         capability: CapTy(cap_ty),
@@ -2600,9 +2599,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 // If the type hint for this function parameter is a type
                 // parameter introduced in this function declaration, don't add
                 // a new type parameter.
-                Ty_::Tgeneric(type_name, _) if tparams.iter().any(|tp| &tp.name.1 == type_name) => {
-                    ty
-                }
+                Ty_::Tgeneric(type_name) if tparams.iter().any(|tp| &tp.name.1 == type_name) => ty,
                 // Otherwise, if the parameter is `G $g`, create tparam
                 // `T$g as G` and replace $g's type hint
                 _ => {
@@ -2610,7 +2607,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     tparams.push(tp(id.clone(), vec![(ConstraintKind::ConstraintAs, ty)]));
                     Ty(
                         Reason::FromWitnessDecl(WitnessDecl::Hint(param_pos)),
-                        Box::new(Ty_::Tgeneric(id.1, Vec::new())),
+                        Box::new(Ty_::Tgeneric(id.1)),
                     )
                 }
             };
@@ -2624,7 +2621,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 context_reason.pos().cloned().unwrap_or(Pos::NONE),
                 left_name,
             );
-            let left_ty_ = Ty_::Tgeneric(left_id.1.clone(), vec![]);
+            let left_ty_ = Ty_::Tgeneric(left_id.1.clone());
             tparams.push(tp(left_id, vec![]));
             let left = Ty(context_reason, Box::new(left_ty_));
             where_constraints.push(WhereConstraint(left, ConstraintKind::ConstraintEq, right));
@@ -2695,10 +2692,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                         self.ctx_generic_for_generic_taccess(t, cst.1.as_str()),
                     );
                     tparams.push(tp(left_id.clone(), vec![]));
-                    let left = Ty(
-                        context_ty.0.clone(),
-                        Box::new(Ty_::Tgeneric(left_id.1, vec![])),
-                    );
+                    let left = Ty(context_ty.0.clone(), Box::new(Ty_::Tgeneric(left_id.1)));
                     where_constraints.push(WhereConstraint(
                         left,
                         ConstraintKind::ConstraintEq,
@@ -2729,17 +2723,17 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             .map(|Ty(r, ty_)| {
                 let ty_ = match *ty_ {
                     Ty_::Tapply((_, name), tys) if tys.is_empty() && name.starts_with('$') => {
-                        Ty_::Tgeneric(self.ctx_generic_for_fun(&name), vec![])
+                        Ty_::Tgeneric(self.ctx_generic_for_fun(&name))
                     }
                     Ty_::Taccess(TaccessType(Ty(_, box Ty_::Tapply((_, name), tys)), cst))
                         if tys.is_empty() && name.starts_with('$') =>
                     {
                         let name = self.ctx_generic_for_dependent(&name, &cst.1);
-                        Ty_::Tgeneric(name, vec![])
+                        Ty_::Tgeneric(name)
                     }
                     Ty_::Taccess(TaccessType(t, cst)) if Self::taccess_root_is_generic(&t) => {
                         let name = self.ctx_generic_for_generic_taccess(&t, &cst.1);
-                        Ty_::Tgeneric(name, vec![])
+                        Ty_::Tgeneric(name)
                     }
                     _ => return Ty(r, ty_),
                 };
@@ -3417,11 +3411,12 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 match class_type.rsplit('\\').next() {
                     Some(name) if self.is_type_param_in_scope(name) => {
                         let pos = Self::merge(pos, self.get_pos(&type_arguments));
-                        let type_arguments = type_arguments
+                        let _type_arguments: Vec<_> = type_arguments
                             .into_iter()
                             .filter_map(|node| self.node_to_ty(node))
                             .collect();
-                        let ty_ = Ty_::Tgeneric(name.into(), type_arguments);
+                        // TODO(T222659258) Clean this up, Tgeneric cannot have type arguments anymore
+                        let ty_ = Ty_::Tgeneric(name.into());
                         self.hint_ty(pos, ty_)
                     }
                     _ => {

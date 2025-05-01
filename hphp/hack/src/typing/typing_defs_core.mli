@@ -330,12 +330,11 @@ and _ ty_ =
   | Ttuple : 'phase tuple_type -> 'phase ty_
       (** A wrapper around tuple_type, which contains information about tuple elements *)
   | Tshape : 'phase shape_type -> 'phase ty_
-  | Tgeneric : string * 'phase ty list -> 'phase ty_
+  | Tgeneric : string -> 'phase ty_
       (** The type of a generic parameter. The constraints on a generic parameter
        * are accessed through the lenv.tpenv component of the environment, which
        * is set up when checking the body of a function or method. See uses of
-       * Typing_phase.add_generic_parameters_and_constraints. The list denotes
-       * type arguments.
+       * Typing_phase.add_generic_parameters_and_constraints.
        *)
   | Tunion : 'phase ty list -> 'phase ty_ [@transform.explicit]
       (** Union type.

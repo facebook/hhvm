@@ -93,7 +93,7 @@ pub enum Ty_<R: Reason, TY> {
     /// is set up when checking the body of a function or method. See uses of
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
-    Tgeneric(TypeName, Vec<TY>),
+    Tgeneric(TypeName),
 
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
@@ -112,7 +112,7 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
     Ty_::Tprim(_) => [],
     Ty_::Tfun(fun_type) => [fun_type],
     Ty_::Tany => [],
-    Ty_::Tgeneric(_, args) => [args],
+    Ty_::Tgeneric(_) => [],
     Ty_::Tclass(_, _, args) => [args],
     Ty_::Tunion(args) => [args],
     Ty_::Toption(arg) => [arg],
@@ -241,8 +241,8 @@ impl<R: Reason> Ty<R> {
         Self::new(r, Ty_::Tany)
     }
 
-    pub fn generic(r: R, ty_name: TypeName, args: Vec<Ty<R>>) -> Self {
-        Self::new(r, Ty_::Tgeneric(ty_name, args))
+    pub fn generic(r: R, ty_name: TypeName) -> Self {
+        Self::new(r, Ty_::Tgeneric(ty_name))
     }
 
     pub fn nonnull(r: R) -> Ty<R> {
@@ -272,7 +272,7 @@ impl<R: Reason> Ty<R> {
 
     pub fn generic_name(&self) -> Option<&TypeName> {
         match self.deref() {
-            Ty_::Tgeneric(name, _) => Some(name),
+            Ty_::Tgeneric(name) => Some(name),
             _ => None,
         }
     }
@@ -349,11 +349,8 @@ impl<R: Reason> Ty<R> {
                     })
                 }
             }
-            Ty_::Tclass(_, _, _)
-            | Ty_::Tgeneric(_, _)
-            | Ty_::Tany
-            | Ty_::Tnonnull
-            | Ty_::Tprim(_) => {}
+            Ty_::Tclass(_, _, _) | Ty_::Tgeneric(_) | Ty_::Tany | Ty_::Tnonnull | Ty_::Tprim(_) => {
+            }
         }
     }
 }
@@ -446,10 +443,7 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for Ty<R> {
             Ty_::Tfun(ft) => OTy_::Tfun(&*arena.alloc(ft.to_oxidized_by_ref(arena))),
             Ty_::Tany => todo!(),
             Ty_::Tnonnull => todo!(),
-            Ty_::Tgeneric(x, argl) => OTy_::Tgeneric(&*arena.alloc((
-                &*arena.alloc_str(x.as_str()),
-                &*arena.alloc_slice_fill_iter(argl.iter().map(|_ty| todo!())),
-            ))),
+            Ty_::Tgeneric(x) => OTy_::Tgeneric(&*arena.alloc_str(x.as_str())),
             Ty_::Tclass(pos_id, exact, tys) => OTy_::Tclass(
                 &*arena.alloc((
                     pos_id.to_oxidized_by_ref(arena),

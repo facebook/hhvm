@@ -441,9 +441,8 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 block.build()
             }
             Ty_::Tgeneric(x) => {
-                let mut block = alloc.block_with_size_and_tag(2usize, 9u8);
-                alloc.set_field(&mut block, 0, alloc.add(&x.0));
-                alloc.set_field(&mut block, 1, alloc.add(&x.1));
+                let mut block = alloc.block_with_size_and_tag(1usize, 9u8);
+                alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
             Ty_::Tunion(x) => {
@@ -536,11 +535,8 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                     Ok(Ty_::Tshape(ocamlrep::from::field(block, 0)?))
                 }
                 9 => {
-                    ocamlrep::from::expect_block_size(block, 2)?;
-                    Ok(Ty_::Tgeneric(Box::new((
-                        ocamlrep::from::field(block, 0)?,
-                        ocamlrep::from::field(block, 1)?,
-                    ))))
+                    ocamlrep::from::expect_block_size(block, 1)?;
+                    Ok(Ty_::Tgeneric(ocamlrep::from::field(block, 0)?))
                 }
                 10 => {
                     ocamlrep::from::expect_block_size(block, 1)?;

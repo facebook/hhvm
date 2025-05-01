@@ -52,8 +52,8 @@
             [(Constraint_as,
               (Rhint ([14:11-22]),
                (Tapply (([14:11-14], "\\HH\\Map"),
-                  [(Rhint ([14:15-17]), (Tgeneric ("Ta", [])));
-                    (Rhint ([14:19-21]), (Tgeneric ("Te", [])))]
+                  [(Rhint ([14:15-17]), (Tgeneric "Ta"));
+                    (Rhint ([14:19-21]), (Tgeneric "Te"))]
                   ))))
               ];
             tp_reified = Erased; tp_user_attributes = [] };

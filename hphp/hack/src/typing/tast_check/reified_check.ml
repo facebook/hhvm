@@ -211,7 +211,7 @@ let handler =
         begin
           match get_node ty with
           (* If we get Tgeneric here, the underlying type was reified *)
-          | Tgeneric (ci, _) when String.equal ci class_id ->
+          | Tgeneric ci when String.equal ci class_id ->
             Typing_error_utils.add_typing_error
               ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(
@@ -251,7 +251,7 @@ let handler =
       | (_, pos, New ((ty, _, CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         (match get_node ty with
-        | Tgeneric (ci, _tyargs) when String.equal ci class_id ->
+        | Tgeneric ci when String.equal ci class_id ->
           (* ignoring type arguments here: If we get a Tgeneric here, the underlying type
              parameter must have been newable and reified, neither of which his allowed for
              higher-kinded type-parameters *)

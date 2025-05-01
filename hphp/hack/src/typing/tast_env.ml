@@ -183,8 +183,9 @@ let get_receiver_ids env ty =
     | Tunion tys
     | Tintersection tys ->
       List.fold tys ~init:acc ~f:(aux seen)
-    | Tgeneric (name, targs) when not (List.mem ~equal:String.equal seen name)
-      ->
+    | Tgeneric name when not (List.mem ~equal:String.equal seen name) ->
+      let targs = [] in
+      (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
       let seen = name :: seen in
       let upper_bounds = Typing_env.get_upper_bounds env name targs in
       Typing_set.fold (fun ty acc -> aux seen acc ty) upper_bounds acc

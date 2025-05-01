@@ -43,7 +43,7 @@ struct
     | (Tany _ | Tthis | Tmixed | Twildcard | Tnonnull | Tdynamic) as x -> x
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
-    | Tgeneric (name, args) -> Tgeneric (name, List.map args ~f:ty)
+    | Tgeneric _ as x -> x
     | Ttuple { t_required; t_extra } ->
       Ttuple
         {

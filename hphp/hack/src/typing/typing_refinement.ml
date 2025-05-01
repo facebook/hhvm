@@ -102,7 +102,7 @@ module TyPredicate = struct
     | Tany _ -> Result.Error "any"
     | Toption _ -> Result.Error "option"
     | Tfun _ -> Result.Error "fun"
-    | Tgeneric (_, _) -> Result.Error "generic"
+    | Tgeneric _ -> Result.Error "generic"
     | Tunion _ -> Result.Error "union"
     | Tintersection _ -> Result.Error "intersection"
     | Tvec_or_dict _ -> Result.Error "vec_or_dict"
@@ -592,11 +592,13 @@ and split_ty
         split_ty ~other_intersected_tys ~expansions ~predicate env super_ty
       in
       (env, TyPartition.(meet (mk_span ~env ~predicate ty) partition))
-    | Tgeneric (name, _)
+    | Tgeneric name
     | Tnewtype (name, _, _)
       when SSet.mem name expansions ->
       (env, TyPartition.mk_span ~env ~predicate ty)
-    | Tgeneric (name, tyl) ->
+    | Tgeneric name ->
+      let tyl = [] in
+      (* TODO(T222659258) Clean this up, tyl gone from Tgeneric *)
       let expansions = SSet.add name expansions in
       let upper_bounds =
         Env.get_upper_bounds env name tyl |> Typing_set.elements

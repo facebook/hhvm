@@ -54,10 +54,7 @@ let validator =
         ^ tconst
         ^ " because it is not marked `<<__Enforceable>>`"
 
-    method! on_tgeneric acc r name _tyargs =
-      (* If we allow higher-kinded generics to be enforceable at some point,
-         handle type arguments here *)
-      this#check_generic acc r name
+    method! on_tgeneric acc r name = this#check_generic acc r name
 
     method! on_newtype acc r sid _ as_cstr _super_cstr _ =
       if String.equal (snd sid) SN.Classes.cSupportDyn then

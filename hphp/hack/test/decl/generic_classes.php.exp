@@ -16,8 +16,7 @@
        sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([4:13-18], "data");
-          sp_xhp_attr = None;
-          sp_type = (Rhint ([4:11-12]), (Tgeneric ("T", [])));
+          sp_xhp_attr = None; sp_type = (Rhint ([4:11-12]), (Tgeneric "T"));
           sp_visibility = Private;
           sp_flags =
           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -35,7 +34,7 @@
                    { ft_tparams = []; ft_where_constraints = [];
                      ft_params =
                      [{ fp_pos = [6:33-38]; fp_name = (Some "$data");
-                        fp_type = (Rhint ([6:31-32]), (Tgeneric ("T", [])));
+                        fp_type = (Rhint ([6:31-32]), (Tgeneric "T"));
                         fp_flags =
                         { Typing_defs_flags.FunParam.accept_disposable =
                           false; inout = false; is_optional = false;
@@ -70,7 +69,7 @@
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params =
                 { capability = (CapDefaults [10:19-22]) };
-                ft_ret = (Rhint ([10:26-27]), (Tgeneric ("T", [])));
+                ft_ret = (Rhint ([10:26-27]), (Tgeneric "T"));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;
@@ -107,7 +106,7 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([16:13-18], "data");
            sp_xhp_attr = None;
-           sp_type = (Rhint ([16:11-12]), (Tgeneric ("T", [])));
+           sp_type = (Rhint ([16:11-12]), (Tgeneric "T"));
            sp_visibility = Private;
            sp_flags =
            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -125,7 +124,7 @@
                     { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [18:33-38]; fp_name = (Some "$data");
-                         fp_type = (Rhint ([18:31-32]), (Tgeneric ("T", [])));
+                         fp_type = (Rhint ([18:31-32]), (Tgeneric "T"));
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; is_optional = false;
@@ -174,7 +173,7 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([24:13-18], "data");
            sp_xhp_attr = None;
-           sp_type = (Rhint ([24:11-12]), (Tgeneric ("T", [])));
+           sp_type = (Rhint ([24:11-12]), (Tgeneric "T"));
            sp_visibility = Private;
            sp_flags =
            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -192,7 +191,7 @@
                     { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [26:33-38]; fp_name = (Some "$data");
-                         fp_type = (Rhint ([26:31-32]), (Tgeneric ("T", [])));
+                         fp_type = (Rhint ([26:31-32]), (Tgeneric "T"));
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; is_optional = false;
@@ -229,7 +228,7 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [30:19-22]) };
-                 ft_ret = (Rhint ([30:26-27]), (Tgeneric ("T", [])));
+                 ft_ret = (Rhint ([30:26-27]), (Tgeneric "T"));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;

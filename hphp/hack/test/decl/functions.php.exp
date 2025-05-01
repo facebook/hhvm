@@ -151,7 +151,7 @@
               ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [18:32-37]; fp_name = (Some "$arg1");
-                 fp_type = (Rhint ([18:30-31]), (Tgeneric ("T", [])));
+                 fp_type = (Rhint ([18:30-31]), (Tgeneric "T"));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -159,7 +159,7 @@
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [18:10-26]) };
-              ft_ret = (Rhint ([18:40-41]), (Tgeneric ("T", [])));
+              ft_ret = (Rhint ([18:40-41]), (Tgeneric "T"));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -192,14 +192,14 @@
               ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [23:6-11]; fp_name = (Some "$arg1");
-                 fp_type = (Rhint ([23:3-5]), (Tgeneric ("T1", [])));
+                 fp_type = (Rhint ([23:3-5]), (Tgeneric "T1"));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
                    ignore_readonly_error = false; splat = false };
                  fp_def_value = None };
                 { fp_pos = [24:6-11]; fp_name = (Some "$arg2");
-                  fp_type = (Rhint ([24:3-5]), (Tgeneric ("T2", [])));
+                  fp_type = (Rhint ([24:3-5]), (Tgeneric "T2"));
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
                     inout = false; is_optional = false; readonly = false;
@@ -207,7 +207,7 @@
                   fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [22:10-38]) };
-              ft_ret = (Rhint ([25:4-6]), (Tgeneric ("T1", [])));
+              ft_ret = (Rhint ([25:4-6]), (Tgeneric "T1"));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -317,7 +317,7 @@
               ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [38:6-8]; fp_name = (Some "$x");
-                 fp_type = (Rhint ([38:3-5]), (Tgeneric ("Tu", [])));
+                 fp_type = (Rhint ([38:3-5]), (Tgeneric "Tu"));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -330,8 +330,7 @@
                       { ft_tparams = []; ft_where_constraints = [];
                         ft_params =
                         [{ fp_pos = [39:13-15]; fp_name = None;
-                           fp_type =
-                           (Rhint ([39:13-15]), (Tgeneric ("Tu", [])));
+                           fp_type = (Rhint ([39:13-15]), (Tgeneric "Tu"));
                            fp_flags =
                            { Typing_defs_flags.FunParam.accept_disposable =
                              false; inout = false; is_optional = false;
@@ -370,7 +369,7 @@
                              ft_params =
                              [{ fp_pos = [40:24-26]; fp_name = None;
                                 fp_type =
-                                (Rhint ([40:24-26]), (Tgeneric ("Tu", [])));
+                                (Rhint ([40:24-26]), (Tgeneric "Tu"));
                                 fp_flags =
                                 { Typing_defs_flags.FunParam.accept_disposable =
                                   false; inout = false; is_optional = false;
@@ -491,7 +490,7 @@
               [{ fp_pos = [52:42-44]; fp_name = (Some "$x");
                  fp_type =
                  (Rhint ([52:39-41]),
-                  (Toption (Rhint ([52:40-41]), (Tgeneric ("T", [])))));
+                  (Toption (Rhint ([52:40-41]), (Tgeneric "T"))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;

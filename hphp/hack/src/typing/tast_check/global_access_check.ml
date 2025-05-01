@@ -442,7 +442,9 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
       tyl
   (* Generic types can be treated similarly to an intersection type
      where we find the first prop that works from the upper bounds *)
-  | Tgeneric (name, tyargs) ->
+  | Tgeneric name ->
+    let tyargs = [] in
+    (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
     (* Avoid circular generics with a set *)
     if SSet.mem name seen then
       []
@@ -577,7 +579,11 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
   | Tclass ((_, id), _, tyl)
     when is_value_collection_ty env ty || String.equal id "\\HH\\Awaitable" ->
     List.for_all tyl ~f:(fun l -> has_no_object_ref_ty env seen l)
-  | Tgeneric (name, tyargs) ->
+  | Tgeneric name ->
+    let tyargs = [] in
+
+    (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
+
     (* Avoid circular generics with a set *)
     if SSet.mem name seen then
       false

@@ -30,8 +30,7 @@ let fun_env ?origin ctx fd =
 let get_self_from_c c =
   let tparams =
     List.map c.c_tparams ~f:(fun { tp_name = (p, s); _ } ->
-        mk
-          (Reason.witness_from_decl (Pos_or_decl.of_raw_pos p), Tgeneric (s, [])))
+        mk (Reason.witness_from_decl (Pos_or_decl.of_raw_pos p), Tgeneric s))
   in
   let (name_pos, name) = c.c_name in
   let name_pos = Pos_or_decl.of_raw_pos name_pos in

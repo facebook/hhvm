@@ -63,10 +63,10 @@
                     tp_reified = Erased; tp_user_attributes = [] }
                    ];
                  ft_where_constraints =
-                 [((Rhint ([7:46-48]), (Tgeneric ("Tb", []))), Constraint_as,
+                 [((Rhint ([7:46-48]), (Tgeneric "Tb")), Constraint_as,
                    (Rhint ([7:52-59]),
                     (Tapply (([7:52-55], "\\Cov"),
-                       [(Rhint ([7:56-58]), (Tgeneric ("Tf", [])))]))))
+                       [(Rhint ([7:56-58]), (Tgeneric "Tf"))]))))
                    ];
                  ft_params = [];
                  ft_implicit_params =
@@ -106,7 +106,7 @@
           (Tapply (([10:27-31], "\\Base"),
              [(Rhint ([10:32-39]),
                (Tapply (([10:32-35], "\\Cov"),
-                  [(Rhint ([10:36-38]), (Tgeneric ("Td", [])))])))
+                  [(Rhint ([10:36-38]), (Tgeneric "Td"))])))
                ]
              )))
           ];
@@ -131,8 +131,7 @@
                     tp_reified = Erased; tp_user_attributes = [] }
                    ];
                  ft_where_constraints =
-                 [((Rhint ([11:46-48]), (Tgeneric ("Td", []))),
-                   Constraint_as,
+                 [((Rhint ([11:46-48]), (Tgeneric "Td")), Constraint_as,
                    (Rhint ([11:52-53]), (Tapply (([11:52-53], "\\A"), []))))];
                  ft_params = [];
                  ft_implicit_params =

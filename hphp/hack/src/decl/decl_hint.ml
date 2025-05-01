@@ -26,7 +26,7 @@ let rec hint env (p, h) =
 and context_hint env (p, h) =
   match h with
   | Hfun_context n ->
-    make_decl_ty env p (Tgeneric (Format.sprintf "T/[ctx %s]" n, []))
+    make_decl_ty env p (Tgeneric (Format.sprintf "T/[ctx %s]" n))
   | Haccess ((_, (Habstr (n, []) | Hvar n)), ids) ->
     let name =
       Format.sprintf
@@ -34,7 +34,7 @@ and context_hint env (p, h) =
         n
         (String.concat ~sep:"::" (List.map ~f:snd ids))
     in
-    make_decl_ty env p (Tgeneric (name, []))
+    make_decl_ty env p (Tgeneric name)
   | _ -> hint env (p, h)
 
 and shape_field_info_to_shape_field_type
@@ -115,9 +115,9 @@ and hint_ p env = function
     in
     Tvec_or_dict (t1, hint env h2)
   | Hprim p -> Tprim p
-  | Habstr (x, argl) ->
-    let argl = List.map argl ~f:(hint env) in
-    Tgeneric (x, argl)
+  | Habstr (x, _tyl) ->
+    (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
+    Tgeneric x
   | Hclass_ptr (k, h) ->
     let h =
       match k with

@@ -162,9 +162,7 @@ impl<R: Reason> ToOxidized for Ty_<R> {
                     fields: shape_fields,
                 })
             }
-            Ty_::Tgeneric(box (name, tyl)) => {
-                typing_defs::Ty_::Tgeneric(name.to_oxidized(), tyl.to_oxidized())
-            }
+            Ty_::Tgeneric(name) => typing_defs::Ty_::Tgeneric(name.to_oxidized()),
             Ty_::Tunion(x) => typing_defs::Ty_::Tunion(x.to_oxidized()),
             Ty_::Tintersection(x) => typing_defs::Ty_::Tintersection(x.to_oxidized()),
             Ty_::TvecOrDict(box (tk, tv)) => {

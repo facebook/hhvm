@@ -85,7 +85,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
       "(function(%s): %s)"
       (String.concat ~sep:", " params)
       (of_decl_ty f.ft_ret)
-  | Tgeneric (name, args)
+  | Tgeneric name -> Utils.strip_all_ns name
   | Tapply ((_, name), args) ->
     let name = Utils.strip_all_ns name in
     (match args with

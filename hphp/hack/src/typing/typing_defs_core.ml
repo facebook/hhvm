@@ -356,12 +356,11 @@ and _ ty_ =
   | Ttuple : 'phase tuple_type -> 'phase ty_
       (** A wrapper around tuple_type, which contains information about tuple elements *)
   | Tshape : 'phase shape_type -> 'phase ty_
-  | Tgeneric : string * 'phase ty list -> 'phase ty_
+  | Tgeneric : string -> 'phase ty_
       (** The type of a generic parameter. The constraints on a generic parameter
        * are accessed through the lenv.tpenv component of the environment, which
        * is set up when checking the body of a function or method. See uses of
-       * Typing_phase.add_generic_parameters_and_constraints. The list denotes
-       * type arguments.
+       * Typing_phase.add_generic_parameters_and_constraints.
        *)
   | Tunion : 'phase ty list -> 'phase ty_ [@transform.explicit]
       (** Union type.
@@ -606,12 +605,10 @@ module Pp = struct
       Format.fprintf fmt ",@ ";
       pp_class_refinement fmt a1;
       Format.fprintf fmt "@,))@]"
-    | Tgeneric (a0, a1) ->
-      Format.fprintf fmt "(@[<2>Tgeneric (@,";
+    | Tgeneric a0 ->
+      Format.fprintf fmt "(@[<2>Tgeneric@ ";
       Format.fprintf fmt "%S" a0;
-      Format.fprintf fmt ",@ ";
-      pp_list pp_ty fmt a1;
-      Format.fprintf fmt "@,)@])"
+      Format.fprintf fmt "@])"
     | Taccess a0 ->
       Format.fprintf fmt "(@[<2>Taccess@ ";
       pp_taccess_type fmt a0;
@@ -1001,11 +998,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tintersection tyl1, Tintersection tyl2) ->
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
     | (Ttuple t1, Ttuple t2) -> tuple_type_compare t1 t2
-    | (Tgeneric (n1, args1), Tgeneric (n2, args2)) -> begin
-      match String.compare n1 n2 with
-      | 0 -> tyl_compare ~sort:false ~normalize_lists args1 args2
-      | n -> n
-    end
+    | (Tgeneric n1, Tgeneric n2) -> String.compare n1 n2
     | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) -> begin
       match String.compare id id2 with
       | 0 ->
@@ -1706,7 +1699,7 @@ module Locl_subst = struct
 
   let rec apply_ty (ty : locl_ty) ~subst ~combine_reasons =
     match deref ty with
-    | (reason_src, Tgeneric (nm, _)) ->
+    | (reason_src, Tgeneric nm) ->
       (match SMap.find_opt nm subst with
       | Some ty_subst ->
         map_reason ty_subst ~f:(fun reason_dest ->

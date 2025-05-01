@@ -41,12 +41,9 @@ let derive_instantiation
       (Typing_defs.get_node uninstantiated, Typing_defs.get_node instantiated)
     with
     (* base cases: Tgeneric, Tthis *)
-    | (Tgeneric (lname, _), Tgeneric (rname, _)) when String.equal lname rname
-      ->
+    | (Tgeneric lname, Tgeneric rname) when String.equal lname rname ->
       (env, subst_acc)
-    | (Tgeneric (name, _targs), _) ->
-      (* TODO if productionising second order generics: handle _targs *)
-      (env, Instantiation.add name instantiated subst_acc)
+    | (Tgeneric name, _) -> (env, Instantiation.add name instantiated subst_acc)
     | (Tthis, _) -> (env, Instantiation.add_this instantiated subst_acc)
     (* Strip all like types and supportdyn on both sides *)
     | (Tlike ty, _) -> derive_instantiation ty instantiated (env, subst_acc)

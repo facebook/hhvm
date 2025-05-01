@@ -24,7 +24,7 @@ let rec strip_ty ty =
       ty
     | Tprim _ -> ty
     | Tvar _ -> ty
-    | Tgeneric (name, args) -> Tgeneric (name, strip_tyl args)
+    | Tgeneric _ -> ty
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (strip_ty ty1, strip_ty ty2)
     | Ttuple { t_required; t_extra } ->
       Ttuple

@@ -137,7 +137,7 @@ File root|module_hint.php--everywhere.php
              [{ fp_pos = [3:23-25]; fp_name = (Some "$x");
                 fp_type =
                 (Rhint ([3:20-22]),
-                 (Toption (Rhint ([3:21-22]), (Tgeneric ("T", [])))));
+                 (Toption (Rhint ([3:21-22]), (Tgeneric "T"))));
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
                   inout = false; is_optional = false; readonly = false;
@@ -147,7 +147,7 @@ File root|module_hint.php--everywhere.php
              ft_implicit_params = { capability = (CapDefaults [3:10-16]) };
              ft_ret =
              (Rhint ([3:27-29]),
-              (Toption (Rhint ([3:28-29]), (Tgeneric ("T", [])))));
+              (Toption (Rhint ([3:28-29]), (Tgeneric "T"))));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;

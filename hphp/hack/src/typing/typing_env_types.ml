@@ -177,7 +177,7 @@ let get_tparams_in_ty_and_acc env acc ty =
     object (this)
       inherit [SSet.t] Type_visitor.locl_type_visitor
 
-      method! on_tgeneric acc _ s _ =
+      method! on_tgeneric acc _ s =
         (* Not traversing args, although they may contain Tgenerics (higher kinds only) *)
         SSet.add s acc
 

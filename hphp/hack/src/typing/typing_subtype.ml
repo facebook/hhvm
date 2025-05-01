@@ -858,13 +858,13 @@ end = struct
     if Subtype_env.get_check_rank subtype_env then
       let p ty =
         match get_node ty with
-        | Tgeneric (name, _) -> Env.rank_of_tparam env name > rank
+        | Tgeneric name -> Env.rank_of_tparam env name > rank
         | _ -> false
       in
       let ty_opt = Typing_defs_core.find_locl_ty ty ~p in
       Option.map ty_opt ~f:(fun ty ->
           match deref ty with
-          | (r, Tgeneric (name, _)) -> (r, name)
+          | (r, Tgeneric name) -> (r, name)
           | _ ->
             (* We are guaranteed that if the result if [Some(...)] then the type
                is a [Tgeneric] so something is seriously wrong here *)
@@ -952,7 +952,9 @@ end = struct
           Typing_set.fold
             (fun ty add_set ->
               match get_node ty with
-              | Tgeneric (name, targs) ->
+              | Tgeneric name ->
+                let targs = [] in
+                (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
                 let gen_bounds = Env.get_lower_bounds env name targs in
                 Typing_set.union add_set gen_bounds
               | _ -> add_set)
@@ -969,7 +971,7 @@ end = struct
     Typing_set.fold
       (fun bound_ty (g_set, o_set) ->
         match get_node bound_ty with
-        | Tgeneric (name, []) -> (SSet.add name g_set, o_set)
+        | Tgeneric name -> (SSet.add name g_set, o_set)
         | _ -> (g_set, Typing_set.add bound_ty o_set))
       lower_bounds
       (SSet.empty, Typing_set.empty)
@@ -1189,7 +1191,9 @@ end = struct
         env
         (LoclType lty_sub)
         (LoclType ty_super)
-    | (r_generic, Tgeneric (name_sub, tyargs)) -> begin
+    | (r_generic, Tgeneric name_sub) -> begin
+      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
+      let tyargs = [] in
       match deref ty_super with
       | (r_super, Tvar id)
         when Env.rank_of_tparam env name_sub > Env.rank_of_tvar env id ->
@@ -1419,7 +1423,9 @@ end = struct
              *)
             let ty =
               match get_node ty with
-              | Tgeneric (name, targs) ->
+              | Tgeneric name ->
+                let targs = [] in
+                (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
                 let bounds = Env.get_lower_bounds env name targs in
                 MakeType.union (get_reason ty) (Typing_set.elements bounds)
               | _ -> ty
@@ -3482,7 +3488,9 @@ end = struct
         env
         (LoclType ty_sub)
         (LoclType ty_super)
-    | ((r_generic, Tgeneric (name_sub, tyargs)), (_, Tunion [])) -> begin
+    | ((r_generic, Tgeneric name_sub), (_, Tunion [])) -> begin
+      let tyargs = [] in
+      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
       match
         VisitedGoals.try_add_visited_generic_sub
           subtype_env.Subtype_env.visited
@@ -3975,9 +3983,10 @@ end = struct
     (* -- C-Access-R -------------------------------------------------------- *)
     | (_, (_, Taccess _)) -> invalid ~fail env
     (* -- C-Generic-R ------------------------------------------------------- *)
-    | ( (r_sub, Tgeneric (name_sub, tyargs_sub)),
-        (r_super, Tgeneric (name_super, tyargs_super)) )
+    | ((r_sub, Tgeneric name_sub), (r_super, Tgeneric name_super))
       when String.equal name_sub name_super ->
+      let (tyargs_sub, tyargs_super) = ([], []) in
+      (* TODO(T222659258) Clean this up, type arguments from gone from Tgeneric *)
       if List.is_empty tyargs_super then
         valid env
       else
@@ -3998,14 +4007,14 @@ end = struct
           ty_sub
           ty_super
           env
-    | ((_r_sub, Tgeneric (name_sub, _)), (_, Tgeneric _))
+    | ((_r_sub, Tgeneric name_sub), (_, Tgeneric _))
       when let (generic_lower_bounds, _other_lower_bounds) =
              generic_lower_bounds env ty_super
            in
            SSet.mem name_sub generic_lower_bounds ->
       valid env
     (* Ensure that higher-ranked type parameters don't escape their scope *)
-    | ((r_sub, Tvar tv_sub), (r_super, Tgeneric (tp_sup, _)))
+    | ((r_sub, Tvar tv_sub), (r_super, Tgeneric tp_sup))
       when Env.rank_of_tparam env tp_sup > Env.rank_of_tvar env tv_sub ->
       let error =
         Typing_error.Secondary.Higher_rank_tparam_escape
@@ -4047,7 +4056,7 @@ end = struct
           | Ttuple _ | Tshape _ | Tintersection _ | Tvec_or_dict _ | Taccess _
           | Tnewtype _ | Tdependent _ | Tclass _ | Tneg _ | Tgeneric _
           | Tlabel _ | Tclass_ptr _ ) ),
-        (r_super, Tgeneric (name_super, _tyargs_super)) ) ->
+        (r_super, Tgeneric name_super) ) ->
       (* If we've seen this type parameter before then we must have gone
        * round a cycle so we fail
        *)
@@ -6049,7 +6058,9 @@ end = struct
             (sub_supportdyn, ty_subs)
             rhs
             env)
-      | ((r_generic, Tgeneric (generic_nm, generic_ty_args)), _) ->
+      | ((r_generic, Tgeneric generic_nm), _) ->
+        let generic_ty_args = [] in
+        (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
         Common.simplify_generic_l
           ~subtype_env
           ~this_ty
@@ -6352,7 +6363,9 @@ end = struct
             (sub_supportdyn, ty_subs)
             rhs
             env)
-      | (r_sub, Tgeneric (generic_nm, generic_ty_args)) ->
+      | (r_sub, Tgeneric generic_nm) ->
+        let generic_ty_args = [] in
+        (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
         Common.simplify_generic_l
           ~subtype_env
           ~this_ty
@@ -6578,7 +6591,9 @@ end = struct
         &&& simplify_subtype_bound `Super ~bound:memloty loty)
     | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
       concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
-    | (_r_sub, Tgeneric (s, ty_args)) when String.equal s SN.Typehints.this ->
+    | (_r_sub, Tgeneric s) when String.equal s SN.Typehints.this ->
+      let ty_args = [] in
+      (* TODO(T222659258) Clean this up, ty_args gone from Tgeneric *)
       let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s ty_args) in
       concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
     | (_, Tvar _) ->
@@ -6611,7 +6626,9 @@ end = struct
         (sub_supportdyn, ty_subs)
         rhs
         env
-    | (r_generic, Tgeneric (generic_nm, generic_ty_args)) ->
+    | (r_generic, Tgeneric generic_nm) ->
+      let generic_ty_args = [] in
+      (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
       (match
          VisitedGoalsInternal.try_add_visited_generic_sub
            subtype_env.Subtype_env.visited_internal
@@ -7132,7 +7149,9 @@ end = struct
           (sub_supportdyn, ty_subs)
           rhs
           env)
-    | (r_generic, Tgeneric (generic_nm, generic_ty_args)) ->
+    | (r_generic, Tgeneric generic_nm) ->
+      let generic_ty_args = [] in
+      (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
       Common.simplify_generic_l
         ~subtype_env
         ~this_ty:(Some this_ty)
@@ -7513,9 +7532,10 @@ end = struct
       rhs_for_mixed
       env =
     begin
-      let lty_sub =
-        mk (reason_generic, Tgeneric (generic_nm, generic_ty_args))
-      in
+      (* TODO(T222659258) Clean this up *)
+      if List.length generic_ty_args <> 0 then
+        failwith "Implementation of higher-kinded types is being removed";
+      let lty_sub = mk (reason_generic, Tgeneric generic_nm) in
       let (env, prop) =
         (* If the generic is actually an expression dependent type,
            we need to update this_ty
@@ -7763,7 +7783,9 @@ end = struct
             env)
       in
       mk_subty_prop env &&& mk_cstr_prop
-    | (r_generic, Tgeneric (nm, tyargs)) ->
+    | (r_generic, Tgeneric nm) ->
+      let tyargs = [] in
+      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
       (match deref rhs_subtype.Subtype.ty_super with
       (* Before using the upper bounds of the generic in a call to
          [simplify_generic_l] we need to check if the super type is a type
@@ -8917,7 +8939,7 @@ end = struct
             mk
               ( Typing_reason.polymorphic_type_param
                   (pos, new_name, old_name, rank),
-                Tgeneric (new_name, []) )
+                Tgeneric new_name )
           in
           (env, tparam :: acc, SMap.add old_name ty subst))
     in
@@ -9098,7 +9120,10 @@ let decompose_subtype_add_bound
   match (get_node ty_sub, get_node ty_super) with
   | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (Tgeneric (name_sub, targs), _) when not (phys_equal ty_sub ty_super) ->
+  | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
+    let targs = [] in
+
+    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
     let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
@@ -9113,7 +9138,9 @@ let decompose_subtype_add_bound
         name_sub
         ty_super
   (* ty_sub <: name_super so add a lower bound on name_super *)
-  | (_, Tgeneric (name_super, targs)) when not (phys_equal ty_sub ty_super) ->
+  | (_, Tgeneric name_super) when not (phys_equal ty_sub ty_super) ->
+    let targs = [] in
+    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_lower_bound call must be adapted *)
     let tys = Env.get_lower_bounds env name_super targs in
@@ -9175,7 +9202,9 @@ let decompose_subtype_add_bound_err
   match (get_node ty_sub, get_node ty_super) with
   | (_, Tany _) -> (env, None)
   (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (Tgeneric (name_sub, targs), _) when not (phys_equal ty_sub ty_super) ->
+  | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
+    let targs = [] in
+    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
     let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
@@ -9191,7 +9220,9 @@ let decompose_subtype_add_bound_err
           ty_super,
         None )
   (* ty_sub <: name_super so add a lower bound on name_super *)
-  | (_, Tgeneric (name_super, targs)) when not (phys_equal ty_sub ty_super) ->
+  | (_, Tgeneric name_super) when not (phys_equal ty_sub ty_super) ->
+    let targs = [] in
+    (* TODO(T222659258) Clean this up, targs  gone from Tgeneric *)
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_lower_bound call must be adapted *)
     let tys = Env.get_lower_bounds env name_super targs in
@@ -9516,8 +9547,8 @@ let apply_where_constraints pos def_pos tparams where_constraints ~env =
         ~init:(env, [], [], [])
         ~f:(fun (env, fwds, bwds, nms) { tp_name = (_, orig_nm); _ } ->
           let (env, new_nm) = Typing_env.fresh_param_name env orig_nm in
-          let new_ty = mk (Typing_reason.none, Tgeneric (new_nm, [])) in
-          let old_ty = mk (Typing_reason.none, Tgeneric (orig_nm, [])) in
+          let new_ty = mk (Typing_reason.none, Tgeneric new_nm) in
+          let old_ty = mk (Typing_reason.none, Tgeneric orig_nm) in
           ( env,
             (orig_nm, new_ty) :: fwds,
             (new_nm, old_ty) :: bwds,
@@ -9811,14 +9842,14 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
       env
       ty1
       MakeType.(union r [vec r tyv; dict r tyk tyv])
-  | (Tgeneric (name, []), _) -> is_generic_disjoint visited env name ty1 ty2
-  | (_, Tgeneric (name, [])) -> is_generic_disjoint visited env name ty2 ty1
-  | ((Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _), _) ->
+  | (Tgeneric name, _) -> is_generic_disjoint visited env name ty1 ty2
+  | (_, Tgeneric name) -> is_generic_disjoint visited env name ty2 ty1
+  | ((Tnewtype _ | Tdependent _ | Tintersection _), _) ->
     let (env, bounds) =
       TUtils.get_concrete_supertypes ~abstract_enum:false env ty1
     in
     is_intersection_type_disjoint visited env bounds ty2
-  | (_, (Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _)) ->
+  | (_, (Tnewtype _ | Tdependent _ | Tintersection _)) ->
     let (env, bounds) =
       TUtils.get_concrete_supertypes ~abstract_enum:false env ty2
     in

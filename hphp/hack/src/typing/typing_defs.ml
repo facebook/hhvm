@@ -315,8 +315,7 @@ let empty_expand_env =
     visibility_behavior = default_visibility_behaviour;
     make_internal_opaque = true;
     substs = SMap.empty;
-    this_ty =
-      mk (Reason.none, Tgeneric (Naming_special_names.Typehints.this, []));
+    this_ty = mk (Reason.none, Tgeneric Naming_special_names.Typehints.this);
     on_error = None;
     wildcard_action = Wildcard_fresh_tyvar;
     ish_weakening = false;
@@ -395,9 +394,8 @@ let is_any t =
   | _ -> false
 
 let is_generic_equal_to n t =
-  (* TODO(T69551141) handle type arguments *)
   match get_node t with
-  | Tgeneric (n', _tyargs) when String.equal n n' -> true
+  | Tgeneric n' when String.equal n n' -> true
   | _ -> false
 
 let is_prim p t =
@@ -548,7 +546,7 @@ let rec is_denotable ty =
     is_denotable ft_ret
     && List.for_all ft_params ~f:(fun { fp_type; _ } -> is_denotable fp_type)
   | Toption ty -> is_denotable ty
-  | Tgeneric (nm, _) ->
+  | Tgeneric nm ->
     not
       (DependentKind.is_generic_dep_ty nm
       || String.is_substring ~substring:"#" nm)

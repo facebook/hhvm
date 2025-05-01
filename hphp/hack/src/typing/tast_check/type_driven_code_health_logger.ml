@@ -51,7 +51,7 @@ let nothing_ty = Typing_make_type.nothing Typing_reason.none
 let replace_placeholders_with_tvars env ty =
   let replace_placeholder env ty =
     match T.get_node ty with
-    | T.Tgeneric (name, []) when String.contains name '#' ->
+    | T.Tgeneric name when String.contains name '#' ->
       Typing_env.fresh_type env Pos.none
     | _ -> (env, ty)
   in

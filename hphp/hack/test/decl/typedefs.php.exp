@@ -20,7 +20,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([11:20-29]),
             (Tapply (([11:20-26], "\\HH\\vec"),
-               [(Rhint ([11:27-28]), (Tgeneric ("T", [])))])))
+               [(Rhint ([11:27-28]), (Tgeneric "T"))])))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
@@ -42,8 +42,8 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([12:25-39]),
             (Tapply (([12:25-31], "\\HH\\dict"),
-               [(Rhint ([12:32-34]), (Tgeneric ("TK", [])));
-                 (Rhint ([12:36-38]), (Tgeneric ("TV", [])))]
+               [(Rhint ([12:32-34]), (Tgeneric "TK"));
+                 (Rhint ([12:36-38]), (Tgeneric "TV"))]
                )))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
@@ -66,8 +66,8 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([13:25-39]),
             (Tapply (([13:25-31], "\\HH\\dict"),
-               [(Rhint ([13:32-34]), (Tgeneric ("TK", [])));
-                 (Rhint ([13:36-38]), (Tgeneric ("TV", [])))]
+               [(Rhint ([13:32-34]), (Tgeneric "TK"));
+                 (Rhint ([13:36-38]), (Tgeneric "TV"))]
                )))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
@@ -85,7 +85,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([14:20-29]),
             (Tapply (([14:20-26], "\\HH\\vec"),
-               [(Rhint ([14:27-28]), (Tgeneric ("T", [])))])))
+               [(Rhint ([14:27-28]), (Tgeneric "T"))])))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
@@ -106,8 +106,8 @@
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([15:33-57]),
-            (Tvec_or_dict (Rhint ([15:50-52]), (Tgeneric ("TK", []))),
-               (Rhint ([15:54-56]), (Tgeneric ("TV", [])))))
+            (Tvec_or_dict (Rhint ([15:50-52]), (Tgeneric "TK")),
+               (Rhint ([15:54-56]), (Tgeneric "TV"))))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));

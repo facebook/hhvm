@@ -260,7 +260,7 @@ and refresh_type renv v ty_orig =
   | (_, Tvar v) ->
     let renv = { renv with tvars = Tvid.Map.add v renv.on_error renv.tvars } in
     (renv, ty_orig, Unchanged)
-  | (r, Tgeneric (name, _ (* TODO(T70068435) assumes no args *))) -> begin
+  | (r, Tgeneric name) -> begin
     (* look if the Tgeneric has to go away and kill it using its
        bounds if the variance of the current occurrence permits it *)
     match renv.remove (Rtv_tparam name) with

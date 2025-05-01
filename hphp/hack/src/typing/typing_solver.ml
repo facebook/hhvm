@@ -92,17 +92,7 @@ let rec freshen_inside_ty env ty :
   | Tlabel _
   | Tneg _ ->
     default ()
-  | Tgeneric (name, tyl) ->
-    if List.is_empty tyl then
-      default ()
-    else
-      (* TODO(T69931993) Replace Invariant here once we support arbitrary variances
-         on HK generics *)
-      let variancel =
-        List.replicate ~num:(List.length tyl) Ast_defs.Invariant
-      in
-      let* (env, tyl) = freshen_tparams env variancel tyl in
-      return (env, mk (r, Tnewtype (name, tyl, ty)))
+  | Tgeneric _ -> default ()
   | Tdependent _ -> default ()
   (* Nullable is covariant *)
   | Toption ty ->
@@ -852,7 +842,7 @@ let widen env widen_concrete_type ty =
         (* Don't widen the `this` type, because the field type changes up the hierarchy
          * so we lose precision
          *)
-        | (_, Tgeneric ("this", [])) -> (env, ty)
+        | (_, Tgeneric "this") -> (env, ty)
         (* For abstract types, just widen to the bound, if possible *)
         | (_, Tdependent (_, ty))
         | (_, Tnewtype (_, _, ty)) ->

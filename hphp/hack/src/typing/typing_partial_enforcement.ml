@@ -57,7 +57,7 @@ let rec get_enforced_type env class_def_opt ty =
     | Decl_entry.NotYetAvailable ->
       default ()
   end
-  | Tgeneric (name, []) -> begin
+  | Tgeneric name -> begin
     match class_def_opt with
     | None -> default ()
     | Some cd ->

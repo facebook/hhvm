@@ -121,8 +121,8 @@
                  (Rhint ([15:27-33]),
                   (Ttuple
                      { t_required =
-                       [(Rhint ([15:28-29]), (Tgeneric ("T", [])));
-                         (Rhint ([15:31-32]), (Tgeneric ("T", [])))];
+                       [(Rhint ([15:28-29]), (Tgeneric "T"));
+                         (Rhint ([15:31-32]), (Tgeneric "T"))];
                        t_optional = [];
                        t_variadic = (Rhint ([15:27-33]), (Tunion [])) }));
                  fp_flags =
@@ -136,8 +136,8 @@
               (Rhint ([15:42-48]),
                (Ttuple
                   { t_required =
-                    [(Rhint ([15:43-44]), (Tgeneric ("T", [])));
-                      (Rhint ([15:46-47]), (Tgeneric ("T", [])))];
+                    [(Rhint ([15:43-44]), (Tgeneric "T"));
+                      (Rhint ([15:46-47]), (Tgeneric "T"))];
                     t_optional = [];
                     t_variadic = (Rhint ([15:42-48]), (Tunion [])) }));
               ft_flags =

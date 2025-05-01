@@ -2176,8 +2176,7 @@ let generate_fresh_tparams env class_info p reason hint_tyl =
     match hint_ty with
     | Some ty -> begin
       match get_node ty with
-      | Tgeneric (name, _targs) when Env.is_fresh_generic_parameter name ->
-        (* TODO(T69551141) handle type arguments above and below *)
+      | Tgeneric name when Env.is_fresh_generic_parameter name ->
         (env, (Some (tp, name), MakeType.generic reason name))
       | _ -> (env, (None, ty))
     end
@@ -10368,7 +10367,10 @@ end = struct
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         let r = Reason.hint (Pos_or_decl.of_raw_pos p) in
         let type_args = List.map tal ~f:fst in
-        let tgeneric = MakeType.generic ~type_args r id in
+        (* TODO(T222659258) Clean this up *)
+        if List.length type_args <> 0 then
+          failwith "Implementation of higher-kinded types being removed";
+        let tgeneric = MakeType.generic r id in
         make_result env tal (Aast.CI c) tgeneric
       | None ->
         (* Not a type parameter *)

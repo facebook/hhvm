@@ -34,7 +34,7 @@ let ft_redundant_generics env tparams ty =
       object
         inherit [SSet.t] Type_visitor.decl_type_visitor
 
-        method! on_tgeneric acc _ n _ = SSet.add n acc
+        method! on_tgeneric acc _ n = SSet.add n acc
       end
     in
     let finder =

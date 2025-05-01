@@ -422,11 +422,8 @@ let add_upper_bound_global env name ty =
   let tpenv =
     let (env, ty) = expand_type env ty in
     match deref ty with
-    | (r, Tgeneric (formal_super, [])) ->
-      TPEnv.add_lower_bound env.tpenv formal_super (mk (r, Tgeneric (name, [])))
-    | (_r, Tgeneric (_formal_super, _targs)) ->
-      (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars *)
-      env.tpenv
+    | (r, Tgeneric formal_super) ->
+      TPEnv.add_lower_bound env.tpenv formal_super (mk (r, Tgeneric name))
     | _ -> env.tpenv
   in
   { env with tpenv = TPEnv.add_upper_bound tpenv name ty }
@@ -435,11 +432,8 @@ let add_lower_bound_global env name ty =
   let tpenv =
     let (env, ty) = expand_type env ty in
     match deref ty with
-    | (r, Tgeneric (formal_super, [])) ->
-      TPEnv.add_upper_bound env.tpenv formal_super (mk (r, Tgeneric (name, [])))
-    | (_r, Tgeneric (_formal_super, _targs)) ->
-      (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars *)
-      env.tpenv
+    | (r, Tgeneric formal_super) ->
+      TPEnv.add_upper_bound env.tpenv formal_super (mk (r, Tgeneric name))
     | _ -> env.tpenv
   in
   { env with tpenv = TPEnv.add_lower_bound tpenv name ty }
@@ -1648,9 +1642,9 @@ and get_tyvars_i env (ty : internal_type) =
           (env, Tvid.Set.empty, Tvid.Set.empty)
       end
     | Tdependent (_, ty) -> get_tyvars env ty
-    | Tgeneric (_, tyl) ->
-      (* TODO(T69931993) Once implementing variance support for HK types, query
-         tyvar env here for list of variances *)
+    | Tgeneric _ ->
+      let tyl = [] in
+      (* TODO(T222659258) Clean this up, tyl gone from Tgeneric *)
       let variancel =
         List.replicate ~num:(List.length tyl) Ast_defs.Invariant
       in

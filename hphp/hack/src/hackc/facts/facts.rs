@@ -403,7 +403,7 @@ fn add_or_update_module_decl(name: String, delta: ModuleFacts, types: &mut Modul
 fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     match ty.get_node() {
         Ty_::Tapply(((_, id), _)) => format(id),
-        Ty_::Tgeneric((id, _)) => format(id),
+        Ty_::Tgeneric(id) => format(id),
         _ => unimplemented!("{:?}", ty),
     }
 }

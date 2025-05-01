@@ -64,11 +64,7 @@ class type ['env] type_mapper_type =
       'env * Typing_defs.locl_ty
 
     method on_tgeneric :
-      'env ->
-      Typing_reason.t ->
-      string ->
-      Typing_defs.locl_ty list ->
-      'env * Typing_defs.locl_ty
+      'env -> Typing_reason.t -> string -> 'env * Typing_defs.locl_ty
 
     method on_tnewtype :
       'env ->

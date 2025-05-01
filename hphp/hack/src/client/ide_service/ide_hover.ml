@@ -759,8 +759,7 @@ let go_quarantined
        This can occur if the user hovers over a literal such as `123`. *)
     let addendum =
       match Typing_defs.get_node ty with
-      | Typing_defs.Tgeneric (name, _) when String.equal name SN.Typehints.this
-        ->
+      | Typing_defs.Tgeneric name when String.equal name SN.Typehints.this ->
         let upper_bounds =
           Tast_env.get_upper_bounds env SN.Typehints.this []
           |> Typing_set.to_list

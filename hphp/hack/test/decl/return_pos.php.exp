@@ -28,7 +28,7 @@
                 (Rhint ([4:34-64]),
                  (Tvec_or_dict
                     (Rvec_or_dict_key ([4:45-64]), (Tprim Tarraykey)),
-                    (Rhint ([4:62-63]), (Tgeneric ("T", [])))));
+                    (Rhint ([4:62-63]), (Tgeneric "T"))));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;

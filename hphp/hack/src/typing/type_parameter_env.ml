@@ -153,7 +153,7 @@ let mark_inconsistent tpenv = { tpenv with consistent = false }
 (* This assumes that [name] is a nullary generic parameter *)
 let rec is_generic_param ~elide_nullable ty name =
   match get_node ty with
-  | Tgeneric (name', []) -> String.equal name name'
+  | Tgeneric name' -> String.equal name name'
   | Toption ty when elide_nullable -> is_generic_param ~elide_nullable ty name
   | _ -> false
 
@@ -218,11 +218,8 @@ let add_lower_bound_ tpenv name ty =
 let add_upper_bound ?intersect env_tpenv name ty =
   let tpenv =
     match deref ty with
-    | (r, Tgeneric (formal_super, [])) ->
-      add_lower_bound_ env_tpenv formal_super (mk (r, Tgeneric (name, [])))
-    | (_r, Tgeneric (_formal_super, _tyargs)) ->
-      (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars *)
-      env_tpenv
+    | (r, Tgeneric formal_super) ->
+      add_lower_bound_ env_tpenv formal_super (mk (r, Tgeneric name))
     | _ -> env_tpenv
   in
   match intersect with
@@ -273,11 +270,8 @@ let add_upper_bound ?intersect env_tpenv name ty =
 let add_lower_bound ?union env_tpenv name ty =
   let tpenv =
     match deref ty with
-    | (r, Tgeneric (formal_sub, [])) ->
-      add_upper_bound_ env_tpenv formal_sub (mk (r, Tgeneric (name, [])))
-    | (_r, Tgeneric (_formal_sub, _tyargs)) ->
-      (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars *)
-      env_tpenv
+    | (r, Tgeneric formal_sub) ->
+      add_upper_bound_ env_tpenv formal_sub (mk (r, Tgeneric name))
     | _ -> env_tpenv
   in
   match union with
@@ -327,20 +321,18 @@ let remove_lower_bound tpenv name bound =
     add ~def_pos name tparam_info tpenv
 
 let remove tpenv name =
-  (* TODO(T70068435) Revisit this function when implementing bounds on HK generic vars,
-     in particular, look at the two Tgeneric below. *)
-  let tparam = mk (Typing_reason.none, Tgeneric (name, [])) in
+  let tparam = mk (Typing_reason.none, Tgeneric name) in
   let lower_bounds = get_lower_bounds tpenv name [] in
   let remove_from_upper_bounds_of ty tpenv =
     match get_node ty with
-    | Tgeneric (name, _tyargs) -> remove_upper_bound tpenv name tparam
+    | Tgeneric name -> remove_upper_bound tpenv name tparam
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_upper_bounds_of lower_bounds tpenv in
   let upper_bounds = get_upper_bounds tpenv name [] in
   let remove_from_lower_bounds_of ty tpenv =
     match get_node ty with
-    | Tgeneric (name, _tyargs) -> remove_lower_bound tpenv name tparam
+    | Tgeneric name -> remove_lower_bound tpenv name tparam
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_lower_bounds_of upper_bounds tpenv in

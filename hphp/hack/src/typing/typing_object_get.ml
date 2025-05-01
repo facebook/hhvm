@@ -1136,7 +1136,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
   | (_, Tdependent (_, ty))
   | (_, Tnewtype (_, _, ty)) ->
     merge_ty_err expand_ty_err_opt @@ obj_get_inner args env ty id on_error
-  | (r, Tgeneric (name, _)) when not (SSet.mem name args.seen) ->
+  | (r, Tgeneric name) when not (SSet.mem name args.seen) ->
     let args = { args with seen = SSet.add name args.seen } in
     (match TUtils.get_concrete_supertypes ~abstract_enum:true env ety1 with
     | (env, []) ->

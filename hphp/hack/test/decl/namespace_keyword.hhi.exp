@@ -12,7 +12,7 @@
        sc_extends =
        [(Rhint ([5:36-55]),
          (Tapply (([5:36-51], "\\HH\\Traversable"),
-            [(Rhint ([5:52-54]), (Tgeneric ("Tv", [])))])))
+            [(Rhint ([5:52-54]), (Tgeneric "Tv"))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
        sc_xhp_marked_empty = false; sc_req_extends = [];
@@ -35,7 +35,7 @@
         sc_extends =
         [(Rhint ([7:33-58]),
           (Tapply (([7:33-54], "\\HH\\Rx\\Traversable"),
-             [(Rhint ([7:55-57]), (Tgeneric ("Tv", [])))])))
+             [(Rhint ([7:55-57]), (Tgeneric "Tv"))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];

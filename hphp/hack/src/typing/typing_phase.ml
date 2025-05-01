@@ -377,7 +377,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     let ty = Tvec_or_dict (tk, tv) in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt, cycles1 @ cycles2), mk (r, ty))
-  | Tgeneric (x, targs) ->
+  | Tgeneric x ->
+    let targs = [] in
+    (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
     let localize_tgeneric ?replace_with name r =
       match (targs, replace_with, Env.get_pos_and_kind_of_generic env name) with
       | (_, _, Some (_def_pos, kind)) ->
@@ -399,12 +401,12 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
               replace_with )
           with
           | ((env, _), Some repl_ty) -> (env, mk (r, repl_ty))
-          | ((env, locl_tyargs), None) ->
-            (env, mk (r, Tgeneric (name, locl_tyargs)))
+          | ((env, []), None) -> (env, mk (r, Tgeneric name))
+          | ((_env, _locl_tyargs), None) -> failwith "should be unreachable"
         end
       | ([], None, None) ->
         (* No kinding info, but also no type arguments. Just return Tgeneric *)
-        ((env, None, []), mk (r, Tgeneric (x, [])))
+        ((env, None, []), mk (r, Tgeneric x))
       | ([], Some repl_ty, None) -> ((env, None, []), mk (r, repl_ty))
       | (_ :: _, _, None) ->
         (* No kinding info, but type arguments given. We don't know the kinds of the arguments,
@@ -439,7 +441,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
               id
               targs
               (Env.get_typedef env id |> Decl_entry.to_option)
-          | (_ :: _, Tgeneric (x', [])) -> localize_tgeneric x' r_inst
+          | (_ :: _, Tgeneric x') -> localize_tgeneric x' r_inst
           | (_, ty_) -> ((env, None, []), mk (r_inst, ty_))
         end
       | None -> localize_tgeneric x r
@@ -792,7 +794,7 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
           (snd name)
           full_kind_without_bounds
       in
-      let ty_fresh = mk (r, Tgeneric (new_name, [])) in
+      let ty_fresh = mk (r, Tgeneric new_name) in
       (* Substitute fresh type parameters for original formals in constraint *)
       let substs = SMap.add (snd name) ty_fresh ety_env.substs in
       let ety_env = { ety_env with substs } in
@@ -1796,9 +1798,7 @@ let localize_and_add_generic_parameters_with_bounds
   let localize_bound
       (env, cycle_acc)
       ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam) =
-    (* TODO(T70068435) This may have to be touched when adding support for constraints on HK
-       types *)
-    let tparam_ty = mk (Reason.witness_from_decl pos, Tgeneric (name, [])) in
+    let tparam_ty = mk (Reason.witness_from_decl pos, Tgeneric name) in
     List.map_env_ty_err_opt
       (env, cycle_acc)
       cstrl

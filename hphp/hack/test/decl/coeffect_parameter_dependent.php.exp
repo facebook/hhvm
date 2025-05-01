@@ -40,16 +40,15 @@
                   tp_user_attributes = [] }
                 ];
               ft_where_constraints =
-              [((Rhint ([7:18-23]), (Tgeneric ("T/[$a::C]", []))),
-                Constraint_eq,
+              [((Rhint ([7:18-23]), (Tgeneric "T/[$a::C]")), Constraint_eq,
                 (Rhint ([7:18-23]),
                  (Taccess
-                    ((Rhint ([7:18-23]), (Tgeneric ("T/$a", []))),
+                    ((Rhint ([7:18-23]), (Tgeneric "T/$a")),
                      [([7:22-23], "C")]))))
                 ];
               ft_params =
               [{ fp_pos = [7:14-16]; fp_name = (Some "$a");
-                 fp_type = (Rhint ([7:14-16]), (Tgeneric ("T/$a", [])));
+                 fp_type = (Rhint ([7:14-16]), (Tgeneric "T/$a"));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -58,7 +57,7 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([7:18-23]), (Tgeneric ("T/[$a::C]", [])))) };
+                (CapTy (Rhint ([7:18-23]), (Tgeneric "T/[$a::C]"))) };
               ft_ret = (Rhint ([7:26-30]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
@@ -90,18 +89,17 @@
                   tp_user_attributes = [] }
                 ];
               ft_where_constraints =
-              [((Rhint ([9:26-31]), (Tgeneric ("T/[$a::C]", []))),
-                Constraint_eq,
+              [((Rhint ([9:26-31]), (Tgeneric "T/[$a::C]")), Constraint_eq,
                 (Rhint ([9:26-31]),
                  (Taccess
-                    ((Rhint ([9:26-31]), (Tgeneric ("T/$a", []))),
+                    ((Rhint ([9:26-31]), (Tgeneric "T/$a")),
                      [([9:30-31], "C")]))))
                 ];
               ft_params =
               [{ fp_pos = [9:22-24]; fp_name = (Some "$a");
                  fp_type =
                  (Rhint ([9:19-21]),
-                  (Toption (Rhint ([9:22-24]), (Tgeneric ("T/$a", [])))));
+                  (Toption (Rhint ([9:22-24]), (Tgeneric "T/$a"))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -110,7 +108,7 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([9:26-31]), (Tgeneric ("T/[$a::C]", [])))) };
+                (CapTy (Rhint ([9:26-31]), (Tgeneric "T/[$a::C]"))) };
               ft_ret = (Rhint ([9:34-38]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
@@ -142,18 +140,17 @@
                   tp_user_attributes = [] }
                 ];
               ft_where_constraints =
-              [((Rhint ([11:24-29]), (Tgeneric ("T/[$a::C]", []))),
-                Constraint_eq,
+              [((Rhint ([11:24-29]), (Tgeneric "T/[$a::C]")), Constraint_eq,
                 (Rhint ([11:24-29]),
                  (Taccess
-                    ((Rhint ([11:24-29]), (Tgeneric ("T/$a", []))),
+                    ((Rhint ([11:24-29]), (Tgeneric "T/$a")),
                      [([11:28-29], "C")]))))
                 ];
               ft_params =
               [{ fp_pos = [11:20-22]; fp_name = (Some "$a");
                  fp_type =
                  (Rhint ([11:17-19]),
-                  (Tlike (Rhint ([11:20-22]), (Tgeneric ("T/$a", [])))));
+                  (Tlike (Rhint ([11:20-22]), (Tgeneric "T/$a"))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -162,7 +159,7 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([11:24-29]), (Tgeneric ("T/[$a::C]", [])))) };
+                (CapTy (Rhint ([11:24-29]), (Tgeneric "T/[$a::C]"))) };
               ft_ret = (Rhint ([11:32-36]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
@@ -194,11 +191,10 @@
                   tp_user_attributes = [] }
                 ];
               ft_where_constraints =
-              [((Rhint ([13:32-37]), (Tgeneric ("T/[$a::C]", []))),
-                Constraint_eq,
+              [((Rhint ([13:32-37]), (Tgeneric "T/[$a::C]")), Constraint_eq,
                 (Rhint ([13:32-37]),
                  (Taccess
-                    ((Rhint ([13:32-37]), (Tgeneric ("T/$a", []))),
+                    ((Rhint ([13:32-37]), (Tgeneric "T/$a")),
                      [([13:36-37], "C")]))))
                 ];
               ft_params =
@@ -207,7 +203,7 @@
                  (Rhint ([13:24-27]),
                   (Tlike
                      (Rhint ([13:25-27]),
-                      (Toption (Rhint ([13:28-30]), (Tgeneric ("T/$a", [])))))));
+                      (Toption (Rhint ([13:28-30]), (Tgeneric "T/$a"))))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -216,7 +212,7 @@
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([13:32-37]), (Tgeneric ("T/[$a::C]", [])))) };
+                (CapTy (Rhint ([13:32-37]), (Tgeneric "T/[$a::C]"))) };
               ft_ret = (Rhint ([13:40-44]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;

@@ -166,9 +166,9 @@ let resource r = prim_type r Nast.Tresource
 
 let tyvar r v = mk (r, Tvar v)
 
-let generic ?(type_args = []) r n = mk (r, Tgeneric (n, type_args))
+let generic r n = mk (r, Tgeneric n)
 
-let this r = mk (r, Tgeneric (SN.Typehints.this, []))
+let this r = mk (r, Tgeneric SN.Typehints.this)
 
 let taccess r ty id = mk (r, Taccess (ty, id))
 

@@ -319,8 +319,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     | _ -> acc
   in
   match get_node ty with
-  | Tgeneric (id, _tyargs) ->
-    (* TODO(T69551141) handle type arguments *)
+  | Tgeneric id ->
     (* Only count tracked generic parameters *)
     if SSet.mem id tracked then
       single id (get_reason ty)

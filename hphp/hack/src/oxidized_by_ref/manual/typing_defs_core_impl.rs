@@ -142,7 +142,7 @@ impl std::fmt::Debug for Ty_<'_> {
             Ttuple(tys) => f.debug_tuple("Ttuple").field(tys).finish(),
             Tshape(shape) => f.debug_tuple("Tshape").field(shape).finish(),
             Tvar(ident) => f.debug_tuple("Tvar").field(ident).finish(),
-            Tgeneric((name, tys)) => write!(f, "Tgeneric({:?}, {:?})", name, tys),
+            Tgeneric(name) => f.debug_tuple("Tgeneric").field(name).finish(),
             Tunion(tys) => f.debug_tuple("Tunion").field(tys).finish(),
             Tintersection(tys) => f.debug_tuple("Tintersection").field(tys).finish(),
             TvecOrDict((tk, tv)) => f.debug_tuple("TvecOrDict").field(tk).field(tv).finish(),

@@ -81,11 +81,8 @@ impl<R: Reason> Display for Ty_<R> {
                 Ok(())
             }
             Tgeneric(params) => {
-                let (name, ref args) = **params;
+                let name = params;
                 write!(f, "{}", name)?;
-                if !args.is_empty() {
-                    list(f, "<", ", ", ">", args.iter())?;
-                }
                 Ok(())
             }
             TvecOrDict(params) => {

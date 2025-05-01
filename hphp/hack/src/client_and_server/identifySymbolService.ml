@@ -125,7 +125,7 @@ let concrete_cls_name_from_ty enclosing_class_name ty : string option =
   in
   match Typing_defs_core.get_node ty with
   | Tclass ((_, cls_name), _, _) -> Some cls_name
-  | Tgeneric ("this", _) -> enclosing_class_name
+  | Tgeneric "this" -> enclosing_class_name
   | _ -> None
 
 let get_callee enclosing_class_name (recv : Tast.expr) : receiver option =

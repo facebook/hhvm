@@ -28,8 +28,7 @@ class type ['a] decl_type_visitor_type =
       Typing_defs.decl_ty ->
       'a
 
-    method on_tgeneric :
-      'a -> Typing_reason.decl_t -> string -> Typing_defs.decl_ty list -> 'a
+    method on_tgeneric : 'a -> Typing_reason.decl_t -> string -> 'a
 
     method on_toption : 'a -> Typing_reason.decl_t -> Typing_defs.decl_ty -> 'a
 
@@ -109,8 +108,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_tfun : 'a -> Typing_reason.t -> Typing_defs.locl_fun_type -> 'a
 
-    method on_tgeneric :
-      'a -> Typing_reason.t -> string -> Typing_defs.locl_ty list -> 'a
+    method on_tgeneric : 'a -> Typing_reason.t -> string -> 'a
 
     method on_tnewtype :
       'a ->

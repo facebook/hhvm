@@ -31,7 +31,7 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
         ~f:
           begin
             fun { tp_name = (p, x); _ } ->
-              mk (Reason.witness_from_decl p, Tgeneric (x, []))
+              mk (Reason.witness_from_decl p, Tgeneric x)
           end
         td_tparams
     in

@@ -34,8 +34,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
     raise Non_denotable
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"
-  | Tgeneric (s, []) -> s
-  | Tgeneric (s, targs) -> Utils.strip_ns s ^ "<" ^ print_tyl_exn targs ^ ">"
+  | Tgeneric s -> s
   | Toption ty -> begin
     match get_node ty with
     | Tnonnull -> "mixed"

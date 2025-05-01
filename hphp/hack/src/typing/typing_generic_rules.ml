@@ -23,7 +23,10 @@ let get_transitive_upper_bounds env ty =
     | ty :: tyl ->
       let (env, ety) = Env.expand_type env ty in
       (match get_node ety with
-      | Tgeneric (n, tyargs) ->
+      | Tgeneric n ->
+        let tyargs = [] in
+        (* TODO(T222659258) Clean this up. Can we remove more logic here *)
+        (*  now that HK args are gone? *)
         if SSet.mem n seen then
           iter seen env acc tyl
         else

@@ -75,7 +75,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
         | _ -> non_xhp
       in
       (env, xhp, non_xhp)
-  | Tgeneric ("this", []) -> begin
+  | Tgeneric "this" -> begin
     (* This is unsound, but we want to do best-effort checking
      * of attribute spreads even on XHP classes not marked `final`. We should
      * implement <<__ConsistentAttributes>> as a way to make this hacky

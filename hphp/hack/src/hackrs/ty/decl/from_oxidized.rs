@@ -206,9 +206,7 @@ impl<R: Reason> From<o::typing_defs::Ty> for Ty<R> {
                     },
                 }))
             }
-            typing_defs_core::Ty_::Tgeneric(pos_id, tys) => {
-                Tgeneric(Box::new((pos_id.into(), slice(tys))))
-            }
+            typing_defs_core::Ty_::Tgeneric(pos_id) => Tgeneric(pos_id.into()),
             typing_defs_core::Ty_::Tunion(tys) => Tunion(slice(tys)),
             typing_defs_core::Ty_::Tintersection(tys) => Tintersection(slice(tys)),
             typing_defs_core::Ty_::TvecOrDict(ty1, ty2) => {

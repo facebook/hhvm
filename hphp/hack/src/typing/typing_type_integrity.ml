@@ -17,6 +17,8 @@ module TGenConstraint = Typing_generic_constraint
 module TUtils = Typing_utils
 module Subst = Decl_subst
 
+(* TOOD(T222659258) This whole file needs updating once HKTs are removed *)
+
 module Locl_Inst = struct
   let rec instantiate subst (ty : locl_ty) =
     let merge_hk_type orig_r orig_var ty args =
@@ -28,9 +30,9 @@ module Locl_Inst = struct
           Tclass (n, exact, existing_args @ args)
         | Tnewtype (n, existing_args, bound) ->
           Tnewtype (n, existing_args @ args, bound)
-        | Tgeneric (n, existing_args) ->
+        | Tgeneric n ->
           (* Same here *)
-          Tgeneric (n, existing_args @ args)
+          Tgeneric n
         | _ ->
           (* We could insist on args = [] here, everything else is a kinding error *)
           ty_
@@ -46,11 +48,11 @@ module Locl_Inst = struct
       ty
     else
       match deref ty with
-      | (r, Tgeneric (x, args)) ->
-        let args = List.map args ~f:(instantiate subst) in
+      | (r, Tgeneric x) ->
+        let args = [] in
         (match SMap.find_opt x subst with
         | Some x_ty -> merge_hk_type r x x_ty args
-        | None -> mk (r, Tgeneric (x, args)))
+        | None -> mk (r, Tgeneric x))
       | (r, ty) ->
         let ty = instantiate_ subst ty in
         mk (r, ty)
@@ -464,7 +466,8 @@ module Simple = struct
       List.iter ft_params ~f:(fun p ->
           check ~should_check_package_boundary:`No p.fp_type)
     (* Interesting cases--------------------------------- *)
-    | Tgeneric (name, targs) -> begin
+    | Tgeneric name -> begin
+      let targs = [] in
       match Env.get_pos_and_kind_of_generic env name with
       | Some (def_pos, (gen_kind : kind)) ->
         let (tparams_named_kinds : Simple.named_kind list) =
@@ -574,7 +577,7 @@ module Simple = struct
         | Decl_entry.NotYetAvailable ->
           ()
       end
-      | Tgeneric (name, []) -> begin
+      | Tgeneric name -> begin
         match Env.get_pos_and_kind_of_generic env name with
         | Some (_pos, gen_kind) ->
           let get_kind = Simple.from_full_kind gen_kind in
@@ -582,7 +585,6 @@ module Simple = struct
             kind_error get_kind env
         | None -> ()
       end
-      | Tgeneric (_, targs)
       | Tapply (_, targs) ->
         Errors.add_error
           Naming_error.(

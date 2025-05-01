@@ -138,7 +138,9 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
   | (p, Tany _) -> obj @@ kind p "any"
   | (p, Tnonnull) -> obj @@ kind p "nonnull"
   | (p, Tdynamic) -> obj @@ kind p "dynamic"
-  | (p, Tgeneric (s, tyargs)) ->
+  | (p, Tgeneric s) ->
+    let tyargs = [] in
+    (* TODO(T222659258) Clean this up *)
     obj @@ kind p "generic" @ is_array true @ name s @ args tyargs
   | (_, Tnewtype (s, _, ty))
     when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
@@ -358,13 +360,17 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
         ty (Tlabel name)
       | "generic" ->
+        (* TODO(T222659258) Clean this up one args array gone *)
+        (*  (see Tgeneric case of serialization logic) *)
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
         get_bool "is_array" (json, keytrace)
         >>= fun (is_array, _is_array_keytrace) ->
         get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
-        aux_args args ~keytrace:args_keytrace >>= fun args ->
+        if List.length args <> 0 then
+          failwith "Higher-kinded types implementation being removed";
+        aux_args args ~keytrace:args_keytrace >>= fun _args ->
         if is_array then
-          ty (Tgeneric (name, args))
+          ty (Tgeneric name)
         else
           wrong_phase ~message:"Tgeneric is a decl-phase type." ~keytrace
       | "enum" ->
@@ -414,7 +420,7 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
                 "Cannot deserialize path-dependent type involving an expression"
               ~keytrace
           | "this" ->
-            aux_as json ~keytrace >>= fun _as_ty -> ty (Tgeneric ("this", []))
+            aux_as json ~keytrace >>= fun _as_ty -> ty (Tgeneric "this")
           | path_kind ->
             deserialization_error
               ~message:("Unknown path kind: " ^ path_kind)

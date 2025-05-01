@@ -699,7 +699,9 @@ end = struct
     | Tshape _ -> (env, shape_to_datatypes ~trail)
     | Tlabel _ -> (env, label_to_datatypes ~trail)
     | Tvar _ -> (env, mixed ~reason)
-    | Tgeneric (name, tyl) ->
+    | Tgeneric name ->
+      (* TODO(T222659258) Clean this up, tyl gone from Tgeneric *)
+      let tyl = [] in
       let upper_bounds =
         Env.get_upper_bounds env name tyl |> Typing_set.elements
       in

@@ -196,7 +196,7 @@ TEST_F(ServiceSchemaTest, Struct) {
   EXPECT_EQ(s.fields()[0].customDefault()->as_i32(), 10);
 
   EXPECT_EQ(s.fields()[1].id(), FieldId{2});
-  EXPECT_EQ(s.fields()[1].presence(), FieldNode::PresenceQualifier::OPTIONAL);
+  EXPECT_EQ(s.fields()[1].presence(), FieldNode::PresenceQualifier::OPTIONAL_);
   EXPECT_EQ(
       &s.fields()[1].type().asEnum(),
       &program->definitionsByName().at("TestEnum")->asEnum());

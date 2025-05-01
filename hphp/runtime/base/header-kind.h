@@ -62,7 +62,7 @@ enum class HeaderKind : uint8_t {
   Slab, // header for a contiguous "slab" of small objects
 };
 const unsigned NumHeaderKinds = unsigned(HeaderKind::Slab) + 1;
-extern const std::array<char*,NumHeaderKinds> header_names;
+extern const std::array<const char*,NumHeaderKinds> header_names;
 
 inline bool haveCount(HeaderKind k) {
   return uint8_t(k) < uint8_t(HeaderKind::AsyncFuncFrame);

@@ -1617,7 +1617,7 @@ static heif_brand2 php_get_heif(const req::ptr<File>& stream) {
 }
 
 /* Convert internal image_type to mime type */
-static char *php_image_type_to_mime_type(int image_type) {
+static const char *php_image_type_to_mime_type(int image_type) {
   switch( image_type) {
   case IMAGE_FILETYPE_GIF:
     return "image/gif";
@@ -2449,7 +2449,7 @@ _php_image_output(const OptResource& image, const String& filename, int quality,
 static gdImagePtr _php_image_create_from(const String& filename,
                                          int srcX, int srcY,
                                          int width, int height,
-                                         int image_type, char *tn,
+                                         int image_type, const char *tn,
                                          gdImagePtr(*func_p)(),
                                          gdImagePtr(*ioctx_func_p)()) {
   VMRegAnchor _;
@@ -2609,7 +2609,7 @@ static int _php_image_type (char data[8]) {
   return -1;
 }
 
-gdImagePtr _php_image_create_from_string(const String& image, char *tn,
+gdImagePtr _php_image_create_from_string(const String& image, const char *tn,
                                          gdImagePtr (*ioctx_func_p)()) {
   VMRegAnchor _;
   gdIOCtx *io_ctx;
@@ -4905,7 +4905,7 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 
 typedef const struct {
   unsigned short Tag;
-  char *Desc;
+  const char *Desc;
 } tag_info_type;
 
 typedef tag_info_type tag_info_array[];
@@ -5320,9 +5320,9 @@ typedef enum mn_offset_mode_t {
 
 typedef struct {
   tag_table_type tag_table;
-  char *make;
-  char *model;
-  char *id_string;
+  const char *make;
+  const char *model;
+  const char *id_string;
   int id_string_len;
   int offset;
   mn_byte_order_t byte_order;
@@ -5347,7 +5347,7 @@ static const maker_note_type maker_note_array[] = {
 };
 
 /* Get headername for tag_num or nullptr if not defined */
-static char * exif_get_tagname(int tag_num, char *ret, int len,
+static const char * exif_get_tagname(int tag_num, char *ret, int len,
                                tag_table_type tag_table) {
   int i, t;
   char tmp[32];
@@ -5682,7 +5682,7 @@ static size_t php_strnlen(char* str, size_t maxlen) {
 
 /* Add a value to image_info */
 static void exif_iif_add_value(image_info_type *image_info, int section_index,
-                               char *name, int tag, int format, int length,
+                               const char *name, int tag, int format, int length,
                                void* value, int motorola_intel) {
   size_t idex;
   void *vptr;
@@ -5823,7 +5823,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
 
 /* Add a tag from IFD to image_info */
 static void exif_iif_add_tag(image_info_type *image_info, int section_index,
-                             char *name, int tag, int format,
+                             const char *name, int tag, int format,
                              size_t length, void* value) {
   exif_iif_add_value(image_info, section_index, name, tag, format,
                      (int)length, value, image_info->motorola_intel);
@@ -7610,7 +7610,7 @@ static void exif_iif_add_int(image_info_type *image_info, int section_index,
 
 /* Add a string value to image_info MUST BE NUL TERMINATED */
 static void exif_iif_add_str(image_info_type *image_info,
-                             int section_index, char *name, char *value) {
+                             int section_index, const char *name, char *value) {
   image_info_data  *info_data;
   image_info_data  *list;
 
@@ -7933,9 +7933,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
 }
 
 Variant HHVM_FUNCTION(exif_tagname, int64_t index) {
-  char *szTemp;
-
-  szTemp = exif_get_tagname(index, nullptr, 0, tag_table_IFD);
+  auto szTemp = exif_get_tagname(index, nullptr, 0, tag_table_IFD);
   if (index <0 || !szTemp || !szTemp[0]) {
     return false;
   } else {

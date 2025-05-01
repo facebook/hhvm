@@ -36,7 +36,7 @@ enum ShutdownEvent {
   kNumEvents
 };
 
-constexpr char* s_shutdownEventNames[ShutdownEvent::kNumEvents] = {
+constexpr const char* s_shutdownEventNames[ShutdownEvent::kNumEvents] = {
   "prepare",
   "initiate",
   "drain_reads",

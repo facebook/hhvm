@@ -136,8 +136,8 @@ void bc_out_num(bc_num num, int o_base, void (* out_char)(int),
 
 /* Prototypes needed for external utility routines. */
 
-void bc_rt_warn(char *mesg ,...);
-void bc_rt_error(char *mesg ,...);
+void bc_rt_warn(const char *mesg ,...);
+void bc_rt_error(const char *mesg ,...);
 
 void* bc_malloc(size_t total);
 void bc_free(void* ptr);

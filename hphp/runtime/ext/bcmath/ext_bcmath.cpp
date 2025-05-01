@@ -313,7 +313,7 @@ void bc_free(void* ptr) {
   HPHP::req::free(ptr);
 }
 
-void bc_rt_warn (char *format ,...)
+void bc_rt_warn (const char *format ,...)
 {
   std::string msg;
   va_list ap;
@@ -323,7 +323,7 @@ void bc_rt_warn (char *format ,...)
   HPHP::raise_warning("bc math warning: %s", msg.c_str());
 }
 
-void bc_rt_error (char *format ,...)
+void bc_rt_error (const char *format ,...)
 {
   std::string msg;
   va_list ap;

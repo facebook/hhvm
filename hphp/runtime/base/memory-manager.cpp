@@ -426,7 +426,7 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-constexpr const std::array<char*,NumHeaderKinds> header_names = {{
+constexpr const std::array<const char*,NumHeaderKinds> header_names = {{
   "Vec", "BespokeVec", "Dict", "BespokeDict", "Keyset", "BespokeKeyset",
   "String", "Resource", "ClsMeth", "RClsMeth", "RFunc",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",

@@ -700,12 +700,12 @@ private:
   );
 
   // Completion suggestion types, from protocol.
-  static constexpr char* CompletionTypeFn = "function";
-  static constexpr char* CompletionTypeVar = "variable";
-  static constexpr char* CompletionTypeClass = "class";
-  static constexpr char* CompletionTypeProp = "property";
-  static constexpr char* CompletionTypeKeyword = "keyword";
-  static constexpr char* CompletionTypeValue = "value";
+  static constexpr const char* CompletionTypeFn = "function";
+  static constexpr const char* CompletionTypeVar = "variable";
+  static constexpr const char* CompletionTypeClass = "class";
+  static constexpr const char* CompletionTypeProp = "property";
+  static constexpr const char* CompletionTypeKeyword = "keyword";
+  static constexpr const char* CompletionTypeValue = "value";
 
   FrameObject* getFrameObject(DebuggerSession* session);
   int m_frameId;

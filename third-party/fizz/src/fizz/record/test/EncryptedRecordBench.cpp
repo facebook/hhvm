@@ -50,7 +50,7 @@ std::unique_ptr<folly::IOBuf> makeRandom(size_t n, size_t num = 1) {
   return ret;
 }
 
-std::unique_ptr<folly::IOBuf> toIOBuf(std::string hexData) {
+std::unique_ptr<folly::IOBuf> toIOBuf(const std::string& hexData) {
   std::string out;
   CHECK(folly::unhexlify(hexData, out));
   return folly::IOBuf::copyBuffer(out);

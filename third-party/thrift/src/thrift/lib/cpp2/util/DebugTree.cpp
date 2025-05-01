@@ -161,6 +161,29 @@ std::string escape(std::string_view s) {
   }
   return ret;
 }
+
+std::optional<scope> ifDynamicPatch(
+    const protocol::Object& object,
+    const SGWrapper& graph,
+    const OptionalTypeRef& ref) {
+  if (!ref) {
+    return {};
+  }
+
+  auto type = ref->trueType();
+  if (!type.isStruct()) {
+    return {};
+  }
+
+  auto uri = type.asStruct().uri();
+  if (!uri.ends_with("Patch") || uri.ends_with("SafePatch")) {
+    return {};
+  }
+
+  auto patch = protocol::DynamicPatch::fromObject(object);
+  Uri origUri = Uri{protocol::fromPatchUri(std::string(uri))};
+  return debugTree(patch, graph, origUri);
+}
 } // namespace
 
 std::unordered_map<std::string, TypeRef> SGWrapper::genUriToTypeRef() const {
@@ -296,6 +319,10 @@ scope DebugTree<protocol::Object>::operator()(
     const OptionalTypeRef& type) {
   if (auto any = ifAny(object, type)) {
     return debugTree(*any, graph);
+  }
+
+  if (auto ret = ifDynamicPatch(object, graph, type)) {
+    return std::move(*ret);
   }
 
   std::set<FieldId> ids;

@@ -542,4 +542,37 @@ TEST(DebugTreeTest, StructWithTypedef) {
    )");
 }
 
+TEST(DebugTreeTest, PatchAsProtocolObject) {
+  MyStructPatch patch;
+  patch.patchIfSet<ident::boolVal>().invert();
+  expectEq(
+      debugTree(
+          patch.toObject(),
+          getGraph(),
+          Uri{apache::thrift::uri<MyStructPatchStruct>()}),
+      R"(
+    DynamicStructPatch
+    ├─ ensure
+    │  ╰─ boolVal
+    │     ╰─ false
+    ╰─ patch
+       ╰─ boolVal
+          ╰─ BoolPatch
+             ╰─ invert
+    )");
+  expectEq(
+      debugTree(AnyData::toAny(patch).toThrift(), getGraph()),
+      R"(
+    <Thrift.Any, type=struct<MyStructPatch>, protocol=Compact>
+    ╰─ DynamicStructPatch
+       ├─ ensure
+       │  ╰─ boolVal
+       │     ╰─ false
+       ╰─ patch
+          ╰─ boolVal
+             ╰─ BoolPatch
+                ╰─ invert
+    )");
+}
+
 } // namespace apache::thrift::detail

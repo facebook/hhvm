@@ -1,55 +1,12 @@
 <?hh
 
 class C {}
-class D {}
 
 enum E : classname<C> {
   C = nameof C;
 }
 
-const dict<arraykey, string> D = dict[
-  E::C => "exists",
-  42 => "does not exist",
-];
-
-function g(classname<C> $c): void {
-  echo "passed classname\n";
-}
-
-function f(?arraykey $a): void {
-  if ($a !== null) {
-    g($a);
-  }
-  echo D[$a ?? 42]."\n";
-}
-
-function ex(): void {
-  $ss = nameof C;
-  $s = __hhvm_intrinsics\launder_value($ss)."";
-  $lc = C::class;
-  $c = HH\classname_to_class($lc);
-
-  f(E::coerce($ss));
-  f(E::coerce($s));
-  f(E::coerce($lc));
-  f(E::coerce($c));
-}
-
-function noex(): void {
-  $ss = nameof D;
-  $s = __hhvm_intrinsics\launder_value($ss)."";
-  $lc = D::class;
-  $c = HH\classname_to_class($lc);
-
-  f(E::coerce($ss));
-  f(E::coerce($s));
-  f(E::coerce($lc));
-  f(E::coerce($c));
-}
-
-
 <<__EntryPoint>>
 function main() {
-  ex();
-  noex();
+  var_dump(E::coerce(C::class));
 }

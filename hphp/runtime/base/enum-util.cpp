@@ -22,35 +22,27 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Optional<TypedValue> maybeEnumValue(const Class* cls, TypedValue cell) {
+bool enumHasValue(const Class* cls, const TypedValue* cell) {
   assertx(isEnum(cls));
-  if (UNLIKELY(!tvIsInt(cell) && !tvIsString(cell) &&
-               !tvIsClass(cell) && !tvIsLazyClass(cell))) {
-    return std::nullopt;
+  auto const type = cell->m_type;
+  if (UNLIKELY(type != KindOfInt64 && !isStringType(type) &&
+               !isClassType(type) && !isLazyClassType(type))) {
+    return false;
   }
   auto const values = EnumCache::getValuesBuiltin(cls);
-  // Manually do int-like string conversion. This is to ensure the lookup
-  // succeeds below (since the values array does int-like string key conversion
-  // when created, even if its a dict).
+  // Manually perform int-like key conversion even if names is a dict, for
+  // backwards compatibility.
   int64_t num;
-  if (isCoercibleToInteger(cell, num, "maybeEnumValue")) {
-    if (values->names.exists(num)) {
-      return make_tv<KindOfInt64>(num);
-    } else {
-      return std::nullopt;
-    }
+  if (isCoercibleToInteger(cell, num, "enumHasValue")) {
+    return values->names.exists(num);
   }
-  auto const val = tvClassToString(cell);
+  auto const val = tvClassToString(*cell);
 
-  if (values->names.exists(val)) {
-    return val;
-  } else {
-    return std::nullopt;
-  };
+  return values->names.exists(val);
 }
 
-bool isCoercibleToInteger(TypedValue cell, int64_t &num, const char* callsite) {
-  if (!tvIsString(cell) || !val(cell).pstr->isStrictlyInteger(num)) {
+bool isCoercibleToInteger(const TypedValue *cell, int64_t &num, const char* callsite) {
+  if (!tvIsString(cell) || !cell->m_data.pstr->isStrictlyInteger(num)) {
     return false;
   }
 

@@ -1202,54 +1202,37 @@ SSATmp* opt_enum_values(IRGS& env, const ParamPrep& params) {
   return enum_values ? cns(env, enum_values->values.get()) : nullptr;
 }
 
-// If we coerce a class or lazy class to an enum value, we want to return the
-// converted string.
-Optional<std::pair<SSATmp*, VanillaDict *>> maybeEnumValueAndKeys(
-  IRGS& env, const ParamPrep& params
-) {
-  if (params.size() != 1) return std::nullopt;
-  auto const value = params[0].value;
-  if (!value->type().isKnownDataType()) return std::nullopt;
+SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const origVal = params[0].value;
+  if (!origVal->type().isKnownDataType()) return nullptr;
   auto const enum_values = getEnumValues(env, params);
-  if (!enum_values) return std::nullopt;
+  if (!enum_values) return nullptr;
+  auto const value = convertClassKey(env, origVal);
   auto const ad = VanillaDict::as(enum_values->names.get());
-  // We're not doing intish-casts here, so we bail if ad has any int keys.
-  if (value->isA(TStr) && !ad->keyTypes().mustBeStrs()) {
-    return std::nullopt;
-  }
-
-  return std::make_pair(convertClassKey(env, value), ad);
-}
-
-SSATmp* enumIsValidImpl(IRGS& env, SSATmp* value, VanillaDict* ad) {
-  assertx(value && ad);
   if (value->isA(TInt)) {
     if (ad->keyTypes().mustBeStrs()) return cns(env, false);
     return gen(env, AKExistsDict, cns(env, ad->asArrayData()), value);
   } else if (value->isA(TStr)) {
+    // We're not doing intish-casts here, so we bail if ad has any int keys.
+    if (!ad->keyTypes().mustBeStrs()) return nullptr;
     return gen(env, AKExistsDict, cns(env, ad->asArrayData()), value);
   }
   return cns(env, false);
 }
 
-SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
-  auto const pair_opt = maybeEnumValueAndKeys(env, params);
-  if (!pair_opt) return nullptr;
-  auto const [value, ad] = *pair_opt;
-  return enumIsValidImpl(env, value, ad);
-}
-
 SSATmp* opt_enum_coerce(IRGS& env, const ParamPrep& params) {
-  auto const pair_opt = maybeEnumValueAndKeys(env, params);
-  if (!pair_opt) return nullptr;
-  auto const value = pair_opt->first;
-  auto const ad = pair_opt->second;
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
 
-  auto const valid = enumIsValidImpl(env, value, ad);
+  // FIXME: Do not try to optimize class types yet, there is a mismatch in
+  // warnings between opt_enum_is_valid() and BuiltinEnum::coerce().
+  if (value->type().maybe(TCls | TLazyCls)) return nullptr;
+
+  auto const valid = opt_enum_is_valid(env, params);
+  if (!valid) return nullptr;
   return cond(env,
-    [&](Block* taken) {
-      gen(env, JmpZero, taken, valid);
-    },
+    [&](Block* taken) { gen(env, JmpZero, taken, valid); },
     [&]{
       // We never need to coerce strs to ints here, but we may need to coerce
       // ints to strs if the enum is a string type with intish values.

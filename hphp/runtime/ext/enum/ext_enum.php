@@ -51,7 +51,7 @@ abstract class BuiltinEnum<+T as arraykey> {
   final public static function assert(mixed $value)[]: T {
     $new_value = static::coerce($value);
     if (null === $new_value) {
-      $cls = nameof static;
+      $cls = static::class;
       throw new \UnexpectedValueException(
         (string)$value." is not a valid value for {$cls}",
       );

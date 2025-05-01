@@ -102,29 +102,44 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   return values->names;
 }
 
-static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, TypedValue tv) {
-  return maybeEnumValue(self_, tv).has_value();
+static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {
+  return enumHasValue(self_, value.asTypedValue());
 }
 
-static TypedValue HHVM_STATIC_METHOD(BuiltinEnum, coerce, TypedValue tv) {
-  auto res_opt = maybeEnumValue(self_, tv);
-  if (!res_opt) {
-    return make_tv<KindOfNull>();
+static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
+  if (UNLIKELY(!value.isInteger() && !value.isString() &&
+               !value.isClass() && !value.isLazyClass())) {
+    return init_null();
   }
 
-  auto res = *res_opt;
-  if (auto base = self_->enumBaseTy().underlyingDataType()) {
-    if (isStringType(*base) && tvIsInt(res)) {
-      return make_tv<KindOfString>(buildStringData(val(res).num));
+  auto res = value;
+
+  // Manually do int-like string conversion. This is to ensure the lookup
+  // succeeds below (since the values array does int-like string key conversion
+  // when created, even if its a dict).
+  int64_t num;
+  if (value.isString() &&
+      value.getStringData()->isStrictlyInteger(num)) {
+    res = Variant(num);
+  } else if (value.isClass()) {
+    res = VarNR{value.toClassVal()->name()};
+  } else if (value.isLazyClass()) {
+    res = VarNR{value.toLazyClassVal().name()};
+  }
+
+  auto values = EnumCache::getValuesBuiltin(self_);
+  if (!values->names.exists(res)) {
+    res = init_null();
+  } else if (auto base = self_->enumBaseTy().underlyingDataType()) {
+    if (isStringType(*base) && res.isInteger()) {
+      res = Variant(res.toString());
     }
-  } else if (tvIsInt(res)) {
+  } else {
     // If the value is present, but the enum has no base type, return the value
     // as specified, undoing any int-like string conversion we did on it.
-    tvIncRefGen(tv);
-    return tv;
+    if (res.isInteger()) return value;
   }
 
-  tvIncRefGen(res);
   return res;
 }
 

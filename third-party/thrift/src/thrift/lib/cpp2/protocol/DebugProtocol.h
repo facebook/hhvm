@@ -197,18 +197,32 @@ std::string debugString(
 }
 
 // TODO: Replace `debugString()` with this function
-template <class T, class..., template <class> class Encode = op::detail::Encode>
+template <
+    class Tag,
+    class...,
+    template <class> class Encode = op::detail::Encode,
+    typename = std::enable_if_t<type::is_thrift_type_tag_v<Tag>>>
 std::string debugStringViaEncode(
-    const T& obj, DebugProtocolWriter::Options options = {}) {
+    const type::native_type<Tag>& obj,
+    DebugProtocolWriter::Options options = {}) {
   folly::IOBufQueue queue;
   DebugProtocolWriter proto(
       COPY_EXTERNAL_BUFFER, // Ignored by constructor.
       options);
   proto.setOutput(&queue);
-  Encode<type::infer_tag<T>>{}(proto, obj);
+  Encode<Tag>{}(proto, obj);
   std::string ret;
   queue.appendToString(ret);
   return ret;
+}
+template <
+    class T,
+    class...,
+    template <class> class Encode = op::detail::Encode,
+    typename = std::enable_if_t<!type::is_thrift_type_tag_v<T>>>
+std::string debugStringViaEncode(
+    const T& obj, DebugProtocolWriter::Options options = {}) {
+  return debugStringViaEncode<type::infer_tag<T>>(obj, options);
 }
 
 } // namespace apache::thrift

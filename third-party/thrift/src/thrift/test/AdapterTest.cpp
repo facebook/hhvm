@@ -36,6 +36,7 @@
 #include <thrift/test/gen-cpp2/adapter_terse_types.h>
 #include <thrift/test/gen-cpp2/adapter_types.h>
 
+#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 
 namespace apache::thrift::test {
@@ -1104,6 +1105,14 @@ TEST_F(AdapterTest, WrappedMyStruct) {
 
   CompactSerializer::deserialize(&iobuf, s);
   EXPECT_EQ(s.myStruct()->toThrift().field1(), 20);
+}
+
+TEST_F(AdapterTest, DebugString) {
+  basic::AdaptedString s{"42"};
+  EXPECT_EQ(
+      (debugStringViaEncode<
+          type::adapted<TemplatedTestAdapter, type::string_t>>(s)),
+      (debugStringViaEncode<type::string_t>(s.value)));
 }
 
 } // namespace apache::thrift::test

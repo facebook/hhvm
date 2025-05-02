@@ -120,7 +120,11 @@ let find_child_classes
       (SSet.singleton class_name)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  FindRefsService.find_child_classes ctx class_name env.naming_table files
+  FindRefsService.find_child_classes_in_files
+    ctx
+    class_name
+    env.naming_table
+    files
   |> SSet.elements
 
 let find_child_classes_in_file
@@ -129,7 +133,11 @@ let find_child_classes_in_file
     (naming_table : Naming_table.t)
     (filename : Relative_path.t) : string list =
   let fileset = Relative_path.Set.(add empty filename) in
-  FindRefsService.find_child_classes ctx class_name naming_table fileset
+  FindRefsService.find_child_classes_in_files
+    ctx
+    class_name
+    naming_table
+    fileset
   |> SSet.elements
 
 let search_class

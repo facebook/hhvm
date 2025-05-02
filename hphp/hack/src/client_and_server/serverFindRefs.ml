@@ -138,7 +138,7 @@ let search_member
       (dep_member_of member)
   in
   let descendant_classes =
-    FindRefsService.find_child_classes
+    FindRefsService.find_child_classes_in_files
       ctx
       origin_class_name
       env.naming_table

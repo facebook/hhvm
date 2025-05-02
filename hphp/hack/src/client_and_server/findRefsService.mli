@@ -44,7 +44,7 @@ val find_references_single_file :
   Relative_path.t ->
   (string * Pos.t) list
 
-val find_child_classes :
+val find_child_classes_in_files :
   Provider_context.t ->
   string ->
   Naming_table.t ->

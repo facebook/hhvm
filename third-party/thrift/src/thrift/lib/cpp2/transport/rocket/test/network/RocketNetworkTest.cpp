@@ -1567,19 +1567,21 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestStream) {
 
     auto connCount = 0;
     for (int i = 0, numTries = 10; i < numTries; ++i) {
+      RocketServerConnection* conn = nullptr;
       this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
+        connCount = 0;
         server_->getConnectionManager()->forEachConnection(
             [&](wangle::ManagedConnection* connection) {
-              if (auto conn =
-                      dynamic_cast<RocketServerConnection*>(connection)) {
-                EXPECT_EQ(conn->numObservers(), 0);
-                conn->addObserver(observer.get());
-                EXPECT_EQ(conn->numObservers(), 1);
+              conn = dynamic_cast<RocketServerConnection*>(connection);
+              if (conn) {
                 connCount += 1;
               }
             });
       });
-      if (connCount != 0) {
+      if (connCount == 1) {
+        EXPECT_EQ(conn->numObservers(), 0);
+        conn->addObserver(observer.get());
+        EXPECT_EQ(conn->numObservers(), 1);
         break;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(10));

@@ -238,7 +238,7 @@ std::string mangle(const std::string& name) {
       "priv",     "proc",    "pub",     "pure",     "ref",      "return",
       "sizeof",   "static",  "struct",  "trait",    "true",     "type",
       "typeof",   "unsafe",  "unsized", "use",      "virtual",  "where",
-      "while",    "yield",
+      "while",    "yield",   "gen",
   };
 
   static const char* keywords_that_participate_in_name_resolution[] = {

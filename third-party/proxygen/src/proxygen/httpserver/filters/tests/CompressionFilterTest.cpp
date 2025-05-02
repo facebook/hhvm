@@ -180,7 +180,8 @@ class CompressionFilterTest : public Test {
     CompressionFilterFactory::Options opts;
     opts.zlibCompressionLevel = compressionLevel;
     opts.minimumCompressionSize = minimumCompressionSize;
-    opts.compressibleContentTypes = compressibleTypes;
+    opts.compressibleContentTypes =
+        std::make_shared<std::set<std::string>>(compressibleTypes);
     opts.enableZstd = true;
     if (disableCompressionForThisEncoding) {
       if (CodecType::getExpectedEncoding() == "gzip") {
@@ -539,7 +540,8 @@ TYPED_TEST(CompressionFilterTest, NoResponseBody) {
                                     : opts.zstdCompressionLevel;
     optCompressionLevel = compressionLevel;
     opts.minimumCompressionSize = minimumCompressionSize;
-    opts.compressibleContentTypes = compressibleTypes;
+    opts.compressibleContentTypes =
+        std::make_shared<std::set<std::string>>(compressibleTypes);
     opts.enableZstd = true;
     auto filterFactory = std::make_unique<CompressionFilterFactory>(opts);
 

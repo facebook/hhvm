@@ -21,7 +21,7 @@ class CompressionFilterUtils {
   struct FactoryOptions {
     FactoryOptions() = default;
     uint32_t minimumCompressionSize = 1000;
-    std::set<std::string> compressibleContentTypes = {};
+    std::shared_ptr<const std::set<std::string>> compressibleContentTypes;
     int32_t zlibCompressionLevel = 4;
     int32_t zstdCompressionLevel = 8;
     bool enableZstd = false;
@@ -36,7 +36,7 @@ class CompressionFilterUtils {
     uint32_t minimumCompressionSize;
     StreamCompressorFactory compressorFactory;
     std::string headerEncoding;
-    std::set<std::string> compressibleContentTypes;
+    std::shared_ptr<const std::set<std::string>> compressibleContentTypes;
   };
 
   static folly::Optional<FilterParams> getFilterParams(
@@ -111,13 +111,11 @@ class CompressionFilterUtils {
       responseContentType = responseContentType.substr(0, parameter_idx);
     }
 
-    auto idx = params.compressibleContentTypes.find(responseContentType);
-
-    if (idx != params.compressibleContentTypes.end()) {
-      return true;
+    if (params.compressibleContentTypes == nullptr) {
+      return false;
     }
-
-    return false;
+    auto it = params.compressibleContentTypes->find(responseContentType);
+    return it != params.compressibleContentTypes->end();
   }
 
  private:

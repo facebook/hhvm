@@ -54,7 +54,7 @@ TEST(FieldsTest, Get) {
 }
 
 TEST(FieldsTest, field_id_by_ordinal) {
-  EXPECT_EQ(op::size_v<test_cpp2::cpp_reflection::struct3>, 19);
+  EXPECT_EQ(op::num_fields<test_cpp2::cpp_reflection::struct3>, 19);
 }
 
 TEST(UnionFieldsTest, Get) {
@@ -92,9 +92,6 @@ template <
     class TypeTag,
     class FieldTag>
 void checkField(const char* identName) {
-  static_assert(
-      std::is_same_v<TypeTag, private_access::type_tag<Struct, Ordinal>>);
-  static_assert(std::is_same_v<Ident, private_access::ident<Struct, Ordinal>>);
   static_assert(std::is_same_v<Ordinal, private_access::ordinal<Struct, Id>>);
   static_assert(
       std::is_same_v<Ordinal, private_access::ordinal<Struct, Ident>>);
@@ -338,14 +335,14 @@ TEST(FieldsTest, HelperAPIs) {
     EXPECT_TRUE(is_field_id_v<decltype(id)>);
     count++;
   });
-  EXPECT_EQ(count, op::size_v<Struct>);
+  EXPECT_EQ(count, op::num_fields<Struct>);
 
   count = 0;
   op::for_each_ident<Struct>([&](auto id) {
     EXPECT_TRUE(isIdentTag(id));
     count++;
   });
-  EXPECT_EQ(count, op::size_v<Struct>);
+  EXPECT_EQ(count, op::num_fields<Struct>);
 
   count = 0;
   op::for_each_ordinal<Struct>([&](auto id) {
@@ -353,7 +350,7 @@ TEST(FieldsTest, HelperAPIs) {
     count++;
   });
 
-  EXPECT_EQ(count, op::size_v<Struct>);
+  EXPECT_EQ(count, op::num_fields<Struct>);
 }
 
 TEST(FieldsTest, GetFieldNameCppName) {

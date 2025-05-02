@@ -192,7 +192,7 @@ template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thr
 
 {{#program:tablebased?}}
 {{#struct:union?}}
-constexpr ::apache::thrift::detail::UnionExtN<{{struct:fields_size}}> {{struct:cpp_underlying_name}}_unionExt = {
+constexpr ::apache::thrift::detail::UnionExtN<{{struct:num_fields}}> {{struct:cpp_underlying_name}}_unionExt = {
   /* .clear */ ::apache::thrift::detail::clearUnion<{{struct:cpp_fullname}}>,
   /* .unionTypeOffset */ ::apache::thrift::detail::unionTypeOffset<{{struct:cpp_fullname}}>(),
   /* .getActiveId */ nullptr,
@@ -202,8 +202,8 @@ constexpr ::apache::thrift::detail::UnionExtN<{{struct:fields_size}}> {{struct:c
 }}{{/field:type}}{{/struct:fields_in_key_order}}},
 };
 {{/struct:union?}}
-constexpr ::apache::thrift::detail::StructInfoN<{{struct:fields_size}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}} = {
-  /* .numFields */ {{struct:fields_size}},
+constexpr ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}} = {
+  /* .numFields */ {{struct:num_fields}},
   /* .name */ "{{struct:name}}",{{!
   }}{{#struct:union?}}
   /* .unionExt */ &{{struct:name}}_unionExt,{{!

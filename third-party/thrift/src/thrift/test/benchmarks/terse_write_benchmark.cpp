@@ -47,11 +47,11 @@ void fill_first(T& obj) {
 }
 template <typename T>
 void fill_middle(T& obj) {
-  op::get<>(field_id<op::size_v<T> / 2 + 1>{}, obj) = 1;
+  op::get<>(field_id<op::num_fields<T> / 2 + 1>{}, obj) = 1;
 }
 template <typename T>
 void fill_last(T& obj) {
-  op::get<>(field_id<op::size_v<T>>{}, obj) = 1;
+  op::get<>(field_id<op::num_fields<T>>{}, obj) = 1;
 }
 
 template <class Struct>

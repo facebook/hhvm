@@ -50,8 +50,7 @@ struct get_ordinal_impl {
 template <type::Ordinal Ord, typename Tag>
 struct get_ordinal_impl<std::integral_constant<type::Ordinal, Ord>, Tag> {
   static_assert(
-      folly::to_underlying(Ord) <=
-          pa::__fbthrift_field_size_v<type::native_type<Tag>>,
+      folly::to_underlying(Ord) <= pa::num_fields<type::native_type<Tag>>,
       "Ordinal cannot be larger than the number of fields");
 
   // Id is an ordinal, return itself.
@@ -131,9 +130,9 @@ struct GetValueOrNull {
 
 } // namespace detail
 
-/// Resolves to the number of definitions contained in Thrift class
+/// Gives the number of fields in a Thrift struct, union or exception.
 template <typename T>
-inline constexpr std::size_t size_v = detail::pa::__fbthrift_field_size_v<T>;
+inline constexpr std::size_t num_fields = detail::pa::num_fields<T>;
 
 template <typename T, typename Id>
 using get_ordinal =
@@ -151,19 +150,22 @@ inline constexpr type::Ordinal get_ordinal_v = get_ordinal<T, Id>::value;
 template <typename T, typename F>
 constexpr void for_each_ordinal(F&& f) {
   detail::for_each_ordinal_impl(
-      std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
+      std::forward<F>(f), std::make_integer_sequence<size_t, num_fields<T>>{});
 }
 
 /// Calls the given function with with ordinal<1> to ordinal<N>, returing the
 /// first 'true' result produced.
-template <typename T, typename F, std::enable_if_t<size_v<T> != 0>* = nullptr>
+template <
+    typename T,
+    typename F,
+    std::enable_if_t<num_fields<T> != 0>* = nullptr>
 decltype(auto) find_by_ordinal(F&& f) {
   return detail::find_by_ordinal_impl(
-      std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
+      std::forward<F>(f), std::make_integer_sequence<size_t, num_fields<T>>{});
 }
 
 template <typename T, typename F>
-std::enable_if_t<size_v<T> == 0, bool> find_by_ordinal(F&&) {
+std::enable_if_t<num_fields<T> == 0, bool> find_by_ordinal(F&&) {
   return false;
 }
 
@@ -171,7 +173,7 @@ template <typename T, typename Id>
 using get_field_id = type::field_id<
     get_ordinal<T, Id>::value == type::Ordinal()
         ? 0
-        : detail::pa::__fbthrift_field_ids<T>()[static_cast<size_t>(
+        : detail::pa::field_ids<T>()[static_cast<size_t>(
               get_ordinal<T, Id>::value)]>;
 
 /// Gets the field id, for example:
@@ -201,10 +203,11 @@ decltype(auto) find_by_field_id(F&& f) {
 ///   using Ident = get_ident<MyS, field_id<7>>
 ///
 template <typename T, typename Id>
-using get_ident = detail::pa::ident<T, get_ordinal<T, Id>>;
+using get_ident = apache::thrift::detail::
+    at<decltype(detail::pa::idents<T>()), get_ordinal<T, Id>::value>;
 
-/// It calls the given function with each folly::tag<thrift::ident::*>{} in
-/// Thrift class.
+/// Calls the given function with each folly::tag<apache::thrift::ident::*> in a
+/// Thrift structured type.
 template <typename T, typename F>
 void for_each_ident(F&& f) {
   for_each_ordinal<T>(
@@ -213,11 +216,12 @@ void for_each_ident(F&& f) {
 
 /// Gets the Thrift type tag, for example:
 ///
-///   // Resolves to Thrift type tag for the field "foo" in MyS.
-///   using Tag = get_type_tag<MyS, ident::foo>
+///   // Resolves to Thrift type tag for the field `foo` in `MyStruct`.
+///   using Tag = get_type_tag<MyStruct, apache::thriftident::foo>;
 ///
 template <typename T, typename Id>
-using get_type_tag = detail::pa::type_tag<T, get_ordinal<T, Id>>;
+using get_type_tag = apache::thrift::detail::
+    at<decltype(detail::pa::type_tags<T>()), get_ordinal<T, Id>::value>;
 
 template <typename T, typename Id>
 using get_field_tag = typename std::conditional_t<
@@ -361,7 +365,7 @@ using get_adapter_t = typename get_adapter<Tag>::type;
 
 template <typename T, std::size_t pos = 0>
 class InvokeByFieldId {
-  static constexpr auto N = size_v<T>;
+  static constexpr auto N = num_fields<T>;
 
   // We use std::min to avoid index > N.
   template <std::size_t Ordinal>

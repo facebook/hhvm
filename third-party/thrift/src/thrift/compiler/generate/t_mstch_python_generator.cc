@@ -877,7 +877,7 @@ class python_mstch_struct : public mstch_struct {
             {"struct:has_invariant_field?",
              &python_mstch_struct::has_invariant_field},
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
-            {"struct:fields_size", &python_mstch_struct::fields_size},
+            {"struct:num_fields", &python_mstch_struct::num_fields},
             {"struct:allow_inheritance?",
              &python_mstch_struct::allow_inheritance},
         });
@@ -918,7 +918,7 @@ class python_mstch_struct : public mstch_struct {
     return ::apache::thrift::compiler::generate_legacy_api(*struct_);
   }
 
-  mstch::node fields_size() { return struct_->fields().size(); }
+  mstch::node num_fields() { return struct_->fields().size(); }
 
   // While inheritance is discouraged, there is limited support for py3
   // auto-migraters

@@ -27,22 +27,22 @@ namespace apache::thrift {
 {{#program:structs}}
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<{{struct:cpp_fullname}}>::name = "{{struct:name}}";
-THRIFT_DATA_MEMBER const std::array<std::string_view, {{struct:fields_size}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_names = { {
   {{#struct:fields}}
   "{{field:name}}"sv,
   {{/struct:fields}}
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, {{struct:fields_size}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_ids = { {
+THRIFT_DATA_MEMBER const std::array<int16_t, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_ids = { {
   {{#struct:fields}}
   {{field:key}},
   {{/struct:fields}}
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, {{struct:fields_size}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_types = { {
+THRIFT_DATA_MEMBER const std::array<protocol::TType, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_types = { {
   {{#struct:fields}}{{#field:type}}
   TType::{{> module_types_tcc/struct_type}},
   {{/field:type}}{{/struct:fields}}
 }};
-THRIFT_DATA_MEMBER const std::array<int, {{struct:fields_size}}> TStructDataStorage<{{struct:cpp_fullname}}>::isset_indexes = { {
+THRIFT_DATA_MEMBER const std::array<int, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::isset_indexes = { {
   {{#struct:fields}}
   {{#field:has_isset?}}{{field:isset_index}}{{/field:has_isset?}}{{^field:has_isset?}}-1{{/field:has_isset?}},
   {{/struct:fields}}

@@ -478,7 +478,7 @@ struct populator_methods<type::union_t<Union>, Union> {
              << folly::to_underlying(out.getType());
 
     const auto selected = static_cast<type::Ordinal>(
-        detail::rand_in_range<size_t>(state.rng, 0, op::size_v<Union> - 1));
+        detail::rand_in_range<size_t>(state.rng, 0, op::num_fields<Union> - 1));
 
     op::for_each_ordinal<Union>([&](auto ord) {
       using Ord = decltype(ord);

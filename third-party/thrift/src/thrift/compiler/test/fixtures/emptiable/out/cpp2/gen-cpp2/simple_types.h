@@ -310,7 +310,7 @@ class MyStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "simple";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 0;
+  static constexpr std::size_t __fbthrift_num_fields = 0;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0};
 
@@ -401,7 +401,7 @@ class EmptiableStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "simple";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
+  static constexpr std::size_t __fbthrift_num_fields = 14;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 
@@ -1276,7 +1276,7 @@ class EmptiableTerseStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "simple";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
+  static constexpr std::size_t __fbthrift_num_fields = 14;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 
@@ -1929,7 +1929,7 @@ class NotEmptiableStruct final  {
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "simple";
   }
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
+  static constexpr std::size_t __fbthrift_num_fields = 14;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 

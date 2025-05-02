@@ -27,10 +27,6 @@ TypeFinder getTypeFinder() {
   return TypeFinder{}.add<MyStructPatchStruct>();
 }
 
-void expectEq(const scope& node, const std::string& text) {
-  EXPECT_EQ(to_string(node), folly::stripLeftMargin(text));
-}
-
 TEST(DebugTreeTest, MyStruct) {
   MyStruct s;
   s.boolVal() = "true";
@@ -87,97 +83,97 @@ TEST(DebugTreeTest, MyStruct) {
       to_string(debugTree(
           v, getTypeFinder(), type::Type::get<type::struct_t<MyStruct>>())));
 
-  expectEq(
-      debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}), R"(
-    Definition(kind=Struct, name='MyStruct', program='DebugTree.thrift')
-    ├─ boolVal
-    │  ╰─ true
-    ├─ byteVal
-    │  ╰─ 10
-    ├─ i16Val
-    │  ╰─ 20
-    ├─ i32Val
-    │  ╰─ 30
-    ├─ i64Val
-    │  ╰─ 40
-    ├─ floatVal
-    │  ╰─ 50
-    ├─ doubleVal
-    │  ╰─ 60
-    ├─ stringVal
-    │  ╰─ 70
-    ├─ binaryVal
-    │  ╰─ \x2\x1\x0
-    ├─ listVal
-    │  ╰─ <List>
-    │     ├─ 200
-    │     ├─ 100
-    │     ╰─ 300
-    ├─ setVal
-    │  ╰─ <Set>
-    │     ├─ 400
-    │     ├─ 500
-    │     ╰─ 600
-    ╰─ mapVal
-       ╰─ <Map>
-          ├─ Key #0
-          │  ╰─ 700
-          ├─ Value #0
-          │  ╰─ 777
-          ├─ Key #1
-          │  ╰─ 800
-          ├─ Value #1
-          │  ╰─ 888
-          ├─ Key #2
-          │  ╰─ 900
-          ╰─ Value #2
-             ╰─ 999
-    )");
-  expectEq(debugTree(v, getTypeFinder()), R"(
-    <UNKNOWN STRUCT>
-    ├─ FieldId(1)
-    │  ╰─ true
-    ├─ FieldId(2)
-    │  ╰─ 10
-    ├─ FieldId(3)
-    │  ╰─ 20
-    ├─ FieldId(4)
-    │  ╰─ 30
-    ├─ FieldId(5)
-    │  ╰─ 40
-    ├─ FieldId(6)
-    │  ╰─ 50
-    ├─ FieldId(7)
-    │  ╰─ 60
-    ├─ FieldId(8)
-    │  ╰─ 70
-    ├─ FieldId(9)
-    │  ╰─ \x2\x1\x0
-    ├─ FieldId(36)
-    │  ╰─ <List>
-    │     ├─ 200
-    │     ├─ 100
-    │     ╰─ 300
-    ├─ FieldId(37)
-    │  ╰─ <Set>
-    │     ├─ 400
-    │     ├─ 500
-    │     ╰─ 600
-    ╰─ FieldId(38)
-       ╰─ <Map>
-          ├─ Key #0
-          │  ╰─ 700
-          ├─ Value #0
-          │  ╰─ 777
-          ├─ Key #1
-          │  ╰─ 800
-          ├─ Value #1
-          │  ╰─ 888
-          ├─ Key #2
-          │  ╰─ 900
-          ╰─ Value #2
-             ╰─ 999
-    )");
+  EXPECT_EQ(
+      to_string(
+          debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
+      R"(Definition(kind=Struct, name='MyStruct', program='DebugTree.thrift')
+├─ boolVal
+│  ╰─ true
+├─ byteVal
+│  ╰─ 10
+├─ i16Val
+│  ╰─ 20
+├─ i32Val
+│  ╰─ 30
+├─ i64Val
+│  ╰─ 40
+├─ floatVal
+│  ╰─ 50
+├─ doubleVal
+│  ╰─ 60
+├─ stringVal
+│  ╰─ 70
+├─ binaryVal
+│  ╰─ \x2\x1\x0
+├─ listVal
+│  ╰─ <List>
+│     ├─ 200
+│     ├─ 100
+│     ╰─ 300
+├─ setVal
+│  ╰─ <Set>
+│     ├─ 400
+│     ├─ 500
+│     ╰─ 600
+╰─ mapVal
+   ╰─ <Map>
+      ├─ Key #0
+      │  ╰─ 700
+      ├─ Value #0
+      │  ╰─ 777
+      ├─ Key #1
+      │  ╰─ 800
+      ├─ Value #1
+      │  ╰─ 888
+      ├─ Key #2
+      │  ╰─ 900
+      ╰─ Value #2
+         ╰─ 999
+)");
+  EXPECT_EQ(to_string(debugTree(v, getTypeFinder())), R"(<UNKNOWN STRUCT>
+├─ FieldId(1)
+│  ╰─ true
+├─ FieldId(2)
+│  ╰─ 10
+├─ FieldId(3)
+│  ╰─ 20
+├─ FieldId(4)
+│  ╰─ 30
+├─ FieldId(5)
+│  ╰─ 40
+├─ FieldId(6)
+│  ╰─ 50
+├─ FieldId(7)
+│  ╰─ 60
+├─ FieldId(8)
+│  ╰─ 70
+├─ FieldId(9)
+│  ╰─ \x2\x1\x0
+├─ FieldId(36)
+│  ╰─ <List>
+│     ├─ 200
+│     ├─ 100
+│     ╰─ 300
+├─ FieldId(37)
+│  ╰─ <Set>
+│     ├─ 400
+│     ├─ 500
+│     ╰─ 600
+╰─ FieldId(38)
+   ╰─ <Map>
+      ├─ Key #0
+      │  ╰─ 700
+      ├─ Value #0
+      │  ╰─ 777
+      ├─ Key #1
+      │  ╰─ 800
+      ├─ Value #1
+      │  ╰─ 888
+      ├─ Key #2
+      │  ╰─ 900
+      ╰─ Value #2
+         ╰─ 999
+)");
 }
 
 TEST(DebugTreeTest, ObjectWithAny) {
@@ -192,29 +188,28 @@ TEST(DebugTreeTest, ObjectWithAny) {
   outer.any() = AnyData::toAny(nested).toThrift();
   auto v = protocol::asValueStruct<type::struct_t<StructWithAny>>(outer);
 
-  expectEq(debugTree(v, getTypeFinder()), R"(
-    <UNKNOWN STRUCT>
-    ├─ FieldId(1)
-    │  ╰─ <Thrift.Any, type=struct<StructWithAny>, protocol=Compact>
-    │     ╰─ Definition(kind=Struct, name='StructWithAny', program='DebugTree.thrift')
-    │        ├─ any
-    │        │  ╰─ <Thrift.Any, type=struct<SharedPtr>, protocol=Compact>
-    │        │     ╰─ Definition(kind=Struct, name='SharedPtr', program='DebugTree.thrift')
-    │        │        ├─ shared_field
-    │        │        │  ╰─ I_AM_SHARED
-    │        │        ├─ field2
-    │        │        │  ╰─ 2000
-    │        │        ╰─ field3
-    │        │           ╰─ 3000
-    │        ├─ any_map
-    │        │  ╰─ <Map>
-    │        ╰─ anydata
-    │           ╰─ <Maybe Empty Thrift.Any>
-    ├─ FieldId(2)
-    │  ╰─ <Map>
-    ╰─ FieldId(3)
-       ╰─ <Maybe Empty Thrift.Any>
-    )");
+  EXPECT_EQ(to_string(debugTree(v, getTypeFinder())), R"(<UNKNOWN STRUCT>
+├─ FieldId(1)
+│  ╰─ <Thrift.Any, type=struct<StructWithAny>, protocol=Compact>
+│     ╰─ Definition(kind=Struct, name='StructWithAny', program='DebugTree.thrift')
+│        ├─ any
+│        │  ╰─ <Thrift.Any, type=struct<SharedPtr>, protocol=Compact>
+│        │     ╰─ Definition(kind=Struct, name='SharedPtr', program='DebugTree.thrift')
+│        │        ├─ shared_field
+│        │        │  ╰─ I_AM_SHARED
+│        │        ├─ field2
+│        │        │  ╰─ 2000
+│        │        ╰─ field3
+│        │           ╰─ 3000
+│        ├─ any_map
+│        │  ╰─ <Map>
+│        ╰─ anydata
+│           ╰─ <Maybe Empty Thrift.Any>
+├─ FieldId(2)
+│  ╰─ <Map>
+╰─ FieldId(3)
+   ╰─ <Maybe Empty Thrift.Any>
+)");
 }
 
 TEST(DebugTreeTest, DynamicPrimitivePatch) {
@@ -229,169 +224,167 @@ TEST(DebugTreeTest, DynamicPrimitivePatch) {
   patch.patchIfSet<ident::stringVal>().prepend("(");
   patch.patchIfSet<ident::stringVal>().append(")");
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
-  expectEq(
-      debugTree(
-          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}),
-      R"(
-    DynamicStructPatch
-    ├─ ensure
-    │  ├─ boolVal
-    │  │  ╰─ false
-    │  ├─ byteVal
-    │  │  ╰─ 0
-    │  ├─ i16Val
-    │  │  ╰─ 0
-    │  ├─ i32Val
-    │  │  ╰─ 0
-    │  ├─ i64Val
-    │  │  ╰─ 0
-    │  ├─ floatVal
-    │  │  ╰─ 0
-    │  ├─ doubleVal
-    │  │  ╰─ 0
-    │  ╰─ stringVal
-    │     ╰─ ""
-    ╰─ patch
-       ├─ boolVal
-       │  ╰─ BoolPatch
-       │     ╰─ invert
-       ├─ byteVal
-       │  ╰─ BytePatch
-       │     ╰─ add
-       │        ╰─ 1
-       ├─ i16Val
-       │  ╰─ I16Patch
-       │     ╰─ add
-       │        ╰─ 2
-       ├─ i32Val
-       │  ╰─ I32Patch
-       │     ╰─ add
-       │        ╰─ 3
-       ├─ i64Val
-       │  ╰─ I64Patch
-       │     ╰─ add
-       │        ╰─ 4
-       ├─ floatVal
-       │  ╰─ FloatPatch
-       │     ╰─ add
-       │        ╰─ 5
-       ├─ doubleVal
-       │  ╰─ DoublePatch
-       │     ╰─ add
-       │        ╰─ 6
-       ╰─ stringVal
-          ╰─ BinaryPatch
-             ├─ prepend
-             │  ╰─ (
-             ╰─ append
-                ╰─ )
-    )");
-  expectEq(debugTree(dynPatch, getTypeFinder()), R"(
-    DynamicStructPatch
-    ├─ ensure
-    │  ├─ FieldId(1)
-    │  │  ╰─ false
-    │  ├─ FieldId(2)
-    │  │  ╰─ 0
-    │  ├─ FieldId(3)
-    │  │  ╰─ 0
-    │  ├─ FieldId(4)
-    │  │  ╰─ 0
-    │  ├─ FieldId(5)
-    │  │  ╰─ 0
-    │  ├─ FieldId(6)
-    │  │  ╰─ 0
-    │  ├─ FieldId(7)
-    │  │  ╰─ 0
-    │  ╰─ FieldId(8)
-    │     ╰─ ""
-    ╰─ patch
-       ├─ FieldId(1)
-       │  ╰─ BoolPatch
-       │     ╰─ invert
-       ├─ FieldId(2)
-       │  ╰─ BytePatch
-       │     ╰─ add
-       │        ╰─ 1
-       ├─ FieldId(3)
-       │  ╰─ I16Patch
-       │     ╰─ add
-       │        ╰─ 2
-       ├─ FieldId(4)
-       │  ╰─ I32Patch
-       │     ╰─ add
-       │        ╰─ 3
-       ├─ FieldId(5)
-       │  ╰─ I64Patch
-       │     ╰─ add
-       │        ╰─ 4
-       ├─ FieldId(6)
-       │  ╰─ FloatPatch
-       │     ╰─ add
-       │        ╰─ 5
-       ├─ FieldId(7)
-       │  ╰─ DoublePatch
-       │     ╰─ add
-       │        ╰─ 6
-       ╰─ FieldId(8)
-          ╰─ BinaryPatch
-             ├─ prepend
-             │  ╰─ (
-             ╰─ append
-                ╰─ )
-    )");
+  EXPECT_EQ(
+      to_string(debugTree(
+          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
+      R"(DynamicStructPatch
+├─ ensure
+│  ├─ boolVal
+│  │  ╰─ false
+│  ├─ byteVal
+│  │  ╰─ 0
+│  ├─ i16Val
+│  │  ╰─ 0
+│  ├─ i32Val
+│  │  ╰─ 0
+│  ├─ i64Val
+│  │  ╰─ 0
+│  ├─ floatVal
+│  │  ╰─ 0
+│  ├─ doubleVal
+│  │  ╰─ 0
+│  ╰─ stringVal
+│     ╰─ ""
+╰─ patch
+   ├─ boolVal
+   │  ╰─ BoolPatch
+   │     ╰─ invert
+   ├─ byteVal
+   │  ╰─ BytePatch
+   │     ╰─ add
+   │        ╰─ 1
+   ├─ i16Val
+   │  ╰─ I16Patch
+   │     ╰─ add
+   │        ╰─ 2
+   ├─ i32Val
+   │  ╰─ I32Patch
+   │     ╰─ add
+   │        ╰─ 3
+   ├─ i64Val
+   │  ╰─ I64Patch
+   │     ╰─ add
+   │        ╰─ 4
+   ├─ floatVal
+   │  ╰─ FloatPatch
+   │     ╰─ add
+   │        ╰─ 5
+   ├─ doubleVal
+   │  ╰─ DoublePatch
+   │     ╰─ add
+   │        ╰─ 6
+   ╰─ stringVal
+      ╰─ BinaryPatch
+         ├─ prepend
+         │  ╰─ (
+         ╰─ append
+            ╰─ )
+)");
+  EXPECT_EQ(
+      to_string(debugTree(dynPatch, getTypeFinder())), R"(DynamicStructPatch
+├─ ensure
+│  ├─ FieldId(1)
+│  │  ╰─ false
+│  ├─ FieldId(2)
+│  │  ╰─ 0
+│  ├─ FieldId(3)
+│  │  ╰─ 0
+│  ├─ FieldId(4)
+│  │  ╰─ 0
+│  ├─ FieldId(5)
+│  │  ╰─ 0
+│  ├─ FieldId(6)
+│  │  ╰─ 0
+│  ├─ FieldId(7)
+│  │  ╰─ 0
+│  ╰─ FieldId(8)
+│     ╰─ ""
+╰─ patch
+   ├─ FieldId(1)
+   │  ╰─ BoolPatch
+   │     ╰─ invert
+   ├─ FieldId(2)
+   │  ╰─ BytePatch
+   │     ╰─ add
+   │        ╰─ 1
+   ├─ FieldId(3)
+   │  ╰─ I16Patch
+   │     ╰─ add
+   │        ╰─ 2
+   ├─ FieldId(4)
+   │  ╰─ I32Patch
+   │     ╰─ add
+   │        ╰─ 3
+   ├─ FieldId(5)
+   │  ╰─ I64Patch
+   │     ╰─ add
+   │        ╰─ 4
+   ├─ FieldId(6)
+   │  ╰─ FloatPatch
+   │     ╰─ add
+   │        ╰─ 5
+   ├─ FieldId(7)
+   │  ╰─ DoublePatch
+   │     ╰─ add
+   │        ╰─ 6
+   ╰─ FieldId(8)
+      ╰─ BinaryPatch
+         ├─ prepend
+         │  ╰─ (
+         ╰─ append
+            ╰─ )
+)");
 }
 
 TEST(DebugTreeTest, DynamicNestedStructPatch) {
   MyStructPatch patch;
   patch.patch<ident::structVal>().patchIfSet<ident::data1>() += ";";
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
-  expectEq(
-      debugTree(
-          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}),
-      R"(
-    DynamicStructPatch
-    ├─ ensure
-    │  ╰─ structVal
-    │     ╰─ Definition(kind=Struct, name='MyData', program='DebugTree.thrift')
-    │        ├─ data1
-    │        │  ╰─ ""
-    │        ╰─ data2
-    │           ╰─ 0
-    ╰─ patch
-       ╰─ structVal
-          ╰─ DynamicStructPatch
-             ├─ ensure
-             │  ╰─ data1
-             │     ╰─ ""
-             ╰─ patch
-                ╰─ data1
-                   ╰─ BinaryPatch
-                      ╰─ append
-                         ╰─ ;
-    )");
+  EXPECT_EQ(
+      to_string(debugTree(
+          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
+      R"(DynamicStructPatch
+├─ ensure
+│  ╰─ structVal
+│     ╰─ Definition(kind=Struct, name='MyData', program='DebugTree.thrift')
+│        ├─ data1
+│        │  ╰─ ""
+│        ╰─ data2
+│           ╰─ 0
+╰─ patch
+   ╰─ structVal
+      ╰─ DynamicStructPatch
+         ├─ ensure
+         │  ╰─ data1
+         │     ╰─ ""
+         ╰─ patch
+            ╰─ data1
+               ╰─ BinaryPatch
+                  ╰─ append
+                     ╰─ ;
+)");
 
-  expectEq(debugTree(dynPatch, getTypeFinder()), R"(
-    DynamicStructPatch
-    ├─ ensure
-    │  ╰─ FieldId(11)
-    │     ╰─ <UNKNOWN STRUCT>
-    │        ├─ FieldId(1)
-    │        │  ╰─ ""
-    │        ╰─ FieldId(2)
-    │           ╰─ 0
-    ╰─ patch
-       ╰─ FieldId(11)
-          ╰─ DynamicStructPatch
-             ├─ ensure
-             │  ╰─ FieldId(1)
-             │     ╰─ ""
-             ╰─ patch
-                ╰─ FieldId(1)
-                   ╰─ BinaryPatch
-                      ╰─ append
-                         ╰─ ;
-    )");
+  EXPECT_EQ(
+      to_string(debugTree(dynPatch, getTypeFinder())), R"(DynamicStructPatch
+├─ ensure
+│  ╰─ FieldId(11)
+│     ╰─ <UNKNOWN STRUCT>
+│        ├─ FieldId(1)
+│        │  ╰─ ""
+│        ╰─ FieldId(2)
+│           ╰─ 0
+╰─ patch
+   ╰─ FieldId(11)
+      ╰─ DynamicStructPatch
+         ├─ ensure
+         │  ╰─ FieldId(1)
+         │     ╰─ ""
+         ╰─ patch
+            ╰─ FieldId(1)
+               ╰─ BinaryPatch
+                  ╰─ append
+                     ╰─ ;
+)");
 }
 
 TEST(DebugTreeTest, DynamicContainerPatch) {
@@ -401,51 +394,49 @@ TEST(DebugTreeTest, DynamicContainerPatch) {
   patch.patchIfSet<ident::optMapVal>().patchByKey("Key").append("Suffix");
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   // TODO(ytj): We knew it's a StructPatch, not UnknownPatch (from the Schema).
-  expectEq(
-      debugTree(
-          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}),
-      R"(
-    UnknownPatch
-    ╰─ patch
-       ├─ optListVal
-       │  ╰─ DynamicListPatch
-       │     ╰─ push_back
-       │        ╰─ 42
-       ├─ optSetVal
-       │  ╰─ DynamicSetPatch
-       │     ╰─ addMulti
-       │        ╰─ <Set>
-       │           ╰─ SetElem
-       ╰─ optMapVal
-          ╰─ DynamicMapPatch
-             ╰─ patch
-                ╰─ KeyAndSubPatch
-                   ├─ Key
-                   ╰─ BinaryPatch
-                      ╰─ append
-                         ╰─ Suffix
-    )");
-  expectEq(debugTree(dynPatch, getTypeFinder()), R"(
-    UnknownPatch
-    ╰─ patch
-       ├─ FieldId(26)
-       │  ╰─ DynamicListPatch
-       │     ╰─ push_back
-       │        ╰─ 42
-       ├─ FieldId(27)
-       │  ╰─ DynamicSetPatch
-       │     ╰─ addMulti
-       │        ╰─ <Set>
-       │           ╰─ SetElem
-       ╰─ FieldId(28)
-          ╰─ DynamicMapPatch
-             ╰─ patch
-                ╰─ KeyAndSubPatch
-                   ├─ Key
-                   ╰─ BinaryPatch
-                      ╰─ append
-                         ╰─ Suffix
-    )");
+  EXPECT_EQ(
+      to_string(debugTree(
+          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
+      R"(UnknownPatch
+╰─ patch
+   ├─ optListVal
+   │  ╰─ DynamicListPatch
+   │     ╰─ push_back
+   │        ╰─ 42
+   ├─ optSetVal
+   │  ╰─ DynamicSetPatch
+   │     ╰─ addMulti
+   │        ╰─ <Set>
+   │           ╰─ SetElem
+   ╰─ optMapVal
+      ╰─ DynamicMapPatch
+         ╰─ patch
+            ╰─ KeyAndSubPatch
+               ├─ Key
+               ╰─ BinaryPatch
+                  ╰─ append
+                     ╰─ Suffix
+)");
+  EXPECT_EQ(to_string(debugTree(dynPatch, getTypeFinder())), R"(UnknownPatch
+╰─ patch
+   ├─ FieldId(26)
+   │  ╰─ DynamicListPatch
+   │     ╰─ push_back
+   │        ╰─ 42
+   ├─ FieldId(27)
+   │  ╰─ DynamicSetPatch
+   │     ╰─ addMulti
+   │        ╰─ <Set>
+   │           ╰─ SetElem
+   ╰─ FieldId(28)
+      ╰─ DynamicMapPatch
+         ╰─ patch
+            ╰─ KeyAndSubPatch
+               ├─ Key
+               ╰─ BinaryPatch
+                  ╰─ append
+                     ╰─ Suffix
+)");
 }
 
 TEST(DebugTreeTest, AnyPatch) {
@@ -458,27 +449,27 @@ TEST(DebugTreeTest, AnyPatch) {
   def.field() = 42;
   anyPatch.patch<ident::any>().ensureAny(type::AnyData::toAny(def).toThrift());
 
-  expectEq(debugTree(anyPatch, getTypeFinder()), R"(
-    DynamicStructPatch
-    ├─ ensure
-    │  ╰─ any
-    │     ╰─ <Maybe Empty Thrift.Any>
-    ╰─ patch
-       ╰─ any
-          ╰─ AnyPatch
-             ├─ patchIfTypeIs
-             │  ╰─ type: struct<MyStruct>
-             │     ╰─ UnknownPatch
-             │        ╰─ patch
-             │           ╰─ optBoolVal
-             │              ╰─ BoolPatch
-             │                 ╰─ invert
-             ╰─ ensure
-                ╰─ <Thrift.Any, type=struct<Def>, protocol=Compact>
-                   ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
-                      ╰─ field
-                         ╰─ 42
-    )");
+  EXPECT_EQ(
+      to_string(debugTree(anyPatch, getTypeFinder())), R"(DynamicStructPatch
+├─ ensure
+│  ╰─ any
+│     ╰─ <Maybe Empty Thrift.Any>
+╰─ patch
+   ╰─ any
+      ╰─ AnyPatch
+         ├─ patchIfTypeIs
+         │  ╰─ type: struct<MyStruct>
+         │     ╰─ UnknownPatch
+         │        ╰─ patch
+         │           ╰─ optBoolVal
+         │              ╰─ BoolPatch
+         │                 ╰─ invert
+         ╰─ ensure
+            ╰─ <Thrift.Any, type=struct<Def>, protocol=Compact>
+               ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+                  ╰─ field
+                     ╰─ 42
+)");
 }
 
 TEST(DebugTreeTest, StructWithTypedef) {
@@ -493,93 +484,89 @@ TEST(DebugTreeTest, StructWithTypedef) {
 
   auto v = protocol::asValueStruct<type::struct_t<StructWithTypedef>>(s);
 
-  expectEq(
-      debugTree(
-          v, getTypeFinder(), Uri{apache::thrift::uri<StructWithTypedef>()}),
-      R"(
-    Definition(kind=Struct, name='StructWithTypedef', program='DebugTree.thrift')
-    ├─ field
-    │  ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
-    │     ╰─ field
-    │        ╰─ 42
-    ├─ list_field
-    │  ╰─ <List>
-    │     ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
-    │        ╰─ field
-    │           ╰─ 42
-    ├─ set_field
-    │  ╰─ <Set>
-    │     ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
-    │        ╰─ field
-    │           ╰─ 42
-    ╰─ map_field
-       ╰─ <Map>
-          ├─ Key #0
-          │  ╰─ 42
-          ╰─ Value #0
-             ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
-                ╰─ field
-                   ╰─ 42
-    )");
+  EXPECT_EQ(
+      to_string(debugTree(
+          v, getTypeFinder(), Uri{apache::thrift::uri<StructWithTypedef>()})),
+      R"(Definition(kind=Struct, name='StructWithTypedef', program='DebugTree.thrift')
+├─ field
+│  ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+│     ╰─ field
+│        ╰─ 42
+├─ list_field
+│  ╰─ <List>
+│     ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+│        ╰─ field
+│           ╰─ 42
+├─ set_field
+│  ╰─ <Set>
+│     ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+│        ╰─ field
+│           ╰─ 42
+╰─ map_field
+   ╰─ <Map>
+      ├─ Key #0
+      │  ╰─ 42
+      ╰─ Value #0
+         ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+            ╰─ field
+               ╰─ 42
+)");
 
-  expectEq(debugTree(v, getTypeFinder()), R"(
-    <UNKNOWN STRUCT>
-    ├─ FieldId(1)
-    │  ╰─ <UNKNOWN STRUCT>
-    │     ╰─ FieldId(1)
-    │        ╰─ 42
-    ├─ FieldId(2)
-    │  ╰─ <List>
-    │     ╰─ <UNKNOWN STRUCT>
-    │        ╰─ FieldId(1)
-    │           ╰─ 42
-    ├─ FieldId(3)
-    │  ╰─ <Set>
-    │     ╰─ <UNKNOWN STRUCT>
-    │        ╰─ FieldId(1)
-    │           ╰─ 42
-    ╰─ FieldId(4)
-       ╰─ <Map>
-          ├─ Key #0
-          │  ╰─ 42
-          ╰─ Value #0
-             ╰─ <UNKNOWN STRUCT>
-                ╰─ FieldId(1)
-                   ╰─ 42
-   )");
+  EXPECT_EQ(to_string(debugTree(v, getTypeFinder())), R"(<UNKNOWN STRUCT>
+├─ FieldId(1)
+│  ╰─ <UNKNOWN STRUCT>
+│     ╰─ FieldId(1)
+│        ╰─ 42
+├─ FieldId(2)
+│  ╰─ <List>
+│     ╰─ <UNKNOWN STRUCT>
+│        ╰─ FieldId(1)
+│           ╰─ 42
+├─ FieldId(3)
+│  ╰─ <Set>
+│     ╰─ <UNKNOWN STRUCT>
+│        ╰─ FieldId(1)
+│           ╰─ 42
+╰─ FieldId(4)
+   ╰─ <Map>
+      ├─ Key #0
+      │  ╰─ 42
+      ╰─ Value #0
+         ╰─ <UNKNOWN STRUCT>
+            ╰─ FieldId(1)
+               ╰─ 42
+)");
 }
 
 TEST(DebugTreeTest, PatchAsProtocolObject) {
   MyStructPatch patch;
   patch.patchIfSet<ident::boolVal>().invert();
-  expectEq(
-      debugTree(
+  EXPECT_EQ(
+      to_string(debugTree(
           patch.toObject(),
           getTypeFinder(),
-          Uri{apache::thrift::uri<MyStructPatchStruct>()}),
-      R"(
-    DynamicStructPatch
-    ├─ ensure
-    │  ╰─ boolVal
-    │     ╰─ false
-    ╰─ patch
-       ╰─ boolVal
-          ╰─ BoolPatch
-             ╰─ invert
-    )");
-  expectEq(
-      debugTree(AnyData::toAny(patch).toThrift(), getTypeFinder()),
-      R"(
-    <Thrift.Any, type=struct<MyStructPatch>, protocol=Compact>
-    ╰─ DynamicStructPatch
-       ├─ ensure
-       │  ╰─ boolVal
-       │     ╰─ false
-       ╰─ patch
-          ╰─ boolVal
-             ╰─ BoolPatch
-                ╰─ invert
-    )");
+          Uri{apache::thrift::uri<MyStructPatchStruct>()})),
+      R"(DynamicStructPatch
+├─ ensure
+│  ╰─ boolVal
+│     ╰─ false
+╰─ patch
+   ╰─ boolVal
+      ╰─ BoolPatch
+         ╰─ invert
+)");
+  EXPECT_EQ(
+      to_string(debugTree(AnyData::toAny(patch).toThrift(), getTypeFinder())),
+      R"(<Thrift.Any, type=struct<MyStructPatch>, protocol=Compact>
+╰─ DynamicStructPatch
+   ├─ ensure
+   │  ╰─ boolVal
+   │     ╰─ false
+   ╰─ patch
+      ╰─ boolVal
+         ╰─ BoolPatch
+            ╰─ invert
+)");
 }
 
 } // namespace apache::thrift::detail

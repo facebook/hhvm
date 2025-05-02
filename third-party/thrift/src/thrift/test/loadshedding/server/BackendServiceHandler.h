@@ -20,9 +20,7 @@
 
 #include <thrift/test/loadshedding/if/gen-cpp2/BackendService.h>
 
-namespace facebook {
-namespace thrift {
-namespace test {
+namespace facebook::thrift::test {
 
 class BackendServiceHandler
     : virtual public apache::thrift::ServiceHandler<BackendService> {
@@ -38,6 +36,4 @@ class BackendServiceHandler
   std::atomic<u_int64_t> requestCount_{0};
 };
 
-} // namespace test
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::test

@@ -27,7 +27,6 @@
 
 namespace apache::thrift::detail {
 
-using SyntaxGraph = apache::thrift::schema::SyntaxGraph;
 using TypeRef = apache::thrift::schema::TypeRef;
 using scope = apache::thrift::tree_printer::scope;
 
@@ -46,15 +45,16 @@ struct Uri {
 // get the field name from field id.
 class TypeFinder {
  public:
-  /* implicit */ TypeFinder(const SyntaxGraph& graph) : graph_(graph) {}
+  template <class T>
+  TypeFinder& add() {
+    return add(SchemaRegistry::get().getDefinitionNode<T>().program());
+  }
+  TypeFinder& add(const schema::ProgramNode& node);
   OptionalTypeRef findType(const Uri& uri) const;
   OptionalTypeRef findTypeInAny(const type::Type& type) const;
 
  private:
-  const SyntaxGraph& graph_;
-
-  std::unordered_map<std::string, TypeRef> genUriToTypeRef() const;
-  std::unordered_map<std::string, TypeRef> uriToType_ = genUriToTypeRef();
+  std::unordered_map<std::string, TypeRef> uriToType_;
 };
 
 // We can specialize this class to support pretty-printing custom type
@@ -97,6 +97,15 @@ scope debugTree(const T& t, const TypeFinder& finder, const type::Type& type) {
 template <class T>
 scope debugTree(const T& t, const TypeFinder& finder) {
   return debugTree(t, finder, OptionalTypeRef{});
+}
+
+template <class T, class... Args>
+scope debugTree(const T& t, const schema::SyntaxGraph& graph, Args&&... args) {
+  TypeFinder finder;
+  for (const auto& p : graph.programs()) {
+    finder.add(*p);
+  }
+  return debugTree(t, finder, std::forward<Args>(args)...);
 }
 
 template <>

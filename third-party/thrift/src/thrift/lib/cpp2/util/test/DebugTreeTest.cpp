@@ -23,10 +23,8 @@ namespace apache::thrift::detail {
 
 using namespace test;
 
-const SyntaxGraph& getGraph() {
-  static auto merged = SchemaRegistry::get().getMergedSchema();
-  static auto graph = SyntaxGraph::fromSchema(merged.get());
-  return graph;
+TypeFinder getTypeFinder() {
+  return TypeFinder{}.add<MyStructPatchStruct>();
 }
 
 void expectEq(const scope& node, const std::string& text) {
@@ -84,11 +82,13 @@ TEST(DebugTreeTest, MyStruct) {
   });
 
   EXPECT_EQ(
-      to_string(debugTree(v, getGraph(), Uri{apache::thrift::uri<MyStruct>()})),
+      to_string(
+          debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
       to_string(debugTree(
-          v, getGraph(), type::Type::get<type::struct_t<MyStruct>>())));
+          v, getTypeFinder(), type::Type::get<type::struct_t<MyStruct>>())));
 
-  expectEq(debugTree(v, getGraph(), Uri{apache::thrift::uri<MyStruct>()}), R"(
+  expectEq(
+      debugTree(v, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}), R"(
     Definition(kind=Struct, name='MyStruct', program='DebugTree.thrift')
     ├─ boolVal
     │  ╰─ true
@@ -133,7 +133,7 @@ TEST(DebugTreeTest, MyStruct) {
           ╰─ Value #2
              ╰─ 999
     )");
-  expectEq(debugTree(v, getGraph()), R"(
+  expectEq(debugTree(v, getTypeFinder()), R"(
     <UNKNOWN STRUCT>
     ├─ FieldId(1)
     │  ╰─ true
@@ -192,7 +192,7 @@ TEST(DebugTreeTest, ObjectWithAny) {
   outer.any() = AnyData::toAny(nested).toThrift();
   auto v = protocol::asValueStruct<type::struct_t<StructWithAny>>(outer);
 
-  expectEq(debugTree(v, getGraph()), R"(
+  expectEq(debugTree(v, getTypeFinder()), R"(
     <UNKNOWN STRUCT>
     ├─ FieldId(1)
     │  ╰─ <Thrift.Any, type=struct<StructWithAny>, protocol=Compact>
@@ -230,7 +230,9 @@ TEST(DebugTreeTest, DynamicPrimitivePatch) {
   patch.patchIfSet<ident::stringVal>().append(")");
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   expectEq(
-      debugTree(dynPatch, getGraph(), Uri{apache::thrift::uri<MyStruct>()}), R"(
+      debugTree(
+          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}),
+      R"(
     DynamicStructPatch
     ├─ ensure
     │  ├─ boolVal
@@ -284,7 +286,7 @@ TEST(DebugTreeTest, DynamicPrimitivePatch) {
              ╰─ append
                 ╰─ )
     )");
-  expectEq(debugTree(dynPatch, getGraph()), R"(
+  expectEq(debugTree(dynPatch, getTypeFinder()), R"(
     DynamicStructPatch
     ├─ ensure
     │  ├─ FieldId(1)
@@ -345,7 +347,9 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
   patch.patch<ident::structVal>().patchIfSet<ident::data1>() += ";";
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   expectEq(
-      debugTree(dynPatch, getGraph(), Uri{apache::thrift::uri<MyStruct>()}), R"(
+      debugTree(
+          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}),
+      R"(
     DynamicStructPatch
     ├─ ensure
     │  ╰─ structVal
@@ -367,7 +371,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
                          ╰─ ;
     )");
 
-  expectEq(debugTree(dynPatch, getGraph()), R"(
+  expectEq(debugTree(dynPatch, getTypeFinder()), R"(
     DynamicStructPatch
     ├─ ensure
     │  ╰─ FieldId(11)
@@ -398,7 +402,9 @@ TEST(DebugTreeTest, DynamicContainerPatch) {
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   // TODO(ytj): We knew it's a StructPatch, not UnknownPatch (from the Schema).
   expectEq(
-      debugTree(dynPatch, getGraph(), Uri{apache::thrift::uri<MyStruct>()}), R"(
+      debugTree(
+          dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()}),
+      R"(
     UnknownPatch
     ╰─ patch
        ├─ optListVal
@@ -419,7 +425,7 @@ TEST(DebugTreeTest, DynamicContainerPatch) {
                       ╰─ append
                          ╰─ Suffix
     )");
-  expectEq(debugTree(dynPatch, getGraph()), R"(
+  expectEq(debugTree(dynPatch, getTypeFinder()), R"(
     UnknownPatch
     ╰─ patch
        ├─ FieldId(26)
@@ -452,7 +458,7 @@ TEST(DebugTreeTest, AnyPatch) {
   def.field() = 42;
   anyPatch.patch<ident::any>().ensureAny(type::AnyData::toAny(def).toThrift());
 
-  expectEq(debugTree(anyPatch, getGraph()), R"(
+  expectEq(debugTree(anyPatch, getTypeFinder()), R"(
     DynamicStructPatch
     ├─ ensure
     │  ╰─ any
@@ -488,7 +494,8 @@ TEST(DebugTreeTest, StructWithTypedef) {
   auto v = protocol::asValueStruct<type::struct_t<StructWithTypedef>>(s);
 
   expectEq(
-      debugTree(v, getGraph(), Uri{apache::thrift::uri<StructWithTypedef>()}),
+      debugTree(
+          v, getTypeFinder(), Uri{apache::thrift::uri<StructWithTypedef>()}),
       R"(
     Definition(kind=Struct, name='StructWithTypedef', program='DebugTree.thrift')
     ├─ field
@@ -515,7 +522,7 @@ TEST(DebugTreeTest, StructWithTypedef) {
                    ╰─ 42
     )");
 
-  expectEq(debugTree(v, getGraph()), R"(
+  expectEq(debugTree(v, getTypeFinder()), R"(
     <UNKNOWN STRUCT>
     ├─ FieldId(1)
     │  ╰─ <UNKNOWN STRUCT>
@@ -548,7 +555,7 @@ TEST(DebugTreeTest, PatchAsProtocolObject) {
   expectEq(
       debugTree(
           patch.toObject(),
-          getGraph(),
+          getTypeFinder(),
           Uri{apache::thrift::uri<MyStructPatchStruct>()}),
       R"(
     DynamicStructPatch
@@ -561,7 +568,7 @@ TEST(DebugTreeTest, PatchAsProtocolObject) {
              ╰─ invert
     )");
   expectEq(
-      debugTree(AnyData::toAny(patch).toThrift(), getGraph()),
+      debugTree(AnyData::toAny(patch).toThrift(), getTypeFinder()),
       R"(
     <Thrift.Any, type=struct<MyStructPatch>, protocol=Compact>
     ╰─ DynamicStructPatch

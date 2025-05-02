@@ -186,19 +186,20 @@ std::optional<scope> ifDynamicPatch(
 }
 } // namespace
 
-std::unordered_map<std::string, TypeRef> TypeFinder::genUriToTypeRef() const {
-  std::unordered_map<std::string, TypeRef> ret;
-  for (auto p : graph_.programs()) {
-    for (auto d : p->definitions()) {
-      d->visit([&](auto& def) {
-        if constexpr (__FBTHRIFT_IS_VALID(def, def.uri(), TypeRef::of(def))) {
-          ret.emplace(def.uri(), TypeRef::of(def));
-        }
-      });
-    }
+TypeFinder& TypeFinder::add(const schema::ProgramNode& p) {
+  for (auto d : p.definitions()) {
+    d->visit([&](auto& def) {
+      if constexpr (__FBTHRIFT_IS_VALID(def, def.uri(), TypeRef::of(def))) {
+        uriToType_.emplace(def.uri(), TypeRef::of(def));
+      }
+    });
   }
-  return ret;
+  for (auto i : p.includes()) {
+    add(*i);
+  }
+  return *this;
 }
+
 OptionalTypeRef TypeFinder::findType(const Uri& uri) const {
   if (auto p = folly::get_ptr(uriToType_, uri.uri)) {
     return *p;

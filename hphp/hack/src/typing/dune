@@ -263,7 +263,6 @@
   typing_regex
   typing_sequencing
   typing_shapes
-  typing_special_fun
   typing_structure
   typing_substring
   typing_try

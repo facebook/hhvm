@@ -304,6 +304,7 @@
   typing_memoize
   typing_toplevel
   typing_typedef
+  typing_toplevel_enable
   typing_toplevel_profile)
  (libraries tast_check typing typing_wellformedness)
  (preprocess

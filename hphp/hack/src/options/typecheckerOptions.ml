@@ -240,6 +240,9 @@ let optimized_member_fanout t =
 let profile_top_level_definitions t =
   t.GlobalOptions.tco_profile_top_level_definitions
 
+let typecheck_if_name_matches_regexp t =
+  t.GlobalOptions.tco_typecheck_if_name_matches_regexp
+
 let allow_all_files_for_module_declarations t =
   t.GlobalOptions.tco_allow_all_files_for_module_declarations
 

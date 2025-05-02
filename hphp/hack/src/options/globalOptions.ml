@@ -163,6 +163,7 @@ type t = {
   tco_type_printer_fuel: int;
   tco_specify_manifold_api_key: bool;
   tco_profile_top_level_definitions: bool;
+  tco_typecheck_if_name_matches_regexp: string option;
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
   tco_record_fine_grained_dependencies: bool;
@@ -279,6 +280,7 @@ let default =
     tco_type_printer_fuel = 100;
     tco_specify_manifold_api_key = false;
     tco_profile_top_level_definitions = false;
+    tco_typecheck_if_name_matches_regexp = None;
     tco_allow_all_files_for_module_declarations = true;
     tco_allowed_files_for_module_declarations = [];
     tco_record_fine_grained_dependencies = false;
@@ -394,6 +396,7 @@ let set
     ?tco_type_printer_fuel
     ?tco_specify_manifold_api_key
     ?tco_profile_top_level_definitions
+    ?tco_typecheck_if_name_matches_regexp
     ?tco_allow_all_files_for_module_declarations
     ?tco_allowed_files_for_module_declarations
     ?tco_record_fine_grained_dependencies
@@ -637,6 +640,10 @@ let set
       setting
         tco_profile_top_level_definitions
         options.tco_profile_top_level_definitions;
+    tco_typecheck_if_name_matches_regexp =
+      setting_opt
+        tco_typecheck_if_name_matches_regexp
+        options.tco_typecheck_if_name_matches_regexp;
     tco_allow_all_files_for_module_declarations =
       setting
         tco_allow_all_files_for_module_declarations

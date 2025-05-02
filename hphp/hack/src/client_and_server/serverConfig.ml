@@ -459,6 +459,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
     ?tco_profile_top_level_definitions:
       (bool_opt "profile_top_level_definitions" config)
+    ?tco_typecheck_if_name_matches_regexp:
+      (string_opt "typecheck_if_name_matches_regexp" config)
     ?log_levels:(prepare_log_levels config)
     ?class_pointer_levels:
       (Option.map

@@ -220,6 +220,9 @@ type t = {
   tco_profile_top_level_definitions: bool;
       (** Measures and reports the time it takes to typecheck each top-level
          definition. *)
+  tco_typecheck_if_name_matches_regexp: string option;
+      (** When set, it checks if the identifier for the definition matches the
+        given regular expression and only then typechecks the definition. *)
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
   tco_record_fine_grained_dependencies: bool;
@@ -373,6 +376,7 @@ val set :
   ?tco_type_printer_fuel:int ->
   ?tco_specify_manifold_api_key:bool ->
   ?tco_profile_top_level_definitions:bool ->
+  ?tco_typecheck_if_name_matches_regexp:string ->
   ?tco_allow_all_files_for_module_declarations:bool ->
   ?tco_allowed_files_for_module_declarations:string list ->
   ?tco_record_fine_grained_dependencies:bool ->

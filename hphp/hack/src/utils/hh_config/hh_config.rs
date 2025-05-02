@@ -474,6 +474,7 @@ impl HhConfig {
                 "profile_top_level_definitions",
                 default.tco_profile_top_level_definitions,
             )?,
+            tco_typecheck_if_name_matches_regexp: default.tco_typecheck_if_name_matches_regexp,
             tco_allow_all_files_for_module_declarations: default
                 .tco_allow_all_files_for_module_declarations,
             tco_allowed_files_for_module_declarations: hhconfig

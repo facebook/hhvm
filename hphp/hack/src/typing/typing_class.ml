@@ -23,6 +23,7 @@ module TCO = TypecheckerOptions
 module Cls = Folded_class
 module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
+module Enable = Typing_toplevel_enable
 
 let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
@@ -137,6 +138,7 @@ let method_return ~supportdyn env cls m ret_decl_ty =
 let method_def ~is_disposable env cls m =
   WorkerCancel.raise_if_stop_requested ();
   let tcopt = Env.get_tcopt env in
+  Enable.if_matches_regexp tcopt (Some env) ~default:None m.m_name @@ fun () ->
   Profile.measure_elapsed_time_and_report tcopt (Some env) m.m_name @@ fun () ->
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
@@ -968,6 +970,21 @@ let typeconst_def
       c_tconst_is_ctx;
     } =
   let tcopt = Env.get_tcopt env in
+  Enable.if_matches_regexp
+    tcopt
+    (Some env)
+    ~default:
+      ( env,
+        {
+          c_tconst_name = id;
+          c_tconst_kind;
+          c_tconst_user_attributes = [];
+          c_tconst_span;
+          c_tconst_doc_comment;
+          c_tconst_is_ctx;
+        } )
+    id
+  @@ fun () ->
   Profile.measure_elapsed_time_and_report tcopt (Some env) id @@ fun () ->
   (if Ast_defs.is_c_enum cls.c_kind then
     let (class_pos, class_name) = cls.c_name in
@@ -1079,6 +1096,22 @@ let typeconst_def
 
 let class_const_def ~in_enum_class c cls env cc =
   let tcopt = Env.get_tcopt env in
+  Enable.if_matches_regexp
+    ~default:
+      ( env,
+        ( {
+            cc_user_attributes = [];
+            cc_type = None;
+            cc_id = cc.cc_id;
+            cc_kind = CCAbstract None;
+            cc_span = cc.cc_span;
+            cc_doc_comment = cc.cc_doc_comment;
+          },
+          Typing_make_type.nothing Reason.none ) )
+    tcopt
+    (Some env)
+    cc.cc_id
+  @@ fun () ->
   Profile.measure_elapsed_time_and_report tcopt (Some env) cc.cc_id @@ fun () ->
   let { cc_type = h; cc_id = id; cc_kind = k; _ } = cc in
   let (env, hint_ty, opt_expected, et_enforced) =

@@ -26,6 +26,7 @@ module EnvFromDef = Typing_env_from_def
 module TCO = TypecheckerOptions
 module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
+module Enable = Typing_toplevel_enable
 
 let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
@@ -58,8 +59,9 @@ let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
       false
 
 let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
-  let f = fd.fd_fun in
   let tcopt = Provider_context.get_tcopt ctx in
+  Enable.if_matches_regexp tcopt None ~default:None fd.fd_name @@ fun () ->
+  let f = fd.fd_fun in
   Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
   Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->

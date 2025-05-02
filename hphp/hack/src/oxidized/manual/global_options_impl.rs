@@ -114,6 +114,7 @@ impl Default for GlobalOptions {
             tco_type_printer_fuel: 100,
             tco_specify_manifold_api_key: false,
             tco_profile_top_level_definitions: false,
+            tco_typecheck_if_name_matches_regexp: None,
             tco_allow_all_files_for_module_declarations: false,
             tco_allowed_files_for_module_declarations: vec![],
             tco_record_fine_grained_dependencies: false,

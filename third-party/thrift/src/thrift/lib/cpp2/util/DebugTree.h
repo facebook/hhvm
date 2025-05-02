@@ -108,6 +108,15 @@ scope debugTree(const T& t, const schema::SyntaxGraph& graph, Args&&... args) {
   return debugTree(t, finder, std::forward<Args>(args)...);
 }
 
+template <class T>
+scope debugTree(const T& t) {
+  DebugTree<T> impl;
+  if constexpr (__FBTHRIFT_IS_VALID(impl, impl(t))) {
+    return impl(t);
+  }
+  return impl(t, TypeFinder{}, OptionalTypeRef{});
+}
+
 template <>
 struct DebugTree<bool> {
   scope operator()(bool b, const TypeFinder&, const OptionalTypeRef&) {
@@ -270,6 +279,9 @@ struct DebugTree<T, std::enable_if_t<op::is_patch_v<T>>> {
       ref = finder.findType(Uri{apache::thrift::uri<typename T::value_type>()});
     }
     return debugTree(patch, finder, ref);
+  }
+  scope operator()(const T& t) {
+    return debugTree(t, TypeFinder{}.add<typename T::value_type>());
   }
 };
 

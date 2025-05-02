@@ -205,10 +205,6 @@ type 'ty fun_type = {
 (** = Reason.t * 'phase ty_ *)
 type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
-and decl_ty = decl_phase ty
-
-and locl_ty = locl_phase ty
-
 and type_tag =
   | BoolTag
   | IntTag
@@ -218,7 +214,7 @@ and type_tag =
   | NumTag
   | ResourceTag
   | NullTag
-  | ClassTag of Ast_defs.id_ * locl_ty list
+  | ClassTag of Ast_defs.id_ * locl_phase ty list
 
 and shape_field_predicate = {
   (* T196048813 *)
@@ -267,9 +263,9 @@ and 'phase shape_field_type = {
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
   | Tthis : decl_phase ty_  (** The late static bound type of a class *)
-  | Tapply : (pos_id[@transform.opaque]) * decl_ty list -> decl_phase ty_
+  | Tapply : (pos_id[@transform.opaque]) * decl_phase ty list -> decl_phase ty_
       (** Either an object type or a type alias, ty list are the arguments *)
-  | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
+  | Trefinement : decl_phase ty * decl_phase class_refinement -> decl_phase ty_
       (** 'With' refinements of the form `_ with { type T as int; type TC = C; }`. *)
   | Tmixed : decl_phase ty_
       (** "Any" is the type of a variable with a missing annotation, and "mixed" is
@@ -305,7 +301,7 @@ and _ ty_ =
         *   placeholder in refinement e.g. $x as Vector<_>
         *   placeholder for higher-kinded formal type parameter e.g. foo<T1<_>>(T1<int> $_)
         *)
-  | Tlike : decl_ty -> decl_phase ty_
+  | Tlike : decl_phase ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : (TanySentinel.t[@transform.opaque]) -> 'phase ty_
   | Tnonnull : 'phase ty_
@@ -381,10 +377,11 @@ and _ ty_ =
 
         The second parameter is the list of type arguments to the type.
        *)
-  | Tdependent : (dependent_type[@transform.opaque]) * locl_ty -> locl_phase ty_
-      (** see dependent_type *)
+  | Tdependent :
+      (dependent_type[@transform.opaque]) * locl_phase ty
+      -> locl_phase ty_  (** see dependent_type *)
   | Tclass :
-      (pos_id[@transform.opaque]) * exact * locl_ty list
+      (pos_id[@transform.opaque]) * exact * locl_phase ty list
       -> locl_phase ty_
       (** An instance of a class or interface, ty list are the arguments
        * If exact=Exact, then this represents instances of *exactly* this class
@@ -454,6 +451,10 @@ and 'phase tuple_extra =
     }
   | Tsplat of 'phase ty
 [@@deriving hash, transform]
+
+type decl_ty = decl_phase ty [@@deriving hash]
+
+type locl_ty = locl_phase ty [@@deriving hash]
 
 val equal_decl_ty : decl_ty -> decl_ty -> bool
 

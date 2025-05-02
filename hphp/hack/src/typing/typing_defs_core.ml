@@ -237,10 +237,6 @@ let _hash_fold_phase hsv _ = hsv
 
 type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
-and decl_ty = decl_phase ty
-
-and locl_ty = locl_phase ty
-
 and type_tag =
   | BoolTag
   | IntTag
@@ -250,7 +246,7 @@ and type_tag =
   | NumTag
   | ResourceTag
   | NullTag
-  | ClassTag of Ast_defs.id_ * locl_ty list
+  | ClassTag of Ast_defs.id_ * locl_phase ty list
 
 and shape_field_predicate = {
   (* T196048813 *)
@@ -293,9 +289,9 @@ and 'phase shape_field_type = {
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
   | Tthis : decl_phase ty_  (** The late static bound type of a class *)
-  | Tapply : (pos_id[@transform.opaque]) * decl_ty list -> decl_phase ty_
+  | Tapply : (pos_id[@transform.opaque]) * decl_phase ty list -> decl_phase ty_
       (** Either an object type or a type alias, ty list are the arguments *)
-  | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
+  | Trefinement : decl_phase ty * decl_phase class_refinement -> decl_phase ty_
       (** 'With' refinements of the form `_ with { type T as int; type TC = C; }`. *)
   | Tmixed : decl_phase ty_
       (** "Any" is the type of a variable with a missing annotation, and "mixed" is
@@ -331,7 +327,7 @@ and _ ty_ =
         *   placeholder in refinement e.g. $x as Vector<_>
         *   placeholder for higher-kinded formal type parameter e.g. foo<T1<_>>(T1<int> $_)
         *)
-  | Tlike : decl_ty -> decl_phase ty_
+  | Tlike : decl_phase ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : (TanySentinel.t[@transform.opaque]) -> 'phase ty_
   | Tnonnull : 'phase ty_
@@ -407,10 +403,11 @@ and _ ty_ =
 
         The second parameter is the list of type arguments to the type.
        *)
-  | Tdependent : (dependent_type[@transform.opaque]) * locl_ty -> locl_phase ty_
-      (** see dependent_type *)
+  | Tdependent :
+      (dependent_type[@transform.opaque]) * locl_phase ty
+      -> locl_phase ty_  (** see dependent_type *)
   | Tclass :
-      (pos_id[@transform.opaque]) * exact * locl_ty list
+      (pos_id[@transform.opaque]) * exact * locl_phase ty list
       -> locl_phase ty_
       (** An instance of a class or interface, ty list are the arguments
        * If exact=Exact, then this represents instances of *exactly* this class
@@ -481,6 +478,10 @@ and 'phase tuple_extra =
     }
   | Tsplat of 'phase ty
 [@@deriving hash, transform]
+
+type decl_ty = decl_phase ty [@@deriving hash]
+
+type locl_ty = locl_phase ty [@@deriving hash]
 
 let nonexact = Nonexact { cr_consts = SMap.empty }
 
@@ -1858,19 +1859,174 @@ module Locl_subst = struct
       apply_ty ty ~subst ~combine_reasons
 end
 
-let find_locl_ty locl_ty ~p =
-  let acc = ref None in
-  let on_ty ty ~ctx =
-    let ty =
-      if p ty then begin
-        acc := Some ty;
-        `Stop ty
-      end else
-        `Continue ty
-    in
-    (ctx, ty)
-  in
-  let id_pass = Pass.identity () in
-  let top_down = Pass.{ id_pass with on_ty_locl_ty = Some on_ty } in
-  let _ = transform_ty_locl_ty locl_ty ~ctx:() ~top_down ~bottom_up:id_pass in
-  !acc
+module Find_locl = struct
+  let rec find_ty (ty : locl_ty) ~p =
+    if p ty then
+      Some ty
+    else begin
+      match get_node ty with
+      | Toption ty
+      | Tclass_ptr ty
+      | Taccess (ty, _)
+      | Tdependent (_, ty) ->
+        find_ty ty ~p
+      | Tunion tys
+      | Tintersection tys ->
+        find_first_ty tys ~p
+      | Tvec_or_dict (ty_k, ty_v) -> begin
+        match find_ty ty_k ~p with
+        | None -> find_ty ty_v ~p
+        | res -> res
+      end
+      | Tclass (_, exact, ty_args) -> begin
+        match find_exact exact ~p with
+        | None -> find_first_ty ty_args ~p
+        | res -> res
+      end
+      | Tnewtype (_, ty_args, ty_bound) -> begin
+        match find_first_ty ty_args ~p with
+        | None -> find_ty ty_bound ~p
+        | res -> res
+      end
+      | Ttuple tuple_ty -> find_tuple tuple_ty ~p
+      | Tfun fun_ty -> find_fun fun_ty ~p
+      | Tshape shape_ty -> find_shape shape_ty ~p
+      | Tgeneric _
+      | Tvar _
+      | Tany _
+      | Tnonnull
+      | Tdynamic
+      | Tprim _
+      | Tlabel _
+      | Tneg _ ->
+        None
+    end
+
+  and find_first_ty tys ~p =
+    match tys with
+    | [] -> None
+    | ty :: _ when p ty -> Some ty
+    | _ :: tys -> find_first_ty tys ~p
+
+  and find_tuple { t_required; t_extra } ~p =
+    match find_first_ty t_required ~p with
+    | None -> begin
+      match t_extra with
+      | Tsplat ty -> find_ty ty ~p
+      | Textra { t_optional; t_variadic } -> begin
+        match find_first_ty t_optional ~p with
+        | None -> find_ty t_variadic ~p
+        | res -> res
+      end
+    end
+    | res -> res
+
+  and find_fun
+      {
+        ft_tparams;
+        ft_where_constraints;
+        ft_params;
+        ft_implicit_params;
+        ft_ret;
+        _;
+      }
+      ~p =
+    match find_first_tparam ft_tparams ~p with
+    | None -> begin
+      match find_first_fun_param ft_params ~p with
+      | None -> begin
+        match find_implicit_params ft_implicit_params ~p with
+        | None -> begin
+          match find_first_where_constraint ft_where_constraints ~p with
+          | None -> find_ty ft_ret ~p
+          | res -> res
+        end
+        | res -> res
+      end
+      | res -> res
+    end
+    | res -> res
+
+  and find_first_tparam tparams ~p =
+    match tparams with
+    | [] -> None
+    | tparam :: tparams -> begin
+      match find_tparam tparam ~p with
+      | None -> find_first_tparam tparams ~p
+      | res -> res
+    end
+
+  and find_tparam { tp_constraints; _ } ~p =
+    find_first_constraint tp_constraints ~p
+
+  and find_first_constraint cstrs ~p =
+    match cstrs with
+    | [] -> None
+    | (_, ty) :: _ when p ty -> Some ty
+    | _ :: cstrs -> find_first_constraint cstrs ~p
+
+  and find_first_fun_param fun_params ~p =
+    match fun_params with
+    | [] -> None
+    | { fp_type; _ } :: _ when p fp_type -> Some fp_type
+    | _ :: cstrs -> find_first_fun_param cstrs ~p
+
+  and find_implicit_params { capability } ~p =
+    match capability with
+    | CapDefaults _ -> None
+    | CapTy ty -> find_ty ty ~p
+
+  and find_first_where_constraint cstrs ~p =
+    match cstrs with
+    | [] -> None
+    | cstr :: cstrs -> begin
+      match find_where_constraint cstr ~p with
+      | None -> find_first_where_constraint cstrs ~p
+      | res -> res
+    end
+
+  and find_where_constraint (ty1, _, ty2) ~p =
+    match find_ty ty1 ~p with
+    | None -> find_ty ty2 ~p
+    | res -> res
+
+  and find_shape { s_unknown_value; s_fields; _ } ~p =
+    match find_ty s_unknown_value ~p with
+    | None -> find_first_shape_field (TShapeMap.bindings s_fields) ~p
+    | res -> res
+
+  and find_first_shape_field fields ~p =
+    match fields with
+    | [] -> None
+    | (_, { sft_ty; _ }) :: fields -> begin
+      match find_ty sft_ty ~p with
+      | None -> find_first_shape_field fields ~p
+      | res -> res
+    end
+
+  and find_exact exact ~p =
+    match exact with
+    | Exact -> None
+    | Nonexact { cr_consts } ->
+      find_first_refined_const (SMap.bindings cr_consts) ~p
+
+  and find_first_refined_const cr_consts ~p =
+    match cr_consts with
+    | [] -> None
+    | (_, next) :: rest -> begin
+      match find_refined_const next ~p with
+      | None -> find_first_refined_const rest ~p
+      | res -> res
+    end
+
+  and find_refined_const { rc_bound; _ } ~p =
+    match rc_bound with
+    | TRexact ty -> find_ty ty ~p
+    | TRloose { tr_lower; tr_upper } -> begin
+      match find_first_ty tr_lower ~p with
+      | None -> find_first_ty tr_upper ~p
+      | res -> res
+    end
+end
+
+let find_locl_ty locl_ty ~p = Find_locl.find_ty locl_ty ~p

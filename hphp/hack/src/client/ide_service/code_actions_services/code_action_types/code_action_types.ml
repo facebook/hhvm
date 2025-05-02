@@ -149,23 +149,19 @@ module Type_string = struct
       | _ -> true
     in
     let id = Pass.identity () in
-    let top_down =
-      Pass.
-        {
-          id with
-          on_ctor_ty__Tunion =
-            Some
-              (fun tys ~ctx ->
-                let tys =
-                  match List.filter ~f:is_not_dynamic tys with
-                  | [] -> tys
-                  | tys -> tys
-                in
-                (ctx, `Continue tys));
-        }
+    let on_tunion :
+        type a. a ty list -> ctx:_ -> _ * [> `Continue of a ty list ] =
+     fun tys ~ctx ->
+      let tys =
+        match List.filter ~f:is_not_dynamic tys with
+        | [] -> tys
+        | tys -> tys
+      in
+      (ctx, `Continue tys)
     in
+    let top_down = Pass.{ id with on_ctor_ty__Tunion = Some on_tunion } in
     let bottom_up = id in
-    transform_ty_locl_ty ty ~ctx:() ~top_down ~bottom_up
+    transform_ty_ty ty ~ctx:() ~top_down ~bottom_up
 
   (** Don't truncate types in printing unless they are really big,
      so we almost always generate valid code.

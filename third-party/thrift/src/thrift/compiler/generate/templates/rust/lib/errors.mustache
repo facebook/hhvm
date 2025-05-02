@@ -342,10 +342,10 @@ pub mod {{service:snake}} {
                     ::std::option::Option::Some(inner)
                 }
                 {{/function:sink_exceptions}}
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -531,10 +531,10 @@ pub mod {{service:snake}} {
                     ::std::option::Option::Some(inner)
                 }
                 {{/function:sink_final_response_exceptions}}
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }

@@ -1565,19 +1565,26 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestStream) {
         std::make_unique<NiceMock<MockRocketServerConnectionObserver>>(
             eventSet);
 
-    this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
-      auto connCount = 0;
-      server_->getConnectionManager()->forEachConnection(
-          [&](wangle::ManagedConnection* connection) {
-            if (auto conn = dynamic_cast<RocketServerConnection*>(connection)) {
-              EXPECT_EQ(conn->numObservers(), 0);
-              conn->addObserver(observer.get());
-              EXPECT_EQ(conn->numObservers(), 1);
-              connCount += 1;
-            }
-          });
-      EXPECT_EQ(connCount, 1);
-    });
+    auto connCount = 0;
+    for (int i = 0, numTries = 10; i < numTries; ++i) {
+      this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
+        server_->getConnectionManager()->forEachConnection(
+            [&](wangle::ManagedConnection* connection) {
+              if (auto conn =
+                      dynamic_cast<RocketServerConnection*>(connection)) {
+                EXPECT_EQ(conn->numObservers(), 0);
+                conn->addObserver(observer.get());
+                EXPECT_EQ(conn->numObservers(), 1);
+                connCount += 1;
+              }
+            });
+      });
+      if (connCount != 0) {
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    EXPECT_EQ(connCount, 1);
 
     constexpr size_t kSetupFrameSize(14);
     constexpr size_t kSetupFrameStreamId(0);

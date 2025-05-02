@@ -439,6 +439,55 @@ TEST(DebugTreeTest, DynamicContainerPatch) {
 )");
 }
 
+TEST(DebugTreeTest, DynamicComplexContainerPatch) {
+  Def d;
+  d.field() = 42;
+
+  StructWithTypedefPatch patch;
+  patch.patch<ident::list_field>().push_back(d);
+  patch.patch<ident::set_field>().insert(d);
+  patch.patch<ident::map_field>().patchByKey(42).patch<ident::field>() += 10;
+
+  // FIXME: Map patch should print field name `field` instead of `FieldId(1)`.
+  EXPECT_EQ(to_string(debugTree(patch)), R"(DynamicStructPatch
+├─ ensure
+│  ├─ list_field
+│  │  ╰─ <List>
+│  ├─ set_field
+│  │  ╰─ <Set>
+│  ╰─ map_field
+│     ╰─ <Map>
+╰─ patch
+   ├─ list_field
+   │  ╰─ DynamicListPatch
+   │     ╰─ push_back
+   │        ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+   │           ╰─ field
+   │              ╰─ 42
+   ├─ set_field
+   │  ╰─ DynamicSetPatch
+   │     ╰─ addMulti
+   │        ╰─ <Set>
+   │           ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
+   │              ╰─ field
+   │                 ╰─ 42
+   ╰─ map_field
+      ╰─ DynamicMapPatch
+         ╰─ patch
+            ╰─ KeyAndSubPatch
+               ├─ 42
+               ╰─ DynamicStructPatch
+                  ├─ ensure
+                  │  ╰─ FieldId(1)
+                  │     ╰─ 0
+                  ╰─ patch
+                     ╰─ FieldId(1)
+                        ╰─ I32Patch
+                           ╰─ add
+                              ╰─ 10
+)");
+}
+
 TEST(DebugTreeTest, AnyPatch) {
   MyStructPatch patch;
   patch.patchIfSet<ident::optBoolVal>().invert();

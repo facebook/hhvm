@@ -18,8 +18,6 @@
 
 #include <exception>
 #include <filesystem>
-#include <fstream>
-#include <map>
 #include <memory>
 #include <set>
 #include <sys/stat.h>
@@ -35,7 +33,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/hhvm/process-init.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -51,8 +48,6 @@
 #include "hphp/util/extern-worker.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/match.h"
-#include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/virtual-file-system.h"
 #include "hphp/zend/zend-string.h"

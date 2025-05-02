@@ -431,10 +431,6 @@ void HardwareCounter::RecordSubprocessTimes() {
   s_recordSubprocessTimes = true;
 }
 
-void HardwareCounter::ExcludeKernel() {
-  s_excludeKernel = true;
-}
-
 void HardwareCounter::Init(bool enable, const std::string& events,
                            bool subProc,
                            bool excludeKernel,

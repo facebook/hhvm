@@ -67,7 +67,6 @@ struct HardwareCounter {
                    bool fastReads,
                    int exportInterval);
   static void RecordSubprocessTimes();
-  static void ExcludeKernel();
   static THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
   bool m_countersSet{false};
 
@@ -138,7 +137,6 @@ struct HardwareCounter {
                    bool fastReads,
                    int exportInterval) {}
   static void RecordSubprocessTimes() {}
-  static void ExcludeKernel() {}
 
   struct ExcludeScope final {};
 

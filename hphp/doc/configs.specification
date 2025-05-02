@@ -793,7 +793,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - std::string Eval.ProfileHWEvents = "", UNKNOWN
 
-- bool Eval.ProfileHWExcludeKernel = false, UNKNOWN
+- bool Eval.ProfileHWExcludeKernel = true, UNKNOWN
 
 - bool Eval.ProfileHWFastReads = false, UNKNOWN
 

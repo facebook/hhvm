@@ -23,6 +23,7 @@
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
 
 #include <folly/Overload.h>
+#include <folly/Utility.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 #include <folly/lang/Exception.h>
@@ -271,19 +272,19 @@ class SerializableRecordWrapper final
   static Text text(std::string_view str) { return Text(str); }
 
   enum class Kind {
-    BOOL = T::Type::boolDatum,
-    INT8 = T::Type::int8Datum,
-    INT16 = T::Type::int16Datum,
-    INT32 = T::Type::int32Datum,
-    INT64 = T::Type::int64Datum,
-    FLOAT32 = T::Type::float32Datum,
-    FLOAT64 = T::Type::float64Datum,
-    TEXT = T::Type::textDatum,
-    BYTE_ARRAY = T::Type::byteArrayDatum,
-    FIELD_SET = T::Type::fieldSetDatum,
-    LIST = T::Type::listDatum,
-    SET = T::Type::setDatum,
-    MAP = T::Type::mapDatum,
+    BOOL = folly::to_underlying(T::Type::boolDatum),
+    INT8 = folly::to_underlying(T::Type::int8Datum),
+    INT16 = folly::to_underlying(T::Type::int16Datum),
+    INT32 = folly::to_underlying(T::Type::int32Datum),
+    INT64 = folly::to_underlying(T::Type::int64Datum),
+    FLOAT32 = folly::to_underlying(T::Type::float32Datum),
+    FLOAT64 = folly::to_underlying(T::Type::float64Datum),
+    TEXT = folly::to_underlying(T::Type::textDatum),
+    BYTE_ARRAY = folly::to_underlying(T::Type::byteArrayDatum),
+    FIELD_SET = folly::to_underlying(T::Type::fieldSetDatum),
+    LIST = folly::to_underlying(T::Type::listDatum),
+    SET = folly::to_underlying(T::Type::setDatum),
+    MAP = folly::to_underlying(T::Type::mapDatum),
   };
   /**
    * Produces the current variant alternative.

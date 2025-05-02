@@ -410,12 +410,12 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
       StructDictInit frame(s_runtimeStruct, btArgs.m_parserFrame ? 4 : 2);
       frame.set(s_file_idx, s_file,
-                Variant(VarNR(const_cast<StringData*>(func->filename()))));
+               Variant(VarNR(const_cast<StringData*>(func->filename()))));
       frame.set(s_line_idx, s_line, func->getLineNumber(curFrm.bcOff()));
       if (btArgs.m_parserFrame) {
         frame.set(s_function_idx, s_function, s_include);
         frame.set(s_args_idx, s_args,
-                  make_vec_array(VarNR(btArgs.m_parserFrame->filename.get())));
+                 make_vec_array(VarNR(btArgs.m_parserFrame->filename.get())));
       }
       bt.append(frame.toVariant());
       depth++;
@@ -431,8 +431,27 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Do not capture frame for HPHP only functions.
     if (func->isNoInjection()) continue;
 
-    StructDictInit frame(s_runtimeStruct, 8);
+    bool includeFrame = !btArgs.m_onlyMetadataFrames;
+    TypedValue* metadataVal = nullptr;
 
+    // Check for metadata if needed
+    if ((btArgs.m_onlyMetadataFrames || btArgs.m_withMetadata) && frm.localsAvailable()) {
+      auto local = func->lookupVarId(s_86metadata.get());
+      if (local != kInvalidId) {
+        auto const val = frm.local(local);
+        if (type(val) != KindOfUninit) {
+          assertx(tvIsPlausible(*val));
+          includeFrame = true;
+          metadataVal = val;
+        }
+      }
+    }
+
+    if (!includeFrame) {
+      continue;
+    }
+    
+    StructDictInit frame(s_runtimeStruct, 8);
     auto const curUnit = func->unit();
 
     // Builtins and generators don't have a file and line number.
@@ -451,8 +470,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     auto funcname = func->nameWithClosureName();
 
     if (Cfg::Eval::EnableArgsInBacktraces &&
-        frm.localsAvailable() &&
-        func->hasReifiedGenerics()) {
+      frm.localsAvailable() &&
+      func->hasReifiedGenerics()) {
       // First local is always $0ReifiedGenerics which comes right after params
       auto const generics = frm.local(func->reifiedGenericsLocalId());
       if (type(generics) != KindOfUninit) {
@@ -519,15 +538,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_args_idx, s_args, args);
     }
 
-    if (btArgs.m_withMetadata && frm.localsAvailable()) {
-      auto local = func->lookupVarId(s_86metadata.get());
-      if (local != kInvalidId) {
-        auto const val = frm.local(local);
-        if (type(val) != KindOfUninit) {
-          always_assert(tvIsPlausible(*val));
-          frame.set(s_metadata_idx, s_metadata, Variant{variant_ref{val}});
-        }
-      }
+    // Add metadata if we found it earlier
+    if (metadataVal) {
+      frame.set(s_metadata_idx, s_metadata, Variant{variant_ref{metadataVal}});
     }
 
     bt.append(frame.toVariant());

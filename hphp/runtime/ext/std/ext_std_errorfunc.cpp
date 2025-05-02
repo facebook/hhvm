@@ -56,6 +56,7 @@ const StaticString
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = (1 << 0);
 const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = (1 << 1);
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA = (1 << 16);
+const int64_t k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES = (1 << 17);
 
 const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA = (1 << 0);
 
@@ -64,10 +65,12 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                                      int64_t limit /* = 0 */) {
   bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
+  bool only_metadata_frames = options & k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
   return createBacktrace(BacktraceArgs()
                          .withThis(provide_object)
                          .withMetadata(provide_metadata)
+                         .onlyMetadataFrames(only_metadata_frames)
                          .ignoreArgs(ignore_args)
                          .setLimit(limit));
 }
@@ -451,6 +454,8 @@ void StandardExtension::registerNativeErrorFunc() {
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,
               k_DEBUG_BACKTRACE_PROVIDE_METADATA);
+  HHVM_RC_INT(DEBUG_BACKTRACE_ONLY_METADATA_FRAMES,
+              k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES);
   HHVM_RC_INT(DEBUG_BACKTRACE_HASH_CONSIDER_METADATA,
               k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA);
   HHVM_RC_INT(E_ERROR, (int)ErrorMode::ERROR);

@@ -117,6 +117,7 @@ Array HHVM_FUNCTION(backtrace,
   bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
+  bool only_metadata_frames = options & k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES;
 
   if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -137,6 +138,7 @@ Array HHVM_FUNCTION(backtrace,
                          .withSelf()
                          .withThis(provide_object)
                          .withMetadata(provide_metadata)
+                         .onlyMetadataFrames(only_metadata_frames)
                          .ignoreArgs(ignore_args)
                          .setLimit(limit));
 }

@@ -155,6 +155,14 @@ struct BacktraceArgs {
   }
 
   /**
+   * Return only frames with metadata associated by having a 86metadata local.
+   */
+  BacktraceArgs& onlyMetadataFrames(bool onlyMetadataFrames = true) {
+    m_onlyMetadataFrames = onlyMetadataFrames;
+    return *this;
+  }
+
+  /**
    * Do not return function arguments for frames on the stack.
    */
   BacktraceArgs& ignoreArgs(bool ignoreArgs = true) {
@@ -217,6 +225,7 @@ struct BacktraceArgs {
       !m_withSelf &&
       (!Cfg::Eval::EnableArgsInBacktraces || !m_withThis) &&
       !m_withMetadata &&
+      !m_onlyMetadataFrames &&
       (!Cfg::Eval::EnableArgsInBacktraces || !m_withArgValues) &&
       !m_withArgNames &&
       !m_limit &&
@@ -231,6 +240,7 @@ private:
   bool m_withSelf{false};
   bool m_withThis{false};
   bool m_withMetadata{false};
+  bool m_onlyMetadataFrames{false};
   bool m_withArgValues{true};
   bool m_withArgNames{false};
   int m_limit{0};

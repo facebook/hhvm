@@ -25,6 +25,7 @@ namespace HPHP {
 extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
 extern const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS;
 extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA;
+extern const int64_t k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES;
 
 extern const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA;
 

@@ -326,6 +326,7 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
   auto opts = exception_get_trace_options();
   bool provide_object = opts & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool provide_metadata = opts & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
+  bool only_metadata_frames = opts & k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES;
   bool ignore_args = opts & k_DEBUG_BACKTRACE_IGNORE_ARGS;
 
   auto trace = createBacktrace(BacktraceArgs()
@@ -333,6 +334,7 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
                                .withSelf()
                                .withThis(provide_object)
                                .withMetadata(provide_metadata)
+                               .onlyMetadataFrames(only_metadata_frames)
                                .ignoreArgs(ignore_args));
   auto tv = make_array_like_tv(trace.detach());
   tvMove(tv, trace_lval);

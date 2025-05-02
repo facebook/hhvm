@@ -347,6 +347,7 @@ function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
  * @param int $options - bitmask of the following options:
  *   DEBUG_BACKTRACE_PROVIDE_OBJECT
  *   DEBUG_BACKTRACE_PROVIDE_METADATA
+ *   DEBUG_BACKTRACE_ONLY_METADATA_FRAMES
  *   DEBUG_BACKTRACE_IGNORE_ARGS
  * @param int $limit - the maximum number of stack frames returned.
  *   By default (limit=0) it returns all stack frames.

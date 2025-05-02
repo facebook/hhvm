@@ -25,9 +25,7 @@
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 class ClientFactory {
  public:
@@ -49,6 +47,4 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     const ClientConfig&,
     ClientRpcStats&);
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

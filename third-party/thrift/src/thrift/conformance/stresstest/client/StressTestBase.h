@@ -19,9 +19,7 @@
 #include <folly/coro/Task.h>
 #include <thrift/conformance/stresstest/client/StressTestClient.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 /**
  * Base interface for stress tests
@@ -34,6 +32,4 @@ class StressTestBase {
       StressTestClient* client) const = 0;
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

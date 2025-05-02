@@ -16,9 +16,7 @@
 
 #include <thrift/conformance/stresstest/client/StressTestRegistry.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 StressTestRegistry& StressTestRegistry::getInstance() {
   static folly::Indestructible<StressTestRegistry> instance;
@@ -44,6 +42,4 @@ std::unique_ptr<StressTestBase> StressTestRegistry::create(
   return !ptr ? nullptr : (*ptr)();
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

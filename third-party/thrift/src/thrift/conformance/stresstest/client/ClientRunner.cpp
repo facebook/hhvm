@@ -23,9 +23,7 @@
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 void ClientThreadMemoryStats::combine(const ClientThreadMemoryStats& other) {
   threadStart += other.threadStart;
@@ -275,6 +273,4 @@ void ClientRunner::resetStats() {
   }
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

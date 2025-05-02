@@ -22,9 +22,7 @@
 #include <thrift/conformance/stresstest/client/StressTestRegistry.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 void StressTestStats::log() const {
   LOG(INFO) << fmt::format(
@@ -175,6 +173,4 @@ void TestRunner::runFixedCount() {
   }
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

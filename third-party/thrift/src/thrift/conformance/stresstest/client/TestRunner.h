@@ -24,9 +24,7 @@
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 struct StressTestStats {
   ClientThreadMemoryStats memoryStats;
@@ -65,6 +63,4 @@ class TestRunner {
   void runFixedCount();
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

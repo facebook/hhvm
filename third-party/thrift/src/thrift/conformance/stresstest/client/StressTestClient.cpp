@@ -20,9 +20,7 @@
 
 #include <folly/coro/Sleep.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 namespace {
 constexpr double kHistogramMax = 1000.0 * 60.0; // 1 minute
@@ -193,6 +191,4 @@ folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
   stats_.numSuccess++;
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

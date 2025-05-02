@@ -20,9 +20,7 @@
 #include <folly/Indestructible.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 /**
  * Registry for stress tests
@@ -48,6 +46,4 @@ class StressTestRegistry {
   std::unordered_map<std::string, folly::Function<Create>> registry_;
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

@@ -24,9 +24,7 @@
 #include <folly/executors/FunctionScheduler.h>
 #include <thrift/conformance/stresstest/client/BaseLoadGenerator.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 class PoissonLoadGenerator : public BaseLoadGenerator {
  public:
@@ -55,6 +53,4 @@ class PoissonLoadGenerator : public BaseLoadGenerator {
   void generateRequestSignal();
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

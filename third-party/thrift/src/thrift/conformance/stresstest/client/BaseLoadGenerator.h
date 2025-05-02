@@ -19,9 +19,7 @@
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Coroutine.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 /**
  * Generates a Signals that indicates the client should create a request.
@@ -35,6 +33,4 @@ class BaseLoadGenerator {
   virtual void start() = 0;
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

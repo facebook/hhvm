@@ -20,9 +20,7 @@
 #include <folly/stats/Histogram.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 class ClientThread;
 
@@ -98,6 +96,4 @@ class ThriftStressTestClient : public StressTestClient {
   const bool enableChecksum_;
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

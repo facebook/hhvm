@@ -16,9 +16,7 @@
 
 #include <thrift/conformance/stresstest/client/PoissonLoadGenerator.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 folly::coro::AsyncGenerator<PoissonLoadGenerator::Count>
 PoissonLoadGenerator::getRequestCount() {
@@ -51,6 +49,4 @@ PoissonLoadGenerator::~PoissonLoadGenerator() {
   running_ = false;
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

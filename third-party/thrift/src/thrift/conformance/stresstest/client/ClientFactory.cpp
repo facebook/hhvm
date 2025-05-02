@@ -30,9 +30,7 @@
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 namespace {
 
@@ -288,6 +286,4 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   customFizzVerifierFn = std::move(fn);
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

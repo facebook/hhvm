@@ -27,9 +27,7 @@
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 class ClientThread;
 
@@ -64,6 +62,4 @@ class ClientRunner {
   std::vector<std::unique_ptr<ClientThread>> clientThreads_;
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

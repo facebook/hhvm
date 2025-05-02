@@ -22,11 +22,7 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-
-#include <filesystem>
-#include <memory>
 
 #include <folly/portability/Stdlib.h>
 #include <folly/portability/SysStat.h>

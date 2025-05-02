@@ -29,8 +29,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/unique-stubs.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/concurrent-scalable-cache.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/struct-log.h"

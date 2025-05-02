@@ -15,20 +15,12 @@
 */
 #include "hphp/runtime/base/autoload-handler.h"
 
-#include <algorithm>
-
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
-#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"

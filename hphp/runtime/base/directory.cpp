@@ -22,8 +22,6 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/server/static-content-cache.h"
 
-#include <sys/types.h>
-
 namespace HPHP {
 
 IMPLEMENT_RESOURCE_ALLOCATION(PlainDirectory)

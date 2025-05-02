@@ -18,7 +18,6 @@
 #include <folly/Bits.h>
 
 #include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-typed-value.h"

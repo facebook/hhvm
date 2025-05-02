@@ -17,8 +17,6 @@
 
 #include <memory>
 
-#include <folly/ScopeGuard.h>
-
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-url.h"

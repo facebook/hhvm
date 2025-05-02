@@ -14,20 +14,13 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/heap-graph.h"
+
 #include "hphp/runtime/base/heap-algorithms.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/ext/weakref/weakref-data-handle.h"
-#include "hphp/util/alloc.h"
 #include "hphp/util/ptr-map.h"
 
 #include <vector>
-#include <folly/Range.h>
 
 namespace HPHP {
 

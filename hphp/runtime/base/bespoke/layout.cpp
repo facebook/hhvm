@@ -22,17 +22,13 @@
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
-#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/util/trace.h"
 
 #include <atomic>
 #include <array>
-#include <folly/lang/Bits.h>
 #include <vector>
 #include <sstream>
 

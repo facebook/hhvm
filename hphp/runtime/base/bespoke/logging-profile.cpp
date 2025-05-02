@@ -25,8 +25,6 @@
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/server/memory-stats.h"
-#include "hphp/runtime/vm/jit/mcgen-translate.h"
-#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/hash-map.h"
 
@@ -35,7 +33,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <sstream>
 
 namespace HPHP::bespoke {
 

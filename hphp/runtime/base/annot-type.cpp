@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/isame-log.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"

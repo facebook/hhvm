@@ -14,12 +14,9 @@
   +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
-#include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/sort-flags.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 

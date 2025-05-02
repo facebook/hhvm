@@ -16,20 +16,15 @@
 
 #include "hphp/runtime/base/apc-object.h"
 
-#include <cstdlib>
-
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/apc-collection.h"
-#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 

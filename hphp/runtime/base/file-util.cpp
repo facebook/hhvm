@@ -17,10 +17,7 @@
 
 #include <algorithm>
 #include <vector>
-#include <fstream>
 #include <filesystem>
-
-#include <sys/types.h>
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
@@ -30,9 +27,7 @@
 
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/network.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
 

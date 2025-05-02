@@ -24,8 +24,6 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-dict-defs.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 

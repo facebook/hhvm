@@ -16,14 +16,11 @@
 #include "hphp/runtime/base/code-coverage.h"
 
 #include <fstream>
-#include <vector>
 
-#include <folly/String.h>
-
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 #include "hphp/util/logger.h"
 

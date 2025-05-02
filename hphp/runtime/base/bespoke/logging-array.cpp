@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
 
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
@@ -26,11 +25,7 @@
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
-#include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
-#include <algorithm>
 #include <atomic>
 
 namespace HPHP::bespoke {

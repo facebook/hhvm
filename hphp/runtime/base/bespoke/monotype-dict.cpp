@@ -17,21 +17,15 @@
 
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/monotype-dict-x64.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/runtime/base/tv-uncounted.h"
-#include "hphp/runtime/base/vanilla-dict-defs.h"
 
-#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include <algorithm>
-#include <atomic>
 
 namespace HPHP::bespoke {
 

@@ -37,7 +37,6 @@
 #include "hphp/util/text-util.h"
 
 #include <folly/Format.h>
-#include <folly/Singleton.h>
 
 #include <dlfcn.h>
 #include <spawn.h>

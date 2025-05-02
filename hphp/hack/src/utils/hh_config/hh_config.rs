@@ -311,7 +311,11 @@ impl HhConfig {
             )?,
             use_oxidized_by_ref_decls: hhconfig.get_bool_or(
                 "use_oxidized_by_ref_decls",
-                default.use_oxidized_by_ref_decls,
+                hh_conf.get_bool_or(
+                    // The JKs are only read into hh_conf
+                    "use_oxidized_by_ref_decls",
+                    default.use_oxidized_by_ref_decls,
+                )?,
             )?,
         };
         let rollouts = SavedStateRollouts::make(

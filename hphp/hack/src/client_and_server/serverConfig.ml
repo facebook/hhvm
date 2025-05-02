@@ -588,6 +588,7 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
               package_info;
+              use_oxidized_by_ref_decls = local_config.use_oxidized_by_ref_decls;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:

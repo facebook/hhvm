@@ -176,34 +176,40 @@ std::string_view toString(Primitive p) {
 }
 
 FunctionStream::FunctionStream(
-    TypeRef&& payloadType, std::vector<TypeRef>&& exceptions)
+    TypeRef&& payloadType, std::vector<FunctionNode::Exception>&& exceptions)
     : payloadType_(folly::copy_to_unique_ptr(std::move(payloadType))),
       exceptions_(std::move(exceptions)) {}
 
-folly::span<const TypeRef> FunctionStream::exceptions() const {
+folly::span<const FunctionNode::Exception> FunctionStream::exceptions() const {
   return exceptions_;
 }
 
 FunctionSink::FunctionSink(
     TypeRef&& payloadType,
     TypeRef&& finalResponseType,
-    std::vector<TypeRef>&& clientExceptions,
-    std::vector<TypeRef>&& serverExceptions)
+    std::vector<FunctionNode::Exception>&& clientExceptions,
+    std::vector<FunctionNode::Exception>&& serverExceptions)
     : payloadType_(folly::copy_to_unique_ptr(std::move(payloadType))),
       finalResponseType_(
           folly::copy_to_unique_ptr(std::move(finalResponseType))),
       clientExceptions_(std::move(clientExceptions)),
       serverExceptions_(std::move(serverExceptions)) {}
 
-folly::span<const TypeRef> FunctionSink::clientExceptions() const {
+folly::span<const FunctionNode::Exception> FunctionSink::clientExceptions()
+    const {
   return clientExceptions_;
 }
 
-folly::span<const TypeRef> FunctionSink::serverExceptions() const {
+folly::span<const FunctionNode::Exception> FunctionSink::serverExceptions()
+    const {
   return serverExceptions_;
 }
 
 TypeRef FunctionParam::type() const {
+  return *type_;
+}
+
+TypeRef FunctionException::type() const {
   return *type_;
 }
 
@@ -214,7 +220,7 @@ FunctionNode::FunctionNode(
     Response&& response,
     std::string_view name,
     std::vector<Param>&& params,
-    std::vector<TypeRef>&& exceptions)
+    std::vector<Exception>&& exceptions)
     : detail::WithResolver(resolver),
       detail::WithName(name),
       detail::WithAnnotations(std::move(annotations)),
@@ -227,7 +233,7 @@ const RpcInterfaceNode& FunctionNode::parent() const {
   return detail::lazyResolve(resolver(), parent_).asRpcInterface();
 }
 
-folly::span<const TypeRef> FunctionNode::exceptions() const {
+folly::span<const FunctionNode::Exception> FunctionNode::exceptions() const {
   return exceptions_;
 }
 
@@ -491,9 +497,10 @@ void FunctionNode::Stream::printTo(
   //     stream<{payloadType} throws (... {exceptions} ...)>
 
   payloadType().printTo(scope.make_child("payloadType = "), visited);
-  if (folly::span<const TypeRef> excepts = exceptions(); !excepts.empty()) {
+  if (folly::span<const FunctionNode::Exception> excepts = exceptions();
+      !excepts.empty()) {
     tree_printer::scope& exceptionsScope = scope.make_child("exceptions");
-    for (const TypeRef& e : excepts) {
+    for (const FunctionNode::Exception& e : excepts) {
       e.printTo(exceptionsScope.make_child(), visited);
     }
   }
@@ -508,22 +515,24 @@ void FunctionNode::Sink::printTo(
   //          {finalResponseType} throws (... {serverExceptions} ...)>
 
   payloadType().printTo(scope.make_child("payloadType = "), visited);
-  if (folly::span<const TypeRef> exceptions = clientExceptions();
+  if (folly::span<const FunctionNode::Exception> exceptions =
+          clientExceptions();
       !exceptions.empty()) {
     tree_printer::scope& clientExceptionsScope =
         scope.make_child("clientExceptions");
-    for (const TypeRef& e : exceptions) {
+    for (const FunctionNode::Exception& e : exceptions) {
       e.printTo(clientExceptionsScope.make_child(), visited);
     }
   }
 
   finalResponseType().printTo(
       scope.make_child("finalResponseType = "), visited);
-  if (folly::span<const TypeRef> exceptions = serverExceptions();
+  if (folly::span<const FunctionNode::Exception> exceptions =
+          serverExceptions();
       !exceptions.empty()) {
     tree_printer::scope& serverExceptionsScope =
         scope.make_child("serverExceptions");
-    for (const TypeRef& e : exceptions) {
+    for (const FunctionNode::Exception& e : exceptions) {
       e.printTo(serverExceptionsScope.make_child(), visited);
     }
   }
@@ -556,6 +565,12 @@ void FunctionNode::Param::printTo(
   type().printTo(scope.make_child("type = "), visited);
 }
 
+void FunctionNode::Exception::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("FunctionNode::Exception (id={}, name='{}')", id(), name());
+  type().printTo(scope.make_child("type = "), visited);
+}
+
 void FunctionNode::printTo(
     tree_printer::scope& scope, detail::VisitationTracker& visited) const {
   scope.print("FunctionNode (name='{}')", name());
@@ -566,6 +581,14 @@ void FunctionNode::printTo(
     tree_printer::scope& paramsScope = scope.make_child("params");
     for (const FunctionNode::Param& p : paramList) {
       p.printTo(paramsScope.make_child(), visited);
+    }
+  }
+
+  if (folly::span<const FunctionNode::Exception> exceptionsList = exceptions();
+      !exceptionsList.empty()) {
+    tree_printer::scope& exceptionsScope = scope.make_child("exceptions");
+    for (const FunctionNode::Exception& e : exceptionsList) {
+      e.printTo(exceptionsScope.make_child(), visited);
     }
   }
 }

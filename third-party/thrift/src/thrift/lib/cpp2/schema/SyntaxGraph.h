@@ -216,6 +216,10 @@ class FunctionResponse;
  * A parameter that is passed to a Thrift RPC.
  */
 class FunctionParam;
+/**
+ * An exception in the throws clause of a Thrift RPC.
+ */
+class FunctionException;
 
 /**
  * A descriptor of a data type within Thrift. A `TypeRef` is one of:
@@ -838,15 +842,44 @@ class Map final : public detail::WithDebugPrinting<Map> {
   folly::not_null_unique_ptr<TypeRef> valueType_;
 };
 
+class FunctionException final
+    : folly::MoveOnly,
+      detail::WithResolver,
+      detail::WithName,
+      public detail::WithDebugPrinting<FunctionException> {
+ public:
+  using detail::WithName::name;
+  FieldId id() const { return id_; }
+  TypeRef type() const;
+
+  FunctionException(
+      const detail::Resolver& resolver,
+      FieldId id,
+      std::string_view name,
+      folly::not_null_unique_ptr<TypeRef> type)
+      : detail::WithResolver(resolver),
+        detail::WithName(name),
+        id_(id),
+        type_(std::move(type)) {}
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
+ private:
+  FieldId id_;
+  folly::not_null_unique_ptr<TypeRef> type_;
+};
+
 class FunctionStream final : folly::MoveOnly,
                              public detail::WithDebugPrinting<FunctionStream> {
  public:
   // A Thrift stream in IDL takes the form:
   //     stream<{payloadType} throws (... {exceptions} ...)>
   const TypeRef& payloadType() const { return *payloadType_; }
-  folly::span<const TypeRef> exceptions() const;
+  folly::span<const FunctionException> exceptions() const;
 
-  FunctionStream(TypeRef&& payloadType, std::vector<TypeRef>&& exceptions);
+  FunctionStream(
+      TypeRef&& payloadType, std::vector<FunctionException>&& exceptions);
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -854,7 +887,7 @@ class FunctionStream final : folly::MoveOnly,
  private:
   // Heap usage prevents mutual recursion with `DefinitionNode`.
   folly::not_null_unique_ptr<TypeRef> payloadType_;
-  std::vector<TypeRef> exceptions_;
+  std::vector<FunctionException> exceptions_;
 };
 
 class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
@@ -1039,14 +1072,14 @@ class FunctionSink final : folly::MoveOnly,
   //          {finalResponseType} throws (... {serverExceptions} ...)>
   const TypeRef& payloadType() const { return *payloadType_; }
   const TypeRef& finalResponseType() const { return *finalResponseType_; }
-  folly::span<const TypeRef> clientExceptions() const;
-  folly::span<const TypeRef> serverExceptions() const;
+  folly::span<const FunctionException> clientExceptions() const;
+  folly::span<const FunctionException> serverExceptions() const;
 
   FunctionSink(
       TypeRef&& payloadType,
       TypeRef&& finalResponseType,
-      std::vector<TypeRef>&& clientExceptions,
-      std::vector<TypeRef>&& serverExceptions);
+      std::vector<FunctionException>&& clientExceptions,
+      std::vector<FunctionException>&& serverExceptions);
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -1055,8 +1088,8 @@ class FunctionSink final : folly::MoveOnly,
   // Heap usage prevents mutual recursion with `DefinitionNode`.
   folly::not_null_unique_ptr<TypeRef> payloadType_;
   folly::not_null_unique_ptr<TypeRef> finalResponseType_;
-  std::vector<TypeRef> clientExceptions_;
-  std::vector<TypeRef> serverExceptions_;
+  std::vector<FunctionException> clientExceptions_;
+  std::vector<FunctionException> serverExceptions_;
 };
 
 class FunctionResponse final
@@ -1160,10 +1193,11 @@ class FunctionNode final : folly::MoveOnly,
   using Stream = FunctionStream;
   using Response = FunctionResponse;
   using Param = FunctionParam;
+  using Exception = FunctionException;
 
   const Response& response() const { return response_; }
   folly::span<const Param> params() const { return params_; }
-  folly::span<const TypeRef> exceptions() const;
+  folly::span<const Exception> exceptions() const;
 
   FunctionNode(
       const detail::Resolver& resolver,
@@ -1172,7 +1206,7 @@ class FunctionNode final : folly::MoveOnly,
       Response&& response,
       std::string_view name,
       std::vector<Param>&& params,
-      std::vector<TypeRef>&& exceptions);
+      std::vector<Exception>&& exceptions);
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -1181,7 +1215,7 @@ class FunctionNode final : folly::MoveOnly,
   detail::DefinitionKeyRef parent_;
   Response response_;
   std::vector<Param> params_;
-  std::vector<TypeRef> exceptions_;
+  std::vector<Exception> exceptions_;
 };
 
 class RpcInterfaceNode : detail::WithDefinition, detail::WithUri {

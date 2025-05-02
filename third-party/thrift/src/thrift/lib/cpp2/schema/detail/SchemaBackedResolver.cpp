@@ -645,9 +645,13 @@ FunctionNode SchemaIndex::createFunction(
 
   const auto collectExceptions =
       [this](folly::span<const type::Field> exceptions) {
-        std::vector<TypeRef> result;
+        std::vector<FunctionNode::Exception> result;
         for (const type::Field& ex : exceptions) {
-          result.emplace_back(typeOf(*ex.type()));
+          result.emplace_back(
+              resolver_,
+              *ex.id(),
+              *ex.name(),
+              folly::copy_to_unique_ptr(typeOf(*ex.type())));
         }
         return result;
       };

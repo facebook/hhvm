@@ -67,7 +67,7 @@ exception TestException {
 const TestStruct testConst = TestStruct{field1 = 2, field2 = VALUE_1};
 
 interaction TestInteraction {
-  i32 foo(1: TestRecursiveStruct input);
+  i32 foo(1: TestRecursiveStruct input) throws (1: TestException ex);
 }
 
 service TestService {

@@ -292,7 +292,7 @@ string t_js_generator::js_includes() {
 string t_js_generator::render_includes() {
   if (gen_node_) {
     const vector<t_program*>& includes = program_->get_includes_for_codegen();
-    string result = "";
+    string result;
     for (size_t i = 0; i < includes.size(); ++i) {
       result += "var " + includes[i]->name() + "_ttypes = require('" +
           js_node_module(includes[i]) + "/" + includes[i]->name() +
@@ -960,7 +960,7 @@ void t_js_generator::generate_service_rest(const t_service* tservice) {
  * @param tservice The service to generate a server for.
  */
 void t_js_generator::generate_service_client(const t_service* tservice) {
-  string extends = "";
+  string extends;
 
   if (gen_node_) {
     f_service_ << js_namespace(tservice->program()) << service_name_
@@ -1703,7 +1703,7 @@ string t_js_generator::function_signature(
  */
 string t_js_generator::argument_list(
     const t_paramlist& tparamlist, bool include_callback) {
-  string result = "";
+  string result;
 
   const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;

@@ -333,7 +333,7 @@ std::string t_cocoa_generator::cocoa_thrift_imports() {
       kExceptionInheritanceRootObjectName,
   };
 
-  std::string result = "";
+  std::string result;
   for (const auto& systemImport : systemImports) {
     if (import_path_ == "") {
       result += "#import \"" + systemImport + ".h\"\n";
@@ -2961,11 +2961,11 @@ std::string t_cocoa_generator::function_signature(const t_function* tfunction) {
  * objective-c parameter list
  */
 std::string t_cocoa_generator::argument_list(const t_paramlist& tparamlist) {
-  std::string result = "";
+  std::string result;
 
   bool first = true;
   for (const auto& field : tparamlist.fields()) {
-    std::string argPrefix = "";
+    std::string argPrefix;
     if (first) {
       first = false;
     } else {

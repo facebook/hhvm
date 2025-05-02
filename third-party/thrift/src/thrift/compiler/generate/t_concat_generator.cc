@@ -83,7 +83,7 @@ void t_concat_generator::generate_program() {
 }
 
 string t_concat_generator::escape_string(const string& in) const {
-  string result = "";
+  string result;
   for (string::const_iterator it = in.begin(); it < in.end(); it++) {
     std::map<char, std::string>::const_iterator res = escape_.find(*it);
     if (res != escape_.end()) {

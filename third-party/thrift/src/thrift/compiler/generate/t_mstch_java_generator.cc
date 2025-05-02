@@ -140,8 +140,8 @@ string toHex(const string& s) {
   return ret.str().substr(0, 8);
 }
 
-std::string str_type_list = "";
-std::string type_list_hash = "";
+std::string str_type_list;
+std::string type_list_hash;
 
 struct type_mapping {
   std::string uri;

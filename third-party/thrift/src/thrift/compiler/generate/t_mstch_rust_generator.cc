@@ -1406,7 +1406,7 @@ class rust_mstch_struct : public mstch_struct {
           get_types_import_name(annotation->program(), options_);
 
       std::string ret;
-      std::string delimiter = "";
+      std::string delimiter;
 
       for (const auto& item : annotation->value()->get_map()) {
         if (item.first->get_string() == "derives") {
@@ -1519,7 +1519,7 @@ class rust_mstch_enum : public mstch_enum {
           get_types_import_name(annotation->program(), options_);
 
       std::string ret;
-      std::string delimiter = "";
+      std::string delimiter;
 
       for (const auto& item : annotation->value()->get_map()) {
         if (item.first->get_string() == "derives") {

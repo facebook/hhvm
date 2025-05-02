@@ -2386,8 +2386,8 @@ void t_java_deprecated_generator::generate_service(const t_service* tservice) {
  */
 void t_java_deprecated_generator::generate_service_interface(
     const t_service* tservice) {
-  string extends = "";
-  string extends_iface = "";
+  string extends;
+  string extends_iface;
   if (tservice->get_extends() != nullptr) {
     extends = type_name(tservice->get_extends());
     extends_iface = " extends " + extends + ".Iface";
@@ -2416,8 +2416,8 @@ void t_java_deprecated_generator::generate_service_interface(
 
 void t_java_deprecated_generator::generate_service_async_interface(
     const t_service* tservice) {
-  string extends = "";
-  string extends_iface = "";
+  string extends;
+  string extends_iface;
   if (tservice->get_extends() != nullptr) {
     extends = type_name(tservice->get_extends());
     extends_iface = " extends " + extends + ".AsyncIface";
@@ -2471,8 +2471,8 @@ void t_java_deprecated_generator::generate_service_helpers(
  */
 void t_java_deprecated_generator::generate_service_client(
     const t_service* tservice) {
-  string extends = "";
-  string extends_client = "";
+  string extends;
+  string extends_client;
   if (tservice->get_extends() != nullptr) {
     extends = type_name(tservice->get_extends());
     extends_client = " extends " + extends + ".Client";
@@ -2707,7 +2707,7 @@ void t_java_deprecated_generator::generate_service_client(
 void t_java_deprecated_generator::generate_service_async_client(
     const t_service* tservice) {
   string extends = "TAsyncClient";
-  string extends_client = "";
+  string extends_client;
   if (tservice->get_extends() != nullptr) {
     extends = type_name(tservice->get_extends()) + ".AsyncClient";
   }
@@ -2907,8 +2907,8 @@ void t_java_deprecated_generator::generate_service_server(
   vector<t_function*>::iterator f_iter;
 
   // Extends stuff
-  string extends = "";
-  string extends_processor = "";
+  string extends;
+  string extends_processor;
   if (tservice->get_extends() != nullptr) {
     extends = type_name(tservice->get_extends());
     extends_processor = " extends " + extends + ".Processor";
@@ -3817,7 +3817,7 @@ string t_java_deprecated_generator::async_function_call_arglist(
     string result_handler_symbol,
     bool /*use_base_method*/,
     bool include_types) {
-  std::string arglist = "";
+  std::string arglist;
   if (tfunc->params().get_members().size() > 0) {
     arglist = argument_list(tfunc->params(), include_types) + ", ";
   }
@@ -3835,7 +3835,7 @@ string t_java_deprecated_generator::async_function_call_arglist(
  */
 string t_java_deprecated_generator::argument_list(
     const t_paramlist& tparamlist, bool include_types) {
-  string result = "";
+  string result;
 
   const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;
@@ -3859,7 +3859,7 @@ string t_java_deprecated_generator::async_argument_list(
     const t_paramlist& tparamlist,
     string result_handler_symbol,
     bool include_types) {
-  string result = "";
+  string result;
   const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;
   bool first = true;
@@ -4040,7 +4040,7 @@ void t_java_deprecated_generator::generate_isset_set(
 
 std::string t_java_deprecated_generator::get_enum_class_name(
     const t_type* type) {
-  string package = "";
+  string package;
   const t_program* program = type->program();
   if (program != nullptr && program != program_) {
     package = program->get_namespace(namespace_key_);

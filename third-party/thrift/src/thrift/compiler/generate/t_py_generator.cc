@@ -409,11 +409,11 @@ void t_py_generator::generate_json_field(
   } else if (type->is_enum()) {
     generate_json_enum(out, (t_enum*)type, name, prefix_json);
   } else if (type->is_primitive_type()) {
-    string conversion_function = "";
+    string conversion_function;
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
-    string number_limit = "";
-    string number_negative_limit = "";
+    string number_limit;
+    string number_negative_limit;
     switch (tbase) {
       case t_primitive_type::TYPE_VOID:
       case t_primitive_type::TYPE_STRING:
@@ -625,9 +625,9 @@ void t_py_generator::generate_json_map_key(
   } else if (type->is_primitive_type()) {
     t_primitive_type::t_primitive tbase =
         ((t_primitive_type*)type)->primitive_type();
-    string conversion_function = "";
-    string number_limit = "";
-    string number_negative_limit = "";
+    string conversion_function;
+    string number_limit;
+    string number_negative_limit;
     bool generate_assignment = true;
     switch (tbase) {
       case t_primitive_type::TYPE_STRING:
@@ -867,7 +867,7 @@ string t_py_generator::rename_reserved_keywords(const string& value) {
  */
 string t_py_generator::render_includes() {
   const vector<t_program*>& includes = program_->get_includes_for_codegen();
-  string result = "";
+  string result;
   for (size_t i = 0; i < includes.size(); ++i) {
     result += "import " + get_real_py_module(includes[i]) + ".ttypes\n";
   }
@@ -2325,8 +2325,8 @@ void t_py_generator::generate_py_converter_helpers(
 void t_py_generator::generate_service_interface(
     const t_service* tservice, bool with_context) {
   string iface_prefix = with_context ? "Context" : "";
-  string extends = "";
-  string extends_if = "";
+  string extends;
+  string extends_if;
   if (tservice->get_extends() != nullptr) {
     extends = service_name(tservice->get_extends());
     extends_if = "(" + extends + "." + iface_prefix + "Iface)";
@@ -2392,8 +2392,8 @@ void t_py_generator::generate_service_interface(
  * @param tservice The service to generate a server for.
  */
 void t_py_generator::generate_service_client(const t_service* tservice) {
-  string extends = "";
-  string extends_client = "";
+  string extends;
+  string extends_client;
   if (tservice->get_extends() != nullptr) {
     extends = service_name(tservice->get_extends());
     extends_client = extends + ".Client, ";
@@ -2938,8 +2938,8 @@ void t_py_generator::generate_service_server(
   // Generate the dispatch methods
   const auto& functions = get_functions(tservice);
 
-  string extends = "";
-  string extends_processor = "";
+  string extends;
+  string extends_processor;
   if (tservice->get_extends() != nullptr) {
     extends = service_name(tservice->get_extends());
     extends_processor = extends + "." + class_prefix + "Processor, ";
@@ -3090,7 +3090,7 @@ void t_py_generator::generate_process_function(
     string handler =
         "self._handler." + rename_reserved_keywords(tfunction->get_name());
 
-    string args_list = "";
+    string args_list;
     bool first = true;
     if (with_context) {
       args_list += "handler_ctx";
@@ -3776,7 +3776,7 @@ string t_py_generator::function_signature_if(
  * Renders a field list
  */
 string t_py_generator::argument_list(const t_paramlist& tparamlist) {
-  string result = "";
+  string result;
 
   const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;

@@ -234,7 +234,7 @@ public:
   }
 
   /**
-   * Send the commmand to server's DebuggerProxy and expect same type of command
+   * Send the command to server's DebuggerProxy and expect same type of command
    * back. The WithNestedExecution version supports commands that cause the
    * server to run PHP on send when we want to be able to debug that PHP before
    * completing the command.

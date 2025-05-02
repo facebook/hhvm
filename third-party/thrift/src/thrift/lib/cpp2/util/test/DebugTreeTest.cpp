@@ -478,10 +478,10 @@ TEST(DebugTreeTest, DynamicComplexContainerPatch) {
                ├─ 42
                ╰─ DynamicStructPatch
                   ├─ ensure
-                  │  ╰─ FieldId(1)
+                  │  ╰─ field
                   │     ╰─ 0
                   ╰─ patch
-                     ╰─ FieldId(1)
+                     ╰─ field
                         ╰─ I32Patch
                            ╰─ add
                               ╰─ 10

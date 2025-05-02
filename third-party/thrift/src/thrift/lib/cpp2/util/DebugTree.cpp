@@ -629,7 +629,7 @@ scope DebugTree<protocol::DynamicMapPatch>::operator()(
         const protocol::Value& k, const protocol::DynamicPatch& patch) {
       auto root = scope::make_root("KeyAndSubPatch");
       root.make_child() = debugTree(k, finder, getMapKey(typeRef));
-      root.make_child() = debugTree(patch, finder, getMapKey(typeRef));
+      root.make_child() = debugTree(patch, finder, getMapValue(typeRef));
       addCombinableOp("patch", k, std::move(root));
     }
   };

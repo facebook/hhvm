@@ -88,12 +88,12 @@ TYPED_TEST(ForEachFieldTest, test_metadata) {
     EXPECT_EQ(
         meta.type_ref()->getType(),
         (vector{
-            meta.type_ref()->t_primitive,
-            meta.type_ref()->t_primitive,
-            meta.type_ref()->t_enum,
-            meta.type_ref()->t_enum,
-            meta.type_ref()->t_union,
-            meta.type_ref()->t_union,
+            apache::thrift::metadata::ThriftType::Type::t_primitive,
+            apache::thrift::metadata::ThriftType::Type::t_primitive,
+            apache::thrift::metadata::ThriftType::Type::t_enum,
+            apache::thrift::metadata::ThriftType::Type::t_enum,
+            apache::thrift::metadata::ThriftType::Type::t_union,
+            apache::thrift::metadata::ThriftType::Type::t_union,
         })[i]);
     EXPECT_EQ(
         *meta.is_optional_ref(),

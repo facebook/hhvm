@@ -81,7 +81,8 @@ TYPED_TEST(VisitUnionTest, basic) {
   a.str_ref() = str;
   TestFixture::adapter(a, [](auto&& meta, auto&& v) {
     EXPECT_EQ(*meta.name_ref(), "str");
-    EXPECT_EQ(meta.type_ref()->getType(), meta.type_ref()->t_primitive);
+    EXPECT_EQ(
+        meta.type_ref()->getType(), metadata::ThriftType::Type::t_primitive);
     EXPECT_EQ(*meta.id_ref(), 2);
     EXPECT_EQ(*meta.is_optional_ref(), false);
     if constexpr (std::is_same_v<decltype(v), std::string&>) {
@@ -95,7 +96,8 @@ TYPED_TEST(VisitUnionTest, basic) {
   a.int64_ref() = int64;
   TestFixture::adapter(a, [](auto&& meta, auto&& v) {
     EXPECT_EQ(*meta.name_ref(), "int64");
-    EXPECT_EQ(meta.type_ref()->getType(), meta.type_ref()->t_primitive);
+    EXPECT_EQ(
+        meta.type_ref()->getType(), metadata::ThriftType::Type::t_primitive);
     EXPECT_EQ(*meta.id_ref(), 1);
     EXPECT_EQ(*meta.is_optional_ref(), false);
     EXPECT_EQ(typeid(v), typeid(int64_t));
@@ -110,7 +112,7 @@ TYPED_TEST(VisitUnionTest, basic) {
   a.list_i32_ref() = list_i32;
   TestFixture::adapter(a, [](auto&& meta, auto&& v) {
     EXPECT_EQ(*meta.name_ref(), "list_i32");
-    EXPECT_EQ(meta.type_ref()->getType(), meta.type_ref()->t_list);
+    EXPECT_EQ(meta.type_ref()->getType(), metadata::ThriftType::Type::t_list);
     EXPECT_EQ(*meta.id_ref(), 4);
     EXPECT_EQ(*meta.is_optional_ref(), false);
     if constexpr (std::is_same_v<decltype(v), std::vector<int32_t>&>) {
@@ -128,7 +130,7 @@ TYPED_TEST(VisitUnionTest, Metadata) {
     // ThriftType itself is union, we can visit it like ordinary thrift union
     TestFixture::adapter(*m.type_ref(), [](auto&& meta, std::any value) {
       EXPECT_EQ(*meta.name_ref(), "t_primitive");
-      EXPECT_EQ(meta.type_ref()->getType(), meta.type_ref()->t_enum);
+      EXPECT_EQ(meta.type_ref()->getType(), metadata::ThriftType::Type::t_enum);
       EXPECT_EQ(
           std::any_cast<metadata::ThriftPrimitiveType>(value),
           metadata::ThriftPrimitiveType::THRIFT_I64_TYPE);

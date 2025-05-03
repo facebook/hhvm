@@ -396,20 +396,20 @@ class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
   }
 
   enum class Kind {
-    BOOL = T::Type::boolType,
-    BYTE = T::Type::byteType,
-    I16 = T::Type::i16Type,
-    I32 = T::Type::i32Type,
-    I64 = T::Type::i64Type,
-    FLOAT = T::Type::floatType,
-    DOUBLE = T::Type::doubleType,
-    STRING = T::Type::stringType,
-    BINARY = T::Type::binaryType,
-    ANY = T::Type::anyType,
-    URI = T::Type::userDefinedType,
-    LIST = T::Type::listType,
-    SET = T::Type::setType,
-    MAP = T::Type::mapType,
+    BOOL = folly::to_underlying(T::Type::boolType),
+    BYTE = folly::to_underlying(T::Type::byteType),
+    I16 = folly::to_underlying(T::Type::i16Type),
+    I32 = folly::to_underlying(T::Type::i32Type),
+    I64 = folly::to_underlying(T::Type::i64Type),
+    FLOAT = folly::to_underlying(T::Type::floatType),
+    DOUBLE = folly::to_underlying(T::Type::doubleType),
+    STRING = folly::to_underlying(T::Type::stringType),
+    BINARY = folly::to_underlying(T::Type::binaryType),
+    ANY = folly::to_underlying(T::Type::anyType),
+    URI = folly::to_underlying(T::Type::userDefinedType),
+    LIST = folly::to_underlying(T::Type::listType),
+    SET = folly::to_underlying(T::Type::setType),
+    MAP = folly::to_underlying(T::Type::mapType),
   };
   /**
    * Produces the current variant alternative.

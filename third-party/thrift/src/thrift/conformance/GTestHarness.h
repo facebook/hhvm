@@ -266,7 +266,8 @@ testing::AssertionResult runTestCase(Client& client, const TestCase& testCase) {
       return testing::AssertionFailure() << "Invalid test client.";
     default:
       return testing::AssertionFailure()
-          << "Unsupported test case type: " << testCase.test()->getType();
+          << "Unsupported test case type: "
+          << util::enumNameSafe(testCase.test()->getType());
   }
 }
 

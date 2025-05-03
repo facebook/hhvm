@@ -227,7 +227,7 @@ TEST(DebugTreeTest, DynamicPrimitivePatch) {
   EXPECT_EQ(
       to_string(debugTree(
           dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
-      R"(DynamicStructPatch
+      R"(<StructPatch>
 ├─ ensure
 │  ├─ boolVal
 │  │  ╰─ false
@@ -280,8 +280,7 @@ TEST(DebugTreeTest, DynamicPrimitivePatch) {
          ╰─ append
             ╰─ )
 )");
-  EXPECT_EQ(
-      to_string(debugTree(dynPatch, getTypeFinder())), R"(DynamicStructPatch
+  EXPECT_EQ(to_string(debugTree(dynPatch, getTypeFinder())), R"(<StructPatch>
 ├─ ensure
 │  ├─ FieldId(1)
 │  │  ╰─ false
@@ -343,7 +342,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
   EXPECT_EQ(
       to_string(debugTree(
           dynPatch, getTypeFinder(), Uri{apache::thrift::uri<MyStruct>()})),
-      R"(DynamicStructPatch
+      R"(<StructPatch>
 ├─ ensure
 │  ╰─ structVal
 │     ╰─ Definition(kind=Struct, name='MyData', program='DebugTree.thrift')
@@ -353,7 +352,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
 │           ╰─ 0
 ╰─ patch
    ╰─ structVal
-      ╰─ DynamicStructPatch
+      ╰─ <StructPatch>
          ├─ ensure
          │  ╰─ data1
          │     ╰─ ""
@@ -364,8 +363,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
                      ╰─ ;
 )");
 
-  EXPECT_EQ(
-      to_string(debugTree(dynPatch, getTypeFinder())), R"(DynamicStructPatch
+  EXPECT_EQ(to_string(debugTree(dynPatch, getTypeFinder())), R"(<StructPatch>
 ├─ ensure
 │  ╰─ FieldId(11)
 │     ╰─ <UNKNOWN STRUCT>
@@ -375,7 +373,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
 │           ╰─ 0
 ╰─ patch
    ╰─ FieldId(11)
-      ╰─ DynamicStructPatch
+      ╰─ <StructPatch>
          ├─ ensure
          │  ╰─ FieldId(1)
          │     ╰─ ""
@@ -400,16 +398,16 @@ TEST(DebugTreeTest, DynamicContainerPatch) {
       R"(UnknownPatch
 ╰─ patch
    ├─ optListVal
-   │  ╰─ DynamicListPatch
+   │  ╰─ <ListPatch>
    │     ╰─ push_back
    │        ╰─ 42
    ├─ optSetVal
-   │  ╰─ DynamicSetPatch
+   │  ╰─ <SetPatch>
    │     ╰─ addMulti
    │        ╰─ <Set>
    │           ╰─ SetElem
    ╰─ optMapVal
-      ╰─ DynamicMapPatch
+      ╰─ <MapPatch>
          ╰─ patch
             ╰─ KeyAndSubPatch
                ├─ Key
@@ -420,16 +418,16 @@ TEST(DebugTreeTest, DynamicContainerPatch) {
   EXPECT_EQ(to_string(debugTree(dynPatch, getTypeFinder())), R"(UnknownPatch
 ╰─ patch
    ├─ FieldId(26)
-   │  ╰─ DynamicListPatch
+   │  ╰─ <ListPatch>
    │     ╰─ push_back
    │        ╰─ 42
    ├─ FieldId(27)
-   │  ╰─ DynamicSetPatch
+   │  ╰─ <SetPatch>
    │     ╰─ addMulti
    │        ╰─ <Set>
    │           ╰─ SetElem
    ╰─ FieldId(28)
-      ╰─ DynamicMapPatch
+      ╰─ <MapPatch>
          ╰─ patch
             ╰─ KeyAndSubPatch
                ├─ Key
@@ -449,7 +447,7 @@ TEST(DebugTreeTest, DynamicComplexContainerPatch) {
   patch.patch<ident::map_field>().patchByKey(42).patch<ident::field>() += 10;
 
   // FIXME: Map patch should print field name `field` instead of `FieldId(1)`.
-  EXPECT_EQ(to_string(debugTree(patch)), R"(DynamicStructPatch
+  EXPECT_EQ(to_string(debugTree(patch)), R"(<StructPatch>
 ├─ ensure
 │  ├─ list_field
 │  │  ╰─ <List>
@@ -459,24 +457,24 @@ TEST(DebugTreeTest, DynamicComplexContainerPatch) {
 │     ╰─ <Map>
 ╰─ patch
    ├─ list_field
-   │  ╰─ DynamicListPatch
+   │  ╰─ <ListPatch>
    │     ╰─ push_back
    │        ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
    │           ╰─ field
    │              ╰─ 42
    ├─ set_field
-   │  ╰─ DynamicSetPatch
+   │  ╰─ <SetPatch>
    │     ╰─ addMulti
    │        ╰─ <Set>
    │           ╰─ Definition(kind=Struct, name='Def', program='DebugTree.thrift')
    │              ╰─ field
    │                 ╰─ 42
    ╰─ map_field
-      ╰─ DynamicMapPatch
+      ╰─ <MapPatch>
          ╰─ patch
             ╰─ KeyAndSubPatch
                ├─ 42
-               ╰─ DynamicStructPatch
+               ╰─ <StructPatch>
                   ├─ ensure
                   │  ╰─ field
                   │     ╰─ 0
@@ -498,8 +496,7 @@ TEST(DebugTreeTest, AnyPatch) {
   def.field() = 42;
   anyPatch.patch<ident::any>().ensureAny(type::AnyData::toAny(def).toThrift());
 
-  EXPECT_EQ(
-      to_string(debugTree(anyPatch, getTypeFinder())), R"(DynamicStructPatch
+  EXPECT_EQ(to_string(debugTree(anyPatch, getTypeFinder())), R"(<StructPatch>
 ├─ ensure
 │  ╰─ any
 │     ╰─ <Maybe Empty Thrift.Any>
@@ -595,7 +592,7 @@ TEST(DebugTreeTest, PatchAsProtocolObject) {
           patch.toObject(),
           getTypeFinder(),
           Uri{apache::thrift::uri<MyStructPatchStruct>()})),
-      R"(DynamicStructPatch
+      R"(<StructPatch>
 ├─ ensure
 │  ╰─ boolVal
 │     ╰─ false
@@ -607,7 +604,7 @@ TEST(DebugTreeTest, PatchAsProtocolObject) {
   EXPECT_EQ(
       to_string(debugTree(AnyData::toAny(patch).toThrift(), getTypeFinder())),
       R"(<Thrift.Any, type=struct<MyStructPatch>, protocol=Compact>
-╰─ DynamicStructPatch
+╰─ <StructPatch>
    ├─ ensure
    │  ╰─ boolVal
    │     ╰─ false

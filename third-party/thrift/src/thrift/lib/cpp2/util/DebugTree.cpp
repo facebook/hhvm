@@ -582,7 +582,7 @@ scope DebugTree<protocol::DynamicListPatch>::operator()(
 
   Visitor v{finder, listType};
   patch.customVisit(v);
-  return v.finalize("DynamicListPatch");
+  return v.finalize("<ListPatch>");
 }
 
 scope DebugTree<protocol::DynamicSetPatch>::operator()(
@@ -600,7 +600,7 @@ scope DebugTree<protocol::DynamicSetPatch>::operator()(
 
   Visitor v{finder, setType};
   patch.customVisit(v);
-  return v.finalize("DynamicSetPatch");
+  return v.finalize("<SetPatch>");
 }
 
 scope DebugTree<protocol::DynamicMapPatch>::operator()(
@@ -636,7 +636,7 @@ scope DebugTree<protocol::DynamicMapPatch>::operator()(
 
   Visitor v{finder, mapType};
   patch.customVisit(v);
-  return v.finalize("DynamicMapPatch");
+  return v.finalize("<MapPatch>");
 }
 
 template <bool IsUnion>
@@ -658,7 +658,7 @@ static scope debugTreeForDynamicStructurePatch(
 
   Visitor v{finder, type};
   patch.customVisit(v);
-  return v.finalize(IsUnion ? "DynamicUnionPatch" : "DynamicStructPatch");
+  return v.finalize(IsUnion ? "<UnionPatch>" : "<StructPatch>");
 }
 
 scope DebugTree<protocol::DynamicStructPatch>::operator()(

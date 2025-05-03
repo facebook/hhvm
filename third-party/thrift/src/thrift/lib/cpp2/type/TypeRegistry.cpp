@@ -105,8 +105,8 @@ const op::Serializer& TypeRegistry::TypeEntry::getSerializer(
     const Protocol& protocol) const {
   auto itr = protocols.find(protocol);
   if (itr == protocols.end()) {
-    // TODO(afuller): Improve error message.
-    folly::throw_exception<std::out_of_range>("Protocol not registered.");
+    folly::throw_exception<std::out_of_range>(
+        fmt::format("Protocol not registered {}.", protocol.name()));
   }
   return *itr->second;
 }

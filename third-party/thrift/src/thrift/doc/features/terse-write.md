@@ -8,9 +8,9 @@ A [terse](../idl/field-qualifiers#fields-annotated-with-thrifttersewrite) field 
 * reduce memory usage by eliminating needs of isset bit
 * reduce the need for `optional` keyword that does not need to distinguish unset and [intrinsic default value](../idl/#intrinsic-default-values)
 * replace nuanced backfill semantic from the custom default of `unqualified` fields
-* replace ill-formed deprecated `terse_write` compiler option version
+* replace ill-formed deprecated `deprecated_terse_write` compiler option version or `@cpp.DeprecatedTerseWrite` annotation
 
-If a terse field equals to the [intrinsic default value](../idl/#default-values), it will be skipped during serialization. This differs from `optional` field that is serialized if it is explicitly set or `unqualified` field that is always serialized. A terse field will be cleared to the intrinsic default value, ignoring the [custom default value](../idl/#default-values) if exist. Please refer to the rest of the guide for more detail.
+If a terse field equals to the [intrinsic default value](../idl/#default-values), it will be skipped during serialization. This differs from `optional` field that is serialized if it is explicitly set or `unqualified` field that is always serialized. A terse field does not support specifying a custom default value. Please refer to the rest of the guide for more detail.
 
 :::note
 Setting a terse field to the intrinsic default value is effectively identical to clearing the field.
@@ -102,7 +102,7 @@ union Foo {
 
 Use `unqualified` field if you need to distinguish whether a field was explicitly set or not. `unqualified` field is always serialized regardless whether it was explicitly set or unset. This may be desirable to verify whether the client’s schema included the field.
 
-Use `unqualified` field if a field has custom default, which implies that a field will not likely have the intrinsic default value unless if it was intentionally cleared. This also applies if you are certain that a field will not likely have the intrinsic default value, avoid using a terse field.
+Use `unqualified` field if a field has custom default. `terse` field does not support specifying custom default value. This also applies if you are certain that a field will not likely have the intrinsic default value, avoid using a terse field.
 
 Otherwise, use `terse` field as it will reduce the network bandwidth and reduce memory usage.
 
@@ -112,7 +112,7 @@ Both `optional` and terse field can be used to save the network bandwidth, as bo
 
 ### Custom Default
 
-Custom defaults are generally discouraged for terse fields, since the usage of custom default indicates that the field is less likely to be empty.
+Custom defaults are not supported for terse fields.
 
 ```
 include "thrift/annotation/thrift.thrift"
@@ -121,28 +121,9 @@ package "facebook.com/thrift/test"
 
 struct Foo {
   @thrift.TerseWrite
-  1: i32 terse_field = 42;
+  1: i32 terse_field = 42; // Thrift compiler error
   2: i32 unqualified_field = 43;
 }
-```
-
-When struct `Foo` is constructed, the field `field1` will have the custom default value. Unless the field is explicitly set to the intrinsic default (i.e. 0), it will always be serialized.
-
-Another thing to note is that custom defaults are also ignored during deserialization, since the deserializer cannot distinguish if the field is missing from the schema version mismatch or if the field was skipped during the serialization. Therefore, the deserializer will always set the field to the intrinsic default value when the field does not exist in the serialized binary. This differ from the unqualified field where custom default values can be use to backfill the missing field with some custom values.
-
-```
-// Example in C++
-// default constructed
-Foo foo1;
-EXPECT_EQ(foo1.terse_field(), 42);
-EXPECT_EQ(foo1.unqualified_field(), 43);
-
-// constructed from deserialization
-// imagine the client did not have both terse_field and unqualified_field
-// in the schema and sent empty struct over the wire.
-Foo foo2 = apache::thrift::CompactSerializer::deserialize(serialized_binary);
-EXPECT_EQ(foo2.terse_field(), 0);
-EXPECT_EQ(foo2.unqualified_field(), 43);
 ```
 
 ### Terse Struct Fields

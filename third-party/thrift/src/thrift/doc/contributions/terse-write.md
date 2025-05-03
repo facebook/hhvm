@@ -33,7 +33,7 @@ If a terse field is not part of the serialized binary, there could be two possib
 1. The field equals to the intrinsic default value, and the serialization was skipped.
 2. The field was newly added, and it was not included in the binary that serialized the struct.
 
-Therefore, a terse field always need to be set to intrinsic default before deserialization even for a terse field with the custom default. For a nested structured type, we only clear nested terse fields before deserialization to keep the semantic other qualifiers. Please refer to the [user guide](../features/terse-write/#custom-default) for examples.
+Therefore, a terse field always need to be set to intrinsic default before deserialization. For a nested structured type, we only clear nested terse fields before deserialization to keep the semantic other qualifiers. Please refer to the [user guide](../features/terse-write/#custom-default) for examples.
 
 
 

@@ -106,14 +106,18 @@ void checkField(const char* identName) {
   static_assert(std::is_same_v<op::get_type_tag<Struct, Ordinal>, TypeTag>);
   static_assert(std::is_same_v<op::get_ident<Struct, Ordinal>, Ident>);
   static_assert(std::is_same_v<op::get_field_tag<Struct, Ordinal>, FieldTag>);
-  EXPECT_EQ((op::get_name_v<Struct, Ordinal>), identName);
+  if constexpr (Ordinal::value != FieldOrdinal{0}) {
+    EXPECT_EQ((op::get_name_v<Struct, Ordinal>), identName);
+  }
 
   static_assert(std::is_same_v<op::get_ordinal<Struct, Id>, Ordinal>);
   static_assert(std::is_same_v<op::get_field_id<Struct, Id>, Id>);
   static_assert(std::is_same_v<op::get_type_tag<Struct, Id>, TypeTag>);
   static_assert(std::is_same_v<op::get_ident<Struct, Id>, Ident>);
   static_assert(std::is_same_v<op::get_field_tag<Struct, Id>, FieldTag>);
-  EXPECT_EQ((op::get_name_v<Struct, Id>), identName);
+  if constexpr (Ordinal::value != FieldOrdinal{0}) {
+    EXPECT_EQ((op::get_name_v<Struct, Id>), identName);
+  }
 
   if constexpr (is_type_tag_unique && !std::is_void_v<TypeTag>) {
     static_assert(std::is_same_v<op::get_ordinal<Struct, TypeTag>, Ordinal>);
@@ -121,7 +125,9 @@ void checkField(const char* identName) {
     static_assert(std::is_same_v<op::get_type_tag<Struct, TypeTag>, TypeTag>);
     static_assert(std::is_same_v<op::get_ident<Struct, TypeTag>, Ident>);
     static_assert(std::is_same_v<op::get_field_tag<Struct, TypeTag>, FieldTag>);
-    EXPECT_EQ((op::get_name_v<Struct, TypeTag>), identName);
+    if constexpr (Ordinal::value != FieldOrdinal{0}) {
+      EXPECT_EQ((op::get_name_v<Struct, TypeTag>), identName);
+    }
   }
 
   if constexpr (!std::is_void_v<Ident>) {
@@ -130,7 +136,9 @@ void checkField(const char* identName) {
     static_assert(std::is_same_v<op::get_type_tag<Struct, Ident>, TypeTag>);
     static_assert(std::is_same_v<op::get_ident<Struct, Ident>, Ident>);
     static_assert(std::is_same_v<op::get_field_tag<Struct, Ident>, FieldTag>);
-    EXPECT_EQ((op::get_name_v<Struct, Ident>), identName);
+    if constexpr (Ordinal::value != FieldOrdinal{0}) {
+      EXPECT_EQ((op::get_name_v<Struct, Ident>), identName);
+    }
   }
 
   if constexpr (!std::is_void_v<FieldTag>) {
@@ -140,7 +148,9 @@ void checkField(const char* identName) {
     static_assert(std::is_same_v<op::get_ident<Struct, FieldTag>, Ident>);
     static_assert(
         std::is_same_v<op::get_field_tag<Struct, FieldTag>, FieldTag>);
-    EXPECT_EQ((op::get_name_v<Struct, FieldTag>), identName);
+    if constexpr (Ordinal::value != FieldOrdinal{0}) {
+      EXPECT_EQ((op::get_name_v<Struct, FieldTag>), identName);
+    }
   }
 }
 

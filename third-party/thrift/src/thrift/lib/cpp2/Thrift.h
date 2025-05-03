@@ -118,6 +118,9 @@ struct struct_private_access {
 
   template <typename T, typename Ord>
   static const folly::StringPiece __fbthrift_get_field_name() {
+    static_assert(
+        1 <= size_t(Ord::value) && size_t(Ord::value) <= num_fields<T>,
+        "Field not found");
     return T::__fbthrift_get_field_name(Ord::value);
   }
 

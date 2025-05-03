@@ -1,0 +1,36 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{> Autogen}}
+#include "{{program:include_prefix}}{{program:name}}_types.tcc"
+
+namespace {{program:qualified_namespace}} {
+{{#program:split_structs}}
+
+{{#struct:extra_namespace}}
+namespace {{struct:extra_namespace}} {
+{{/struct:extra_namespace}}
+template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+{{#struct:extra_namespace}}
+} // namespace {{struct:extra_namespace}}
+{{/struct:extra_namespace}}
+{{/program:split_structs}}
+
+} // namespace {{program:qualified_namespace}}

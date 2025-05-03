@@ -2525,11 +2525,16 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
           std::shared_ptr<mstch_base>(split_program),
           "module_types_compact.cpp",
           name + "_types_compact." + s + ".split.cpp");
+      render_to_file(
+          std::shared_ptr<mstch_base>(split_program),
+          "module_types_binary.cpp",
+          name + "_types_binary." + s + ".split.cpp");
     }
   } else {
     render_to_file(prog, "module_types.cpp", name + "_types.cpp");
     render_to_file(
         prog, "module_types_compact.cpp", name + "_types_compact.cpp");
+    render_to_file(prog, "module_types_binary.cpp", name + "_types_binary.cpp");
   }
 
   render_to_file(

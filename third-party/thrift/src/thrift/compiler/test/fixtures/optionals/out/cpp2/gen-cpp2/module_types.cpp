@@ -144,11 +144,11 @@ void swap([[maybe_unused]] Color& a, [[maybe_unused]] Color& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void Color::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Color::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Color::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Color::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void Color::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Color::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Color::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -313,11 +313,11 @@ void swap([[maybe_unused]] Vehicle& a, [[maybe_unused]] Vehicle& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void Vehicle::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Vehicle::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Vehicle::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Vehicle::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void Vehicle::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Vehicle::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Vehicle::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -564,11 +564,11 @@ void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void Person::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Person::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Person::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Person::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void Person::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Person::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Person::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

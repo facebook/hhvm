@@ -98,11 +98,11 @@ void swap([[maybe_unused]] Fields& a, [[maybe_unused]] Fields& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void Fields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Fields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Fields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Fields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void Fields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Fields::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Fields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -197,11 +197,11 @@ void swap([[maybe_unused]] FieldsInjectedToEmptyStruct& a, [[maybe_unused]] Fiel
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void FieldsInjectedToEmptyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t FieldsInjectedToEmptyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t FieldsInjectedToEmptyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldsInjectedToEmptyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void FieldsInjectedToEmptyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t FieldsInjectedToEmptyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t FieldsInjectedToEmptyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -302,11 +302,11 @@ void swap([[maybe_unused]] FieldsInjectedToStruct& a, [[maybe_unused]] FieldsInj
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void FieldsInjectedToStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t FieldsInjectedToStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t FieldsInjectedToStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldsInjectedToStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void FieldsInjectedToStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t FieldsInjectedToStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t FieldsInjectedToStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -417,11 +417,11 @@ void swap([[maybe_unused]] FieldsInjectedWithIncludedStruct& a, [[maybe_unused]]
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void FieldsInjectedWithIncludedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t FieldsInjectedWithIncludedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void FieldsInjectedWithIncludedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t FieldsInjectedWithIncludedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

@@ -249,11 +249,11 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void MyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void MyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -394,11 +394,11 @@ void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void Containers::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Containers::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Containers::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Containers::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void Containers::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Containers::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Containers::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -471,11 +471,11 @@ void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
   using ::std::swap;
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyDataItem::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyDataItem::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void MyDataItem::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyDataItem::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -629,11 +629,11 @@ void swap(MyUnion& a, MyUnion& b) {
   b = std::move(temp);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void MyUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void MyUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -788,11 +788,11 @@ void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void MyException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyException::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void MyException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyException::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t MyException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -951,11 +951,11 @@ void swap([[maybe_unused]] MyExceptionWithMessage& a, [[maybe_unused]] MyExcepti
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void MyExceptionWithMessage::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyExceptionWithMessage::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyExceptionWithMessage::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyExceptionWithMessage::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void MyExceptionWithMessage::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyExceptionWithMessage::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t MyExceptionWithMessage::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -1056,11 +1056,11 @@ void swap([[maybe_unused]] ReservedKeyword& a, [[maybe_unused]] ReservedKeyword&
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void ReservedKeyword::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t ReservedKeyword::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t ReservedKeyword::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t ReservedKeyword::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void ReservedKeyword::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t ReservedKeyword::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ReservedKeyword::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
@@ -1184,11 +1184,11 @@ void swap(UnionToBeRenamed& a, UnionToBeRenamed& b) {
   b = std::move(temp);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void UnionToBeRenamed::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t UnionToBeRenamed::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t UnionToBeRenamed::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t UnionToBeRenamed::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void UnionToBeRenamed::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t UnionToBeRenamed::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t UnionToBeRenamed::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

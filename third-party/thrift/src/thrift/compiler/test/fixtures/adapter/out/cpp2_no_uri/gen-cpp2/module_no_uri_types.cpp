@@ -126,11 +126,11 @@ void swap(RefUnion& a, RefUnion& b) {
   b = std::move(temp);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void RefUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t RefUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t RefUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t RefUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void RefUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t RefUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t RefUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

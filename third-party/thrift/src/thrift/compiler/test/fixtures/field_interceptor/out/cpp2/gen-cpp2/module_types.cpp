@@ -130,11 +130,11 @@ void swap([[maybe_unused]] InterceptedFields& a, [[maybe_unused]] InterceptedFie
   swap(a.__isset, b.__isset);
 }
 
+#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
 template void InterceptedFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t InterceptedFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t InterceptedFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_PROTOCOL_IN_SEPARATE_TU
 template void InterceptedFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t InterceptedFields::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t InterceptedFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

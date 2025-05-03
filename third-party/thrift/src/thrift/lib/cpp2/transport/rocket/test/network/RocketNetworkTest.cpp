@@ -110,6 +110,29 @@ class RocketNetworkTest : public testing::Test {
 
   void unsetExpectedSetupMetadata() { server_->setExpectedSetupMetadata({}); }
 
+  // Returns the server connection once it is established.
+  RocketServerConnection* getServerConnection() {
+    for (int i = 0, numTries = 10; i < numTries; ++i) {
+      auto connCount = 0;
+      RocketServerConnection* conn = nullptr;
+      this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
+        connCount = 0;
+        server_->getConnectionManager()->forEachConnection(
+            [&](wangle::ManagedConnection* connection) {
+              conn = dynamic_cast<RocketServerConnection*>(connection);
+              if (conn) {
+                connCount += 1;
+              }
+            });
+      });
+      if (connCount == 1) {
+        return conn;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    throw std::runtime_error("Failed to get a server connection");
+  }
+
  protected:
   std::unique_ptr<RocketTestServer> server_;
   std::unique_ptr<RocketTestClient> client_;
@@ -139,10 +162,10 @@ static StreamElementEncoderStub encode;
 
 TEST_F(RocketNetworkTest, FlushManager) {
   this->withClients([](RocketTestClient& client, RocketClient& client2) {
-    constexpr folly::StringPiece kMetadata1("metadata1");
-    constexpr folly::StringPiece kData1("test_request1");
-    constexpr folly::StringPiece kMetadata2("metadata2");
-    constexpr folly::StringPiece kData2("test_request2");
+    const folly::StringPiece metadata1("metadata1");
+    const folly::StringPiece data1("test_request1");
+    const folly::StringPiece metadata2("metadata2");
+    const folly::StringPiece data2("test_request2");
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
@@ -155,14 +178,14 @@ TEST_F(RocketNetworkTest, FlushManager) {
     fm.addTaskRemoteFuture([&] {
         auto reply1Fut = fm.addTaskEagerFuture([&] {
           return client1.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata1, kData1),
+              Payload::makeFromMetadataAndData(metadata1, data1),
               std::chrono::milliseconds(250),
               &onWriteSuccess1);
         });
 
         auto reply2Fut = fm.addTaskEagerFuture([&] {
           return client2.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata2, kData2),
+              Payload::makeFromMetadataAndData(metadata2, data2),
               std::chrono::milliseconds(250),
               &onWriteSuccess2);
         });
@@ -185,10 +208,10 @@ TEST_F(RocketNetworkTest, FlushManager) {
 
 TEST_F(RocketNetworkTest, FlushManagerLowMaxPendingFlushPolicy) {
   this->withClients([](RocketTestClient& client, RocketClient& client2) {
-    constexpr folly::StringPiece kMetadata1("metadata1");
-    constexpr folly::StringPiece kData1("test_request1");
-    constexpr folly::StringPiece kMetadata2("metadata2");
-    constexpr folly::StringPiece kData2("test_request2");
+    const folly::StringPiece metadata1("metadata1");
+    const folly::StringPiece data1("test_request1");
+    const folly::StringPiece metadata2("metadata2");
+    const folly::StringPiece data2("test_request2");
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
@@ -206,14 +229,14 @@ TEST_F(RocketNetworkTest, FlushManagerLowMaxPendingFlushPolicy) {
     fm.addTaskRemoteFuture([&] {
         auto reply1Fut = fm.addTaskEagerFuture([&] {
           return client1.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata1, kData1),
+              Payload::makeFromMetadataAndData(metadata1, data1),
               std::chrono::milliseconds(250),
               &onWriteSuccess1);
         });
 
         auto reply2Fut = fm.addTaskEagerFuture([&] {
           return client2.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata2, kData2),
+              Payload::makeFromMetadataAndData(metadata2, data2),
               std::chrono::milliseconds(250),
               &onWriteSuccess2);
         });
@@ -235,10 +258,10 @@ TEST_F(RocketNetworkTest, FlushManagerLowMaxPendingFlushPolicy) {
 
 TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicy) {
   this->withClients([](RocketTestClient& client, RocketClient& client2) {
-    constexpr folly::StringPiece kMetadata1("metadata1");
-    constexpr folly::StringPiece kData1("test_request1");
-    constexpr folly::StringPiece kMetadata2("metadata2");
-    constexpr folly::StringPiece kData2("test_request2");
+    const folly::StringPiece metadata1("metadata1");
+    const folly::StringPiece data1("test_request1");
+    const folly::StringPiece metadata2("metadata2");
+    const folly::StringPiece data2("test_request2");
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
@@ -256,14 +279,14 @@ TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicy) {
     fm.addTaskRemoteFuture([&] {
         auto reply1Fut = fm.addTaskEagerFuture([&] {
           return client1.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata1, kData1),
+              Payload::makeFromMetadataAndData(metadata1, data1),
               std::chrono::milliseconds(250),
               &onWriteSuccess1);
         });
 
         auto reply2Fut = fm.addTaskEagerFuture([&] {
           return client2.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata2, kData2),
+              Payload::makeFromMetadataAndData(metadata2, data2),
               std::chrono::milliseconds(250),
               &onWriteSuccess2);
         });
@@ -285,10 +308,10 @@ TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicy) {
 
 TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicyResetPolicy) {
   this->withClients([](RocketTestClient& client, RocketClient& client2) {
-    constexpr folly::StringPiece kMetadata1("metadata1");
-    constexpr folly::StringPiece kData1("test_request1");
-    constexpr folly::StringPiece kMetadata2("metadata2");
-    constexpr folly::StringPiece kData2("test_request2");
+    const folly::StringPiece metadata1("metadata1");
+    const folly::StringPiece data1("test_request1");
+    const folly::StringPiece metadata2("metadata2");
+    const folly::StringPiece data2("test_request2");
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
@@ -306,14 +329,14 @@ TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicyResetPolicy) {
     fm.addTaskRemoteFuture([&] {
         auto reply1Fut = fm.addTaskEagerFuture([&] {
           return client1.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata1, kData1),
+              Payload::makeFromMetadataAndData(metadata1, data1),
               std::chrono::milliseconds(250),
               &onWriteSuccess1);
         });
 
         auto reply2Fut = fm.addTaskEagerFuture([&] {
           return client2.sendRequestResponseSync(
-              Payload::makeFromMetadataAndData(kMetadata2, kData2),
+              Payload::makeFromMetadataAndData(metadata2, data2),
               std::chrono::milliseconds(250),
               &onWriteSuccess2);
         });
@@ -339,8 +362,8 @@ TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicyResetPolicy) {
 
 TEST_F(RocketNetworkTest, FlushList) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata("metadata");
-    constexpr folly::StringPiece kData("test_request");
+    const folly::StringPiece metadata("metadata");
+    const folly::StringPiece data("test_request");
 
     FlushManager::FlushList flushList;
     auto& rawClient = client.getRawClient();
@@ -354,7 +377,7 @@ TEST_F(RocketNetworkTest, FlushList) {
       rawClient.setFlushList(&flushList);
 
       auto reply = rawClient.sendRequestResponseSync(
-          Payload::makeFromMetadataAndData(kMetadata, kData),
+          Payload::makeFromMetadataAndData(metadata, data),
           std::chrono::milliseconds(250),
           &onWriteSuccess);
 
@@ -381,16 +404,16 @@ TEST_F(RocketNetworkTest, FlushList) {
 
     EXPECT_TRUE(onWriteSuccess.writeSuccess);
     auto dam = splitMetadataAndData(reply);
-    EXPECT_EQ(kData, getRange(*dam.second));
+    EXPECT_EQ(data, getRange(*dam.second));
     EXPECT_TRUE(reply.hasNonemptyMetadata());
-    EXPECT_EQ(kMetadata, getRange(*dam.first));
+    EXPECT_EQ(metadata, getRange(*dam.first));
   });
 }
 
 TEST_F(RocketNetworkTest, FlushListFlushPolicyNoop) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata("metadata");
-    constexpr folly::StringPiece kData("test_request");
+    const folly::StringPiece metadata("metadata");
+    const folly::StringPiece data("test_request");
 
     FlushManager::FlushList flushList;
     auto& rawClient = client.getRawClient();
@@ -410,7 +433,7 @@ TEST_F(RocketNetworkTest, FlushListFlushPolicyNoop) {
       rawClient.setFlushList(&flushList);
 
       auto reply = rawClient.sendRequestResponseSync(
-          Payload::makeFromMetadataAndData(kMetadata, kData),
+          Payload::makeFromMetadataAndData(metadata, data),
           std::chrono::milliseconds(250),
           &onWriteSuccess);
 
@@ -438,9 +461,9 @@ TEST_F(RocketNetworkTest, FlushListFlushPolicyNoop) {
 
     EXPECT_TRUE(onWriteSuccess.writeSuccess);
     auto dam = splitMetadataAndData(reply);
-    EXPECT_EQ(kData, getRange(*dam.second));
+    EXPECT_EQ(data, getRange(*dam.second));
     EXPECT_TRUE(reply.hasNonemptyMetadata());
-    EXPECT_EQ(kMetadata, getRange(*dam.first));
+    EXPECT_EQ(metadata, getRange(*dam.first));
   });
 }
 
@@ -455,31 +478,31 @@ TEST_F(RocketNetworkTest, RequestResponseBasic) {
       rawClient.detachEventBase();
       EXPECT_FALSE(rawClient.isDetachable());
     });
-    constexpr folly::StringPiece kMetadata("metadata");
-    constexpr folly::StringPiece kData("test_request");
+    const folly::StringPiece metadata("metadata");
+    const folly::StringPiece data("test_request");
 
     OnWriteSuccess onWriteSuccess;
     auto reply = client.sendRequestResponseSync(
-        Payload::makeFromMetadataAndData(kMetadata, kData),
+        Payload::makeFromMetadataAndData(metadata, data),
         std::chrono::milliseconds(250) /* timeout */,
         &onWriteSuccess);
 
     EXPECT_TRUE(onWriteSuccess.writeSuccess);
     EXPECT_TRUE(reply.hasValue());
     auto dam = splitMetadataAndData(*reply);
-    EXPECT_EQ(kData, getRange(*dam.second));
+    EXPECT_EQ(data, getRange(*dam.second));
     EXPECT_TRUE(reply->hasNonemptyMetadata());
-    EXPECT_EQ(kMetadata, getRange(*dam.first));
+    EXPECT_EQ(metadata, getRange(*dam.first));
   });
 }
 
 TEST_F(RocketNetworkTest, RequestResponseTimeout) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata("metadata");
-    constexpr folly::StringPiece kData("sleep_ms:200");
+    const folly::StringPiece metadata("metadata");
+    const folly::StringPiece data("sleep_ms:200");
 
     auto reply = client.sendRequestResponseSync(
-        Payload::makeFromMetadataAndData(kMetadata, kData),
+        Payload::makeFromMetadataAndData(metadata, data),
         std::chrono::milliseconds(100));
 
     EXPECT_TRUE(reply.hasException());
@@ -492,17 +515,16 @@ TEST_F(RocketNetworkTest, RequestResponseTimeout) {
 TEST_F(RocketNetworkTest, RequestResponseLargeMetadata) {
   this->withClient([](RocketTestClient& client) {
     // Ensure metadata will be split across multiple frames
-    constexpr size_t kReplyMetadataSize = 0x2ffffff;
-    constexpr folly::StringPiece kPattern =
-        "abcdefghijklmnopqrstuvwxyz0123456789";
+    const size_t replyMetadataSize = 0x2ffffff;
+    const folly::StringPiece pattern = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto expectedMetadata = repeatPattern(kPattern, kReplyMetadataSize);
+    const folly::StringPiece metadata("metadata");
+    const auto expectedMetadata = repeatPattern(pattern, replyMetadataSize);
     const std::string data =
         folly::to<std::string>("metadata_echo:", expectedMetadata);
 
     auto reply = client.sendRequestResponseSync(
-        Payload::makeFromMetadataAndData(kMetadata, folly::StringPiece{data}),
+        Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}),
         std::chrono::seconds(5));
 
     EXPECT_TRUE(reply.hasValue());
@@ -516,22 +538,21 @@ TEST_F(RocketNetworkTest, RequestResponseLargeMetadata) {
 TEST_F(RocketNetworkTest, RequestResponseLargeData) {
   this->withClient([](RocketTestClient& client) {
     // Ensure metadata will be split across multiple frames
-    constexpr size_t kReplyDataSize = 0x2ffffff;
-    constexpr folly::StringPiece kPattern =
-        "abcdefghijklmnopqrstuvwxyz0123456789";
+    const size_t replyDataSize = 0x2ffffff;
+    const folly::StringPiece pattern = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    constexpr folly::StringPiece kMetadata{"metadata"};
-    const auto expectedData = repeatPattern(kPattern, kReplyDataSize);
+    const folly::StringPiece metadata{"metadata"};
+    const auto expectedData = repeatPattern(pattern, replyDataSize);
     const std::string data = folly::to<std::string>("data_echo:", expectedData);
 
     auto reply = client.sendRequestResponseSync(
-        Payload::makeFromMetadataAndData(kMetadata, folly::StringPiece{data}),
+        Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}),
         std::chrono::seconds(5));
 
     EXPECT_TRUE(reply.hasValue());
     EXPECT_TRUE(reply->hasNonemptyMetadata());
     auto dam = splitMetadataAndData(*reply);
-    EXPECT_EQ(kMetadata, getRange(*dam.first));
+    EXPECT_EQ(metadata, getRange(*dam.first));
     EXPECT_EQ(expectedData, getRange(*dam.second));
   });
 }
@@ -540,18 +561,17 @@ TEST_F(RocketNetworkTest, RequestResponseSendTimeout) {
   this->withClient([this](RocketTestClient& client) {
     // Ensure data is large enough to fill up the kernel buffer and trigger send
     // timeout
-    constexpr size_t kDataSize = 0x8000000;
-    constexpr folly::StringPiece kPattern =
-        "abcdefghijklmnopqrstuvwxyz0123456789";
+    const size_t dataSize = 0x8000000;
+    const folly::StringPiece pattern = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    constexpr folly::StringPiece kMetadata{"metadata"};
-    constexpr folly::StringPiece kSmallData{"data"};
-    const auto kLargeData = repeatPattern(kPattern, kDataSize);
+    const folly::StringPiece metadata{"metadata"};
+    const folly::StringPiece smallData{"data"};
+    const auto largeData = repeatPattern(pattern, dataSize);
 
     // Send a request to make sure the connection is live
     {
       auto reply = client.sendRequestResponseSync(
-          Payload::makeFromMetadataAndData(kMetadata, kSmallData),
+          Payload::makeFromMetadataAndData(metadata, smallData),
           std::chrono::seconds(5));
       EXPECT_TRUE(reply.hasValue());
     }
@@ -567,7 +587,7 @@ TEST_F(RocketNetworkTest, RequestResponseSendTimeout) {
       });
       auto reply = client.sendRequestResponseSync(
           Payload::makeFromMetadataAndData(
-              kMetadata, folly::StringPiece{kLargeData}),
+              metadata, folly::StringPiece{largeData}),
           std::chrono::seconds(5));
       EXPECT_TRUE(reply.hasException());
       EXPECT_TRUE(reply.withException([](const TTransportException& ex) {
@@ -582,11 +602,11 @@ TEST_F(RocketNetworkTest, RequestResponseSendTimeout) {
 
 TEST_F(RocketNetworkTest, RequestResponseEmptyMetadata) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata{"metadata"};
-    constexpr folly::StringPiece kData{"metadata_echo:"};
+    const folly::StringPiece metadata{"metadata"};
+    const folly::StringPiece data{"metadata_echo:"};
 
     auto reply = client.sendRequestResponseSync(
-        Payload::makeFromMetadataAndData(kMetadata, kData));
+        Payload::makeFromMetadataAndData(metadata, data));
 
     EXPECT_TRUE(reply.hasValue());
     EXPECT_FALSE(reply->hasNonemptyMetadata());
@@ -597,27 +617,27 @@ TEST_F(RocketNetworkTest, RequestResponseEmptyMetadata) {
 
 TEST_F(RocketNetworkTest, RequestResponseEmptyData) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata{"metadata"};
-    constexpr folly::StringPiece kData{"data_echo:"};
+    const folly::StringPiece metadata{"metadata"};
+    const folly::StringPiece data{"data_echo:"};
 
     auto reply = client.sendRequestResponseSync(
-        Payload::makeFromMetadataAndData(kMetadata, kData));
+        Payload::makeFromMetadataAndData(metadata, data));
 
     EXPECT_TRUE(reply.hasValue());
     EXPECT_TRUE(reply->hasNonemptyMetadata());
     auto dam = splitMetadataAndData(*reply);
-    EXPECT_EQ(kMetadata, getRange(*dam.first));
+    EXPECT_EQ(metadata, getRange(*dam.first));
     EXPECT_TRUE(dam.second->empty());
   });
 }
 
 TEST_F(RocketNetworkTest, RequestResponseError) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata{"metadata"};
-    constexpr folly::StringPiece kData{"error:application"};
+    const folly::StringPiece metadata{"metadata"};
+    const folly::StringPiece data{"error:application"};
 
     auto reply = client.sendRequestResponseSync(
-        Payload::makeFromMetadataAndData(kMetadata, kData));
+        Payload::makeFromMetadataAndData(metadata, data));
 
     EXPECT_TRUE(reply.hasException());
     expectRocketExceptionType(
@@ -626,14 +646,14 @@ TEST_F(RocketNetworkTest, RequestResponseError) {
 }
 
 TEST_F(RocketNetworkTest, RequestResponseDeadServer) {
-  constexpr folly::StringPiece kMetadata{"metadata"};
-  constexpr folly::StringPiece kData{"data"};
+  const folly::StringPiece metadata{"metadata"};
+  const folly::StringPiece data{"data"};
 
   this->server_.reset();
 
   OnWriteSuccess onWriteSuccess;
   auto reply = this->client_->sendRequestResponseSync(
-      Payload::makeFromMetadataAndData(kMetadata, kData),
+      Payload::makeFromMetadataAndData(metadata, data),
       std::chrono::milliseconds(250),
       &onWriteSuccess);
 
@@ -647,11 +667,11 @@ TEST_F(RocketNetworkTest, RequestResponseDeadServer) {
 TEST_F(RocketNetworkTest, ServerShutdown) {
   this->withClient(
       [server = std::move(server_)](RocketTestClient& client) mutable {
-        constexpr folly::StringPiece kMetadata{"metadata"};
-        constexpr folly::StringPiece kData{"data_echo:"};
+        const folly::StringPiece metadata{"metadata"};
+        const folly::StringPiece data{"data_echo:"};
 
         auto reply = client.sendRequestResponseSync(
-            Payload::makeFromMetadataAndData(kMetadata, kData));
+            Payload::makeFromMetadataAndData(metadata, data));
 
         EXPECT_TRUE(reply.hasValue());
         EXPECT_TRUE(reply->hasNonemptyMetadata());
@@ -691,11 +711,11 @@ TEST_F(RocketNetworkTest, RocketClientEventBaseDestruction) {
  */
 TEST_F(RocketNetworkTest, RequestFnfBasic) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata("metadata");
-    constexpr folly::StringPiece kData("test_request");
+    const folly::StringPiece metadata("metadata");
+    const folly::StringPiece data("test_request");
 
     auto reply = client.sendRequestFnfSync(
-        Payload::makeFromMetadataAndData(kMetadata, kData));
+        Payload::makeFromMetadataAndData(metadata, data));
 
     EXPECT_TRUE(reply.hasValue());
   });
@@ -712,13 +732,12 @@ TEST_F(RocketNetworkTest, RequestStreamBasic) {
     // on server when the connection is closed
     this->server_->setExpectedRemainingStreams(0);
 
-    constexpr size_t kNumRequestedPayloads = 200;
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t numRequestedPayloads = 200;
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
     auto stream = client.sendRequestStreamSync(
-        Payload::makeFromMetadataAndData(kMetadata, folly::StringPiece{data}));
+        Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
     EXPECT_TRUE(stream.hasValue());
     this->getUserExecutor()->drain();
 
@@ -738,17 +757,17 @@ TEST_F(RocketNetworkTest, RequestStreamBasic) {
         .futureJoin()
         .via(this->getUserExecutor())
         .waitVia(this->getUserExecutor());
-    EXPECT_EQ(kNumRequestedPayloads, received);
+    EXPECT_EQ(numRequestedPayloads, received);
   });
 }
 
 TEST_F(RocketNetworkTest, RequestStreamError) {
   this->withClient([](RocketTestClient& client) {
-    constexpr folly::StringPiece kMetadata("metadata");
-    constexpr folly::StringPiece kData("error:application");
+    const folly::StringPiece metadata("metadata");
+    const folly::StringPiece data("error:application");
 
     auto stream = client.sendRequestStreamSync(
-        Payload::makeFromMetadataAndData(kMetadata, kData));
+        Payload::makeFromMetadataAndData(metadata, data));
     EXPECT_TRUE(stream.hasException());
     expectEncodedError(stream.exception());
   });
@@ -758,13 +777,12 @@ TEST_F(RocketNetworkTest, RequestStreamSmallInitialRequestN) {
   // TODO (T62211580)
   return;
   this->withClient([this](RocketTestClient& client) {
-    constexpr size_t kNumRequestedPayloads = 200;
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t numRequestedPayloads = 200;
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
     auto stream = client.sendRequestStreamSync(
-        Payload::makeFromMetadataAndData(kMetadata, folly::StringPiece{data}));
+        Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
     EXPECT_TRUE(stream.hasValue());
 
     size_t received = 0;
@@ -783,7 +801,7 @@ TEST_F(RocketNetworkTest, RequestStreamSmallInitialRequestN) {
         .futureJoin()
         .via(this->getUserExecutor())
         .waitVia(this->getUserExecutor());
-    EXPECT_EQ(kNumRequestedPayloads, received);
+    EXPECT_EQ(numRequestedPayloads, received);
   });
 }
 
@@ -791,14 +809,12 @@ TEST_F(RocketNetworkTest, RequestStreamCancelSubscription) {
   this->withClient([this](RocketTestClient& client) {
     // Open an essentially infinite stream and ensure stream is able to be
     // canceled within a reasonable amount of time.
-    constexpr size_t kNumRequestedPayloads =
-        std::numeric_limits<int32_t>::max();
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t numRequestedPayloads = std::numeric_limits<int32_t>::max();
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
     auto stream = client.sendRequestStreamSync(
-        Payload::makeFromMetadataAndData(kMetadata, folly::StringPiece{data}));
+        Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
     EXPECT_TRUE(stream.hasValue());
 
     size_t received = 0;
@@ -818,33 +834,31 @@ TEST_F(RocketNetworkTest, RequestStreamCancelSubscription) {
         .futureJoin()
         .via(this->getUserExecutor())
         .waitVia(this->getUserExecutor());
-    EXPECT_LT(received, kNumRequestedPayloads);
+    EXPECT_LT(received, numRequestedPayloads);
   });
 }
 
 TEST_F(RocketNetworkTest, RequestStreamNeverSubscribe) {
   this->withClient([](RocketTestClient& client) {
-    constexpr size_t kNumRequestedPayloads = 200;
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t numRequestedPayloads = 200;
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
     {
-      auto stream =
-          client.sendRequestStreamSync(Payload::makeFromMetadataAndData(
-              kMetadata, folly::StringPiece{data}));
+      auto stream = client.sendRequestStreamSync(
+          Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
       EXPECT_TRUE(stream.hasValue());
     }
   });
 }
 
 TEST_F(RocketNetworkTest, RequestStreamCloseClient) {
-  constexpr size_t kNumRequestedPayloads = 200;
-  constexpr folly::StringPiece kMetadata("metadata");
-  const auto data = folly::to<std::string>("generate:", kNumRequestedPayloads);
+  const size_t numRequestedPayloads = 200;
+  const folly::StringPiece metadata("metadata");
+  const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
   auto stream = this->client_->sendRequestStreamSync(
-      Payload::makeFromMetadataAndData(kMetadata, folly::StringPiece{data}));
+      Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
   EXPECT_TRUE(stream.hasValue());
 
   bool onErrorCalled = false;
@@ -869,17 +883,15 @@ TEST_F(RocketNetworkTest, RequestStreamCloseClient) {
 
 TEST_F(RocketNetworkTest, ClientCreationAndReconnectStreamOutlivesClient) {
   this->withClient([](RocketTestClient& client) {
-    constexpr size_t kNumRequestedPayloads = 1000000;
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t numRequestedPayloads = 1000000;
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
     // Open a stream and reconnect many times, having each stream slightly
     // outlive its associated RocketClient.
     for (size_t i = 0; i < 1000; ++i) {
-      auto stream =
-          client.sendRequestStreamSync(Payload::makeFromMetadataAndData(
-              kMetadata, folly::StringPiece{data}));
+      auto stream = client.sendRequestStreamSync(
+          Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
       EXPECT_TRUE(stream.hasValue());
       client.reconnect();
     }
@@ -889,17 +901,15 @@ TEST_F(RocketNetworkTest, ClientCreationAndReconnectStreamOutlivesClient) {
 TEST_F(
     RocketNetworkTest, ClientCreationAndReconnectSubscriptionOutlivesClient) {
   this->withClient([this](RocketTestClient& client) {
-    constexpr size_t kNumRequestedPayloads = 1000000;
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t numRequestedPayloads = 1000000;
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
     // Open a stream and reconnect many times, subscribing to the stream before
     // and having the subscription outlive the client.
     for (size_t i = 0; i < 1000; ++i) {
-      auto stream =
-          client.sendRequestStreamSync(Payload::makeFromMetadataAndData(
-              kMetadata, folly::StringPiece{data}));
+      auto stream = client.sendRequestStreamSync(
+          Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
       EXPECT_TRUE(stream.hasValue());
       size_t received = 0;
       auto subscription = std::move(*stream).subscribeExTry(
@@ -922,10 +932,9 @@ TEST_F(
 
 TEST_F(RocketNetworkTest, ClientCreationAndReconnectClientOutlivesStream) {
   this->withClient([](RocketTestClient& client) {
-    constexpr size_t kNumRequestedPayloads = 1000000;
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t numRequestedPayloads = 1000000;
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
 
     // Open a stream and reconnect many times, having each RocketClient slightly
     // outlive the associated stream.
@@ -933,7 +942,7 @@ TEST_F(RocketNetworkTest, ClientCreationAndReconnectClientOutlivesStream) {
       {
         auto stream =
             client.sendRequestStreamSync(Payload::makeFromMetadataAndData(
-                kMetadata, folly::StringPiece{data}));
+                metadata, folly::StringPiece{data}));
         EXPECT_TRUE(stream.hasValue());
       }
       client.reconnect();
@@ -1065,13 +1074,13 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiBasic) {
       new folly::AsyncSocket(&evb, "::1", this->server_->getListeningPort()));
   auto channel = RocketClientChannel::newChannel(std::move(socket));
 
-  constexpr uint64_t kNumRequestedPayloads = 200;
+  const uint64_t numRequestedPayloads = 200;
   auto payload = folly::IOBuf::copyBuffer(
-      folly::sformat("generate:{}", kNumRequestedPayloads));
+      folly::sformat("generate:{}", numRequestedPayloads));
 
   RpcOptions rpcOptions;
   rpcOptions.setChunkBufferSize(0);
-  TestClientCallback clientCallback(evb, kNumRequestedPayloads);
+  TestClientCallback clientCallback(evb, numRequestedPayloads);
 
   channel->sendRequestStream(
       rpcOptions,
@@ -1079,12 +1088,12 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiBasic) {
       apache::thrift::SerializedRequest(std::move(payload)),
       std::make_shared<THeader>(),
       &clientCallback,
-      /* frameworkMetadata */ nullptr);
+      /* framewormetadata */ nullptr);
 
   evb.loop();
 
   EXPECT_FALSE(clientCallback.getError());
-  EXPECT_EQ(kNumRequestedPayloads, clientCallback.payloadsReceived());
+  EXPECT_EQ(numRequestedPayloads, clientCallback.payloadsReceived());
 }
 
 TEST_F(RocketNetworkTest, RequestStreamNewApiError) {
@@ -1096,11 +1105,11 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiError) {
       new folly::AsyncSocket(&evb, "::1", this->server_->getListeningPort()));
   auto channel = RocketClientChannel::newChannel(std::move(socket));
 
-  constexpr uint64_t kNumRequestedPayloads = 200;
+  const uint64_t numRequestedPayloads = 200;
   auto payload = folly::IOBuf::copyBuffer("error:application");
 
   RpcOptions rpcOptions;
-  TestClientCallback clientCallback(evb, kNumRequestedPayloads);
+  TestClientCallback clientCallback(evb, numRequestedPayloads);
 
   channel->sendRequestStream(
       rpcOptions,
@@ -1108,7 +1117,7 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiError) {
       apache::thrift::SerializedRequest(std::move(payload)),
       std::make_shared<THeader>(),
       &clientCallback,
-      /* frameworkMetadata */ nullptr);
+      /* framewormetadata */ nullptr);
 
   evb.loop();
 
@@ -1126,13 +1135,13 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiHeadersPush) {
   auto channel = RocketClientChannel::newChannel(std::move(socket));
 
   {
-    constexpr uint64_t kNumRequestedHeaders = 200;
+    const uint64_t numRequestedHeaders = 200;
     auto payload = folly::IOBuf::copyBuffer(
-        folly::sformat("generateheaders:{}", kNumRequestedHeaders));
+        folly::sformat("generateheaders:{}", numRequestedHeaders));
 
     RpcOptions rpcOptions;
     rpcOptions.setChunkBufferSize(0);
-    TestClientCallback clientCallback(evb, 0, kNumRequestedHeaders);
+    TestClientCallback clientCallback(evb, 0, numRequestedHeaders);
 
     channel->sendRequestStream(
         rpcOptions,
@@ -1140,23 +1149,23 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiHeadersPush) {
         apache::thrift::SerializedRequest(std::move(payload)),
         std::make_shared<THeader>(),
         &clientCallback,
-        /* frameworkMetadata */ nullptr);
+        /* framewormetadata */ nullptr);
 
     evb.loop();
 
     EXPECT_FALSE(clientCallback.getError());
     EXPECT_EQ(0, clientCallback.payloadsReceived());
-    EXPECT_EQ(kNumRequestedHeaders, clientCallback.headersReceived());
+    EXPECT_EQ(numRequestedHeaders, clientCallback.headersReceived());
   }
 
   {
-    constexpr uint64_t kNumEchoHeaders = 200;
+    const uint64_t numEchoHeaders = 200;
     auto payload = folly::IOBuf::copyBuffer(
-        folly::sformat("echoheaders:{}", kNumEchoHeaders));
+        folly::sformat("echoheaders:{}", numEchoHeaders));
 
     RpcOptions rpcOptions;
     rpcOptions.setChunkBufferSize(0);
-    TestClientCallback clientCallback(evb, 0, kNumEchoHeaders, kNumEchoHeaders);
+    TestClientCallback clientCallback(evb, 0, numEchoHeaders, numEchoHeaders);
 
     channel->sendRequestStream(
         rpcOptions,
@@ -1164,13 +1173,13 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiHeadersPush) {
         apache::thrift::SerializedRequest(std::move(payload)),
         std::make_shared<THeader>(),
         &clientCallback,
-        /* frameworkMetadata */ nullptr);
+        /* framewormetadata */ nullptr);
 
     evb.loop();
 
     EXPECT_FALSE(clientCallback.getError());
     EXPECT_EQ(0, clientCallback.payloadsReceived());
-    EXPECT_EQ(kNumEchoHeaders, clientCallback.headersReceived());
+    EXPECT_EQ(numEchoHeaders, clientCallback.headersReceived());
   }
 }
 
@@ -1212,8 +1221,8 @@ struct FirstResponseCallback
 
 TEST_F(RocketNetworkTest, SinkBasic) {
   this->withClient([](RocketTestClient& client) {
-    constexpr size_t kNumUploadPayloads = 200;
-    constexpr folly::StringPiece kMetadata("metadata");
+    const size_t numUploadPayloads = 200;
+    const folly::StringPiece metadata("metadata");
     // instruct server to append A on each payload client sents, and
     // sends the appended payload back to client
     const auto data = "upload:";
@@ -1225,9 +1234,9 @@ TEST_F(RocketNetworkTest, SinkBasic) {
           client.sendRequestSink(
               apache::thrift::detail::ClientSinkBridge::create(callback),
               Payload::makeFromMetadataAndData(
-                  kMetadata,
+                  metadata,
                   folly::StringPiece{
-                      folly::to<std::string>(data, kNumUploadPayloads)}));
+                      folly::to<std::string>(data, numUploadPayloads)}));
           co_await response.getFirstThriftResponse();
           auto clientSink = ClientSink<int, int>(
               std::move(response.sinkBridge_),
@@ -1243,19 +1252,19 @@ TEST_F(RocketNetworkTest, SinkBasic) {
 
           int finalResponse = co_await clientSink.sink(folly::coro::co_invoke(
               []() -> folly::coro::AsyncGenerator<int&&> {
-                for (size_t i = 0; i < kNumUploadPayloads; i++) {
+                for (size_t i = 0; i < numUploadPayloads; i++) {
                   co_yield i;
                 }
               }));
-          EXPECT_EQ(kNumUploadPayloads, finalResponse);
+          EXPECT_EQ(numUploadPayloads, finalResponse);
         }));
   });
 }
 
 TEST_F(RocketNetworkTest, SinkCloseClient) {
   this->withClient([](RocketTestClient& client) {
-    constexpr size_t kNumUploadPayloads = 200;
-    constexpr folly::StringPiece kMetadata("metadata");
+    const size_t numUploadPayloads = 200;
+    const folly::StringPiece metadata("metadata");
     // instruct server to append A on each payload client sents, and
     // sends the appended payload back to client
     const auto data = "upload:";
@@ -1264,9 +1273,9 @@ TEST_F(RocketNetworkTest, SinkCloseClient) {
     client.sendRequestSink(
         apache::thrift::detail::ClientSinkBridge::create(callback),
         Payload::makeFromMetadataAndData(
-            kMetadata,
+            metadata,
             folly::StringPiece{
-                folly::to<std::string>(data, kNumUploadPayloads)}));
+                folly::to<std::string>(data, numUploadPayloads)}));
 
     folly::coro::blockingWait(
         folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
@@ -1292,7 +1301,7 @@ TEST_F(RocketNetworkTest, SinkCloseClient) {
           try {
             co_await sink.sink(folly::coro::co_invoke(
                 [&]() -> folly::coro::AsyncGenerator<int&&> {
-                  for (size_t i = 0; i < kNumUploadPayloads; i++) {
+                  for (size_t i = 0; i < numUploadPayloads; i++) {
                     co_yield i;
                   }
                 }));
@@ -1383,22 +1392,11 @@ TEST_F(RocketNetworkTest, CloseNowWithPendingWriteCallback) {
 TEST_F(RocketNetworkTest, ObserverIsNotInstalledWhenFlagIsFalse) {
   THRIFT_FLAG_SET_MOCK(enable_rocket_connection_observers, false);
   client_->reconnect();
-  auto observer =
-      std::make_unique<NiceMock<MockRocketServerConnectionObserver>>();
-
-  this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
-    auto connCount = 0;
-    server_->getConnectionManager()->forEachConnection(
-        [&](wangle::ManagedConnection* connection) {
-          if (auto conn = dynamic_cast<RocketServerConnection*>(connection)) {
-            EXPECT_EQ(conn->numObservers(), 0);
-            conn->addObserver(observer.get());
-            EXPECT_EQ(conn->numObservers(), 0);
-            connCount += 1;
-          }
-        });
-    EXPECT_EQ(connCount, 1);
-  });
+  auto observer = NiceMock<MockRocketServerConnectionObserver>();
+  auto conn = getServerConnection();
+  EXPECT_EQ(conn->numObservers(), 0);
+  conn->addObserver(&observer);
+  EXPECT_EQ(conn->numObservers(), 0);
 }
 
 MATCHER_P3(WriteStartingMatcher, id, bytes, offset, "") {
@@ -1427,110 +1425,94 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
     RocketServerConnection::ManagedObserver::EventSet eventSet;
     eventSet.enable(
         RocketServerConnection::ManagedObserver::Events::WriteEvents);
-    auto observer =
-        std::make_unique<NiceMock<MockRocketServerConnectionObserver>>(
-            eventSet);
+    auto observer = NiceMock<MockRocketServerConnectionObserver>(eventSet);
+    auto conn = getServerConnection();
+    EXPECT_EQ(conn->numObservers(), 0);
+    conn->addObserver(&observer);
+    EXPECT_EQ(conn->numObservers(), 1);
 
-    auto connCount = 0;
-    folly::stop_watch<std::chrono::minutes> timer;
-    while (connCount == 0 && timer.elapsed() < std::chrono::minutes(1)) {
-      this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
-        server_->getConnectionManager()->forEachConnection(
-            [&](wangle::ManagedConnection* connection) {
-              if (auto conn =
-                      dynamic_cast<RocketServerConnection*>(connection)) {
-                EXPECT_EQ(conn->numObservers(), 0);
-                conn->addObserver(observer.get());
-                EXPECT_EQ(conn->numObservers(), 1);
-                connCount += 1;
-              }
-            });
-      });
-    }
-    EXPECT_EQ(connCount, 1);
-
-    constexpr size_t kSetupFrameSize(14);
-    constexpr size_t kSetupFrameStreamId(0);
+    const size_t setupFrameSize = 14;
+    const size_t setupFrameStreamId = 0;
 
     // send a request and check the event notifications when the
     // response is ready and written to the socket
     {
-      constexpr folly::StringPiece kMetadata("metadata");
-      constexpr folly::StringPiece kData("data");
+      const folly::StringPiece metadata("metadata");
+      const folly::StringPiece data("data");
       const unsigned int startOffsetBatch1 = 0;
-      const unsigned int endOffsetBatch1 = kSetupFrameSize + 24 - 1;
+      const unsigned int endOffsetBatch1 = setupFrameSize + 24 - 1;
 
       // responses to setup frame (stream id = 0) and to the first
       // request (stream id = 1) are batched together
       EXPECT_CALL(
-          *observer,
+          observer,
           writeStarting(
               _,
               WriteStartingMatcher(
-                  kSetupFrameStreamId /* streamId */,
-                  kSetupFrameSize /* totalBytesWritten */,
+                  setupFrameStreamId /* streamId */,
+                  setupFrameSize /* totalBytesWritten */,
                   0 /* batchOffset */)));
       EXPECT_CALL(
-          *observer,
+          observer,
           writeSuccess(
               _,
               WriteSuccessMatcher(
-                  kSetupFrameStreamId /* streamId */,
-                  kSetupFrameSize /* totalBytesWritten */,
+                  setupFrameStreamId /* streamId */,
+                  setupFrameSize /* totalBytesWritten */,
                   0 /* batchOffset */),
               WriteEventContextMatcher(
                   startOffsetBatch1 /* startRawByteOffset */,
                   endOffsetBatch1 /* endRawByteOffset */)));
       EXPECT_CALL(
-          *observer,
+          observer,
           writeStarting(
               _,
               WriteStartingMatcher(
-                  kSetupFrameStreamId + 1 /* streamId */,
+                  setupFrameStreamId + 1 /* streamId */,
                   24 /* totalBytesWritten */,
-                  kSetupFrameSize /* batchOffset */)));
+                  setupFrameSize /* batchOffset */)));
       EXPECT_CALL(
-          *observer,
+          observer,
           writeSuccess(
               _,
               WriteSuccessMatcher(
-                  kSetupFrameStreamId + 1 /* streamId */,
+                  setupFrameStreamId + 1 /* streamId */,
                   24 /* totalBytesWritten */,
-                  kSetupFrameSize /* batchOffset */),
+                  setupFrameSize /* batchOffset */),
               WriteEventContextMatcher(
                   startOffsetBatch1 /* startRawByteOffset */,
                   endOffsetBatch1 /* endRawByteOffset */)));
 
       client.sendRequestResponseSync(
-          Payload::makeFromMetadataAndData(kMetadata, kData),
+          Payload::makeFromMetadataAndData(metadata, data),
           std::chrono::milliseconds(250) /* timeout */);
 
-      Mock::VerifyAndClearExpectations(observer.get());
+      Mock::VerifyAndClearExpectations(&observer);
     }
 
     // send another request and check again the event notifications
     {
-      constexpr folly::StringPiece kNewMetadata("new_metadata");
-      constexpr folly::StringPiece kNewData("new_data");
+      const folly::StringPiece newMetadata("new_metadata");
+      const folly::StringPiece newData("new_data");
       const unsigned int startOffsetBatch2 =
-          kSetupFrameSize + 24 /* 24 is the size of the first response */;
+          setupFrameSize + 24 /* 24 is the size of the first response */;
       const unsigned int endOffsetBatch2 = startOffsetBatch2 + 32 -
           1 /* 32 is the size of the second response */;
 
       EXPECT_CALL(
-          *observer,
+          observer,
           writeStarting(
               _,
               WriteStartingMatcher(
-                  kSetupFrameStreamId + 3 /* streamId */,
+                  setupFrameStreamId + 3 /* streamId */,
                   32 /* totalBytesWritten */,
                   0 /* batchOffset */)));
       EXPECT_CALL(
-          *observer,
+          observer,
           writeSuccess(
               _,
               WriteSuccessMatcher(
-                  kSetupFrameStreamId + 3 /* streamId */,
+                  setupFrameStreamId + 3 /* streamId */,
                   32 /* totalBytesWritten */,
                   0 /* batchOffset */),
               WriteEventContextMatcher(
@@ -1538,7 +1520,7 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
                   endOffsetBatch2 /* endRawByteOffset */)));
 
       client.sendRequestResponseSync(
-          Payload::makeFromMetadataAndData(kNewMetadata, kNewData),
+          Payload::makeFromMetadataAndData(newMetadata, newData),
           std::chrono::milliseconds(250) /* timeout */);
     }
 
@@ -1546,7 +1528,7 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
       server_->getConnectionManager()->forEachConnection(
           [&](wangle::ManagedConnection* connection) {
             if (auto conn = dynamic_cast<RocketServerConnection*>(connection)) {
-              conn->removeObserver(observer.get());
+              conn->removeObserver(&observer);
               EXPECT_EQ(conn->numObservers(), 0);
             }
           });
@@ -1561,89 +1543,67 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestStream) {
     RocketServerConnection::ManagedObserver::EventSet eventSet;
     eventSet.enable(
         RocketServerConnection::ManagedObserver::Events::WriteEvents);
-    auto observer =
-        std::make_unique<NiceMock<MockRocketServerConnectionObserver>>(
-            eventSet);
+    auto observer = NiceMock<MockRocketServerConnectionObserver>(eventSet);
+    auto conn = getServerConnection();
+    EXPECT_EQ(conn->numObservers(), 0);
+    conn->addObserver(&observer);
+    EXPECT_EQ(conn->numObservers(), 1);
 
-    auto connCount = 0;
-    for (int i = 0, numTries = 10; i < numTries; ++i) {
-      RocketServerConnection* conn = nullptr;
-      this->server_->getEventBase().runInEventBaseThreadAndWait([&] {
-        connCount = 0;
-        server_->getConnectionManager()->forEachConnection(
-            [&](wangle::ManagedConnection* connection) {
-              conn = dynamic_cast<RocketServerConnection*>(connection);
-              if (conn) {
-                connCount += 1;
-              }
-            });
-      });
-      if (connCount == 1) {
-        EXPECT_EQ(conn->numObservers(), 0);
-        conn->addObserver(observer.get());
-        EXPECT_EQ(conn->numObservers(), 1);
-        break;
-      }
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-    EXPECT_EQ(connCount, 1);
-
-    constexpr size_t kSetupFrameSize(14);
-    constexpr size_t kSetupFrameStreamId(0);
-    constexpr size_t kNumRequestedPayloads = 200;
-    constexpr folly::StringPiece kMetadata("metadata");
-    const auto data =
-        folly::to<std::string>("generate:", kNumRequestedPayloads);
+    const size_t setupFrameSize = 14;
+    const size_t setupFrameStreamId = 0;
+    const size_t numRequestedPayloads = 200;
+    const folly::StringPiece metadata("metadata");
+    const auto data = folly::to<std::string>("generate:", numRequestedPayloads);
     const unsigned int startOffsetBatch = 0;
-    const unsigned int endOffsetBatch = kSetupFrameSize + 16 - 1;
+    const unsigned int endOffsetBatch = setupFrameSize + 16 - 1;
 
     EXPECT_CALL(
-        *observer,
+        observer,
         writeStarting(
             _,
             WriteStartingMatcher(
-                kSetupFrameStreamId /* streamId */,
-                kSetupFrameSize /* totalBytesWritten */,
+                setupFrameStreamId /* streamId */,
+                setupFrameSize /* totalBytesWritten */,
                 0 /* batchOffset */)));
     EXPECT_CALL(
-        *observer,
+        observer,
         writeSuccess(
             _,
             WriteSuccessMatcher(
-                kSetupFrameStreamId /* streamId */,
-                kSetupFrameSize /* totalBytesWritten */,
+                setupFrameStreamId /* streamId */,
+                setupFrameSize /* totalBytesWritten */,
                 0 /* batchOffset */),
             WriteEventContextMatcher(
                 startOffsetBatch /* startRawByteOffset */,
                 endOffsetBatch /* endRawByteOffset */)));
     EXPECT_CALL(
-        *observer,
+        observer,
         writeStarting(
             _,
             WriteStartingMatcher(
-                kSetupFrameStreamId + 1 /* streamId */,
+                setupFrameStreamId + 1 /* streamId */,
                 16 /* totalBytesWritten */,
-                kSetupFrameSize /* batchOffset */)));
+                setupFrameSize /* batchOffset */)));
     EXPECT_CALL(
-        *observer,
+        observer,
         writeSuccess(
             _,
             WriteSuccessMatcher(
-                kSetupFrameStreamId + 1 /* streamId */,
+                setupFrameStreamId + 1 /* streamId */,
                 16 /* totalBytesWritten */,
-                kSetupFrameSize /* batchOffset */),
+                setupFrameSize /* batchOffset */),
             WriteEventContextMatcher(
                 startOffsetBatch /* startRawByteOffset */,
                 endOffsetBatch /* endRawByteOffset */)));
 
     auto stream = client.sendRequestStreamSync(
-        Payload::makeFromMetadataAndData(kMetadata, folly::StringPiece{data}));
+        Payload::makeFromMetadataAndData(metadata, folly::StringPiece{data}));
 
     server_->getEventBase().runInEventBaseThreadAndWait([&] {
       server_->getConnectionManager()->forEachConnection(
           [&](wangle::ManagedConnection* connection) {
             if (auto conn = dynamic_cast<RocketServerConnection*>(connection)) {
-              conn->removeObserver(observer.get());
+              conn->removeObserver(&observer);
               EXPECT_EQ(conn->numObservers(), 0);
             }
           });

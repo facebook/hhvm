@@ -132,15 +132,6 @@ template <typename T>
 constexpr static bool is_safe_patch_v =
     folly::is_detected_v<detail::detect_safe_patch_value_type, T>;
 
-template <typename T>
-std::string prettyPrintPatch(
-    const T& obj,
-    DebugProtocolWriter::Options options =
-        DebugProtocolWriter::Options::simple()) {
-  static_assert(is_patch_v<T>, "Argument must be a Patch.");
-  return debugStringViaEncode(obj, std::move(options));
-}
-
 /**
  * Returns a Thrift Patch instance corresponding to the (decoded) `SafePatch`.
  *

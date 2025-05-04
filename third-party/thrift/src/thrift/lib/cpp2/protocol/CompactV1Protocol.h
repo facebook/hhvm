@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <folly/Portability.h>
 #include <folly/lang/Bits.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
@@ -90,6 +91,8 @@ class CompactV1ProtocolWriter : protected CompactProtocolWriter {
   using CompactProtocolWriter::tail;
 
   inline void rewriteDouble(double dub, int64_t offset);
+
+  static constexpr bool kSupportsArithmeticVectors() { return false; }
 };
 
 class CompactV1ProtocolReader : protected CompactProtocolReader {

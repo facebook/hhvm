@@ -1982,8 +1982,8 @@ ReqBindJmp and CallFuncEntry.
 
 | DecReleaseCheck<locId>, ND, S(Cell), B|CRc
 
-  Decrease the refcount of S0 and fall through if the refcount goes to zero.
-  Otherwise, branch to B.
+  If the refcount of S0 is 1, fall through.
+  Otherwise, decrease the refcount of S0 and branch to B.
 
 12. Misc
 

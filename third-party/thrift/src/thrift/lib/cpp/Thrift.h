@@ -51,7 +51,7 @@
 
 namespace apache::thrift {
 namespace detail {
-std::string* makeCheckEqErrorMessage(
+std::string* makeCheckErrorMessage(
     intmax_t v1, intmax_t v2, const char* s1, const char* s2, const char* name);
 }
 
@@ -252,7 +252,21 @@ std::string* Check_EQImpl(Enum v1, Enum v2, const char* names) {
   if (FOLLY_LIKELY(v1 == v2)) {
     return nullptr;
   }
-  return apache::thrift::detail::makeCheckEqErrorMessage(
+  return apache::thrift::detail::makeCheckErrorMessage(
+      static_cast<intmax_t>(v1),
+      static_cast<intmax_t>(v2),
+      apache::thrift::TEnumTraits<Enum>::findName(v1),
+      apache::thrift::TEnumTraits<Enum>::findName(v2),
+      names);
+}
+template <
+    class Enum,
+    decltype(apache::thrift::TEnumTraits<Enum>::size)* = nullptr>
+std::string* Check_NEImpl(Enum v1, Enum v2, const char* names) {
+  if (FOLLY_LIKELY(v1 != v2)) {
+    return nullptr;
+  }
+  return apache::thrift::detail::makeCheckErrorMessage(
       static_cast<intmax_t>(v1),
       static_cast<intmax_t>(v2),
       apache::thrift::TEnumTraits<Enum>::findName(v1),

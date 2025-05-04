@@ -24,7 +24,7 @@
 
 namespace apache::thrift {
 namespace detail {
-std::string* makeCheckEqErrorMessage(
+std::string* makeCheckErrorMessage(
     intmax_t v1,
     intmax_t v2,
     const char* s1,

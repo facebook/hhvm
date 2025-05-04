@@ -28,7 +28,6 @@
 #include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
-#include <thrift/lib/cpp2/patch/detail/Scuba.h>
 
 namespace apache::thrift::op::detail {
 
@@ -132,8 +131,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     if (!data_.prepend()->empty()) {
       auto msg = "Prepend in ListPatch is disallowed.";
       LOG(DFATAL) << msg;
-      patch::detail::logDeprecatedOperation(
-          "ListPatch::Prepend", folly::pretty_name<T>(), msg);
     }
 
     v.prepend(*data_.prepend());

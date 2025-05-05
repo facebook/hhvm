@@ -57,7 +57,7 @@ constexpr size_t kMaximumContainerSize = std::numeric_limits<uint32_t>::max();
 
 // We could write the BSER parser to use O(1) stack depth, but in the short term
 // let's limit container depth.
-constexpr size_t kMaximumDepth = 1000;
+constexpr size_t kMaximumDepth = 500;
 
 constexpr size_t kMaximumReservation = 10000;
 

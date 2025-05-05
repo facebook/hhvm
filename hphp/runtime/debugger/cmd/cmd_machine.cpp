@@ -203,7 +203,7 @@ void CmdMachine::onClient(DebuggerClient &client) {
     }
     std::string host = client.argValue(2);
     int port = 0;
-    size_t pos = host.find(":");
+    size_t pos = host.find(':');
     if (pos != std::string::npos) {
       if (!DebuggerClient::IsValidNumber(host.substr(pos + 1))) {
         client.error("Port needs to be a number");

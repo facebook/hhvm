@@ -374,7 +374,7 @@ class TSSLServerSocket(TServerSocket):
     def accept(self):
         plain_client, addr = self._sock_accept()
         try:
-            client = ssl.SSLContext.wrap_socket(
+            client = ssl.wrap_socket(
                 plain_client,
                 certfile=self.certfile,
                 server_side=True,

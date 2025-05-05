@@ -44,7 +44,7 @@ fn tag_to_dep_type(tag: u8) -> DepType {
 /// transitively called functions from here call into the OCaml runtime, and we
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
 /// concurrently modified.
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
     fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
         let dep_type_tag = dep_type_tag
@@ -85,7 +85,7 @@ unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
 /// transitively called functions from here call into the OCaml runtime, and we
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
 /// concurrently modified.
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn hash2_ocaml(
     dep_type_tag: usize,
     type_hash: usize,
@@ -313,7 +313,7 @@ ocaml_ffi! {
     }
 
     fn hh_dep_set_elements(s: Custom<DepSet>) -> Vec<Dep> {
-        s.iter().copied().map(Dep::from).collect()
+        s.iter().copied().collect()
     }
 
      fn hh_dep_set_cardinal(s: Custom<DepSet>) -> usize {

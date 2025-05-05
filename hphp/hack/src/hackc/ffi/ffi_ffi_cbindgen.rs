@@ -7,7 +7,7 @@ use triomphe::OffsetArc;
 /// This definition exists for ffi_cbindgen C++ header generation. Any
 /// attempt to call this function will result in an intentional
 /// unresolved symbol at link time.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn no_call_compile_only_USED_TYPES_ffi(
     _: Maybe<i32>,
     _: Vector<u8>,

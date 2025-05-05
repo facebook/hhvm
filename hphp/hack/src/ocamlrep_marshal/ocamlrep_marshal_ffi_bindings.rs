@@ -7,7 +7,7 @@ use ocamlrep::FromOcamlRep;
 
 type OcamlValue = usize;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(
     v: OcamlValue,
     flags: OcamlValue,
@@ -21,7 +21,7 @@ unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(
     })
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn ocamlrep_marshal_input_value_from_string(
     str: OcamlValue,
     ofs: OcamlValue,

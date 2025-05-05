@@ -19,7 +19,7 @@ use rpds::HashTrieSet;
 use super::NamingTable;
 
 // stub for hh_shared.c function called by shm_store crate
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn hh_log_level() -> ocamlrep::Value<'static> {
     ocamlrep::Value::int(0)
 }

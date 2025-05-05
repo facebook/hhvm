@@ -28,7 +28,7 @@ pub fn with<R>(f: impl FnOnce(&ShmemTableSegmentRef<'static, HeapValue>) -> R) -
     f(SEGMENT.get().unwrap())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_init(
     mmap_address: *mut libc::c_void,
     file_size: libc::size_t,
@@ -65,7 +65,7 @@ pub extern "C" fn shmffi_init(
     });
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc::size_t) {
     catch_unwind(|| {
         if SEGMENT
@@ -82,7 +82,7 @@ pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc
     });
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_add(evictable: bool, hash: u64, data: usize) -> usize {
     catch_unwind(|| {
         let data = unsafe { Value::from_bits(data) };
@@ -117,7 +117,7 @@ pub extern "C" fn shmffi_add(evictable: bool, hash: u64, data: usize) -> usize {
 /// Writes the given data directly into the shared memory.
 /// `data` should be an OCaml `bytes` object returned by
 /// `shmffi_get_raw` or `shmffi_serialize_raw`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_add_raw(hash: u64, ocaml_bytes: usize) -> usize {
     catch_unwind(|| {
         let ocaml_bytes = unsafe { Value::from_bits(ocaml_bytes) };
@@ -144,7 +144,7 @@ pub extern "C" fn shmffi_add_raw(hash: u64, ocaml_bytes: usize) -> usize {
     })
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
     catch_unwind(|| {
         with(|segment| {
@@ -179,7 +179,7 @@ pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
 /// its raw form as an OCaml `bytes option`, without deserializing.
 /// The result is meant to be passed to `shmffi_deserialize_raw`
 /// and `shmffi_add_raw`, potentially over the network.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_get_raw(hash: u64) -> usize {
     catch_unwind(|| {
         with(|segment| {
@@ -210,7 +210,7 @@ pub extern "C" fn shmffi_get_raw(hash: u64) -> usize {
 
 /// Takes an OCaml `bytes` object as returned by `shmffi_serialize_raw`
 /// or `shmffi_get_raw`, and deserialize it back into an OCaml value.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_deserialize_raw(ocaml_bytes: usize) -> usize {
     catch_unwind(|| {
         // First we have to copy the OCaml buffer contents to a native buffer,
@@ -238,7 +238,7 @@ pub extern "C" fn shmffi_deserialize_raw(ocaml_bytes: usize) -> usize {
 /// Takes an OCaml value and serializes it into a form suitable
 /// for sending over the network, and for usage with `shmffi_deserialize_raw`
 /// and `shmffi_add_raw`. Returns an OCaml `bytes` object.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_serialize_raw(data: usize) -> usize {
     catch_unwind(|| {
         // Serialize and compress
@@ -264,7 +264,7 @@ pub extern "C" fn shmffi_serialize_raw(data: usize) -> usize {
     })
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_mem(hash: u64) -> usize {
     catch_unwind(|| {
         let flag = with(|segment| segment.table.contains_key(&hash));
@@ -272,7 +272,7 @@ pub extern "C" fn shmffi_mem(hash: u64) -> usize {
     })
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_mem_status(hash: u64) -> usize {
     let flag = with(|segment| segment.table.contains_key(&hash));
     // From hh_shared.c: 1 = present, -1 = not present
@@ -280,7 +280,7 @@ pub extern "C" fn shmffi_mem_status(hash: u64) -> usize {
     Value::int(result).to_bits()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
     let size = with(|segment| {
         segment
@@ -293,7 +293,7 @@ pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
     Value::int(size as isize).to_bits()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
     with(|segment| {
         let (header, data) = segment.table.inspect_and_remove(&hash1, |value| {
@@ -315,7 +315,7 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
     });
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     let size = with(|segment| {
         segment
@@ -325,7 +325,7 @@ pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     Value::int(size as isize).to_bits()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_allocated_bytes() -> usize {
     catch_unwind(|| {
         let bytes = with(|segment| segment.table.allocated_bytes());
@@ -333,7 +333,7 @@ pub extern "C" fn shmffi_allocated_bytes() -> usize {
     })
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn shmffi_num_entries() -> usize {
     catch_unwind(|| {
         let num_entries = with(|segment| segment.table.len());

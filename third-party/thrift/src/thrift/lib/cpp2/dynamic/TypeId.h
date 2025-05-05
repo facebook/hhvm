@@ -20,9 +20,13 @@
 
 #include <iosfwd>
 
+#include <string_view>
+
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
 namespace apache::thrift::dynamic {
+
+using UriView = std::string_view;
 
 /**
  * A class containing helpers to author TypeId objects.

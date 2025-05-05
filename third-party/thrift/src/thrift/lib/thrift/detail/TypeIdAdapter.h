@@ -322,17 +322,27 @@ class MapTypeIdWrapper final
 };
 using MapTypeIdAdapter = InlineAdapter<MapTypeId>;
 
+using TypeIdKinds = folly::tag_t<
+    BoolTypeId,
+    ByteTypeId,
+    I16TypeId,
+    I32TypeId,
+    I64TypeId,
+    FloatTypeId,
+    DoubleTypeId,
+    StringTypeId,
+    BinaryTypeId,
+    AnyTypeId,
+    ListTypeId,
+    SetTypeId,
+    MapTypeId>;
+
 /**
  * Determines if T is one of the union alternatives of TypeId.
  */
 template <typename T>
-constexpr bool isTypeIdKind = std::is_same_v<T, BoolTypeId> ||
-    std::is_same_v<T, ByteTypeId> || std::is_same_v<T, I16TypeId> ||
-    std::is_same_v<T, I32TypeId> || std::is_same_v<T, I64TypeId> ||
-    std::is_same_v<T, FloatTypeId> || std::is_same_v<T, DoubleTypeId> ||
-    std::is_same_v<T, StringTypeId> || std::is_same_v<T, BinaryTypeId> ||
-    std::is_same_v<T, AnyTypeId> || std::is_same_v<T, ListTypeId> ||
-    std::is_same_v<T, SetTypeId> || std::is_same_v<T, MapTypeId>;
+constexpr bool isTypeIdKind = folly::type_list_find_v<T, TypeIdKinds> !=
+    folly::type_list_size_v<TypeIdKinds>;
 
 template <typename T>
 class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {

@@ -199,24 +199,28 @@ using SerializableRecordMap = folly::F14FastMap<
     SerializableRecord,
     SerializableRecordHasher>;
 
+using SerializableRecordKinds = folly::tag_t<
+    SerializableRecordBool,
+    SerializableRecordInt8,
+    SerializableRecordInt16,
+    SerializableRecordInt32,
+    SerializableRecordInt64,
+    SerializableRecordFloat32,
+    SerializableRecordFloat64,
+    SerializableRecordText,
+    SerializableRecordByteArray,
+    SerializableRecordFieldSet,
+    SerializableRecordList,
+    SerializableRecordSet,
+    SerializableRecordMap>;
+
 /**
  * Determines if T is one of the union alternatives of SerializableRecord.
  */
 template <typename T>
 constexpr bool isSerializableRecordKind =
-    std::is_same_v<T, SerializableRecordBool> ||
-    std::is_same_v<T, SerializableRecordInt8> ||
-    std::is_same_v<T, SerializableRecordInt16> ||
-    std::is_same_v<T, SerializableRecordInt32> ||
-    std::is_same_v<T, SerializableRecordInt64> ||
-    std::is_same_v<T, SerializableRecordFloat32> ||
-    std::is_same_v<T, SerializableRecordFloat64> ||
-    std::is_same_v<T, SerializableRecordText> ||
-    std::is_same_v<T, SerializableRecordByteArray> ||
-    std::is_same_v<T, SerializableRecordFieldSet> ||
-    std::is_same_v<T, SerializableRecordList> ||
-    std::is_same_v<T, SerializableRecordSet> ||
-    std::is_same_v<T, SerializableRecordMap>;
+    folly::type_list_find_v<T, SerializableRecordKinds> !=
+    folly::type_list_size_v<SerializableRecordKinds>;
 
 template <typename T>
 class SerializableRecordWrapper final

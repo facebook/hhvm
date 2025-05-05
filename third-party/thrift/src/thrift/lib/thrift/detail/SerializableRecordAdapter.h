@@ -181,6 +181,43 @@ struct PrimitiveDatum {
   }
 };
 
+using SerializableRecordBool = PrimitiveDatum<bool>;
+using SerializableRecordInt8 = PrimitiveDatum<std::int8_t>;
+using SerializableRecordInt16 = PrimitiveDatum<std::int16_t>;
+using SerializableRecordInt32 = PrimitiveDatum<std::int32_t>;
+using SerializableRecordInt64 = PrimitiveDatum<std::int64_t>;
+using SerializableRecordFloat32 = PrimitiveDatum<float>;
+using SerializableRecordFloat64 = PrimitiveDatum<double>;
+using SerializableRecordText = std::string;
+using SerializableRecordByteArray = std::unique_ptr<type::ByteBuffer>;
+using SerializableRecordFieldSet = std::map<FieldId, SerializableRecord>;
+using SerializableRecordList = std::vector<SerializableRecord>;
+using SerializableRecordSet =
+    folly::F14FastSet<SerializableRecord, SerializableRecordHasher>;
+using SerializableRecordMap = folly::F14FastMap<
+    SerializableRecord,
+    SerializableRecord,
+    SerializableRecordHasher>;
+
+/**
+ * Determines if T is one of the union alternatives of SerializableRecord.
+ */
+template <typename T>
+constexpr bool isSerializableRecordKind =
+    std::is_same_v<T, SerializableRecordBool> ||
+    std::is_same_v<T, SerializableRecordInt8> ||
+    std::is_same_v<T, SerializableRecordInt16> ||
+    std::is_same_v<T, SerializableRecordInt32> ||
+    std::is_same_v<T, SerializableRecordInt64> ||
+    std::is_same_v<T, SerializableRecordFloat32> ||
+    std::is_same_v<T, SerializableRecordFloat64> ||
+    std::is_same_v<T, SerializableRecordText> ||
+    std::is_same_v<T, SerializableRecordByteArray> ||
+    std::is_same_v<T, SerializableRecordFieldSet> ||
+    std::is_same_v<T, SerializableRecordList> ||
+    std::is_same_v<T, SerializableRecordSet> ||
+    std::is_same_v<T, SerializableRecordMap>;
+
 template <typename T>
 class SerializableRecordWrapper final
     : public type::detail::EqWrap<SerializableRecordWrapper<T>, T> {
@@ -198,22 +235,21 @@ class SerializableRecordWrapper final
       delete;
   /* implicit */ SerializableRecordWrapper(SerializableRecordUnion&&) = delete;
 
-  using Bool = PrimitiveDatum<bool>;
-  using Int8 = PrimitiveDatum<std::int8_t>;
-  using Int16 = PrimitiveDatum<std::int16_t>;
-  using Int32 = PrimitiveDatum<std::int32_t>;
-  using Int64 = PrimitiveDatum<std::int64_t>;
-  using Float32 = PrimitiveDatum<float>;
-  using Float64 = PrimitiveDatum<double>;
-  using Text = std::string;
-  using ByteArray = std::unique_ptr<type::ByteBuffer>;
-  using FieldSet = std::map<FieldId, SerializableRecord>;
-  using List = std::vector<SerializableRecord>;
-  using Set = folly::F14FastSet<SerializableRecord, SerializableRecordHasher>;
-  using Map = folly::F14FastMap<
-      SerializableRecord,
-      SerializableRecord,
-      SerializableRecordHasher>;
+  // These aliases exist so that the user can write SerializableRecord::<type>
+  // instead of reaching into the detail namesspace.
+  using Bool = SerializableRecordBool;
+  using Int8 = SerializableRecordInt8;
+  using Int16 = SerializableRecordInt16;
+  using Int32 = SerializableRecordInt32;
+  using Int64 = SerializableRecordInt64;
+  using Float32 = SerializableRecordFloat32;
+  using Float64 = SerializableRecordFloat64;
+  using Text = SerializableRecordText;
+  using ByteArray = SerializableRecordByteArray;
+  using FieldSet = SerializableRecordFieldSet;
+  using List = SerializableRecordList;
+  using Set = SerializableRecordSet;
+  using Map = SerializableRecordMap;
 
   /* implicit */ SerializableRecordWrapper(Bool datum) noexcept {
     this->data_.boolDatum_ref() = datum;
@@ -539,17 +575,26 @@ class SerializableRecordWrapper final
     return lhs.isMap() && lhs.asMap() == rhs;
   }
 
-  template <typename V>
+  template <
+      typename V,
+      std::enable_if_t<isSerializableRecordKind<std::remove_cvref_t<V>>>* =
+          nullptr>
   friend bool operator==(const V& lhs, const SerializableRecordWrapper& rhs) {
     return rhs == lhs;
   }
 
   // In C++20, operator!= can be synthesized from operator==.
-  template <typename V>
+  template <
+      typename V,
+      std::enable_if_t<isSerializableRecordKind<std::remove_cvref_t<V>>>* =
+          nullptr>
   friend bool operator!=(const SerializableRecordWrapper& lhs, const V& rhs) {
     return !(lhs == rhs);
   }
-  template <typename V>
+  template <
+      typename V,
+      std::enable_if_t<isSerializableRecordKind<std::remove_cvref_t<V>>>* =
+          nullptr>
   friend bool operator!=(const V& lhs, const SerializableRecordWrapper& rhs) {
     return !(lhs == rhs);
   }

@@ -322,6 +322,18 @@ class MapTypeIdWrapper final
 };
 using MapTypeIdAdapter = InlineAdapter<MapTypeId>;
 
+/**
+ * Determines if T is one of the union alternatives of TypeId.
+ */
+template <typename T>
+constexpr bool isTypeIdKind = std::is_same_v<T, BoolTypeId> ||
+    std::is_same_v<T, ByteTypeId> || std::is_same_v<T, I16TypeId> ||
+    std::is_same_v<T, I32TypeId> || std::is_same_v<T, I64TypeId> ||
+    std::is_same_v<T, FloatTypeId> || std::is_same_v<T, DoubleTypeId> ||
+    std::is_same_v<T, StringTypeId> || std::is_same_v<T, BinaryTypeId> ||
+    std::is_same_v<T, AnyTypeId> || std::is_same_v<T, ListTypeId> ||
+    std::is_same_v<T, SetTypeId> || std::is_same_v<T, MapTypeId>;
+
 template <typename T>
 class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
  private:
@@ -605,17 +617,23 @@ class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
     return lhs.isMap() && lhs.asMap() == rhs;
   }
 
-  template <typename V>
+  template <
+      typename V,
+      std::enable_if_t<isTypeIdKind<std::remove_reference_t<V>>>* = nullptr>
   friend bool operator==(const V& lhs, const TypeIdWrapper& rhs) {
     return rhs == lhs;
   }
 
   // In C++20, operator!= can be synthesized from operator==.
-  template <typename V>
+  template <
+      typename V,
+      std::enable_if_t<isTypeIdKind<std::remove_cvref_t<V>>>* = nullptr>
   friend bool operator!=(const TypeIdWrapper& lhs, const V& rhs) {
     return !(lhs == rhs);
   }
-  template <typename V>
+  template <
+      typename V,
+      std::enable_if_t<isTypeIdKind<std::remove_cvref_t<V>>>* = nullptr>
   friend bool operator!=(const V& lhs, const TypeIdWrapper& rhs) {
     return !(lhs == rhs);
   }

@@ -10567,6 +10567,7 @@ private:
       string_data_lt{}
     );
 
+    SStringSet copied;
     for (auto const name : sortedClsConstants) {
       auto& cnsIdx = cinfo.clsConstants.find(name)->second;
       if (cnsIdx.idx.cls->tsame(cls.name)) continue;
@@ -10612,11 +10613,25 @@ private:
       copy.cls = cls.name;
       copy.isAbstract = false;
       state.m_cnsFromTrait.erase(copy.name);
+      copied.emplace(copy.name);
 
       cnsIdx.idx.cls = cls.name;
       cnsIdx.idx.idx = cls.constants.size();
       cnsIdx.kind = copy.kind;
       cls.constants.emplace_back(std::move(copy));
+    }
+
+    if (!copied.empty()) {
+      // If we've copied a constant into this class, remove it from
+      // the m_traitCns list, or we might try to import an identical
+      // copy agian when we flatten traits.
+      state.m_traitCns.erase(
+        std::remove_if(
+          begin(state.m_traitCns), end(state.m_traitCns),
+          [&] (const php::Const& cns) { return copied.contains(cns.name); }
+        ),
+        end(state.m_traitCns)
+      );
     }
 
     return true;

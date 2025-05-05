@@ -194,14 +194,6 @@ class Foo final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i32_t
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -338,14 +330,6 @@ class Bar final  {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -492,14 +476,6 @@ class Baz final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
     ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -720,14 +696,6 @@ class OpEncodeStruct final  {
     ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>,
     ::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>,
     ::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

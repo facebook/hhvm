@@ -207,14 +207,6 @@ class runtime_annotation final  {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -302,14 +294,6 @@ class structured_annotation_inline final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i64_t,
     ::apache::thrift::type::string_t
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -505,14 +489,6 @@ class structured_annotation_with_default final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -661,14 +637,6 @@ class structured_annotation_forward final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i64_t
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -807,14 +775,6 @@ class structured_annotation_recursive final  {
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_forward>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1068,14 +1028,6 @@ class structured_annotation_nested final  {
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1283,14 +1235,6 @@ class MyStruct final  {
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::i64_t
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1590,14 +1534,6 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1757,14 +1693,6 @@ class MyUnion final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::i64_t
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_destruct();

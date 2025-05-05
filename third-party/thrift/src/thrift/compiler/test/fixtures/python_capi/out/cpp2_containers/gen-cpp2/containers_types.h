@@ -221,14 +221,6 @@ class TemplateLists final  {
     ::apache::thrift::type::cpp_type<folly::small_vector<::test::fixtures::python_capi::fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<folly::fbvector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>>,
     ::apache::thrift::type::cpp_type<folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<folly::fbvector<::test::fixtures::python_capi::fbvector_string>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<folly::fbvector<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>>>>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -599,14 +591,6 @@ class TemplateSets final  {
     ::apache::thrift::type::cpp_type<folly::F14ValueSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
     ::apache::thrift::type::cpp_type<folly::F14VectorSet<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
     ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1088,14 +1072,6 @@ class TemplateMaps final  {
     ::apache::thrift::type::cpp_type<folly::F14VectorMap<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>,
     ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::string, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1566,14 +1542,6 @@ class TWrapped final  {
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::binary_t
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1780,14 +1748,6 @@ class IndirectionA final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1932,14 +1892,6 @@ class IndirectionB final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::cpp_type<std::vector<::test::fixtures::python_capi::TWrapped>, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2083,14 +2035,6 @@ class IndirectionC final  {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::TWrapped>>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

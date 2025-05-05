@@ -92,15 +92,6 @@ template <
     class TypeTag,
     class FieldTag>
 void checkField(const char* identName) {
-  static_assert(std::is_same_v<Ordinal, private_access::ordinal<Struct, Id>>);
-  static_assert(
-      std::is_same_v<Ordinal, private_access::ordinal<Struct, Ident>>);
-
-  if constexpr (is_type_tag_unique) {
-    static_assert(
-        std::is_same_v<Ordinal, private_access::ordinal<Struct, TypeTag>>);
-  }
-
   static_assert(std::is_same_v<op::get_ordinal<Struct, Ordinal>, Ordinal>);
   static_assert(std::is_same_v<op::get_field_id<Struct, Ordinal>, Id>);
   static_assert(std::is_same_v<op::get_type_tag<Struct, Ordinal>, TypeTag>);

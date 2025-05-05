@@ -195,14 +195,6 @@ class TrivialTypesStruct final  {
     ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>,
     ::apache::thrift::type::enum_t<::test::fixtures::tablebased::ExampleEnum>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -572,14 +564,6 @@ class ContainerStruct final  {
     ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int32_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>>,
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::tablebased::TrivialTypesStruct>>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1105,14 +1089,6 @@ class ExampleUnion final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::struct_t<::test::fixtures::tablebased::ContainerStruct>,
     ::apache::thrift::type::struct_t<::test::fixtures::tablebased::TrivialTypesStruct>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_destruct();

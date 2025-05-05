@@ -153,14 +153,6 @@ class TerseFoo final  {
     ::apache::thrift::type::list<::apache::thrift::type::double_t>,
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -472,14 +464,6 @@ class TerseLazyFoo final  {
     ::apache::thrift::type::list<::apache::thrift::type::double_t>,
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -780,14 +764,6 @@ class TerseOptionalFoo final  {
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
     ::apache::thrift::type::list<::apache::thrift::type::double_t>,
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1107,14 +1083,6 @@ class TerseOptionalLazyFoo final  {
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
     ::apache::thrift::type::list<::apache::thrift::type::double_t>,
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

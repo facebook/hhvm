@@ -214,14 +214,6 @@ class Color final  {
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::double_t
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -504,14 +496,6 @@ class Vehicle final  {
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::bool_t
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -893,14 +877,6 @@ class Person final  {
     ::apache::thrift::type::map<::apache::thrift::type::enum_t<::cpp2::Animal>, ::apache::thrift::type::string_t>,
     ::apache::thrift::type::enum_t<::cpp2::Animal>,
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::Vehicle>>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

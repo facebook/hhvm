@@ -504,14 +504,6 @@ class MyStruct final  {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -595,14 +587,6 @@ class MyUnion final  {
   >;
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_destruct();
@@ -755,14 +739,6 @@ class StructLevelTerseStruct final  {
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
     ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
     ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1479,14 +1455,6 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
     ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>,
     ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::byte_t>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -2912,14 +2880,6 @@ class CppRefStructFields final  {
     ::apache::thrift::type::i32_t,
     ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3128,14 +3088,6 @@ class DeprecatedTerseWriteWithCustomDefault final  {
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -3896,14 +3848,6 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>
-  >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

@@ -243,14 +243,6 @@ class MyStruct final  {
     ::apache::thrift::type::enum_t<::test::fixtures::enumstrict::MyEnum>,
     ::apache::thrift::type::enum_t<::test::fixtures::enumstrict::MyBigEnum>
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;

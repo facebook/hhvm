@@ -26,11 +26,3 @@
   using __fbthrift_reflection_type_tags = folly::tag_t<{{#struct:fields}}
     {{field:type_tag}}{{^last?}},{{/last?}}{{/struct:fields}}
   >;
-
-  template <typename T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_idents,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_ids
-    )
-  >;

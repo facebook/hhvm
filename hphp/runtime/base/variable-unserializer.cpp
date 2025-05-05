@@ -1230,7 +1230,7 @@ void VariableUnserializer::unserializeVariant(
       throwUnknownType(type);
     }
   case 'm': // ClsMeth
-    if (m_type == VariableUnserializer::Type::DebuggerSerialize) {
+    if (m_type == VariableUnserializer::Type::DebuggerSerialize || m_type == VariableUnserializer::Type::Internal) {
       const auto cls{Class::load(unserializeString().get())};
       expectChar(':');
       const auto func{cls->lookupMethod(unserializeString().get())};

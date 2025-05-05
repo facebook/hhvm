@@ -19,8 +19,8 @@
 namespace apache::thrift::test {
 
 void* TrackingTProcessorEventHandler::getServiceContext(
-    const char* serviceName,
-    const char* functionName,
+    std::string_view serviceName,
+    std::string_view functionName,
     TConnectionContext* /* connectionContext */) {
   history_.emplace_back(
       fmt::format("getServiceContext('{}', '{}')", serviceName, functionName));
@@ -28,44 +28,44 @@ void* TrackingTProcessorEventHandler::getServiceContext(
 }
 
 void TrackingTProcessorEventHandler::freeContext(
-    void* /* ctx */, const char* functionName) {
+    void* /* ctx */, std::string_view functionName) {
   history_.emplace_back(fmt::format("freeContext('{}')", functionName));
 }
 
 void TrackingTProcessorEventHandler::preRead(
-    void* /* ctx */, const char* functionName) {
+    void* /* ctx */, std::string_view functionName) {
   history_.emplace_back(fmt::format("preRead('{}')", functionName));
 }
 
 void TrackingTProcessorEventHandler::onReadData(
     void* /* ctx */,
-    const char* functionName,
+    std::string_view functionName,
     const SerializedMessage& /* msg */) {
   history_.emplace_back(fmt::format("onReadData('{}')", functionName));
 }
 
 void TrackingTProcessorEventHandler::postRead(
     void* /* ctx */,
-    const char* functionName,
+    std::string_view functionName,
     apache::thrift::transport::THeader* /* header */,
     uint32_t /*bytes*/) {
   history_.emplace_back(fmt::format("postRead('{}')", functionName));
 }
 
 void TrackingTProcessorEventHandler::preWrite(
-    void* /* ctx */, const char* functionName) {
+    void* /* ctx */, std::string_view functionName) {
   history_.emplace_back(fmt::format("preWrite('{}')", functionName));
 }
 
 void TrackingTProcessorEventHandler::onWriteData(
     void* /* ctx */,
-    const char* functionName,
+    std::string_view functionName,
     const SerializedMessage& /* msg */) {
   history_.emplace_back(fmt::format("onWriteData('{}')", functionName));
 }
 
 void TrackingTProcessorEventHandler::postWrite(
-    void* /* ctx */, const char* functionName, uint32_t /* bytes */) {
+    void* /* ctx */, std::string_view functionName, uint32_t /* bytes */) {
   history_.emplace_back(fmt::format("postWrite('{}')", functionName));
 }
 

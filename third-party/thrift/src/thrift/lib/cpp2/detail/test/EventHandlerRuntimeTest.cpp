@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <string_view>
 #include <folly/portability/GTest.h>
 
 #include <folly/synchronization/Rcu.h>
@@ -51,7 +52,7 @@ class EventHandlerRuntimeTest : public testing::Test {
  public:
   class CountingEventHandler : public TProcessorEventHandler {
    private:
-    void preRead(void* /* ctx */, const char* /* fn_name */) override {
+    void preRead(void* /* ctx */, std::string_view /* fn_name */) override {
       ++callCount;
     }
 

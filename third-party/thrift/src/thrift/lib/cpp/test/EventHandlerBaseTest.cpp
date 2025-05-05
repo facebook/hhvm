@@ -41,11 +41,11 @@ class EventHandler : public TProcessorEventHandler {
   string ex_what;
   void userException(
       void*,
-      const char*,
-      const std::string& ex_type,
-      const std::string& ex_what) override {
-    this->ex_type = ex_type;
-    this->ex_what = ex_what;
+      std::string_view,
+      std::string_view ex_type,
+      std::string_view ex_what) override {
+    this->ex_type = std::string(ex_type);
+    this->ex_what = std::string(ex_what);
   }
 };
 
@@ -84,7 +84,7 @@ TEST_F(TProcessorEventHandlerTest, with_full_wrapped_eptr) {
   EXPECT_EQ("lulz: hello", wrap.what().toStdString());
 
   EventHandler eh;
-  eh.userExceptionWrapped(nullptr, nullptr, false, wrap);
+  eh.userExceptionWrapped(nullptr, "", false, wrap);
   EXPECT_EQ("lulz", eh.ex_type);
   EXPECT_EQ("lulz: hello", eh.ex_what);
 }
@@ -95,7 +95,7 @@ TEST_F(TProcessorEventHandlerTest, with_wrap_surprise) {
   EXPECT_EQ("lulz: hello", wrap.what().toStdString());
 
   EventHandler eh;
-  eh.userExceptionWrapped(nullptr, nullptr, false, wrap);
+  eh.userExceptionWrapped(nullptr, "", false, wrap);
   EXPECT_EQ("lulz", eh.ex_type);
   EXPECT_EQ("lulz: hello", eh.ex_what);
 }
@@ -106,7 +106,7 @@ TEST_F(TProcessorEventHandlerTest, with_wrap_declared) {
   EXPECT_EQ("lulz: hello", wrap.what().toStdString());
 
   EventHandler eh;
-  eh.userExceptionWrapped(nullptr, nullptr, true, wrap);
+  eh.userExceptionWrapped(nullptr, "", true, wrap);
   EXPECT_EQ("lulz", eh.ex_type);
   EXPECT_EQ("hello", eh.ex_what);
 }

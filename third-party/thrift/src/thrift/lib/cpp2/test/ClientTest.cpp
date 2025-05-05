@@ -24,8 +24,8 @@ using namespace apache::thrift;
 
 TEST(ClientTest, ReadHeaderAvailableToEventProcessor) {
   struct EventHandler : TProcessorEventHandler {
-    void postRead(
-        void*, const char*, transport::THeader* header, uint32_t) override {
+    void postRead(void*, std::string_view, transport::THeader* header, uint32_t)
+        override {
       ASSERT_EQ(header->getHeaders().at("header"), "value");
     }
   };

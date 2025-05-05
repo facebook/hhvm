@@ -35,7 +35,7 @@ class ThriftPythonUnitTestException : public std::exception {
 class ThrowPreReadClientEventHandler
     : public apache::thrift::TProcessorEventHandler {
  public:
-  void preRead(void* /*ctx*/, const char* /*fn_name*/) override {
+  void preRead(void* /*ctx*/, std::string_view /*fn_name*/) override {
     throw ThriftPythonUnitTestException("pre_read");
   }
 };
@@ -45,7 +45,7 @@ class ThrowOnReadClientEventHandler
  public:
   void onReadData(
       void* /*ctx*/,
-      const char* /*fn_name*/,
+      std::string_view /*fn_name*/,
       const apache::thrift::SerializedMessage& /*msg*/) override {
     throw ThriftPythonUnitTestException("on_read");
   }
@@ -56,7 +56,7 @@ class ThrowPostReadClientEventHandler
  public:
   void postRead(
       void* /*ctx*/,
-      const char* /*fn_name*/,
+      std::string_view /*fn_name*/,
       apache::thrift::transport::THeader* /*header*/,
       uint32_t /*bytes*/) override {
     throw ThriftPythonUnitTestException("post_read");

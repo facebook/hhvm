@@ -54,23 +54,23 @@ class ExceptionTrackingEventHandler : public TProcessorEventHandler {
       std::vector<std::shared_ptr<Context>>* contexts) {
     contexts_ = contexts;
   }
-  void* getContext(const char* fn_name, TConnectionContext*) override {
-    contexts_->push_back(std::make_shared<Context>(fn_name));
+  void* getContext(std::string_view fn_name, TConnectionContext*) override {
+    contexts_->push_back(std::make_shared<Context>(std::string(fn_name)));
     return contexts_->back().get();
   }
   void userException(
       void* ctx,
-      const char* fn_name,
-      const std::string& ex,
-      const std::string& ex_what) override {
+      std::string_view fn_name,
+      std::string_view ex,
+      std::string_view ex_what) override {
     auto context = static_cast<Context*>(ctx);
     CHECK_EQ(context->name, fn_name);
-    context->ex_type = ex;
-    context->ex_what = ex_what;
+    context->ex_type = std::string(ex);
+    context->ex_what = std::string(ex_what);
   }
   void userExceptionWrapped(
       void* ctx,
-      const char* fn_name,
+      std::string_view fn_name,
       bool declared,
       const folly::exception_wrapper& ew) override {
     TProcessorEventHandler::userExceptionWrapped(ctx, fn_name, declared, ew);

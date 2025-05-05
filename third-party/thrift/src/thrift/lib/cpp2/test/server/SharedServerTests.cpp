@@ -388,17 +388,17 @@ class TestServerEventHandler : public server::TServerEventHandler,
     EXPECT_EQ(7, count++);
   }
 
-  void* getContext(const char*, TConnectionContext*) override {
+  void* getContext(std::string_view, TConnectionContext*) override {
     EXPECT_EQ(2, count++);
     return nullptr;
   }
-  void freeContext(void*, const char*) override { EXPECT_EQ(6, count++); }
-  void preRead(void*, const char*) override { EXPECT_EQ(3, count++); }
-  void onReadData(void*, const char*, const SerializedMessage&) override {
+  void freeContext(void*, std::string_view) override { EXPECT_EQ(6, count++); }
+  void preRead(void*, std::string_view) override { EXPECT_EQ(3, count++); }
+  void onReadData(void*, std::string_view, const SerializedMessage&) override {
     EXPECT_EQ(4, count++);
   }
 
-  void postRead(void*, const char*, THeader*, uint32_t) override {
+  void postRead(void*, std::string_view, THeader*, uint32_t) override {
     EXPECT_EQ(5, count++);
   }
 

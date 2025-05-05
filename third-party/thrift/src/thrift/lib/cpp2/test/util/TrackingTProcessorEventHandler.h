@@ -31,34 +31,34 @@ class TrackingTProcessorEventHandler
   const std::vector<std::string> getHistory() const { return history_; }
 
   void* getServiceContext(
-      const char* serviceName,
-      const char* functionName,
+      std::string_view serviceName,
+      std::string_view functionName,
       TConnectionContext* /* connectionContext */) override;
 
-  void freeContext(void* ctx, const char* functionName) override;
+  void freeContext(void* ctx, std::string_view functionName) override;
 
-  void preRead(void* ctx, const char* functionName) override;
+  void preRead(void* ctx, std::string_view functionName) override;
 
   void onReadData(
       void* ctx,
-      const char* functionName,
+      std::string_view functionName,
       const SerializedMessage& /* msg */) override;
 
   void postRead(
       void* ctx,
-      const char* functionName,
+      std::string_view functionName,
       apache::thrift::transport::THeader* /* header */,
       uint32_t /* bytes */) override;
 
-  void preWrite(void* ctx, const char* functionName) override;
+  void preWrite(void* ctx, std::string_view functionName) override;
 
   void onWriteData(
       void* ctx,
-      const char* functionName,
+      std::string_view functionName,
       const SerializedMessage& /* msg */) override;
 
   void postWrite(
-      void* ctx, const char* functionName, uint32_t /* bytes */) override;
+      void* ctx, std::string_view functionName, uint32_t /* bytes */) override;
 };
 
 } // namespace apache::thrift::test

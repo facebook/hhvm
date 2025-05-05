@@ -48,22 +48,22 @@ class TestEventHandler : public TProcessorEventHandler {
 
  public:
   void* getServiceContext(
-      const char* service_name,
-      const char* fn_name,
+      std::string_view service_name,
+      std::string_view fn_name,
       TConnectionContext* ctx) override {
     LOG(INFO) << fmt::format(
         "getServiceContext(\"{}\", \"{}\")", service_name, fn_name);
     return new EventHandlerContext(ctx);
   }
 
-  void freeContext(void* _ctx, const char* fn_name) override {
+  void freeContext(void* _ctx, std::string_view fn_name) override {
     LOG(INFO) << fmt::format("freeContext(\"{}\")", fn_name);
     ASSERT_TRUE(_ctx);
     delete static_cast<EventHandlerContext*>(_ctx);
   }
 
   void onReadData(
-      void* _ctx, const char* fn_name, const SerializedMessage&) override {
+      void* _ctx, std::string_view fn_name, const SerializedMessage&) override {
     LOG(INFO) << fmt::format("onReadData(\"{}\")", fn_name);
     ASSERT_TRUE(_ctx);
     const auto* ctx = static_cast<EventHandlerContext*>(_ctx);

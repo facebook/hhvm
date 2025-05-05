@@ -22,7 +22,9 @@ using namespace apache::thrift;
 class TestEventHandler : public TProcessorEventHandler {
  public:
   void postWrite(
-      void* /*ctx*/, const char* /*fn_name*/, uint32_t /*bytes*/) override {
+      void* /*ctx*/,
+      std::string_view /*fn_name*/,
+      uint32_t /*bytes*/) override {
     throw std::runtime_error("from postWrite");
   }
 };

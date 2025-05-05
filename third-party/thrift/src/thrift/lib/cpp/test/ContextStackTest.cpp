@@ -109,21 +109,21 @@ TEST(ContextStack, ClientHeaders) {
     using Base = TrackingTProcessorEventHandler;
 
     void* getServiceContext(
-        const char* serviceName,
-        const char* methodName,
+        std::string_view serviceName,
+        std::string_view methodName,
         apache::thrift::TConnectionContext* connectionContext) override {
       Base::getServiceContext(serviceName, methodName, connectionContext);
       return connectionContext;
     }
 
-    void preRead(void* ctx, const char* functionName) override {
+    void preRead(void* ctx, std::string_view functionName) override {
       auto* connectionContext =
           static_cast<apache::thrift::TConnectionContext*>(ctx);
       connectionContext->setHeader("preRead", "1");
       Base::preRead(ctx, functionName);
     }
 
-    void preWrite(void* ctx, const char* functionName) override {
+    void preWrite(void* ctx, std::string_view functionName) override {
       auto* connectionContext =
           static_cast<apache::thrift::TConnectionContext*>(ctx);
       connectionContext->setHeader("preWrite", "1");

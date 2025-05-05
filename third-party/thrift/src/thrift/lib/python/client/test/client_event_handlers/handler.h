@@ -16,13 +16,14 @@
 
 #pragma once
 
+#include <string_view>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 
 namespace thrift::python::test {
 
 class TestClientEventHandler : public apache::thrift::TProcessorEventHandler {
  public:
-  void preWrite(void* ctx, const char* fn_name) override {
+  void preWrite(void* ctx, std::string_view fn_name) override {
     preWriteCalled_ = true;
   }
 

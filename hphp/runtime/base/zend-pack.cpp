@@ -681,17 +681,19 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
     /* Do actual unpacking */
     for (int i = 0; i != arg; i++ ) {
       /* Space for name + number, safe as namelen is ensured <= 200 */
-      char n[256];
+      String n_str;
 
-      if (arg != 1 || namelen == 0) {
+      if (namelen == 0) {
+        n_str = String(i + 1);
+      } else if (arg != 1) {
         /* Need to add element number to name */
-        snprintf(n, sizeof(n), "%.*s%d", namelen, name, i + 1);
+        n_str = String(name, namelen, CopyString);
+        n_str += String(i + 1);
       } else {
         /* Truncate name to next format code or end of string */
-        snprintf(n, sizeof(n), "%.*s", namelen, name);
+        n_str = String(name, namelen, CopyString);
       }
 
-      const auto n_str = String(n, CopyString);
       int64_t n_int;
       const auto n_key = n_str.get()->isStrictlyInteger(n_int)
         ? Variant(n_int)

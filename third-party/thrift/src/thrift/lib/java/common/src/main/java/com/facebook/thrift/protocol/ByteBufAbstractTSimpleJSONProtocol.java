@@ -530,8 +530,7 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
         if (ch == ESCSEQ[1]) {
           readJSONSyntaxChar(ZERO);
           readJSONSyntaxChar(ZERO);
-          byteBuf.readBytes(tmpbuf_, 0, 2);
-          ch = (byte) ((hexVal((byte) tmpbuf_[0]) << 4) + hexVal(tmpbuf_[1]));
+          ch = (byte) ((hexVal(reader_.read(false)) << 4) + hexVal(reader_.read(false)));
         } else {
           int off = ESCAPE_CHARS.indexOf(ch);
           if (off == -1) {

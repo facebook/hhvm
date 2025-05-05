@@ -63,4 +63,20 @@ public class ByteBufTProtocolTest {
     assertEquals(struct.getALong(), received.getALong());
     assertEquals(struct.getAString(), received.getAString());
   }
+
+  @Test
+  public void testUnicodeCharterEncodingAndEscape() {
+    EveryLayout struct =
+        new EveryLayout.Builder().setAInt(5).setALong(1000).setAString("\n\u0001😀").build();
+
+    ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
+    ByteBufTProtocol protocol = SerializerUtil.toByteBufProtocol(serializationProtocol, dest);
+
+    struct.write0(protocol);
+    EveryLayout received = EveryLayout.read0(protocol);
+
+    assertEquals(struct.getAInt(), received.getAInt());
+    assertEquals(struct.getALong(), received.getALong());
+    assertEquals(struct.getAString(), received.getAString());
+  }
 }

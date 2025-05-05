@@ -169,7 +169,7 @@ void readEdgcntData(CallGraph& cg, FILE* file) {
 }
 
 std::string getNameWithoutSuffix(std::string str) {
-  int suffixStartPosition = str.find(".");
+  int suffixStartPosition = str.find('.');
   if (suffixStartPosition == -1) {
     // if no suffix is found, just add the wildcard
     return str + "*";

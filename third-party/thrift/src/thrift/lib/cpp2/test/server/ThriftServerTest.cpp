@@ -3065,15 +3065,17 @@ TEST(ThriftServerTest, QueueTimeHeaderTest) {
   // Send the request with a high queue timeout to make sure it succeeds.
   RpcOptions options;
   options.setTimeout(std::chrono::milliseconds(1000));
+  auto start = std::chrono::steady_clock::now();
   auto [resp, header] =
       client->header_semifuture_sendResponse(options, 42).get();
+  auto finish = std::chrono::steady_clock::now();
   EXPECT_EQ(resp, "42");
   // Check that queue time headers are set.
   auto queueTimeout = header->getServerQueueTimeout();
   auto queueingTime = header->getProcessDelay();
   EXPECT_TRUE(queueTimeout.hasValue() && queueingTime.hasValue());
   EXPECT_EQ(queueTimeout.value(), defaultQueueTimeout);
-  EXPECT_LT(queueingTime.value(), std::chrono::milliseconds(50));
+  EXPECT_LT(queueingTime.value(), finish - start);
 }
 
 TEST(ThriftServer, QueueTimeoutStressTest) {

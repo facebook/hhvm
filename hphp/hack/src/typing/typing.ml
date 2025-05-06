@@ -3767,40 +3767,8 @@ end = struct
           (* Shouldn't happen *)
           let (env, ty) = Env.fresh_type_error env pos in
           make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty))
-    | FunctionPointer (FP_class_const (cid, meth), targs) ->
-      let (env, _, ce, cty) =
-        Class_id.class_expr ~is_function_pointer:true env [] cid
-      in
-      let (env, (fpty, tal)) =
-        Class_get_expr.class_get
-          ~is_method:true
-          ~is_const:false
-          ~transform_fty:None
-          ~incl_tc:false (* What is this? *)
-          ~coerce_from_ty:None (* What is this? *)
-          ~explicit_targs:targs
-          ~is_function_pointer:true
-          env
-          cty
-          meth
-          cid
-      in
-      let env = Env.set_tyvar_variance env fpty in
-      let (env, fpty) = set_function_pointer env fpty in
-      (* All function pointers are readonly since they don't capture any values *)
-      let (env, fpty) = set_capture_only_readonly env fpty in
-      let fpty =
-        make_function_ref
-          ~contains_generics:(not (List.is_empty tal))
-          env
-          p
-          fpty
-      in
-      make_result
-        env
-        p
-        (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
-        fpty
+    | FunctionPointer (fp_id, targs) ->
+      Function_pointer.synth p (fp_id, targs) env
     | Lplaceholder p ->
       let r = Reason.placeholder p in
       let ty = MakeType.void r in
@@ -4082,19 +4050,6 @@ end = struct
           env
       in
       (env, te, ty)
-    | FunctionPointer (FP_id fun_id, ty_args) ->
-      let (env, ty, ty_args) = Fun_id.synth fun_id ty_args env in
-      let (env, ty) = set_function_pointer env ty in
-      (* All function pointers are readonly since they capture no values *)
-      let (env, ty) = set_capture_only_readonly env ty in
-      let ty =
-        make_function_ref
-          ~contains_generics:(not (List.is_empty ty_args))
-          env
-          p
-          ty
-      in
-      make_result env p (FunctionPointer (FP_id fun_id, ty_args)) ty
     | Binop { bop; lhs = e1; rhs = e2 } ->
       Binop.check_binop
         ~check_defined:ctxt.Context.check_defined
@@ -8167,6 +8122,64 @@ end = struct
         ~ctxt:Context.{ default with lhs_of_null_coalesce }
         env
         e1
+end
+
+and Function_pointer : sig
+  val synth :
+    Pos.t ->
+    (unit, unit) function_ptr_id * unit Aast_defs.targ list ->
+    env ->
+    env * Tast.expr * locl_ty
+end = struct
+  let synth pos (fpid, args) env =
+    match (fpid, args) with
+    | (FP_class_const (cid, meth), targs) ->
+      let (env, _, ce, cty) =
+        Class_id.class_expr ~is_function_pointer:true env [] cid
+      in
+      let (env, (fpty, tal)) =
+        Class_get_expr.class_get
+          ~is_method:true
+          ~is_const:false
+          ~transform_fty:None
+          ~incl_tc:false (* What is this? *)
+          ~coerce_from_ty:None (* What is this? *)
+          ~explicit_targs:targs
+          ~is_function_pointer:true
+          env
+          cty
+          meth
+          cid
+      in
+      let env = Env.set_tyvar_variance env fpty in
+      let (env, fpty) = set_function_pointer env fpty in
+      (* All function pointers are readonly since they don't capture any values *)
+      let (env, fpty) = set_capture_only_readonly env fpty in
+      let fpty =
+        make_function_ref
+          ~contains_generics:(not (List.is_empty tal))
+          env
+          pos
+          fpty
+      in
+      make_result
+        env
+        pos
+        (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
+        fpty
+    | (FP_id fun_id, ty_args) ->
+      let (env, ty, ty_args) = Fun_id.synth fun_id ty_args env in
+      let (env, ty) = set_function_pointer env ty in
+      (* All function pointers are readonly since they capture no values *)
+      let (env, ty) = set_capture_only_readonly env ty in
+      let ty =
+        make_function_ref
+          ~contains_generics:(not (List.is_empty ty_args))
+          env
+          pos
+          ty
+      in
+      make_result env pos (FunctionPointer (FP_id fun_id, ty_args)) ty
 end
 
 and Stmt : sig

@@ -29,9 +29,7 @@
         "char_end": 58
       },
       "kind": "generic",
-      "is_array": true,
-      "name": "T",
-      "args": []
+      "name": "T"
     }
   },
   "expected_type": "int",

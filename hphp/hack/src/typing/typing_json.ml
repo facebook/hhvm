@@ -138,10 +138,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
   | (p, Tany _) -> obj @@ kind p "any"
   | (p, Tnonnull) -> obj @@ kind p "nonnull"
   | (p, Tdynamic) -> obj @@ kind p "dynamic"
-  | (p, Tgeneric s) ->
-    let tyargs = [] in
-    (* TODO(T222659258) Clean this up *)
-    obj @@ kind p "generic" @ is_array true @ name s @ args tyargs
+  | (p, Tgeneric s) -> obj @@ kind p "generic" @ name s
   | (_, Tnewtype (s, _, ty))
     when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
     from_type env ~show_like_ty ty
@@ -341,9 +338,6 @@ let deserialization_error ~message ~keytrace =
 let not_supported ~message ~keytrace =
   Error (Not_supported (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
-let wrong_phase ~message ~keytrace =
-  Error (Wrong_phase (message ^ Hh_json.Access.keytrace_to_string keytrace))
-
 let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
     : deserialized_result =
   let reason = Reason.none in
@@ -363,19 +357,9 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
         ty (Tlabel name)
       | "generic" ->
-        (* TODO(T222659258) Clean this up one args array gone *)
         (*  (see Tgeneric case of serialization logic) *)
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
-        get_bool "is_array" (json, keytrace)
-        >>= fun (is_array, _is_array_keytrace) ->
-        get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
-        if List.length args <> 0 then
-          failwith "Higher-kinded types implementation being removed";
-        aux_args args ~keytrace:args_keytrace >>= fun _args ->
-        if is_array then
-          ty (Tgeneric name)
-        else
-          wrong_phase ~message:"Tgeneric is a decl-phase type." ~keytrace
+        ty (Tgeneric name)
       | "enum" ->
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
         aux_as json ~keytrace >>= fun as_ty -> ty (Tnewtype (name, [], as_ty))

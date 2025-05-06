@@ -10434,10 +10434,6 @@ end = struct
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         let r = Reason.hint (Pos_or_decl.of_raw_pos p) in
-        let type_args = List.map tal ~f:fst in
-        (* TODO(T222659258) Clean this up *)
-        if List.length type_args <> 0 then
-          failwith "Implementation of higher-kinded types being removed";
         let tgeneric = MakeType.generic r id in
         make_result env tal (Aast.CI c) tgeneric
       | None ->

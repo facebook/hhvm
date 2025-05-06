@@ -881,32 +881,27 @@ module Full = struct
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam (penv : Typing_env_types.env) tparam =
-    (* TODO(T222659258) clean this up. Remove  get_pos_and_kind_of_generic? *)
-    let kind_opt = Typing_env_types.get_pos_and_kind_of_generic penv tparam in
-    match kind_opt with
-    | None -> []
-    | Some (_pos, _kind) ->
-      let lower = Typing_env_types.get_lower_bounds penv tparam in
-      let upper = Typing_env_types.get_upper_bounds penv tparam in
-      let equ = Typing_env_types.get_equal_bounds penv tparam in
-      let upper =
-        if show_supportdyn penv then
-          upper
-        else
-          (* Don't show "as mixed" if we're not printing supportdyn *)
-          TySet.remove
-            Typing_make_type.(supportdyn Reason.none (mixed Reason.none))
-            upper
-      in
-      (* If we have an equality we can ignore the other bounds *)
-      if not (TySet.is_empty equ) then
-        List.map (TySet.elements equ) ~f:(fun ty ->
-            (tparam, Ast_defs.Constraint_eq, ty))
+    let lower = Typing_env_types.get_lower_bounds penv tparam in
+    let upper = Typing_env_types.get_upper_bounds penv tparam in
+    let equ = Typing_env_types.get_equal_bounds penv tparam in
+    let upper =
+      if show_supportdyn penv then
+        upper
       else
-        List.map (TySet.elements lower) ~f:(fun ty ->
-            (tparam, Ast_defs.Constraint_super, ty))
-        @ List.map (TySet.elements upper) ~f:(fun ty ->
-              (tparam, Ast_defs.Constraint_as, ty))
+        (* Don't show "as mixed" if we're not printing supportdyn *)
+        TySet.remove
+          Typing_make_type.(supportdyn Reason.none (mixed Reason.none))
+          upper
+    in
+    (* If we have an equality we can ignore the other bounds *)
+    if not (TySet.is_empty equ) then
+      List.map (TySet.elements equ) ~f:(fun ty ->
+          (tparam, Ast_defs.Constraint_eq, ty))
+    else
+      List.map (TySet.elements lower) ~f:(fun ty ->
+          (tparam, Ast_defs.Constraint_super, ty))
+      @ List.map (TySet.elements upper) ~f:(fun ty ->
+            (tparam, Ast_defs.Constraint_as, ty))
 
   let rec is_open_mixed env t =
     match get_node t with

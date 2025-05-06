@@ -1642,16 +1642,7 @@ and get_tyvars_i env (ty : internal_type) =
           (env, Tvid.Set.empty, Tvid.Set.empty)
       end
     | Tdependent (_, ty) -> get_tyvars env ty
-    | Tgeneric _ ->
-      let tyl = [] in
-      (* TODO(T222659258) Clean this up, tyl gone from Tgeneric *)
-      let variancel =
-        List.replicate ~num:(List.length tyl) Ast_defs.Invariant
-      in
-      get_tyvars_variance_list
-        (env, Tvid.Set.empty, Tvid.Set.empty)
-        variancel
-        tyl
+    | Tgeneric _ -> (env, Tvid.Set.empty, Tvid.Set.empty)
     | Tclass ((_, cid), _, tyl) ->
       if List.is_empty tyl then
         (env, Tvid.Set.empty, Tvid.Set.empty)

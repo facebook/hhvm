@@ -115,9 +115,7 @@ and hint_ p env = function
     in
     Tvec_or_dict (t1, hint env h2)
   | Hprim p -> Tprim p
-  | Habstr (x, _tyl) ->
-    (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
-    Tgeneric x
+  | Habstr (x, _tyl) -> Tgeneric x
   | Hclass_ptr (k, h) ->
     let h =
       match k with

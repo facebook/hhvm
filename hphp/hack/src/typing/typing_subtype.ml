@@ -1190,8 +1190,6 @@ end = struct
         (LoclType lty_sub)
         (LoclType ty_super)
     | (r_generic, Tgeneric name_sub) -> begin
-      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
-      let tyargs = [] in
       match deref ty_super with
       | (r_super, Tvar id)
         when Env.rank_of_tparam env name_sub > Env.rank_of_tvar env id ->
@@ -1229,7 +1227,7 @@ end = struct
             ~this_ty
             ~fail
             ~mk_prop
-            (sub_supportdyn, r_generic, name_sub, tyargs)
+            (sub_supportdyn, r_generic, name_sub)
             { super_like; super_supportdyn = false; ty_super }
             { super_like = false; super_supportdyn = false; ty_super }
             env
@@ -3485,8 +3483,6 @@ end = struct
         (LoclType ty_sub)
         (LoclType ty_super)
     | ((r_generic, Tgeneric name_sub), (_, Tunion [])) -> begin
-      let tyargs = [] in
-      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
       match
         VisitedGoals.try_add_visited_generic_sub
           subtype_env.Subtype_env.visited
@@ -3509,7 +3505,7 @@ end = struct
           ~this_ty
           ~fail
           ~mk_prop
-          (sub_supportdyn, r_generic, name_sub, tyargs)
+          (sub_supportdyn, r_generic, name_sub)
           { super_like; super_supportdyn = false; ty_super }
           { super_like = false; super_supportdyn = false; ty_super }
           env
@@ -3979,30 +3975,9 @@ end = struct
     (* -- C-Access-R -------------------------------------------------------- *)
     | (_, (_, Taccess _)) -> invalid ~fail env
     (* -- C-Generic-R ------------------------------------------------------- *)
-    | ((r_sub, Tgeneric name_sub), (r_super, Tgeneric name_super))
+    | ((_, Tgeneric name_sub), (_, Tgeneric name_super))
       when String.equal name_sub name_super ->
-      let (tyargs_sub, tyargs_super) = ([], []) in
-      (* TODO(T222659258) Clean this up, type arguments from gone from Tgeneric *)
-      if List.is_empty tyargs_super then
-        valid env
-      else
-        (* TODO(T69931993) Type parameter env must carry variance information *)
-        let variance_reifiedl =
-          List.map tyargs_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
-        in
-        (* Unfortunately, we have to expose this function for proto-HKTs *)
-        simplify_subtype_variance_for_non_injective
-          ~subtype_env
-          ~sub_supportdyn
-          ~super_like
-          name_sub
-          None
-          variance_reifiedl
-          (r_sub, tyargs_sub)
-          (r_super, tyargs_super)
-          ty_sub
-          ty_super
-          env
+      valid env
     | ((_r_sub, Tgeneric name_sub), (_, Tgeneric _))
       when let (generic_lower_bounds, _other_lower_bounds) =
              generic_lower_bounds env ty_super
@@ -6060,14 +6035,12 @@ end = struct
             rhs
             env)
       | ((r_generic, Tgeneric generic_nm), _) ->
-        let generic_ty_args = [] in
-        (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
         Common.simplify_generic_l
           ~subtype_env
           ~this_ty
           ~fail
           ~mk_prop:simplify
-          (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+          (sub_supportdyn, r_generic, generic_nm)
           rhs
           rhs
           env
@@ -6365,14 +6338,12 @@ end = struct
             rhs
             env)
       | (r_sub, Tgeneric generic_nm) ->
-        let generic_ty_args = [] in
-        (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
         Common.simplify_generic_l
           ~subtype_env
           ~this_ty
           ~fail
           ~mk_prop
-          (sub_supportdyn, r_sub, generic_nm, generic_ty_args)
+          (sub_supportdyn, r_sub, generic_nm)
           rhs
           rhs
           env
@@ -6626,8 +6597,6 @@ end = struct
         rhs
         env
     | (r_generic, Tgeneric generic_nm) ->
-      let generic_ty_args = [] in
-      (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
       (match
          VisitedGoalsInternal.try_add_visited_generic_sub
            subtype_env.Subtype_env.visited_internal
@@ -6644,7 +6613,7 @@ end = struct
           ~this_ty
           ~fail
           ~mk_prop:simplify
-          (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+          (sub_supportdyn, r_generic, generic_nm)
           rhs
           rhs
           env)
@@ -7149,14 +7118,12 @@ end = struct
           rhs
           env)
     | (r_generic, Tgeneric generic_nm) ->
-      let generic_ty_args = [] in
-      (* TODO(T222659258) Clean this up, generic_ty_args gone from Tgeneric *)
       Common.simplify_generic_l
         ~subtype_env
         ~this_ty:(Some this_ty)
         ~fail
         ~mk_prop:simplify
-        (sub_supportdyn, r_generic, generic_nm, generic_ty_args)
+        (sub_supportdyn, r_generic, generic_nm)
         rhs
         rhs
         env
@@ -7392,7 +7359,7 @@ and Common : sig
       rhs:'rhs ->
       env ->
       env * TL.subtype_prop) ->
-    Reason.t option * locl_phase Reason.t_ * string * locl_ty list ->
+    Reason.t option * locl_phase Reason.t_ * string ->
     'rhs ->
     'rhs ->
     env ->
@@ -7526,14 +7493,11 @@ end = struct
       ~this_ty
       ~fail
       ~mk_prop
-      (sub_supportdyn, reason_generic, generic_nm, generic_ty_args)
+      (sub_supportdyn, reason_generic, generic_nm)
       rhs
       rhs_for_mixed
       env =
     begin
-      (* TODO(T222659258) Clean this up *)
-      if List.length generic_ty_args <> 0 then
-        failwith "Implementation of higher-kinded types is being removed";
       let lty_sub = mk (reason_generic, Tgeneric generic_nm) in
       let (env, prop) =
         (* If the generic is actually an expression dependent type,
@@ -7782,8 +7746,6 @@ end = struct
       in
       mk_subty_prop env &&& mk_cstr_prop
     | (r_generic, Tgeneric nm) ->
-      let tyargs = [] in
-      (* TODO(T222659258) Clean this up, tyargs gone from Tgeneric *)
       (match deref rhs_subtype.Subtype.ty_super with
       (* Before using the upper bounds of the generic in a call to
          [simplify_generic_l] we need to check if the super type is a type
@@ -7819,7 +7781,7 @@ end = struct
           ~this_ty
           ~fail
           ~mk_prop:mk_prop_generic
-          (sub_supportdyn, r_generic, nm, tyargs)
+          (sub_supportdyn, r_generic, nm)
           rhs
           rhs
           env)

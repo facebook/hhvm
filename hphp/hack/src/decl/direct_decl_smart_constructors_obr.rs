@@ -3620,13 +3620,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 let Id(pos, class_type) = class_id;
                 match class_type.rsplit('\\').next() {
                     Some(name) if self.is_type_param_in_scope(name) => {
-                        let pos = self.merge(pos, self.get_pos(type_arguments));
-                        let _type_arguments = self.slice(
-                            type_arguments
-                                .iter()
-                                .filter_map(|&node| self.node_to_ty(node)),
-                        );
-                        // TODO(T222659258) Clean this up, Tgeneric cannot have type arguments anymore
                         let ty_ = Ty_::Tgeneric(self.alloc(name));
                         self.hint_ty(pos, ty_)
                     }

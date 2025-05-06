@@ -1,7 +1,7 @@
 <?hh
 
-function f(int $i): string {
-  $j = HH\FIXME\UNSAFE_CAST<int, string>($i); // compiles to $j = $i;
+function f(arraykey $i): string {
+  $j = HH\FIXME\UNSAFE_CAST<arraykey, string>($i); // compiles to $j = $i;
   return $j; // TypeHintViolation
 }
 

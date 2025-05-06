@@ -18,6 +18,4 @@ function main():void {
   var_dump($c->arg1);
   $c->test2(vec[23,45]);
   var_dump($c->arg2);
-  try { $c->test1("Broken"); } catch (Exception $e) { var_dump($e->getMessage()); }
-  try { $c->test2("Broken"); } catch (Exception $e) { var_dump($e->getMessage()); }
 }

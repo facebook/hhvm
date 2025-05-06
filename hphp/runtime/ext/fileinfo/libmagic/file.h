@@ -390,7 +390,7 @@ struct magic_set {
 };
 
 /* Type for Unicode characters */
-typedef unsigned long unichar;
+using unichar = unsigned long;
 
 struct stat;
 #define FILE_T_LOCAL  1

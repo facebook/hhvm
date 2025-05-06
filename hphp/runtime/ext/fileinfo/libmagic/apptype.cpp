@@ -39,7 +39,7 @@ FILE_RCSID("@(#)$File: apptype.c,v 1.13 2011/09/07 21:57:15 christos Exp $")
 #define INCL_DOSERRORS
 #define INCL_DOSFILEMGR
 #include <os2.h>
-typedef ULONG   APPTYPE;
+using APPTYPE = ULONG;
 
 protected int
 file_os2_apptype(struct magic_set *ms, const char *fn, const void *buf,

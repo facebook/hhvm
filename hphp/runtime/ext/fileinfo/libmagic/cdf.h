@@ -35,6 +35,10 @@
 #ifndef _H_CDF_
 #define _H_CDF_
 
+#include <cstddef>
+#include <cstdint>
+#include <sys/types.h>
+
 #ifdef PHP_WIN32
 #include <winsock2.h>
 #define timespec timeval
@@ -47,7 +51,7 @@
 #define tv_nsec tv_usec
 #endif
 
-typedef int32_t cdf_secid_t;
+using cdf_secid_t = int32_t;
 
 #define CDF_LOOP_LIMIT          10000
 
@@ -57,7 +61,7 @@ typedef int32_t cdf_secid_t;
 #define CDF_SECID_SECTOR_ALLOCATION_TABLE    -3
 #define CDF_SECID_MASTER_SECTOR_ALLOCATION_TABLE  -4
 
-typedef struct {
+struct cdf_header_t {
   uint64_t  h_magic;
 #if defined(PHP_WIN32) && _MSC_VER <= 1500
 # define CDF_MAGIC  0xE11AB1A1E011CFD0i64
@@ -80,21 +84,21 @@ typedef struct {
   cdf_secid_t  h_secid_first_sector_in_master_sat;
   uint32_t  h_num_sectors_in_master_sat;
   cdf_secid_t  h_master_sat[436/4];
-} cdf_header_t;
+};
 
 #define CDF_SEC_SIZE(h) ((size_t)(1 << (h)->h_sec_size_p2))
 #define CDF_SEC_POS(h, secid) (CDF_SEC_SIZE(h) + (secid) * CDF_SEC_SIZE(h))
 #define CDF_SHORT_SEC_SIZE(h)  ((size_t)(1 << (h)->h_short_sec_size_p2))
 #define CDF_SHORT_SEC_POS(h, secid) ((secid) * CDF_SHORT_SEC_SIZE(h))
 
-typedef int32_t cdf_dirid_t;
+using cdf_dirid_t = int32_t;
 #define CDF_DIRID_NULL  -1
 
-typedef int64_t cdf_timestamp_t;
+using cdf_timestamp_t = int64_t;
 #define CDF_BASE_YEAR  1601
 #define CDF_TIME_PREC  10000000
 
-typedef struct {
+struct cdf_directory_t {
   uint16_t  d_name[32];
   uint16_t  d_namelen;
   uint8_t    d_type;
@@ -117,55 +121,55 @@ typedef struct {
   cdf_secid_t  d_stream_first_sector;
   uint32_t  d_size;
   uint32_t  d_unused0;
-} cdf_directory_t;
+};
 
 #define CDF_DIRECTORY_SIZE  128
 
-typedef struct {
+struct cdf_sat_t {
   cdf_secid_t *sat_tab;
   size_t sat_len;
-} cdf_sat_t;
+};
 
-typedef struct {
+struct cdf_dir_t {
   cdf_directory_t *dir_tab;
   size_t dir_len;
-} cdf_dir_t;
+};
 
-typedef struct {
+struct cdf_stream_t {
   void *sst_tab;
   size_t sst_len;
   size_t sst_dirlen;
-} cdf_stream_t;
+};
 
-typedef struct {
+struct cdf_classid_t {
   uint32_t  cl_dword;
   uint16_t  cl_word[2];
   uint8_t    cl_two[2];
   uint8_t    cl_six[6];
-} cdf_classid_t;
+};
 
-typedef struct {
+struct cdf_summary_info_header_t {
   uint16_t  si_byte_order;
   uint16_t  si_zero;
   uint16_t  si_os_version;
   uint16_t  si_os;
   cdf_classid_t  si_class;
   uint32_t  si_count;
-} cdf_summary_info_header_t;
+};
 
 #define CDF_SECTION_DECLARATION_OFFSET 0x1c
 
-typedef struct {
+struct cdf_section_declaration_t {
   cdf_classid_t  sd_class;
   uint32_t  sd_offset;
-} cdf_section_declaration_t;
+};
 
-typedef struct {
+struct cdf_section_header_t {
   uint32_t  sh_len;
   uint32_t  sh_properties;
-} cdf_section_header_t;
+};
 
-typedef struct {
+struct cdf_property_info_t {
   uint32_t  pi_id;
   uint32_t  pi_type;
   union {
@@ -193,7 +197,7 @@ typedef struct {
 #define pi_d  pi_val._pi_d
 #define pi_tp  pi_val._pi_tp
 #define pi_str  pi_val._pi_str
-} cdf_property_info_t;
+};
 
 #define CDF_ROUND(val, by)     (((val) + (by) - 1) & ~((by) - 1))
 
@@ -267,11 +271,11 @@ typedef struct {
 #define CDF_PROPERTY_SECURITY      0x00000013
 #define CDF_PROPERTY_LOCALE_ID      0x80000000
 
-typedef struct {
+struct cdf_info_t {
   int i_fd;
   const unsigned char *i_buf;
   size_t i_len;
-} cdf_info_t;
+};
 
 struct timeval;
 int cdf_timestamp_to_timespec(struct timeval *, cdf_timestamp_t);

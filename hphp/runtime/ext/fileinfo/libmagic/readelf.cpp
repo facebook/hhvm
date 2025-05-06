@@ -807,10 +807,10 @@ core:
 }
 
 /* SunOS 5.x hardware capability descriptions */
-typedef struct cap_desc {
+struct cap_desc_t {
   uint64_t cd_mask;
   const char *cd_name;
-} cap_desc_t;
+};
 
 static const cap_desc_t cap_desc_sparc[] = {
   { AV_SPARC_MUL32,    "MUL32" },

@@ -82,7 +82,7 @@
 extern "C" {
 #endif
 
-typedef struct magic_set *magic_t;
+using magic_t = struct magic_set *;
 magic_t magic_open(int);
 void magic_close(magic_t);
 

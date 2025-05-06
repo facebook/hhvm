@@ -30,7 +30,9 @@ class B extends A {
 }
 
 class C extends A {
-    // Not OK
+    // Not OK since since we are narrowing visibility and not in the same module
+    private function foobar(): void {}
+    // Not OK since since we are narrowing visibility and not in the same module
     protected function abstractFoobar(): void {}
 }
 
@@ -40,10 +42,22 @@ class C extends A {
 module D;
 
 class D extends A {
-    // Not OK
+    // Not OK since we are in a different module
     internal function foobar(): void {}
-    // Not OK
+    // Not OK since we are in a different module
     internal function abstractFoobar(): void {}
-    // Not OK
+    //Not OK since we are in a different module
     internal int $foobar = 13;
+}
+
+//// E.php
+<?hh
+
+module A;
+
+class E extends A {
+    // Not OK since we are narrowing visibility even though we are in the same module
+    protected function foobar(): void {}
+    // OK since we are in the same module
+    internal function abstractFoobar(): void {}
 }

@@ -1,7 +1,11 @@
-ERROR: File "module_bad_override.php--B.php", line 14, characters 24-37:
-Cannot override this member outside module `A` (Typing[4444])
+ERROR: File "module_bad_override.php--B.php", line 14, characters 22-27:
+This member visibility is: `private` (Typing[4113])
+  File "module_bad_override.php--A.php", line 6, characters 20-25:
+  `internal` was expected
+ERROR: File "module_bad_override.php--B.php", line 16, characters 24-37:
+This member visibility is: `protected` (Typing[4113])
   File "module_bad_override.php--A.php", line 7, characters 29-42:
-  This member is internal to module `A`
+  `internal` was expected
 ERROR: File "module_bad_override.php--D.php", line 7, characters 23-28:
 Cannot override this member in module `D` (Typing[4444])
   File "module_bad_override.php--A.php", line 6, characters 20-25:
@@ -14,3 +18,7 @@ ERROR: File "module_bad_override.php--D.php", line 11, characters 14-16:
 Cannot override this member in module `D` (Typing[4444])
   File "module_bad_override.php--A.php", line 8, characters 11-13:
   This member is internal to module `A`
+ERROR: File "module_bad_override.php--E.php", line 7, characters 24-29:
+This member visibility is: `protected` (Typing[4113])
+  File "module_bad_override.php--A.php", line 6, characters 20-25:
+  `internal` was expected

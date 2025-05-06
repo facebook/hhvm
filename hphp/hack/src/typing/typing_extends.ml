@@ -208,13 +208,6 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
   | (Vprotected _, Vpublic)
   | (Vinternal _, Vpublic) ->
     ()
-  | (Vinternal parent_module, (Vprotected _ | Vprivate _)) ->
-    let err =
-      Typing_error.Secondary.Visibility_override_internal
-        { pos; module_name = None; parent_pos; parent_module }
-    in
-    Typing_error_utils.add_typing_error ~env
-    @@ Typing_error.(apply_reasons ~on_error err)
   | (Vinternal parent_m, Vinternal child_m) ->
     let err_opt =
       match

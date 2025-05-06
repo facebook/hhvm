@@ -45,7 +45,7 @@ using std::string;
  */
 static FILE *new_log_file(const char *fileTemplate, const char *linkname,
                           mode_t linktype, const char *prevlinkname,
-                          PERIODICITY periodicity, int period_multiple,
+                          Periodicity periodicity, int period_multiple,
                           int period_delay, char *pfilename,
                           size_t pfilename_len, time_t time_now,
                           time_t *pnext_period) {
@@ -108,7 +108,7 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
 }
 
 void Cronolog::setPeriodicity() {
-  if (m_periodicity == UNKNOWN) {
+  if (m_periodicity == Periodicity::Unknown) {
     m_periodicity = determine_periodicity((char *)m_template.c_str());
   }
 }

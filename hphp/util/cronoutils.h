@@ -107,40 +107,38 @@ extern int optind, opterr, optopt;
 
 /* How often the log is rotated */
 
-typedef enum
-{
-  PER_SECOND,
-  PER_MINUTE,
-  HOURLY,
-  DAILY,
-  WEEKLY,
-  MONTHLY,
-  YEARLY,
-  ONCE_ONLY,
-  UNKNOWN,
-  INVALID_PERIOD
-}
-PERIODICITY;
+enum class Periodicity {
+  PerSecond,
+  PerMinute,
+  Hourly,
+  Daily,
+  Weekly,
+  Monthly,
+  Yearly,
+  OnceOnly,
+  Unknown,
+  InvalidPeriod
+};
 
 
 /* Function prototypes */
 
-void    create_subdirs(char *);
-void    create_link(const char *, const char *, mode_t, const char *);
-PERIODICITY  determine_periodicity(char *);
-PERIODICITY   parse_timespec(char *optarg, int *p_period_multiple);
-time_t    start_of_next_period(time_t, PERIODICITY, int);
-time_t    start_of_this_period(time_t, PERIODICITY, int);
-void    print_debug_msg(const char *msg, ...);
-time_t    parse_time(char *time_str, int);
-char     *timestamp(time_t thetime);
+void create_subdirs(char *);
+void create_link(const char *, const char *, mode_t, const char *);
+Periodicity determine_periodicity(char *);
+Periodicity parse_timespec(char *optarg, int *p_period_multiple);
+time_t start_of_next_period(time_t, Periodicity, int);
+time_t start_of_this_period(time_t, Periodicity, int);
+void print_debug_msg(const char *msg, ...);
+time_t parse_time(char *time_str, int);
+char* timestamp(time_t thetime);
 
 
 /* Global variables */
 
-extern FILE  *debug_file;
-extern const char  *periods[];
-extern int  period_seconds[];
+extern FILE *debug_file;
+extern const char *periods[];
+extern int period_seconds[];
 
 
 /* Usage message and CRONO_DEBUG macro.
@@ -152,4 +150,3 @@ extern int  period_seconds[];
 
 #define CRONO_DEBUG(msg_n_args)  \
 do { if (debug_file) print_debug_msg  msg_n_args; } while (0)
-

@@ -31,24 +31,6 @@ let get_tparams_in_subst subst =
 (*****************************************************************************)
 
 let rec instantiate subst (ty : decl_ty) =
-  let merge_hk_type orig_r orig_var ty args =
-    (* TODO(T222659258) Remove this function altogether, it's pointless now *)
-    let (r, ty_) = deref ty in
-    let res_ty_ =
-      match ty_ with
-      | Tapply (n, existing_args) ->
-        (* We could insist on existing_args = [] here unless we want to support partial application. *)
-        Tapply (n, existing_args @ args)
-      | Tgeneric n ->
-        (* Same here *)
-        Tgeneric n
-      | _ ->
-        (* We could insist on args = [] here, everything else is a kinding error *)
-        ty_
-    in
-    mk (Reason.instantiate (r, orig_var, orig_r), res_ty_)
-  in
-
   (* PERF: If subst is empty then instantiation is a no-op. We can save a
    * significant amount of CPU by avoiding recursively deconstructing the ty
    * data type.
@@ -58,9 +40,11 @@ let rec instantiate subst (ty : decl_ty) =
   else
     match deref ty with
     | (r, Tgeneric x) ->
-      let args = [] in
       (match SMap.find_opt x subst with
-      | Some x_ty -> merge_hk_type r x x_ty args
+      | Some found_ty ->
+        let (found_r, found_ty_) = deref found_ty in
+        let new_r = Reason.instantiate (found_r, x, r) in
+        mk (new_r, found_ty_)
       | None -> mk (r, Tgeneric x))
     | (r, ty) ->
       let ty = instantiate_ subst ty in

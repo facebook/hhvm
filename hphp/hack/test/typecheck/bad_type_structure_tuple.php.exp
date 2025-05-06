@@ -13,7 +13,7 @@ File "bad_type_structure_tuple.php", line 11, characters 3-26:
 File "bad_type_structure_tuple.php", line 12, characters 3-24:
   nothing
 File "bad_type_structure_tuple.php", line 13, characters 3-29:
-  nothing
+  _
 File "bad_type_structure_tuple.php", line 14, characters 3-29:
   _
 File "bad_type_structure_tuple.php", line 15, characters 3-31:
@@ -35,7 +35,7 @@ File "bad_type_structure_tuple.php", line 29, characters 3-26:
 File "bad_type_structure_tuple.php", line 30, characters 3-24:
   nothing
 File "bad_type_structure_tuple.php", line 31, characters 3-29:
-  nothing
+  _
 File "bad_type_structure_tuple.php", line 32, characters 3-29:
   _
 File "bad_type_structure_tuple.php", line 33, characters 3-31:
@@ -55,9 +55,9 @@ This shape doesn't have a field `fields` (Typing[4108])
   File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_tuple.php", line 13, characters 15-27:
-This shape doesn't have a field `param_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-698:
-  The shape is defined here
+The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 68, characters 6-18:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_tuple.php", line 14, characters 15-27:
 The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "typestructure.hhi", line 67, characters 6-18:
@@ -79,9 +79,9 @@ This shape doesn't have a field `fields` (Typing[4108])
   File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_tuple.php", line 31, characters 15-27:
-This shape doesn't have a field `param_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-698:
-  The shape is defined here
+The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 68, characters 6-18:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_tuple.php", line 32, characters 15-27:
 The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "typestructure.hhi", line 67, characters 6-18:

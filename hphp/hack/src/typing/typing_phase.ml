@@ -378,11 +378,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt, cycles1 @ cycles2), mk (r, ty))
   | Tgeneric x ->
-    let targs = [] in
-    (* TODO(T222659258) Clean this up, targs gone from Tgeneric *)
     let localize_tgeneric ?replace_with name r =
-      match (targs, replace_with, Env.get_pos_and_kind_of_generic env name) with
-      | (_, _, Some (_def_pos, kind)) ->
+      match (replace_with, Env.get_pos_and_kind_of_generic env name) with
+      | (_, Some (_def_pos, kind)) ->
         let arg_kinds : KindDefs.Simple.named_kind list =
           KindDefs.Simple.from_full_kind kind
           |> KindDefs.Simple.get_named_parameter_kinds
@@ -396,7 +394,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
                     visibility_behavior = default_visibility_behaviour;
                   }
                 env
-                targs
+                []
                 arg_kinds,
               replace_with )
           with
@@ -404,15 +402,10 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
           | ((env, []), None) -> (env, mk (r, Tgeneric name))
           | ((_env, _locl_tyargs), None) -> failwith "should be unreachable"
         end
-      | ([], None, None) ->
-        (* No kinding info, but also no type arguments. Just return Tgeneric *)
+      | (None, None) ->
+        (* No info about x, and no replacement. Just return Tgeneric *)
         ((env, None, []), mk (r, Tgeneric x))
-      | ([], Some repl_ty, None) -> ((env, None, []), mk (r, repl_ty))
-      | (_ :: _, _, None) ->
-        (* No kinding info, but type arguments given. We don't know the kinds of the arguments,
-           so we can't localize them. Not much we can do. *)
-        let (env, ty) = Env.fresh_type_error env Pos.none in
-        ((env, None, []), ty)
+      | (Some repl_ty, None) -> ((env, None, []), mk (r, repl_ty))
     in
     begin
       match SMap.find_opt x ety_env.substs with
@@ -422,28 +415,8 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
           let rp = get_reason x_ty in
           Reason.instantiate (rp, x, r)
         in
-        begin
-          match (targs, get_node x_ty) with
-          | (_ :: _, Tclass (((_, name) as id), _, [])) ->
-            let class_info = Env.get_class env name in
-            localize_class_instantiation
-              ~ety_env
-              env
-              r_inst
-              id
-              targs
-              (Decl_entry.to_option class_info)
-          | (_ :: _, Tnewtype (id, [], _)) ->
-            localize_typedef_instantiation
-              ~ety_env
-              env
-              r_inst
-              id
-              targs
-              (Env.get_typedef env id |> Decl_entry.to_option)
-          | (_ :: _, Tgeneric x') -> localize_tgeneric x' r_inst
-          | (_, ty_) -> ((env, None, []), mk (r_inst, ty_))
-        end
+        let ty_ = get_node x_ty in
+        ((env, None, []), mk (r_inst, ty_))
       | None -> localize_tgeneric x r
     end
   | Toption ty ->
@@ -842,9 +815,7 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
       let ty_err_opt = Typing_error.multiple_opt ty_errs in
       ((env, ety_env, ty_err_opt, cycles), ty_fresh)
   | _ ->
-    let ((env, ty_err_opt, cycles), ty) =
-      localize_with_kind ~ety_env env ty nkind
-    in
+    let ((env, ty_err_opt, cycles), ty) = localize ~ety_env env ty in
     ((env, ety_env, ty_err_opt, cycles), ty)
 
 and localize_class_instantiation
@@ -978,27 +949,6 @@ and localize_typedef_instantiation
     (* This must be unreachable. We only call localize_typedef_instantiation if we *know* that
        we have a typedef with typedef info at hand. *)
     failwith "Internal error: No info about typedef"
-
-(* Localize a type with the given expected kind, which
-   may either indicate a higher-kinded or fully applied type.
-*)
-and localize_with_kind
-    ~ety_env
-    env
-    (dty : decl_ty)
-    (expected_named_kind : KindDefs.Simple.named_kind) :
-    (env * Typing_error.t option * Type_expansions.cycle_reporter list)
-    * locl_ty =
-  let expected_kind = snd expected_named_kind in
-  let arity = KindDefs.Simple.get_arity expected_kind in
-  if Int.( = ) arity 0 then
-    (* Not higher-kinded *)
-    localize ~ety_env env dty
-  else
-    (* TODO(T222659258) Remove this whole function *)
-    (* Higher-kinded types implementation is being removed. We will always generate an error during naming*)
-    let (env, ty) = Env.fresh_type_error env Pos.none in
-    ((env, None, []), ty)
 
 and localize_cstr_ty ~ety_env env ty tp_name =
   let (env, ty) = localize ~ety_env env ty in
@@ -1369,24 +1319,6 @@ and localize_refinement ~ety_env env r root decl_cr =
   let cycles = cycles_root @ cycles_refinements in
   ((env, err, cycles), ty)
 
-(* Like localize_no_subst, but uses the supplied kind, enabling support
-   for higher-kinded types *)
-let localize_no_subst_and_kind env ~tparam ~on_error ty nkind =
-  let ety_env =
-    Option.value_map
-      ~default:empty_expand_env
-      ~f:empty_expand_env_with_on_error
-      on_error
-  in
-  let ety_env =
-    match tparam with
-    | Some tp
-      when Attributes.mem SN.UserAttributes.uaExplicit tp.tp_user_attributes ->
-      { ety_env with wildcard_action = Wildcard_require_explicit tp }
-    | _ -> ety_env
-  in
-  localize_with_kind ~ety_env env ty nkind
-
 (** Localize an explicit type argument to a constructor or function. We
     support the use of wildcards at the top level only *)
 let localize_targ_with_kind
@@ -1428,15 +1360,19 @@ let localize_targ_with_kind
         env
         ty
         nkind;
-    let (env, ty) =
-      localize_no_subst_and_kind
-        env
-        ~tparam
-        ~on_error:
-          (Some (Typing_error.Reasons_callback.invalid_type_hint hint_pos))
-        ty
-        nkind
+    let ety_env =
+      empty_expand_env_with_on_error
+        (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
     in
+    let ety_env =
+      match tparam with
+      | Some tp
+        when Attributes.mem SN.UserAttributes.uaExplicit tp.tp_user_attributes
+        ->
+        { ety_env with wildcard_action = Wildcard_require_explicit tp }
+      | _ -> ety_env
+    in
+    let (env, ty) = localize ~ety_env env ty in
     (env, (ty, hint))
 
 let localize_targ ?tparam ~check_well_kinded env hint =

@@ -6,6 +6,7 @@ module SN = Naming_special_names
 
 type tparam_bounds = TySet.t [@@deriving hash, show]
 
+(* TODO(T222659258) remove parameters field here *)
 type kind = {
   lower_bounds: tparam_bounds;
   upper_bounds: tparam_bounds;

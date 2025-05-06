@@ -61,11 +61,11 @@ namespace HPHP {
 
 #define PHP_MBSTR_STACK_BLOCK_SIZE 32
 
-typedef struct _php_mb_nls_ident_list {
+struct php_mb_nls_ident_list {
   mbfl_no_language lang;
   mbfl_no_encoding* list;
   int list_size;
-} php_mb_nls_ident_list;
+};
 
 static mbfl_no_encoding php_mb_default_identify_list_ja[] = {
   mbfl_no_encoding_ascii,
@@ -150,7 +150,7 @@ static php_mb_nls_ident_list php_mb_default_identify_list[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 // globals
-typedef std::map<std::string, php_mb_regex_t *> RegexCache;
+using RegexCache = std::map<std::string, php_mb_regex_t *>;
 
 struct MBGlobals final : RequestEventHandler {
   mbfl_no_language language;
@@ -2084,7 +2084,7 @@ String HHVM_FUNCTION(mb_output_handler,
   return String(reinterpret_cast<char*>(result.val), result.len, AttachString);
 }
 
-typedef struct _php_mb_encoding_handler_info_t {
+struct php_mb_encoding_handler_info_t {
   int data_type;
   const char *separator;
   unsigned int force_register_globals: 1;
@@ -2094,7 +2094,7 @@ typedef struct _php_mb_encoding_handler_info_t {
   enum mbfl_no_language from_language;
   int num_from_encodings;
   mbfl_encoding **from_encodings;
-} php_mb_encoding_handler_info_t;
+};
 
 static mbfl_encoding* _php_mb_encoding_handler_ex
 (const php_mb_encoding_handler_info_t *info, Array& arg, char *res) {
@@ -3160,10 +3160,10 @@ Variant HHVM_FUNCTION(mb_substr_count,
 ///////////////////////////////////////////////////////////////////////////////
 // regex helpers
 
-typedef struct _php_mb_regex_enc_name_map_t {
+struct php_mb_regex_enc_name_map_t {
   const char *names;
   OnigEncoding code;
-} php_mb_regex_enc_name_map_t;
+};
 
 static php_mb_regex_enc_name_map_t enc_name_map[] ={
   {

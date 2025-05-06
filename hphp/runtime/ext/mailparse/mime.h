@@ -104,7 +104,7 @@ private:
   Array m_headers; /* a record of all the headers */
 
   /* these are used during part extraction */
-  typedef void (MimePart::*PFN_CALLBACK)(const String&);
+  using PFN_CALLBACK = void (MimePart::*)(const String&);
   PFN_CALLBACK m_extract_func;
   mbfl_convert_filter *m_extract_filter;
   Variant m_extract_context;
@@ -140,8 +140,7 @@ private:
     Enumerator *next;
     int id;
   };
-  typedef bool (MimePart::*PFUNC_ENUMERATOR)
-    (Enumerator *enumerator, void *ptr);
+  using PFUNC_ENUMERATOR = bool (MimePart::*)(Enumerator *enumerator, void *ptr);
   bool enumeratePartsImpl(Enumerator *top, Enumerator **child,
                           PFUNC_ENUMERATOR callback, void *ptr);
   void enumerateParts(PFUNC_ENUMERATOR callback, void *ptr);

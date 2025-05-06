@@ -27,8 +27,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef std::map<std::string, xmlDocPtr> xmlDocMap;
-typedef std::map<std::string, xmlNodePtr> xmlNodeMap;
+using xmlDocMap = std::map<std::string, xmlDocPtr>;
+using xmlNodeMap = std::map<std::string, xmlNodePtr>;
 
 #define NS_STRING(ns) (ns.empty() ? nullptr : BAD_CAST(ns.c_str()))
 

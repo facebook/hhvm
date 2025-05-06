@@ -10,8 +10,8 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-typedef folly::EventHandler AsioEventHandler;
-typedef folly::AsyncTimeout AsioTimeoutHandler;
+using AsioEventHandler = folly::EventHandler;
+using AsioTimeoutHandler = folly::AsyncTimeout;
 
 struct AsioEventBase : folly::EventBase {
   AsioEventBase();

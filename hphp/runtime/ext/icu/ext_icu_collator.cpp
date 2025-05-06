@@ -167,10 +167,10 @@ static bool HHVM_METHOD(Collator, setStrength, int64_t strength) {
   return true;
 }
 
-typedef struct _collator_sort_key_index {
+struct collator_sort_key_index_t {
   char* key;       /* pointer to sort key */
   ssize_t valPos;  /* position of the original array element */
-} collator_sort_key_index_t;
+};
 
 /* Bytes to reserve for sort keys */
 static const int32_t DEF_SORT_KEYS_BUF_SIZE = 1048576;

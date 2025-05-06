@@ -36,8 +36,9 @@ namespace HPHP::Intl {
 const int64_t k_UREGEX_OFFSET_CAPTURE   = 1LL<<32;
 
 ///////////////////////////////////////////////////////////////////////////////
-typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
-                                StringDataHashCompare> PatternStringMap;
+using PatternStringMap = tbb::concurrent_hash_map<const StringData*,
+                                                  const RegexPattern*,
+                                                  StringDataHashCompare>;
 
 static PatternStringMap s_patternCacheMap;
 

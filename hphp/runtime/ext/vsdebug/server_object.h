@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/req-root.h"
 
-typedef unsigned int request_id_t;
+using request_id_t = unsigned int;
 
 namespace HPHP {
 namespace VSDEBUG {

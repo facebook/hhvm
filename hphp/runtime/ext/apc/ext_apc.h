@@ -106,8 +106,8 @@ Variant apc_unserialize(const char* data, int len, bool pure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
-typedef hphp_fast_string_set APCKeySet;
-typedef hphp_fast_string_map<HPHP::Optional<std::string>> APCEntryMap;
+using APCKeySet = hphp_fast_string_set;
+using APCEntryMap = hphp_fast_string_map<HPHP::Optional<std::string>>;
 APCKeySet apc_debug_get_keys();
 APCEntryMap apc_debug_get_all_entries();
 APCEntryMap apc_debug_get_entries_with_prefix(const std::string& prefix,

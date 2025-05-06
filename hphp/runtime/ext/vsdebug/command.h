@@ -27,7 +27,7 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-typedef int request_id_t;
+using request_id_t = int;
 
 // Forward declaration of Debugger
 struct Debugger;

@@ -2065,9 +2065,9 @@ namespace {
 #define YYMARKER        s->ptr
 #define YYFILL(n)       RET(PDO_PARSER_EOI)
 
-typedef struct Scanner {
+struct Scanner {
   char *ptr, *cur, *lim, *tok;
-} Scanner;
+};
 
 static int scan(Scanner *s) {
   char* cursor = s->cur;

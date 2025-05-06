@@ -35,7 +35,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-typedef msgbuf hhvm_msgbuf;
+using hhvm_msgbuf = msgbuf;
 
 using HPHP::ScopedMem;
 
@@ -550,20 +550,20 @@ bool HHVM_FUNCTION(sem_remove,
 ///////////////////////////////////////////////////////////////////////////////
 // shared memory
 
-typedef struct {
+struct sysvshm_chunk {
   long key;
   long length;
   long next;
   char mem;
-} sysvshm_chunk;
+};
 
-typedef struct {
+struct sysvshm_chunk_head {
   char magic[8];
   long start;
   long end;
   long free;
   long total;
-} sysvshm_chunk_head;
+};
 
 struct sysvshm_shm {
   key_t key;               /* Key set by user */

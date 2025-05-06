@@ -4,11 +4,11 @@ namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator)
 
-typedef union {
+union UAlignedMemory {
   long    t1;
   double  t2;
   void   *t3;
-} UAlignedMemory;
+};
 
 inline ptrdiff_t pointerMaskLSB(void *ptr, ptrdiff_t mask) {
   return (ptrdiff_t)ptr & mask;

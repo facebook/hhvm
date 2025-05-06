@@ -30,7 +30,7 @@ namespace HPHP::ExtensionRegistry {
 // start registering themselves, so we have to be explicit about
 // allocating/initializing/destroying this rather than just
 // putting it global and letting the compiler deal with it. :(
-typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
+using ExtensionMap = std::map<std::string, Extension*, stdltistr>;
 static ExtensionMap *s_exts = nullptr;
 
 // just to make valgrind cleaner
@@ -41,7 +41,7 @@ struct ExtensionRegistryUninitializer {
 };
 static ExtensionRegistryUninitializer s_extension_registry_uninitializer;
 
-typedef std::vector<Extension*> OrderedExtensionVector;
+using OrderedExtensionVector = std::vector<Extension*>;
 static OrderedExtensionVector s_ordered;
 
 static bool s_sorted = false;

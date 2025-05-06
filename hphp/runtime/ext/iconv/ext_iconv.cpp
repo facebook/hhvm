@@ -58,12 +58,12 @@ static char _generic_superset_name[] = "UCS-4LE";
 #define PHP_ICONV_MIME_DECODE_STRICT            (1<<0)
 #define PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR (1<<1)
 
-typedef enum _php_iconv_enc_scheme_t {
+enum php_iconv_enc_scheme_t {
   PHP_ICONV_ENC_SCHEME_BASE64,
   PHP_ICONV_ENC_SCHEME_QPRINT
-} php_iconv_enc_scheme_t;
+};
 
-typedef enum _php_iconv_err_t {
+enum php_iconv_err_t {
   PHP_ICONV_ERR_SUCCESS           = 0,
   PHP_ICONV_ERR_CONVERTER         = 1,
   PHP_ICONV_ERR_WRONG_CHARSET     = 2,
@@ -73,7 +73,7 @@ typedef enum _php_iconv_err_t {
   PHP_ICONV_ERR_UNKNOWN           = 6,
   PHP_ICONV_ERR_MALFORMED         = 7,
   PHP_ICONV_ERR_ALLOC             = 8
-} php_iconv_err_t;
+};
 
 static void _php_iconv_show_error(const char *func, php_iconv_err_t &err,
                                   const char *out_charset,

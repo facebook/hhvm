@@ -64,11 +64,11 @@ public:
 
 IMPLEMENT_RESOURCE_ALLOCATION(MCrypt)
 
-typedef enum {
+enum iv_source {
   RANDOM = 0,
   URANDOM,
   RAND
-} iv_source;
+};
 
 struct mcrypt_data {
   std::string algorithms_dir;

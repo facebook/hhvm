@@ -85,7 +85,7 @@ void initialize_apc() {
 
 const StaticString s_internal_preload("__apc_internal_preload");
 
-typedef ConcurrentTableSharedStore::DumpMode DumpMode;
+using DumpMode = ConcurrentTableSharedStore::DumpMode;
 
 void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(Enable, ini, config, "Server.APC.EnableApc", true);

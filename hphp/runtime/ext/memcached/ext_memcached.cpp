@@ -135,7 +135,7 @@ struct MemcachedData {
   MemcachedData() {}
   ~MemcachedData() {}
 
-  typedef std::shared_ptr<Impl> ImplPtr;
+  using ImplPtr = std::shared_ptr<Impl>;
   ImplPtr m_impl;
 
   bool handleError(memcached_return status) {
@@ -339,7 +339,7 @@ struct MemcachedData {
     item = make_dict_array(s_key, sKey, s_value, value, s_cas, cas);
     return true;
   }
-  typedef memcached_return_t (*SetOperation)(memcached_st *,
+  using SetOperation = memcached_return_t (*)(memcached_st *,
       const char *, size_t, const char *, size_t, const char *, size_t,
       time_t, uint32_t);
 
@@ -443,7 +443,7 @@ struct MemcachedData {
                                   MEMCACHED_BEHAVIOR_BINARY_PROTOCOL);
   }
 
-  typedef std::map<std::string, ImplPtr> ImplMap;
+  using ImplMap = std::map<std::string, ImplPtr>;
   static RDS_LOCAL(ImplMap, s_persistentMap);
 };
 

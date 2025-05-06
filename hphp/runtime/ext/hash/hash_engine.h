@@ -49,7 +49,7 @@ struct HashEngine {
   int context_size;
 };
 
-typedef std::map<std::string,std::shared_ptr<HashEngine>> HashEngineMap;
+using HashEngineMap = std::map<std::string,std::shared_ptr<HashEngine>>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -85,10 +85,10 @@ struct LmdbObjectMap {
   unsigned int counter = 0;
 };
 
-typedef struct LmdbObjectMap<MDB_cursor> LmdbCursorMap;
-typedef struct LmdbObjectMap<Variant> LmdbDbiMap;
-typedef struct LmdbObjectMap<MDB_env> LmdbEnvMap;
-typedef struct LmdbObjectMap<MDB_txn> LmdbTxnMap;
+using LmdbCursorMap = struct LmdbObjectMap<MDB_cursor>;
+using LmdbDbiMap = struct LmdbObjectMap<Variant>;
+using LmdbEnvMap = struct LmdbObjectMap<MDB_env>;
+using LmdbTxnMap = struct LmdbObjectMap<MDB_txn>;
 
 /*
  * mdb_set_compare

@@ -136,11 +136,11 @@ inline void clearParser(const req::ptr<XmlParser>& p) {
 
 }
 
-typedef struct {
+struct xml_encoding {
   XML_Char *name;
   char (*decoding_function)(unsigned short);
   unsigned short (*encoding_function)(unsigned char);
-} xml_encoding;
+};
 
 static XML_Char * xml_globals_default_encoding = (XML_Char*)"UTF-8";
 // for xml_parse_into_struct

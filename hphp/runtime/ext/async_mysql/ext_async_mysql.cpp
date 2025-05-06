@@ -38,8 +38,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>
-    AsyncMysqlClientPool;
+using AsyncMysqlClientPool = am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>;
 
 namespace {
 int HdfAsyncMysqlClientPoolSize = -1;

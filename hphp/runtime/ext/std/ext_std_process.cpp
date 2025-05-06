@@ -273,7 +273,7 @@ const StaticString s_w("w");
 
 struct DescriptorItem {
 private:
-  typedef int FileDescriptor;
+  using FileDescriptor = int;
   static constexpr int defaultFd = -1;
   static int dupFd(int fd) {
     return dup(fd);

@@ -33,7 +33,7 @@ namespace HPHP::asio {
 
 namespace {
   struct EnterContextState final {
-    typedef c_Awaitable::Kind Kind;
+    using Kind = c_Awaitable::Kind;
 
     EnterContextState(c_WaitableWaitHandle* root, ContextStateIndex ctxStateIdx)
       : m_importSet({root}), m_pending({root}), m_ctxStateIdx(ctxStateIdx) {

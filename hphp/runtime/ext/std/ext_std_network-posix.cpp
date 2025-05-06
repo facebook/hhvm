@@ -105,10 +105,10 @@ bool HHVM_FUNCTION(checkdnsrr, const String& host,
   return (i >= 0);
 }
 
-typedef union {
+union querybuf {
   HEADER qb1;
   u_char qb2[65536];
-} querybuf;
+};
 
 const StaticString
   s_host("host"),

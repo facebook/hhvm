@@ -77,7 +77,7 @@ struct AsioSession final {
   }
 
   // Meager time abstractions.
-  typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
+  using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
 
   // The latest time we will wait for an I/O operation to complete.  If this
   // time is exceeded, onIOWaitExit will throw after checking surprise.

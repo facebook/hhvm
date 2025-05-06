@@ -85,11 +85,11 @@ static struct FilterExtension final : Extension {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct filter_list_entry {
+struct filter_list_entry {
   StaticString name;
   int64_t id;
   Variant (*function)(PHP_INPUT_FILTER_PARAM_DECL);
-} filter_list_entry;
+};
 
 static const filter_list_entry filter_list[] = {
   {

@@ -36,7 +36,7 @@ class DbMixedStackArgumentsServiceInfoHolder : public apache::thrift::ServiceInf
 namespace apache::thrift {
 template <>
 class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public apache::thrift::ServerInterface {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::fixtures::basic::DbMixedStackArguments>, "Definition collision with service tag");
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::fixtures::basic::DbMixedStackArguments>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "DbMixedStackArguments"; }

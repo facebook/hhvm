@@ -23,7 +23,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::thrift::GeneratedAsyncClient {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::fixtures::basic::DbMixedStackArguments>, "Definition collision with service tag");
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::fixtures::basic::DbMixedStackArguments>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 

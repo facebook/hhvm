@@ -36,7 +36,7 @@ class TestServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
 namespace apache::thrift {
 template <>
 class ServiceHandler<::test::namespace_from_package::module::TestService> : public apache::thrift::ServerInterface {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::namespace_from_package::module::TestService>, "Definition collision with service tag");
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::namespace_from_package::module::TestService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "TestService"; }

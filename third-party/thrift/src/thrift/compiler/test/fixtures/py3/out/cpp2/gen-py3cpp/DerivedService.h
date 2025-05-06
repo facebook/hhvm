@@ -41,7 +41,7 @@ class DerivedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder
 namespace apache::thrift {
 template <>
 class ServiceHandler<::py3::simple::DerivedService> : virtual public ::py3::simple::SimpleServiceSvIf {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::py3::simple::DerivedService>, "Definition collision with service tag");
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::py3::simple::DerivedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "DerivedService"; }

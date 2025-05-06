@@ -27,7 +27,7 @@ class {{service:cpp_name}}AsyncProcessor;
 namespace apache::thrift {
 template <>
 class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public ::{{service:qualified_namespace}}::{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, {{service:qualified_name}}>, "Definition collision with service tag");
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, {{service:qualified_name}}>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "{{service:name}}"; }

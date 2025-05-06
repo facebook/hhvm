@@ -22,7 +22,7 @@ namespace apache::thrift {
 
 template <>
 class Client<{{service:qualified_name}}> : public {{#service:extends}}::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncClient{{/service:extends}}{{^service:extends}}apache::thrift::GeneratedAsyncClient{{/service:extends}} {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, {{service:qualified_name}}>, "Definition collision with service tag");
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, {{service:qualified_name}}>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
   using {{#service:extends}}::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncClient::{{service:cpp_name}}AsyncClient{{/service:extends}}{{^service:extends}}apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient{{/service:extends}};
 

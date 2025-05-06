@@ -65,18 +65,18 @@
 #define BF_SCALE      0
 #endif
 
-typedef unsigned int BF_word;
-typedef signed int BF_word_signed;
+using BF_word = unsigned int;
+using BF_word_signed = signed int;
 
 /* Number of Blowfish rounds, this is also hardcoded into a few places */
 #define BF_N        16
 
-typedef BF_word BF_key[BF_N + 2];
+using BF_key = BF_word[BF_N + 2];
 
-typedef struct {
+struct BF_ctx {
   BF_word S[4][0x100];
   BF_key P;
-} BF_ctx;
+};
 
 /*
  * Magic IV for 64 Blowfish encryptions that we do at the end.

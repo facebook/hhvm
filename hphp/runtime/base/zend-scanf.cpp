@@ -101,13 +101,13 @@
   char end;
 };
 
-typedef struct CharSet {
+struct CharSet {
   int exclude;    /* 1 if this is an exclusion set. */
   int nchars;
   char *chars;
   int nranges;
   Range *ranges;
-} CharSet;
+};
 
 namespace HPHP {
 /**

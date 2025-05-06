@@ -33,7 +33,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef void PFN_THREAD_FUNC(void *);
+using PFN_THREAD_FUNC = void(void *);
 
 PFN_THREAD_FUNC* AsyncFuncImpl::s_initFunc = nullptr;
 void* AsyncFuncImpl::s_initFuncArg = nullptr;

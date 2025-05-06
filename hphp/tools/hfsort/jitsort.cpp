@@ -35,7 +35,7 @@ namespace HPHP { namespace hfsort {
 
 constexpr uint32_t kPageSize = 2 << 20;
 
-typedef std::map<uint32_t,std::vector<TargetId>> Group2BaseMap;
+using Group2BaseMap = std::map<uint32_t,std::vector<TargetId>>;
 
 void error(const char* msg) {
   Logger::Error("JitSort: %s\n", msg);

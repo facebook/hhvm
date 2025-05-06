@@ -222,10 +222,10 @@ namespace HPHP {
        should be defined.
 #endif
 
-  typedef union {
+  union _double {
         double d;
           ULong ul[2];
-  } _double;
+  };
 #define value(x) ((x).d)
 #ifdef IEEE_LITTLE_ENDIAN
 #define word0(x) ((x).ul[1])
@@ -374,8 +374,6 @@ struct Bigint {
   int k, maxwds, sign, wds;
   ULong x[1];
 };
-
-typedef struct Bigint Bigint;
 
 } // namespace
 

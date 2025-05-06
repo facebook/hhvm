@@ -2200,7 +2200,7 @@ String string_metaphone(const char *input, int word_len, long max_phonemes,
  * _cyr_cp866     - for x-cp866 charset
  * _cyr_mac       - for x-mac-cyrillic charset
  */
-typedef unsigned char _cyr_charset_table[512];
+using _cyr_charset_table = unsigned char[512];
 
 static const _cyr_charset_table _cyr_win1251 = {
   0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,

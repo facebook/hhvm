@@ -134,7 +134,7 @@ StringData* makeDocComment(const String& s) {
 }
 
 struct AsmState;
-typedef void (*ParserFunc)(AsmState& as);
+using ParserFunc = void (*)(AsmState& as);
 
 struct Input {
   explicit Input(std::istream& in)

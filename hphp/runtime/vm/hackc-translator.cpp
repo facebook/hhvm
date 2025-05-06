@@ -968,7 +968,7 @@ OPCODES
 #undef handleSLA
 #undef handleOA
 
-typedef void (*translatorFunc)(TranslationState& ts, const Opcode& o);
+using translatorFunc = void (*)(TranslationState& ts, const Opcode& o);
 hphp_hash_map<Opcode::Tag, translatorFunc> opcodeTranslators;
 
 void initializeMap() {

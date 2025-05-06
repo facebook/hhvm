@@ -36,7 +36,7 @@ namespace HPHP {
  */
 #define NDIG 320
 
-typedef enum {
+enum length_modifier_e {
   LM_STD = 0,
   LM_INTMAX_T,
   LM_PTRDIFF_T,
@@ -44,11 +44,11 @@ typedef enum {
   LM_SIZE_T,
   LM_LONG,
   LM_LONG_DOUBLE
-} length_modifier_e;
+};
 
-typedef enum {
+enum boolean_e {
   NO = 0, YES = 1
-} boolean_e;
+};
 
 #define NUM(c) (c - '0')
 
@@ -79,8 +79,8 @@ typedef enum {
     }                                                   \
 } while (0)
 
-typedef int64_t wide_int;
-typedef uint64_t u_wide_int;
+using wide_int = int64_t;
+using u_wide_int = uint64_t;
 
 #define FALSE           0
 #define TRUE            1

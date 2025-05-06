@@ -43,7 +43,7 @@ namespace HPHP {
 
 namespace {
 
-typedef std::lock_guard<std::mutex> G;
+using G = std::lock_guard<std::mutex>;
 std::mutex nameCacheLock;
 hphp_fast_map<void*, std::string, pointer_hash<void>> nameCache;
 

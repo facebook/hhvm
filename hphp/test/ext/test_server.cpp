@@ -512,11 +512,11 @@ struct TestTransport final : Transport {
   }
 };
 
-typedef std::shared_ptr<TestTransport> TestTransportPtr;
-typedef std::vector<TestTransportPtr> TestTransportPtrVec;
-typedef AsyncFunc<TestTransport> TestTransportAsyncFunc;
-typedef std::shared_ptr<TestTransportAsyncFunc> TestTransportAsyncFuncPtr;
-typedef std::vector<TestTransportAsyncFuncPtr> TestTransportAsyncFuncPtrVec;
+using TestTransportPtr = std::shared_ptr<TestTransport>;
+using TestTransportPtrVec = std::vector<TestTransportPtr>;
+using TestTransportAsyncFunc = AsyncFunc<TestTransport>;
+using TestTransportAsyncFuncPtr = std::shared_ptr<TestTransportAsyncFunc>;
+using TestTransportAsyncFuncPtrVec = std::vector<TestTransportAsyncFuncPtr>;
 
 #define TEST_SIZE 100
 

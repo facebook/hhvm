@@ -98,7 +98,7 @@ const char* eventTypeToSmallCaption(PerfEventType eventType) {
 // StackTraceTree
 
 struct StackTraceTree::Node {
-  typedef std::unordered_map<string, Node*> StrToPNode;
+  using StrToPNode = std::unordered_map<string, Node*>;
 
   uint64_t inclusiveCount;
   uint64_t selfCount; // samples that happen precisely at this node

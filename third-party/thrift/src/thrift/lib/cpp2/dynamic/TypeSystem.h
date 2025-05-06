@@ -395,7 +395,32 @@ class TypeRef final {
         [&](auto&&) -> const T& { throwTypeRefAccessInactiveKind(); });
   }
 
-  explicit TypeRef(Alternative type) : type_(std::move(type)) {}
+  // TypeRef to primitives
+  explicit TypeRef(Bool) noexcept : type_(std::in_place_type<Bool>) {}
+  explicit TypeRef(Byte) noexcept : type_(std::in_place_type<Byte>) {}
+  explicit TypeRef(I16) noexcept : type_(std::in_place_type<I16>) {}
+  explicit TypeRef(I32) noexcept : type_(std::in_place_type<I32>) {}
+  explicit TypeRef(I64) noexcept : type_(std::in_place_type<I64>) {}
+  explicit TypeRef(Float) noexcept : type_(std::in_place_type<Float>) {}
+  explicit TypeRef(Double) noexcept : type_(std::in_place_type<Double>) {}
+  explicit TypeRef(String) noexcept : type_(std::in_place_type<String>) {}
+  explicit TypeRef(Binary) noexcept : type_(std::in_place_type<Binary>) {}
+  explicit TypeRef(Any) noexcept : type_(std::in_place_type<Any>) {}
+
+  // TypeRef to containers
+  explicit TypeRef(List list) noexcept : type_(std::move(list)) {}
+  explicit TypeRef(Set set) noexcept : type_(std::move(set)) {}
+  explicit TypeRef(Map map) noexcept : type_(std::move(map)) {}
+
+  // TypeRef to definitions
+  explicit TypeRef(const StructNode& structDef)
+      : type_(std::in_place_type<StructPtr>, &structDef) {}
+  explicit TypeRef(const UnionNode& unionDef)
+      : type_(std::in_place_type<UnionPtr>, &unionDef) {}
+  explicit TypeRef(const EnumNode& enumDef)
+      : type_(std::in_place_type<EnumPtr>, &enumDef) {}
+  explicit TypeRef(const OpaqueAliasNode& opaqueAliasDef)
+      : type_(std::in_place_type<OpaqueAliasPtr>, &opaqueAliasDef) {}
 
   /**
    * Creates a reference to a user-defined type.

@@ -223,13 +223,13 @@ bool operator==(const TypeRef& lhs, const TypeRef& rhs) {
 /* static */ TypeRef TypeRef::fromDefinition(DefinitionRef def) {
   switch (def.kind()) {
     case DefinitionRef::Kind::STRUCT:
-      return TypeRef(&def.asStruct());
+      return TypeRef(def.asStruct());
     case DefinitionRef::Kind::UNION:
-      return TypeRef(&def.asUnion());
+      return TypeRef(def.asUnion());
     case DefinitionRef::Kind::ENUM:
-      return TypeRef(&def.asEnum());
+      return TypeRef(def.asEnum());
     case DefinitionRef::Kind::OPAQUE_ALIAS:
-      return TypeRef(&def.asOpaqueAlias());
+      return TypeRef(def.asOpaqueAlias());
     default:
       break;
   };

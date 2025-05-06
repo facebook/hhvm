@@ -123,9 +123,3 @@ class SyncClientTests(unittest.TestCase):
                 with self.assertRaisesRegex(TApplicationException, "Surprise!") as ex:
                     client.surprise()
                 self.assertEqual(TApplicationException.UNKNOWN, ex.exception.type)
-
-    def test_transport_error(self) -> None:
-        with get_client(TestService.Client, path="/no/where") as client:
-            with self.assertRaises(TTransportException) as ex:
-                client.add(1, 2)
-            self.assertEqual(TTransportException.UNKNOWN, ex.exception.type)

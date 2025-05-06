@@ -499,6 +499,13 @@ type::Schema t_ast_generator::gen_schema(
   return ast;
 }
 
+namespace {
+template <typename Writer>
+struct SortingProtocolWriter : Writer {
+  static constexpr bool kSortKeys() { return true; }
+};
+} // namespace
+
 void t_ast_generator::generate_program() {
   std::filesystem::create_directory(get_out_dir());
   std::string fname = fmt::format("{}/{}.ast", get_out_dir(), program_->name());
@@ -508,16 +515,16 @@ void t_ast_generator::generate_program() {
 
   switch (protocol_) {
     case ast_protocol::json:
-      f_out_ << serialize<SimpleJSONProtocolWriter>(ast);
+      f_out_ << serialize<SortingProtocolWriter<SimpleJSONProtocolWriter>>(ast);
       break;
     case ast_protocol::debug:
-      f_out_ << serialize<DebugProtocolWriter>(ast);
+      f_out_ << serialize<SortingProtocolWriter<DebugProtocolWriter>>(ast);
       break;
     case ast_protocol::compact:
-      f_out_ << serialize<CompactProtocolWriter>(ast);
+      f_out_ << serialize<SortingProtocolWriter<CompactProtocolWriter>>(ast);
       break;
     case ast_protocol::binary:
-      f_out_ << serialize<BinaryProtocolWriter>(ast);
+      f_out_ << serialize<SortingProtocolWriter<BinaryProtocolWriter>>(ast);
       break;
   }
   f_out_.close();
@@ -542,7 +549,8 @@ std::string gen_schema(
     const t_program& root_program) {
   auto schema =
       t_ast_generator::gen_schema(schema_opts, source_mgr, root_program);
-  auto serialized = serialize<CompactProtocolWriter>(schema);
+  auto serialized =
+      serialize<SortingProtocolWriter<CompactProtocolWriter>>(schema);
   auto compressed = folly::compression::getCodec(
                         folly::compression::CodecType::ZSTD,
                         folly::compression::COMPRESSION_LEVEL_BEST)

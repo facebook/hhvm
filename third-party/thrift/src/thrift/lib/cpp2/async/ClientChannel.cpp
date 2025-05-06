@@ -17,8 +17,15 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ClientChannel.h>
 
-#ifdef __linux__
-#include <sys/utsname.h>
+#if __has_include(<unistd.h>)
+#include <unistd.h>
+#define THRIFT_HAS_UNISTD_H
+#endif
+
+#include <limits.h> // IWYU pragma: keep
+
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 255
 #endif
 
 namespace apache::thrift {
@@ -30,10 +37,11 @@ ClientChannel::ClientChannel() {
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(ClientHostMetadata, getClientHostMetadata) {
   ClientHostMetadata hostMetadata;
-#ifdef __linux__
-  struct utsname bufs;
-  ::uname(&bufs);
-  hostMetadata.hostname = bufs.nodename;
+#ifdef THRIFT_HAS_UNISTD_H
+  char hostname[HOST_NAME_MAX + 1];
+  if (gethostname(hostname, sizeof(hostname)) == 0) {
+    hostMetadata.hostname = hostname;
+  }
 #endif
   return hostMetadata;
 }

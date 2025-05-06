@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <type_traits>
 #include <folly/portability/GTest.h>
 #include <folly/sorted_vector_types.h>
@@ -818,6 +819,77 @@ TEST(EncodeTest, EncodeMethod) {
   EXPECT_EQ(encodeJSONMockStruct(simpleJson, jsonMock), UseWrite);
   EXPECT_EQ(encodeJSONMockStruct(json, jsonMock), UseStructEncode);
   EXPECT_EQ(encodeJSONMockStruct(debug, jsonMock), UseStructEncode);
+}
+
+TEST(EncodeTest, kSortKeys) {
+  struct SortingProtocolWriter : CompactProtocolWriter {
+    constexpr bool kSortKeys() const { return true; }
+  };
+
+  struct OrderPreservingSet : std::vector<int> {
+    void emplace(int i) { push_back(i); }
+    void insert(int i) { push_back(i); }
+  };
+  OrderPreservingSet reversedSet{{3, 2, 1}};
+  OrderPreservingSet readSet;
+
+  {
+    folly::IOBufQueue queue;
+    SortingProtocolWriter writer;
+    writer.setOutput(&queue);
+    op::encode<type::set<type::i32_t>>(writer, reversedSet);
+    CompactProtocolReader reader;
+    reader.setInput(queue.front());
+    op::decode<type::set<type::i32_t>>(reader, readSet);
+  }
+  EXPECT_EQ(readSet, (OrderPreservingSet{{1, 2, 3}}));
+
+  std::unordered_set<int> unorderedSet{3, 2, 1};
+  {
+    folly::IOBufQueue queue;
+    SortingProtocolWriter writer;
+    writer.setOutput(&queue);
+    op::encode<type::set<type::i32_t>>(writer, unorderedSet);
+    CompactProtocolReader reader;
+    reader.setInput(queue.front());
+    op::decode<type::set<type::i32_t>>(reader, readSet);
+  }
+  EXPECT_EQ(readSet, (OrderPreservingSet{{1, 2, 3}}));
+
+  std::set<int, std::greater> orderedSet{3, 2, 1};
+  {
+    folly::IOBufQueue queue;
+    SortingProtocolWriter writer;
+    writer.setOutput(&queue);
+    op::encode<type::set<type::i32_t>>(writer, orderedSet);
+    CompactProtocolReader reader;
+    reader.setInput(queue.front());
+    op::decode<type::set<type::i32_t>>(reader, readSet);
+  }
+  // Does not re-sort if already sorted.
+  EXPECT_EQ(readSet, (OrderPreservingSet{{3, 2, 1}}));
+
+  struct OrderPreservingMap : std::vector<std::pair<int, int>> {
+    using key_type = int;
+    using mapped_type = int;
+    void emplace(std::pair<int, int> p) { push_back(p); }
+    int& operator[](int i) {
+      push_back({i, 0});
+      return back().second;
+    }
+  };
+  OrderPreservingMap reversedMap{{{3, 0}, {2, 0}, {1, 0}}};
+  OrderPreservingMap readMap;
+  {
+    folly::IOBufQueue queue;
+    SortingProtocolWriter writer;
+    writer.setOutput(&queue);
+    op::encode<type::map<type::i32_t, type::i32_t>>(writer, reversedMap);
+    CompactProtocolReader reader;
+    reader.setInput(queue.front());
+    op::decode<type::map<type::i32_t, type::i32_t>>(reader, readMap);
+  }
+  EXPECT_EQ(readMap, (OrderPreservingMap{{{1, 0}, {2, 0}, {3, 0}}}));
 }
 
 } // namespace apache::thrift::op::detail

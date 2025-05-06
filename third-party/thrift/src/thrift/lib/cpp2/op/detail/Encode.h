@@ -16,7 +16,9 @@
 
 #pragma once
 
+#include <algorithm>
 #include <utility>
+#include <vector>
 
 #include <folly/Overload.h>
 #include <folly/Range.h>
@@ -628,9 +630,29 @@ struct SetEncode {
     uint32_t xfer = 0;
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
-    for (const auto& elem : set) {
-      xfer += Encode<Tag>{}(prot, elem);
+
+    if (!folly::is_detected_v<
+            ::apache::thrift::detail::pm::detect_key_compare,
+            T> &&
+        prot.kSortKeys()) {
+      std::vector<typename T::const_iterator> iters;
+      iters.reserve(set.size());
+      for (auto it = set.begin(); it != set.end(); ++it) {
+        iters.push_back(it);
+      }
+      std::sort(
+          iters.begin(), iters.end(), [](auto a, auto b) { return *a < *b; });
+      for (auto it : iters) {
+        xfer += Encode<Tag>{}(prot, *it);
+      }
+    } else {
+      // Support containers with defined but non-FIFO iteration order.
+      for (const auto& elem :
+           folly::order_preserving_reinsertion_view_or_default(set)) {
+        xfer += Encode<Tag>{}(prot, elem);
+      }
     }
+
     xfer += prot.writeSetEnd();
     return xfer;
   }
@@ -648,12 +670,36 @@ struct MapEncode {
         typeTagToTType<Key>,
         typeTagToTType<Value>,
         checked_container_size(map.size()));
-    for (const auto& kv : map) {
-      xfer += apache::thrift::detail::pm::writeMapValueBegin(prot, true);
-      xfer += Encode<Key>{}(prot, kv.first);
-      xfer += Encode<Value>{}(prot, kv.second);
-      xfer += apache::thrift::detail::pm::writeMapValueEnd(prot, true);
+
+    if (!folly::is_detected_v<
+            ::apache::thrift::detail::pm::detect_key_compare,
+            T> &&
+        prot.kSortKeys()) {
+      std::vector<typename T::const_iterator> iters;
+      iters.reserve(map.size());
+      for (auto it = map.begin(); it != map.end(); ++it) {
+        iters.push_back(it);
+      }
+      std::sort(iters.begin(), iters.end(), [](auto a, auto b) {
+        return (*a).first < (*b).first;
+      });
+      for (auto it : iters) {
+        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot, true);
+        xfer += Encode<Key>{}(prot, (*it).first);
+        xfer += Encode<Value>{}(prot, (*it).second);
+        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot, true);
+      }
+    } else {
+      // Support containers with defined but non-FIFO iteration order.
+      for (const auto& elem_pair :
+           folly::order_preserving_reinsertion_view_or_default(map)) {
+        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot, true);
+        xfer += Encode<Key>{}(prot, elem_pair.first);
+        xfer += Encode<Value>{}(prot, elem_pair.second);
+        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot, true);
+      }
     }
+
     xfer += prot.writeMapEnd();
     return xfer;
   }

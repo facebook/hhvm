@@ -15,6 +15,8 @@
   +----------------------------------------------------------------------+
 */
 
+#pragma once
+
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 
 #include <folly/container/F14Map.h>

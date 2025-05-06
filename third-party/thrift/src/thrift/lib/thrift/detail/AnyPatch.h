@@ -28,9 +28,7 @@
 #include <thrift/lib/thrift/gen-cpp2/any_patch_detail_types.h>
 #include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 namespace detail {
 
 template <typename Patch>
@@ -397,6 +395,4 @@ template <typename T>
 using AnyPatchAdapter = InlineAdapter<AnyPatch<T>>;
 
 } // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

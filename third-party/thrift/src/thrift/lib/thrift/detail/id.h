@@ -18,8 +18,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace protocol {
 enum class PathSegmentId : std::int64_t {};
 }
@@ -44,5 +43,4 @@ class StrongIntegerAdapter {
 
 } // namespace detail
 } // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

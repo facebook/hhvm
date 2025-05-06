@@ -85,7 +85,6 @@
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 
-#include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/program-functions.h"
 
 namespace HPHP {

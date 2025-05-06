@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
 

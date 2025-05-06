@@ -28,9 +28,6 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/types.h"
-
 namespace HPHP {
 
 struct Class;

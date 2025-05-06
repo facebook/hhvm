@@ -33,7 +33,6 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"

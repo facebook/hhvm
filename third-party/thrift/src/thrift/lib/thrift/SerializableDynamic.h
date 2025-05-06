@@ -191,7 +191,7 @@ class SerializableDynamic {
 
       case folly::dynamic::Type::STRING:
         xfer += p->writeFieldBegin("str", protocol::T_STRING, 4);
-        xfer += p->writeString(value_.asString());
+        xfer += p->writeString(value_.getString());
         xfer += p->writeFieldEnd();
         break;
 
@@ -273,7 +273,7 @@ class Cpp2Ops<SerializableDynamic> {
 
       case folly::dynamic::Type::STRING:
         xfer += p->serializedFieldSize("str", protocol::T_STRING, 4);
-        xfer += p->serializedSizeString(obj->value_.asString());
+        xfer += p->serializedSizeString(obj->value_.getString());
         break;
 
       case folly::dynamic::Type::ARRAY:

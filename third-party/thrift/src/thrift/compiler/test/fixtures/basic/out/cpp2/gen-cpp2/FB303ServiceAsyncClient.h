@@ -23,6 +23,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::fixtures::basic::FB303Service>, "Definition collision with service tag");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 

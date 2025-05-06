@@ -39,6 +39,8 @@ class service_with_special_namesServiceInfoHolder : public apache::thrift::Servi
 namespace apache::thrift {
 template <>
 class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test_cpp2::cpp_reflection::service_with_special_names>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "service_with_special_names"; }
 

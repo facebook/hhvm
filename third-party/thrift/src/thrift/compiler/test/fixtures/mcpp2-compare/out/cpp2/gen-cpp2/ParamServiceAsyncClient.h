@@ -25,6 +25,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::some::valid::ns::ParamService> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::some::valid::ns::ParamService>, "Definition collision with service tag");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 

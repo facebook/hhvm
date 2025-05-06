@@ -38,6 +38,8 @@ class GoodServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
 namespace apache::thrift {
 template <>
 class ServiceHandler<::cpp2::GoodService> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::GoodService>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "BadService"; }
 

@@ -42,6 +42,8 @@ class ExtraServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
 namespace apache::thrift {
 template <>
 class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid::ns::ParamServiceSvIf {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::extra::svc::ExtraService>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "ExtraService"; }
 

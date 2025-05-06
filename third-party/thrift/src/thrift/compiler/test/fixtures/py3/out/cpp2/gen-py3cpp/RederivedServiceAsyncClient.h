@@ -28,6 +28,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedServiceAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::py3::simple::RederivedService>, "Definition collision with service tag");
  public:
   using ::py3::simple::DerivedServiceAsyncClient::DerivedServiceAsyncClient;
 

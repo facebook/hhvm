@@ -37,6 +37,8 @@ class SinkServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
 namespace apache::thrift {
 template <>
 class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::SinkService>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "SinkService"; }
 

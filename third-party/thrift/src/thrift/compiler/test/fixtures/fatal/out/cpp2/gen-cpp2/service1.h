@@ -39,6 +39,8 @@ class service1ServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
 namespace apache::thrift {
 template <>
 class ServiceHandler<::test_cpp2::cpp_reflection::service1> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test_cpp2::cpp_reflection::service1>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "service1"; }
 

@@ -23,6 +23,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::facebook::thrift::test::Service> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::facebook::thrift::test::Service>, "Definition collision with service tag");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 

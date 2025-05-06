@@ -36,6 +36,8 @@ class FB303ServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
 namespace apache::thrift {
 template <>
 class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test::fixtures::basic::FB303Service>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "FB303Service"; }
 

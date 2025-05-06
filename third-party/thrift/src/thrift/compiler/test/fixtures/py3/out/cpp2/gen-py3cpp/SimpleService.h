@@ -36,6 +36,8 @@ class SimpleServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder 
 namespace apache::thrift {
 template <>
 class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::py3::simple::SimpleService>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "SimpleService"; }
 

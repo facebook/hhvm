@@ -23,6 +23,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::MyServicePrioParent>, "Definition collision with service tag");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 

@@ -28,6 +28,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::MyLeaf>, "Definition collision with service tag");
  public:
   using ::cpp2::MyNodeAsyncClient::MyNodeAsyncClient;
 

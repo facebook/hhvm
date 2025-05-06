@@ -38,6 +38,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::cpp2::A> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::A>, "Definition collision with service tag");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
@@ -298,6 +299,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::B>, "Definition collision with service tag");
  public:
   using ::cpp2::AAsyncClient::AAsyncClient;
 
@@ -580,6 +582,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::C>, "Definition collision with service tag");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 

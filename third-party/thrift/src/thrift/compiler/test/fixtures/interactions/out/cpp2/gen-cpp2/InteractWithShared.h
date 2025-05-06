@@ -39,6 +39,8 @@ class InteractWithSharedServiceInfoHolder : public apache::thrift::ServiceInfoHo
 namespace apache::thrift {
 template <>
 class ServiceHandler<::cpp2::InteractWithShared> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::InteractWithShared>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "InteractWithShared"; }
 

@@ -38,6 +38,8 @@ class InteractLocallyServiceInfoHolder : public apache::thrift::ServiceInfoHolde
 namespace apache::thrift {
 template <>
 class ServiceHandler<::thrift::shared_interactions::InteractLocally> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::thrift::shared_interactions::InteractLocally>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "InteractLocally"; }
 

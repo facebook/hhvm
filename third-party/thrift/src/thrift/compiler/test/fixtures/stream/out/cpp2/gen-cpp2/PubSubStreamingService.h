@@ -37,6 +37,8 @@ class PubSubStreamingServiceServiceInfoHolder : public apache::thrift::ServiceIn
 namespace apache::thrift {
 template <>
 class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::cpp2::PubSubStreamingService>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "PubSubStreamingService"; }
 

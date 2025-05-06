@@ -41,6 +41,8 @@ class RederivedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHold
 namespace apache::thrift {
 template <>
 class ServiceHandler<::py3::simple::RederivedService> : virtual public ::py3::simple::DerivedServiceSvIf {
+  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::py3::simple::RederivedService>, "Definition collision with service tag");
+
  public:
   std::string_view getGeneratedName() const override { return "RederivedService"; }
 

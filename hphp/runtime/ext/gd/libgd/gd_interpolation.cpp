@@ -83,7 +83,7 @@ using std::abs;
 
 /* only used here, let do a generic fixed point integers later if required by other
    part of GD */
-typedef long gdFixed;
+using gdFixed = long;
 /* Integer to fixed point */
 #define gd_itofx(x) ((x) * 256)
 
@@ -108,18 +108,17 @@ typedef long gdFixed;
 /* Divide a fixed by a fixed */
 #define gd_divfx(x,y) (((x) * 256) / (y))
 
-typedef struct
-{
+/* Contribution information for a single pixel */
+struct ContributionType {
    double *Weights;  /* Normalized weights of neighboring pixels */
    int Left,Right;   /* Bounds of source pixels window */
-} ContributionType;  /* Contirbution information for a single pixel */
+};
 
-typedef struct
-{
+struct LineContribType {
    ContributionType *ContribRow; /* Row (or column) of contribution weights */
    unsigned int WindowSize,      /* Filter window size (of affecting source pixels) */
         LineLength;      /* Length of line (no. or rows / cols) */
-} LineContribType;
+};
 
 /* Each core filter has its own radius */
 #define DEFAULT_FILTER_BICUBIC        3.0
@@ -145,7 +144,7 @@ typedef struct
 #define DEFAULT_SINC_RADIUS         1.0
 #define DEFAULT_WELSH_RADIUS        1.0
 
-enum GD_RESIZE_FILTER_TYPE{
+enum gdResizeFilterType{
   FILTER_DEFAULT          = 0,
   FILTER_BELL,
   FILTER_BESSEL,
@@ -171,8 +170,6 @@ enum GD_RESIZE_FILTER_TYPE{
 
   FILTER_CALLBACK        = 999
 };
-
-typedef enum GD_RESIZE_FILTER_TYPE gdResizeFilterType;
 
 static double KernelBessel_J1(const double x)
 {

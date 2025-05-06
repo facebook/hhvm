@@ -81,38 +81,34 @@ gdImageStringTTF (gdImage * im, int *brect, int fg, char *fontlist,
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
-typedef struct
-{
+struct font_t {
   char *fontlist;   /* key */
   FT_Library *library;
   FT_Face face;
   FT_Bool have_char_map_unicode, have_char_map_big5, have_char_map_sjis, have_char_map_apple_roman;
   gdCache_head_t *glyphCache;
-} font_t;
+};
 
-typedef struct
-{
+struct fontkey_t {
   char *fontlist;   /* key */
   int preferred_map;
   FT_Library *library;
-} fontkey_t;
+};
 
-typedef struct
-{
+struct tweencolor_t {
   int pixel;    /* key */
   int bgcolor;    /* key */
   int fgcolor;    /* key *//* -ve means no antialias */
   gdImagePtr im;    /* key */
   int tweencolor;
-} tweencolor_t;
+};
 
-typedef struct
-{
+struct tweencolorkey_t {
   int pixel;    /* key */
   int bgcolor;    /* key */
   int fgcolor;    /* key *//* -ve means no antialias */
   gdImagePtr im;    /* key */
-} tweencolorkey_t;
+};
 
 /********************************************************************
  * gdTcl_UtfToUniChar is borrowed from Tcl ...

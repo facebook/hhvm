@@ -142,7 +142,7 @@ int gdAlphaBlend(int dest, int src);
  * See also:
  *  <gdSetInterpolationMethod>
  **/
-typedef enum {
+enum gdInterpolationMethod {
   GD_DEFAULT          = 0,
   GD_BELL,
   GD_BESSEL,
@@ -166,14 +166,14 @@ typedef enum {
   GD_TRIANGLE,
   GD_WEIGHTED4,
   GD_METHOD_COUNT = 21
-} gdInterpolationMethod;
+};
 
 /* define struct with name and func ptr and add it to gdImageStruct gdInterpolationMethod interpolation; */
 
 /* Interpolation function ptr */
-typedef double (* interpolation_method )(double);
+using interpolation_method = double (*)(double);
 
-typedef struct gdImageStruct {
+struct gdImage {
   /* Palette-based image pixels */
   unsigned char ** pixels;
   int sx;
@@ -199,8 +199,8 @@ typedef struct gdImageStruct {
   int transparent;
   int *polyInts;
   int polyAllocated;
-  struct gdImageStruct *brush;
-  struct gdImageStruct *tile;
+  struct gdImage *brush;
+  struct gdImage *tile;
   int brushColorMap[gdMaxColors];
   int tileColorMap[gdMaxColors];
   int styleLength;
@@ -262,34 +262,34 @@ typedef struct gdImageStruct {
   int cy2;
   gdInterpolationMethod interpolation_id;
   interpolation_method interpolation;
-} gdImage;
+};
 
-typedef gdImage * gdImagePtr;
+using gdImagePtr = gdImage *;
 
 /* Point type for use in polygon drawing. */
 
 /**
  * Group: Types
  *
- * typedef: gdPointF
+ * struct: gdPointF
  *  Defines a point in a 2D coordinate system using floating point
  *  values.
  * x - Floating point position (increase from left to right)
  * y - Floating point Row position (increase from top to bottom)
  *
- * typedef: gdPointFPtr
+ * struct: gdPointFPtr
  *  Pointer to a <gdPointF>
  *
  * See also:
  *  <gdImageCreate>, <gdImageCreateTrueColor>,
  **/
-typedef struct
-{
+struct gdPointF {
   double x, y;
-}
-gdPointF, *gdPointFPtr;
+};
 
-typedef struct {
+using gdPointFPtr = gdPointF*;
+
+struct gdFont {
   /* # of characters in font */
   int nchars;
   /* First character is numbered... (usually 32 = space) */
@@ -301,16 +301,16 @@ typedef struct {
     Easily included in code, also easily loaded from
     data files. */
   char *data;
-} gdFont;
+};
 
 /* Text functions take these. */
-typedef gdFont *gdFontPtr;
+using gdFontPtr = gdFont *;
 
 
 /**
  * Group: Types
  *
- * typedef: gdRect
+ * struct: gdRect
  *  Defines a rectilinear region.
  *
  *  x - left position
@@ -318,18 +318,17 @@ typedef gdFont *gdFontPtr;
  *  width - Rectangle width
  *  height - Rectangle height
  *
- * typedef: gdRectPtr
+ * struct: gdRectPtr
  *  Pointer to a <gdRect>
  *
  * See also:
  *  <gdSetInterpolationMethod>
  **/
-typedef struct
-{
+struct gdRect {
   int x, y;
   int width, height;
-}
-gdRect, *gdRectPtr;
+};
+using gdRectPtr = gdRect*;
 
 /* For backwards compatibility only. Use gdImageSetStyle()
   for MUCH more flexible line drawing. Also see
@@ -390,10 +389,11 @@ const char * gdJpegGetVersionString();
         of bytes fetched. 0 is EOF, not an error! */
 /* context will be passed to your source function. */
 
-typedef struct {
-        int (*source) (void *context, char *buffer, int len);
-        void *context;
-} gdSource, *gdSourcePtr;
+struct gdSource {
+  int (*source) (void *context, char *buffer, int len);
+  void *context;
+};
+using gdSourcePtr = gdSource *;
 
 gdImagePtr gdImageCreateFromPngSource(gdSourcePtr in);
 
@@ -473,7 +473,7 @@ char *gdImageStringTTF(gdImage *im, int *brect, int fg, char *fontlist,
 char *gdImageStringFT(gdImage *im, int *brect, int fg, char *fontlist,
                 double ptsize, double angle, int x, int y, char *string);
 
-typedef struct {
+struct gdFTStringExtra {
   double linespacing; /* fine tune line spacing for '\n' */
   int flags;    /* Logical OR of gdFTEX_ values */
   int charmap;    /* TBB: 2.0.12: may be gdFTEX_Unicode,
@@ -482,8 +482,8 @@ typedef struct {
            for in the above order. */
   int hdpi;
   int vdpi;
-}
- gdFTStringExtra, *gdFTStringExtraPtr;
+};
+using gdFTStringExtraPtr = gdFTStringExtra *;
 
 #define gdFTEX_LINESPACE 1
 #define gdFTEX_CHARMAP 2
@@ -503,9 +503,10 @@ gdImageStringFTEx(gdImage * im, int *brect, int fg, char * fontlist,
 
 
 /* Point type for use in polygon drawing. */
-typedef struct {
+struct gdPoint {
   int x, y;
-} gdPoint, *gdPointPtr;
+};
+using gdPointPtr = gdPoint *;
 
 void gdImagePolygon(gdImagePtr im, gdPointPtr p, int n, int c);
 void gdImageFilledPolygon(gdImagePtr im, gdPointPtr p, int n, int c);
@@ -630,10 +631,11 @@ gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
 /* The sink function must return -1 on error, otherwise the number
         of bytes written, which must be equal to len. */
 /* context will be passed to your sink function. */
-typedef struct {
+struct gdSink {
         int (*sink) (void *context, const char *buffer, int len);
         void *context;
-} gdSink, *gdSinkPtr;
+};
+using gdSinkPtr = gdSink *;
 
 void gdImagePngToSink(gdImagePtr im, gdSinkPtr out);
 
@@ -859,13 +861,13 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 
 
 
-typedef enum {
+enum gdAffineStandardMatrix {
   GD_AFFINE_TRANSLATE = 0,
   GD_AFFINE_SCALE,
   GD_AFFINE_ROTATE,
   GD_AFFINE_SHEAR_HORIZONTAL,
   GD_AFFINE_SHEAR_VERTICAL,
-} gdAffineStandardMatrix;
+};
 
 int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src, const double affine[6]);
 int gdAffineInvert (double dst[6], const double src[6]);

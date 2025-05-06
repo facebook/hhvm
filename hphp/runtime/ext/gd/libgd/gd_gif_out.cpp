@@ -28,13 +28,13 @@
 /*
  * a code_int must be able to hold 2**GIFBITS values of type int, and also -1
  */
-typedef int             code_int;
+using code_int = int;
 
 #ifdef SIGNED_COMPARE_SLOW
-typedef unsigned long int count_int;
-typedef unsigned short int count_short;
+using count_int = unsigned long int;
+using count_short = unsigned short int;
 #else /*SIGNED_COMPARE_SLOW*/
-typedef long int          count_int;
+using count_int = long int;
 #endif /*SIGNED_COMPARE_SLOW*/
 
 /* 2.0.28: threadsafe */
@@ -48,7 +48,7 @@ typedef long int          count_int;
 #define hsize HSIZE            /* Apparently invariant, left over from
           compress */
 
-typedef struct {
+struct GifCtx {
   int Width, Height;
   int curx, cury;
   long CountDown;
@@ -83,7 +83,7 @@ typedef struct {
          * Define the storage for the packet accumulator
          */
         char accum[ 256 ];
-} GifCtx;
+};
 
 static int gifPutWord(int w, gdIOCtx *out);
 static int colorstobpp(int colors);
@@ -422,9 +422,9 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
 #define GIFBITS    12
 
 #ifdef NO_UCHAR
- typedef char   char_type;
+  using char_type = char;
 #else /*NO_UCHAR*/
- typedef        unsigned char   char_type;
+  using char_type = unsigned char;
 #endif /*NO_UCHAR*/
 
 /*

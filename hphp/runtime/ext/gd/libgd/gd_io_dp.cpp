@@ -26,23 +26,21 @@
 #define FALSE 0
 
 /* this is used for creating images in main memory */
-typedef struct dpStruct
-{
+struct dynamicPtr {
   void *data;
   int logicalSize;
   int realSize;
   int dataGood;
   int pos;
   int freeOK;
-} dynamicPtr;
+};
 
-typedef struct dpIOCtx
-{
+struct dpIOCtx {
   gdIOCtx ctx;
   dynamicPtr *dp;
-} dpIOCtx;
+};
 
-typedef struct dpIOCtx *dpIOCtxPtr;
+using dpIOCtxPtr = struct dpIOCtx *;
 
 /* these functions operate on in-memory dynamic pointers */
 static int allocDynamic (dynamicPtr * dp, int initialSize, void *data);

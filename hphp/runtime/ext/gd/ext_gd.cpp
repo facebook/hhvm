@@ -401,7 +401,7 @@ static char *php_strdup_impl(const char* s
   } while (0)
 #endif
 
-typedef enum {
+enum image_filetype {
   IMAGE_FILETYPE_UNKNOWN=0,
   IMAGE_FILETYPE_GIF=1,
   IMAGE_FILETYPE_JPEG,
@@ -426,7 +426,7 @@ typedef enum {
   IMAGE_FILETYPE_HEIC,
 
   IMAGE_FILETYPE_COUNT /* Must remain last */
-} image_filetype;
+};
 
 
 // PHP extension STANDARD: image.c
@@ -4903,13 +4903,14 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 #define PMI_YCBCR               6
 #define PMI_CIELAB              8
 
-typedef const struct {
+struct _tag_info_type {
   unsigned short Tag;
   const char *Desc;
-} tag_info_type;
+};
+using tag_info_type = const struct _tag_info_type;
 
-typedef tag_info_type tag_info_array[];
-typedef tag_info_type *tag_table_type;
+using tag_info_array = tag_info_type[];
+using tag_table_type = tag_info_type *;
 
 #define TAG_TABLE_END \
   {((unsigned short)TAG_NONE),           "No tag value"},\
@@ -5306,19 +5307,19 @@ static const tag_info_array tag_table_VND_OLYMPUS = {
   TAG_TABLE_END
 };
 
-typedef enum mn_byte_order_t {
+enum mn_byte_order_t {
   MN_ORDER_INTEL = 0,
   MN_ORDER_MOTOROLA = 1,
   MN_ORDER_NORMAL
-} mn_byte_order_t;
+};
 
-typedef enum mn_offset_mode_t {
+enum mn_offset_mode_t {
   MN_OFFSET_NORMAL,
   MN_OFFSET_MAKER,
   MN_OFFSET_GUESS
-} mn_offset_mode_t;
+};
 
-typedef struct {
+struct maker_note_type {
   tag_table_type tag_table;
   const char *make;
   const char *model;
@@ -5327,7 +5328,7 @@ typedef struct {
   int offset;
   mn_byte_order_t byte_order;
   mn_offset_mode_t offset_mode;
-} maker_note_type;
+};
 
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON, "Canon", nullptr, nullptr,
@@ -5387,17 +5388,17 @@ static const char * exif_get_tagname(int tag_num, char *ret, int len,
 #define DWORD unsigned int
 #endif
 
-typedef struct {
+struct signed_rational {
   int num;
   int den;
-} signed_rational;
+};
 
-typedef struct {
+struct unsigned_rational {
   unsigned int num;
   unsigned int den;
-} unsigned_rational;
+};
 
-typedef union _image_info_value {
+union image_info_value {
   char *s;
   unsigned u;
   int i;
@@ -5405,22 +5406,22 @@ typedef union _image_info_value {
   double d;
   signed_rational sr;
   unsigned_rational ur;
-  union _image_info_value *list;
-} image_info_value;
+  union image_info_value *list;
+};
 
-typedef struct {
+struct image_info_data {
   WORD tag;
   WORD format;
   DWORD length;
   DWORD dummy;  /* value ptr of tiff directory entry */
   char *name;
   image_info_value value;
-} image_info_data;
+};
 
-typedef struct {
+struct image_info_list {
   int count;
   image_info_data *list;
-} image_info_list;
+};
 
 #define SECTION_FILE        0
 #define SECTION_COMPUTED    1
@@ -5538,38 +5539,38 @@ static char *exif_get_sectionlist(int sectionlist) {
    Used to store camera data as extracted from the various ways that
    it can be stored in a nexif header
 */
-typedef struct {
+struct file_section {
   int type;
   size_t size;
   unsigned char *data;
-} file_section;
+};
 
-typedef struct {
+struct file_section_list {
   int count;
   file_section *list;
-} file_section_list;
+};
 
-typedef struct {
+struct thumbnail_data {
   image_filetype filetype;
   size_t width, height;
   size_t size;
   size_t offset;
   char *data;
-} thumbnail_data;
+};
 
-typedef struct {
+struct xp_field_type {
   char *value;
   size_t size;
   int tag;
-} xp_field_type;
+};
 
-typedef struct {
+struct xp_field_list {
   int count;
   xp_field_type *list;
-} xp_field_list;
+};
 
 /* This structure is used to store a section of a Jpeg file. */
-typedef struct {
+struct image_info_type {
   req::ptr<File> infile;
   String FileName;
   time_t FileDateTime;
@@ -5618,14 +5619,14 @@ typedef struct {
   int ifd_nesting_level;
   /* internal */
   file_section_list file;
-} image_info_type;
+};
 
-typedef struct {
-    int     bits_per_sample;
-    size_t  width;
-    size_t  height;
-    int     num_components;
-} jpeg_sof_info;
+struct jpeg_sof_info {
+  int     bits_per_sample;
+  size_t  width;
+  size_t  height;
+  int     num_components;
+};
 
 /* forward declarations */
 static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo,

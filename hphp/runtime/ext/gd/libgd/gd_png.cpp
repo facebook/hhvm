@@ -42,10 +42,9 @@ const char * gdPngGetVersionString()
 
 namespace {
 
-typedef struct _jmpbuf_wrapper
-{
+struct jmpbuf_wrapper {
   jmp_buf jmpbuf;
-} jmpbuf_wrapper;
+};
 
 }
 

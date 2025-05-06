@@ -6,7 +6,7 @@
 #define Putchar gdPutchar
 #endif
 
-typedef struct gdIOCtx {
+struct gdIOCtx {
   int (*getC)(struct gdIOCtx*);
   int (*getBuf)(struct gdIOCtx*, void*, int);
 
@@ -19,9 +19,9 @@ typedef struct gdIOCtx {
   void  (*gd_free)(struct gdIOCtx*);
 
   void  *data;
-} gdIOCtx;
+};
 
-typedef struct gdIOCtx  *gdIOCtxPtr;
+using gdIOCtxPtr = struct gdIOCtx  *;
 
 void Putword(int w, gdIOCtx *ctx);
 void Putchar(int c, gdIOCtx *ctx);

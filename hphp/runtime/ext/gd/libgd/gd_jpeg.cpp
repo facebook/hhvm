@@ -41,11 +41,10 @@ static const char *const GD_JPEG_VERSION = "1.0";
 
 namespace {
 
-typedef struct _jmpbuf_wrapper
-{
+struct jmpbuf_wrapper {
   jmp_buf jmpbuf;
   int ignore_warning;
-} jmpbuf_wrapper;
+};
 
 }
 
@@ -514,16 +513,15 @@ static int CMYKToRGB(int c, int m, int y, int k, int inverted)
 
 /* Expanded data source object for gdIOCtx input */
 
-typedef struct
-{
+struct my_source_mgr {
   struct jpeg_source_mgr pub; /* public fields */
 
   gdIOCtx *infile;    /* source stream */
   unsigned char *buffer;  /* start of buffer */
   boolean start_of_file;  /* have we gotten any data yet? */
-} my_source_mgr;
+};
 
-typedef my_source_mgr *my_src_ptr;
+using my_src_ptr = my_source_mgr *;
 
 #define INPUT_BUF_SIZE  4096  /* choose an efficiently fread'able size */
 
@@ -718,14 +716,13 @@ void jpeg_gdIOCtx_src (j_decompress_ptr cinfo, gdIOCtx * infile)
 
 /* Expanded data destination object for stdio output */
 
-typedef struct
-{
+struct my_destination_mgr {
   struct jpeg_destination_mgr pub; /* public fields */
   gdIOCtx *outfile;    /* target stream */
   unsigned char *buffer;     /* start of buffer */
-} my_destination_mgr;
+};
 
-typedef my_destination_mgr *my_dest_ptr;
+using my_dest_ptr = my_destination_mgr *;
 
 #define OUTPUT_BUF_SIZE  4096 /* choose an efficiently fwrite'able size */
 

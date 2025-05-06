@@ -28,11 +28,10 @@
 
 /* this is used for creating images in main memory */
 
-typedef struct fileIOCtx
-{
+struct fileIOCtx {
   gdIOCtx ctx;
   FILE *f;
-} fileIOCtx;
+};
 
 gdIOCtx *newFileCtx (FILE * f);
 

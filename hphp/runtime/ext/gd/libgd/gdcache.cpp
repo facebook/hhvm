@@ -148,12 +148,10 @@ gdCacheGet (gdCache_head_t * head, void *keydata)
 
 #include <stdio.h>
 
-typedef struct
-{
+struct key_value_t {
   int key;
   int value;
-}
-key_value_t;
+};
 
 static int
 cacheTest (void *map, void *key)

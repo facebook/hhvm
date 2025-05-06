@@ -47,20 +47,18 @@
 #endif
 
 /* user defined function templates */
-typedef int (*gdCacheTestFn_t)(void *userdata, void *keydata);
-typedef void *(*gdCacheFetchFn_t)(char **error, void *keydata);
-typedef void (*gdCacheReleaseFn_t)(void *userdata);
+using gdCacheTestFn_t = int (*)(void *userdata, void *keydata);
+using gdCacheFetchFn_t = void *(*)(char **error, void *keydata);
+using gdCacheReleaseFn_t = void (*)(void *userdata);
 
 /* element structure */
-typedef struct gdCache_element_s gdCache_element_t;
-struct gdCache_element_s {
+struct gdCache_element_t {
   gdCache_element_t *next;
   void      *userdata;
 };
 
 /* head structure */
-typedef struct gdCache_head_s gdCache_head_t;
-struct gdCache_head_s {
+struct gdCache_head_t {
   gdCache_element_t *mru;
   int         size;
   char        *error;

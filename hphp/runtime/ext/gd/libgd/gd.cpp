@@ -321,16 +321,12 @@ int gdImageColorClosestAlpha (gdImagePtr im, int r, int g, int b, int a)
  * red always maps to 6 in this implementation. Therefore UNDEFINED can be
  * defined as 0 in situations where only unsigned numbers are desired.
  */
-typedef struct
-{
+struct RGBType {
   float R, G, B;
-}
-RGBType;
-typedef struct
-{
+};
+struct HWBType {
   float H, W, B;
-}
-HWBType;
+};
 
 static HWBType * RGB_to_HWB (RGBType RGB, HWBType * HWB)
 {
@@ -2543,7 +2539,7 @@ void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
   int i;
   int lx, ly;
-  typedef void (*image_line)(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+  using image_line = void (*)(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
   image_line draw_line;
 
   if (n <= 0) {

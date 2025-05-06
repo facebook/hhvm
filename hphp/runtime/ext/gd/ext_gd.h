@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-php-config.h"
 
-typedef struct gdImageStruct* gdImagePtr;
+using gdImagePtr = struct gdImage *;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,4 +56,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

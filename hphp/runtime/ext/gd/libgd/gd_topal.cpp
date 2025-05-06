@@ -256,13 +256,13 @@
 #define C2_SHIFT  (BITS_IN_JSAMPLE-HIST_C2_BITS)
 
 
-typedef UINT16 histcell;  /* histogram cell; prefer an unsigned type */
+using histcell = UINT16;  /* histogram cell; prefer an unsigned type */
 
-typedef histcell FAR *histptr;  /* for pointers to histogram cells */
+using histptr = histcell FAR *;  /* for pointers to histogram cells */
 
-typedef histcell hist1d[HIST_C2_ELEMS]; /* typedefs for the array */
-typedef hist1d FAR *hist2d; /* type for the 2nd-level pointers */
-typedef hist2d *hist3d;   /* type for top-level pointer */
+using hist1d = histcell[HIST_C2_ELEMS]; /* type for the array */
+using hist2d = hist1d FAR *; /* type for the 2nd-level pointers */
+using hist3d = hist2d *;   /* type for top-level pointer */
 
 
 /* Declarations for Floyd-Steinberg dithering.
@@ -290,20 +290,19 @@ typedef hist2d *hist3d;   /* type for top-level pointer */
  */
 
 #if BITS_IN_JSAMPLE == 8
-typedef INT16 FSERROR;    /* 16 bits should be enough */
-typedef int LOCFSERROR;   /* use 'int' for calculation temps */
+using FSERROR = INT16;    /* 16 bits should be enough */
+using LOCFSERROR = int;   /* use 'int' for calculation temps */
 #else
-typedef INT32 FSERROR;    /* may need more than 16 bits */
-typedef INT32 LOCFSERROR; /* be sure calculation temps are big enough */
+using FSERROR = INT32;    /* may need more than 16 bits */
+using LOCFSERROR = INT32; /* be sure calculation temps are big enough */
 #endif
 
-typedef FSERROR FAR *FSERRPTR;  /* pointer to error array (in FAR storage!) */
+using FSERRPTR = FSERROR FAR *;  /* pointer to error array (in FAR storage!) */
 
 
 /* Private subobject */
 
-typedef struct
-{
+struct my_cquantizer {
 #ifdef ORIGINAL_LIB_JPEG
   struct jpeg_color_quantizer pub;  /* public fields */
 
@@ -325,10 +324,9 @@ typedef struct
 #ifndef ORIGINAL_LIB_JPEG
   int *error_limiter_storage; /* gdMalloc'd storage for the above */
 #endif
-}
-my_cquantizer;
+};
 
-typedef my_cquantizer *my_cquantize_ptr;
+using my_cquantize_ptr = my_cquantizer *;
 
 
 /*
@@ -405,8 +403,7 @@ prescan_quantize (j_decompress_ptr cinfo, JSAMPARRAY input_buf,
  * subset of the input color space (to histogram precision).
  */
 
-typedef struct
-{
+struct box {
   /* The bounds of the box (inclusive); expressed as histogram indexes */
   int c0min, c0max;
   int c1min, c1max;
@@ -415,10 +412,9 @@ typedef struct
   INT32 volume;
   /* The number of nonzero histogram cells within this box */
   long colorcount;
-}
-box;
+};
 
-typedef box *boxptr;
+using boxptr = box *;
 
 
 LOCAL (boxptr) find_biggest_color_pop (boxptr boxlist, int numboxes)

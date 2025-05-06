@@ -15,7 +15,7 @@ File "bad_type_structure_nullable.php", line 12, characters 3-24:
 File "bad_type_structure_nullable.php", line 13, characters 3-29:
   nothing
 File "bad_type_structure_nullable.php", line 14, characters 3-29:
-  nothing
+  _
 File "bad_type_structure_nullable.php", line 15, characters 3-31:
   nothing
 File "bad_type_structure_nullable.php", line 18, characters 3-22:
@@ -37,52 +37,52 @@ File "bad_type_structure_nullable.php", line 30, characters 3-24:
 File "bad_type_structure_nullable.php", line 31, characters 3-29:
   nothing
 File "bad_type_structure_nullable.php", line 32, characters 3-29:
-  nothing
+  _
 File "bad_type_structure_nullable.php", line 33, characters 3-31:
   ?vec<mixed>
 File "bad_type_structure_nullable.php", line 36, characters 3-22:
   TypeStructureKind
 ERROR: File "bad_type_structure_nullable.php", line 10, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 11, characters 15-26:
 This shape doesn't have a field `elem_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 12, characters 15-22:
 This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 13, characters 15-27:
 This shape doesn't have a field `param_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 14, characters 15-27:
-This shape doesn't have a field `return_type` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
-  The shape is defined here
+The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 67, characters 6-18:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_nullable.php", line 15, characters 15-29:
 This shape doesn't have a field `generic_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 28, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 29, characters 15-26:
 This shape doesn't have a field `elem_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 30, characters 15-22:
 This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 31, characters 15-27:
 This shape doesn't have a field `param_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
+  File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
 ERROR: File "bad_type_structure_nullable.php", line 32, characters 15-27:
-This shape doesn't have a field `return_type` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-697:
-  The shape is defined here
+The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 67, characters 6-18:
+  This is where the field was declared as optional.

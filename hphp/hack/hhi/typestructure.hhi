@@ -64,7 +64,7 @@ namespace HH {
     'elem_types' => ?varray<mixed>,
     ?'optional_elem_types' => varray<mixed>,
     ?'variadic_type' => mixed,
-    'return_type' => mixed,
+    ?'return_type' => mixed,
     'param_types' => ?varray<mixed>,
     'generic_types' => ?varray<mixed>,
     'root_name' => ?string,
@@ -91,7 +91,7 @@ namespace HH {
     // For tuples and functions
     ?'variadic_type' => mixed,
     // for functions
-    'return_type' => mixed,
+    ?'return_type' => mixed,
     'param_types' => ?varray<mixed>,
     // for arrays, classes
     'generic_types' => ?varray<mixed>,

@@ -61,7 +61,7 @@ namespace HH {
     'kind' => TypeStructureKind,
     'name' => ?string,
     'classname' => ?classname<T>,
-    'elem_types' => ?varray<mixed>,
+    ?'elem_types' => varray<mixed>,
     ?'optional_elem_types' => varray<mixed>,
     ?'variadic_type' => mixed,
     ?'return_type' => mixed,
@@ -86,7 +86,7 @@ namespace HH {
     // classname for classes, interfaces, enums, or traits
     'classname' => ?classname<T>,
     // for tuples
-    'elem_types' => ?varray<mixed>,
+    ?'elem_types' => varray<mixed>,
     ?'optional_elem_types' => varray<mixed>,
     // For tuples and functions
     ?'variadic_type' => mixed,

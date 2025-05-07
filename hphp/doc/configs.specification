@@ -1410,7 +1410,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Whether or not to support low priority awaitables in the runtime. If disabled,
   will turn AwaitLowPri instructions into noops.
 
-- int32_t Eval.CustomSrcKeyFilter = 0, rburks
+- int32_t Eval.CustomSrcKeyFilter = 1, rburks
 
   Which version of the concurrent storage to use
   for filtering SrcKeys in the async JIT
@@ -1424,7 +1424,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Size hint to initialize the atomic SrcKey filter with for the async JIT
 
-- bool Eval.CheckValueBeforeEnqueue = false, rburks
+- bool Eval.CheckValueBeforeEnqueue = true, rburks
 
   Attempt to get whether or not a function has been enqueued for async JIT before attempting to write
 

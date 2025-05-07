@@ -631,10 +631,11 @@ struct SetEncode {
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
 
-    if (!folly::is_detected_v<
+    if constexpr (
+        !folly::is_detected_v<
             ::apache::thrift::detail::pm::detect_key_compare,
             T> &&
-        prot.kSortKeys()) {
+        Protocol::kSortKeys()) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(set.size());
       for (auto it = set.begin(); it != set.end(); ++it) {
@@ -671,10 +672,11 @@ struct MapEncode {
         typeTagToTType<Value>,
         checked_container_size(map.size()));
 
-    if (!folly::is_detected_v<
+    if constexpr (
+        !folly::is_detected_v<
             ::apache::thrift::detail::pm::detect_key_compare,
             T> &&
-        prot.kSortKeys()) {
+        Protocol::kSortKeys()) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(map.size());
       for (auto it = map.begin(); it != map.end(); ++it) {

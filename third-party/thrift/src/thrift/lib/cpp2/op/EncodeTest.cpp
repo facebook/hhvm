@@ -823,7 +823,7 @@ TEST(EncodeTest, EncodeMethod) {
 
 TEST(EncodeTest, kSortKeys) {
   struct SortingProtocolWriter : CompactProtocolWriter {
-    constexpr bool kSortKeys() const { return true; }
+    static constexpr bool kSortKeys() { return true; }
   };
 
   struct OrderPreservingSet : std::vector<int> {
@@ -856,7 +856,7 @@ TEST(EncodeTest, kSortKeys) {
   }
   EXPECT_EQ(readSet, (OrderPreservingSet{{1, 2, 3}}));
 
-  std::set<int, std::greater> orderedSet{3, 2, 1};
+  std::set<int, std::greater<>> orderedSet{3, 2, 1};
   {
     folly::IOBufQueue queue;
     SortingProtocolWriter writer;

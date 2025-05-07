@@ -24,9 +24,7 @@
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/perf/cpp/ClientLoadConfig.h>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 const int kTimeout = 60000;
 
@@ -259,6 +257,4 @@ void ClientWorker2::performIterAllFields(
   }
 }
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

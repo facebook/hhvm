@@ -21,10 +21,7 @@
 #include <thrift/lib/cpp/test/loadgen/Worker.h>
 #include <thrift/perf/if/gen-cpp2/LoadTest.h>
 
-namespace apache {
-namespace thrift {
-
-namespace test {
+namespace apache::thrift::test {
 
 class ClientLoadConfig;
 
@@ -67,8 +64,6 @@ class ClientWorker2
   folly::EventBaseManager ebm_;
 };
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test
 
 #endif // THRIFT_TEST_PERF_CLIENTWORKER2_H_

@@ -106,9 +106,7 @@ DEFINE_double(
     -1.0,
     "log-normal sigma parameter for struct field size");
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 ClientLoadConfig::ClientLoadConfig() : WeightedLoadConfig(NUM_OPS) {
   setOpInfo(OP_NOOP, "noop()", FLAGS_weight_noop);
@@ -283,6 +281,4 @@ uint32_t ClientLoadConfig::pickLogNormal(double mean, double sigma) {
   return static_cast<uint32_t>(loadgen::RNG::getLogNormal(mean, sigma));
 }
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

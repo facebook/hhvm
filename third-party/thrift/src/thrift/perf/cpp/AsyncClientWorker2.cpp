@@ -32,8 +32,7 @@
 using namespace apache::thrift::test;
 using apache::thrift::loadgen::ScoreBoard;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 typedef std::shared_ptr<AsyncClientWorker2::Client> LoadTestClientPtr;
 
@@ -483,5 +482,4 @@ void AsyncRunner2::genericCob(
   }
   terminator_.decr();
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

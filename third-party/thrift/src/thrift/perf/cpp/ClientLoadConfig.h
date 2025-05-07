@@ -20,10 +20,7 @@
 #include <folly/SocketAddress.h>
 #include <thrift/lib/cpp/test/loadgen/WeightedLoadConfig.h>
 
-namespace apache {
-namespace thrift {
-
-namespace test {
+namespace apache::thrift::test {
 
 class ClientLoadConfig : public loadgen::WeightedLoadConfig {
  public:
@@ -147,8 +144,6 @@ class ClientLoadConfig : public loadgen::WeightedLoadConfig {
   std::string addressHostname_;
 };
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test
 
 #endif // THRIFT_TEST_PERF_CLIENTLOADCONFIG_H_

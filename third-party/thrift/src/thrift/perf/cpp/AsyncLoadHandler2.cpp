@@ -21,8 +21,7 @@
 
 using namespace apache::thrift::test;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 static constexpr int64_t US_PER_MS = std::micro::den / std::milli::den;
 
 void AsyncLoadHandler2::async_eb_noop(HandlerCallbackPtr<void> callback) {
@@ -212,5 +211,4 @@ void AsyncLoadHandler2::async_eb_add(
   callback->result(a + b);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

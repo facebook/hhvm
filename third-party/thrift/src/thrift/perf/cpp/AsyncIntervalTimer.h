@@ -25,8 +25,7 @@
 #include <thread>
 #include <folly/portability/Unistd.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * AsyncIntervalTimer helps async tasks run at a desired rate. It is very
@@ -159,7 +158,6 @@ class AsyncIntervalTimer {
   std::mutex mutex_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_TEST_PERF_ASYNCINTERVALTIMER_H_

@@ -28,8 +28,7 @@
 using apache::thrift::loadgen::Worker;
 using apache::thrift::test::ClientLoadConfig;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Before updating for header format LoadTestClientT was specialized on
 // TBinaryProtocolT<TBufferBase>, but in practice it didn't seem to
@@ -62,7 +61,6 @@ class AsyncClientWorker2
   std::shared_ptr<folly::ssl::SSLSession> session_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_TEST_PERF_CLIENTWORKER_H_

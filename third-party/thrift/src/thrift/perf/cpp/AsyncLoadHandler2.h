@@ -19,8 +19,7 @@
 
 #include <thrift/perf/if/gen-cpp2/LoadTest.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class AsyncLoadHandler2
     : public apache::thrift::ServiceHandler<test::LoadTest> {
@@ -74,7 +73,6 @@ class AsyncLoadHandler2
       std::unique_ptr<std::vector<test::BigStruct>> items) override;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_TEST_HANDLERS_ASYNCLOADHANDLER2_H_

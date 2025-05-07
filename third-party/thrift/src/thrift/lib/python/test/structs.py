@@ -418,6 +418,11 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertIsNone(m.opt_field)
         self.assertFalse(self.isset(m)["opt_field"])
 
+    def test_getattr(self) -> None:
+        e = self.easy(val=1, an_int=self.Integers(small=300), name="foo")
+        for name, value in e:
+            self.assertEqual(getattr(e, name), value)
+
 
 class StructTestsImmutable(unittest.TestCase):
     """
@@ -437,6 +442,30 @@ class StructTestsImmutable(unittest.TestCase):
         with self.assertRaises(AttributeError):
             # pyre-ignore[41]: Cannot reassign final attribute `name`.
             e.name = "foo"
+
+    def test_setattr(self) -> None:
+        e = easy(val=1, an_int=Integers(small=300), name="foo")
+
+        vals = {
+            "an_int": Integers(small=3),
+            "val": 2,
+            "name": "bar",
+        }
+
+        # run-around for linter error on setattr usage
+        for field, val in vals.items():
+            with self.assertRaisesRegex(AttributeError, field):
+                setattr(e, field, val)
+
+            if field == "val":
+                object.__setattr__(e, field, val)
+                self.assertEqual(e.val, val)
+                # BAD, AttributeError still not raised for primitive types
+                # and the mutation succeeds
+                # "primitive" means types where internal type same as python type
+                continue
+            with self.assertRaisesRegex(AttributeError, field):
+                object.__setattr__(e, field, val)
 
 
 class StructTests(unittest.TestCase):

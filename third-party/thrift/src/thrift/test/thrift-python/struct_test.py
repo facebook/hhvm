@@ -346,17 +346,14 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         w = TestStructImmutable(unqualified_string="hello, world!")
 
         # Attributes of immutable types cannot be deleted.
-        #
-        # Note the interesting (and somewhat inconsistent) current behavior on Linux:
-        # Calling `del` prior to accessing an attribute raises an AttributeError
-        # (at the cinder level), but doing so after accessing it is a silent
-        # no-op.
         with self.assertRaisesRegex(AttributeError, "unqualified_string"):
             del w.unqualified_string
         self.assertEqual(w.unqualified_string, "hello, world!")
 
-        if platform == "linux":
-            del w.unqualified_string  # silent no-op
+        # deleting after setting is no longer a no-op;
+        # we correctly raise AttributeError
+        with self.assertRaisesRegex(AttributeError, "unqualified_string"):
+            del w.unqualified_string
 
         self.assertEqual(w.unqualified_string, "hello, world!")
 

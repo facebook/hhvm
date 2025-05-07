@@ -62,23 +62,6 @@ cdef _is_py3_structured(obj):
     return isinstance(obj, _fbthrift__PY3_STRUCTURED)
     
 
-def _make_noncached_property(getter_function, struct_class, field_name):
-    prop = property(getter_function)
-    prop.__set_name__(struct_class, field_name)
-    return prop
-
-try:
-    import cinder
-    def _make_cached_property(getter_function, struct_class, field_name):
-        return cinder.cached_property(
-            getter_function,
-            getattr(struct_class, field_name)
-        )
-except ImportError:
-    # On MacOS/Windows where Cinder is not available, degrade to not-cached property.
-    # Field values are always cached in Cython level, we just lose the Python level cache.
-    def _make_cached_property(getter_function, struct_class, field_name):
-        return _make_noncached_property(getter_function, struct_class, field_name)
 
 cdef public api object deepcopy(object obj):
     """
@@ -1042,7 +1025,7 @@ cdef class StructOrUnion:
         raise NotImplementedError("Not implemented on base StructOrUnion class")
     cdef uint32_t _deserialize(Struct self, folly.iobuf.IOBuf buf, Protocol proto) except? 0:
         raise NotImplementedError("Not implemented on base StructOrUnion class")
-    cdef _fbthrift_get_field_value(self, int16_t index):
+    cdef _fbthrift_get_cached_field_value(self, int16_t index):
         raise NotImplementedError("Not implemented on base StructOrUnion class")
 
     @staticmethod
@@ -1219,7 +1202,7 @@ cdef class Struct(StructOrUnion):
         self._fbthrift_populate_primitive_fields()
         return len
 
-    cdef _fbthrift_get_field_value(self, int16_t index):
+    cdef _fbthrift_get_cached_field_value(self, int16_t index):
         cdef PyObject* cached_value = PyTuple_GET_ITEM(
             self._fbthrift_field_cache, index
         )
@@ -1555,7 +1538,7 @@ cdef class Union(StructOrUnion):
         self._fbthrift_update_current_field_attributes()
         return size
 
-    cdef _fbthrift_get_field_value(self, int16_t field_id):
+    cdef _fbthrift_get_cached_field_value(self, int16_t field_id):
         """
         Returns the value of the field with the given `field_id` if it is indeed the
         field that is (currently) set for this union. Otherwise, raises AttributeError.
@@ -1685,17 +1668,6 @@ cdef inline pbool _strict_type_info_mismatch(value, type_info):
         return not isinstance(value, float)
     return False
 
-cdef _make_fget_struct(i):
-    """
-    Returns a function that takes a `Struct` instance and returns the value of
-    the field with index `i`, or `None` if n/a.
-
-    The field must be either a non-primitive or adapted type.
-
-    The value is returned in "Python value" representation (as opposed to
-    "internal data representation", see `*TypeInfo` classes.
-    """
-    return lambda self: (<Struct>self)._fbthrift_get_field_value(i)
 
 cdef _make_fget_union(field_id, adapter_info):
     """
@@ -1713,13 +1685,13 @@ cdef _make_fget_union(field_id, adapter_info):
         adapter_class, transitive_annotation = adapter_info
         return property(lambda self:
             adapter_class.from_thrift_field(
-                (<Union>self)._fbthrift_get_field_value(field_id),
+                (<Union>self)._fbthrift_get_cached_field_value(field_id),
                 field_id,
                 self,
                 transitive_annotation=transitive_annotation(),
             )
         )
-    return property(lambda self: (<Union>self)._fbthrift_get_field_value(field_id))
+    return property(lambda self: (<Union>self)._fbthrift_get_cached_field_value(field_id))
 
 
 def _make_readonly_setattr():
@@ -1730,6 +1702,26 @@ def _make_readonly_setattr():
         raise AttributeError(f"Cannot set attribute '{name}' in Thrift struct '{type(self)}'.")
 
     return _readonly_setattr
+
+cdef class _StructCachedField:
+    cdef int _field_index
+    cdef str _field_name
+
+    def __init__(self, int field_id, str field_name):
+        self._field_index = field_id
+        self._field_name = field_name
+
+    def __get__(self, Struct obj, objtype):
+        if obj is None:
+            return None
+
+        return obj._fbthrift_get_cached_field_value(self._field_index)
+
+    def __set__(self, obj, value):
+        raise AttributeError(f"Cannot set attribute {self._field_name}: thrift-python structs are immutable") 
+
+    def __delete__(self, obj):
+        raise AttributeError(f"Cannot delete attribute {self._field_name}: thrift-python structs are immutable") 
 
 
 class StructMeta(type):
@@ -1799,11 +1791,7 @@ class StructMeta(type):
             type.__setattr__(
                 klass,
                 field_name,
-                _make_cached_property(
-                    _make_fget_struct(field_index),
-                    klass,
-                    field_name,
-                )
+                _StructCachedField(field_index, field_name),
             )
         klass.__setattr__ = _make_readonly_setattr()
         return klass

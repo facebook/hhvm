@@ -22,9 +22,7 @@
 #include <thrift/conformance/stresstest/client/TestRunner.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 using namespace apache::thrift::rocket;
 
@@ -43,9 +41,7 @@ FOLLY_ATTR_WEAK int customStressTestMain(int argc, char* argv[])
     ;
 #endif
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress
 
 using namespace apache::thrift::stress;
 

@@ -59,7 +59,6 @@ let expand_typedef_decl
       let td_type =
         match td_type_assignment with
         | SimpleTypeDef (_vis, td_type) -> td_type
-        (* TODO T201569125 - should we not expand in the case that there are where constraints? *)
         | CaseType (variant, variants) ->
           Typing_utils.get_case_type_variants_as_type variant variants
       in

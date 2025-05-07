@@ -52,7 +52,7 @@ int emulate_zend(int argc, char** argv) {
   bool need_file = true;
   int ini_fd = -1;
   char ini_path[] = "/tmp/php-ini-XXXXXX.ini";
-  std::string ini_section = "";
+  std::string ini_section;
 
   const char* posArg = nullptr;
 

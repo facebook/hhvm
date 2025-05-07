@@ -92,7 +92,7 @@ Config::IniName(const Hdf& config, bool /*prepend_hhvm*/ /* = true */) {
 
 std::string Config::IniName(const std::string& config,
                             bool prepend_hhvm /* = true */) {
-  std::string out = "";
+  std::string out;
   if (prepend_hhvm) {
     out += "hhvm.";
   }

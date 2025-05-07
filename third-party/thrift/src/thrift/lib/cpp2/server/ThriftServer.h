@@ -310,6 +310,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     bool resourcePoolEnablementLocked{false};
     bool resourcePoolRuntimeRequested{false};
     bool resourcePoolRuntimeDisabled{false};
+    std::string resourcePoolRuntimeDisabledReason{};
     bool resourcePoolEnabled{false};
 
     bool resourcePoolEnabledGflag{false};
@@ -588,7 +589,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   // Used to disable resource pool at run time. This
   // should only be used by thrift team.
-  void runtimeDisableResourcePoolsDeprecated() {
+  void runtimeDisableResourcePoolsDeprecated(
+      const std::string& reason = "Unknown") {
     if (runtimeServerActions_.resourcePoolRuntimeDisabled) {
       return;
     }
@@ -599,6 +601,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       return;
     }
     runtimeServerActions_.resourcePoolRuntimeDisabled = true;
+    runtimeServerActions_.resourcePoolRuntimeDisabledReason = reason;
   }
 
   bool runtimeDisableResourcePoolsSet() {
@@ -676,7 +679,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
           threadManager) {
     setThreadManagerInternal(threadManager);
     if (!THRIFT_FLAG(allow_set_thread_manager_resource_pools)) {
-      runtimeDisableResourcePoolsDeprecated();
+      runtimeDisableResourcePoolsDeprecated("setThreadManager");
     }
     runtimeServerActions_.userSuppliedThreadManager = true;
   }
@@ -693,7 +696,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       std::shared_ptr<apache::thrift::concurrency::ThreadManager>
           threadManager) {
     setThreadManagerInternal(threadManager);
-    runtimeDisableResourcePoolsDeprecated();
+    runtimeDisableResourcePoolsDeprecated("setThreadManager_deprecated");
     runtimeServerActions_.userSuppliedThreadManager = true;
   }
 
@@ -712,7 +715,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       setThreadManagerInternal(
           std::make_shared<concurrency::ThreadManagerExecutorAdapter>(
               folly::getKeepAliveToken(executor), std::move(opts)));
-      runtimeDisableResourcePoolsDeprecated();
+      runtimeDisableResourcePoolsDeprecated("setThreadManagerFromExecutor");
       runtimeServerActions_.userSuppliedThreadManager = true;
     }
   }

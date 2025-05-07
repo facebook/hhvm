@@ -1183,7 +1183,7 @@ bool ThriftServer::runtimeResourcePoolsChecksImpl() {
           << "It's too early to call runtimeResourcePoolsChecks(), returning True for now";
       return true;
     }
-    runtimeDisableResourcePoolsDeprecated();
+    runtimeDisableResourcePoolsDeprecated("setupThreadManagerBeforeHandler");
   } else {
     // A call to ensureProcessedServiceDescriptionInitialized causes any
     // ServerModule added afterwards to not work, since this
@@ -1216,7 +1216,7 @@ bool ThriftServer::runtimeResourcePoolsChecksImpl() {
           XLOG_IF(INFO, infoLoggingEnabled_)
               << "Resource pools disabled. Incomplete metadata";
           runtimeServerActions_.noServiceRequestInfo = true;
-          runtimeDisableResourcePoolsDeprecated();
+          runtimeDisableResourcePoolsDeprecated("IncompleteMetadata");
         }
         if (metadata.interactionType ==
             AsyncProcessorFactory::MethodMetadata::InteractionType::
@@ -1246,7 +1246,7 @@ bool ThriftServer::runtimeResourcePoolsChecksImpl() {
         XLOG_IF(INFO, infoLoggingEnabled_)
             << "Resource pools disabled. Wildcard methods";
         runtimeServerActions_.wildcardMethods = true;
-        runtimeDisableResourcePoolsDeprecated();
+        runtimeDisableResourcePoolsDeprecated("WildcardMethods");
       }
     }
   }
@@ -2598,6 +2598,7 @@ ThriftServer::RuntimeServerActions::toStringPairs() const {
   result.emplace_back("resourcePoolEnablementLocked",       resourcePoolEnablementLocked ? "true" : "false");
   result.emplace_back("resourcePoolRuntimeRequested",       resourcePoolRuntimeRequested ? "true" : "false");
   result.emplace_back("resourcePoolRuntimeDisabled",        resourcePoolRuntimeDisabled ? "true" : "false");
+  result.emplace_back("resourcePoolRuntimeDisabledReason",  resourcePoolRuntimeDisabledReason);
   result.emplace_back("resourcePoolEnabled",                resourcePoolEnabled ? "true" : "false");
   result.emplace_back("resourcePoolEnabledGflag",           resourcePoolEnabledGflag ? "true" : "false");
   result.emplace_back("resourcePoolDisabledGflag",          resourcePoolDisabledGflag ? "true" : "false");

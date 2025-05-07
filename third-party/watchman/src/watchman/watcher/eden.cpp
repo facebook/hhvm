@@ -1007,7 +1007,7 @@ class EdenView final : public QueryableView {
 
   void allFilesGenerator(const Query*, QueryContext* ctx) const override {
     ctx->generationStarted();
-    std::string relative_root = "";
+    std::string relative_root;
     std::vector<std::string> globPatterns;
     bool includeDir = true;
     if (isSimpleSuffixQuery(ctx)) {
@@ -1259,7 +1259,7 @@ class EdenView final : public QueryableView {
       // Avoid a full tree walk if we don't need it!
       return std::vector<NameAndDType>();
     }
-    std::string relative_root = "";
+    std::string relative_root;
     std::vector<std::string> globPatterns;
     if (isSimpleSuffixQuery(ctx)) {
       globPatterns = getSuffixQueryGlobPatterns(ctx);

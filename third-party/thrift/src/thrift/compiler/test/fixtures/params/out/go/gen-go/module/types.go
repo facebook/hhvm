@@ -55,7 +55,7 @@ func (x *reqNestedContainersMapList) IsSetFoo() bool {
 
 func (x *reqNestedContainersMapList) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapList write field begin error: ", err)
     }
 
     item := x.Foo
@@ -93,7 +93,7 @@ func (x *reqNestedContainersMapList) writeField1(p thrift.Encoder) error {  // F
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapList write field end error: ", err)
     }
     return nil
 }
@@ -158,7 +158,7 @@ func (x *reqNestedContainersMapList) readField1(p thrift.Decoder) error {  // Fo
 
 func (x *reqNestedContainersMapList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersMapList"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapList write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -166,24 +166,24 @@ func (x *reqNestedContainersMapList) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapList write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapList write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqNestedContainersMapList) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapList read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqNestedContainersMapList field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -208,7 +208,7 @@ func (x *reqNestedContainersMapList) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapList read struct end error: ", err)
     }
 
     return nil
@@ -244,29 +244,29 @@ func (x *respNestedContainersMapList) Exception() thrift.WritableException {
 
 func (x *respNestedContainersMapList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersMapList"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapList write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapList write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapList write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respNestedContainersMapList) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapList read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respNestedContainersMapList field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -289,7 +289,7 @@ func (x *respNestedContainersMapList) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapList read struct end error: ", err)
     }
 
     return nil
@@ -339,7 +339,7 @@ func (x *reqNestedContainersMapSet) IsSetFoo() bool {
 
 func (x *reqNestedContainersMapSet) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapSet write field begin error: ", err)
     }
 
     item := x.Foo
@@ -377,7 +377,7 @@ func (x *reqNestedContainersMapSet) writeField1(p thrift.Encoder) error {  // Fo
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapSet write field end error: ", err)
     }
     return nil
 }
@@ -442,7 +442,7 @@ func (x *reqNestedContainersMapSet) readField1(p thrift.Decoder) error {  // Foo
 
 func (x *reqNestedContainersMapSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersMapSet"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapSet write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -450,24 +450,24 @@ func (x *reqNestedContainersMapSet) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapSet write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapSet write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqNestedContainersMapSet) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapSet read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqNestedContainersMapSet field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -492,7 +492,7 @@ func (x *reqNestedContainersMapSet) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersMapSet read struct end error: ", err)
     }
 
     return nil
@@ -528,29 +528,29 @@ func (x *respNestedContainersMapSet) Exception() thrift.WritableException {
 
 func (x *respNestedContainersMapSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersMapSet"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapSet write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapSet write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapSet write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respNestedContainersMapSet) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapSet read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respNestedContainersMapSet field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -573,7 +573,7 @@ func (x *respNestedContainersMapSet) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersMapSet read struct end error: ", err)
     }
 
     return nil
@@ -623,7 +623,7 @@ func (x *reqNestedContainersListMap) IsSetFoo() bool {
 
 func (x *reqNestedContainersListMap) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListMap write field begin error: ", err)
     }
 
     item := x.Foo
@@ -661,7 +661,7 @@ func (x *reqNestedContainersListMap) writeField1(p thrift.Encoder) error {  // F
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListMap write field end error: ", err)
     }
     return nil
 }
@@ -726,7 +726,7 @@ func (x *reqNestedContainersListMap) readField1(p thrift.Decoder) error {  // Fo
 
 func (x *reqNestedContainersListMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersListMap"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListMap write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -734,24 +734,24 @@ func (x *reqNestedContainersListMap) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListMap write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListMap write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqNestedContainersListMap) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListMap read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqNestedContainersListMap field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -776,7 +776,7 @@ func (x *reqNestedContainersListMap) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListMap read struct end error: ", err)
     }
 
     return nil
@@ -812,29 +812,29 @@ func (x *respNestedContainersListMap) Exception() thrift.WritableException {
 
 func (x *respNestedContainersListMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersListMap"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respNestedContainersListMap write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respNestedContainersListMap write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersListMap write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respNestedContainersListMap) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respNestedContainersListMap read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respNestedContainersListMap field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -857,7 +857,7 @@ func (x *respNestedContainersListMap) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersListMap read struct end error: ", err)
     }
 
     return nil
@@ -907,7 +907,7 @@ func (x *reqNestedContainersListSet) IsSetFoo() bool {
 
 func (x *reqNestedContainersListSet) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListSet write field begin error: ", err)
     }
 
     item := x.Foo
@@ -938,7 +938,7 @@ func (x *reqNestedContainersListSet) writeField1(p thrift.Encoder) error {  // F
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListSet write field end error: ", err)
     }
     return nil
 }
@@ -993,7 +993,7 @@ func (x *reqNestedContainersListSet) readField1(p thrift.Decoder) error {  // Fo
 
 func (x *reqNestedContainersListSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersListSet"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListSet write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1001,24 +1001,24 @@ func (x *reqNestedContainersListSet) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListSet write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListSet write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqNestedContainersListSet) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListSet read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqNestedContainersListSet field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1043,7 +1043,7 @@ func (x *reqNestedContainersListSet) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersListSet read struct end error: ", err)
     }
 
     return nil
@@ -1079,29 +1079,29 @@ func (x *respNestedContainersListSet) Exception() thrift.WritableException {
 
 func (x *respNestedContainersListSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersListSet"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respNestedContainersListSet write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respNestedContainersListSet write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersListSet write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respNestedContainersListSet) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respNestedContainersListSet read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respNestedContainersListSet field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1124,7 +1124,7 @@ func (x *respNestedContainersListSet) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersListSet read struct end error: ", err)
     }
 
     return nil
@@ -1174,7 +1174,7 @@ func (x *reqNestedContainersTurtles) IsSetFoo() bool {
 
 func (x *reqNestedContainersTurtles) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersTurtles write field begin error: ", err)
     }
 
     item := x.Foo
@@ -1252,7 +1252,7 @@ func (x *reqNestedContainersTurtles) writeField1(p thrift.Encoder) error {  // F
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersTurtles write field end error: ", err)
     }
     return nil
 }
@@ -1381,7 +1381,7 @@ func (x *reqNestedContainersTurtles) readField1(p thrift.Decoder) error {  // Fo
 
 func (x *reqNestedContainersTurtles) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersTurtles"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqNestedContainersTurtles write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1389,24 +1389,24 @@ func (x *reqNestedContainersTurtles) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqNestedContainersTurtles write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersTurtles write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqNestedContainersTurtles) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqNestedContainersTurtles read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqNestedContainersTurtles field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1431,7 +1431,7 @@ func (x *reqNestedContainersTurtles) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqNestedContainersTurtles read struct end error: ", err)
     }
 
     return nil
@@ -1467,29 +1467,29 @@ func (x *respNestedContainersTurtles) Exception() thrift.WritableException {
 
 func (x *respNestedContainersTurtles) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersTurtles"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respNestedContainersTurtles write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respNestedContainersTurtles write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersTurtles write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respNestedContainersTurtles) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respNestedContainersTurtles read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respNestedContainersTurtles field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1512,7 +1512,7 @@ func (x *respNestedContainersTurtles) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respNestedContainersTurtles read struct end error: ", err)
     }
 
     return nil

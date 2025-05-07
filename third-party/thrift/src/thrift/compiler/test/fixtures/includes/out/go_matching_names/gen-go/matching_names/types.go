@@ -56,7 +56,7 @@ func (x *IncludesAlso) writeField1(p thrift.Encoder) error {  // Also
     }
 
     if err := p.WriteFieldBegin("also", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("IncludesAlso write field begin error: ", err)
     }
 
     item := x.Also
@@ -65,7 +65,7 @@ func (x *IncludesAlso) writeField1(p thrift.Encoder) error {  // Also
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("IncludesAlso write field end error: ", err)
     }
     return nil
 }
@@ -93,7 +93,7 @@ func (x *IncludesAlso) DefaultGetAlso() *includesAlso.Also {
 
 func (x *IncludesAlso) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncludesAlso"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("IncludesAlso write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -101,24 +101,24 @@ func (x *IncludesAlso) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("IncludesAlso write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("IncludesAlso write struct end error: ", err)
     }
     return nil
 }
 
 func (x *IncludesAlso) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("IncludesAlso read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("IncludesAlso field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -143,7 +143,7 @@ func (x *IncludesAlso) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("IncludesAlso read struct end error: ", err)
     }
 
     return nil

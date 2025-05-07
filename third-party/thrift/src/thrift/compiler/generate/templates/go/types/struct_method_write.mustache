@@ -26,7 +26,7 @@ func (x *{{struct:go_name}}) Write(p thrift.Encoder) error {
     }
     {{/struct:union?}}
     if err := p.WriteStructBegin("{{struct:name}}"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("{{struct:go_name}} write struct begin error: ", err)
     }
 
     {{#struct:fields_sorted}}
@@ -36,11 +36,11 @@ func (x *{{struct:go_name}}) Write(p thrift.Encoder) error {
     {{/struct:fields_sorted}}
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("{{struct:go_name}} write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("{{struct:go_name}} write struct end error: ", err)
     }
     return nil
 }

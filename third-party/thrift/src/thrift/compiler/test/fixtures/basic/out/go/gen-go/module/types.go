@@ -319,7 +319,7 @@ func (x *MyStruct) IsSetFloatSet() bool {
 
 func (x *MyStruct) writeField1(p thrift.Encoder) error {  // MyIntField
     if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.MyIntField
@@ -328,14 +328,14 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // MyIntField
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MyStringField
     if err := p.WriteFieldBegin("MyStringField", thrift.STRING, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.MyStringField
@@ -344,7 +344,7 @@ func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MyStringField
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
@@ -355,7 +355,7 @@ func (x *MyStruct) writeField3(p thrift.Encoder) error {  // MyDataField
     }
 
     if err := p.WriteFieldBegin("MyDataField", thrift.STRUCT, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.MyDataField
@@ -365,14 +365,14 @@ func (x *MyStruct) writeField3(p thrift.Encoder) error {  // MyDataField
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField4(p thrift.Encoder) error {  // MyEnum
     if err := p.WriteFieldBegin("myEnum", thrift.I32, 4); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.MyEnum
@@ -381,14 +381,14 @@ func (x *MyStruct) writeField4(p thrift.Encoder) error {  // MyEnum
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField5(p thrift.Encoder) error {  // Oneway
     if err := p.WriteFieldBegin("oneway", thrift.BOOL, 5); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.Oneway
@@ -397,14 +397,14 @@ func (x *MyStruct) writeField5(p thrift.Encoder) error {  // Oneway
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField6(p thrift.Encoder) error {  // Readonly
     if err := p.WriteFieldBegin("readonly", thrift.BOOL, 6); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.Readonly
@@ -413,14 +413,14 @@ func (x *MyStruct) writeField6(p thrift.Encoder) error {  // Readonly
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField7(p thrift.Encoder) error {  // Idempotent
     if err := p.WriteFieldBegin("idempotent", thrift.BOOL, 7); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.Idempotent
@@ -429,14 +429,14 @@ func (x *MyStruct) writeField7(p thrift.Encoder) error {  // Idempotent
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField8(p thrift.Encoder) error {  // FloatSet
     if err := p.WriteFieldBegin("floatSet", thrift.SET, 8); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.FloatSet
@@ -456,14 +456,14 @@ func (x *MyStruct) writeField8(p thrift.Encoder) error {  // FloatSet
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField9(p thrift.Encoder) error {  // NoHackCodegenField
     if err := p.WriteFieldBegin("no_hack_codegen_field", thrift.STRING, 9); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.NoHackCodegenField
@@ -472,7 +472,7 @@ func (x *MyStruct) writeField9(p thrift.Encoder) error {  // NoHackCodegenField
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
@@ -598,7 +598,7 @@ func (x *MyStruct) DefaultGetMyDataField() *MyDataItemAlias {
 
 func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("MyStruct write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -630,24 +630,24 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("MyStruct write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("MyStruct write struct end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("MyStruct read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("MyStruct field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -688,7 +688,7 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("MyStruct read struct end error: ", err)
     }
 
     return nil
@@ -788,7 +788,7 @@ func (x *Containers) IsSetStringToI64Map() bool {
 
 func (x *Containers) writeField1(p thrift.Encoder) error {  // I32List
     if err := p.WriteFieldBegin("I32List", thrift.LIST, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("Containers write field begin error: ", err)
     }
 
     item := x.I32List
@@ -808,14 +808,14 @@ func (x *Containers) writeField1(p thrift.Encoder) error {  // I32List
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("Containers write field end error: ", err)
     }
     return nil
 }
 
 func (x *Containers) writeField2(p thrift.Encoder) error {  // StringSet
     if err := p.WriteFieldBegin("StringSet", thrift.SET, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("Containers write field begin error: ", err)
     }
 
     item := x.StringSet
@@ -835,14 +835,14 @@ func (x *Containers) writeField2(p thrift.Encoder) error {  // StringSet
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("Containers write field end error: ", err)
     }
     return nil
 }
 
 func (x *Containers) writeField3(p thrift.Encoder) error {  // StringToI64Map
     if err := p.WriteFieldBegin("StringToI64Map", thrift.MAP, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("Containers write field begin error: ", err)
     }
 
     item := x.StringToI64Map
@@ -869,7 +869,7 @@ func (x *Containers) writeField3(p thrift.Encoder) error {  // StringToI64Map
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("Containers write field end error: ", err)
     }
     return nil
 }
@@ -972,7 +972,7 @@ func (x *Containers) readField3(p thrift.Decoder) error {  // StringToI64Map
 
 func (x *Containers) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Containers"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("Containers write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -986,24 +986,24 @@ func (x *Containers) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("Containers write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("Containers write struct end error: ", err)
     }
     return nil
 }
 
 func (x *Containers) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("Containers read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("Containers field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1032,7 +1032,7 @@ func (x *Containers) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("Containers read struct end error: ", err)
     }
 
     return nil
@@ -1062,29 +1062,29 @@ func NewMyDataItem() *MyDataItem {
 
 func (x *MyDataItem) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("MyDataItem write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("MyDataItem write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("MyDataItem write struct end error: ", err)
     }
     return nil
 }
 
 func (x *MyDataItem) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("MyDataItem read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("MyDataItem field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1107,7 +1107,7 @@ func (x *MyDataItem) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("MyDataItem read struct end error: ", err)
     }
 
     return nil
@@ -1224,7 +1224,7 @@ func (x *MyUnion) writeField1(p thrift.Encoder) error {  // MyEnum
     }
 
     if err := p.WriteFieldBegin("myEnum", thrift.I32, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyUnion write field begin error: ", err)
     }
 
     item := *x.MyEnum
@@ -1234,7 +1234,7 @@ func (x *MyUnion) writeField1(p thrift.Encoder) error {  // MyEnum
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
 }
@@ -1245,7 +1245,7 @@ func (x *MyUnion) writeField2(p thrift.Encoder) error {  // MyStruct
     }
 
     if err := p.WriteFieldBegin("myStruct", thrift.STRUCT, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyUnion write field begin error: ", err)
     }
 
     item := x.MyStruct
@@ -1254,7 +1254,7 @@ func (x *MyUnion) writeField2(p thrift.Encoder) error {  // MyStruct
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
 }
@@ -1265,7 +1265,7 @@ func (x *MyUnion) writeField3(p thrift.Encoder) error {  // MyDataItem
     }
 
     if err := p.WriteFieldBegin("myDataItem", thrift.STRUCT, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyUnion write field begin error: ", err)
     }
 
     item := x.MyDataItem
@@ -1274,7 +1274,7 @@ func (x *MyUnion) writeField3(p thrift.Encoder) error {  // MyDataItem
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
 }
@@ -1285,7 +1285,7 @@ func (x *MyUnion) writeField4(p thrift.Encoder) error {  // FloatSet
     }
 
     if err := p.WriteFieldBegin("floatSet", thrift.SET, 4); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyUnion write field begin error: ", err)
     }
 
     item := x.FloatSet
@@ -1305,7 +1305,7 @@ func (x *MyUnion) writeField4(p thrift.Encoder) error {  // FloatSet
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
 }
@@ -1415,7 +1415,7 @@ func (x *MyUnion) Write(p thrift.Encoder) error {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
     if err := p.WriteStructBegin("MyUnion"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("MyUnion write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1432,24 +1432,24 @@ func (x *MyUnion) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("MyUnion write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("MyUnion write struct end error: ", err)
     }
     return nil
 }
 
 func (x *MyUnion) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("MyUnion read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("MyUnion field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1480,7 +1480,7 @@ func (x *MyUnion) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("MyUnion read struct end error: ", err)
     }
 
     return nil
@@ -1579,7 +1579,7 @@ func (x *MyException) IsSetMyUnion() bool {
 
 func (x *MyException) writeField1(p thrift.Encoder) error {  // MyIntField
     if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyException write field begin error: ", err)
     }
 
     item := x.MyIntField
@@ -1588,14 +1588,14 @@ func (x *MyException) writeField1(p thrift.Encoder) error {  // MyIntField
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyException write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyException) writeField2(p thrift.Encoder) error {  // MyStringField
     if err := p.WriteFieldBegin("MyStringField", thrift.STRING, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyException write field begin error: ", err)
     }
 
     item := x.MyStringField
@@ -1604,7 +1604,7 @@ func (x *MyException) writeField2(p thrift.Encoder) error {  // MyStringField
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyException write field end error: ", err)
     }
     return nil
 }
@@ -1615,7 +1615,7 @@ func (x *MyException) writeField3(p thrift.Encoder) error {  // MyStruct
     }
 
     if err := p.WriteFieldBegin("myStruct", thrift.STRUCT, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyException write field begin error: ", err)
     }
 
     item := x.MyStruct
@@ -1624,7 +1624,7 @@ func (x *MyException) writeField3(p thrift.Encoder) error {  // MyStruct
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyException write field end error: ", err)
     }
     return nil
 }
@@ -1635,7 +1635,7 @@ func (x *MyException) writeField4(p thrift.Encoder) error {  // MyUnion
     }
 
     if err := p.WriteFieldBegin("myUnion", thrift.STRUCT, 4); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyException write field begin error: ", err)
     }
 
     item := x.MyUnion
@@ -1644,7 +1644,7 @@ func (x *MyException) writeField4(p thrift.Encoder) error {  // MyUnion
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyException write field end error: ", err)
     }
     return nil
 }
@@ -1711,7 +1711,7 @@ func (x *MyException) DefaultGetMyUnion() *MyUnion {
 
 func (x *MyException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyException"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("MyException write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1728,24 +1728,24 @@ func (x *MyException) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("MyException write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("MyException write struct end error: ", err)
     }
     return nil
 }
 
 func (x *MyException) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("MyException read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("MyException field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1776,7 +1776,7 @@ func (x *MyException) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("MyException read struct end error: ", err)
     }
 
     return nil
@@ -1882,7 +1882,7 @@ func (x *MyExceptionWithMessage) IsSetMyUnion() bool {
 
 func (x *MyExceptionWithMessage) writeField1(p thrift.Encoder) error {  // MyIntField
     if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field begin error: ", err)
     }
 
     item := x.MyIntField
@@ -1891,14 +1891,14 @@ func (x *MyExceptionWithMessage) writeField1(p thrift.Encoder) error {  // MyInt
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyExceptionWithMessage) writeField2(p thrift.Encoder) error {  // MyStringField
     if err := p.WriteFieldBegin("MyStringField", thrift.STRING, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field begin error: ", err)
     }
 
     item := x.MyStringField
@@ -1907,7 +1907,7 @@ func (x *MyExceptionWithMessage) writeField2(p thrift.Encoder) error {  // MyStr
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field end error: ", err)
     }
     return nil
 }
@@ -1918,7 +1918,7 @@ func (x *MyExceptionWithMessage) writeField3(p thrift.Encoder) error {  // MyStr
     }
 
     if err := p.WriteFieldBegin("myStruct", thrift.STRUCT, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field begin error: ", err)
     }
 
     item := x.MyStruct
@@ -1927,7 +1927,7 @@ func (x *MyExceptionWithMessage) writeField3(p thrift.Encoder) error {  // MyStr
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field end error: ", err)
     }
     return nil
 }
@@ -1938,7 +1938,7 @@ func (x *MyExceptionWithMessage) writeField4(p thrift.Encoder) error {  // MyUni
     }
 
     if err := p.WriteFieldBegin("myUnion", thrift.STRUCT, 4); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field begin error: ", err)
     }
 
     item := x.MyUnion
@@ -1947,7 +1947,7 @@ func (x *MyExceptionWithMessage) writeField4(p thrift.Encoder) error {  // MyUni
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field end error: ", err)
     }
     return nil
 }
@@ -2014,7 +2014,7 @@ func (x *MyExceptionWithMessage) DefaultGetMyUnion() *MyUnion {
 
 func (x *MyExceptionWithMessage) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyExceptionWithMessage"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -2031,24 +2031,24 @@ func (x *MyExceptionWithMessage) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage write struct end error: ", err)
     }
     return nil
 }
 
 func (x *MyExceptionWithMessage) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("MyExceptionWithMessage field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2079,7 +2079,7 @@ func (x *MyExceptionWithMessage) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("MyExceptionWithMessage read struct end error: ", err)
     }
 
     return nil
@@ -2126,7 +2126,7 @@ func (x *ReservedKeyword) SetReservedField(value int32) *ReservedKeyword {
 
 func (x *ReservedKeyword) writeField1(p thrift.Encoder) error {  // ReservedField
     if err := p.WriteFieldBegin("reserved_field", thrift.I32, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("ReservedKeyword write field begin error: ", err)
     }
 
     item := x.ReservedField
@@ -2135,7 +2135,7 @@ func (x *ReservedKeyword) writeField1(p thrift.Encoder) error {  // ReservedFiel
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("ReservedKeyword write field end error: ", err)
     }
     return nil
 }
@@ -2154,7 +2154,7 @@ func (x *ReservedKeyword) readField1(p thrift.Decoder) error {  // ReservedField
 
 func (x *ReservedKeyword) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ReservedKeyword"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("ReservedKeyword write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -2162,24 +2162,24 @@ func (x *ReservedKeyword) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("ReservedKeyword write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("ReservedKeyword write struct end error: ", err)
     }
     return nil
 }
 
 func (x *ReservedKeyword) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("ReservedKeyword read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("ReservedKeyword field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2204,7 +2204,7 @@ func (x *ReservedKeyword) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("ReservedKeyword read struct end error: ", err)
     }
 
     return nil
@@ -2256,7 +2256,7 @@ func (x *UnionToBeRenamed) writeField1(p thrift.Encoder) error {  // ReservedFie
     }
 
     if err := p.WriteFieldBegin("reserved_field", thrift.I32, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("UnionToBeRenamed write field begin error: ", err)
     }
 
     item := *x.ReservedField
@@ -2265,7 +2265,7 @@ func (x *UnionToBeRenamed) writeField1(p thrift.Encoder) error {  // ReservedFie
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("UnionToBeRenamed write field end error: ", err)
     }
     return nil
 }
@@ -2300,7 +2300,7 @@ func (x *UnionToBeRenamed) Write(p thrift.Encoder) error {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
     }
     if err := p.WriteStructBegin("UnionToBeRenamed"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("UnionToBeRenamed write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -2308,24 +2308,24 @@ func (x *UnionToBeRenamed) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("UnionToBeRenamed write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("UnionToBeRenamed write struct end error: ", err)
     }
     return nil
 }
 
 func (x *UnionToBeRenamed) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("UnionToBeRenamed read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("UnionToBeRenamed field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2350,7 +2350,7 @@ func (x *UnionToBeRenamed) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("UnionToBeRenamed read struct end error: ", err)
     }
 
     return nil
@@ -2382,29 +2382,29 @@ func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
 
 func (x *reqFooServiceSimpleRPC) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooServiceSimpleRPC"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqFooServiceSimpleRPC write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqFooServiceSimpleRPC write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqFooServiceSimpleRPC write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqFooServiceSimpleRPC) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqFooServiceSimpleRPC read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqFooServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2427,7 +2427,7 @@ func (x *reqFooServiceSimpleRPC) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqFooServiceSimpleRPC read struct end error: ", err)
     }
 
     return nil
@@ -2462,29 +2462,29 @@ func (x *respFooServiceSimpleRPC) Exception() thrift.WritableException {
 
 func (x *respFooServiceSimpleRPC) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFooServiceSimpleRPC"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respFooServiceSimpleRPC write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respFooServiceSimpleRPC write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respFooServiceSimpleRPC write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respFooServiceSimpleRPC) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respFooServiceSimpleRPC read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respFooServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2507,7 +2507,7 @@ func (x *respFooServiceSimpleRPC) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respFooServiceSimpleRPC read struct end error: ", err)
     }
 
     return nil
@@ -2550,7 +2550,7 @@ func (x *reqFB303ServiceSimpleRPC) SetIntParameter(value int32) *reqFB303Service
 
 func (x *reqFB303ServiceSimpleRPC) writeField1(p thrift.Encoder) error {  // IntParameter
     if err := p.WriteFieldBegin("int_parameter", thrift.I32, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqFB303ServiceSimpleRPC write field begin error: ", err)
     }
 
     item := x.IntParameter
@@ -2559,7 +2559,7 @@ func (x *reqFB303ServiceSimpleRPC) writeField1(p thrift.Encoder) error {  // Int
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqFB303ServiceSimpleRPC write field end error: ", err)
     }
     return nil
 }
@@ -2578,7 +2578,7 @@ func (x *reqFB303ServiceSimpleRPC) readField1(p thrift.Decoder) error {  // IntP
 
 func (x *reqFB303ServiceSimpleRPC) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFB303ServiceSimpleRPC"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqFB303ServiceSimpleRPC write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -2586,24 +2586,24 @@ func (x *reqFB303ServiceSimpleRPC) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqFB303ServiceSimpleRPC write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqFB303ServiceSimpleRPC write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqFB303ServiceSimpleRPC) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqFB303ServiceSimpleRPC read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqFB303ServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2628,7 +2628,7 @@ func (x *reqFB303ServiceSimpleRPC) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqFB303ServiceSimpleRPC read struct end error: ", err)
     }
 
     return nil
@@ -2684,7 +2684,7 @@ func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("respFB303ServiceSimpleRPC write field begin error: ", err)
     }
 
     item := x.Success
@@ -2693,7 +2693,7 @@ func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("respFB303ServiceSimpleRPC write field end error: ", err)
     }
     return nil
 }
@@ -2725,7 +2725,7 @@ func (x *respFB303ServiceSimpleRPC) Exception() thrift.WritableException {
 
 func (x *respFB303ServiceSimpleRPC) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFB303ServiceSimpleRPC"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respFB303ServiceSimpleRPC write struct begin error: ", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2733,24 +2733,24 @@ func (x *respFB303ServiceSimpleRPC) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respFB303ServiceSimpleRPC write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respFB303ServiceSimpleRPC write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respFB303ServiceSimpleRPC) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respFB303ServiceSimpleRPC read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respFB303ServiceSimpleRPC field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2775,7 +2775,7 @@ func (x *respFB303ServiceSimpleRPC) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respFB303ServiceSimpleRPC read struct end error: ", err)
     }
 
     return nil
@@ -2805,29 +2805,29 @@ func newReqMyServicePing() *reqMyServicePing {
 
 func (x *reqMyServicePing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePing"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServicePing write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServicePing write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServicePing write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServicePing) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServicePing read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServicePing field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2850,7 +2850,7 @@ func (x *reqMyServicePing) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServicePing read struct end error: ", err)
     }
 
     return nil
@@ -2885,29 +2885,29 @@ func (x *respMyServicePing) Exception() thrift.WritableException {
 
 func (x *respMyServicePing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServicePing"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServicePing write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServicePing write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServicePing write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServicePing) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServicePing read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServicePing field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2930,7 +2930,7 @@ func (x *respMyServicePing) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServicePing read struct end error: ", err)
     }
 
     return nil
@@ -2960,29 +2960,29 @@ func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
 
 func (x *reqMyServiceGetRandomData) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceGetRandomData"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetRandomData write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetRandomData write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetRandomData write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceGetRandomData) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetRandomData read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceGetRandomData field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3005,7 +3005,7 @@ func (x *reqMyServiceGetRandomData) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetRandomData read struct end error: ", err)
     }
 
     return nil
@@ -3060,7 +3060,7 @@ func (x *respMyServiceGetRandomData) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("respMyServiceGetRandomData write field begin error: ", err)
     }
 
     item := *x.Success
@@ -3069,7 +3069,7 @@ func (x *respMyServiceGetRandomData) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("respMyServiceGetRandomData write field end error: ", err)
     }
     return nil
 }
@@ -3093,7 +3093,7 @@ func (x *respMyServiceGetRandomData) Exception() thrift.WritableException {
 
 func (x *respMyServiceGetRandomData) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceGetRandomData"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceGetRandomData write struct begin error: ", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3101,24 +3101,24 @@ func (x *respMyServiceGetRandomData) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceGetRandomData write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceGetRandomData write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceGetRandomData) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceGetRandomData read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceGetRandomData field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3143,7 +3143,7 @@ func (x *respMyServiceGetRandomData) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceGetRandomData read struct end error: ", err)
     }
 
     return nil
@@ -3186,7 +3186,7 @@ func (x *reqMyServiceSink) SetSink(value int64) *reqMyServiceSink {
 
 func (x *reqMyServiceSink) writeField1(p thrift.Encoder) error {  // Sink
     if err := p.WriteFieldBegin("sink", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceSink write field begin error: ", err)
     }
 
     item := x.Sink
@@ -3195,7 +3195,7 @@ func (x *reqMyServiceSink) writeField1(p thrift.Encoder) error {  // Sink
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServiceSink write field end error: ", err)
     }
     return nil
 }
@@ -3214,7 +3214,7 @@ func (x *reqMyServiceSink) readField1(p thrift.Decoder) error {  // Sink
 
 func (x *reqMyServiceSink) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceSink"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceSink write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -3222,24 +3222,24 @@ func (x *reqMyServiceSink) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceSink write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceSink write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceSink) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceSink read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceSink field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3264,7 +3264,7 @@ func (x *reqMyServiceSink) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceSink read struct end error: ", err)
     }
 
     return nil
@@ -3300,29 +3300,29 @@ func (x *respMyServiceSink) Exception() thrift.WritableException {
 
 func (x *respMyServiceSink) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceSink"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceSink write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceSink write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceSink write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceSink) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceSink read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceSink field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3345,7 +3345,7 @@ func (x *respMyServiceSink) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceSink read struct end error: ", err)
     }
 
     return nil
@@ -3403,7 +3403,7 @@ func (x *reqMyServicePutDataById) SetData(value string) *reqMyServicePutDataById
 
 func (x *reqMyServicePutDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById write field begin error: ", err)
     }
 
     item := x.Id
@@ -3412,14 +3412,14 @@ func (x *reqMyServicePutDataById) writeField1(p thrift.Encoder) error {  // Id
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById write field end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServicePutDataById) writeField2(p thrift.Encoder) error {  // Data
     if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById write field begin error: ", err)
     }
 
     item := x.Data
@@ -3428,7 +3428,7 @@ func (x *reqMyServicePutDataById) writeField2(p thrift.Encoder) error {  // Data
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById write field end error: ", err)
     }
     return nil
 }
@@ -3457,7 +3457,7 @@ func (x *reqMyServicePutDataById) readField2(p thrift.Decoder) error {  // Data
 
 func (x *reqMyServicePutDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePutDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -3468,24 +3468,24 @@ func (x *reqMyServicePutDataById) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServicePutDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServicePutDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3512,7 +3512,7 @@ func (x *reqMyServicePutDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServicePutDataById read struct end error: ", err)
     }
 
     return nil
@@ -3549,29 +3549,29 @@ func (x *respMyServicePutDataById) Exception() thrift.WritableException {
 
 func (x *respMyServicePutDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServicePutDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServicePutDataById write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServicePutDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServicePutDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServicePutDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServicePutDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServicePutDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3594,7 +3594,7 @@ func (x *respMyServicePutDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServicePutDataById read struct end error: ", err)
     }
 
     return nil
@@ -3637,7 +3637,7 @@ func (x *reqMyServiceHasDataById) SetId(value int64) *reqMyServiceHasDataById {
 
 func (x *reqMyServiceHasDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceHasDataById write field begin error: ", err)
     }
 
     item := x.Id
@@ -3646,7 +3646,7 @@ func (x *reqMyServiceHasDataById) writeField1(p thrift.Encoder) error {  // Id
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServiceHasDataById write field end error: ", err)
     }
     return nil
 }
@@ -3665,7 +3665,7 @@ func (x *reqMyServiceHasDataById) readField1(p thrift.Decoder) error {  // Id
 
 func (x *reqMyServiceHasDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceHasDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceHasDataById write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -3673,24 +3673,24 @@ func (x *reqMyServiceHasDataById) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceHasDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceHasDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceHasDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceHasDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceHasDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3715,7 +3715,7 @@ func (x *reqMyServiceHasDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceHasDataById read struct end error: ", err)
     }
 
     return nil
@@ -3771,7 +3771,7 @@ func (x *respMyServiceHasDataById) writeField0(p thrift.Encoder) error {  // Suc
     }
 
     if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("respMyServiceHasDataById write field begin error: ", err)
     }
 
     item := *x.Success
@@ -3780,7 +3780,7 @@ func (x *respMyServiceHasDataById) writeField0(p thrift.Encoder) error {  // Suc
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("respMyServiceHasDataById write field end error: ", err)
     }
     return nil
 }
@@ -3804,7 +3804,7 @@ func (x *respMyServiceHasDataById) Exception() thrift.WritableException {
 
 func (x *respMyServiceHasDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceHasDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceHasDataById write struct begin error: ", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3812,24 +3812,24 @@ func (x *respMyServiceHasDataById) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceHasDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceHasDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceHasDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceHasDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceHasDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3854,7 +3854,7 @@ func (x *respMyServiceHasDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceHasDataById read struct end error: ", err)
     }
 
     return nil
@@ -3897,7 +3897,7 @@ func (x *reqMyServiceGetDataById) SetId(value int64) *reqMyServiceGetDataById {
 
 func (x *reqMyServiceGetDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetDataById write field begin error: ", err)
     }
 
     item := x.Id
@@ -3906,7 +3906,7 @@ func (x *reqMyServiceGetDataById) writeField1(p thrift.Encoder) error {  // Id
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetDataById write field end error: ", err)
     }
     return nil
 }
@@ -3925,7 +3925,7 @@ func (x *reqMyServiceGetDataById) readField1(p thrift.Decoder) error {  // Id
 
 func (x *reqMyServiceGetDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceGetDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetDataById write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -3933,24 +3933,24 @@ func (x *reqMyServiceGetDataById) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceGetDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceGetDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -3975,7 +3975,7 @@ func (x *reqMyServiceGetDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceGetDataById read struct end error: ", err)
     }
 
     return nil
@@ -4031,7 +4031,7 @@ func (x *respMyServiceGetDataById) writeField0(p thrift.Encoder) error {  // Suc
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("respMyServiceGetDataById write field begin error: ", err)
     }
 
     item := *x.Success
@@ -4040,7 +4040,7 @@ func (x *respMyServiceGetDataById) writeField0(p thrift.Encoder) error {  // Suc
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("respMyServiceGetDataById write field end error: ", err)
     }
     return nil
 }
@@ -4064,7 +4064,7 @@ func (x *respMyServiceGetDataById) Exception() thrift.WritableException {
 
 func (x *respMyServiceGetDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceGetDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceGetDataById write struct begin error: ", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -4072,24 +4072,24 @@ func (x *respMyServiceGetDataById) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceGetDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceGetDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceGetDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceGetDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceGetDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4114,7 +4114,7 @@ func (x *respMyServiceGetDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceGetDataById read struct end error: ", err)
     }
 
     return nil
@@ -4157,7 +4157,7 @@ func (x *reqMyServiceDeleteDataById) SetId(value int64) *reqMyServiceDeleteDataB
 
 func (x *reqMyServiceDeleteDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceDeleteDataById write field begin error: ", err)
     }
 
     item := x.Id
@@ -4166,7 +4166,7 @@ func (x *reqMyServiceDeleteDataById) writeField1(p thrift.Encoder) error {  // I
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServiceDeleteDataById write field end error: ", err)
     }
     return nil
 }
@@ -4185,7 +4185,7 @@ func (x *reqMyServiceDeleteDataById) readField1(p thrift.Decoder) error {  // Id
 
 func (x *reqMyServiceDeleteDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceDeleteDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceDeleteDataById write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -4193,24 +4193,24 @@ func (x *reqMyServiceDeleteDataById) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceDeleteDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceDeleteDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceDeleteDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceDeleteDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceDeleteDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4235,7 +4235,7 @@ func (x *reqMyServiceDeleteDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceDeleteDataById read struct end error: ", err)
     }
 
     return nil
@@ -4271,29 +4271,29 @@ func (x *respMyServiceDeleteDataById) Exception() thrift.WritableException {
 
 func (x *respMyServiceDeleteDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceDeleteDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceDeleteDataById write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceDeleteDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceDeleteDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceDeleteDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceDeleteDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceDeleteDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4316,7 +4316,7 @@ func (x *respMyServiceDeleteDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceDeleteDataById read struct end error: ", err)
     }
 
     return nil
@@ -4374,7 +4374,7 @@ func (x *reqMyServiceLobDataById) SetData(value string) *reqMyServiceLobDataById
 
 func (x *reqMyServiceLobDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById write field begin error: ", err)
     }
 
     item := x.Id
@@ -4383,14 +4383,14 @@ func (x *reqMyServiceLobDataById) writeField1(p thrift.Encoder) error {  // Id
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById write field end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceLobDataById) writeField2(p thrift.Encoder) error {  // Data
     if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById write field begin error: ", err)
     }
 
     item := x.Data
@@ -4399,7 +4399,7 @@ func (x *reqMyServiceLobDataById) writeField2(p thrift.Encoder) error {  // Data
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById write field end error: ", err)
     }
     return nil
 }
@@ -4428,7 +4428,7 @@ func (x *reqMyServiceLobDataById) readField2(p thrift.Decoder) error {  // Data
 
 func (x *reqMyServiceLobDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceLobDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -4439,24 +4439,24 @@ func (x *reqMyServiceLobDataById) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceLobDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceLobDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4483,7 +4483,7 @@ func (x *reqMyServiceLobDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceLobDataById read struct end error: ", err)
     }
 
     return nil
@@ -4520,29 +4520,29 @@ func (x *respMyServiceLobDataById) Exception() thrift.WritableException {
 
 func (x *respMyServiceLobDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceLobDataById"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceLobDataById write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceLobDataById write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceLobDataById write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceLobDataById) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceLobDataById read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceLobDataById field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4565,7 +4565,7 @@ func (x *respMyServiceLobDataById) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceLobDataById read struct end error: ", err)
     }
 
     return nil
@@ -4595,29 +4595,29 @@ func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
 
 func (x *reqMyServiceInvalidReturnForHack) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceInvalidReturnForHack"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceInvalidReturnForHack write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceInvalidReturnForHack write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceInvalidReturnForHack write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceInvalidReturnForHack) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceInvalidReturnForHack read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceInvalidReturnForHack field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4640,7 +4640,7 @@ func (x *reqMyServiceInvalidReturnForHack) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceInvalidReturnForHack read struct end error: ", err)
     }
 
     return nil
@@ -4695,7 +4695,7 @@ func (x *respMyServiceInvalidReturnForHack) writeField0(p thrift.Encoder) error 
     }
 
     if err := p.WriteFieldBegin("success", thrift.SET, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("respMyServiceInvalidReturnForHack write field begin error: ", err)
     }
 
     item := x.Success
@@ -4715,7 +4715,7 @@ func (x *respMyServiceInvalidReturnForHack) writeField0(p thrift.Encoder) error 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("respMyServiceInvalidReturnForHack write field end error: ", err)
     }
     return nil
 }
@@ -4756,7 +4756,7 @@ func (x *respMyServiceInvalidReturnForHack) Exception() thrift.WritableException
 
 func (x *respMyServiceInvalidReturnForHack) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceInvalidReturnForHack"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceInvalidReturnForHack write struct begin error: ", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -4764,24 +4764,24 @@ func (x *respMyServiceInvalidReturnForHack) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceInvalidReturnForHack write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceInvalidReturnForHack write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceInvalidReturnForHack) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceInvalidReturnForHack read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceInvalidReturnForHack field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4806,7 +4806,7 @@ func (x *respMyServiceInvalidReturnForHack) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceInvalidReturnForHack read struct end error: ", err)
     }
 
     return nil
@@ -4836,29 +4836,29 @@ func newReqMyServiceRpcSkippedCodegen() *reqMyServiceRpcSkippedCodegen {
 
 func (x *reqMyServiceRpcSkippedCodegen) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceRpcSkippedCodegen"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqMyServiceRpcSkippedCodegen write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqMyServiceRpcSkippedCodegen write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceRpcSkippedCodegen write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqMyServiceRpcSkippedCodegen) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqMyServiceRpcSkippedCodegen read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqMyServiceRpcSkippedCodegen field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4881,7 +4881,7 @@ func (x *reqMyServiceRpcSkippedCodegen) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqMyServiceRpcSkippedCodegen read struct end error: ", err)
     }
 
     return nil
@@ -4916,29 +4916,29 @@ func (x *respMyServiceRpcSkippedCodegen) Exception() thrift.WritableException {
 
 func (x *respMyServiceRpcSkippedCodegen) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceRpcSkippedCodegen"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respMyServiceRpcSkippedCodegen write struct begin error: ", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respMyServiceRpcSkippedCodegen write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceRpcSkippedCodegen write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respMyServiceRpcSkippedCodegen) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respMyServiceRpcSkippedCodegen read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respMyServiceRpcSkippedCodegen field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -4961,7 +4961,7 @@ func (x *respMyServiceRpcSkippedCodegen) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respMyServiceRpcSkippedCodegen read struct end error: ", err)
     }
 
     return nil
@@ -5004,7 +5004,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKey(value string) *reqDbMixed
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) writeField1(p thrift.Encoder) error {  // Key
     if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field begin error: ", err)
     }
 
     item := x.Key
@@ -5013,7 +5013,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) writeField1(p thrift.Encoder) er
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field end error: ", err)
     }
     return nil
 }
@@ -5032,7 +5032,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) readField1(p thrift.Decoder) err
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqDbMixedStackArgumentsGetDataByKey0"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -5040,24 +5040,24 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqDbMixedStackArgumentsGetDataByKey0 field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -5082,7 +5082,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 read struct end error: ", err)
     }
 
     return nil
@@ -5138,7 +5138,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field begin error: ", err)
     }
 
     item := x.Success
@@ -5147,7 +5147,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field end error: ", err)
     }
     return nil
 }
@@ -5170,7 +5170,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) Exception() thrift.WritableExce
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respDbMixedStackArgumentsGetDataByKey0"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write struct begin error: ", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -5178,24 +5178,24 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respDbMixedStackArgumentsGetDataByKey0 field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -5220,7 +5220,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey0 read struct end error: ", err)
     }
 
     return nil
@@ -5263,7 +5263,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKey(value string) *reqDbMixed
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) writeField1(p thrift.Encoder) error {  // Key
     if err := p.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field begin error: ", err)
     }
 
     item := x.Key
@@ -5272,7 +5272,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) writeField1(p thrift.Encoder) er
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field end error: ", err)
     }
     return nil
 }
@@ -5291,7 +5291,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) readField1(p thrift.Decoder) err
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqDbMixedStackArgumentsGetDataByKey1"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -5299,24 +5299,24 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 write struct end error: ", err)
     }
     return nil
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("reqDbMixedStackArgumentsGetDataByKey1 field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -5341,7 +5341,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey1 read struct end error: ", err)
     }
 
     return nil
@@ -5397,7 +5397,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field begin error: ", err)
     }
 
     item := x.Success
@@ -5406,7 +5406,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field end error: ", err)
     }
     return nil
 }
@@ -5429,7 +5429,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) Exception() thrift.WritableExce
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respDbMixedStackArgumentsGetDataByKey1"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write struct begin error: ", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -5437,24 +5437,24 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 write struct end error: ", err)
     }
     return nil
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("respDbMixedStackArgumentsGetDataByKey1 field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -5479,7 +5479,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("respDbMixedStackArgumentsGetDataByKey1 read struct end error: ", err)
     }
 
     return nil

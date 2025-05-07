@@ -93,7 +93,7 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // MyIncludedField
     }
 
     if err := p.WriteFieldBegin("MyIncludedField", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.MyIncludedField
@@ -102,7 +102,7 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // MyIncludedField
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
@@ -113,7 +113,7 @@ func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MyOtherIncludedFiel
     }
 
     if err := p.WriteFieldBegin("MyOtherIncludedField", thrift.STRUCT, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.MyOtherIncludedField
@@ -122,14 +122,14 @@ func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MyOtherIncludedFiel
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) writeField3(p thrift.Encoder) error {  // MyIncludedInt
     if err := p.WriteFieldBegin("MyIncludedInt", thrift.I64, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+        return thrift.PrependError("MyStruct write field begin error: ", err)
     }
 
     item := x.MyIncludedInt
@@ -139,7 +139,7 @@ func (x *MyStruct) writeField3(p thrift.Encoder) error {  // MyIncludedInt
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+        return thrift.PrependError("MyStruct write field end error: ", err)
     }
     return nil
 }
@@ -196,7 +196,7 @@ func (x *MyStruct) DefaultGetMyOtherIncludedField() *includes.Included {
 
 func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+        return thrift.PrependError("MyStruct write struct begin error: ", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -210,24 +210,24 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+        return thrift.PrependError("MyStruct write field stop error: ", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+        return thrift.PrependError("MyStruct write struct end error: ", err)
     }
     return nil
 }
 
 func (x *MyStruct) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+        return thrift.PrependError("MyStruct read error: ", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+            return thrift.PrependError(fmt.Sprintf("MyStruct field %d ('%s') read error: ", id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -256,7 +256,7 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+        return thrift.PrependError("MyStruct read struct end error: ", err)
     }
 
     return nil

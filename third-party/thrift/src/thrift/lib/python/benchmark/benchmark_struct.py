@@ -37,6 +37,18 @@ table = []
 
 
 INIT_STATEMENT_MyStruct = """
+val_struct = StringBucket(
+    one="one",
+    two="two",
+    three="three",
+    four="four",
+    five="five",
+    six="six",
+    seven="seven",
+    eight="eight",
+    nine="nine",
+    ten="ten",
+)
 inst = MyStruct(
     val_bool=True,
     val_i32=42,
@@ -46,6 +58,8 @@ inst = MyStruct(
     val_list=to_thrift_list({val_list}),
     val_set=to_thrift_set({val_set}),
     val_map=to_thrift_map({val_map}),
+    val_struct=val_struct,
+    val_enum=MyEnum.FOO,
 )
 """
 
@@ -71,7 +85,7 @@ def to_thrift_map(m):
 
 def get_import(flavor) -> str:
     return (
-        f"from thrift.benchmark.struct.{NAMESPACES[flavor]} import MyStruct, Included"
+        f"from thrift.benchmark.struct.{NAMESPACES[flavor]} import MyEnum, MyStruct, Included, StringBucket"
         + (
             "\nfrom thrift.python.mutable_types import to_thrift_list, to_thrift_set, to_thrift_map"
             if flavor == "mutable-python"
@@ -129,7 +143,9 @@ def benchmark_field_access():
         val_list = list(range(100))
         val_set = set(range(100))
         init_statement = INIT_STATEMENT_MyStruct.format(
-            val_list=val_list, val_set=val_set, val_map={}
+            val_list=val_list,
+            val_set=val_set,
+            val_map={},
         )
         setup = f"{get_import(flavor)}\n{init_statement}"
         if cached:
@@ -148,6 +164,8 @@ def benchmark_field_access():
         "val_i64",
         "val_string",
         "val_binary",
+        "val_enum",
+        "val_struct",
     ]
     table = [
         [flavor]

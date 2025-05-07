@@ -533,7 +533,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   } else if (
       metadata.checksum().has_value() &&
       metadata.checksum()->algorithm().value() != ChecksumAlgorithm::NONE) {
-    LOG_FIRST_N(WARNING, 10)
+    FB_LOG_ONCE(WARNING)
         << "Checksum is not supported, but checksum on the client was set";
     Checksum c;
     c.algorithm() = ChecksumAlgorithm::NONE;

@@ -1498,7 +1498,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
     Optional<std::filesystem::path> suppressionFilePath,
-    std::vector<std::string> indexedMethodAttrsVec) {
+    const std::vector<std::string>& indexedMethodAttrsVec) {
   hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {
@@ -1523,7 +1523,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
 std::shared_ptr<FactsStore> make_trusted_facts(
     fs::path root,
     AutoloadDB::Opener dbOpener,
-    std::vector<std::string> indexedMethodAttrsVec) {
+    const std::vector<std::string>& indexedMethodAttrsVec) {
   hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {

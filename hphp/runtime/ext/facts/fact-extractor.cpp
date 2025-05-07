@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
@@ -75,7 +76,7 @@ ExtractorFactory* s_extractorFactory = nullptr;
 
 struct SimpleExtractor final : Extractor {
   explicit SimpleExtractor(folly::Executor::KeepAlive<folly::Executor> token)
-      : Extractor{token} {}
+      : Extractor{std::move(token)} {}
 
   ~SimpleExtractor() override = default;
 
@@ -106,7 +107,7 @@ void setExtractorFactory(ExtractorFactory* factory) {
 }
 
 std::unique_ptr<Extractor> makeExtractor(
-    folly::Executor::KeepAlive<folly::Executor> token) {
+    const folly::Executor::KeepAlive<folly::Executor>& token) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
   if (s_extractorFactory && Cfg::Autoload::EnableExternFactExtractor) {

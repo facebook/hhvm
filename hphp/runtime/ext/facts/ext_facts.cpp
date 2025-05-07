@@ -75,8 +75,8 @@ constexpr std::chrono::seconds kDefaultIdleSec{30 * 60};
 constexpr int32_t kDefaultWatchmanRetries = 0;
 
 struct RepoOptionsParseExc : public std::runtime_error {
-  explicit RepoOptionsParseExc(std::string msg)
-      : std::runtime_error{std::move(msg)} {}
+  explicit RepoOptionsParseExc(const std::string& msg)
+      : std::runtime_error{msg} {}
 };
 
 bool hasWatchedFileExtension(const std::filesystem::path& path) {

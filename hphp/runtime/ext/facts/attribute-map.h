@@ -75,7 +75,7 @@ struct AttributeMap {
     return m_attrMap.getKeysForValue(attr, std::move(keysFromDB));
   }
 
-  void setAttributes(Key key, rust::Vec<AttrFacts> attrVec) {
+  void setAttributes(Key key, const rust::Vec<AttrFacts>& attrVec) {
     Attrs attrs;
     attrs.reserve(attrVec.size());
 

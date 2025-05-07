@@ -17,6 +17,7 @@
 #pragma once
 
 #include <filesystem>
+#include <utility>
 #include <vector>
 
 #include <folly/Try.h>
@@ -31,7 +32,7 @@ namespace Facts {
 
 struct Extractor {
   explicit Extractor(folly::Executor::KeepAlive<folly::Executor> token)
-      : m_token(token) {}
+      : m_token(std::move(token)) {}
 
   virtual ~Extractor() = default;
 

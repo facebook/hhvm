@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/zend/zend-string.h"
 
-#include <unicode/coll.h> // icu
 #include <vector>
 
 namespace HPHP {

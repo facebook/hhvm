@@ -40,7 +40,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
 #include "hphp/runtime/vm/vm-regs.h"

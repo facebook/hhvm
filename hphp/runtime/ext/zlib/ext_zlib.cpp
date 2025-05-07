@@ -16,11 +16,9 @@
 */
 
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
-#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/ext/zlib/zip-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -29,11 +27,6 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/util/gzip.h"
-#include <folly/String.h>
-#include <memory>
-#include <algorithm>
-#include <vector>
 
 #define PHP_ZLIB_MODIFIER 1000
 

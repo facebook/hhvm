@@ -28,7 +28,6 @@
 #include <folly/portability/Stdlib.h>
 
 #include "hphp/hhbbc/class-util.h"
-#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"

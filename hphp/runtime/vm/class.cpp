@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/enum-cache.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"

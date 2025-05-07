@@ -30,7 +30,6 @@
 #include <boost/program_options.hpp>
 
 #include <folly/ScopeGuard.h>
-#include <folly/String.h>
 #include <folly/portability/Unistd.h>
 
 #include "hphp/runtime/base/configs/configs.h"
@@ -39,7 +38,6 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/hhvm/process-init.h"
-#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
@@ -48,13 +46,11 @@
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/options.h"
-#include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
-#include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 

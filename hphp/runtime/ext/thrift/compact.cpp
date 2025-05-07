@@ -25,7 +25,6 @@
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/field_wrapper.h"
 #include "hphp/runtime/ext/thrift/type_wrapper.h"

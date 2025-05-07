@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/std/ext_std_function.h"

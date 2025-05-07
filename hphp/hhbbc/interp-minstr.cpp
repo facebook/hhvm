@@ -15,7 +15,6 @@
 */
 #include "hphp/hhbbc/interp.h"
 
-#include <vector>
 #include <algorithm>
 #include <string>
 #include <utility>

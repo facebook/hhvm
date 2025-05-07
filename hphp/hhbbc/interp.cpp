@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <vector>
 #include <string>
-#include <iterator>
 
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
@@ -26,10 +25,7 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
@@ -38,7 +34,6 @@
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
@@ -54,10 +49,7 @@
 #include "hphp/hhbbc/type-ops.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
-
-#include "hphp/hhbbc/stats.h"
 
 #include "hphp/hhbbc/interp-internal.h"
 

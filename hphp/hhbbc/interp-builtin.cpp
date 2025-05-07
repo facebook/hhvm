@@ -29,7 +29,6 @@
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP::HHBBC {
 

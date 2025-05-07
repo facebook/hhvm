@@ -15,15 +15,12 @@
 */
 #include "hphp/hhbbc/parse.h"
 
-#include <unordered_map>
 #include <map>
 
 #include <variant>
 #include <algorithm>
 #include <iterator>
 #include <memory>
-#include <set>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -49,7 +46,6 @@
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/util/configs/eval.h"

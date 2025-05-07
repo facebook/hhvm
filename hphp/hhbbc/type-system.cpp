@@ -21,13 +21,11 @@
 #include <vector>
 
 #include <folly/Traits.h>
-#include <folly/Hash.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
-#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
@@ -35,7 +33,6 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/type-structure.h"
 
 #include "hphp/util/check-size.h"
 #include "hphp/util/configs/eval.h"

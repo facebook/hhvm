@@ -33,7 +33,6 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
-#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/index.h"
 
 #include "hphp/runtime/base/array-init.h"

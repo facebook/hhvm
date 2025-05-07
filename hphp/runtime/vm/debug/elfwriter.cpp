@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/debug/elfwriter.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <elf.h>
-#include <gelf.h>
 #include <string>
 #include <vector>
 #include <iostream>

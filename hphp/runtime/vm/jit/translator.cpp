@@ -21,7 +21,6 @@
 #include <string>
 
 #include <folly/Conv.h>
-#include <folly/MapUtil.h>
 
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/ringbuffer.h"

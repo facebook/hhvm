@@ -16,7 +16,6 @@
 #include "hphp/util/process.h"
 #include "hphp/util/process-host.h"
 
-#include <sys/types.h>
 #include <stdlib.h>
 
 #include <sys/fcntl.h>

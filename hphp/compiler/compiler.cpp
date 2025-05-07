@@ -57,9 +57,6 @@
 #include "hphp/hhvm/process-init.h"
 
 #include <sys/types.h>
-#ifndef _MSC_VER
-#include <sys/wait.h>
-#endif
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>

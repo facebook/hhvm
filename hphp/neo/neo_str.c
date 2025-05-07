@@ -27,7 +27,6 @@
 #include "neo_misc.h"
 #include "neo_err.h"
 #include "neo_str.h"
-#include "ulist.h"
 
 #ifndef va_copy
 #ifdef __va_copy

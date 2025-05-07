@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <set>
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/container/flat_map.hpp>
 
 #include <folly/gen/Base.h>
@@ -37,19 +36,13 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/analyze.h"
-#include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/optimize.h"
-#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/unit-util.h"
-
-#include "hphp/runtime/base/vanilla-dict.h"
 
 namespace HPHP::HHBBC {
 

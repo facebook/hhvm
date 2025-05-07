@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"

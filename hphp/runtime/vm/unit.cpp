@@ -25,7 +25,6 @@
 #include <sstream>
 #include <vector>
 
-#include <boost/container/flat_map.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/Format.h>

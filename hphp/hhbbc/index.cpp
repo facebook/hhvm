@@ -26,14 +26,11 @@
 #include <utility>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/filesystem.hpp>
 
 #include <tbb/concurrent_hash_map.h>
-#include <tbb/concurrent_unordered_map.h>
 
 #include <folly/Format.h>
-#include <folly/Hash.h>
 #include <folly/Lazy.h>
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>

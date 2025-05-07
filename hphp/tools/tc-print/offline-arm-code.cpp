@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#if defined(__aarch64__)
+
 #include <iomanip>
 
 #include "hphp/tools/tc-print/offline-code.h"
@@ -25,8 +27,6 @@
 #define MAX_INSTR_ASM_LEN 128
 
 namespace HPHP { namespace jit {
-
-#if defined(__aarch64__)
 
 using namespace vixl;
 
@@ -171,6 +171,6 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
   return regionInfo;
 }
 
-#endif
-
 } } // HPHP::jit
+
+#endif

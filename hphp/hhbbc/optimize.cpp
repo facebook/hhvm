@@ -22,8 +22,6 @@
 #include <cassert>
 #include <bitset>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
@@ -46,7 +44,6 @@
 #include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP::HHBBC {
 

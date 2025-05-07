@@ -22,10 +22,8 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/timestamp.h"
@@ -63,6 +61,10 @@
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
+
+#ifdef USE_JEMALLOC
+#include "hphp/runtime/base/memory-manager.h"
+#endif
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 #include "hphp/util/hugetlb.h"

@@ -15,7 +15,6 @@
 */
 #include "hphp/hhbbc/representation.h"
 
-#include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <memory>
 #include <vector>

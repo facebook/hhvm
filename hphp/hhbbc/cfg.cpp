@@ -15,7 +15,6 @@
 */
 #include "hphp/hhbbc/cfg.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
 #include <vector>
 

@@ -30,7 +30,6 @@
 #include <folly/Format.h>
 #include <folly/SharedMutex.h>
 
-#include <sys/mman.h>
 #include <type_traits>
 
 namespace HPHP::arrprov {

@@ -33,13 +33,9 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
-#include "hphp/hhbbc/unit-util.h"
-#include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
-
-#include "hphp/runtime/vm/reified-generics.h"
 
 namespace HPHP::HHBBC {
 

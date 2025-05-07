@@ -15,7 +15,6 @@
 */
 #include "hphp/hhbbc/misc.h"
 
-#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/parallel.h"
 
 #include "hphp/runtime/base/string-data.h"

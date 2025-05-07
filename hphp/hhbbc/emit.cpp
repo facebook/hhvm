@@ -31,14 +31,11 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/tv-comparisons.h"
 
 #include "hphp/runtime/ext/extension-registry.h"
 

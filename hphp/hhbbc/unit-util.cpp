@@ -17,7 +17,6 @@
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/native.h"
 
 namespace HPHP::HHBBC {

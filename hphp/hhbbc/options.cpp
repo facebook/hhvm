@@ -25,7 +25,6 @@
 #include "hphp/hhbbc/hhbbc.h"
 
 #include "hphp/util/address-range.h"
-#include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/struct-log.h"

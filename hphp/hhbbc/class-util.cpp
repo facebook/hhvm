@@ -16,7 +16,6 @@
 #include "hphp/hhbbc/class-util.h"
 
 #include "hphp/hhbbc/analyze.h"
-#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"

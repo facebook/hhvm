@@ -13,7 +13,6 @@
  */
 
 #include <math.h>
-#include <stdlib.h>
 #include "hphp/runtime/ext/gd/libgd/gd.h"
 
 /* Use this for commenting out debug-print statements. */

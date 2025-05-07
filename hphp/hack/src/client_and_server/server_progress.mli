@@ -211,7 +211,7 @@ module ErrorsWrite : sig
   one gets unlinked; and if the previous error file was not yet complete then anyone
   reading from the previous errors file will now get a [Error (Restarted cancel_reason)]. *)
   val new_empty_file :
-    clock:Watchman.clock option ->
+    clock:ServerNotifierTypes.clock option ->
     ignore_hh_version:bool ->
     cancel_reason:string * string ->
     unit
@@ -251,8 +251,8 @@ module ErrorsRead : sig
     pid: int;
         (** the PID of the server process that produced this errors file *)
     timestamp: float;  (** The time at which the typecheck started. *)
-    clock: Watchman.clock option;
-        (** The watchman clock at which this typecheck started. *)
+    clock: ServerNotifierTypes.clock option;
+        (** The file watcher clock at which this typecheck started. *)
   }
 
   type open_error =

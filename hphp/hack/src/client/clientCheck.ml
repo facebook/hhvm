@@ -354,7 +354,7 @@ let main_internal
         ServerCommandTypes.Server_status.liveness =
           ServerCommandTypes.Live_status;
         last_recheck_stats = None;
-        watchman_clock = None;
+        file_watcher_clock = None;
       }
     in
     let exit_status =

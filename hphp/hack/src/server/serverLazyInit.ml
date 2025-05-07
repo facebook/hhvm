@@ -813,7 +813,7 @@ let calculate_fanout_and_defer_or_do_type_check
     result
 
 let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
-    Relative_path.Set.t * Watchman.clock option =
+    Relative_path.Set.t * ServerNotifier.clock option =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Getting files changed while parsing...";
   ServerNotifier.wait_until_ready genv.notifier;
@@ -1038,7 +1038,8 @@ let update_naming_table
     env
     genv
     ~(do_indexing : bool)
-    ~(state_result : loaded_info * Relative_path.Set.t * Watchman.clock option)
+    ~(state_result :
+       loaded_info * Relative_path.Set.t * ServerNotifier.clock option)
     (cgroup_steps : CgroupProfiler.step_group) =
   let ((loaded_info : ServerInitTypes.loaded_info), changed_while_parsing, clock)
       =
@@ -1237,7 +1238,8 @@ let post_saved_state_initialization
     ~(do_indexing : bool)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
-    ~(state_result : loaded_info * Relative_path.Set.t * Watchman.clock option)
+    ~(state_result :
+       loaded_info * Relative_path.Set.t * ServerNotifier.clock option)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   let ( (loaded_info : ServerInitTypes.loaded_info),
         _changed_while_parsing,

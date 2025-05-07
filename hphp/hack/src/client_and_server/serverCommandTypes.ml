@@ -22,7 +22,7 @@ module Server_status = struct
     error_list: Errors.finalized_error list;
     dropped_count: int;
     last_recheck_stats: Telemetry.t option;
-    watchman_clock: Watchman.clock option;
+    file_watcher_clock: ServerNotifierTypes.clock option;
   }
 end
 

@@ -82,7 +82,7 @@ let handle :
         error_list;
         dropped_count;
         last_recheck_stats;
-        watchman_clock = env.ServerEnv.clock;
+        file_watcher_clock = env.ServerEnv.clock;
       } )
   | ServerCommandTypes.STATUS_SINGLE
       {

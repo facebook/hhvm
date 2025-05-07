@@ -319,7 +319,7 @@ type env = {
   disk_needs_parsing: Relative_path.Set.t;
       (** Files which parse trees were invalidated (because they changed on disk)
           and need to be re-parsed *)
-  clock: Watchman.clock option;
+  clock: ServerNotifier.clock option;
       (** This is the clock as of when disk_needs_parsing was last updated.
       None if not using Watchman. *)
   needs_phase2_redecl: Relative_path.Set.t;
@@ -385,5 +385,5 @@ let add_changed_files env changed_files =
     changed_files = Relative_path.Set.union env.changed_files changed_files;
   }
 
-let show_clock (clock : Watchman.clock option) : string =
-  Option.value clock ~default:"[noclock]"
+let show_clock (clock : ServerNotifier.clock option) : string =
+  Option.value_map ~f:ServerNotifier.show_clock ~default:"[noclock]" clock

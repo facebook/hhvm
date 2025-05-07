@@ -208,7 +208,7 @@ type env = {
       (** Timestamp of last query for disk changes *)
   last_idle_job_time: float;  (** Timestamp of last ServerIdle.go run *)
   disk_needs_parsing: Relative_path.Set.t;
-  clock: Watchman.clock option;
+  clock: ServerNotifier.clock option;
       (** This is the clock as of when disk_needs_parsing was last updated.
       None if not using Watchman. *)
   needs_phase2_redecl: Relative_path.Set.t;
@@ -260,4 +260,4 @@ val list_files_with_errors : env -> string list
 
 val add_changed_files : env -> Relative_path.Set.t -> env
 
-val show_clock : Watchman.clock option -> string
+val show_clock : ServerNotifier.clock option -> string

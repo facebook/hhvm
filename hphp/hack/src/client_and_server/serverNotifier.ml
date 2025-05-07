@@ -18,6 +18,12 @@ type changes =
   | StateEnter of string * Hh_json.json option
   | StateLeave of string * Hh_json.json option
 
+type clock = ServerNotifierTypes.clock = Watchman of Watchman.clock
+[@@deriving show, eq]
+
+let watchman_clock_of_clock = function
+  | ServerNotifierTypes.Watchman clock -> clock
+
 type t =
   | IndexOnly of { root: Path.t }
   | Dfind of {
@@ -195,7 +201,7 @@ let sync_changes_from_watchman_changes_list
   in
   SyncChanges set
 
-let get_changes_sync (t : t) : changes * Watchman.clock option =
+let get_changes_sync (t : t) : changes * clock option =
   match t with
   | IndexOnly _ -> (SyncChanges SSet.empty, None)
   | MockChanges { get_changes_sync; _ } -> (get_changes_sync (), None)
@@ -224,9 +230,9 @@ let get_changes_sync (t : t) : changes * Watchman.clock option =
       sync_changes_from_watchman_changes_list ~root ~local_config changes
     in
     let clock = Watchman.get_clock !watchman in
-    (changes, Some clock)
+    (changes, Some (Watchman clock))
 
-let get_changes_async (t : t) : changes * Watchman.clock option =
+let get_changes_async (t : t) : changes * clock option =
   match t with
   | IndexOnly _ -> (SyncChanges SSet.empty, None)
   | MockChanges { get_changes_async; _ } -> (get_changes_async (), None)
@@ -243,7 +249,7 @@ let get_changes_async (t : t) : changes * Watchman.clock option =
         sync_changes_from_watchman_changes_list ~root ~local_config changes
     in
     let clock = Watchman.get_clock !watchman in
-    (changes, Some clock)
+    (changes, Some (Watchman clock))
 
 let async_reader_opt (t : t) : Buffered_line_reader.t option =
   match t with

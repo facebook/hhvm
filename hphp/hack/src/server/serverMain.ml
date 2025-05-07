@@ -175,7 +175,7 @@ let query_notifier
     (start_time : float) :
     ServerEnv.env
     * Relative_path.Set.t
-    * Watchman.clock option
+    * ServerNotifier.clock option
     * bool
     * Telemetry.t =
   let telemetry =
@@ -331,7 +331,9 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   let stats = { stats with RecheckLoopStats.updates_stale } in
   (* saving any file is our trigger to start full recheck *)
   let env =
-    if Option.is_some clock && not (Option.equal String.equal clock env.clock)
+    if
+      Option.is_some clock
+      && not (Option.equal ServerNotifier.equal_clock clock env.clock)
     then begin
       Hh_logger.log "Recheck at watchclock %s" (ServerEnv.show_clock clock);
       { env with clock }
@@ -711,7 +713,7 @@ let serve_one_iteration genv env client_provider =
 a typecheck cancelled due to files changing on disk. It constructs the
 human-readable [user_message] and also [log_message] appropriately. *)
 let cancel_due_to_watchman
-    (updates : Relative_path.Set.t) (clock : Watchman.clock option) :
+    (updates : Relative_path.Set.t) (clock : ServerNotifier.clock option) :
     MultiThreadedCall.interrupt_result =
   assert (not (Relative_path.Set.is_empty updates));
   let size = Relative_path.Set.cardinal updates in

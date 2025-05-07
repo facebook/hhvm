@@ -399,7 +399,7 @@ let test_async_read_unlinked () : bool Lwt.t =
     try_with_tmp (fun ~root ->
         let errors_file_path = ServerFiles.errors_file_path root in
         Server_progress.ErrorsWrite.new_empty_file
-          ~clock:(Some "clock123")
+          ~clock:(Some (ServerNotifier.Watchman "clock123"))
           ~ignore_hh_version:false
           ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
@@ -407,7 +407,11 @@ let test_async_read_unlinked () : bool Lwt.t =
         let { Server_progress.ErrorsRead.pid; clock; _ } =
           Result.ok open_result |> Option.value_exn
         in
-        assert (Option.equal String.equal (Some "clock123") clock);
+        assert (
+          Option.equal
+            ServerNotifier.equal_clock
+            (Some (ServerNotifier.Watchman "clock123"))
+            clock);
         assert (pid = Unix.getpid ());
         let q = Server_progress_lwt.watch_errors_file ~pid fd in
         (* we'll unlink the file, and after this the stream should be closed *)

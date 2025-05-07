@@ -16,6 +16,11 @@ type changes =
   | StateEnter of string * Hh_json.json option
   | StateLeave of string * Hh_json.json option
 
+type clock = ServerNotifierTypes.clock = Watchman of Watchman.clock
+[@@deriving show, eq]
+
+val watchman_clock_of_clock : clock -> Watchman.clock
+
 type t
 
 (** This takes a filter, and returns all files under root that match *)
@@ -33,9 +38,9 @@ val wait_until_ready : t -> unit
 
 (** This might return AsyncChanges the ones that we happen to have received by now,
 or SyncChanges, depending on the underlying notifier's state *)
-val get_changes_async : t -> changes * Watchman.clock option
+val get_changes_async : t -> changes * clock option
 
 (** This will always return SyncChanges, all changes up to the point this was invoked. *)
-val get_changes_sync : t -> changes * Watchman.clock option
+val get_changes_sync : t -> changes * clock option
 
 val async_reader_opt : t -> Buffered_line_reader.t option

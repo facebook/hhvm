@@ -276,13 +276,13 @@
   marshal_tools
   pos
   search_utils
+  server_notifier_types
   symbol
   typing_defs
   typing_deps
   utils_lint
   version
-  warnings_saved_state
-  watchman)
+  warnings_saved_state)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.show ppx_deriving.enum)))
 
@@ -321,7 +321,7 @@
    errors
    server_command_types
    server_files
-   watchman)
+   server_notifier_types)
  (preprocess
   (pps
    lwt_ppx
@@ -335,11 +335,22 @@
  (libraries
    server_command_types
    server_files
+   server_notifier_types
    server_revision_tracker
    dfind
    watchman)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_notifier_types)
+ (wrapped false)
+ (modules serverNotifierTypes)
+ (libraries
+   watchman)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
 
 (library
   (name server_config)

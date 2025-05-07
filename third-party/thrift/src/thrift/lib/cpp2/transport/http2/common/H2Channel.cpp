@@ -105,7 +105,7 @@ void H2Channel::decodeHeaders(
       // key and value are decoded from there.  The key is not used
       // because it will get converted to lowercase and therefore the
       // original key cannot be recovered.
-      auto us = val.find("_");
+      auto us = val.find('_');
       if (us != string::npos) {
         std::string decodedKey;
         std::string decodedVal;

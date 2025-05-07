@@ -152,7 +152,7 @@ bool EmptyMonotypeVec::checkInvariants() const {
   return true;
 }
 
-void EmptyMonotypeVec::Scan(const EmptyMonotypeVec* ead, type_scan::Scanner&) {
+void EmptyMonotypeVec::Scan(const EmptyMonotypeVec*, type_scan::Scanner&) {
 }
 
 ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
@@ -163,17 +163,17 @@ ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
 }
 
 void EmptyMonotypeVec::ConvertToUncounted(
-    EmptyMonotypeVec* madIn, const MakeUncountedEnv& env) {
+    EmptyMonotypeVec*, const MakeUncountedEnv&) {
   // All EmptyMonotypeVecs are static, so we should never make them uncounted.
   always_assert(false);
 }
 
-void EmptyMonotypeVec::ReleaseUncounted(EmptyMonotypeVec* ead) {
+void EmptyMonotypeVec::ReleaseUncounted(EmptyMonotypeVec*) {
   // All EmptyMonotypeVecs are static, so we should never release them.
   always_assert(false);
 }
 
-void EmptyMonotypeVec::Release(EmptyMonotypeVec* ead) {
+void EmptyMonotypeVec::Release(EmptyMonotypeVec*) {
   // All EmptyMonotypeVecs are static, so we should never release them.
   always_assert(false);
 }
@@ -269,7 +269,7 @@ ssize_t EmptyMonotypeVec::IterAdvance(const EmptyMonotypeVec*, ssize_t) {
   return 0;
 }
 
-ssize_t EmptyMonotypeVec::IterRewind(const EmptyMonotypeVec*, ssize_t pos) {
+ssize_t EmptyMonotypeVec::IterRewind(const EmptyMonotypeVec*, ssize_t /*pos*/) {
   return 0;
 }
 
@@ -285,16 +285,16 @@ ArrayData* EmptyMonotypeVec::PopMove(EmptyMonotypeVec* ead, Variant& value) {
   return ead;
 }
 
-ArrayData* EmptyMonotypeVec::PreSort(EmptyMonotypeVec* ead, SortFunction sf) {
+ArrayData* EmptyMonotypeVec::PreSort(EmptyMonotypeVec*, SortFunction /*sf*/) {
   always_assert(false);
 }
 
-ArrayData* EmptyMonotypeVec::PostSort(EmptyMonotypeVec* ead, ArrayData* vad) {
+ArrayData* EmptyMonotypeVec::PostSort(EmptyMonotypeVec*, ArrayData* /*vad*/) {
   always_assert(false);
 }
 
-ArrayData* EmptyMonotypeVec::SetLegacyArray(EmptyMonotypeVec* eadIn,
-                                            bool copy, bool legacy) {
+ArrayData* EmptyMonotypeVec::SetLegacyArray(EmptyMonotypeVec*,
+                                            bool /*copy*/, bool legacy) {
   return GetVec(legacy);
 }
 
@@ -328,8 +328,8 @@ void MonotypeVec::decRefValues() {
 
 void MonotypeVec::incRefValues() {
   forEachCountableValue(
-    [&](auto t, auto v) { v->incRefCount(); },
-    [&](auto t, auto v) { v->incRefCount(); }
+    [&](auto /*t*/, auto v) { v->incRefCount(); },
+    [&](auto /*t*/, auto v) { v->incRefCount(); }
   );
 }
 
@@ -539,7 +539,7 @@ ArrayData* MonotypeVec::Copy(const MonotypeVec* mad) {
   return mad->copy();
 }
 
-bool MonotypeVec::IsVectorData(const MonotypeVec* mad) {
+bool MonotypeVec::IsVectorData(const MonotypeVec*) {
   return true;
 }
 
@@ -548,7 +548,7 @@ TypedValue MonotypeVec::NvGetInt(const MonotypeVec* mad, int64_t k) {
   return mad->typedValueUnchecked(k);
 }
 
-TypedValue MonotypeVec::NvGetStr(const MonotypeVec* mad, const StringData*) {
+TypedValue MonotypeVec::NvGetStr(const MonotypeVec*, const StringData*) {
   return make_tv<KindOfUninit>();
 }
 
@@ -678,7 +678,7 @@ ArrayData* MonotypeVec::RemoveStrMove(MonotypeVec* madIn, const StringData*) {
   return madIn;
 }
 
-ssize_t MonotypeVec::IterBegin(const MonotypeVec* mad) {
+ssize_t MonotypeVec::IterBegin(const MonotypeVec*) {
   return 0;
 }
 
@@ -774,24 +774,24 @@ ArrayLayout EmptyMonotypeVecLayout::appendType(Type val) const {
     : ArrayLayout(TopMonotypeVecLayout::Index());
 }
 
-ArrayLayout EmptyMonotypeVecLayout::removeType(Type key) const {
+ArrayLayout EmptyMonotypeVecLayout::removeType(Type /*key*/) const {
   return ArrayLayout(this);
 }
 
-ArrayLayout EmptyMonotypeVecLayout::setType(Type key, Type val) const {
+ArrayLayout EmptyMonotypeVecLayout::setType(Type /*key*/, Type /*val*/) const {
   return ArrayLayout::Bottom();
 }
 
-std::pair<Type, bool> EmptyMonotypeVecLayout::elemType(Type key) const {
+std::pair<Type, bool> EmptyMonotypeVecLayout::elemType(Type /*key*/) const {
   return {TBottom, false};
 }
 
 std::pair<Type, bool> EmptyMonotypeVecLayout::firstLastType(
-    bool isFirst, bool isKey) const {
+    bool /*isFirst*/, bool /*isKey*/) const {
   return {TBottom, false};
 }
 
-Type EmptyMonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
+Type EmptyMonotypeVecLayout::iterPosType(Type /*pos*/, bool /*isKey*/) const {
   return TBottom;
 }
 
@@ -801,7 +801,7 @@ ArrayLayout MonotypeVecLayout::appendType(Type val) const {
   return setType(TInt, val);
 }
 
-ArrayLayout MonotypeVecLayout::removeType(Type key) const {
+ArrayLayout MonotypeVecLayout::removeType(Type /*key*/) const {
   return ArrayLayout(this);
 }
 
@@ -817,16 +817,16 @@ ArrayLayout MonotypeVecLayout::setType(Type key, Type val) const {
   return ArrayLayout(Index(valType));
 }
 
-std::pair<Type, bool> MonotypeVecLayout::elemType(Type key) const {
+std::pair<Type, bool> MonotypeVecLayout::elemType(Type /*key*/) const {
   return {Type(m_fixedType), false};
 }
 
 std::pair<Type, bool> MonotypeVecLayout::firstLastType(
-    bool isFirst, bool isKey) const {
+    bool /*isFirst*/, bool isKey) const {
   return {isKey ? TInt : Type(m_fixedType), false};
 }
 
-Type MonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
+Type MonotypeVecLayout::iterPosType(Type /*pos*/, bool isKey) const {
   return isKey ? TInt : Type(m_fixedType);
 }
 

@@ -499,39 +499,39 @@ Layout::Initializer Layout::s_initializer;
 
 //////////////////////////////////////////////////////////////////////////////
 
-ArrayLayout Layout::appendType(Type val) const {
+ArrayLayout Layout::appendType(Type /*val*/) const {
   return ArrayLayout::Top();
 }
 
-ArrayLayout Layout::removeType(Type key) const {
+ArrayLayout Layout::removeType(Type /*key*/) const {
   return ArrayLayout::Top();
 }
 
-ArrayLayout Layout::setType(Type val) const {
+ArrayLayout Layout::setType(Type /*val*/) const {
   return ArrayLayout::Top();
 }
 
-ArrayLayout Layout::setType(Type key, Type val) const {
+ArrayLayout Layout::setType(Type /*key*/, Type /*val*/) const {
   return ArrayLayout::Top();
 }
 
-std::pair<Type, bool> Layout::elemType(Type key) const {
+std::pair<Type, bool> Layout::elemType(Type /*key*/) const {
   return {TInitCell, false};
 }
 
-bool Layout::slotAlwaysPresent(const Type&) const {
+bool Layout::slotAlwaysPresent(const Type& /*slot*/) const {
   return false;
 }
 
-std::pair<Type, bool> Layout::firstLastType(bool isFirst, bool isKey) const {
+std::pair<Type, bool> Layout::firstLastType(bool /*isFirst*/, bool isKey) const {
   return {isKey ? (TInt | TStr) : TInitCell, false};
 }
 
-Type Layout::iterPosType(Type pos, bool isKey) const {
+Type Layout::iterPosType(Type /*pos*/, bool isKey) const {
   return isKey ? (TInt | TStr) : TInitCell;
 }
 
-Type Layout::getTypeBound(Type) const {
+Type Layout::getTypeBound(Type /*slot*/) const {
   return TCell;
 }
 

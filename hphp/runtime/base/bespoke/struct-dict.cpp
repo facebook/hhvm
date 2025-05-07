@@ -988,7 +988,7 @@ LayoutIndex TopStructLayout::Index() {
 
 using namespace jit;
 
-ArrayLayout StructLayout::appendType(Type val) const {
+ArrayLayout StructLayout::appendType(Type /*val*/) const {
   return ArrayLayout::Vanilla();
 }
 
@@ -1035,7 +1035,7 @@ bool StructLayout::slotAlwaysPresent(const Type& slot) const {
 }
 
 std::pair<Type, bool> StructLayout::firstLastType(
-    bool isFirst, bool isKey) const {
+    bool /*isFirst*/, bool isKey) const {
   return {isKey ? TStaticStr : getUnionTypeBound(), false};
 }
 
@@ -1047,7 +1047,7 @@ Type StructLayout::getTypeBound(Type slot) const {
   return getTypeBound(slotVal);
 }
 
-Type StructLayout::iterPosType(Type pos, bool isKey) const {
+Type StructLayout::iterPosType(Type /*pos*/, bool isKey) const {
   return isKey ? TStaticStr : getUnionTypeBound();
 }
 
@@ -1058,15 +1058,15 @@ Optional<int64_t> StructLayout::numElements() const {
   return numFields();
 }
 
-ArrayLayout TopStructLayout::appendType(Type val) const {
+ArrayLayout TopStructLayout::appendType(Type /*val*/) const {
   return ArrayLayout::Vanilla();
 }
 
-ArrayLayout TopStructLayout::removeType(Type key) const {
+ArrayLayout TopStructLayout::removeType(Type /*key*/) const {
   return ArrayLayout::Top();
 }
 
-ArrayLayout TopStructLayout::setType(Type key, Type val) const {
+ArrayLayout TopStructLayout::setType(Type /*key*/, Type /*val*/) const {
   return ArrayLayout::Top();
 }
 
@@ -1080,11 +1080,11 @@ bool TopStructLayout::slotAlwaysPresent(const Type&) const {
 }
 
 std::pair<Type, bool> TopStructLayout::firstLastType(
-    bool isFirst, bool isKey) const {
+    bool /*isFirst*/, bool isKey) const {
   return {isKey ? TStaticStr : TInitCell, false};
 }
 
-Type TopStructLayout::iterPosType(Type pos, bool isKey) const {
+Type TopStructLayout::iterPosType(Type /*pos*/, bool isKey) const {
   return isKey ? TStaticStr : TInitCell;
 }
 

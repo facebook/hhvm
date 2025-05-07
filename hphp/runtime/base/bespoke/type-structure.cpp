@@ -816,7 +816,7 @@ tv_lval TypeStructure::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
 // type structure shouldn't return a reference that's able to be mutated,
 // so escalate
 tv_lval TypeStructure::ElemStr(
-    tv_lval lvalIn, StringData* k, bool throwOnMissing) {
+    tv_lval lvalIn, StringData* k, bool /*throwOnMissing*/) {
   auto tadIn = As(lvalIn.val().parr);
   auto const lval = TypeStructure::LvalStr(tadIn, k);
   if (lval.arr != tadIn) {
@@ -901,7 +901,7 @@ ArrayData* TypeStructure::SetLegacyArray(
 
 namespace {
 
-template<class T> void tsMakeUncounted(T t, const MakeUncountedEnv& env) {}
+template<class T> void tsMakeUncounted(T, const MakeUncountedEnv&) {}
 template<>
 void tsMakeUncounted<StringData*>(StringData* field, const MakeUncountedEnv& env) {
   if (field) MakeUncountedString(field, env);
@@ -911,7 +911,7 @@ void tsMakeUncounted<ArrayData*>(ArrayData* field, const MakeUncountedEnv& env) 
   if (field) MakeUncountedArray(field, env);
 }
 
-template<class T> void tsDecRefUncounted(T t) {}
+template<class T> void tsDecRefUncounted(T) {}
 template<>
 void tsDecRefUncounted<StringData*>(StringData* field) {
   if (field) DecRefUncountedString(field);
@@ -921,7 +921,7 @@ void tsDecRefUncounted<ArrayData*>(ArrayData* field) {
   if (field) DecRefUncountedArray(field);
 }
 
-template<class T> void initializeField(T t) {}
+template<class T> void initializeField(T) {}
 template<>
 void initializeField<bool&>(bool& field) {
   field = 0;
@@ -935,7 +935,7 @@ void initializeField<ArrayData*&>(ArrayData*& field) {
   field = nullptr;
 }
 
-template<class T> void scanField(const T& t, type_scan::Scanner& scanner) {}
+template<class T> void scanField(const T&, type_scan::Scanner&) {}
 template<>
 void scanField<StringData*>(StringData *const& field, type_scan::Scanner& scanner) {
   scanner.scan(field);
@@ -945,7 +945,7 @@ void scanField<ArrayData*>(ArrayData *const& field, type_scan::Scanner& scanner)
   scanner.scan(field);
 }
 
-template<class T> void incRefField(T t) {}
+template<class T> void incRefField(T) {}
 template<>
 void incRefField<StringData*>(StringData* field) {
   if (field) field->incRefCount();
@@ -955,7 +955,7 @@ void incRefField<ArrayData*>(ArrayData* field) {
   if (field) field->incRefCount();
 }
 
-template<class T> void decRefField(T t) {}
+template<class T> void decRefField(T) {}
 template<>
 void decRefField<StringData*>(StringData* field) {
   if (field) field->decRefAndRelease();
@@ -965,7 +965,7 @@ void decRefField<ArrayData*>(ArrayData* field) {
   if (field) field->decRefAndRelease();
 }
 
-template<class T> void setEvalScalar(T t) {}
+template<class T> void setEvalScalar(T) {}
 template<>
 void setEvalScalar(StringData*& field) {
   if (field && !field->isStatic()) {
@@ -1240,13 +1240,13 @@ TypeStructureLayout::TypeStructureLayout()
 
 // TODO: currently these are placeholder values, change them
 
-ArrayLayout TypeStructureLayout::appendType(Type val) const {
+ArrayLayout TypeStructureLayout::appendType(Type /*val*/) const {
   return ArrayLayout::Vanilla();
 }
-ArrayLayout TypeStructureLayout::removeType(Type key) const {
+ArrayLayout TypeStructureLayout::removeType(Type /*key*/) const {
   return ArrayLayout::Vanilla();
 }
-ArrayLayout TypeStructureLayout::setType(Type key, Type val) const {
+ArrayLayout TypeStructureLayout::setType(Type /*key*/, Type /*val*/) const {
   return ArrayLayout::Vanilla();
 }
 
@@ -1265,10 +1265,10 @@ std::pair<Type, bool> TypeStructureLayout::elemType(Type key) const {
   return {TInitCell, false};
 }
 std::pair<Type, bool> TypeStructureLayout::firstLastType(
-    bool isFirst, bool isKey) const {
+    bool /*isFirst*/, bool /*isKey*/) const {
   return {TBottom, false};
 }
-Type TypeStructureLayout::iterPosType(Type pos, bool isKey) const {
+Type TypeStructureLayout::iterPosType(Type /*pos*/, bool /*isKey*/) const {
   return TBottom;
 }
 

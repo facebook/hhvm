@@ -124,7 +124,7 @@ public:
 
 private:
   template <typename T, typename ... Args>
-  [[noreturn]] static inline T UnsupportedOp(Args ... args) {
+  [[noreturn]] static inline T UnsupportedOp(Args ... /*args*/) {
     always_assert(false);
   }
 

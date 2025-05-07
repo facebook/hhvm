@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/ExceptionTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/IncludeTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/MyTestService.h>
+#include <thrift/lib/cpp2/test/metadata/gen-cpp2/MyTestServiceWithUri.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/NestedStructsTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/ParentService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/RepeatedTestService.h>
@@ -608,6 +609,7 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
 
   const auto& p = metadata.services_ref()->at("service_test.ParentService");
   EXPECT_EQ(*p.name_ref(), "service_test.ParentService");
+  EXPECT_TRUE(p.uri()->empty());
   EXPECT_EQ(p.structured_annotations()->size(), 1);
   EXPECT_EQ(
       p.structured_annotations()->at(0), *cons("service").cv_struct_ref());
@@ -629,6 +631,7 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
   const auto& s = metadata.services_ref()->at(
       *response_.services_ref()->front().service_name_ref());
   EXPECT_EQ(*s.name_ref(), "service_test.MyTestService");
+  EXPECT_TRUE(p.uri()->empty());
   EXPECT_EQ(s.functions_ref()->size(), 3);
   EXPECT_EQ(
       *apache::thrift::get_pointer(s.parent()), "service_test.ParentService");
@@ -669,6 +672,75 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
   EXPECT_EQ(
       *f1.exceptions_ref()[0].type_ref()->get_t_struct().name_ref(),
       "service_test.CutoffException");
+  EXPECT_FALSE(*f1.is_oneway_ref());
+
+  const auto& f2 = s.functions_ref()[2];
+  EXPECT_EQ(*f2.name_ref(), "noReturn");
+  EXPECT_TRUE(*f2.is_oneway_ref());
+}
+
+TEST_F(ServiceMetadataTest, ServiceNameTestWithUri) {
+  auto& metadata = getMetadata<apache::thrift::ServiceHandler<
+      metadata::test::services::MyTestServiceWithUri>>();
+  EXPECT_EQ(
+      response_.services_ref()->front().module_ref()->name_ref(),
+      "service_test_with_package_name");
+
+  const auto& p = metadata.services_ref()->at(
+      "service_test_with_package_name.ParentServiceWithUri");
+  EXPECT_EQ(
+      *p.name_ref(), "service_test_with_package_name.ParentServiceWithUri");
+  EXPECT_FALSE(p.uri()->empty());
+  EXPECT_EQ(*p.uri(), "meta.com/metadata/test/ParentServiceWithUri");
+  EXPECT_EQ(p.functions_ref()->size(), 1);
+  EXPECT_EQ(apache::thrift::get_pointer(p.parent()), nullptr);
+
+  const auto& f = p.functions_ref()[0];
+  EXPECT_EQ(*f.name_ref(), "parentFun");
+  EXPECT_EQ(f.return_type_ref()->getType(), ThriftType::Type::t_primitive);
+  EXPECT_EQ(
+      f.return_type_ref()->get_t_primitive(),
+      ThriftPrimitiveType::THRIFT_I32_TYPE);
+  EXPECT_EQ(f.arguments_ref()->size(), 0);
+  EXPECT_EQ(f.exceptions_ref()->size(), 0);
+
+  const auto& s = metadata.services_ref()->at(
+      *response_.services_ref()->front().service_name_ref());
+  EXPECT_EQ(
+      *s.name_ref(), "service_test_with_package_name.MyTestServiceWithUri");
+  EXPECT_FALSE(s.uri()->empty());
+  EXPECT_EQ(*s.uri(), "meta.com/metadata/test/MyTestServiceWithUri");
+  EXPECT_EQ(s.functions_ref()->size(), 3);
+  EXPECT_EQ(
+      *apache::thrift::get_pointer(s.parent()),
+      "service_test_with_package_name.ParentServiceWithUri");
+
+  const auto& f0 = s.functions_ref()[0];
+  EXPECT_EQ(*f0.name_ref(), "getAllTypes");
+  EXPECT_EQ(f0.return_type_ref()->getType(), ThriftType::Type::t_list);
+  auto retType1 = f0.return_type_ref()->get_t_list();
+  auto elemType = retType1.valueType_ref().get();
+  EXPECT_EQ(elemType->getType(), ThriftType::Type::t_struct);
+  EXPECT_EQ(*elemType->get_t_struct().name_ref(), "typedef_test.Types");
+  EXPECT_EQ(f0.arguments_ref()->size(), 0);
+  EXPECT_EQ(f0.exceptions_ref()->size(), 0);
+  EXPECT_FALSE(*f0.is_oneway_ref());
+
+  const auto& f1 = s.functions_ref()[1];
+  EXPECT_EQ(*f1.name_ref(), "getStr");
+  EXPECT_EQ(f1.return_type_ref()->getType(), ThriftType::Type::t_primitive);
+  EXPECT_EQ(
+      f1.return_type_ref()->get_t_primitive(),
+      ThriftPrimitiveType::THRIFT_STRING_TYPE);
+  EXPECT_EQ(*f1.arguments_ref()[0].id_ref(), 1);
+  EXPECT_EQ(*f1.arguments_ref()[0].name_ref(), "input");
+  EXPECT_EQ(*f1.arguments_ref()[0].is_optional_ref(), false);
+  EXPECT_EQ(
+      f1.arguments_ref()[0].type_ref()->getType(),
+      ThriftType::Type::t_primitive);
+  EXPECT_EQ(
+      f1.arguments_ref()[0].type_ref()->get_t_primitive(),
+      ThriftPrimitiveType::THRIFT_I32_TYPE);
   EXPECT_FALSE(*f1.is_oneway_ref());
 
   const auto& f2 = s.functions_ref()[2];

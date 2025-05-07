@@ -214,6 +214,9 @@ struct ThriftService {
   2: list<ThriftFunction> functions;
   3: optional string parent;
   4: list<ThriftConstStruct> structured_annotations;
+  // Universal identifier will be empty when there's no @thrift.uri annotation,
+  // nor package name set in the thrift file.
+  5: string uri;
 }
 
 // ThriftModuleContext represents module-specific metadata.

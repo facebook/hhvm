@@ -374,13 +374,17 @@ class TSSLServerSocket(TServerSocket):
     def accept(self):
         plain_client, addr = self._sock_accept()
         try:
-            client = ssl.wrap_socket(
+            context = ssl.SSLContext(self.ssl_version)
+            context.verify_mode = self.cert_reqs
+
+            if self.certfile:
+                context.load_cert_chain(certfile=self.certfile)
+            if self.ca_certs:
+                context.load_verify_locations(cafile=self.ca_certs)
+
+            client = context.wrap_socket(
                 plain_client,
-                certfile=self.certfile,
                 server_side=True,
-                ssl_version=self.ssl_version,
-                cert_reqs=self.cert_reqs,
-                ca_certs=self.ca_certs,
             )
         except ssl.SSLError:
             # failed handshake/ssl wrap, close socket to client

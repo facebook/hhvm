@@ -14,9 +14,8 @@ type changes =
   | SyncChanges of SSet.t
       (** contains all changes up to the point that the notifier was invoked *)
   | AsyncChanges of SSet.t
-      (** contains whatever changes have been pushed up to this moment *)
-  | StateEnter of string * Hh_json.json option
-  | StateLeave of string * Hh_json.json option
+      (** contains some of the changes up to the point that the notifier was invoked,
+          but there may be more pending changes that have not been included *)
 
 type clock = ServerNotifierTypes.clock = Watchman of Watchman.clock
 [@@deriving show, eq]
@@ -42,7 +41,7 @@ type t =
     }
   | MockChanges of {
       get_changes_async: unit -> changes;
-      get_changes_sync: unit -> changes;
+      get_changes_sync: unit -> SSet.t;
     }
 
 type indexer = (string -> bool) -> unit -> string list
@@ -131,13 +130,14 @@ let init
   (notifier, indexer notifier)
 
 let init_mock
-    ~(get_changes_async : unit -> changes) ~(get_changes_sync : unit -> changes)
+    ~(get_changes_async : unit -> changes) ~(get_changes_sync : unit -> SSet.t)
     : t =
   MockChanges { get_changes_async; get_changes_sync }
 
 let init_null () : t =
   let f () = SyncChanges SSet.empty in
-  init_mock ~get_changes_async:f ~get_changes_sync:f
+  let g () = SSet.empty in
+  init_mock ~get_changes_async:f ~get_changes_sync:g
 
 let wait_until_ready (t : t) : unit =
   match t with
@@ -155,55 +155,33 @@ let wait_until_ready (t : t) : unit =
        done, so we don't have anything else to wait for here. *)
     ()
 
-(** Helper conversion function, from a single watchman-changes to ServerNotifier.changes *)
-let async_changes_from_watchman_changes
+(** Helper conversion function, from a single watchman-changes to a set of changed
+    files. Also handles informing ServerRevisionTracker about changes *)
+let convert_watchman_changes
     ~(root : Path.t)
     ~(local_config : ServerLocalConfig.t)
-    (watchman_changes : Watchman.pushed_changes) : changes =
+    (watchman_changes : Watchman.pushed_changes) : SSet.t =
   match watchman_changes with
   | Watchman.Changed_merge_base _ ->
     let () =
       Hh_logger.log "Error: Typechecker does not use Source Control Aware mode"
     in
     raise Exit_status.(Exit_with Watchman_invalid_result)
-  | Watchman.State_enter (name, metadata) ->
+  | Watchman.State_enter (name, _metadata) ->
     if local_config.ServerLocalConfig.hg_aware then
       ServerRevisionTracker.on_state_enter name;
-    StateEnter (name, metadata)
+    SSet.empty
   | Watchman.State_leave (name, metadata) ->
     if local_config.ServerLocalConfig.hg_aware then
       ServerRevisionTracker.on_state_leave root name metadata;
-    StateLeave (name, metadata)
+    SSet.empty
   | Watchman.Files_changed changes ->
     ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
-    AsyncChanges changes
+    changes
 
-(** Helper conversion function, from a list of watchman-changes to combined ServerNotifier.changes *)
-let sync_changes_from_watchman_changes_list
-    ~(root : Path.t)
-    ~(local_config : ServerLocalConfig.t)
-    (watchman_changes_list : Watchman.pushed_changes list) : changes =
-  let set =
-    List.fold_left
-      watchman_changes_list
-      ~f:(fun acc changes ->
-        match
-          async_changes_from_watchman_changes ~root ~local_config changes
-        with
-        | Unavailable
-        | StateEnter _
-        | StateLeave _ ->
-          acc
-        | SyncChanges changes
-        | AsyncChanges changes ->
-          SSet.union acc changes)
-      ~init:SSet.empty
-  in
-  SyncChanges set
-
-let get_changes_sync (t : t) : changes * clock option =
+let get_changes_sync (t : t) : SSet.t * clock option =
   match t with
-  | IndexOnly _ -> (SyncChanges SSet.empty, None)
+  | IndexOnly _ -> (SSet.empty, None)
   | MockChanges { get_changes_sync; _ } -> (get_changes_sync (), None)
   | Dfind { dfind; _ } ->
     let set =
@@ -216,7 +194,7 @@ let get_changes_sync (t : t) : changes * clock option =
       with
       | _ -> Exit.exit Exit_status.Dfind_died
     in
-    (SyncChanges set, None)
+    (set, None)
   | Watchman { local_config; watchman; root; _ } ->
     let (watchman', changes) =
       Watchman.get_changes_synchronously
@@ -227,7 +205,8 @@ let get_changes_sync (t : t) : changes * clock option =
     in
     watchman := watchman';
     let changes =
-      sync_changes_from_watchman_changes_list ~root ~local_config changes
+      List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
+          SSet.union acc (convert_watchman_changes ~root ~local_config c))
     in
     let clock = Watchman.get_clock !watchman in
     (changes, Some (Watchman clock))
@@ -236,7 +215,9 @@ let get_changes_async (t : t) : changes * clock option =
   match t with
   | IndexOnly _ -> (SyncChanges SSet.empty, None)
   | MockChanges { get_changes_async; _ } -> (get_changes_async (), None)
-  | Dfind _ -> get_changes_sync t
+  | Dfind _ ->
+    let (changes, _) = get_changes_sync t in
+    (SyncChanges changes, None)
   | Watchman { watchman; root; local_config; _ } ->
     let (watchman', changes) = Watchman.get_changes !watchman in
     watchman := watchman';
@@ -244,9 +225,13 @@ let get_changes_async (t : t) : changes * clock option =
       match changes with
       | Watchman.Watchman_unavailable -> Unavailable
       | Watchman.Watchman_pushed changes ->
-        async_changes_from_watchman_changes ~root ~local_config changes
+        AsyncChanges (convert_watchman_changes ~root ~local_config changes)
       | Watchman.Watchman_synchronous changes ->
-        sync_changes_from_watchman_changes_list ~root ~local_config changes
+        let accumulated_changes =
+          List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
+              SSet.union acc (convert_watchman_changes ~root ~local_config c))
+        in
+        SyncChanges accumulated_changes
     in
     let clock = Watchman.get_clock !watchman in
     (changes, Some (Watchman clock))

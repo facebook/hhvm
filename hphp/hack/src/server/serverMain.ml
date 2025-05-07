@@ -185,8 +185,15 @@ let query_notifier
     match query_kind with
     | `Sync ->
       ( env,
-        (try ServerNotifier.get_changes_sync genv.notifier with
-        | Watchman.Timeout -> (ServerNotifier.Unavailable, None)) )
+        begin
+          try
+            let (changes, clock) =
+              ServerNotifier.get_changes_sync genv.notifier
+            in
+            (ServerNotifier.SyncChanges changes, clock)
+          with
+          | Watchman.Timeout -> (ServerNotifier.Unavailable, None)
+        end )
     | `Async ->
       ( { env with last_notifier_check_time = start_time },
         ServerNotifier.get_changes_async genv.notifier )
@@ -195,10 +202,14 @@ let query_notifier
   let telemetry = Telemetry.duration telemetry ~key:"notified" ~start_time in
   let unpack_updates = function
     | ServerNotifier.Unavailable -> (true, SSet.empty)
-    | ServerNotifier.StateEnter _ -> (true, SSet.empty)
-    | ServerNotifier.StateLeave _ -> (true, SSet.empty)
     | ServerNotifier.AsyncChanges updates -> (true, updates)
-    | ServerNotifier.SyncChanges updates -> (false, updates)
+    | ServerNotifier.SyncChanges updates ->
+      (* We get SyncChanges either
+         a) due to a call to to  ServerNotifier.get_changes_sync  (see match on query_kind above) or
+         b) if we used ServerNotifier.get_changes_async, but the latter actually received
+            changes in a synchronous fashion,
+         In any case, the updates are up to date, meaning that the staleness flag is set to false *)
+      (false, updates)
   in
   let (updates_stale, raw_updates) = unpack_updates raw_updates in
   let rec pump_async_updates acc acc_clock =

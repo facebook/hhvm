@@ -135,14 +135,13 @@ let run_loop_once :
 
   let did_read_disk_changes_ref = ref false in
   let get_changes_sync () =
-    ServerNotifier.SyncChanges
-      (if not !did_read_disk_changes_ref then (
-        did_read_disk_changes_ref := true;
-        SSet.of_list (List.map disk_changes ~f:fst)
-      ) else
-        SSet.empty)
+    if not !did_read_disk_changes_ref then (
+      did_read_disk_changes_ref := true;
+      SSet.of_list (List.map disk_changes ~f:fst)
+    ) else
+      SSet.empty
   in
-  let get_changes_async () = get_changes_sync () in
+  let get_changes_async () = ServerNotifier.SyncChanges (get_changes_sync ()) in
   let genv =
     {
       !genv with

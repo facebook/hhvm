@@ -13,8 +13,6 @@ type changes =
       (** contains all changes up to the point that the notifier was invoked *)
   | AsyncChanges of SSet.t
       (** contains whatever changes have been pushed up to this moment *)
-  | StateEnter of string * Hh_json.json option
-  | StateLeave of string * Hh_json.json option
 
 type clock = ServerNotifierTypes.clock = Watchman of Watchman.clock
 [@@deriving show, eq]
@@ -32,7 +30,7 @@ val init :
 val init_null : unit -> t
 
 val init_mock :
-  get_changes_async:(unit -> changes) -> get_changes_sync:(unit -> changes) -> t
+  get_changes_async:(unit -> changes) -> get_changes_sync:(unit -> SSet.t) -> t
 
 val wait_until_ready : t -> unit
 
@@ -40,7 +38,9 @@ val wait_until_ready : t -> unit
 or SyncChanges, depending on the underlying notifier's state *)
 val get_changes_async : t -> changes * clock option
 
-(** This will always return SyncChanges, all changes up to the point this was invoked. *)
-val get_changes_sync : t -> changes * clock option
+(** Returns all changes up to the point this was invoked, represented as a set
+of changed files. This will raise an exception if the file watching service
+is unavailable *)
+val get_changes_sync : t -> SSet.t * clock option
 
 val async_reader_opt : t -> Buffered_line_reader.t option

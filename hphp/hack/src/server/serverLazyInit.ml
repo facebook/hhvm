@@ -820,10 +820,7 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
   let (changes, clock) = ServerNotifier.get_changes_async genv.notifier in
   let files_changed_while_parsing =
     match changes with
-    | ServerNotifier.StateEnter _
-    | ServerNotifier.StateLeave _
-    | ServerNotifier.Unavailable ->
-      Relative_path.Set.empty
+    | ServerNotifier.Unavailable -> Relative_path.Set.empty
     | ServerNotifier.SyncChanges updates
     | ServerNotifier.AsyncChanges updates ->
       let root = Path.to_string root in

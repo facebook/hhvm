@@ -36,8 +36,8 @@ class HPACKHeaderName {
     storeAddress(name);
   }
   explicit HPACKHeaderName(HTTPHeaderCode headerCode) {
-    CHECK_NE(headerCode, HTTP_HEADER_NONE);
-    CHECK_NE(headerCode, HTTP_HEADER_OTHER);
+    CHECK_NE(headerCode, HTTPHeaderCode::HTTP_HEADER_NONE);
+    CHECK_NE(headerCode, HTTPHeaderCode::HTTP_HEADER_OTHER);
     address_ = HTTPCommonHeaders::getPointerToName(
         headerCode, HTTPCommonHeaderTableType::TABLE_LOWERCASE);
   }
@@ -222,7 +222,7 @@ template <>
 struct hash<proxygen::HPACKHeaderName> {
   size_t operator()(const proxygen::HPACKHeaderName& headerName) const {
     auto code = headerName.getHeaderCode();
-    if (code == proxygen::HTTP_HEADER_OTHER) {
+    if (code == proxygen::HTTPHeaderCode::HTTP_HEADER_OTHER) {
       return std::hash<std::string>()(headerName.get());
     }
     return std::hash<uint8_t>()(code);

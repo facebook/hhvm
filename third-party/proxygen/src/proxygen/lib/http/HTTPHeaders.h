@@ -429,7 +429,7 @@ void HTTPHeaders::add(folly::StringPiece name, T&& value) {
   assert(name.size());
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   auto namePtr =
-      ((code == HTTP_HEADER_OTHER)
+      ((code == HTTPHeaderCode::HTTP_HEADER_OTHER)
            ? new std::string(name.data(), name.size())
            : (std::string*)HTTPCommonHeaders::getPointerToName(code));
   emplace_back(code, namePtr, std::forward<T>(value));
@@ -457,13 +457,13 @@ void HTTPHeaders::add(HTTPHeaderCode code, T&& value) {
   static_assert(true, "semicolon required")
 
 // iterate over the positions of all headers with given name
-#define ITERATE_OVER_STRINGS(String, Block)              \
-  ITERATE_OVER_CODES(HTTP_HEADER_OTHER, {                \
-    if (caseInsensitiveEqual((String), *names()[pos])) { \
-      {                                                  \
-        Block                                            \
-      }                                                  \
-    }                                                    \
+#define ITERATE_OVER_STRINGS(String, Block)               \
+  ITERATE_OVER_CODES(HTTPHeaderCode::HTTP_HEADER_OTHER, { \
+    if (caseInsensitiveEqual((String), *names()[pos])) {  \
+      {                                                   \
+        Block                                             \
+      }                                                   \
+    }                                                     \
   })
 
 // iterate over the positions of all headers with given name ignoring - and _
@@ -482,7 +482,7 @@ void HTTPHeaders::forEach(LAMBDA func) const {
   auto n = names();
   auto v = values();
   for (size_t i = 0; i < length_; ++i) {
-    if (c[i] != HTTP_HEADER_NONE) {
+    if (c[i] != HTTPHeaderCode::HTTP_HEADER_NONE) {
       func(*n[i], v[i]);
     }
   }
@@ -494,7 +494,7 @@ void HTTPHeaders::forEachWithCode(LAMBDA func) const {
   auto n = names();
   auto v = values();
   for (size_t i = 0; i < length_; ++i) {
-    if (c[i] != HTTP_HEADER_NONE) {
+    if (c[i] != HTTPHeaderCode::HTTP_HEADER_NONE) {
       func(c[i], *n[i], v[i]);
     }
   }
@@ -504,7 +504,7 @@ template <typename LAMBDA> // const string & -> bool
 bool HTTPHeaders::forEachValueOfHeader(folly::StringPiece name,
                                        LAMBDA func) const {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
-  if (code != HTTP_HEADER_OTHER) {
+  if (code != HTTPHeaderCode::HTTP_HEADER_OTHER) {
     return forEachValueOfHeader(code, func);
   } else {
     ITERATE_OVER_STRINGS(name, {
@@ -549,16 +549,16 @@ bool HTTPHeaders::removeByPredicate(LAMBDA func) {
   auto n = names();
   auto v = values();
   for (size_t i = 0; i < length_; ++i) {
-    if (c[i] == HTTP_HEADER_NONE || !func(c[i], *n[i], v[i])) {
+    if (c[i] == HTTPHeaderCode::HTTP_HEADER_NONE || !func(c[i], *n[i], v[i])) {
       continue;
     }
 
-    if (c[i] == HTTP_HEADER_OTHER) {
+    if (c[i] == HTTPHeaderCode::HTTP_HEADER_OTHER) {
       delete n[i];
       n[i] = nullptr;
     }
 
-    c[i] = HTTP_HEADER_NONE;
+    c[i] = HTTPHeaderCode::HTTP_HEADER_NONE;
     ++deletedCount_;
     removed = true;
   }

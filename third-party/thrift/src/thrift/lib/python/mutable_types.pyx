@@ -333,7 +333,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         # When `deepcopy` is called on an instance (`self`), the instance must
         # already be populated in `_fbthrift_data`.
         assert self._fbthrift_has_struct_instance(self._fbthrift_data)
-        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data[:-1]))
+        return self._fbthrift_from_internal_data(copy.deepcopy(self._fbthrift_data[:-1]))
 
     def fbthrift_copy_from(self, other):
         """
@@ -527,7 +527,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         self._fbthrift_field_cache[field_index] = None
 
     @classmethod
-    def _fbthrift_create(cls, data):
+    def _fbthrift_from_internal_data(cls, data):
         if cls._fbthrift_has_struct_instance(data):
             # An instance of `MutableStruct` has already created for given
             # `._fbthrift_data`, just return the previous instance.
@@ -1103,16 +1103,16 @@ cdef class MutableUnion(MutableStructOrUnion):
         # When `copy` is called on an instance (`self`), the instance must
         # already be populated in `_fbthrift_data`.
         assert len(self._fbthrift_data) == 3
-        return self._fbthrift_create(copy.copy(self._fbthrift_data[:-1]))
+        return self._fbthrift_from_internal_data(copy.copy(self._fbthrift_data[:-1]))
 
     def __deepcopy__(self, memo):
         # When `deepcopy` is called on an instance (`self`), the instance must
         # already be populated in `_fbthrift_data`.
         assert len(self._fbthrift_data) == 3
-        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data[:-1]))
+        return self._fbthrift_from_internal_data(copy.deepcopy(self._fbthrift_data[:-1]))
 
     @classmethod
-    def _fbthrift_create(cls, data):
+    def _fbthrift_from_internal_data(cls, data):
         if cls._fbthrift_has_union_instance(data):
             # An instance of `MutableUnion` has already created for given
             # `._fbthrift_data`, just return the previous instance.

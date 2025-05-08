@@ -95,7 +95,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
 
     # convert deserialized data to user format
     cdef to_python_value(self, object struct_list):
-        return self._mutable_struct_class._fbthrift_create(struct_list)
+        return self._mutable_struct_class._fbthrift_from_internal_data(struct_list)
 
     def to_container_value(self, object value not None):
         """

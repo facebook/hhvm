@@ -204,7 +204,7 @@ cdef class MutableGeneratedError(Error):
         return f"{type(self).__name__}({fields})"
 
     def __deepcopy__(MutableGeneratedError self, memo):
-        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data, memo))
+        return self._fbthrift_from_internal_data(copy.deepcopy(self._fbthrift_data, memo))
 
     def __eq__(MutableGeneratedError self, other):
         if other is self:
@@ -254,7 +254,7 @@ cdef class MutableGeneratedError(Error):
         return length
 
     @classmethod
-    def _fbthrift_create(cls, data):
+    def _fbthrift_from_internal_data(cls, data):
         if cls._fbthrift_has_exception_instance(data):
             # An instance of `MutableGeneratedError` has already created for
             # given `._fbthrift_data`, just return the previous instance.

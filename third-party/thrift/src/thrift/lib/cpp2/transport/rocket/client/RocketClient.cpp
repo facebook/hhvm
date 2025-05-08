@@ -45,9 +45,12 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+THRIFT_FLAG_DEFINE_bool(rocket_client_new_protocol_key, true);
 THRIFT_FLAG_DEFINE_bool(rocket_client_binary_rpc_metadata_encoding, false);
+THRIFT_FLAG_DEFINE_bool(rocket_client_rocket_skip_protocol_key, false);
 
 namespace apache::thrift {
 
@@ -84,12 +87,59 @@ folly::exception_wrapper makeContractViolation(std::string msg) {
           STREAMING_CONTRACT_VIOLATION,
       std::move(msg));
 }
+
+std::unique_ptr<rocket::SetupFrame> makeSetupFrame(
+    RequestSetupMetadata const& meta) {
+  uint32_t serialized_size;
+  folly::IOBufQueue paramQueue;
+
+  bool encodeMetadataUsingBinary =
+      THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding);
+
+  if (meta.encodeMetadataUsingBinary().has_value()) {
+    encodeMetadataUsingBinary = meta.encodeMetadataUsingBinary().value();
+  }
+
+  // TODO: migrate this to
+  if (encodeMetadataUsingBinary) {
+    BinaryProtocolWriter binaryProtocolWriter;
+    binaryProtocolWriter.setOutput(&paramQueue);
+    meta.write(&binaryProtocolWriter);
+    serialized_size = meta.serializedSize(&binaryProtocolWriter);
+  } else {
+    CompactProtocolWriter compactProtocolWriter;
+    compactProtocolWriter.setOutput(&paramQueue);
+    meta.write(&compactProtocolWriter);
+    serialized_size = meta.serializedSize(&compactProtocolWriter);
+  }
+
+  // Serialize RocketClient's major/minor version (which is separate from the
+  // rsocket protocol major/minor version) into setup metadata.
+  auto buf = folly::IOBuf::createCombined(sizeof(int32_t) + serialized_size);
+  folly::IOBufQueue queue;
+  queue.append(std::move(buf));
+  folly::io::QueueAppender appender(&queue, /* do not grow */ 0);
+  if (!THRIFT_FLAG(rocket_client_rocket_skip_protocol_key)) {
+    const uint32_t protocolKey = THRIFT_FLAG(rocket_client_new_protocol_key)
+        ? RpcMetadata_constants::kRocketProtocolKey()
+        : 1;
+
+    appender.writeBE<uint32_t>(protocolKey); // Rocket protocol key
+  }
+  // Append serialized setup parameters to setup frame metadata
+  appender.insert(paramQueue.move());
+
+  return std::make_unique<SetupFrame>(
+      rocket::Payload::makeFromMetadataAndData(queue.move(), {}),
+      encodeMetadataUsingBinary);
+}
+
 } // namespace
 
 RocketClient::RocketClient(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
-    std::unique_ptr<SetupFrame> setupFrame,
+    RequestSetupMetadata&& setupMetadata,
     int32_t keepAliveTimeoutMs,
     std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr)
     : evb_(&evb),
@@ -99,7 +149,7 @@ RocketClient::RocketClient(
       detachableLoopCallback_(*this),
       closeLoopCallback_(*this),
       eventBaseDestructionCallback_(*this),
-      setupFrame_(std::move(setupFrame)),
+      setupFrame_(makeSetupFrame(setupMetadata)),
       encodeMetadataUsingBinary_(setupFrame_->encodeMetadataUsingBinary()) {
   DCHECK(socket_ != nullptr);
   socket_->setReadCB(&parser_);
@@ -136,13 +186,13 @@ RocketClient::~RocketClient() {
 RocketClient::Ptr RocketClient::create(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
-    std::unique_ptr<SetupFrame> setupFrame,
+    RequestSetupMetadata&& setupMetadata,
     int32_t keepAliveTimeoutMs,
     std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr) {
   return Ptr(new RocketClient(
       evb,
       std::move(socket),
-      std::move(setupFrame),
+      std::move(setupMetadata),
       keepAliveTimeoutMs,
       std::move(allocatorPtr)));
 }

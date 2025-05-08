@@ -95,10 +95,7 @@ class RocketNetworkTest : public testing::Test {
           &evb,
           folly::SocketAddress("::1", this->server_->getListeningPort())));
       client = RocketClient::create(
-          evb,
-          std::move(socket),
-          std::make_unique<rocket::SetupFrame>(
-              this->client_->makeTestSetupFrame()));
+          evb, std::move(socket), this->client_->makeTestSetupMetadata());
     });
   }
 
@@ -697,9 +694,7 @@ TEST_F(RocketNetworkTest, RocketClientEventBaseDestruction) {
       evb.get(),
       folly::SocketAddress("::1", this->server_->getListeningPort())));
   auto client = RocketClient::create(
-      *evb,
-      std::move(socket),
-      std::make_unique<SetupFrame>(this->client_->makeTestSetupFrame()));
+      *evb, std::move(socket), this->client_->makeTestSetupMetadata());
   EXPECT_NE(nullptr, client->getTransportWrapper());
 
   evb.reset();
@@ -1373,9 +1368,7 @@ TEST_F(RocketNetworkTest, CloseNowWithPendingWriteCallback) {
   auto evb = std::make_unique<folly::EventBase>();
   auto sock = folly::AsyncTransport::UniquePtr(new FakeTransport(evb.get()));
   auto client = RocketClient::create(
-      *evb,
-      std::move(sock),
-      std::make_unique<SetupFrame>(this->client_->makeTestSetupFrame()));
+      *evb, std::move(sock), this->client_->makeTestSetupMetadata());
   // write something to the socket, without holding keepalive of evb and waiting
   // for write callback
   client->cancelStream(StreamId(1));

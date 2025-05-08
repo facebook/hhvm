@@ -156,6 +156,7 @@ class RocketClientChannel final : public ClientChannel,
       folly::EventBase* evb,
       folly::AsyncTransport::UniquePtr socket,
       RequestSetupMetadata meta,
+      int32_t keepAliveTimeoutMs = 0,
       std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
   RocketClientChannel(const RocketClientChannel&) = delete;
@@ -194,7 +195,7 @@ class RocketClientChannel final : public ClientChannel,
   template <typename CallbackPtr>
   bool canHandleRequest(CallbackPtr& cb);
 
-  rocket::SetupFrame makeSetupFrame(RequestSetupMetadata meta);
+  RequestSetupMetadata populateSetupMetadata(RequestSetupMetadata&& meta);
 
   int32_t getServerVersion() const;
 

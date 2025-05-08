@@ -71,7 +71,7 @@ class RocketTestClient {
       Payload request);
   void sendRequestSink(SinkClientCallback* callback, Payload request);
 
-  rocket::SetupFrame makeTestSetupFrame(
+  RequestSetupMetadata makeTestSetupMetadata(
       MetadataOpaqueMap<std::string, std::string> md =
           MetadataOpaqueMap<std::string, std::string>{
               {"rando_key", "setup_data"}});

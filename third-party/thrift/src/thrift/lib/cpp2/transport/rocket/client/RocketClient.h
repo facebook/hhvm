@@ -80,7 +80,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
   static Ptr create(
       folly::EventBase& evb,
       folly::AsyncTransport::UniquePtr socket,
-      std::unique_ptr<SetupFrame> setupFrame,
+      RequestSetupMetadata&& setupMetadata,
       int32_t keepAliveTimeoutMs = 0,
       std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
@@ -448,7 +448,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
   RocketClient(
       folly::EventBase& evb,
       folly::AsyncTransport::UniquePtr socket,
-      std::unique_ptr<SetupFrame> setupFrame,
+      RequestSetupMetadata&& setupMetadata,
       int32_t keepAliveTimeoutMs = 0,
       std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 

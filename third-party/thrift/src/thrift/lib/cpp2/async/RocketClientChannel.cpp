@@ -60,9 +60,7 @@ const int64_t kRocketClientMaxVersion = 10;
 const int64_t kRocketClientMinVersion = 8;
 } // namespace
 
-THRIFT_FLAG_DEFINE_bool(rocket_client_new_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_client_max_version, kRocketClientMaxVersion);
-THRIFT_FLAG_DEFINE_bool(rocket_client_rocket_skip_protocol_key, false);
 THRIFT_FLAG_DEFINE_bool(rocket_client_enable_bidirectional_propagation, false);
 
 using namespace apache::thrift::transport;
@@ -563,6 +561,11 @@ class FirstRequestProcessorSink : public SinkClientCallback,
   folly::EventBase* evb_;
   rocket::RocketClient::DestructionGuardedClient guardedClient_;
 };
+
+int32_t getMetaKeepAliveTimeoutMs(RequestSetupMetadata& meta) {
+  return meta.keepAliveTimeoutMs().value_or(0);
+}
+
 } // namespace
 
 class RocketClientChannel::SingleRequestSingleResponseCallback final
@@ -723,8 +726,8 @@ class RocketClientChannel::SingleRequestNoResponseCallback final
   RequestClientCallback::Ptr cb_;
 };
 
-rocket::SetupFrame RocketClientChannel::makeSetupFrame(
-    RequestSetupMetadata meta) {
+RequestSetupMetadata RocketClientChannel::populateSetupMetadata(
+    RequestSetupMetadata&& meta) {
   meta.maxVersion_ref() =
       std::min(kRocketClientMaxVersion, THRIFT_FLAG(rocket_client_max_version));
   meta.minVersion_ref() = kRocketClientMinVersion;
@@ -734,7 +737,7 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
     // TODO: verify if we can avoid overriding hostname blindly
     // here.
     clientMetadata.hostname_ref().from_optional(hostMetadata->hostname);
-    // no otherMetadata provided in makeSetupFrame override, copy
+    // no otherMetadata provided in populateSetupMetadata override, copy
     // hostMetadata.otherMetadata directly instead of doing inserts
     if (!apache::thrift::get_pointer(clientMetadata.otherMetadata())) {
       clientMetadata.otherMetadata_ref().from_optional(
@@ -753,62 +756,20 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
     clientMetadata.agent_ref() = "RocketClientChannel.cpp";
   }
 
-  uint32_t serialized_size;
-  folly::IOBufQueue paramQueue;
-
-  bool encodeMetadataUsingBinary =
-      THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding);
-
-  if (meta.encodeMetadataUsingBinary().has_value()) {
-    encodeMetadataUsingBinary = meta.encodeMetadataUsingBinary().value();
-  }
-
-  // TODO: migrate this to
-  if (encodeMetadataUsingBinary) {
-    BinaryProtocolWriter binaryProtocolWriter;
-    binaryProtocolWriter.setOutput(&paramQueue);
-    meta.write(&binaryProtocolWriter);
-    serialized_size = meta.serializedSize(&binaryProtocolWriter);
-  } else {
-    CompactProtocolWriter compactProtocolWriter;
-    compactProtocolWriter.setOutput(&paramQueue);
-    meta.write(&compactProtocolWriter);
-    serialized_size = meta.serializedSize(&compactProtocolWriter);
-  }
-
-  // Serialize RocketClient's major/minor version (which is separate from the
-  // rsocket protocol major/minor version) into setup metadata.
-  auto buf = folly::IOBuf::createCombined(sizeof(int32_t) + serialized_size);
-  folly::IOBufQueue queue;
-  queue.append(std::move(buf));
-  folly::io::QueueAppender appender(&queue, /* do not grow */ 0);
-  if (!THRIFT_FLAG(rocket_client_rocket_skip_protocol_key)) {
-    const uint32_t protocolKey = THRIFT_FLAG(rocket_client_new_protocol_key)
-        ? RpcMetadata_constants::kRocketProtocolKey()
-        : 1;
-
-    appender.writeBE<uint32_t>(protocolKey); // Rocket protocol key
-  }
-  // Append serialized setup parameters to setup frame metadata
-  appender.insert(paramQueue.move());
-
-  return rocket::SetupFrame(
-      rocket::Payload::makeFromMetadataAndData(queue.move(), {}),
-      encodeMetadataUsingBinary);
+  return meta;
 }
 
 RocketClientChannel::RocketClientChannel(
     folly::EventBase* eventBase,
     folly::AsyncTransport::UniquePtr socket,
     RequestSetupMetadata meta,
+    int32_t keepAliveTimeoutMs,
     std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr)
     : rocket::RocketClient(
           *eventBase,
           std::move(socket),
-          std::make_unique<rocket::SetupFrame>(makeSetupFrame(meta)),
-          apache::thrift::get_pointer(meta.keepAliveTimeoutMs())
-              ? *apache::thrift::get_pointer(meta.keepAliveTimeoutMs())
-              : 0,
+          populateSetupMetadata(std::move(meta)),
+          keepAliveTimeoutMs,
           allocatorPtr),
       evb_(eventBase) {
   apache::thrift::detail::hookForClientTransport(getTransport());
@@ -832,11 +793,13 @@ RocketClientChannel::Ptr RocketClientChannel::newChannel(
   return RocketClientChannel::Ptr(
       new RocketClientChannel(evb, std::move(socket), RequestSetupMetadata()));
 }
+
 RocketClientChannel::Ptr RocketClientChannel::newChannelWithMetadata(
     folly::AsyncTransport::UniquePtr socket, RequestSetupMetadata meta) {
   auto evb = socket->getEventBase();
-  return RocketClientChannel::Ptr(
-      new RocketClientChannel(evb, std::move(socket), std::move(meta)));
+  auto keepAliveTimeoutMs = getMetaKeepAliveTimeoutMs(meta);
+  return RocketClientChannel::Ptr(new RocketClientChannel(
+      evb, std::move(socket), std::move(meta), keepAliveTimeoutMs));
 }
 
 void RocketClientChannel::sendRequestResponse(

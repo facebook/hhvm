@@ -638,6 +638,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
  protected:
   std::optional<PayloadSerializer::PayloadSerializerHolder>
       payloadSerializerHolder_;
+  std::optional<CustomCompressionSetupRequest> customCompressionSetupRequest_;
   std::shared_ptr<CustomCompressor> customCompressor_;
 };
 

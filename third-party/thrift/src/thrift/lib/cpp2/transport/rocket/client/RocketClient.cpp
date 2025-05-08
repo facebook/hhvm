@@ -169,6 +169,13 @@ RocketClient::RocketClient(
   evb_->runOnDestruction(eventBaseDestructionCallback_);
   // Get or create flush manager from EventBaseLocal
   flushManager_ = &FlushManager::getInstance(*evb_);
+
+  // keep a copy to be used in later
+  if (setupMetadata.compressionSetupRequest()) {
+    if (auto ref = setupMetadata.compressionSetupRequest()->custom_ref()) {
+      customCompressionSetupRequest_.emplace(*ref);
+    }
+  }
 }
 
 RocketClient::~RocketClient() {
@@ -326,9 +333,19 @@ RocketClient::handleSetupResponseCustomCompression(
             *customSetupResponse.compressorName())));
   }
 
+  if (!customCompressionSetupRequest_) {
+    return folly::makeUnexpected(transport::TTransportException(
+        transport::TTransportException::INTERNAL_ERROR,
+        "Trying to setup custom compression on client without a valid request. "
+        "Maybe it has already been moved out? Did we somehow invoke "
+        "handleSetupResponseCustomCompression more than once?"));
+  }
+
   std::shared_ptr<CustomCompressor> compressor;
+  auto customSetupRequest = std::move(*customCompressionSetupRequest_);
   try {
     compressor = factory->make(
+        customSetupRequest,
         customSetupResponse,
         CustomCompressorFactory::CompressorLocation::CLIENT);
   } catch (const std::exception& ex) {

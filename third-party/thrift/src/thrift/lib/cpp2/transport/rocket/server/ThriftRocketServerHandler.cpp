@@ -323,19 +323,20 @@ ThriftRocketServerHandler::handleSetupFrameCustomCompression(
     return folly::makeUnexpected(
         "Cannot setup compression on server due to unrecognized request type");
   }
+  const auto& customSetupRequest = *setupRequest.custom_ref();
 
-  auto factory = CustomCompressorRegistry::get(
-      *setupRequest.custom_ref()->compressorName());
+  auto factory =
+      CustomCompressorRegistry::get(*customSetupRequest.compressorName());
   if (!factory) {
     return folly::makeUnexpected(fmt::format(
         "Custom compressor {} is not supported on server.",
-        *setupRequest.custom_ref()->compressorName()));
+        *customSetupRequest.compressorName()));
   }
 
   std::optional<CustomCompressionSetupResponse> response;
   try {
-    response = factory->createCustomCompressorNegotiationResponse(
-        *setupRequest.custom_ref());
+    response =
+        factory->createCustomCompressorNegotiationResponse(customSetupRequest);
   } catch (const std::exception& ex) {
     return folly::makeUnexpected(fmt::format(
         "Failed to make create negotiation response on server due to: {}",
@@ -350,7 +351,9 @@ ThriftRocketServerHandler::handleSetupFrameCustomCompression(
   std::shared_ptr<CustomCompressor> compressor;
   try {
     compressor = factory->make(
-        *response, CustomCompressorFactory::CompressorLocation::SERVER);
+        customSetupRequest,
+        *response,
+        CustomCompressorFactory::CompressorLocation::SERVER);
   } catch (const std::exception& ex) {
     return folly::makeUnexpected(fmt::format(
         "Failed to make create custom compressor on server due to: {}",

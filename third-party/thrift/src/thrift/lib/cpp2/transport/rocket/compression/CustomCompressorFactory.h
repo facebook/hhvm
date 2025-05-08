@@ -63,6 +63,7 @@ class CustomCompressorFactory {
   // shared_ptr is used since both payload serializer as well as the
   // client/server connection may need to hold onto the compressor.
   virtual std::shared_ptr<CustomCompressor> make(
+      CustomCompressionSetupRequest const& request,
       CustomCompressionSetupResponse const& response,
       CompressorLocation location) const = 0;
 };

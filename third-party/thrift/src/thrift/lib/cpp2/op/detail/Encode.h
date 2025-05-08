@@ -589,12 +589,7 @@ template <typename T>
 struct Encode<type::union_t<T>> : Encode<type::struct_t<T>> {};
 
 template <typename T>
-struct Encode<type::exception_t<T>> {
-  template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const T& s) const {
-    return s.write(&prot);
-  }
-};
+struct Encode<type::exception_t<T>> : Encode<type::struct_t<T>> {};
 
 template <typename T>
 struct Encode<type::enum_t<T>> {

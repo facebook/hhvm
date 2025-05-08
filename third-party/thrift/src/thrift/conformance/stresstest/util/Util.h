@@ -19,14 +19,10 @@
 #include <cstddef>
 #include <utility>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 void resetMemoryStats();
 
 size_t getThreadMemoryUsage();
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

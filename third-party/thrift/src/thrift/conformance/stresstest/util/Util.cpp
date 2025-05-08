@@ -18,9 +18,7 @@
 
 #include <folly/memory/MallctlHelper.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 namespace {
 size_t* getStatsPtr(const char* name) {
@@ -44,6 +42,4 @@ size_t getThreadMemoryUsage() {
   return allocatedp && deallocatedp ? (*allocatedp - *deallocatedp) : 0;
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

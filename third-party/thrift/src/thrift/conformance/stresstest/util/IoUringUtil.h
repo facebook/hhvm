@@ -35,11 +35,9 @@ DECLARE_string(io_zcrx_ifname);
 DECLARE_int32(io_zcrx_queue_id);
 
 #if FOLLY_HAS_LIBURING
-namespace apache {
-namespace thrift {
-namespace stress {
+
+namespace apache::thrift::stress {
 folly::IoUringBackend::Options getIoUringOptions();
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress
+
 #endif

@@ -31,9 +31,8 @@ DEFINE_int32(io_zcrx_refill_entries, 16384, "");
 DEFINE_string(io_zcrx_ifname, "eth0", "");
 DEFINE_int32(io_zcrx_queue_id, 0, "");
 #if FOLLY_HAS_LIBURING
-namespace apache {
-namespace thrift {
-namespace stress {
+
+namespace apache::thrift::stress {
 #if FOLLY_HAVE_WEAK_SYMBOLS
 FOLLY_ATTR_WEAK int resolve_napi_callback(
     int /*ifindex*/, uint32_t /*queueId*/);
@@ -92,7 +91,6 @@ folly::IoUringBackend::Options getIoUringOptions() {
 
   return options;
 }
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress
+
 #endif

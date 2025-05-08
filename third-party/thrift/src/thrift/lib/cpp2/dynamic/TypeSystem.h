@@ -24,6 +24,7 @@
 #include <folly/CppAttributes.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
+#include <folly/container/F14Set.h>
 #include <folly/container/span.h>
 #include <folly/lang/Assume.h>
 #include <folly/lang/Exception.h>
@@ -116,6 +117,17 @@ class TypeSystem {
    *   - InvalidTypeError if the type is not defined in the type system.
    */
   virtual DefinitionRef getUserDefinedType(UriView) = 0;
+
+  /**
+   * Generates a set of all user-defined type URIs currently known to the type
+   * system.
+   *
+   * Note: The TypeSystem can be extended with new types at any time, so this
+   * set is not guaranteed to be exhaustive. However, it is guaranteed to
+   * resolve all types that were known to the TypeSystem at the time of this
+   * call.
+   */
+  virtual folly::F14FastSet<Uri> getKnownUris() const = 0;
 };
 
 /**

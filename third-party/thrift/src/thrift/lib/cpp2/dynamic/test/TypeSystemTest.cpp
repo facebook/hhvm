@@ -89,6 +89,13 @@ SerializableOpaqueAliasDefinition makeOpaqueAlias(TypeId targetType) {
   return def;
 }
 
+void expectKnownUris(
+    const TypeSystem& typeSystem, std::initializer_list<Uri> uris) {
+  folly::F14FastSet<Uri> expectedUris{uris.begin(), uris.end()};
+  const auto knownUris = typeSystem.getKnownUris();
+  EXPECT_EQ(expectedUris, knownUris);
+}
+
 } // namespace
 
 TEST(TypeSystemTest, EmptyStruct) {
@@ -104,6 +111,8 @@ TEST(TypeSystemTest, EmptyStruct) {
       typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyStruct"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/EmptyStruct");
   EXPECT_EQ(def.asStruct().fields().size(), 0);
+
+  expectKnownUris(*typeSystem, {def.uri()});
 }
 
 TEST(TypeSystemTest, EmptyUnion) {
@@ -119,22 +128,26 @@ TEST(TypeSystemTest, EmptyUnion) {
       typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyUnion"));
   EXPECT_EQ(def.uri(), "meta.com/thrift/test/EmptyUnion");
   EXPECT_EQ(def.asUnion().fields().size(), 0);
+
+  expectKnownUris(*typeSystem, {def.uri()});
 }
 
 TEST(TypeSystemTest, NestedStructs) {
   TypeSystemBuilder builder;
 
   // Define a nested struct
+  Uri outerStructUri = "meta.com/thrift/test/OuterStruct";
   builder.addType(
-      "meta.com/thrift/test/OuterStruct",
+      outerStructUri,
       makeStruct({
           makeField(
               identity(1, "innerStruct"),
               optional,
               TypeIds::uri("meta.com/thrift/test/InnerStruct")),
       }));
+  Uri innerStructUri = "meta.com/thrift/test/InnerStruct";
   builder.addType(
-      "meta.com/thrift/test/InnerStruct",
+      innerStructUri,
       makeStruct({
           makeField(identity(1, "field1"), optional, TypeIds::I32),
       }));
@@ -142,9 +155,8 @@ TEST(TypeSystemTest, NestedStructs) {
   auto typeSystem = std::move(builder).build();
 
   // Check the outer struct
-  DefinitionRef outerDef =
-      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/OuterStruct"));
-  EXPECT_EQ(outerDef.uri(), "meta.com/thrift/test/OuterStruct");
+  DefinitionRef outerDef = typeSystem->getUserDefinedType(outerStructUri);
+  EXPECT_EQ(outerDef.uri(), outerStructUri);
   EXPECT_EQ(outerDef.asStruct().fields().size(), 1);
   const FieldNode& innerField = outerDef.asStruct().fields()[0];
   EXPECT_EQ(innerField.identity(), identity(1, "innerStruct"));
@@ -154,6 +166,8 @@ TEST(TypeSystemTest, NestedStructs) {
   EXPECT_EQ(field1.identity(), identity(1, "field1"));
   EXPECT_EQ(field1.presence(), optional);
   EXPECT_EQ(field1.type().id(), TypeIds::I32);
+
+  expectKnownUris(*typeSystem, {innerStructUri, outerStructUri});
 }
 
 TEST(TypeSystemTest, RecursiveStructAndUnion) {
@@ -204,6 +218,8 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
   EXPECT_EQ(
       std::addressof(unionField.type().asUnion()),
       std::addressof(unionDef.asUnion()));
+
+  expectKnownUris(*typeSystem, {structDef.uri(), unionDef.uri()});
 }
 
 TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
@@ -266,6 +282,10 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
       }
     }
   }
+
+  expectKnownUris(
+      *typeSystem,
+      {"meta.com/thrift/test/MyStruct", "meta.com/thrift/test/MyUnion"});
 }
 
 TEST(TypeSystemTest, CustomDefaultFieldValues) {

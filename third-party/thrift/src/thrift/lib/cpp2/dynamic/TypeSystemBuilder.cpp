@@ -225,6 +225,15 @@ class TypeSystemImpl final : public TypeSystem {
         fmt::format("Definition for uri '{}' was not found", uri));
   }
 
+  folly::F14FastSet<Uri> getKnownUris() const final {
+    folly::F14FastSet<Uri> result;
+    result.reserve(definitions.size());
+    for (const auto& [uri, _] : definitions) {
+      result.insert(uri);
+    }
+    return result;
+  }
+
   // NOTE: This function should ONLY be called within TypeSystemBuilder::build.
   // It is defined here instead of as a local lambda because the implementation
   // is recursive and such lambdas as a pain until C++23's "deducing this".

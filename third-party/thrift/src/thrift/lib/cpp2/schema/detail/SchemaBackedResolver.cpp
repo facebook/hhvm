@@ -90,7 +90,7 @@ class SchemaIndex {
 
   // Every top-level definition has exactly one associated graph node. These are
   // stored and kept alive in this map.
-  using DefinitionsByKey = folly::F14FastMap<
+  using DefinitionsByKey = folly::F14NodeMap<
       DefinitionKeyRef,
       DefinitionNode,
       DefinitionKeyHash,
@@ -100,12 +100,12 @@ class SchemaIndex {
   // Every top-level definition is defined in a .thrift file. This map allows
   // back-references from these definition graph nodes to have efficient lookup
   // of their containing file.
-  using ProgramsById = folly::F14FastMap<type::ProgramId, ProgramNode>;
+  using ProgramsById = folly::F14NodeMap<type::ProgramId, ProgramNode>;
   ProgramsById programsById_;
 
   // A mapping of value IDs to a runtime representation of their value. This
   // matches how the data is stored in schema.thrift and de-duplicated.
-  using ValuesById = folly::F14FastMap<type::ValueId, protocol::Value>;
+  using ValuesById = folly::F14NodeMap<type::ValueId, protocol::Value>;
   ValuesById valuesById_;
 
   // A mapping of a definition to its containing Thrift file. Chaining this with
@@ -117,13 +117,14 @@ class SchemaIndex {
       DefinitionKeyHash,
       DefinitionKeyEqual>;
 
-  ProgramsById createProgramsById(const type::Schema&, const DefinitionsByKey&);
-  ValuesById createValuesById(const type::Schema& schema);
+  void updateProgramsById(
+      ProgramsById&, const type::Schema&, const DefinitionsByKey&);
+  void updateValuesById(ValuesById&, const type::Schema& schema);
 
   static ProgramIdsByDefinitionKey createProgramIdsByDefinitionKey(
       const type::Schema&);
-  DefinitionsByKey createDefinitionsByKey(
-      const type::Schema&, const ProgramIdsByDefinitionKey&);
+  void updateDefinitionsByKey(
+      DefinitionsByKey&, const type::Schema&, const ProgramIdsByDefinitionKey&);
 
   DefinitionNode createDefinition(
       const ProgramIdsByDefinitionKey&,
@@ -195,11 +196,11 @@ class SchemaIndex {
   const DefinitionNode* definitionOf(const type::DefinitionKey&) const;
   ProgramNode::IncludesList programs() const;
 
-  void init(const type::Schema& schema) {
-    definitionsByKey_ =
-        createDefinitionsByKey(schema, createProgramIdsByDefinitionKey(schema));
-    programsById_ = createProgramsById(schema, definitionsByKey_);
-    valuesById_ = createValuesById(schema);
+  void updateIndices(const type::Schema& schema) {
+    updateDefinitionsByKey(
+        definitionsByKey_, schema, createProgramIdsByDefinitionKey(schema));
+    updateProgramsById(programsById_, schema, definitionsByKey_);
+    updateValuesById(valuesById_, schema);
   }
 };
 
@@ -207,7 +208,7 @@ class FullyResolvedSchemaRefBackedResolver : public Resolver {
  public:
   explicit FullyResolvedSchemaRefBackedResolver(const type::Schema& schema)
       : schema_(schema), index_(*this) {
-    index_.init(schema_);
+    index_.updateIndices(schema_);
   }
 
   const ProgramNode& programOf(const type::ProgramId& id) const override {
@@ -233,7 +234,7 @@ class FullyResolvedSchemaBackedResolver : public Resolver {
  public:
   explicit FullyResolvedSchemaBackedResolver(type::Schema&& schema)
       : schema_(std::move(schema)), index_(*this) {
-    index_.init(schema_);
+    index_.updateIndices(schema_);
   }
 
   const ProgramNode& programOf(const type::ProgramId& id) const override {
@@ -416,10 +417,14 @@ ProgramNode::IncludesList SchemaIndex::programs() const {
   return programs;
 }
 
-SchemaIndex::ProgramsById SchemaIndex::createProgramsById(
-    const type::Schema& schema, const DefinitionsByKey& definitionsByKey) {
-  ProgramsById result;
+void SchemaIndex::updateProgramsById(
+    SchemaIndex::ProgramsById& result,
+    const type::Schema& schema,
+    const DefinitionsByKey& definitionsByKey) {
   for (const type::Program& program : *schema.programs()) {
+    if (result.contains(*program.id())) {
+      continue;
+    }
     ProgramNode::Definitions definitions;
     for (const type::DefinitionKey& definitionKey : *program.definitionKeys()) {
       if (const DefinitionNode* definition =
@@ -436,16 +441,11 @@ SchemaIndex::ProgramsById SchemaIndex::createProgramsById(
             *program.includes(),
             std::move(definitions)));
   }
-  return result;
 }
 
-SchemaIndex::ValuesById SchemaIndex::createValuesById(
-    const type::Schema& schema) {
-  ValuesById result;
-  for (const auto& [valueId, value] : *schema.valuesMap()) {
-    result.emplace(valueId, value);
-  }
-  return result;
+void SchemaIndex::updateValuesById(
+    SchemaIndex::ValuesById& result, const type::Schema& schema) {
+  result.insert(schema.valuesMap()->begin(), schema.valuesMap()->end());
 }
 
 /* static */ SchemaIndex::ProgramIdsByDefinitionKey
@@ -459,11 +459,14 @@ SchemaIndex::createProgramIdsByDefinitionKey(const type::Schema& schema) {
   return result;
 }
 
-SchemaIndex::DefinitionsByKey SchemaIndex::createDefinitionsByKey(
+void SchemaIndex::updateDefinitionsByKey(
+    SchemaIndex::DefinitionsByKey& result,
     const type::Schema& schema,
     const SchemaIndex::ProgramIdsByDefinitionKey& programIdsByDefinitionKey) {
-  DefinitionsByKey result;
   for (const auto& entry : *schema.definitionsMap()) {
+    if (result.contains(entry.first)) {
+      continue;
+    }
     const type::DefinitionKey& definitionKey = entry.first;
     const type::Definition& definition = entry.second;
     const auto& definitionAttrs = visitDefinition(
@@ -507,7 +510,6 @@ SchemaIndex::DefinitionsByKey SchemaIndex::createDefinitionsByKey(
             std::move(alternative),
             schema));
   }
-  return result;
 }
 
 DefinitionNode SchemaIndex::createDefinition(
@@ -859,9 +861,7 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode(
       std::make_move_iterator(src.definitionsMap()->begin()),
       std::make_move_iterator(src.definitionsMap()->end()));
 
-  // Rebuild indices
-  // TODO: incremental rebuild
-  index_->init(dst);
+  index_->updateIndices(dst);
 
   if (auto* def = index_->definitionOf(key)) {
     return *def;

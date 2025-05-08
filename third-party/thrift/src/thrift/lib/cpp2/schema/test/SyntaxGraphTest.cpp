@@ -24,6 +24,7 @@
 
 #include <thrift/annotation/gen-cpp2/thrift_types.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_2_handlers.h>
+#include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_3_types.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_handlers.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_types.h>
 
@@ -666,6 +667,10 @@ TEST(SyntaxGraphTest, getDefinitionNode) {
   EXPECT_THROW(
       registry.getDefinitionNode<facebook::thrift::annotation::Experimental>(),
       std::out_of_range);
+
+  // Adding to the SyntaxGraph should not invalidate old nodes
+  registry.getDefinitionNode<test::OtherTestStruct>();
+  EXPECT_EQ(serv.definition().name(), "TestService");
 }
 
 TEST(SyntaxGraphTest, getNode) {

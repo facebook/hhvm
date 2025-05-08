@@ -995,6 +995,13 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
     state_ = State::Active;
   }
 
+  template <typename CTag>
+  void abandonWrite(ContainerCursorWriter<CTag>&& child) {
+    checkState(State::Child);
+    child.abandon();
+    state_ = State::Abandoned;
+  }
+
   /** structured types
    *
    * Note: none of this writer's other methods may be called between
@@ -1014,6 +1021,13 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
     child.finalize();
     afterWriteField();
     state_ = State::Active;
+  }
+
+  template <typename CTag>
+  void abandonWrite(StructuredCursorWriter<CTag>&& child) {
+    checkState(State::Child);
+    child.abandon();
+    state_ = State::Abandoned;
   }
 
   template <typename Ident, enable_for<type::structured_c, Ident> = 0>

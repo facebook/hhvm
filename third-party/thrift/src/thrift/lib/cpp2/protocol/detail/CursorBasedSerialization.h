@@ -160,7 +160,7 @@ class BaseCursorWriter {
     Active,
     Child,
     Done,
-    Abandonded,
+    Abandoned,
   };
   State state_ = State::Active;
 
@@ -184,7 +184,7 @@ class BaseCursorWriter {
   }
 
   ~BaseCursorWriter() {
-    DCHECK(state_ == State::Done || state_ == State::Abandonded)
+    DCHECK(state_ == State::Done || state_ == State::Abandoned)
         << "Writer must be passed to endWrite";
   }
 
@@ -195,7 +195,7 @@ class BaseCursorWriter {
   }
   BaseCursorWriter& operator=(BaseCursorWriter&& other) noexcept {
     if (this != &other) {
-      DCHECK(state_ == State::Done || state_ == State::Abandonded)
+      DCHECK(state_ == State::Done || state_ == State::Abandoned)
           << "Writer must be passed to endWrite";
       protocol_ = std::move(other.protocol_);
       state_ = other.state_;
@@ -211,7 +211,7 @@ class BaseCursorWriter {
   template <typename T>
   friend class StructuredCursorWriter;
 
-  void abandon() { state_ = State::Abandonded; }
+  void abandon() { state_ = State::Abandoned; }
 };
 
 // std::swap isn't constexpr until C++20 so we need to reimplement :(

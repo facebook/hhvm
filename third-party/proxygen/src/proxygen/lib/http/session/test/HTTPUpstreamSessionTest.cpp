@@ -1689,6 +1689,33 @@ TEST_F(HTTPUpstreamSessionTest, HttpUpgradeOnTxn2) {
   httpSession_->destroy();
 }
 
+TEST_F(HTTPUpstreamSessionTest, FailedUpgradeDrainsSession) {
+  // rejected upgrade (e.g. 500 resp from upstream) should drain the connection;
+  // future ::newTransactions should fail
+  folly::DelayedDestruction::DestructorGuard g(httpSession_);
+  HTTPMessage req = getGetRequest();
+  req.setEgressWebsocketUpgrade();
+  req.getHeaders().set(HTTP_HEADER_UPGRADE, "websocket");
+
+  auto handler = openTransaction();
+  handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
+    EXPECT_EQ(msg->getStatusCode(), 500);
+  });
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+
+  handler->txn_->sendHeadersWithEOM(req);
+  eventBase_.loop();
+
+  readAndLoop(
+      "HTTP/1.1 500 Internal Server Error\r\n"
+      "Content-length: 0\r\n\r\n");
+
+  // new txn fails
+  NiceMock<MockHTTPHandler> handler2;
+  EXPECT_FALSE(httpSession_->newTransaction(&handler2));
+}
+
 class HTTPUpstreamRecvStreamTest : public HTTPUpstreamSessionTest {
  public:
   HTTPUpstreamRecvStreamTest() : HTTPUpstreamTest({100000, 105000, 110000}) {

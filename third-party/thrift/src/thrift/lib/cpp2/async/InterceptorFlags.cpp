@@ -24,6 +24,8 @@ THRIFT_FLAG_DEFINE_bool(enable_service_interceptor_framework_metadata, false);
 
 THRIFT_FLAG_DEFINE_bool(disable_all_client_interceptors, false);
 
+THRIFT_FLAG_DEFINE_bool(disable_all_service_interceptors, false);
+
 THRIFT_FLAG_DEFINE_string(disabled_service_interceptors, "");
 
 } // namespace apache::thrift

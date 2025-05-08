@@ -108,7 +108,7 @@ ServiceInterceptorControl::ServiceInterceptorControl(
           })} {}
 
 bool ServiceInterceptorControl::isDisabled() const {
-  return *observer_;
+  return THRIFT_FLAG(disable_all_service_interceptors) || *observer_;
 }
 
 } // namespace apache::thrift

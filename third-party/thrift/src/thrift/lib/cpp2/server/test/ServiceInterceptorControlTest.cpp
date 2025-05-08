@@ -49,6 +49,10 @@ class ServiceInterceptorControlTest : public Test {
     THRIFT_FLAG_SET_MOCK(disabled_service_interceptors, value);
   }
 
+  void setGlobalDisableAll(bool val) {
+    THRIFT_FLAG_SET_MOCK(disable_all_service_interceptors, val);
+  }
+
   void expectDisabled(const TestControl& testController) {
     EXPECT_TRUE(testController.controller.isDisabled()) << fmt::format(
         "{} is not disabled, but should be", testController.name.get());
@@ -114,6 +118,14 @@ TEST_F(ServiceInterceptorControlTest, DisableModuleAndInterceptor) {
   expectDisabled(testControllers.m0I0);
   expectNotDisabled(testControllers.m0I1);
   expectNotDisabled(testControllers.m1I0);
+  expectDisabled(testControllers.m2I1);
+}
+
+TEST_F(ServiceInterceptorControlTest, DisableAllInterceptorsGlobal) {
+  setGlobalDisableAll(true);
+  expectDisabled(testControllers.m0I0);
+  expectDisabled(testControllers.m0I1);
+  expectDisabled(testControllers.m1I0);
   expectDisabled(testControllers.m2I1);
 }
 

@@ -38,6 +38,11 @@ THRIFT_FLAG_DECLARE_bool(enable_service_interceptor_framework_metadata);
 THRIFT_FLAG_DECLARE_bool(disable_all_client_interceptors);
 
 /**
+ * This flag will prevent all client interceptors from running if set to true.
+ */
+THRIFT_FLAG_DECLARE_bool(disable_all_service_interceptors);
+
+/**
  * This is a string flag that contains a comma separated list of fully qualified
  * names of service interceptors that should be disabled. An empty string
  * indicates that no service interceptors are disabled by name.

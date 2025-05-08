@@ -24,5 +24,5 @@ cdef api int can_extract__test__namespace_from_package__module__Foo(object __obj
 
 
 cdef api object init__test__namespace_from_package__module__Foo(object data):
-    return __thrift_types.Foo._fbthrift_create(data)
+    return __thrift_types.Foo._fbthrift_from_internal_data(data)
 

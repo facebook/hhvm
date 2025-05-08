@@ -50,7 +50,7 @@ cdef api object construct__{{program:capi_module_prefix}}__{{struct:py_name}}(__
 {{/struct:marshal_capi?}}
 
 cdef api object init__{{program:capi_module_prefix}}__{{struct:py_name}}(object data):
-    return __thrift_types.{{struct:py_name}}._fbthrift_create(data)
+    return __thrift_types.{{struct:py_name}}._fbthrift_from_internal_data(data)
 
 {{/program:structs}}
 {{#program:enums}}

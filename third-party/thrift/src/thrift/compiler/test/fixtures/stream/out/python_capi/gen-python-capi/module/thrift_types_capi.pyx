@@ -24,19 +24,19 @@ cdef api int can_extract__module__FooStreamEx(object __obj) except -1:
 
 
 cdef api object init__module__FooStreamEx(object data):
-    return __thrift_types.FooStreamEx._fbthrift_create(data)
+    return __thrift_types.FooStreamEx._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__FooEx(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FooEx) else 0
 
 
 cdef api object init__module__FooEx(object data):
-    return __thrift_types.FooEx._fbthrift_create(data)
+    return __thrift_types.FooEx._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__FooEx2(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FooEx2) else 0
 
 
 cdef api object init__module__FooEx2(object data):
-    return __thrift_types.FooEx2._fbthrift_create(data)
+    return __thrift_types.FooEx2._fbthrift_from_internal_data(data)
 

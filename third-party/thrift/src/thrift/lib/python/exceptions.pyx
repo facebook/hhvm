@@ -396,7 +396,7 @@ cdef class GeneratedError(Error):
         return hash(value_tuple if value_tuple else type(self))
 
     @classmethod
-    def _fbthrift_create(cls, data):
+    def _fbthrift_from_internal_data(cls, data):
         cdef GeneratedError inst = cls.__new__(cls)
         inst._fbthrift_data = data
         inst._fbthrift_populate_field_values()

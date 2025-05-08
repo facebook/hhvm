@@ -24,12 +24,12 @@ cdef api int can_extract__c__C(object __obj) except -1:
 
 
 cdef api object init__c__C(object data):
-    return __thrift_types.C._fbthrift_create(data)
+    return __thrift_types.C._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__c__E(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.E) else 0
 
 
 cdef api object init__c__E(object data):
-    return __thrift_types.E._fbthrift_create(data)
+    return __thrift_types.E._fbthrift_from_internal_data(data)
 

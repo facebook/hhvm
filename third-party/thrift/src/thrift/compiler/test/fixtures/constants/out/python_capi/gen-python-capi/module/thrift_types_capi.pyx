@@ -24,56 +24,56 @@ cdef api int can_extract__module__Internship(object __obj) except -1:
 
 
 cdef api object init__module__Internship(object data):
-    return __thrift_types.Internship._fbthrift_create(data)
+    return __thrift_types.Internship._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__Range(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Range) else 0
 
 
 cdef api object init__module__Range(object data):
-    return __thrift_types.Range._fbthrift_create(data)
+    return __thrift_types.Range._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__struct1(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct1) else 0
 
 
 cdef api object init__module__struct1(object data):
-    return __thrift_types.struct1._fbthrift_create(data)
+    return __thrift_types.struct1._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__struct2(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct2) else 0
 
 
 cdef api object init__module__struct2(object data):
-    return __thrift_types.struct2._fbthrift_create(data)
+    return __thrift_types.struct2._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__struct3(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct3) else 0
 
 
 cdef api object init__module__struct3(object data):
-    return __thrift_types.struct3._fbthrift_create(data)
+    return __thrift_types.struct3._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__struct4(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct4) else 0
 
 
 cdef api object init__module__struct4(object data):
-    return __thrift_types.struct4._fbthrift_create(data)
+    return __thrift_types.struct4._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__union1(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.union1) else 0
 
 
 cdef api object init__module__union1(object data):
-    return __thrift_types.union1._fbthrift_create(data)
+    return __thrift_types.union1._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__union2(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.union2) else 0
 
 
 cdef api object init__module__union2(object data):
-    return __thrift_types.union2._fbthrift_create(data)
+    return __thrift_types.union2._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__EmptyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.EmptyEnum) else 0

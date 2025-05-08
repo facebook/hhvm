@@ -24,47 +24,47 @@ cdef api int can_extract__test__fixtures__python_capi__containers__TemplateLists
 
 
 cdef api object init__test__fixtures__python_capi__containers__TemplateLists(object data):
-    return __thrift_types.TemplateLists._fbthrift_create(data)
+    return __thrift_types.TemplateLists._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__containers__TemplateSets(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TemplateSets) else 0
 
 
 cdef api object init__test__fixtures__python_capi__containers__TemplateSets(object data):
-    return __thrift_types.TemplateSets._fbthrift_create(data)
+    return __thrift_types.TemplateSets._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__containers__TemplateMaps(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TemplateMaps) else 0
 
 
 cdef api object init__test__fixtures__python_capi__containers__TemplateMaps(object data):
-    return __thrift_types.TemplateMaps._fbthrift_create(data)
+    return __thrift_types.TemplateMaps._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__containers__TWrapped(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TWrapped) else 0
 
 
 cdef api object init__test__fixtures__python_capi__containers__TWrapped(object data):
-    return __thrift_types.TWrapped._fbthrift_create(data)
+    return __thrift_types.TWrapped._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__containers__IndirectionA(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.IndirectionA) else 0
 
 
 cdef api object init__test__fixtures__python_capi__containers__IndirectionA(object data):
-    return __thrift_types.IndirectionA._fbthrift_create(data)
+    return __thrift_types.IndirectionA._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__containers__IndirectionB(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.IndirectionB) else 0
 
 
 cdef api object init__test__fixtures__python_capi__containers__IndirectionB(object data):
-    return __thrift_types.IndirectionB._fbthrift_create(data)
+    return __thrift_types.IndirectionB._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__containers__IndirectionC(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.IndirectionC) else 0
 
 
 cdef api object init__test__fixtures__python_capi__containers__IndirectionC(object data):
-    return __thrift_types.IndirectionC._fbthrift_create(data)
+    return __thrift_types.IndirectionC._fbthrift_from_internal_data(data)
 

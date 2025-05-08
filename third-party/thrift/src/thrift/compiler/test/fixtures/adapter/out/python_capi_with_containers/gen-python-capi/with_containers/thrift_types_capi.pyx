@@ -24,12 +24,12 @@ cdef api int can_extract__with_containers__AnnotationWithContainers(object __obj
 
 
 cdef api object init__with_containers__AnnotationWithContainers(object data):
-    return __thrift_types.AnnotationWithContainers._fbthrift_create(data)
+    return __thrift_types.AnnotationWithContainers._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__with_containers__MyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStruct) else 0
 
 
 cdef api object init__with_containers__MyStruct(object data):
-    return __thrift_types.MyStruct._fbthrift_create(data)
+    return __thrift_types.MyStruct._fbthrift_from_internal_data(data)
 

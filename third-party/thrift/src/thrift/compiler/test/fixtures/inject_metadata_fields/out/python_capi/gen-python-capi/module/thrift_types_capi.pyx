@@ -24,26 +24,26 @@ cdef api int can_extract__module__Fields(object __obj) except -1:
 
 
 cdef api object init__module__Fields(object data):
-    return __thrift_types.Fields._fbthrift_create(data)
+    return __thrift_types.Fields._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__FieldsInjectedToEmptyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FieldsInjectedToEmptyStruct) else 0
 
 
 cdef api object init__module__FieldsInjectedToEmptyStruct(object data):
-    return __thrift_types.FieldsInjectedToEmptyStruct._fbthrift_create(data)
+    return __thrift_types.FieldsInjectedToEmptyStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__FieldsInjectedToStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FieldsInjectedToStruct) else 0
 
 
 cdef api object init__module__FieldsInjectedToStruct(object data):
-    return __thrift_types.FieldsInjectedToStruct._fbthrift_create(data)
+    return __thrift_types.FieldsInjectedToStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__FieldsInjectedWithIncludedStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FieldsInjectedWithIncludedStruct) else 0
 
 
 cdef api object init__module__FieldsInjectedWithIncludedStruct(object data):
-    return __thrift_types.FieldsInjectedWithIncludedStruct._fbthrift_create(data)
+    return __thrift_types.FieldsInjectedWithIncludedStruct._fbthrift_from_internal_data(data)
 

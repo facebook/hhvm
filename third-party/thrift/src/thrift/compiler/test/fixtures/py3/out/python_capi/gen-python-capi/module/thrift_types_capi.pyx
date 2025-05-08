@@ -24,21 +24,21 @@ cdef api int can_extract__module__SimpleException(object __obj) except -1:
 
 
 cdef api object init__module__SimpleException(object data):
-    return __thrift_types.SimpleException._fbthrift_create(data)
+    return __thrift_types.SimpleException._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__OptionalRefStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.OptionalRefStruct) else 0
 
 
 cdef api object init__module__OptionalRefStruct(object data):
-    return __thrift_types.OptionalRefStruct._fbthrift_create(data)
+    return __thrift_types.OptionalRefStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__SimpleStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.SimpleStruct) else 0
 
 
 cdef api object init__module__SimpleStruct(object data):
-    return __thrift_types.SimpleStruct._fbthrift_create(data)
+    return __thrift_types.SimpleStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__HiddenTypeFieldsStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.HiddenTypeFieldsStruct) else 0
@@ -55,21 +55,21 @@ cdef api object construct__module__HiddenTypeFieldsStruct(__unique_ptr[__cIOBuf]
     )
 
 cdef api object init__module__HiddenTypeFieldsStruct(object data):
-    return __thrift_types.HiddenTypeFieldsStruct._fbthrift_create(data)
+    return __thrift_types.HiddenTypeFieldsStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__AdaptedUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AdaptedUnion) else 0
 
 
 cdef api object init__module__AdaptedUnion(object data):
-    return __thrift_types.AdaptedUnion._fbthrift_create(data)
+    return __thrift_types.AdaptedUnion._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__HiddenException(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.HiddenException) else 0
 
 
 cdef api object init__module__HiddenException(object data):
-    return __thrift_types.HiddenException._fbthrift_create(data)
+    return __thrift_types.HiddenException._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__ComplexStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ComplexStruct) else 0
@@ -86,21 +86,21 @@ cdef api object construct__module__ComplexStruct(__unique_ptr[__cIOBuf] __s):
     )
 
 cdef api object init__module__ComplexStruct(object data):
-    return __thrift_types.ComplexStruct._fbthrift_create(data)
+    return __thrift_types.ComplexStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__BinaryUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.BinaryUnion) else 0
 
 
 cdef api object init__module__BinaryUnion(object data):
-    return __thrift_types.BinaryUnion._fbthrift_create(data)
+    return __thrift_types.BinaryUnion._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__BinaryUnionStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.BinaryUnionStruct) else 0
 
 
 cdef api object init__module__BinaryUnionStruct(object data):
-    return __thrift_types.BinaryUnionStruct._fbthrift_create(data)
+    return __thrift_types.BinaryUnionStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__CustomFields(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.CustomFields) else 0
@@ -117,7 +117,7 @@ cdef api object construct__module__CustomFields(__unique_ptr[__cIOBuf] __s):
     )
 
 cdef api object init__module__CustomFields(object data):
-    return __thrift_types.CustomFields._fbthrift_create(data)
+    return __thrift_types.CustomFields._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__CustomTypedefFields(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.CustomTypedefFields) else 0
@@ -134,7 +134,7 @@ cdef api object construct__module__CustomTypedefFields(__unique_ptr[__cIOBuf] __
     )
 
 cdef api object init__module__CustomTypedefFields(object data):
-    return __thrift_types.CustomTypedefFields._fbthrift_create(data)
+    return __thrift_types.CustomTypedefFields._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__AdaptedTypedefFields(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AdaptedTypedefFields) else 0
@@ -151,7 +151,7 @@ cdef api object construct__module__AdaptedTypedefFields(__unique_ptr[__cIOBuf] _
     )
 
 cdef api object init__module__AdaptedTypedefFields(object data):
-    return __thrift_types.AdaptedTypedefFields._fbthrift_create(data)
+    return __thrift_types.AdaptedTypedefFields._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__AnEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AnEnum) else 0

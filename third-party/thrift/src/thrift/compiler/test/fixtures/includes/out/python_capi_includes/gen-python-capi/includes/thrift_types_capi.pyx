@@ -24,5 +24,5 @@ cdef api int can_extract__includes__Included(object __obj) except -1:
 
 
 cdef api object init__includes__Included(object data):
-    return __thrift_types.Included._fbthrift_create(data)
+    return __thrift_types.Included._fbthrift_from_internal_data(data)
 

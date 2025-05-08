@@ -24,5 +24,5 @@ cdef api int can_extract__module__Limits(object __obj) except -1:
 
 
 cdef api object init__module__Limits(object data):
-    return __thrift_types.Limits._fbthrift_create(data)
+    return __thrift_types.Limits._fbthrift_from_internal_data(data)
 

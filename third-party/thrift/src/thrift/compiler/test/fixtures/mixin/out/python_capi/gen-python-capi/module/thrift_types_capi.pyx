@@ -24,26 +24,26 @@ cdef api int can_extract__module__Mixin1(object __obj) except -1:
 
 
 cdef api object init__module__Mixin1(object data):
-    return __thrift_types.Mixin1._fbthrift_create(data)
+    return __thrift_types.Mixin1._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__Mixin2(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Mixin2) else 0
 
 
 cdef api object init__module__Mixin2(object data):
-    return __thrift_types.Mixin2._fbthrift_create(data)
+    return __thrift_types.Mixin2._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__Mixin3Base(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Mixin3Base) else 0
 
 
 cdef api object init__module__Mixin3Base(object data):
-    return __thrift_types.Mixin3Base._fbthrift_create(data)
+    return __thrift_types.Mixin3Base._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__Foo(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Foo) else 0
 
 
 cdef api object init__module__Foo(object data):
-    return __thrift_types.Foo._fbthrift_create(data)
+    return __thrift_types.Foo._fbthrift_from_internal_data(data)
 

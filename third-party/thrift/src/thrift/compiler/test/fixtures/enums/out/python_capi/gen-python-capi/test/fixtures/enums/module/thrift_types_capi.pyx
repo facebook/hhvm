@@ -24,14 +24,14 @@ cdef api int can_extract__test__fixtures__enums__module__SomeStruct(object __obj
 
 
 cdef api object init__test__fixtures__enums__module__SomeStruct(object data):
-    return __thrift_types.SomeStruct._fbthrift_create(data)
+    return __thrift_types.SomeStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__enums__module__MyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStruct) else 0
 
 
 cdef api object init__test__fixtures__enums__module__MyStruct(object data):
-    return __thrift_types.MyStruct._fbthrift_create(data)
+    return __thrift_types.MyStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__enums__module__Metasyntactic(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Metasyntactic) else 0

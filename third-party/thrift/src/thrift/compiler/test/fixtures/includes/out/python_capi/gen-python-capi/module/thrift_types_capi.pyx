@@ -24,5 +24,5 @@ cdef api int can_extract__module__MyStruct(object __obj) except -1:
 
 
 cdef api object init__module__MyStruct(object data):
-    return __thrift_types.MyStruct._fbthrift_create(data)
+    return __thrift_types.MyStruct._fbthrift_from_internal_data(data)
 

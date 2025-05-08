@@ -858,7 +858,7 @@ cdef class StructTypeInfo(TypeInfoBase):
 
     # convert deserialized data to user format
     cpdef to_python_value(self, object value):
-        return self._class._fbthrift_create(value)
+        return self._class._fbthrift_from_internal_data(value)
 
     def to_container_value(self, object value not None):
         if not isinstance(value, self._class):
@@ -1245,7 +1245,7 @@ cdef class Struct(StructOrUnion):
           * `__call__()`, after creating a new instance and processing all
             previous and new values. This method is called on the new instance.
           * `_deserialize()`
-          * `Struct._fbthrift_create()`
+          * `Struct._fbthrift_from_internal_data()`
         """
         for index, name, type_info in self._fbthrift_primitive_types:
             data = self._fbthrift_data[index + 1]
@@ -1331,7 +1331,7 @@ cdef class Struct(StructOrUnion):
         )
 
     @classmethod
-    def _fbthrift_create(cls, data):
+    def _fbthrift_from_internal_data(cls, data):
         cdef Struct inst = cls.__new__(cls)
         inst._fbthrift_data = data
         inst._fbthrift_populate_primitive_fields()
@@ -1461,7 +1461,7 @@ cdef class Union(StructOrUnion):
             ) from exc
 
     @classmethod
-    def _fbthrift_create(cls, data):
+    def _fbthrift_from_internal_data(cls, data):
         cdef Union inst = cls.__new__(cls)
         inst._fbthrift_data = data
         inst._fbthrift_update_current_field_attributes()

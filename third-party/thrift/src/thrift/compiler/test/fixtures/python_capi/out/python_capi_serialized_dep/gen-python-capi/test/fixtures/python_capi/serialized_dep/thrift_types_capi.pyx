@@ -34,7 +34,7 @@ cdef api object construct__test__fixtures__python_capi__serialized_dep__Serializ
     )
 
 cdef api object init__test__fixtures__python_capi__serialized_dep__SerializedStruct(object data):
-    return __thrift_types.SerializedStruct._fbthrift_create(data)
+    return __thrift_types.SerializedStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__serialized_dep__SerializedUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.SerializedUnion) else 0
@@ -51,7 +51,7 @@ cdef api object construct__test__fixtures__python_capi__serialized_dep__Serializ
     )
 
 cdef api object init__test__fixtures__python_capi__serialized_dep__SerializedUnion(object data):
-    return __thrift_types.SerializedUnion._fbthrift_create(data)
+    return __thrift_types.SerializedUnion._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__serialized_dep__SerializedError(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.SerializedError) else 0
@@ -68,26 +68,26 @@ cdef api object construct__test__fixtures__python_capi__serialized_dep__Serializ
     )
 
 cdef api object init__test__fixtures__python_capi__serialized_dep__SerializedError(object data):
-    return __thrift_types.SerializedError._fbthrift_create(data)
+    return __thrift_types.SerializedError._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__serialized_dep__MarshalStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MarshalStruct) else 0
 
 
 cdef api object init__test__fixtures__python_capi__serialized_dep__MarshalStruct(object data):
-    return __thrift_types.MarshalStruct._fbthrift_create(data)
+    return __thrift_types.MarshalStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__serialized_dep__MarshalUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MarshalUnion) else 0
 
 
 cdef api object init__test__fixtures__python_capi__serialized_dep__MarshalUnion(object data):
-    return __thrift_types.MarshalUnion._fbthrift_create(data)
+    return __thrift_types.MarshalUnion._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__python_capi__serialized_dep__MarshalError(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MarshalError) else 0
 
 
 cdef api object init__test__fixtures__python_capi__serialized_dep__MarshalError(object data):
-    return __thrift_types.MarshalError._fbthrift_create(data)
+    return __thrift_types.MarshalError._fbthrift_from_internal_data(data)
 

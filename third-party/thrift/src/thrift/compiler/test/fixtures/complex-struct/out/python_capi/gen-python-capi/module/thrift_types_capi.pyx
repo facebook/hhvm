@@ -24,112 +24,112 @@ cdef api int can_extract__module__MyStructFloatFieldThrowExp(object __obj) excep
 
 
 cdef api object init__module__MyStructFloatFieldThrowExp(object data):
-    return __thrift_types.MyStructFloatFieldThrowExp._fbthrift_create(data)
+    return __thrift_types.MyStructFloatFieldThrowExp._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__MyStructMapFloatThrowExp(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructMapFloatThrowExp) else 0
 
 
 cdef api object init__module__MyStructMapFloatThrowExp(object data):
-    return __thrift_types.MyStructMapFloatThrowExp._fbthrift_create(data)
+    return __thrift_types.MyStructMapFloatThrowExp._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__MyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStruct) else 0
 
 
 cdef api object init__module__MyStruct(object data):
-    return __thrift_types.MyStruct._fbthrift_create(data)
+    return __thrift_types.MyStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__SimpleStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.SimpleStruct) else 0
 
 
 cdef api object init__module__SimpleStruct(object data):
-    return __thrift_types.SimpleStruct._fbthrift_create(data)
+    return __thrift_types.SimpleStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__defaultStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.defaultStruct) else 0
 
 
 cdef api object init__module__defaultStruct(object data):
-    return __thrift_types.defaultStruct._fbthrift_create(data)
+    return __thrift_types.defaultStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__MyStructTypeDef(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructTypeDef) else 0
 
 
 cdef api object init__module__MyStructTypeDef(object data):
-    return __thrift_types.MyStructTypeDef._fbthrift_create(data)
+    return __thrift_types.MyStructTypeDef._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__MyDataItem(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataItem) else 0
 
 
 cdef api object init__module__MyDataItem(object data):
-    return __thrift_types.MyDataItem._fbthrift_create(data)
+    return __thrift_types.MyDataItem._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__MyUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyUnion) else 0
 
 
 cdef api object init__module__MyUnion(object data):
-    return __thrift_types.MyUnion._fbthrift_create(data)
+    return __thrift_types.MyUnion._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__MyUnionFloatFieldThrowExp(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyUnionFloatFieldThrowExp) else 0
 
 
 cdef api object init__module__MyUnionFloatFieldThrowExp(object data):
-    return __thrift_types.MyUnionFloatFieldThrowExp._fbthrift_create(data)
+    return __thrift_types.MyUnionFloatFieldThrowExp._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__ComplexNestedStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ComplexNestedStruct) else 0
 
 
 cdef api object init__module__ComplexNestedStruct(object data):
-    return __thrift_types.ComplexNestedStruct._fbthrift_create(data)
+    return __thrift_types.ComplexNestedStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__TypeRemapped(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TypeRemapped) else 0
 
 
 cdef api object init__module__TypeRemapped(object data):
-    return __thrift_types.TypeRemapped._fbthrift_create(data)
+    return __thrift_types.TypeRemapped._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__emptyXcep(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.emptyXcep) else 0
 
 
 cdef api object init__module__emptyXcep(object data):
-    return __thrift_types.emptyXcep._fbthrift_create(data)
+    return __thrift_types.emptyXcep._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__reqXcep(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.reqXcep) else 0
 
 
 cdef api object init__module__reqXcep(object data):
-    return __thrift_types.reqXcep._fbthrift_create(data)
+    return __thrift_types.reqXcep._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__optXcep(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.optXcep) else 0
 
 
 cdef api object init__module__optXcep(object data):
-    return __thrift_types.optXcep._fbthrift_create(data)
+    return __thrift_types.optXcep._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__complexException(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.complexException) else 0
 
 
 cdef api object init__module__complexException(object data):
-    return __thrift_types.complexException._fbthrift_create(data)
+    return __thrift_types.complexException._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__Containers(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Containers) else 0
 
 
 cdef api object init__module__Containers(object data):
-    return __thrift_types.Containers._fbthrift_create(data)
+    return __thrift_types.Containers._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__module__MyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0

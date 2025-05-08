@@ -24,5 +24,5 @@ cdef api int can_extract__transitive__Foo(object __obj) except -1:
 
 
 cdef api object init__transitive__Foo(object data):
-    return __thrift_types.Foo._fbthrift_create(data)
+    return __thrift_types.Foo._fbthrift_from_internal_data(data)
 

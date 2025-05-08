@@ -24,5 +24,5 @@ cdef api int can_extract__foo__Fields(object __obj) except -1:
 
 
 cdef api object init__foo__Fields(object data):
-    return __thrift_types.Fields._fbthrift_create(data)
+    return __thrift_types.Fields._fbthrift_from_internal_data(data)
 

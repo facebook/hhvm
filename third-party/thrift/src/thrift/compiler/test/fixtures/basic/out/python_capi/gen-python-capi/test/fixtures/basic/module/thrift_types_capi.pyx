@@ -24,56 +24,56 @@ cdef api int can_extract__test__fixtures__basic__module__MyStruct(object __obj) 
 
 
 cdef api object init__test__fixtures__basic__module__MyStruct(object data):
-    return __thrift_types.MyStruct._fbthrift_create(data)
+    return __thrift_types.MyStruct._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__Containers(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Containers) else 0
 
 
 cdef api object init__test__fixtures__basic__module__Containers(object data):
-    return __thrift_types.Containers._fbthrift_create(data)
+    return __thrift_types.Containers._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__MyDataItem(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataItem) else 0
 
 
 cdef api object init__test__fixtures__basic__module__MyDataItem(object data):
-    return __thrift_types.MyDataItem._fbthrift_create(data)
+    return __thrift_types.MyDataItem._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__MyUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyUnion) else 0
 
 
 cdef api object init__test__fixtures__basic__module__MyUnion(object data):
-    return __thrift_types.MyUnion._fbthrift_create(data)
+    return __thrift_types.MyUnion._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__MyException(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyException) else 0
 
 
 cdef api object init__test__fixtures__basic__module__MyException(object data):
-    return __thrift_types.MyException._fbthrift_create(data)
+    return __thrift_types.MyException._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__MyExceptionWithMessage(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyExceptionWithMessage) else 0
 
 
 cdef api object init__test__fixtures__basic__module__MyExceptionWithMessage(object data):
-    return __thrift_types.MyExceptionWithMessage._fbthrift_create(data)
+    return __thrift_types.MyExceptionWithMessage._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__ReservedKeyword(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ReservedKeyword) else 0
 
 
 cdef api object init__test__fixtures__basic__module__ReservedKeyword(object data):
-    return __thrift_types.ReservedKeyword._fbthrift_create(data)
+    return __thrift_types.ReservedKeyword._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__UnionToBeRenamed(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.UnionToBeRenamed) else 0
 
 
 cdef api object init__test__fixtures__basic__module__UnionToBeRenamed(object data):
-    return __thrift_types.UnionToBeRenamed._fbthrift_create(data)
+    return __thrift_types.UnionToBeRenamed._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__basic__module__MyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0

@@ -24,12 +24,12 @@ cdef api int can_extract__test__fixtures__interactions__module__CustomException(
 
 
 cdef api object init__test__fixtures__interactions__module__CustomException(object data):
-    return __thrift_types.CustomException._fbthrift_create(data)
+    return __thrift_types.CustomException._fbthrift_from_internal_data(data)
 
 cdef api int can_extract__test__fixtures__interactions__module__ShouldBeBoxed(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ShouldBeBoxed) else 0
 
 
 cdef api object init__test__fixtures__interactions__module__ShouldBeBoxed(object data):
-    return __thrift_types.ShouldBeBoxed._fbthrift_create(data)
+    return __thrift_types.ShouldBeBoxed._fbthrift_from_internal_data(data)
 

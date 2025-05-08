@@ -61,6 +61,9 @@ pub trait ContextStack {
 
     /// Called after a response a written.
     fn post_write(&mut self, bytes: u32) -> Result<(), Error>;
+
+    /// Called when an error is about to be returned
+    fn on_error(&mut self, declared: bool, what: &str) -> Result<(), Error>;
 }
 
 pub struct DummyContextStack<Name: ?Sized, Frame> {
@@ -109,6 +112,10 @@ where
     }
 
     fn post_write(&mut self, _bytes: u32) -> Result<(), Error> {
+        Ok(())
+    }
+
+    fn on_error(&mut self, _declared: bool, _what: &str) -> Result<(), Error> {
         Ok(())
     }
 }

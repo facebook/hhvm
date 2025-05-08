@@ -112,6 +112,7 @@ where
             let res_type = exn.result_type();
             assert_ne!(res_type, ResultType::Return);
             assert_eq!(exn.exn_is_declared(), res_type == ResultType::Error);
+            ctx_stack.on_error(exn.exn_is_declared(), &exn.exn_value())?;
             rctxt.set_user_exception_header(exn.exn_name(), &exn.exn_value())?;
             res_type
         }

@@ -50,7 +50,7 @@ SerializableFieldDefinition makeField(
   def.presence() = presence;
   def.type() = type;
   if (customDefault.has_value()) {
-    def.customDefaultValue() = std::move(*customDefault);
+    def.customDefaultValue() = SerializableRecord::toThrift(*customDefault);
   }
   return def;
 }

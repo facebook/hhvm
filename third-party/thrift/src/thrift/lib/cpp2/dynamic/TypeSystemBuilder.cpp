@@ -289,7 +289,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
           *field.presence(),
           typeSystem->typeOf(*field.type()),
           field.customDefaultValue().has_value()
-              ? std::optional{std::move(*field.customDefaultValue())}
+              ? std::optional{SerializableRecord::fromThrift(
+                    std::move(*field.customDefaultValue()))}
               : std::nullopt);
     }
     return result;

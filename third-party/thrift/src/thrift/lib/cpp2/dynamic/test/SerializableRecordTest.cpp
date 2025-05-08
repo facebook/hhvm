@@ -33,6 +33,15 @@ namespace {
 SerializableRecord::ByteArray makeByteArray(std::string_view str) {
   return folly::IOBuf::copyBuffer(str);
 }
+
+SerializableRecord decode(SerializableRecordUnion&& raw) {
+  return SerializableRecord::fromThrift(std::move(raw));
+}
+
+SerializableRecordUnion encode(const SerializableRecord& record) {
+  return SerializableRecord::toThrift(record);
+}
+
 } // namespace
 
 TEST(SerializableRecordTest, Bool) {
@@ -48,6 +57,8 @@ TEST(SerializableRecordTest, Bool) {
   EXPECT_NE(r, SerializableRecord::Int32(0));
 
   EXPECT_EQ(toDebugString(r), "Bool(true)\n");
+
+  EXPECT_EQ(encode(r).boolDatum_ref().value(), true);
 }
 
 TEST(SerializableRecordTest, Int8) {
@@ -61,6 +72,8 @@ TEST(SerializableRecordTest, Int8) {
   EXPECT_NE(r, SerializableRecord::Int16(42));
 
   EXPECT_EQ(toDebugString(r), "Int8(42)\n");
+
+  EXPECT_EQ(encode(r).int8Datum_ref().value(), 42);
 }
 
 TEST(SerializableRecordTest, Int16) {
@@ -74,6 +87,8 @@ TEST(SerializableRecordTest, Int16) {
   EXPECT_NE(r, SerializableRecord::Int32(42));
 
   EXPECT_EQ(toDebugString(r), "Int16(42)\n");
+
+  EXPECT_EQ(encode(r).int16Datum_ref().value(), 42);
 }
 
 TEST(SerializableRecordTest, Int32) {
@@ -87,6 +102,8 @@ TEST(SerializableRecordTest, Int32) {
   EXPECT_NE(r, SerializableRecord::Int64(42));
 
   EXPECT_EQ(toDebugString(r), "Int32(42)\n");
+
+  EXPECT_EQ(encode(r).int32Datum_ref().value(), 42);
 }
 
 TEST(SerializableRecordTest, Int64) {
@@ -100,6 +117,8 @@ TEST(SerializableRecordTest, Int64) {
   EXPECT_NE(r, SerializableRecord::Float32(42));
 
   EXPECT_EQ(toDebugString(r), "Int64(42)\n");
+
+  EXPECT_EQ(encode(r).int64Datum_ref().value(), 42);
 }
 
 TEST(SerializableRecordTest, Float32) {
@@ -113,6 +132,8 @@ TEST(SerializableRecordTest, Float32) {
   EXPECT_NE(r, SerializableRecord::Float64(42));
 
   EXPECT_EQ(toDebugString(r), "Float32(42)\n");
+
+  EXPECT_EQ(encode(r).float32Datum_ref().value(), 42);
 }
 
 TEST(SerializableRecordTest, Float64) {
@@ -127,6 +148,8 @@ TEST(SerializableRecordTest, Float64) {
   EXPECT_NE(r, SerializableRecord::Text("hello"));
 
   EXPECT_EQ(toDebugString(r), "Float64(42)\n");
+
+  EXPECT_EQ(encode(r).float64Datum_ref().value(), 42);
 }
 
 TEST(SerializableRecordTest, Text) {
@@ -140,6 +163,8 @@ TEST(SerializableRecordTest, Text) {
   EXPECT_NE(r, SerializableRecord::Float32(42));
 
   EXPECT_EQ(toDebugString(r), "Text(\"hello\")\n");
+
+  EXPECT_EQ(encode(r).textDatum_ref().value(), "hello");
 }
 
 TEST(SerializableRecordTest, ByteArray) {
@@ -152,9 +177,12 @@ TEST(SerializableRecordTest, ByteArray) {
   EXPECT_NE(r, SerializableRecord::Text("hello"));
 
   EXPECT_EQ(toDebugString(r), "ByteArray(\"aGVsbG8=\")\n");
+
+  EXPECT_TRUE(folly::IOBufEqualTo{}(
+      encode(r).byteArrayDatum_ref().value(), *makeByteArray("hello")));
 }
 
-TEST(SerializableRecordTest, TestKind) {
+TEST(SerializableRecordTest, Kind) {
   SerializableRecord r = SerializableRecord::Int64(42);
   EXPECT_THAT(
       [&] { r.asType<SerializableRecord::Int32>(); },
@@ -234,6 +262,8 @@ TEST(SerializableRecordTest, FieldSet) {
       "   ├─ key = Bool(true)\n"
       "   ╰─ value = Set(size=1)\n"
       "      ╰─ Text(\"hello\")\n");
+
+  EXPECT_EQ(decode(encode(r)), r);
 }
 
 TEST(SerializableRecordTest, List) {
@@ -255,6 +285,8 @@ TEST(SerializableRecordTest, List) {
       "├─ [0] → Int32(1)\n"
       "├─ [1] → Int64(2)\n"
       "╰─ [2] → Text(\"hello\")\n");
+
+  EXPECT_EQ(decode(encode(r)), r);
 }
 
 TEST(SerializableRecordTest, Set) {
@@ -269,6 +301,8 @@ TEST(SerializableRecordTest, Set) {
   EXPECT_TRUE(set.contains(SerializableRecord::Int32(1)));
   EXPECT_TRUE(set.contains(SerializableRecord::Int64(1)));
   EXPECT_TRUE(set.contains(SerializableRecord::Int64(2)));
+
+  EXPECT_EQ(decode(encode(r)), r);
 }
 
 TEST(SerializableRecordTest, Map) {
@@ -282,6 +316,8 @@ TEST(SerializableRecordTest, Map) {
   EXPECT_EQ(map.size(), 2);
   EXPECT_EQ(map.at(SerializableRecord::Int32(1)).asText(), "one");
   EXPECT_EQ(map.at(SerializableRecord::Int32(2)).asText(), "two");
+
+  EXPECT_EQ(decode(encode(r)), r);
 }
 
 TEST(SerializableRecordTest, ComplexNestedRecords) {
@@ -345,6 +381,8 @@ TEST(SerializableRecordTest, ComplexNestedRecords) {
       level2Map.at(SerializableRecord::Text("key2")).asFieldSet();
   EXPECT_EQ(key2FieldSet.size(), 1);
   EXPECT_EQ(key2FieldSet.at(FieldId(3)), makeByteArray("nested"));
+
+  EXPECT_EQ(decode(encode(r)), r);
 }
 
 TEST(SerializableRecordTest, InvalidUTF8Text) {
@@ -405,10 +443,6 @@ TEST(SerializableRecordTest, InvalidFloat) {
 }
 
 TEST(SerializableRecordTest, InvalidDatumSerde) {
-  const auto decode = [](SerializableRecordUnion&& raw) {
-    return detail::SerializableRecordAdapter<>::fromThrift(std::move(raw));
-  };
-
   EXPECT_NO_THROW({
     SerializableRecordUnion raw;
     raw.float64Datum_ref() = 0.0;

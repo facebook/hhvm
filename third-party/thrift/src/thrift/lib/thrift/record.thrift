@@ -22,10 +22,6 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
-cpp_include "folly/container/F14Map.h"
-cpp_include "folly/container/F14Set.h"
-cpp_include "thrift/lib/thrift/detail/SerializableRecordAdapter.h"
-
 namespace cpp2 apache.thrift.dynamic
 
 /**
@@ -45,11 +41,7 @@ namespace cpp2 apache.thrift.dynamic
  * used for data manipulation and converted to/from SerializableRecord when
  * persisting/transmitting.
  */
-@cpp.Adapter{
-  underlyingName = "SerializableRecordUnion",
-  adaptedType = "::apache::thrift::dynamic::detail::SerializableRecord",
-  name = "::apache::thrift::dynamic::detail::SerializableRecordAdapter<>",
-}
+@cpp.Name{value = "SerializableRecordUnion"}
 union SerializableRecord {
   1: bool boolDatum;
   2: byte int8Datum;
@@ -63,23 +55,29 @@ union SerializableRecord {
   @cpp.Ref{type = cpp.RefType.Unique}
   10: standard.ByteBuffer byteArrayDatum;
 
-  // @thrift.Box does not currently work with incomplete types
   11: map<id.FieldId, SerializableRecord> fieldSetDatum;
 
   12: list<SerializableRecord> listDatum;
 
-  // @thrift.Box does not currently work with incomplete types
-  @cpp.Ref{type = cpp.RefType.Unique}
-  @cpp.Type{
-    name = "::folly::F14FastSet<::apache::thrift::dynamic::SerializableRecord, ::apache::thrift::dynamic::detail::SerializableRecordHasher>",
-  }
-  13: set<SerializableRecord> setDatum;
+  /**
+   * This list MUST not contain two elements that compare equal to each other.
+   *
+   * At present, Thrift implementations have poor support for structured types
+   * as the element of set types. Therefore, we use a list to instead.
+   */
+  13: list<SerializableRecord> setDatum;
 
-  // @thrift.Box does not currently work with incomplete types
-  @cpp.Ref{type = cpp.RefType.Unique}
-  @cpp.Type{
-    name = "::folly::F14FastMap<::apache::thrift::dynamic::SerializableRecord, ::apache::thrift::dynamic::SerializableRecord, ::apache::thrift::dynamic::detail::SerializableRecordHasher>",
-  }
-  14: map<SerializableRecord, SerializableRecord> mapDatum;
+  /**
+   * This list MUST not contain two entries whose keys compare equal to each other.
+   *
+   * At present, Thrift implementations have poor support for structured types
+   * as the element of set types. Therefore, we use a list to instead.
+   */
+  14: list<SerializableRecordMapEntry> mapDatum;
   // TODO(praihan): Add anyDatum
+}
+
+struct SerializableRecordMapEntry {
+  1: SerializableRecord key;
+  2: SerializableRecord value;
 }

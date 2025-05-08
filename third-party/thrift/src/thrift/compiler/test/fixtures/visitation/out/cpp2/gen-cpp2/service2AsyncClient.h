@@ -26,7 +26,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::test_cpp2::cpp_reflection::service2> : public apache::thrift::GeneratedAsyncClient {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::test_cpp2::cpp_reflection::service2>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::test_cpp2::cpp_reflection::service2>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 

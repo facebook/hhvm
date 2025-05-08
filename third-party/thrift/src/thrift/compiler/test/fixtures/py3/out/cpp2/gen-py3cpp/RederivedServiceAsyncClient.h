@@ -28,7 +28,7 @@ namespace apache::thrift {
 
 template <>
 class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedServiceAsyncClient {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::py3::simple::RederivedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::py3::simple::RederivedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
   using ::py3::simple::DerivedServiceAsyncClient::DerivedServiceAsyncClient;
 

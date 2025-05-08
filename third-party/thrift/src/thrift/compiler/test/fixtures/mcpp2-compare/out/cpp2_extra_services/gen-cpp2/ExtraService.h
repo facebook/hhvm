@@ -42,7 +42,7 @@ class ExtraServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
 namespace apache::thrift {
 template <>
 class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid::ns::ParamServiceSvIf {
-  static_assert(!folly::is_detected_v<detail::st::detect_complete, ::extra::svc::ExtraService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::extra::svc::ExtraService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "ExtraService"; }

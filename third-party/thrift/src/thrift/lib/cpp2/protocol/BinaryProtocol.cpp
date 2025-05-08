@@ -49,22 +49,17 @@ namespace apache::thrift {
 template <typename T>
 void BinaryProtocolReader::readArithmeticVector(
     T* outputPtr, size_t numElements) {
-  constexpr size_t size = sizeof(T);
-  while (numElements) {
-    const uint8_t* inputPtr = in_.data();
-    const auto div = std::div(folly::to_signed(in_.length()), size);
-    size_t elementsInBuffer =
-        std::min(numElements, folly::to_unsigned(div.quot));
-    for (numElements -= elementsInBuffer; elementsInBuffer;
-         elementsInBuffer--, inputPtr += size, outputPtr++) {
-      *outputPtr = folly::Endian::big(folly::loadUnaligned<T>(inputPtr));
-    }
-
-    in_.skip(inputPtr - in_.data());
-    if (numElements && div.rem) {
-      numElements--;
-      *outputPtr++ = in_.readBE<T>();
-    }
+  const uint8_t* inPtr = in_.data();
+  size_t i = 0;
+  size_t loopLen = std::min(numElements, in_.length() / sizeof(T));
+  for (; i < loopLen; ++i) {
+    outputPtr[i] =
+        folly::Endian::big<T>(folly::loadUnaligned<T>(inPtr + i * sizeof(T)));
+  }
+  in_.skip(i * sizeof(T));
+  // read elements one-by-one beyond what initially fits into the buffer
+  for (; i < numElements; ++i) {
+    outputPtr[i] = in_.readBE<T>();
   }
 }
 

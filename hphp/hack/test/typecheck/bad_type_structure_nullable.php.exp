@@ -3,9 +3,9 @@ File "bad_type_structure_nullable.php", line 4, characters 3-22:
 File "bad_type_structure_nullable.php", line 5, characters 3-23:
   ?string
 File "bad_type_structure_nullable.php", line 6, characters 3-22:
-  ?string
+  string
 File "bad_type_structure_nullable.php", line 7, characters 3-26:
-  bool
+  _
 File "bad_type_structure_nullable.php", line 10, characters 3-27:
   nothing
 File "bad_type_structure_nullable.php", line 11, characters 3-28:
@@ -25,9 +25,9 @@ File "bad_type_structure_nullable.php", line 22, characters 3-22:
 File "bad_type_structure_nullable.php", line 23, characters 3-23:
   ?string
 File "bad_type_structure_nullable.php", line 24, characters 3-22:
-  ?string
+  string
 File "bad_type_structure_nullable.php", line 25, characters 3-26:
-  bool
+  _
 File "bad_type_structure_nullable.php", line 28, characters 3-27:
   nothing
 File "bad_type_structure_nullable.php", line 29, characters 3-28:
@@ -42,6 +42,10 @@ File "bad_type_structure_nullable.php", line 33, characters 3-31:
   ?vec<mixed>
 File "bad_type_structure_nullable.php", line 36, characters 3-22:
   TypeStructureKind
+ERROR: File "bad_type_structure_nullable.php", line 7, characters 15-24:
+The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 60, characters 6-15:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_nullable.php", line 10, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
   File "typestructure.hhi", line 59, characters 31-698:
@@ -66,6 +70,10 @@ ERROR: File "bad_type_structure_nullable.php", line 15, characters 15-29:
 This shape doesn't have a field `generic_types` (Typing[4108])
   File "typestructure.hhi", line 59, characters 31-698:
   The shape is defined here
+ERROR: File "bad_type_structure_nullable.php", line 25, characters 15-24:
+The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 60, characters 6-15:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_nullable.php", line 28, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
   File "typestructure.hhi", line 59, characters 31-698:

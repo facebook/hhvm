@@ -57,9 +57,9 @@ namespace HH {
   // should be considered optional. Additionally, shapes of this type may contain
   // additional fields other than those specified here.
   newtype TypeStructure<T> as shape(
-    'nullable' => ?bool,
+    ?'nullable' => bool,
     'kind' => TypeStructureKind,
-    'name' => ?string,
+    ?'name' => string,
     'classname' => ?classname<T>,
     ?'elem_types' => varray<mixed>,
     ?'optional_elem_types' => varray<mixed>,
@@ -79,10 +79,10 @@ namespace HH {
     ?'exact' => bool,
     ?'like' => bool,
   ) = shape(
-    'nullable' => ?bool,
+    ?'nullable' => bool,
     'kind' => TypeStructureKind,
     // name for generics (type variables)
-    'name' => ?string,
+    ?'name' => string,
     // classname for classes, interfaces, enums, or traits
     'classname' => ?classname<T>,
     // for tuples

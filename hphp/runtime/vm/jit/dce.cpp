@@ -1385,6 +1385,9 @@ void fullDCE(IRUnit& unit) {
       IRInstruction* srcInst = src->inst();
       auto const srcCanonical = canonical(src);
       auto const srcCanonicalInst = srcCanonical->inst();
+      FTRACE(4, "Processing inst {}; srcCanonical {}; srcCanonicalInst {};\n",
+        inst->toString(), srcCanonical->toString(), srcCanonicalInst->toString()
+      );
       if (srcInst->op() == DefConst) return;
 
       // Use the Canonical source for accounting
@@ -1466,6 +1469,9 @@ void fullDCE(IRUnit& unit) {
     auto& info = pair.second;
     auto const trackedUses =
       info.decs.size() + info.aux.size() + info.stores.size() + info.passthroughs.size();
+    FTRACE(5, "Instr {}; uses = {} trackedUses = {}\n", 
+      pair.first->toString(), uses[pair.first->dst()], trackedUses
+    );
     if (uses[pair.first->dst()] != trackedUses) continue;
     killInstrAdjustRC(state, unit, pair.first, info.decs);
     for (auto inst : info.aux) killInstrAdjustRC(state, unit, inst, info.decs);

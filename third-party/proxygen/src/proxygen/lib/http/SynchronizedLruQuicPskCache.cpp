@@ -14,7 +14,7 @@ SynchronizedLruQuicPskCache::SynchronizedLruQuicPskCache(uint64_t mapMax)
     : cache_(EvictingPskMap(mapMax)) {
 }
 
-folly::Optional<quic::QuicCachedPsk> SynchronizedLruQuicPskCache::getPsk(
+quic::Optional<quic::QuicCachedPsk> SynchronizedLruQuicPskCache::getPsk(
     const std::string& identity) {
   auto cacheMap = cache_.wlock();
   auto result = cacheMap->find(identity);
@@ -26,11 +26,11 @@ folly::Optional<quic::QuicCachedPsk> SynchronizedLruQuicPskCache::getPsk(
                       ? result->second.cachedPsk.serverCert->getIdentity()
                       : "none");
       cacheMap->erase(result);
-      return folly::none;
+      return std::nullopt;
     }
     return result->second;
   } else {
-    return folly::none;
+    return std::nullopt;
   }
 }
 

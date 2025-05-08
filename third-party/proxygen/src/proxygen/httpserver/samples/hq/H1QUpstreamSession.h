@@ -31,7 +31,7 @@ class H1QUpstreamSession
       session->setInfoCallback(nullptr);
     }
     if (sock_) {
-      sock_->close(folly::none);
+      sock_->close(std::nullopt);
       sock_->setConnectionCallback(nullptr);
     }
   }

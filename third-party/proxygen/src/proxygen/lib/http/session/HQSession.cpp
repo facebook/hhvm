@@ -1359,7 +1359,7 @@ void HQSession::rejectStream(quic::StreamId id) {
   if (sock_->isBidirectionalStream(id)) {
     sock_->resetStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
   }
-  sock_->setReadCallback(id, nullptr, folly::none);
+  sock_->setReadCallback(id, nullptr, std::nullopt);
   sock_->setPeekCallback(id, nullptr);
 }
 
@@ -1384,7 +1384,7 @@ size_t HQSession::cleanupPendingStreams() {
 
 void HQSession::clearStreamCallbacks(quic::StreamId id) {
   if (sock_) {
-    sock_->setReadCallback(id, nullptr, folly::none);
+    sock_->setReadCallback(id, nullptr, std::nullopt);
     sock_->setPeekCallback(id, nullptr);
     sock_->setDSRPacketizationRequestSender(id, nullptr);
 
@@ -2754,7 +2754,7 @@ void HQSession::abortStream(HTTPException::Direction dir,
 void HQSession::abortStream(quic::StreamId id) {
   if (sock_ && sock_->getState() && sock_->getState()->qLogger) {
     sock_->getState()->qLogger->addStreamStateUpdate(
-        id, quic::kAbort, folly::none);
+        id, quic::kAbort, std::nullopt);
   }
   auto cancel = qpackCodec_.encodeCancelStream(id);
   auto QPACKDecoderStream =
@@ -3750,7 +3750,7 @@ void HQSession::onDatagramsAvailable() noexcept {
     }
     auto streamId = quarterStreamId->first * 4;
     auto stream = findNonDetachedStream(streamId);
-    folly::Optional<std::pair<uint64_t, size_t>> ctxId;
+    quic::Optional<std::pair<uint64_t, size_t>> ctxId;
     if (!stream || !stream->txn_.isWebTransportConnectStream()) {
       // TODO: draft 8 and rfc don't include context ID
       ctxId = quic::decodeQuicInteger(cursor);

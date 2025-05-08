@@ -15,7 +15,6 @@
 #include <quic/api/test/MockQuicSocket.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/priority/HTTPPriorityQueue.h>
-#include <unordered_map>
 
 namespace quic {
 
@@ -185,13 +184,13 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
     EXPECT_CALL(*sock_, setControlStream(testing::_))
         .WillRepeatedly(testing::Invoke(
-            [this](quic::StreamId id) -> folly::Optional<quic::LocalErrorCode> {
+            [this](quic::StreamId id) -> quic::Optional<quic::LocalErrorCode> {
               auto stream = streams_.find(id);
               if (id == kConnectionStreamId || stream == streams_.end()) {
                 return quic::LocalErrorCode::STREAM_NOT_EXISTS;
               }
               stream->second.isControl = true;
-              return folly::none;
+              return std::nullopt;
             }));
 
     EXPECT_CALL(*sock_, getConnectionFlowControl())
@@ -265,10 +264,9 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     using ReadCBResult = folly::Expected<folly::Unit, LocalErrorCode>;
     EXPECT_CALL(*sock_, setReadCallback(testing::_, testing::_, testing::_))
         .WillRepeatedly(testing::Invoke(
-            [this](
-                StreamId id,
-                QuicSocket::ReadCallback* cb,
-                folly::Optional<ApplicationErrorCode> error) -> ReadCBResult {
+            [this](StreamId id,
+                   QuicSocket::ReadCallback* cb,
+                   quic::Optional<ApplicationErrorCode> error) -> ReadCBResult {
               checkNotWriteOnlyStream(id);
               auto& stream = streams_[id];
               if (cb == nullptr && stream.readCB == nullptr) {
@@ -276,7 +274,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 return folly::makeUnexpected(LocalErrorCode::INVALID_OPERATION);
               }
               stream.readCB = cb;
-              if (cb == nullptr && error.hasValue()) {
+              if (cb == nullptr && error.has_value()) {
                 stream.error = error.value();
               }
               if (cb && stream.readState == NEW) {
@@ -671,12 +669,12 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     // For the purpose of testing close and closeNe=ow are identical
     EXPECT_CALL(*sock_, closeNow(testing::_))
         .WillRepeatedly(
-            testing::Invoke([this](folly::Optional<QuicError> errorCode) {
+            testing::Invoke([this](quic::Optional<QuicError> errorCode) {
               closeImpl(errorCode);
             }));
     EXPECT_CALL(*sock_, close(testing::_))
         .WillRepeatedly(
-            testing::Invoke([this](folly::Optional<QuicError> errorCode) {
+            testing::Invoke([this](quic::Optional<QuicError> errorCode) {
               // close does not invoke onConnectionEnd/onConnectionError
               sock_->connCb_ = nullptr;
               sock_->setupCb_ = nullptr;
@@ -1204,7 +1202,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     connState.writeState = CLOSED;
   }
 
-  void closeImpl(folly::Optional<QuicError> errorCode) {
+  void closeImpl(quic::Optional<QuicError> errorCode) {
     closeConnection();
     if (errorCode) {
       quic::ApplicationErrorCode* err =

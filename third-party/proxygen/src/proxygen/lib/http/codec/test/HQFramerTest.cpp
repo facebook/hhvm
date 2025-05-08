@@ -30,7 +30,7 @@ bool comparePushId(PushId lhs, PushId rhs) {
 
 // Validate the given push ID.
 bool isValidPushId(folly::Optional<PushId> maxAllowedPushId, PushId pushId) {
-  if (!maxAllowedPushId.hasValue()) {
+  if (!maxAllowedPushId.has_value()) {
     VLOG(3) << __func__ << "maximum push ID value has not been set";
     return false;
   } else if (!comparePushId(maxAllowedPushId.value(), pushId)) {
@@ -71,10 +71,10 @@ class HQFramerTestFixture : public T {
     size_t prevLen = cursor.totalLength();
 
     auto type = quic::decodeQuicInteger(cursor);
-    ASSERT_TRUE(type.hasValue());
+    ASSERT_TRUE(type.has_value());
     outHeader.type = FrameType(type->first);
     auto length = quic::decodeQuicInteger(cursor);
-    ASSERT_TRUE(length.hasValue());
+    ASSERT_TRUE(length.has_value());
     outHeader.length = length->first;
 
     auto readBytes = prevLen - cursor.totalLength();
@@ -138,11 +138,11 @@ TEST_F(HQFramerTest, TestWriteGreaseFrame) {
 
   Cursor cursor(queue_.front());
   auto type = quic::decodeQuicInteger(cursor);
-  EXPECT_TRUE(type.hasValue());
+  EXPECT_TRUE(type.has_value());
   EXPECT_TRUE(hq::isGreaseId(type->first));
 
   auto length = quic::decodeQuicInteger(cursor);
-  EXPECT_TRUE(length.hasValue());
+  EXPECT_TRUE(length.has_value());
   EXPECT_EQ(length->first, 0);
 }
 
@@ -154,12 +154,12 @@ TEST_F(HQFramerTest, TestWriteWebTransportStreamPreface) {
 
   Cursor cursor(queue_.front());
   auto type = quic::decodeQuicInteger(cursor);
-  EXPECT_TRUE(type.hasValue());
+  EXPECT_TRUE(type.has_value());
   EXPECT_EQ(type->first,
             folly::to_underlying(hq::UnidirectionalStreamType::WEBTRANSPORT));
 
   auto sessionId = quic::decodeQuicInteger(cursor);
-  EXPECT_TRUE(sessionId.hasValue());
+  EXPECT_TRUE(sessionId.has_value());
   EXPECT_EQ(sessionId->first, wtSessionId);
 }
 

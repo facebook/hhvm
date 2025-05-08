@@ -20,7 +20,7 @@ class PersistentQuicTokenCache : public quic::QuicTokenCache {
   PersistentQuicTokenCache(const std::string& filename,
                            wangle::PersistentCacheConfig config);
 
-  [[nodiscard]] folly::Optional<std::string> getToken(
+  [[nodiscard]] quic::Optional<std::string> getToken(
       const std::string& hostname) override;
 
   void putToken(const std::string& hostname, std::string token) override;

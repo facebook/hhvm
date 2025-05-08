@@ -15,9 +15,11 @@ PersistentQuicTokenCache::PersistentQuicTokenCache(
     : cache_(filename, std::move(config)) {
 }
 
-folly::Optional<std::string> PersistentQuicTokenCache::getToken(
+quic::Optional<std::string> PersistentQuicTokenCache::getToken(
     const std::string& hostname) {
-  return cache_.get(hostname);
+  auto result = cache_.get(hostname);
+  return result.has_value() ? quic::Optional<std::string>(result.value())
+                            : std::nullopt;
 }
 
 void PersistentQuicTokenCache::putToken(const std::string& hostname,

@@ -297,9 +297,9 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.advertisedInitialMaxStreamsUni = 100;
 
   if (FLAGS_use_ack_receive_timestamps) {
-    hqParams.transportSettings.maybeAckReceiveTimestampsConfigSentToPeer.assign(
-        {.maxReceiveTimestampsPerAck = FLAGS_max_ack_receive_timestamps_to_send,
-         .receiveTimestampsExponent = kDefaultReceiveTimestampsExponent});
+    hqParams.transportSettings.maybeAckReceiveTimestampsConfigSentToPeer = {
+        .maxReceiveTimestampsPerAck = FLAGS_max_ack_receive_timestamps_to_send,
+        .receiveTimestampsExponent = kDefaultReceiveTimestampsExponent};
   }
   hqParams.transportSettings.datagramConfig.enabled = true;
 

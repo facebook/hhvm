@@ -9,6 +9,7 @@
 #pragma once
 
 #include <quic/api/QuicSocket.h>
+#include <quic/common/Optional.h>
 #include <wangle/acceptor/TransportInfo.h>
 
 namespace proxygen {
@@ -19,12 +20,12 @@ namespace proxygen {
 struct QuicProtocolInfo : public wangle::ProtocolInfo {
   ~QuicProtocolInfo() override = default;
 
-  folly::Optional<quic::ConnectionId> clientChosenDestConnectionId;
-  folly::Optional<quic::ConnectionId> clientConnectionId;
-  folly::Optional<quic::ConnectionId> serverConnectionId;
-  folly::Optional<quic::TransportSettings> transportSettings;
-  folly::Optional<std::string> fingerprint;
-  folly::Optional<quic::QuicVersion> quicVersion;
+  quic::Optional<quic::ConnectionId> clientChosenDestConnectionId;
+  quic::Optional<quic::ConnectionId> clientConnectionId;
+  quic::Optional<quic::ConnectionId> serverConnectionId;
+  quic::Optional<quic::TransportSettings> transportSettings;
+  quic::Optional<std::string> fingerprint;
+  quic::Optional<quic::QuicVersion> quicVersion;
 
   uint32_t ptoCount{0};
   uint32_t totalPTOCount{0};
@@ -39,8 +40,8 @@ inline void initQuicProtocolInfo(QuicProtocolInfo& quicInfo,
       sock.getClientChosenDestConnectionId();
   quicInfo.clientConnectionId = sock.getClientConnectionId();
   quicInfo.serverConnectionId = sock.getServerConnectionId();
-  quicInfo.quicVersion =
-      sock.getState() ? sock.getState()->version : folly::none;
+  quicInfo.quicVersion = sock.getState() ? sock.getState()->version
+                                         : quic::Optional<quic::QuicVersion>();
 }
 
 inline void updateQuicProtocolInfo(QuicProtocolInfo& quicInfo,

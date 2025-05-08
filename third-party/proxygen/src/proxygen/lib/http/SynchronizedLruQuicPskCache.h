@@ -20,7 +20,7 @@ class SynchronizedLruQuicPskCache : public quic::QuicPskCache {
 
   explicit SynchronizedLruQuicPskCache(uint64_t mapMax);
 
-  folly::Optional<quic::QuicCachedPsk> getPsk(
+  quic::Optional<quic::QuicCachedPsk> getPsk(
       const std::string& identity) override;
 
   void putPsk(const std::string& identity, quic::QuicCachedPsk psk) override;

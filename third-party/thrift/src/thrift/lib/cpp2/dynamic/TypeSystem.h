@@ -531,7 +531,7 @@ class OpaqueAliasNode final : folly::MoveOnly {
   TypeRef targetType_;
 };
 
-class DefinitionRef final : folly::MoveOnly {
+class DefinitionRef final {
  private:
   using StructPtr = folly::not_null<const StructNode*>;
   using UnionPtr = folly::not_null<const UnionNode*>;

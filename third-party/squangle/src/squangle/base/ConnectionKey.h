@@ -31,7 +31,7 @@ class ConnectionKey {
   [[nodiscard]] virtual std::string getDisplayString(
       bool level2 = false) const = 0;
 
-  [[nodiscard]] virtual const std::string& host() const noexcept = 0;
+  [[nodiscard]] virtual const std::string& host() const = 0;
 
   [[nodiscard]] virtual const std::string& db_name() const noexcept = 0;
 
@@ -39,7 +39,7 @@ class ConnectionKey {
 
   [[nodiscard]] virtual const std::string& password() const noexcept = 0;
 
-  [[nodiscard]] virtual int port() const noexcept = 0;
+  [[nodiscard]] virtual int port() const = 0;
 
   [[nodiscard]] virtual const std::string& special_tag() const noexcept = 0;
 
@@ -75,7 +75,7 @@ class MysqlConnectionKey : public ConnectionKey {
   [[nodiscard]] virtual bool operator==(
       const ConnectionKey& rhs) const noexcept override;
 
-  [[nodiscard]] const std::string& host() const noexcept override {
+  [[nodiscard]] const std::string& host() const override {
     return host_;
   }
 
@@ -103,7 +103,7 @@ class MysqlConnectionKey : public ConnectionKey {
     return partialHash_;
   }
 
-  [[nodiscard]] int port() const noexcept override {
+  [[nodiscard]] int port() const override {
     return port_;
   }
 

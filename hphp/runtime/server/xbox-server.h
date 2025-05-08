@@ -73,7 +73,7 @@ struct XboxServerInfo : SatelliteServerInfo {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_xbox("xbox");
+extern const StaticString s_xbox;
 
 struct XboxTransport final : Transport, Synchronizable {
   explicit XboxTransport(

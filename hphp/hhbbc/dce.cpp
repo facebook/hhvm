@@ -165,6 +165,11 @@ TRACE_SET_MOD(hhbbc_dce)
  *
  */
 
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_unreachable("static analysis error: supposedly "
+                                 "unreachable code was reached");
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////

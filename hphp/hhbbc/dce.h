@@ -49,10 +49,8 @@ bool global_dce(const Index&, const FuncAnalysis&, php::WideFunc&);
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_unreachable("static analysis error: supposedly "
-                                 "unreachable code was reached");
+extern const StaticString s_unreachable;
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -49,12 +49,12 @@ namespace HPHP {
 #define GMP_MIN_BASE -36
 
 // GMP class strings
-const StaticString s_GMP_num("num");
+extern const StaticString s_GMP_num;
 
 // Array indexes for division functions
-const StaticString s_GMP_s("s");
-const StaticString s_GMP_t("t");
-const StaticString s_GMP_g("g");
+extern const StaticString s_GMP_s;
+extern const StaticString s_GMP_t;
+extern const StaticString s_GMP_g;
 
 // Error strings
 const char* const cs_GMP_INVALID_TYPE =

@@ -41,6 +41,42 @@
 namespace HPHP {
 
 const StaticString s_unresolved("[unresolved]");
+const StaticString s_allows_unknown_fields("allows_unknown_fields");
+const StaticString s_elem_types("elem_types");
+const StaticString s_optional_elem_types("optional_elem_types");
+const StaticString s_param_types("param_types");
+const StaticString s_return_type("return_type");
+const StaticString s_variadic_type("variadic_type");
+const StaticString s_fields("fields");
+const StaticString s_kind("kind");
+const StaticString s_value("value");
+const StaticString s_nullable("nullable");
+const StaticString s_soft("soft");
+const StaticString s_opaque("opaque");
+const StaticString s_optional_shape_field("optional_shape_field");
+const StaticString s_classname("classname");
+const StaticString s_wildcard("_");
+const StaticString s_name("name");
+const StaticString s_generic_types("generic_types");
+const StaticString s_is_cls_cns("is_cls_cns");
+const StaticString s_access_list("access_list");
+const StaticString s_root_name("root_name");
+const StaticString s_alias("alias");
+const StaticString s_case_type("case_type");
+const StaticString s_callable("callable");
+const StaticString s_exact("exact");
+const StaticString s_typevars("typevars");
+const StaticString s_typevar_types("typevar_types");
+const StaticString s_union_types("union_types");
+const StaticString s_hh_this(annotTypeName(AnnotType::This));
+const StaticString s_type_structure_non_existant_class(
+  "HH\\__internal\\type_structure_non_existant_class");
+
+// Fixed error messages
+const StaticString s_reified_type_must_be_ts(
+  "Reified type must be a type structure");
+const StaticString s_new_instance_of_not_string(
+  "You cannot create a new instance of this type as it is not a string");
 
 namespace {
 

@@ -22,6 +22,14 @@
 
 namespace HPHP {
 
+// GMP class strings
+const StaticString s_GMP_num("num");
+
+// Array indexes for division functions
+const StaticString s_GMP_s("s");
+const StaticString s_GMP_t("t");
+const StaticString s_GMP_g("g");
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 static String mpzToString(mpz_t gmpData, const int64_t base) {

@@ -92,7 +92,7 @@ struct CollectionsExtension : Extension {
   void registerNativeSet();
 };
 
-const StaticString s_isset{"isset"};
+extern const StaticString s_isset;
 
 struct CollectionPropHandler: Native::BasePropHandler {
   static Variant issetProp(const Object&, const String&) {

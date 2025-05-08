@@ -35,6 +35,10 @@ ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_isset{"isset"};
+
+/////////////////////////////////////////////////////////////////////////////
+
 template<bool oob>
 [[noreturn]] ALWAYS_INLINE
 void throwInt(int64_t key) {

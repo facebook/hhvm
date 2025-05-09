@@ -613,4 +613,51 @@ class InvokeByFieldId {
 template <typename T>
 inline constexpr detail::InvokeByFieldId<T> invoke_by_field_id{};
 
+/// Applies the callable to active member of thrift union. Example:
+///
+///   T thriftUnion;
+///
+///   op::visit_union_with_tag(
+///     thriftUnion,
+///     [](folly::tag_t<ident::int_field>, int& f) {
+///       LOG(INFO) << "Int value: " << f;
+///     },
+///     [](folly::tag_t<ident::string_field>, std::string& f) {
+///       LOG(INFO) << "String value: " << f;
+///     },
+///     []() { LOG(INFO) << "No active field"; });
+///
+///   op::visit_union_with_tag(
+///     thriftUnion,
+///     []<typename ident>(folly::tag_t<ident>, auto& value) {
+///       LOG(INFO) << op::get_name_v<T, ident> << " --> " << value;
+///     },
+///      []() { LOG(INFO) << "Empty union"; });
+///
+/// If union is empty, callable will be called with no arguments.
+///
+/// @param t thrift union
+/// @param f... one or more callables that accepts all member types from union
+
+template <typename T, typename F>
+constexpr decltype(auto) visit_union_with_tag(T&& t, F&& f) {
+  using Type = folly::remove_cvref_t<T>;
+  static_assert(is_thrift_union_v<Type>, "T must be a thrift union");
+
+  return invoke_by_field_id<Type>(
+      static_cast<FieldId>(t.getType()),
+      [&](auto id) -> decltype(auto) {
+        using Ident = get_ident<Type, decltype(id)>;
+        return std::forward<F>(f)(
+            folly::tag_t<Ident>{}, *get<Ident>(std::forward<T>(t)));
+      },
+      [&]() -> decltype(auto) { return std::forward<F>(f)(); });
+}
+template <typename T, typename... F>
+FOLLY_ALWAYS_INLINE constexpr decltype(auto) visit_union_with_tag(
+    T&& t, F&&... f) {
+  return visit_union_with_tag(
+      std::forward<T>(t), folly::overload(std::forward<F>(f)...));
+}
+
 } // namespace apache::thrift::op

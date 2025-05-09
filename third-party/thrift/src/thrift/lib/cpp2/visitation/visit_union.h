@@ -32,7 +32,8 @@ struct VisitUnion {
 /**
  * Applies the callable to active member of thrift union. Example:
  *
- *   visit_union(thriftUnion, [](const ThriftField& meta, auto&& value) {
+ *   visit_union_with_metadata(thriftUnion,
+ *                             [](const ThriftField& meta, auto&& value) {
  *     LOG(INFO) << *meta.name_ref() << " --> " << value;
  *   })
  *
@@ -40,12 +41,23 @@ struct VisitUnion {
  * If `no_metadata` thrift option is enabled, ThriftField will be empty.
  * If union is empty, callable won't be called.
  *
+ * A lighter-weight version not using metadata is available as
+ * `op::visit_union_with_tag`, defined in thrift/lib/cpp2/op/Get.h
+ *
  * @param t thrift union
  * @param f a callable that accepts all member types from union
  */
 template <typename T, typename F>
-decltype(auto) visit_union(T&& t, F&& f) {
+decltype(auto) visit_union_with_metadata(T&& t, F&& f) {
   return apache::thrift::detail::VisitUnion<folly::remove_cvref_t<T>>()(
       detail::MetadataForwarder<T, F>{std::forward<F>(f)}, static_cast<T&&>(t));
 }
+
+template <typename T, typename F>
+[[deprecated(
+    "Deprecated in favor of apache::thrift::op::visit_union_with_tag. If metadata is needed then visit_union_with_metadata is a drop-in replacement.")]]
+decltype(auto) visit_union(T&& t, F&& f) {
+  return visit_union_with_metadata(std::forward<T>(t), std::forward<F>(f));
+}
+
 } // namespace apache::thrift

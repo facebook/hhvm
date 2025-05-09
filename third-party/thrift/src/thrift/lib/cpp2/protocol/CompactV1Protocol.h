@@ -139,6 +139,8 @@ class CompactV1ProtocolReader : protected CompactProtocolReader {
 
   using CompactProtocolReader::getCursor;
   using CompactProtocolReader::getCursorPosition;
+
+  static constexpr bool kSupportsArithmeticVectors() { return false; }
 };
 
 } // namespace apache::thrift

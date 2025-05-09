@@ -225,7 +225,11 @@ void runBigListTest(
       } else {
         prot_method_integral::read(r, outList);
       }
-      ASSERT_EQ(intList, outList);
+      ASSERT_EQ(intList.size(), outList.size());
+      size_t len = std::min(intList.size(), outList.size());
+      for (size_t j = 0; j < len; ++j) {
+        ASSERT_EQ(intList[j], outList[j]);
+      }
     }
   }
 }

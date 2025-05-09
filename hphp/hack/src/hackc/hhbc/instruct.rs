@@ -97,7 +97,7 @@ impl FCallArgs {
             "length of readonly must be either zero or num_args"
         );
         assert!(
-            context.map_or(true, |c| !c.is_empty()),
+            context.is_none_or(|c| !c.is_empty()),
             "unexpected empty context"
         );
         if context.is_some() {

@@ -322,11 +322,12 @@ impl Display for FmtIdentifier<'_> {
         // Or if it contains non-ascii printable chars.
         // Or ':' (to disambiguate "Foo::Bar" from "Foo"::"Bar").
         // Or if it starts with a non-letter, number, backslash.
-        let needs_quote = id.first().map_or(true, |&c| {
-            !(c.is_ascii_alphabetic() || c == b'_' || c == b'\\' || c == b'$')
-        }) || id[1..]
-            .iter()
-            .any(|&c| !c.is_ascii_graphic() || c == b':' || c == b'#');
+        let needs_quote = id
+            .first()
+            .is_none_or(|&c| !(c.is_ascii_alphabetic() || c == b'_' || c == b'\\' || c == b'$'))
+            || id[1..]
+                .iter()
+                .any(|&c| !c.is_ascii_graphic() || c == b':' || c == b'#');
         if !needs_quote {
             if let Ok(string) = std::str::from_utf8(id) {
                 return f.write_str(string);

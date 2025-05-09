@@ -90,9 +90,11 @@ struct PrimitiveDatum {
     return !(lhs == rhs);
   }
   template <
-      typename V,
-      std::enable_if_t<!std::is_same_v<V, PrimitiveDatum>>* = nullptr>
-  friend bool operator!=(const V& lhs, const PrimitiveDatum& rhs) {
+      typename U,
+      std::enable_if_t<
+          !std::is_same_v<U, PrimitiveDatum> && std::is_convertible_v<U, T>>* =
+          nullptr>
+  friend bool operator!=(const U& lhs, const PrimitiveDatum& rhs) {
     return !(lhs == rhs);
   }
 };

@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <fmt/format.h>
@@ -130,7 +131,7 @@ namespace folly {
 template <>
 class FormatValue<HPHP::Facts::Clock> {
  public:
-  explicit FormatValue(HPHP::Facts::Clock v) : m_val(v) {}
+  explicit FormatValue(HPHP::Facts::Clock v) : m_val(std::move(v)) {}
 
   template <typename Callback>
   void format(FormatArg& arg, Callback& cb) const {

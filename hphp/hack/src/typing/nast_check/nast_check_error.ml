@@ -464,7 +464,8 @@ let entrypoint_generics pos =
 let variadic_memoize pos =
   User_error.make_err
     Error_code.(to_enum VariadicMemoize)
-    (pos, "Memoized functions cannot be variadic.")
+    ( pos,
+      "Memoized functions cannot be variadic or use the type-splat operator." )
     []
 
 let abstract_method_memoize pos =

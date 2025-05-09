@@ -97,22 +97,26 @@ struct GetRouteTestData {
   std::string value_;
   int64_t flags_;
   int16_t appSpecificErrorCode_;
+  int64_t exptime_;
 
   GetRouteTestData()
       : result_(carbon::Result::UNKNOWN),
         value_(std::string()),
         flags_(0),
-        appSpecificErrorCode_(0) {}
+        appSpecificErrorCode_(0),
+        exptime_(0) {}
 
   GetRouteTestData(
       carbon::Result result,
       const std::string& value,
       int64_t flags = 0,
-      int16_t appSpecificErrorCode = 0)
+      int16_t appSpecificErrorCode = 0,
+      int64_t exptime = 0)
       : result_(result),
         value_(value),
         flags_(flags),
-        appSpecificErrorCode_(appSpecificErrorCode) {}
+        appSpecificErrorCode_(appSpecificErrorCode),
+        exptime_(exptime) {}
 };
 
 struct UpdateRouteTestData {
@@ -357,6 +361,26 @@ struct RecordingRoute {
     reply.appSpecificErrorCode_ref() = dataGet_.appSpecificErrorCode_;
   }
 
+  template <typename T, typename = void>
+  struct has_exptime : std::false_type {};
+  template <typename T>
+  struct has_exptime<
+      T,
+      folly::void_t<decltype(std::declval<T>().exptime_ref())>>
+      : std::true_type {};
+
+  template <
+      typename Reply,
+      typename std::enable_if_t<!has_exptime<Reply>::value>* = nullptr>
+  void setExptime(Reply& /* unused */) {}
+
+  template <
+      typename Reply,
+      typename std::enable_if_t<has_exptime<Reply>::value>* = nullptr>
+  void setExptime(Reply& reply) {
+    reply.exptime_ref() = dataGet_.exptime_;
+  }
+
   template <class Request>
   ReplyT<Request> routeInternal(const Request& req) {
     ReplyT<Request> reply;
@@ -389,6 +413,9 @@ struct RecordingRoute {
       detail::setReplyValue(reply, dataGet_.value_);
       detail::testSetFlags(reply, dataGet_.flags_);
       setAppspecificErrorCode(reply);
+      if (getFlagsIfExist(req) & MC_MSG_FLAG_REQUEST_EXPTIME) {
+        setExptime(reply);
+      }
       return reply;
     }
     if (carbon::UpdateLike<Request>::value) {

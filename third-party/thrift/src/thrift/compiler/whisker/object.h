@@ -629,7 +629,15 @@ class object final : private detail::object_base {
   }
 
   /* implicit */ object(null = {}) : base(std::in_place_type<null>) {}
-  explicit object(boolean value) : base(bool(value)) {}
+
+  /**
+   * Pointers have the nasty behavior of being implicitly convertible to bool.
+   */
+  template <
+      typename U = boolean,
+      std::enable_if_t<std::is_same_v<U, boolean>>* = nullptr>
+  explicit object(U value) : base(value) {}
+
   explicit object(i64 value) : base(value) {}
   explicit object(f64 value) : base(value) {}
   explicit object(string value) : base(std::move(value)) {}

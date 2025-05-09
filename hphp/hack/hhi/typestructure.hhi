@@ -73,9 +73,9 @@ namespace HH {
     ?'allows_unknown_fields' => bool,
     ?'is_cls_cns' => bool,
     ?'optional_shape_field' => bool,
-    'value' => mixed,
-    'typevars' => ?string,
-    'alias' => ?string,
+    ?'value' => mixed,
+    ?'typevars' => string,
+    ?'alias' => string,
     ?'exact' => bool,
     ?'like' => bool,
   ) = shape(
@@ -102,11 +102,11 @@ namespace HH {
     ?'allows_unknown_fields' => bool,
     ?'is_cls_cns' => bool,
     ?'optional_shape_field' => bool,
-    'value' => mixed,
+    ?'value' => mixed,
     // Comma-separated string
-    'typevars' => ?string,
+    ?'typevars' => string,
     // for type aliases
-    'alias' => ?string,
+    ?'alias' => string,
     // if the type is exact (i.e., not a subtype)
     ?'exact' => bool,
     // if the type is a like-type

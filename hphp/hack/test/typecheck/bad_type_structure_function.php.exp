@@ -1,7 +1,7 @@
 File "bad_type_structure_function.php", line 4, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_function.php", line 5, characters 3-23:
-  ?string
+  string
 File "bad_type_structure_function.php", line 6, characters 3-22:
   string
 File "bad_type_structure_function.php", line 7, characters 3-29:
@@ -23,7 +23,7 @@ File "bad_type_structure_function.php", line 18, characters 3-22:
 File "bad_type_structure_function.php", line 22, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_function.php", line 23, characters 3-23:
-  ?string
+  string
 File "bad_type_structure_function.php", line 24, characters 3-22:
   string
 File "bad_type_structure_function.php", line 25, characters 3-29:
@@ -44,7 +44,7 @@ File "bad_type_structure_function.php", line 36, characters 3-22:
   TypeStructureKind
 ERROR: File "bad_type_structure_function.php", line 11, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-698:
+  File "typestructure.hhi", line 59, characters 31-699:
   The shape is defined here
 ERROR: File "bad_type_structure_function.php", line 12, characters 15-24:
 The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
@@ -56,15 +56,15 @@ The field `elem_types` may not be present in this shape. Use `??` or `Shapes::id
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_function.php", line 14, characters 15-22:
 This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-698:
+  File "typestructure.hhi", line 59, characters 31-699:
   The shape is defined here
 ERROR: File "bad_type_structure_function.php", line 15, characters 15-29:
 This shape doesn't have a field `generic_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-698:
+  File "typestructure.hhi", line 59, characters 31-699:
   The shape is defined here
 ERROR: File "bad_type_structure_function.php", line 29, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-698:
+  File "typestructure.hhi", line 59, characters 31-699:
   The shape is defined here
 ERROR: File "bad_type_structure_function.php", line 30, characters 15-24:
 The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
@@ -76,5 +76,5 @@ The field `elem_types` may not be present in this shape. Use `??` or `Shapes::id
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_function.php", line 32, characters 15-22:
 This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-698:
+  File "typestructure.hhi", line 59, characters 31-699:
   The shape is defined here

@@ -532,7 +532,7 @@ class StructuredNode {
       auto emplaced =
           idToOrdinal_.emplace(field.identity().id(), FieldOrdinal(ord)).second;
       if (!emplaced) {
-        folly::throw_exception<std::runtime_error>(fmt::format(
+        folly::throw_exception<InvalidTypeError>(fmt::format(
             "duplicate field id {} in struct {}",
             (int)field.identity().id(),
             uri_));
@@ -541,7 +541,7 @@ class StructuredNode {
           nameToOrdinal_.emplace(field.identity().name(), FieldOrdinal(ord))
               .second;
       if (!emplaced) {
-        folly::throw_exception<std::runtime_error>(fmt::format(
+        folly::throw_exception<InvalidTypeError>(fmt::format(
             "duplicate field name {} in struct {}",
             field.identity().name(),
             uri_));

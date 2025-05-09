@@ -1545,6 +1545,10 @@ ThreadManagerExecutorAdapter::ThreadManagerExecutorAdapter(
 
 ThreadManagerExecutorAdapter::~ThreadManagerExecutorAdapter() {
   joinKeepAliveOnce();
+  // Executors must be destroyed in the same order as they were created.
+  for (auto& executor : owning_) {
+    executor.reset();
+  }
 }
 
 void ThreadManagerExecutorAdapter::join() {

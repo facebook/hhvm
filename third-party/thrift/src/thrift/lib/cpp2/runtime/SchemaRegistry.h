@@ -58,16 +58,14 @@ template <typename T>
 using SyntaxGraphNodeTypeFor =
     typename decltype(getSyntaxGraphNodeTypeFor<T>())::type;
 } // namespace detail
+namespace test {
+struct SchemaTest;
+}
 
 class SchemaRegistry {
  public:
   // Access the global registry.
   static SchemaRegistry& get();
-
-  using Ptr = std::shared_ptr<type::Schema>;
-
-  // Access all data registered
-  Ptr getMergedSchema();
 
   /**
    * Gets node for given definition, or throws `std::out_of_range` if not
@@ -94,12 +92,19 @@ class SchemaRegistry {
   ~SchemaRegistry();
 
  private:
+  using Ptr = std::shared_ptr<type::Schema>;
+
+  // Access all data registered
+  Ptr getMergedSchema();
+
   BaseSchemaRegistry& base_;
   Ptr mergedSchema_;
   folly::relaxed_atomic<bool> mergedSchemaAccessed_{false};
   std::unordered_set<type::ProgramId> includedPrograms_;
   std::unique_ptr<schema::SyntaxGraph> syntaxGraph_;
   schema::detail::IncrementalResolver* resolver_;
+
+  friend struct test::SchemaTest;
 };
 
 } // namespace apache::thrift

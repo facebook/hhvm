@@ -32,8 +32,13 @@ using namespace apache::thrift;
 using namespace apache::thrift::schema;
 using namespace apache::thrift::schema::detail;
 
-TEST(SchemaTest, not_linked) {
-  auto schemaPtr = SchemaRegistry::get().getMergedSchema();
+namespace apache::thrift::test {
+struct SchemaTest : public testing::Test {
+  auto getMergedSchema(SchemaRegistry& reg) { return reg.getMergedSchema(); }
+  auto getMergedSchema() { return SchemaRegistry::get().getMergedSchema(); }
+};
+TEST_F(SchemaTest, not_linked) {
+  auto schemaPtr = getMergedSchema();
   const auto& schema = *schemaPtr;
   for (const auto& program : *schema.programs()) {
     EXPECT_NE(
@@ -44,8 +49,8 @@ TEST(SchemaTest, not_linked) {
   (void)apache::thrift::test::IncompleteMap{};
 }
 
-TEST(SchemaTest, not_linked_but_included) {
-  auto schemaPtr = SchemaRegistry::get().getMergedSchema();
+TEST_F(SchemaTest, not_linked_but_included) {
+  auto schemaPtr = getMergedSchema();
   const auto& schema = *schemaPtr;
   for (const auto& program : *schema.programs()) {
     if (program.path() != "thrift/annotation/thrift.thrift") {
@@ -60,9 +65,9 @@ TEST(SchemaTest, not_linked_but_included) {
   (void)facebook::thrift::annotation::Uri{};
 }
 
-TEST(SchemaTest, linked) {
+TEST_F(SchemaTest, linked) {
   bool found = false;
-  auto schemaPtr = SchemaRegistry::get().getMergedSchema();
+  auto schemaPtr = getMergedSchema();
   const auto& schema = *schemaPtr;
   for (const auto& program : *schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
@@ -92,7 +97,7 @@ TEST(SchemaTest, linked) {
   (void)facebook::thrift::test::schema::Empty{};
 }
 
-TEST(SchemaTest, static_schema) {
+TEST_F(SchemaTest, static_schema) {
   auto static_schema = schema::detail::mergeSchemas(
       facebook::thrift::test::schema::schema_constants::
           _fbthrift_schema_542ebcbee39d65d1_includes());
@@ -104,7 +109,7 @@ TEST(SchemaTest, static_schema) {
   }
   ASSERT_TRUE(static_program);
 
-  auto dynamic_schema_ptr = SchemaRegistry::get().getMergedSchema();
+  auto dynamic_schema_ptr = getMergedSchema();
   const type::Program* dynamic_program = nullptr;
   for (const auto& program : *dynamic_schema_ptr->programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
@@ -116,21 +121,21 @@ TEST(SchemaTest, static_schema) {
   EXPECT_EQ(*static_program, *dynamic_program);
 }
 
-TEST(SchemaTest, merged_schema_add_after_access) {
+TEST_F(SchemaTest, merged_schema_add_after_access) {
   auto data = facebook::thrift::test::schema::schema_constants::
       _fbthrift_schema_542ebcbee39d65d1();
 
   BaseSchemaRegistry base;
   SchemaRegistry registry(base);
-  auto schemaPtr = registry.getMergedSchema();
+  auto schemaPtr = getMergedSchema(registry);
   base.registerSchema("schema", data, "schema.thrift");
-  auto newSchemaPtr = registry.getMergedSchema();
+  auto newSchemaPtr = getMergedSchema(registry);
   // Data is not reused after access.
   EXPECT_EQ(schemaPtr->programs()->size(), 0);
   EXPECT_GT(newSchemaPtr->programs()->size(), 0);
 }
 
-TEST(SchemaTest, service_schema) {
+TEST_F(SchemaTest, service_schema) {
   ServiceHandler<facebook::thrift::test::schema::TestService> handler;
   auto metadata = handler.getServiceSchema();
   EXPECT_TRUE(metadata);
@@ -145,7 +150,7 @@ TEST(SchemaTest, service_schema) {
       service.functions()[0].returnType()->baseType(), type::BaseType::Void);
 }
 
-TEST(SchemaTest, schema_data_traits) {
+TEST_F(SchemaTest, schema_data_traits) {
   using apache::thrift::detail::TSchemaAssociation;
   EXPECT_GT(
       TSchemaAssociation<facebook::thrift::test::schema::TestService>::bundle()
@@ -184,3 +189,5 @@ TEST(SchemaTest, schema_data_traits) {
       TSchemaAssociation<
           facebook::thrift::test::schema::TestService>::definitionKey);
 }
+
+} // namespace apache::thrift::test

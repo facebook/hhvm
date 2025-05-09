@@ -25,6 +25,7 @@
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/container/F14Set.h>
+#include <folly/container/MapUtil.h>
 #include <folly/container/span.h>
 #include <folly/lang/Assume.h>
 #include <folly/lang/Exception.h>
@@ -486,13 +487,70 @@ class StructuredNode {
   folly::span<const FieldNode> fields() const noexcept { return fields_; }
   bool isSealed() const noexcept { return isSealed_; }
 
+  const FieldNode& at(FieldId id) const { return at(tryFieldIdToOrdinal(id)); }
+  const FieldNode& at(std::string_view name) const {
+    return at(tryFieldNameToOrdinal(name));
+  }
+  const FieldNode& at(FieldOrdinal ordinal) const {
+    if (ordinal == FieldOrdinal{0} ||
+        folly::to_underlying(ordinal) > fields_.size()) {
+      folly::throw_exception<std::out_of_range>("invalid ordinal");
+    }
+    return fields_.at(folly::to_underlying(ordinal) - 1);
+  }
+
+  bool hasField(FieldId id) const { return idToOrdinal_.contains(id); }
+  bool hasField(std::string_view name) const {
+    return nameToOrdinal_.contains(name);
+  }
+
+  // Returns FieldOrdinal{0} if the field is not found.
+  FieldOrdinal tryFieldIdToOrdinal(FieldId id) const {
+    if (auto* ptr = folly::get_ptr(idToOrdinal_, id)) {
+      return *ptr;
+    }
+    return FieldOrdinal{0};
+  }
+  FieldOrdinal tryFieldNameToOrdinal(std::string_view name) const {
+    if (auto* ptr = folly::get_ptr(nameToOrdinal_, name)) {
+      return *ptr;
+    }
+    return FieldOrdinal{0};
+  }
+
  protected:
   Uri uri_;
   std::vector<FieldNode> fields_;
+  folly::F14FastMap<FieldId, FieldOrdinal> idToOrdinal_;
+  folly::F14FastMap<std::string_view, FieldOrdinal> nameToOrdinal_;
   bool isSealed_;
 
   StructuredNode(Uri uri, std::vector<FieldNode> fields, bool isSealed)
-      : uri_(std::move(uri)), fields_(std::move(fields)), isSealed_(isSealed) {}
+      : uri_(std::move(uri)), fields_(std::move(fields)), isSealed_(isSealed) {
+    std::uint32_t ord = 1;
+    for (auto& field : fields_) {
+      auto emplaced =
+          idToOrdinal_.emplace(field.identity().id(), FieldOrdinal(ord)).second;
+      if (!emplaced) {
+        folly::throw_exception<std::runtime_error>(fmt::format(
+            "duplicate field id {} in struct {}",
+            (int)field.identity().id(),
+            uri_));
+      }
+      emplaced =
+          nameToOrdinal_.emplace(field.identity().name(), FieldOrdinal(ord))
+              .second;
+      if (!emplaced) {
+        folly::throw_exception<std::runtime_error>(fmt::format(
+            "duplicate field name {} in struct {}",
+            field.identity().name(),
+            uri_));
+      }
+      ++ord;
+    }
+  }
+
+  friend class DefinitionNode;
 };
 
 class StructNode final : folly::MoveOnly, public StructuredNode {

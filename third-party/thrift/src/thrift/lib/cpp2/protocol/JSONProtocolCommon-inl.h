@@ -17,8 +17,8 @@
 #pragma once
 
 #include <folly/Utility.h>
-
 #include <folly/algorithm/simd/find_first_of.h>
+#include <folly/codec/hex.h>
 
 namespace apache {
 namespace thrift {
@@ -803,13 +803,11 @@ inline void JSONProtocolReaderCommon::readJSONBase64(StrType& str) {
 // Return the integer value of a hex character ch.
 // Throw a protocol exception if the character is not [0-9a-f].
 inline uint8_t JSONProtocolReaderCommon::hexVal(uint8_t ch) {
-  if ((ch >= '0') && (ch <= '9')) {
-    return ch - '0';
-  } else if ((ch >= 'a') && (ch <= 'f')) {
-    return ch - 'a' + 10;
-  } else {
+  auto const v = folly::hex_decode_digit_table(char(ch));
+  if (!folly::hex_decoded_digit_is_valid(v)) {
     throwInvalidHexChar(ch);
   }
+  return v;
 }
 
 template <class Predicate>

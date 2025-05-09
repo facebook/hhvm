@@ -85,8 +85,11 @@ inline std::string get_service_qualified_name(const t_service& service) {
  * its not considered orderable, and we don't need to generate operator< methods
  */
 bool is_orderable(
-    std::unordered_map<const t_type*, bool>& memo, const t_type& type);
-bool is_orderable(const t_type& type);
+    std::unordered_map<const t_type*, bool>& memo,
+    const t_type& type,
+    bool enableCustomTypeOrderingIfStructureHasUri);
+bool is_orderable(
+    const t_type& type, bool enableCustomTypeOrderingIfStructureHasUri);
 
 /**
  * Return the cpp.type/cpp2.type attribute or empty string if nothing set.

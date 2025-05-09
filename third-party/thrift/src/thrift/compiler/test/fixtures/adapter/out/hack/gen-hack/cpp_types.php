@@ -2573,3 +2573,96 @@ class AllowLegacyDeprecatedTerseWritesRef implements \IThriftSyncStruct, \IThrif
 
 }
 
+/**
+ * If there are custom types in thrift structure (e.g., `std::unordered_map` field),
+ * We won't define `operator<` automatically (unless URI exists, but that's about
+ * to change). Note that `operator<` is always declared.
+ * This annotation ensures the `operator<` is always defined. For types that
+ * don't have `operator<`, such as `std::unordered_map`, we will convert it to
+ * a sorted `std::vector<pair<K*, V*>>` to do the comparison.
+ *
+ * Original thrift struct:-
+ * EnableCustomTypeOrdering
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/EnableCustomTypeOrdering'))>>
+class EnableCustomTypeOrdering implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'EnableCustomTypeOrdering';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.EnableCustomTypeOrdering",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+

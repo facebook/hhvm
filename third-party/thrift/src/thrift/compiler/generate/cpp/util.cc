@@ -232,11 +232,17 @@ gen_dependency_graph(
 
 namespace {
 
+bool enable_custom_type_ordering(const t_structured& s) {
+  return s.program() != nullptr &&
+      s.program()->inherit_annotation_or_null(s, kCppEnableCustomTypeOrdering);
+}
+
 struct is_orderable_walk_context {
-  std::unordered_set<t_type const*> pending_back_propagation;
-  std::unordered_set<t_type const*> seen;
+  const bool enableCustomTypeOrderingIfStructureHasUri;
+  std::unordered_set<t_type const*> pending_back_propagation = {};
+  std::unordered_set<t_type const*> seen = {};
   std::unordered_map<t_type const*, std::unordered_set<t_type const*>>
-      inv_graph;
+      inv_graph = {};
 };
 
 bool is_orderable_walk(
@@ -289,7 +295,9 @@ bool is_orderable_walk(
                      f.type().deref(),
                      &type,
                      context,
-                     !as_struct->uri().empty());
+                     enable_custom_type_ordering(*as_struct) ||
+                         (context.enableCustomTypeOrderingIfStructureHasUri &&
+                          !as_struct->uri().empty()));
                });
   } else if (type.is_list()) {
     return result = is_orderable_walk(
@@ -347,20 +355,24 @@ void is_orderable_back_propagate(
 } // namespace
 
 bool is_orderable(
-    std::unordered_map<t_type const*, bool>& memo, t_type const& type) {
+    std::unordered_map<t_type const*, bool>& memo,
+    t_type const& type,
+    bool enableCustomTypeOrderingIfStructureHasUri) {
   // Thrift struct could self-reference, so have to perform a two-stage walk:
   // first all self-references are speculated, then negative classification is
   // back-propagated through the traversed dependencies.
-  is_orderable_walk_context context;
+  is_orderable_walk_context context{enableCustomTypeOrderingIfStructureHasUri};
   is_orderable_walk(memo, type, nullptr, context, false);
   is_orderable_back_propagate(memo, context);
   auto it = memo.find(&type);
   return it == memo.end() || it->second;
 }
 
-bool is_orderable(t_type const& type) {
+bool is_orderable(
+    t_type const& type, bool enableCustomTypeOrderingIfStructureHasUri) {
+  // Thrift struct could self-reference, so have to perform a two-stage walk:
   std::unordered_map<t_type const*, bool> memo;
-  return is_orderable(memo, type);
+  return is_orderable(memo, type, enableCustomTypeOrderingIfStructureHasUri);
 }
 
 std::string_view get_type(const t_type* type) {

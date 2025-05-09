@@ -52,8 +52,21 @@ TEST_F(UtilTest, is_orderable_set_template) {
   t_program p("path/to/program.thrift", "path/to/program.thrift");
   t_struct s(&p, "struct_name");
   s.append(std::make_unique<t_field>(&t, "set_field", 1));
-  EXPECT_FALSE(cpp2::is_orderable(t));
-  EXPECT_FALSE(cpp2::is_orderable(s));
+  EXPECT_FALSE(cpp2::is_orderable(t, true));
+  EXPECT_FALSE(cpp2::is_orderable(s, true));
+
+  s.set_uri("facebook.com/path/to/struct_name");
+  EXPECT_TRUE(cpp2::is_orderable(s, true));
+  EXPECT_FALSE(cpp2::is_orderable(s, false));
+
+  s.set_uri(""); // remove uri
+  EXPECT_FALSE(cpp2::is_orderable(s, true));
+  EXPECT_FALSE(cpp2::is_orderable(s, false));
+
+  auto builder = gen::cpp_annotation_builder::EnableCustomTypeOrdering(p);
+  s.add_structured_annotation(builder.make());
+  EXPECT_TRUE(cpp2::is_orderable(s, true));
+  EXPECT_TRUE(cpp2::is_orderable(s, false));
 }
 
 TEST_F(UtilTest, is_orderable_struct) {
@@ -61,7 +74,7 @@ TEST_F(UtilTest, is_orderable_struct) {
   t_struct s(&p, "struct_name");
   s.append(std::make_unique<t_field>(
       &t_primitive_type::t_string(), "field_name", 1));
-  EXPECT_TRUE(cpp2::is_orderable(s));
+  EXPECT_TRUE(cpp2::is_orderable(s, true));
 }
 
 TEST_F(UtilTest, is_orderable_struct_self_reference) {
@@ -72,7 +85,7 @@ TEST_F(UtilTest, is_orderable_struct_self_reference) {
 
   t_struct c(&p, "C");
   c.append(std::make_unique<t_field>(&t, "set_field", 1));
-  EXPECT_FALSE(cpp2::is_orderable(c));
+  EXPECT_FALSE(cpp2::is_orderable(c, true));
 
   t_struct b(&p, "B");
   t_struct a(&p, "A");
@@ -81,13 +94,13 @@ TEST_F(UtilTest, is_orderable_struct_self_reference) {
   a.append(std::make_unique<t_field>(&b, "b", 1));
   a.append(std::make_unique<t_field>(&c, "c", 2));
 
-  EXPECT_FALSE(cpp2::is_orderable(a));
-  EXPECT_FALSE(cpp2::is_orderable(b));
+  EXPECT_FALSE(cpp2::is_orderable(a, true));
+  EXPECT_FALSE(cpp2::is_orderable(b, true));
 
   std::unordered_map<t_type const*, bool> memo;
-  EXPECT_FALSE(cpp2::is_orderable(memo, a));
-  EXPECT_FALSE(cpp2::is_orderable(memo, b));
-  EXPECT_FALSE(cpp2::is_orderable(memo, c));
+  EXPECT_FALSE(cpp2::is_orderable(memo, a, true));
+  EXPECT_FALSE(cpp2::is_orderable(memo, b, true));
+  EXPECT_FALSE(cpp2::is_orderable(memo, c, true));
 }
 
 TEST_F(UtilTest, is_eligible_for_constexpr) {

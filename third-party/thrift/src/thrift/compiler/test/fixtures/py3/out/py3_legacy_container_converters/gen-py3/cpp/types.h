@@ -208,6 +208,13 @@ inline void reset_field<::facebook::thrift::annotation::cpp::AllowLegacyDeprecat
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::cpp::EnableCustomTypeOrdering>(
+    ::facebook::thrift::annotation::cpp::EnableCustomTypeOrdering& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::Name>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -410,6 +417,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::AllowLegacyDeprecatedTerseWritesRef>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::cpp::EnableCustomTypeOrdering>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

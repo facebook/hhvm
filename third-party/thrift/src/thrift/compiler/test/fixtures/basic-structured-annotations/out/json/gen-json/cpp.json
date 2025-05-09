@@ -710,6 +710,28 @@
           "column" : 46
         }
       }
+    },
+    "EnableCustomTypeOrdering" : {
+      "lineno" : 425,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Structured" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 425,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 427,
+          "column" : 35
+        }
+      }
     }
   }
 }

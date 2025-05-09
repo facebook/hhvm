@@ -680,6 +680,31 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 414
+      },
+      "EnableCustomTypeOrdering" : {
+        "name" : "EnableCustomTypeOrdering",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Program",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Structured" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Structured",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "If there are custom types in thrift structure (e.g., `std::unordered_map` field),\nWe won't define `operator<` automatically (unless URI exists, but that's about\nto change). Note that `operator<` is always declared.\nThis annotation ensures the `operator<` is always defined. For types that\ndon't have `operator<`, such as `std::unordered_map`, we will convert it to\na sorted `std::vector<pair<K*, V*>>` to do the comparison.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 425
       }
   },
   "source_path" : "thrift/annotation/cpp",

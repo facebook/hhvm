@@ -153,7 +153,6 @@
 // https://github.com/kkos/oniguruma/commit/e79406479b6be4a56e40ede6c1a87b51fba073a2
 #undef UChar
 #include <signal.h>
-#include <libxml/parser.h>
 
 #include <chrono>
 #include <exception>

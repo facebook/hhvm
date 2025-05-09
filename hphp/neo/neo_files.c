@@ -9,13 +9,8 @@
  *
  */
 
-#include "cs_config.h"
-
-#include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/stat.h>
@@ -27,10 +22,8 @@
 #include <strsafe.h>
 #else
 #include <unistd.h>
-#include <dirent.h>
 #endif
 
-#include "neo_misc.h"
 #include "neo_err.h"
 #include "neo_files.h"
 

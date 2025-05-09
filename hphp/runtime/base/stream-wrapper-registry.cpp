@@ -16,12 +16,10 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/data-stream-wrapper.h"
-#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
-#include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-hash-set.h"
 #include "hphp/runtime/base/string-hash-map.h"

@@ -17,12 +17,8 @@
 
 #include <vector>
 
-#include <folly/Hash.h>
-
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/runtime/vm/func-emitter.h"

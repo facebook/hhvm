@@ -17,8 +17,6 @@
 
 #include <algorithm>
 
-#include <sys/types.h>
-
 #include <folly/Conv.h>
 #include <folly/portability/Fcntl.h>
 

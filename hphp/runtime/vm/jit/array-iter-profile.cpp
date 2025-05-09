@@ -20,8 +20,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 
-#include <folly/Format.h>
-
 #include <string>
 #include <sstream>
 

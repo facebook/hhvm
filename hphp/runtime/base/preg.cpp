@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/preg.h"
 
 #include <atomic>
-#include <fstream>
 #include <mutex>
 #include <pcre.h>
 #include <onigposix.h>
@@ -29,14 +28,9 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"

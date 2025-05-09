@@ -21,8 +21,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/rds-local.h"
 
-#include <dlfcn.h>
-
 /*
  * This class reimplements the setlocale() and localeconv() functions
  * in a thread-safe manner and provides stronger symbols for them than

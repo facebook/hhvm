@@ -9,10 +9,7 @@
  *
  */
 
-#include "cs_config.h"
-
 #include <stdlib.h>
-#include <string.h>
 
 #include "neo_misc.h"
 #include "neo_err.h"

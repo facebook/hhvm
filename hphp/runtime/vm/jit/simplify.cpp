@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/simplify.h"
 
-#include "hphp/runtime/base/array-data-defs.h"
+// #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"

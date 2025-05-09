@@ -17,11 +17,9 @@
 #include "hphp/runtime/base/recorder.h"
 
 #include <cstdio>
-#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <limits>
-#include <sstream>
 #include <stdexcept>
 #include <string_view>
 
@@ -42,15 +40,12 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/type-object.h"
-#include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/hhbc-shared.h"
@@ -62,7 +57,6 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
-#include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/sha1.h"

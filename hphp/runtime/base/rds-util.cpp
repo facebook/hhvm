@@ -16,7 +16,6 @@
 #include "hphp/runtime/base/rds-util.h"
 
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/named-entity.h"
 
 #include "hphp/runtime/vm/jit/target-cache.h"
 

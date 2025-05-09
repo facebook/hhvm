@@ -32,13 +32,10 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/reified-generics.h"
-#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/system/systemlib.h"
 
-#include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/util/text-util.h"

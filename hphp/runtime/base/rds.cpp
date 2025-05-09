@@ -23,7 +23,6 @@
 #include <vector>
 
 #include <folly/Bits.h>
-#include <folly/Hash.h>
 #include <folly/portability/SysMman.h>
 #include <folly/sorted_vector_types.h>
 #include <folly/String.h>
@@ -46,8 +45,6 @@
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP::rds {
 

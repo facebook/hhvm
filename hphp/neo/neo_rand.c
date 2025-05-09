@@ -9,8 +9,6 @@
  *
  */
 
-#include "cs_config.h"
-
 #include <stdlib.h>
 #include <time.h>
 #include "neo_rand.h"

@@ -30,10 +30,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/perf-mem-event.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/server/cli-server.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/process/ext_process.h"
 

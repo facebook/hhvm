@@ -16,9 +16,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/configs/configs.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/reverse-data-map.h"

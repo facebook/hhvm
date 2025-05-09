@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-nonnull-ret.h"

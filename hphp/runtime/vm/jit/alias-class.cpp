@@ -17,9 +17,7 @@
 
 #include <limits>
 #include <algorithm>
-#include <bitset>
 
-#include <folly/Hash.h>
 #include <folly/Format.h>
 
 #include "hphp/runtime/base/string-data.h"

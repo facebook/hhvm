@@ -22,7 +22,6 @@
 
 #include <variant>
 #include <folly/Format.h>
-#include <folly/Hash.h>
 
 #include <string>
 #include <type_traits>

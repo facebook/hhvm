@@ -24,11 +24,7 @@
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/bytecode.h"
 
-#include "hphp/util/rds-local.h"
-
-#include <folly/AtomicHashMap.h>
 #include <folly/Format.h>
-#include <folly/SharedMutex.h>
 
 #include <type_traits>
 

@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/util/low-ptr.h"
 
 namespace HPHP::jit {
 

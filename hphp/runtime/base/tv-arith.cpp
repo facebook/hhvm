@@ -19,8 +19,6 @@
 #include <limits>
 #include <algorithm>
 
-#include <folly/CPortability.h>
-#include <folly/ScopeGuard.h>
 #include <usdt/usdt.h>
 
 #include "hphp/runtime/base/array-data-defs.h"

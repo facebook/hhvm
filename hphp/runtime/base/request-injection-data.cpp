@@ -17,8 +17,6 @@
 #include "hphp/runtime/base/request-injection-data.h"
 
 #include <atomic>
-#include <cinttypes>
-#include <filesystem>
 #include <limits>
 #include <string>
 #include <thread>
@@ -34,7 +32,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"

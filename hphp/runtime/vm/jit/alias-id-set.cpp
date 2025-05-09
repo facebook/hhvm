@@ -19,7 +19,6 @@
 #include "hphp/util/bitops.h"
 
 #include <folly/Bits.h>
-#include <folly/Format.h>
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////

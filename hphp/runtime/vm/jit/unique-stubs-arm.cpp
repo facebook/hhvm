@@ -23,8 +23,6 @@
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include <folly/ScopeGuard.h>
-
 namespace HPHP::jit {
 
 TRACE_SET_MOD(ustubs)

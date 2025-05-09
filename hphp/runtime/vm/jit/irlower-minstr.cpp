@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unaligned-typed-value.h"
@@ -27,7 +26,6 @@
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/property-profile.h"
-#include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"

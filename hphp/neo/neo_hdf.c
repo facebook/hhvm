@@ -13,10 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <errno.h>
-#include <limits.h>
 #include <stdarg.h>
-#include <sys/stat.h>
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -33,7 +30,6 @@
 #include "neo_hdf.h"
 #include "neo_str.h"
 #include "neo_files.h"
-#include "ulist.h"
 
 static NEOERR* hdf_read_file_internal (HDF *hdf, const char *path,
                                        int include_handle);

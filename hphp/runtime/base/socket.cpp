@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {

@@ -37,11 +37,8 @@
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/req-heap-sanitizer.h"
-#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
@@ -49,11 +46,8 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/virtual-host.h"
-#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/arch.h"
-#include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/configs/adminserver.h"
@@ -72,17 +66,14 @@
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/network.h"
-#include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/struct-log.h"
-#include "hphp/util/text-util.h"
 #include "hphp/zend/zend-string.h"
 
 #include <cstdint>
 #include <filesystem>
-#include <limits>
 #include <map>
 #include <memory>
 #include <set>
@@ -91,7 +82,6 @@
 #include <vector>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <folly/CPortability.h>
 #include <folly/Conv.h>
 #include <folly/json/DynamicConverter.h>
 #include <folly/FileUtil.h>

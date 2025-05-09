@@ -14,23 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/php7.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/util/struct-log.h"
 
-#include <folly/AtomicHashMap.h>
 #include <folly/logging/RateLimiter.h>
 #include <folly/Range.h>
 

@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/reified-generics-info.h"
 #include "hphp/runtime/vm/srckey.h"
 

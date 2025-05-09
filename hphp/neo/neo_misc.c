@@ -9,13 +9,11 @@
  *
  */
 
-#include "cs_config.h"
-
 #include <time.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <sys/types.h>
 #include <string.h>
 
 #ifdef _MSC_VER
@@ -23,13 +21,9 @@
 // Because someone thought this was a good place to put
 // timeval.
 #include <WinSock2.h>
-#else
-#include <sys/time.h>
-#include <unistd.h>
 #endif
 
 #include "neo_misc.h"
-#include "neo_err.h"
 
 void ne_vwarn (const char *fmt, va_list ap)
 {
@@ -122,4 +116,3 @@ UINT32 ne_crc (UINT8 *data, UINT32 bytes)
 
   return crc;
 }
-

@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/iter.h"
 
 #include <folly/container/Array.h>

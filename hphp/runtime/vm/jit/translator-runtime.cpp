@@ -46,7 +46,6 @@
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/type-constraint.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"

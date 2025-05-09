@@ -32,8 +32,6 @@
 
 #include <string>
 
-#include <boost/dynamic_bitset.hpp>
-
 namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////

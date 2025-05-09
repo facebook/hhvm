@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/util/data-block.h"
 
 namespace HPHP {
 namespace Stats {

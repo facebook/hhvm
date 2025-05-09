@@ -17,6 +17,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <string_view>
 #include <type_traits>
 #include <unordered_set>
 
@@ -107,6 +108,9 @@ const Mask& getMask(const MapIdToMask& map, detail::MapId id) {
 const Mask& getMask(const MapStringToMask& map, const std::string& key) {
   return folly::get_ref_default(map, key, field_mask_constants::noneMask());
 }
+const Mask& getMask(const MapStringToMask& map, std::string_view key) {
+  return folly::get_ref_default(map, key, field_mask_constants::noneMask());
+}
 
 // Gets the mask of the given type if it exists in the type map, otherwise,
 // returns noneMask.
@@ -179,6 +183,18 @@ MaskRef MaskRef::get(detail::MapId id) const {
 }
 
 MaskRef MaskRef::get(const std::string& key) const {
+  if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
+    return *this;
+  }
+  throwIfNotStringMapMask();
+  if (mask.includes_string_map_ref()) {
+    return MaskRef{
+        getMask(mask.includes_string_map_ref().value(), key), is_exclusion};
+  }
+  return MaskRef{
+      getMask(mask.excludes_string_map_ref().value(), key), !is_exclusion};
+}
+MaskRef MaskRef::get(std::string_view key) const {
   if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
     return *this;
   }

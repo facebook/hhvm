@@ -394,8 +394,16 @@ inline MaskRef getKeyMaskRefByValue(MaskRef maskRef, const Value& value) {
     case Value::Type::stringValue:
       return maskRef.get(value.as_string());
     case Value::Type::binaryValue: {
-      // TODO(dokwon): Optimize the binary key look up.
-      std::string key = value.as_binary().toString();
+      const auto& binaryValue = value.as_binary();
+
+      if (binaryValue.isChained()) {
+        std::string key = binaryValue.toString();
+        return maskRef.get(key);
+      }
+
+      std::string_view key(
+          reinterpret_cast<const char*>(binaryValue.data()),
+          binaryValue.length());
       return maskRef.get(key);
     }
     case Value::Type::boolValue:

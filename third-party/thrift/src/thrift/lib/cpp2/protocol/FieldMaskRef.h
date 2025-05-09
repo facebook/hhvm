@@ -17,6 +17,7 @@
 #pragma once
 
 #include <optional>
+#include <string_view>
 
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
@@ -56,6 +57,7 @@ class MaskRef {
   //
   // Throws a runtime exception if the mask is not a string map mask.
   MaskRef get(const std::string& key) const;
+  MaskRef get(std::string_view key) const;
 
   // Get nested MaskRef for the given type. If the type does not exist in the
   // type mask, it returns noneMask or allMask depending on whether the field

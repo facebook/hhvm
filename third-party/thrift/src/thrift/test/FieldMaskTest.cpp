@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
@@ -29,6 +31,7 @@ using apache::thrift::protocol::MaskBuilder;
 using apache::thrift::protocol::MaskRef;
 using apache::thrift::protocol::noneMask;
 using namespace apache::thrift::protocol::detail;
+using namespace std::literals;
 
 namespace apache::thrift::test {
 
@@ -805,25 +808,25 @@ TEST(FieldMaskTest, MaskRefGetAllMaskNoneMask) {
     MaskRef ref{allMask(), false};
     EXPECT_TRUE(ref.get(FieldId{1}).isAllMask());
     EXPECT_TRUE(ref.get(MapId{1}).isAllMask());
-    EXPECT_TRUE(ref.get("1").isAllMask());
+    EXPECT_TRUE(ref.get("1"sv).isAllMask());
   }
   {
     MaskRef ref{allMask(), true};
     EXPECT_TRUE(ref.get(FieldId{1}).isNoneMask());
     EXPECT_TRUE(ref.get(MapId{1}).isNoneMask());
-    EXPECT_TRUE(ref.get("1").isNoneMask());
+    EXPECT_TRUE(ref.get("1"sv).isNoneMask());
   }
   {
     MaskRef ref{noneMask(), false};
     EXPECT_TRUE(ref.get(FieldId{1}).isNoneMask());
     EXPECT_TRUE(ref.get(MapId{1}).isNoneMask());
-    EXPECT_TRUE(ref.get("1").isNoneMask());
+    EXPECT_TRUE(ref.get("1"sv).isNoneMask());
   }
   {
     MaskRef ref{noneMask(), true};
     EXPECT_TRUE(ref.get(FieldId{1}).isAllMask());
     EXPECT_TRUE(ref.get(MapId{1}).isAllMask());
-    EXPECT_TRUE(ref.get("1").isAllMask());
+    EXPECT_TRUE(ref.get("1"sv).isAllMask());
   }
 }
 
@@ -834,40 +837,40 @@ TEST(FieldMaskTest, MaskRefGetException) {
     EXPECT_THROW((MaskRef{m, true}).get(FieldId{1}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, false}).get(MapId{1}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(MapId{1}), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, false}).get("1"), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, true}).get("1"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("1"sv), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("1"sv), std::runtime_error);
   }
   {
     Mask m;
     m.includes_map_ref().emplace()[4] = allMask();
     EXPECT_THROW((MaskRef{m, false}).get(FieldId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(FieldId{4}), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"sv), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"sv), std::runtime_error);
   }
   {
     Mask m;
     m.excludes_map_ref().emplace()[4] = allMask();
     EXPECT_THROW((MaskRef{m, false}).get(FieldId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(FieldId{4}), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"sv), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"sv), std::runtime_error);
   }
   {
     Mask m;
     m.includes_ref().emplace()[4] = allMask();
     EXPECT_THROW((MaskRef{m, false}).get(MapId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(MapId{4}), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"sv), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"sv), std::runtime_error);
   }
   {
     Mask m;
     m.excludes_ref().emplace()[4] = allMask();
     EXPECT_THROW((MaskRef{m, false}).get(MapId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(MapId{4}), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
-    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"sv), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"sv), std::runtime_error);
   }
   {
     Mask m;
@@ -4096,7 +4099,7 @@ TEST(FieldMaskTest, emptyMask) {
   // get fails with empty mask
   EXPECT_THROW(maskRef.get(FieldId{42}), std::runtime_error);
   EXPECT_THROW(maskRef.get(MapId{42}), std::runtime_error);
-  EXPECT_THROW(maskRef.get("42"), std::runtime_error);
+  EXPECT_THROW(maskRef.get("42"sv), std::runtime_error);
   EXPECT_THROW(maskRef.get(type::Type::get<type::i32_t>()), std::runtime_error);
 }
 

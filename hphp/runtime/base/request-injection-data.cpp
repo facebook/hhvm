@@ -146,7 +146,7 @@ bool RequestInjectionData::setAllowedDirectories(const std::string& value) {
   // Backwards compat with ;
   // but moving forward should use PATH_SEPARATOR
   std::vector<std::string> boom;
-  if (value.find(";") != std::string::npos) {
+  if (value.find(';') != std::string::npos) {
     folly::split(';', value, boom, true);
     m_open_basedir_separator = ";";
   } else {

@@ -195,7 +195,7 @@ void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
     // Anything that is not a syntactically correct #include "file" after
     // this pre-processing, will be treated as an ini comment and processed
     // as such in the ini parser
-    auto pos = line.find_first_not_of(" ");
+    auto pos = line.find_first_not_of(' ');
     if (pos == std::string::npos ||
         line.compare(pos, strlen("#include"), "#include") != 0) {
       // treat as normal ini line, including comment that doesn't start with
@@ -204,8 +204,8 @@ void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
       continue;
     }
     pos += strlen("#include");
-    auto start = line.find_first_not_of(" ", pos);
-    auto end = line.find_last_not_of(" ");
+    auto start = line.find_first_not_of(' ', pos);
+    auto end = line.find_last_not_of(' ');
     if ((start == std::string::npos || line[start] != '"') ||
         (end == start || line[end] != '"')) {
       with_includes += line + "\n"; // treat as normal comment

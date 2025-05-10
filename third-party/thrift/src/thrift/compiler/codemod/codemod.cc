@@ -25,6 +25,7 @@ namespace apache::thrift::compiler {
 int run_codemod(
     int argc,
     char** argv,
+    codemod_parsing_options options,
     std::function<void(source_manager&, t_program_bundle&)> codemod) {
   if (argc <= 1) {
     fmt::print(stderr, "Usage: {} <thrift-file>\n", argv[0]);
@@ -40,7 +41,7 @@ int run_codemod(
     return 1;
   }
   parsing_params.allow_missing_includes = true;
-  sema_params.skip_lowering_annotations = true;
+  sema_params.skip_lowering_annotations = options.skip_lowering_annotations;
 
   // Parse the Thrift file.
   auto source_mgr = source_manager();

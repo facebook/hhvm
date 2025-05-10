@@ -21,6 +21,7 @@
 #include <folly/Executor.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
+#include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 
 namespace apache::thrift {
 

@@ -17,6 +17,7 @@
 #ifdef __linux__
 
 #include <linux/kcmp.h>
+#include <sys/syscall.h>
 
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/fdsock/AsyncFdSocket.h>

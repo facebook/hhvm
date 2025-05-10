@@ -202,10 +202,10 @@ void ParseURL::parseNonFully(bool strict) noexcept {
 }
 
 bool ParseURL::parseAuthority() noexcept {
-  auto left = authority_.find("[");
-  auto right = authority_.find("]");
+  auto left = authority_.find('[');
+  auto right = authority_.find(']');
 
-  auto pos = authority_.find(":", right != std::string::npos ? right : 0);
+  auto pos = authority_.find(':', right != std::string::npos ? right : 0);
   if (pos != std::string::npos) {
     try {
       port_ = folly::to<uint16_t>(

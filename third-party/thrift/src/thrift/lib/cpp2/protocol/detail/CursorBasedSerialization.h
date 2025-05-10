@@ -272,7 +272,7 @@ struct DefaultValueWriter {
   };
 
   static constexpr std::array<Field, op::num_fields<T>> fields = [] {
-    std::array<Field, op::num_fields<T>> fields;
+    std::array<Field, op::num_fields<T>> fields{};
     op::for_each_ordinal<T>([&](auto ord) {
       using Ord = decltype(ord);
       using Id = op::get_field_id<T, Ord>;

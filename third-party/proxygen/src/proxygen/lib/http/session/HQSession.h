@@ -239,10 +239,10 @@ class HQSession
     os << "proto=" << alpn_;
     auto clientCid = (sock_ && sock_->getClientConnectionId())
                          ? *sock_->getClientConnectionId()
-                         : quic::ConnectionId({0, 0, 0, 0});
+                         : quic::ConnectionId::createZeroLength();
     auto serverCid = (sock_ && sock_->getServerConnectionId())
                          ? *sock_->getServerConnectionId()
-                         : quic::ConnectionId({0, 0, 0, 0});
+                         : quic::ConnectionId::createZeroLength();
     if (direction_ == TransportDirection::DOWNSTREAM) {
       os << ", UA=" << userAgent_ << ", client CID=" << clientCid
          << ", server CID=" << serverCid << ", downstream=" << getPeerAddress()

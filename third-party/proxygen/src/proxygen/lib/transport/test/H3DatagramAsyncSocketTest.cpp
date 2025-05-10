@@ -60,7 +60,7 @@ void H3DatagramAsyncSocketTest::SetUp() {
   EXPECT_CALL(*socketDriver_->getSocket(), getTransportInfo())
       .WillRepeatedly(testing::Return(transportInfo));
   EXPECT_CALL(*socketDriver_->getSocket(), getClientChosenDestConnectionId())
-      .WillRepeatedly(Return(ConnectionId::createRandom(2)));
+      .WillRepeatedly(Return(ConnectionId::createRandom(2).value()));
 }
 
 void H3DatagramAsyncSocketTest::TearDown() {

@@ -166,12 +166,12 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
         .WillRepeatedly(testing::Return(bufferAvailable_));
 
     EXPECT_CALL(*sock_, getClientConnectionId())
-        .WillRepeatedly(
-            testing::Return(quic::ConnectionId({0x11, 0x11, 0x11, 0x11})));
+        .WillRepeatedly(testing::Return(
+            quic::ConnectionId::createAndMaybeCrash({0x11, 0x11, 0x11, 0x11})));
 
     EXPECT_CALL(*sock_, getServerConnectionId())
-        .WillRepeatedly(
-            testing::Return(quic::ConnectionId({0x11, 0x11, 0x11, 0x11})));
+        .WillRepeatedly(testing::Return(
+            quic::ConnectionId::createAndMaybeCrash({0x11, 0x11, 0x11, 0x11})));
 
     EXPECT_CALL(*sock_, getAppProtocol())
         .WillRepeatedly(testing::Return(alpn_));

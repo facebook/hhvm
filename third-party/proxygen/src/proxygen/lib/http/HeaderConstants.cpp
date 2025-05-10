@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/http/HeaderConstants.h>
 
-namespace proxygen { namespace headers {
+namespace proxygen::headers {
 
 const std::string kAuthority(":authority");
 const std::string kMethod(":method");
@@ -24,4 +24,4 @@ const std::string kMasque("masque");
 const std::string kWebsocketString("websocket");
 const std::string kStatus200("200");
 
-}} // namespace proxygen::headers
+} // namespace proxygen::headers

@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace proxygen { namespace headers {
+namespace proxygen::headers {
 extern const std::string kAuthority;
 extern const std::string kMethod;
 extern const std::string kPath;
@@ -25,4 +25,4 @@ extern const std::string kMasque;
 extern const std::string kWebsocketString;
 extern const std::string kStatus200;
 
-}} // namespace proxygen::headers
+} // namespace proxygen::headers

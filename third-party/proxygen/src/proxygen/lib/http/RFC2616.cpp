@@ -44,7 +44,7 @@ bool equalsIgnoreCase(folly::StringPiece s1, folly::StringPiece s2) {
 }
 } // namespace
 
-namespace proxygen { namespace RFC2616 {
+namespace proxygen::RFC2616 {
 
 BodyAllowed isRequestBodyAllowed(folly::Optional<HTTPMethod> method) {
   if (method == HTTPMethod::TRACE) {
@@ -237,4 +237,4 @@ bool acceptsEncoding(const EncodingList& encodings,
   return false;
 }
 
-}} // namespace proxygen::RFC2616
+} // namespace proxygen::RFC2616

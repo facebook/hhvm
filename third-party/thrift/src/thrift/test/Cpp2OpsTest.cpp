@@ -15,7 +15,7 @@
  */
 
 #include <glog/logging.h>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>

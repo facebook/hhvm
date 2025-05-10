@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/ScopeGuard.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/server/WeightedRequestPileQueue.h>
 
 using namespace apache::thrift::server;

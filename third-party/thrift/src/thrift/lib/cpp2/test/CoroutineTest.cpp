@@ -16,10 +16,10 @@
 
 #include <exception>
 
+#include <gtest/gtest.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/Coroutine.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/test/gen-cpp2/Coroutine.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>

@@ -20,8 +20,8 @@
 #include <type_traits>
 #include <typeindex>
 
+#include <gtest/gtest.h>
 #include <folly/Utility.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/BadFieldAccess.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Get.h>

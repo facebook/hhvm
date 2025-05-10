@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/Conv.h>
 #include <folly/Try.h>

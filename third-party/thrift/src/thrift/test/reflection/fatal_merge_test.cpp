@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 #include <thrift/lib/cpp2/debug_thrift_data_difference/diff.h>

@@ -19,7 +19,7 @@
 
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift;
 

@@ -15,7 +15,7 @@
  */
 
 #include <string_view>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/synchronization/Rcu.h>
 

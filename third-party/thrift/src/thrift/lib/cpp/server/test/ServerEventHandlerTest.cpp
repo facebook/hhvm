@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/coro/GtestHelpers.h>
 #include <thrift/lib/cpp/server/test/TrackingTServerEventHandler.h>

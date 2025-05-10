@@ -16,7 +16,7 @@
 
 #include <cmath>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp/DistinctTable.h>
 
 namespace apache::thrift {

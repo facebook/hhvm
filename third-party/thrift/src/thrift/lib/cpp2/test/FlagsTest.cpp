@@ -16,8 +16,8 @@
 
 #include <exception>
 
+#include <gtest/gtest.h>
 #include <folly/MapUtil.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>

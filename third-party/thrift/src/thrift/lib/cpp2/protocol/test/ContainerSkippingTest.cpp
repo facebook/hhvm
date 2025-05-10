@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/io/Cursor.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>

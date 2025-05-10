@@ -20,10 +20,10 @@
 
 #include <glog/logging.h>
 
+#include <gtest/gtest.h>
 #include <folly/Memory.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocket.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>

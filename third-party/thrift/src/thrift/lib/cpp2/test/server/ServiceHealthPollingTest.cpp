@@ -17,13 +17,13 @@
 #include <chrono>
 #include <mutex>
 
+#include <gtest/gtest.h>
 #include <folly/SharedMutex.h>
 #include <folly/Synchronized.h>
 #include <folly/coro/Baton.h>
 #include <folly/coro/GtestHelpers.h>
 #include <folly/observer/Observer.h>
 #include <folly/observer/SimpleObservable.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>

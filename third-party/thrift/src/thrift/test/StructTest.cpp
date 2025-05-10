@@ -18,8 +18,8 @@
 #include <thrift/test/gen-cpp2/structs_terse_types.h>
 #include <thrift/test/gen-cpp2/structs_types.h>
 
+#include <gtest/gtest.h>
 #include <folly/Traits.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>

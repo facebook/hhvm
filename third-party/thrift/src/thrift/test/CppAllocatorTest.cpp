@@ -20,7 +20,7 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/gen-cpp2/CppAllocatorTest_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace apache::thrift::test {
 

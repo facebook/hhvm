@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/container/Foreach.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/BadFieldAccess.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>

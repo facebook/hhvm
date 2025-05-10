@@ -20,7 +20,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/async/GuardedRequestChannel.h>
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>

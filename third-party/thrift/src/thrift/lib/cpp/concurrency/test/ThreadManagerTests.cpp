@@ -24,11 +24,11 @@
 #include <thread>
 
 #include <fmt/chrono.h>
+#include <gtest/gtest.h>
 #include <folly/CPortability.h>
 #include <folly/Synchronized.h>
 #include <folly/executors/Codel.h>
 #include <folly/lang/Keep.h>
-#include <folly/portability/GTest.h>
 #include <folly/portability/PThread.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>

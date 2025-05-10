@@ -16,7 +16,7 @@
 
 #include <numeric>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types.h>

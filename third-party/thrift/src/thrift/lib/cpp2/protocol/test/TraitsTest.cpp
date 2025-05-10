@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 
 using namespace apache::thrift;

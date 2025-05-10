@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/transport/core/testutil/FakeChannel.h>
 #include <thrift/lib/cpp2/transport/core/testutil/ServerConfigsMock.h>

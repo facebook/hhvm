@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketThriftRequests.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 

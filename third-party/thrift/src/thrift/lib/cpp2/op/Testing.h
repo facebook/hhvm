@@ -19,8 +19,8 @@
 
 #include <utility>
 
+#include <gtest/gtest.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Compare.h>

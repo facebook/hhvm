@@ -18,7 +18,7 @@
 
 #include <thrift/test/reflection/gen-cpp2/reflection_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <string>
 #include <vector>

@@ -16,7 +16,7 @@
 
 #include <memory>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>

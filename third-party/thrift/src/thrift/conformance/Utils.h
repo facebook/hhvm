@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include <gtest/gtest.h>
 #include <folly/json.h>
-#include <folly/portability/GTest.h>
 #include <thrift/conformance/if/gen-cpp2/test_suite_types.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Tag.h>

@@ -16,8 +16,8 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/test/Util.h>
 
+#include <gtest/gtest.h>
 #include <folly/io/IOBufQueue.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 

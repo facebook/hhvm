@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using apache::thrift::protocol::base64_decode;
 using apache::thrift::protocol::base64_encode;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/test/gen-cpp2/FieldRefConstPropagation_types.h>
 
 // Similar to std::as_const but don't delete rvalue reference overload

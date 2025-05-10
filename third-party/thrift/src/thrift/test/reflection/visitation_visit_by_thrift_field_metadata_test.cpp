@@ -17,8 +17,8 @@
 #include <thrift/test/reflection/gen-cpp2/reflection_for_each_field.h>
 #include <thrift/test/reflection/gen-cpp2/reflection_visit_by_thrift_field_metadata.h> // @manual
 
+#include <gtest/gtest.h>
 #include <folly/Overload.h>
-#include <folly/portability/GTest.h>
 
 #include <typeindex>
 

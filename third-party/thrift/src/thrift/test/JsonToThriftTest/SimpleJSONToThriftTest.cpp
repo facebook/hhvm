@@ -19,7 +19,7 @@
 #include <limits>
 #include <memory>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/FileUtil.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>

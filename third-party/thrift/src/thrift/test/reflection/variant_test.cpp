@@ -20,7 +20,7 @@
 
 #include <thrift/test/reflection/gen-cpp2/reflection_fatal_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <memory>
 #include <utility>

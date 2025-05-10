@@ -17,8 +17,8 @@
 #include <thrift/conformance/cpp2/Testing.h>
 
 #include <fmt/core.h>
+#include <gtest/gtest.h>
 #include <folly/lang/Exception.h>
-#include <folly/portability/GTest.h>
 #include <thrift/conformance/if/gen-cpp2/any_constants.h>
 
 namespace apache::thrift::conformance {

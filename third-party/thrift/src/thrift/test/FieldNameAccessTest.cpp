@@ -16,7 +16,7 @@
 
 #include <thrift/test/gen-cpp2/FieldNameAccess_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace apache::thrift::test {
 TEST(Field, Access) {

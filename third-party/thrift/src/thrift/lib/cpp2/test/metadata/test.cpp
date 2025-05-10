@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/AnotherTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/EnumTestService.h>

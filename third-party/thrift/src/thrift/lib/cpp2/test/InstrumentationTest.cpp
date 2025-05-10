@@ -22,6 +22,7 @@
 #include <sstream>
 #include <thread>
 
+#include <gtest/gtest.h>
 #include <folly/Format.h>
 #include <folly/ThreadLocal.h>
 #include <folly/coro/BlockingWait.h>
@@ -30,7 +31,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/Request.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>

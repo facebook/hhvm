@@ -16,8 +16,8 @@
 
 #include <thrift/test/reflection/gen-cpp2/reflection_visitation.h>
 
+#include <gtest/gtest.h>
 #include <folly/Overload.h>
-#include <folly/portability/GTest.h>
 
 using namespace apache::thrift;
 using namespace std;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/SocketAddress.h>
 #include <folly/io/Cursor.h>

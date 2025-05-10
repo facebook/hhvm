@@ -20,6 +20,7 @@
 #include <tuple>
 #include <utility>
 
+#include <gtest/gtest.h>
 #include <folly/Synchronized.h>
 #include <folly/coro/AsyncScope.h>
 #include <folly/coro/Baton.h>
@@ -30,7 +31,6 @@
 #include <folly/coro/Task.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/observer/SimpleObservable.h>
-#include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/server/ServiceHealthPoller.h>

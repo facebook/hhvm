@@ -19,7 +19,7 @@
 #include <string>
 #include <thrift/lib/cpp2/FieldRef.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/container/Array.h>
 #include <thrift/lib/cpp2/BadFieldAccess.h>

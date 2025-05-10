@@ -23,7 +23,7 @@
 #include <sstream>
 #include <type_traits>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using output_result = std::false_type;
 

@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include <gtest/gtest.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
 namespace apache::thrift::rocket::test {

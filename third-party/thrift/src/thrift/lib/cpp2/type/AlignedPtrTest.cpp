@@ -16,10 +16,10 @@
 
 #include <thrift/lib/cpp2/type/AlignedPtr.h>
 
+#include <gtest/gtest.h>
 #include <folly/ConstexprMath.h>
 #include <folly/Memory.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 
 namespace apache::thrift::type::detail {
 namespace {

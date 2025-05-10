@@ -20,12 +20,12 @@
 #include <memory>
 #include <thread>
 
+#include <gtest/gtest.h>
 #include <folly/Portability.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>

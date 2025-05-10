@@ -21,7 +21,7 @@
 #include <tuple>
 #include <typeinfo>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/Demangle.h>
 

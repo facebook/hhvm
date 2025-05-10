@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/test/gen-cpp2/MixinTestStrict_types.h>
 #include <thrift/test/gen-cpp2/MixinTest_types.h>
 

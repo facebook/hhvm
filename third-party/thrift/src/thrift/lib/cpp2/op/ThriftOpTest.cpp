@@ -16,7 +16,7 @@
 
 #include <array>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/conformance/data/ValueGenerator.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Testing.h>

@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/TypeClass.h>
 
 using namespace apache::thrift;

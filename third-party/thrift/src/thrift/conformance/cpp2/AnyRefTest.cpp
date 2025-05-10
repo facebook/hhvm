@@ -16,7 +16,7 @@
 
 #include <thrift/conformance/cpp2/AnyRef.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace apache::thrift::conformance {
 namespace {

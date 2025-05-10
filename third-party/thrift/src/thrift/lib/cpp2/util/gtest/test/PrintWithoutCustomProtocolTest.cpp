@@ -19,8 +19,8 @@
 #include <thrift/lib/cpp2/util/gtest/Printer.h>
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types.h>
 
+#include <gtest/gtest.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 
 // portability/GTest must be imported before any other gtest header
 #include <gmock/gmock.h>

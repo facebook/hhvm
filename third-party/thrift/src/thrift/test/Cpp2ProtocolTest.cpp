@@ -24,8 +24,8 @@
 
 #include <math.h>
 
+#include <gtest/gtest.h>
 #include <folly/portability/GFlags.h>
-#include <folly/portability/GTest.h>
 
 using namespace std;
 using namespace apache::thrift;

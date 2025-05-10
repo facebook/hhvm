@@ -18,9 +18,9 @@
 #include <string>
 #include <utility>
 
+#include <gtest/gtest.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
-#include <folly/portability/GTest.h>
 #include <thrift/test/gen-cpp2/UnionThriftBoxRandomTest_types.h>
 
 constexpr int kIterationCount = folly::kIsDebug ? 100'000 : 1'000'000;

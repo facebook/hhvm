@@ -16,8 +16,8 @@
 
 #include <thrift/lib/cpp2/util/DebugString.h>
 
+#include <gtest/gtest.h>
 #include <folly/String.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/util/test/gen-cpp2/DebugString_types.h>

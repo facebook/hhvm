@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/util/BucketedRate.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/Random.h>
 

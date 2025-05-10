@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 
 #include <thrift/test/gen-cpp2/enum_types.h>

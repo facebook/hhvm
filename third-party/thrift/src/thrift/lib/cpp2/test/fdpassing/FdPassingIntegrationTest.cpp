@@ -19,9 +19,9 @@
 #include <linux/kcmp.h>
 #include <sys/syscall.h>
 
+#include <gtest/gtest.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
-#include <folly/portability/GTest.h>
 #include <folly/testing/TestUtil.h>
 
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>

@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include <gtest/gtest.h>
 #include <folly/Traits.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>

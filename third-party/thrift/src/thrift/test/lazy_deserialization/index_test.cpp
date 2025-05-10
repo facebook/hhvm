@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/Random.h>
 #include <folly/ScopeGuard.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/detail/index.h>
 #include <thrift/lib/cpp2/reflection/testing.h>
 #include <thrift/test/lazy_deserialization/MemberAccessor.h>

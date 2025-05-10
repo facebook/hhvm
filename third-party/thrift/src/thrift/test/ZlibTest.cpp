@@ -24,7 +24,7 @@
 #include <thrift/lib/cpp/transport/TBufferTransports.h>
 #include <thrift/lib/cpp/transport/TZlibTransport.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace std;
 using namespace apache::thrift::transport;

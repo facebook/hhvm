@@ -20,11 +20,11 @@
 #include <optional>
 #include <string>
 
+#include <gtest/gtest.h>
 #include <folly/Conv.h>
 #include <folly/MPMCQueue.h>
 #include <folly/String.h>
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
-#include <folly/portability/GTest.h>
 
 namespace apache::thrift::rocket::test {
 

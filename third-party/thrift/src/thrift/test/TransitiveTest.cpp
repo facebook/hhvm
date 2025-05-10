@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/test/gen-cpp2/transitive_types.h>
 
 using apache::thrift::test::TestStruct;

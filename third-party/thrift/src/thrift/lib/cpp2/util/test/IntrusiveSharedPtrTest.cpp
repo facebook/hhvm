@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>

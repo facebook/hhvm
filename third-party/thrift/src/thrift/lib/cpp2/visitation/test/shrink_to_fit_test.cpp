@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/visitation/ShrinkToFit.h>
 #include <thrift/lib/cpp2/visitation/test/gen-cpp2/ShrinkToFit_types.h>
 #include <thrift/lib/cpp2/visitation/test/gen-cpp2/ShrinkToFit_visitation.h>

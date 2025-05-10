@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <string>
 
+#include <gtest/gtest.h>
 #include <folly/Conv.h>
 #include <folly/FBString.h>
 #include <folly/container/F14Map.h>
@@ -30,7 +31,6 @@
 #include <folly/container/FBVector.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Ordering.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Thrift.h>

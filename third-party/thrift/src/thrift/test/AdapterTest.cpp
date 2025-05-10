@@ -23,7 +23,7 @@
 #include <set>
 #include <vector>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>

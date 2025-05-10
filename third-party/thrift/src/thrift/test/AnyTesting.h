@@ -18,7 +18,7 @@
 
 #include <thrift/lib/cpp2/type/Any.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/type/Protocol.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/test/gen-cpp2/AnyTest1_types.h>

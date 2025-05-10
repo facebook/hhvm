@@ -16,7 +16,7 @@
 
 #include <thrift/conformance/cpp2/Any.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/conformance/cpp2/Testing.h>
 

@@ -16,7 +16,7 @@
 
 #include <type_traits>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/NativeTypeTest_types.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Testing.h>

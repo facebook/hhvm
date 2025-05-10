@@ -19,11 +19,11 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <gtest/gtest.h>
 #include <folly/Executor.h>
 #include <folly/MapUtil.h>
 #include <folly/executors/ManualExecutor.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/portability/GTest.h>
 
 #include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/cpp2/async/FutureRequest.h>

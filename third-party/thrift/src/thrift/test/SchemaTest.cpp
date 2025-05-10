@@ -15,7 +15,7 @@
  */
 
 #include <vector>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>

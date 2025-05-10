@@ -16,8 +16,8 @@
 
 #include <thrift/conformance/Utils.h>
 
+#include <gtest/gtest.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 
 namespace apache::thrift::conformance {
 namespace {

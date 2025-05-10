@@ -19,7 +19,7 @@
 #include <sstream>
 #include <string>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 TEST(fatal_indenter, arbitrary_push_depth) {
   std::ostringstream out;

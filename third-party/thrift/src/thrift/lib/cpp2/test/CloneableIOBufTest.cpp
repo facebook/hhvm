@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/CloneableIOBuf.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace folly;
 using namespace apache::thrift;

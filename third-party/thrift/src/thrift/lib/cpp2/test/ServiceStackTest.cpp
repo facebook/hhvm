@@ -16,7 +16,7 @@
 
 #include <memory>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceStack.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>

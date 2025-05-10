@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/http2/common/testutil/FakeResponseHandler.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace apache::thrift {
 

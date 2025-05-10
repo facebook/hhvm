@@ -25,8 +25,8 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 
+#include <gtest/gtest.h>
 #include <folly/Traits.h>
-#include <folly/portability/GTest.h>
 
 using apache::thrift::bad_field_access;
 using apache::thrift::field_ref;

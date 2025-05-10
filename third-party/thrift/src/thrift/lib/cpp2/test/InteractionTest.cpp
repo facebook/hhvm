@@ -17,6 +17,7 @@
 #include <chrono>
 #include <memory>
 
+#include <gtest/gtest.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/Collect.h>
 #include <folly/coro/FutureUtil.h>
@@ -24,7 +25,6 @@
 #include <folly/coro/Sleep.h>
 #include <folly/coro/Task.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>

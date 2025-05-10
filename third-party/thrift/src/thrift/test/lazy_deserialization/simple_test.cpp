@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/container/Foreach.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/VirtualProtocol.h>
 #include <thrift/lib/cpp2/protocol/detail/index.h>

@@ -18,7 +18,7 @@
 
 #include <random>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>

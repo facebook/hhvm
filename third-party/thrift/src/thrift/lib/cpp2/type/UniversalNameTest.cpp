@@ -22,10 +22,10 @@
 #include <openssl/evp.h>
 
 #include <fmt/core.h>
+#include <gtest/gtest.h>
 #include <folly/Demangle.h>
 #include <folly/FBString.h>
 #include <folly/String.h>
-#include <folly/portability/GTest.h>
 #include <thrift/conformance/data/Constants.h>
 #include <thrift/lib/cpp2/type/UniversalHashAlgorithm.h>
 

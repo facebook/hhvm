@@ -18,8 +18,8 @@
 
 #include <algorithm>
 #include <random>
+#include <gtest/gtest.h>
 #include <folly/String.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/JSONProtocol.h>

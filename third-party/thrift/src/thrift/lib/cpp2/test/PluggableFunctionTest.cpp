@@ -16,8 +16,8 @@
 
 #include <exception>
 
+#include <gtest/gtest.h>
 #include <folly/lang/Keep.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/PluggableFunction.h>
 

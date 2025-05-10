@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <thread>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::concurrency;
 

@@ -16,9 +16,9 @@
 
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
+#include <gtest/gtest.h>
 #include <folly/io/IOBuf.h>
 #include <folly/json.h>
-#include <folly/portability/GTest.h>
 #include <folly/test/JsonTestUtil.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/TableBasedSerializerImpl.h>

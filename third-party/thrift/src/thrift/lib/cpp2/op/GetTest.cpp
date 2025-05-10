@@ -19,7 +19,7 @@
 #include <memory>
 #include <type_traits>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>

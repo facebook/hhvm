@@ -16,9 +16,9 @@
 
 #include <thrift/lib/cpp2/async/tests/util/TestSinkService.h>
 
+#include <gtest/gtest.h>
 #include <folly/ScopeGuard.h>
 #include <folly/coro/Sleep.h>
-#include <folly/portability/GTest.h>
 
 namespace apache::thrift::detail::test {
 

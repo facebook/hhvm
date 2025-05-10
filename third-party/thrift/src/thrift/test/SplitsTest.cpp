@@ -18,7 +18,7 @@
 #include <thrift/test/gen-cpp2/Service2.h>
 #include <thrift/test/gen-cpp2/SplitsTest_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <folly/test/JsonTestUtil.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 

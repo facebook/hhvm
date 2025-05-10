@@ -21,7 +21,7 @@
 #include <type_traits>
 #include <unordered_set>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>

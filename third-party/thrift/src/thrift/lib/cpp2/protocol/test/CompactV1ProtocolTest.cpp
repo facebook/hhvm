@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/protocol/CompactV1Protocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>

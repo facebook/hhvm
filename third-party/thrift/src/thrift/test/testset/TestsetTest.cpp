@@ -16,8 +16,8 @@
 
 #include <thrift/test/testset/Testset.h>
 
+#include <gtest/gtest.h>
 #include <folly/Traits.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
 namespace apache::thrift::test::testset {

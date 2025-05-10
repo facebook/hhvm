@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <random>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/lang/Bits.h>
 #include <thrift/lib/cpp/transport/TBufferTransports.h>

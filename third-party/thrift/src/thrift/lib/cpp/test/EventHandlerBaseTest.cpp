@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp/EventHandlerBase.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/runtime/Init.h>
 

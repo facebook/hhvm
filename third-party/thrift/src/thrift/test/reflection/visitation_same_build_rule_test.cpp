@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/test/reflection/visitation_same_build_rule.h>
 
 TEST(TestStruct, names) {

@@ -19,8 +19,8 @@
 
 #include <glog/logging.h>
 
+#include <gtest/gtest.h>
 #include <folly/Benchmark.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>

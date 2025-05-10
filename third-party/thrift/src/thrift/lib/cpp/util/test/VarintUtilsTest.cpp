@@ -16,10 +16,10 @@
 
 #include <thrift/lib/cpp/util/VarintUtils.h>
 
+#include <gtest/gtest.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/util/test/VarintUtilsTestUtil.h>
 
 #if !THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER

@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <fmt/core.h>
+#include <gtest/gtest.h>
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
 #include <folly/String.h>
@@ -35,7 +36,6 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/lang/Exception.h>
-#include <folly/portability/GTest.h>
 #include <folly/stop_watch.h>
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>

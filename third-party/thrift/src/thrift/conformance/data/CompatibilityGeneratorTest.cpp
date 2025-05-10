@@ -16,7 +16,7 @@
 
 #include <thrift/conformance/data/CompatibilityGenerator.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/AnyStructSerializer.h>
 #include <thrift/conformance/cpp2/ThriftTypeInfo.h>

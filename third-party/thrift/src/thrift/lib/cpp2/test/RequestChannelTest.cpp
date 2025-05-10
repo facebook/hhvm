@@ -19,11 +19,11 @@
 #include <memory>
 #include <thread>
 
+#include <gtest/gtest.h>
 #include <folly/Memory.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/test/ScopedBoundPort.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 
 #include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>

@@ -16,7 +16,7 @@
 
 #include <thrift/test/gen-cpp2/field_ref_codegen_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::test;
 

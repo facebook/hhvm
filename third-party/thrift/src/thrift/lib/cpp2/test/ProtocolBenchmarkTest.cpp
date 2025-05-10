@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/test/Structs.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchmark_types.h>
 

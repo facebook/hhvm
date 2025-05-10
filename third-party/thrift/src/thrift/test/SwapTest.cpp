@@ -17,7 +17,7 @@
 #include <thrift/test/gen-cpp2/OptionalRequiredTest_types.h>
 #include <thrift/test/gen-cpp2/ThriftTest_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace std;
 

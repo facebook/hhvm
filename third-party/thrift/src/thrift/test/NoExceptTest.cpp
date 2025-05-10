@@ -16,7 +16,7 @@
 
 #include <type_traits>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/test/gen-cpp2/NoExcept_types.h>
 

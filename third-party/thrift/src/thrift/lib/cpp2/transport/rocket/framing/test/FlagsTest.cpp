@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::rocket;
 

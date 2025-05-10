@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/op/Patch.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/op/Testing.h>
 
 namespace apache {

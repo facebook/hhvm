@@ -18,7 +18,7 @@
 
 #include <thrift/lib/cpp2/op/Compare.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/op/detail/Compare.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types_custom_protocol.h>

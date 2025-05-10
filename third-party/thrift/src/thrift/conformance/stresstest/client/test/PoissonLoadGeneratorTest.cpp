@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/executors/GlobalExecutor.h>
-#include <folly/portability/GTest.h>
 #include <thrift/conformance/stresstest/client/PoissonLoadGenerator.h>
 
 using namespace apache::thrift;

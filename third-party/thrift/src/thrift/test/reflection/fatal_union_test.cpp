@@ -19,7 +19,7 @@
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
 #include <thrift/lib/cpp2/reflection/reflection.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <fatal/type/transform.h>
 

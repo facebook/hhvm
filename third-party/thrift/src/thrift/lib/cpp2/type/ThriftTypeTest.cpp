@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 

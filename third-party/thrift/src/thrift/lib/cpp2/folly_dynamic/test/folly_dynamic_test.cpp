@@ -19,9 +19,9 @@
 
 #include <glog/logging.h>
 
+#include <gtest/gtest.h>
 #include <folly/String.h>
 #include <folly/json.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 #include <thrift/lib/cpp2/debug_thrift_data_difference/pretty_print.h>

@@ -16,8 +16,8 @@
 
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 
+#include <gtest/gtest.h>
 #include <folly/io/async/AsyncTransport.h>
-#include <folly/portability/GTest.h>
 
 #include <folly/io/async/AsyncSocket.h>
 #include <proxygen/httpserver/HTTPServer.h>

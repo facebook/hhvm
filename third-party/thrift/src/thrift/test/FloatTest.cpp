@@ -17,7 +17,7 @@
 #include <thrift/test/gen-cpp2/FloatTest_constants.h>
 #include <thrift/test/gen-cpp2/FloatTest_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::test;
 

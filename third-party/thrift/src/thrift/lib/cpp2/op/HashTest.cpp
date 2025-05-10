@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/op/Hash.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/hash/DeterministicHash.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h>
 

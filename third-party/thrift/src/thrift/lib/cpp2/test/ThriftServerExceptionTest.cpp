@@ -19,8 +19,8 @@
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 #include <fmt/core.h>
+#include <gtest/gtest.h>
 #include <folly/coro/BlockingWait.h>
-#include <folly/portability/GTest.h>
 
 using namespace std;
 using namespace folly;

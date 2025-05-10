@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/BadFieldAccess.h>
 #include <thrift/test/gen-cpp2/UnionFieldRef_types.h>
 using namespace std;

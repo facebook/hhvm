@@ -19,9 +19,9 @@
 #include <random>
 #include <string>
 
+#include <gtest/gtest.h>
 #include <folly/String.h>
 #include <folly/io/IOBuf.h>
-#include <folly/portability/GTest.h>
 
 class JSONProtocolCommonTest : public testing::Test {};
 

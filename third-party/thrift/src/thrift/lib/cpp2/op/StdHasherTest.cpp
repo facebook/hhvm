@@ -18,9 +18,9 @@
 
 #include <cstdint>
 
+#include <gtest/gtest.h>
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
-#include <folly/portability/GTest.h>
 
 namespace apache::thrift::op {
 

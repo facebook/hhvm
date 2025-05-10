@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace apache::thrift {
 

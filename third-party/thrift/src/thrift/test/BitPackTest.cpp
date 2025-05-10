@@ -15,7 +15,7 @@
  */
 
 #include <random>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/test/gen-cpp2/Bitpack_for_each_field.h>
 #include <thrift/test/gen-cpp2/Bitpack_types.h>
 

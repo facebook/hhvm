@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <fatal/type/array.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/reflection/reflection.h>
 #include <thrift/test/reflection/gen-cpp2/troublesome_fatal_all.h>
 

@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/type/BaseType.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>
 
 namespace apache::thrift::type {

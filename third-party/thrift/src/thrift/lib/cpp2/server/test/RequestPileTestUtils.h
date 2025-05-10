@@ -19,7 +19,7 @@
 #include <memory>
 #include <vector>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>

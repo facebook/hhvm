@@ -16,7 +16,7 @@
 
 #include <thrift/test/gen-cpp2/OrderTest_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace thrift::test::cpp2;
 

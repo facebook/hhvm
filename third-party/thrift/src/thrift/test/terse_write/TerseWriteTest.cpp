@@ -20,9 +20,9 @@
 #include <utility>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include <folly/Traits.h>
 #include <folly/io/IOBuf.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/JSONProtocol.h>

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/coro/BlockingWait.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/test/gen-cpp2/HandlerGeneric.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>

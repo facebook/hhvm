@@ -16,8 +16,8 @@
 
 #include <string>
 
+#include <gtest/gtest.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>

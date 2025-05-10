@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Paths_types.h>

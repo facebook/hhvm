@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/test/reflection/gen-cpp2/AnnotationTest_types.h>
 
 namespace apache::thrift::test {

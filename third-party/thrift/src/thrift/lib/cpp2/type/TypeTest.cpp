@@ -18,7 +18,7 @@
 
 #include <stdexcept>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 

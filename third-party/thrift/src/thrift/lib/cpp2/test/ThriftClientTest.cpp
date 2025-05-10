@@ -17,9 +17,9 @@
 #include <chrono>
 #include <condition_variable>
 
+#include <gtest/gtest.h>
 #include <folly/fibers/Fiber.h>
 #include <folly/fibers/FiberManagerMap.h>
-#include <folly/portability/GTest.h>
 #include <folly/synchronization/test/Barrier.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>

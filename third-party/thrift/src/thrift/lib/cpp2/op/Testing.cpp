@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/op/Testing.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace apache::thrift::test {
 using type::AnyRef;

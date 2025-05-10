@@ -16,9 +16,9 @@
 
 #include <random>
 
+#include <gtest/gtest.h>
 #include <folly/Traits.h>
 #include <folly/container/Array.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/BadFieldAccess.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>

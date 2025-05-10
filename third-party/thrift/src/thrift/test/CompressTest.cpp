@@ -16,9 +16,9 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <gtest/gtest.h>
 #include <folly/Benchmark.h>
 #include <folly/portability/GFlags.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 

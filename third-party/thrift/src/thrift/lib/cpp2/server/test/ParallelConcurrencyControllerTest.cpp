@@ -16,8 +16,8 @@
 
 #include <chrono>
 
+#include <gtest/gtest.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 #include <folly/synchronization/Latch.h>
 

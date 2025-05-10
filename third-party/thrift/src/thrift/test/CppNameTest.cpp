@@ -25,7 +25,7 @@
 #include <thrift/test/gen-cpp2/MyService.h>
 #include <thrift/test/gen-cpp2/cpp_name_types.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using apache::thrift::SimpleJSONSerializer;
 using namespace apache::thrift;

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <folly/Math.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
 #include <thrift/lib/cpp2/frozen/test/gen-cpp2/Reference_layouts.h>

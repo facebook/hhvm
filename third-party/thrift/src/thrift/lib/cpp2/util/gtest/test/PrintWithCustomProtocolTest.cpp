@@ -21,7 +21,7 @@
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types.h>
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types_custom_protocol.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 // portability/GTest must be imported before any other gtest header
 #include <gtest/gtest-spi.h>

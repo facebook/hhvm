@@ -20,7 +20,7 @@
 
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace test_cpp2 {
 namespace cpp_reflection {

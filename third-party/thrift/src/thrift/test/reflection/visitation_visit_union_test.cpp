@@ -15,7 +15,7 @@
  */
 
 #include <any>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_for_each_field.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_visit_by_thrift_field_metadata.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_visit_union.h>

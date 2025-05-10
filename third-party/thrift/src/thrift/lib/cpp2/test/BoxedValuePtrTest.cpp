@@ -17,8 +17,8 @@
 #include <stdexcept>
 #include <type_traits>
 
+#include <gtest/gtest.h>
 #include <folly/Portability.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/BoxedValuePtr.h>
 
 using namespace apache::thrift::detail;

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <utility>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/Optional.h>
 #include <folly/Range.h>

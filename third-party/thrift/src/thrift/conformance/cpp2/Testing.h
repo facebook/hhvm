@@ -22,10 +22,10 @@
 #include <string>
 #include <string_view>
 
+#include <gtest/gtest.h>
 #include <folly/Conv.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
-#include <folly/portability/GTest.h>
 #include <thrift/conformance/cpp2/AnySerializer.h>
 #include <thrift/conformance/cpp2/AnyStructSerializer.h>
 #include <thrift/conformance/cpp2/Protocol.h>

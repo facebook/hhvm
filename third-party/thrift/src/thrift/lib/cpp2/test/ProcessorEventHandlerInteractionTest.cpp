@@ -16,8 +16,8 @@
 
 #include <chrono>
 
+#include <gtest/gtest.h>
 #include <folly/Synchronized.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp/EventHandlerBase.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>

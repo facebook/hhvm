@@ -16,8 +16,8 @@
 
 #include <thrift/lib/cpp2/protocol/CursorBasedSerializer.h>
 
+#include <gtest/gtest.h>
 #include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_clients.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_handlers.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_types.h>

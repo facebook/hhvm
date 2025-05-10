@@ -20,7 +20,7 @@
 #include <iterator>
 #include <string>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Range.h>

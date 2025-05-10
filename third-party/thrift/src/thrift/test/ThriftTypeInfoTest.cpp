@@ -16,7 +16,7 @@
 
 #include <thrift/conformance/cpp2/ThriftTypeInfo.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/test/gen-cpp2/AnyTest1_types.h>
 #include <thrift/test/gen-cpp2/AnyTest2_types.h>
 #include <thrift/test/gen-cpp2/AnyTest3_types.h>

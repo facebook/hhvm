@@ -16,7 +16,7 @@
 
 #include <functional>
 #include <type_traits>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <folly/sorted_vector_types.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>

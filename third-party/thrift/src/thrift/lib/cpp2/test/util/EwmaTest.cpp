@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/util/Ewma.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/test/util/FakeClock.h>
 

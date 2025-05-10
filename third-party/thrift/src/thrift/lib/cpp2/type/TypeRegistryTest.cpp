@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/type/TypeRegistry.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/cpp2/op/Testing.h>
 #include <thrift/lib/cpp2/type/Any.h>
 #include <thrift/lib/cpp2/type/AnyValue.h>

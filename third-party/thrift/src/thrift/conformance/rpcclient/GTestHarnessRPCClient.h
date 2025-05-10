@@ -18,9 +18,9 @@
 
 #include <functional>
 
+#include <gtest/gtest.h>
 #include <folly/Range.h>
 #include <folly/String.h>
-#include <folly/portability/GTest.h>
 #include <thrift/conformance/if/gen-cpp2/test_suite_types.h>
 
 // Registers the given conformance test suites with gtest

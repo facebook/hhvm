@@ -17,6 +17,7 @@
 #include <boost/cast.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <gtest/gtest.h>
 #include <folly/CancellationToken.h>
 #include <folly/Optional.h>
 #include <folly/Synchronized.h>
@@ -26,7 +27,6 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>

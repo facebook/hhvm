@@ -16,10 +16,10 @@
 
 #include <glog/logging.h>
 
+#include <gtest/gtest.h>
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/io/IOBuf.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/async/metadata/RequestRpcMetadataFacade.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>

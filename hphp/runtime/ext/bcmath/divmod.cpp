@@ -29,10 +29,8 @@
 
 *************************************************************************/
 
-#include "hphp/runtime/ext/bcmath/config.h"
 #include <stdlib.h>
 #include "hphp/runtime/ext/bcmath/bcmath.h"
-#include "hphp/runtime/ext/bcmath/private.h"
 
 #include <folly/ScopeGuard.h>
 

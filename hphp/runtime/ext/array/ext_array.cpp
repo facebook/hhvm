@@ -31,18 +31,15 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
-#include <folly/lang/UncaughtExceptions.h>
 #include <vector>
 
 namespace HPHP {

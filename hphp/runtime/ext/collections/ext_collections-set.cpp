@@ -1,15 +1,12 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 

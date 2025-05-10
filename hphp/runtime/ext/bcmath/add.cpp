@@ -32,7 +32,6 @@
 #include "hphp/runtime/ext/bcmath/config.h"
 #include "hphp/runtime/ext/bcmath/bcmath.h"
 #include "hphp/runtime/ext/bcmath/private.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 /* Here is the full add routine that takes care of negative numbers.

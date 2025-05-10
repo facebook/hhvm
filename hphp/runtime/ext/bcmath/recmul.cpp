@@ -29,8 +29,6 @@
 
 *************************************************************************/
 
-#include "hphp/runtime/ext/bcmath/config.h"
-#include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include "hphp/runtime/ext/bcmath/bcmath.h"

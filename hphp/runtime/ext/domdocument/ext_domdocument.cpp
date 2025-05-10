@@ -17,8 +17,6 @@
 
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
 
-#include <map>
-
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
@@ -29,10 +27,9 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/systemlib.h"
-#include "hphp/util/functional.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/string-vsnprintf.h"
 

@@ -18,13 +18,11 @@
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/health-monitor-types.h"
-#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,6 @@
 #include "hphp/runtime/ext/collections/hash-collection.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-set.h"
-#include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/util/text-util.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////

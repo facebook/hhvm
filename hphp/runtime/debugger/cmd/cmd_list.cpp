@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_list.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/array-iterator.h"

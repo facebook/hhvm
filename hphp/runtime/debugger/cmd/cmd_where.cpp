@@ -18,8 +18,6 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 
 namespace HPHP::Eval {

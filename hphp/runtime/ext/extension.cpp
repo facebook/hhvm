@@ -18,22 +18,18 @@
 #include "hphp/runtime/ext/extension-registry.h"
 
 #include <cstdio>
+#include <vector>
 
-#include "hphp/util/exception.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
-
-#include <map>
-#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

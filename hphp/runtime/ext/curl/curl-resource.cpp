@@ -8,10 +8,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/stack-logger.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 

@@ -17,8 +17,6 @@
 
 #include "hphp/runtime/ext/core/ext_core.h"
 
-#include "hphp/runtime/ext/extension.h"
-
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 

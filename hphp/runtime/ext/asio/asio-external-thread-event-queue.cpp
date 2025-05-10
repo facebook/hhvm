@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/system/systemlib.h"
 #include "hphp/util/configs/eval.h"
 
 namespace HPHP {

@@ -29,9 +29,7 @@
 
 *************************************************************************/
 
-#include "hphp/runtime/ext/bcmath/config.h"
 #include "hphp/runtime/ext/bcmath/bcmath.h"
-#include "hphp/runtime/ext/bcmath/private.h"
 
 /* In some places we need to check if the number NUM is almost zero.
    Specifically, all but the last digit is 0 and the last digit is 1.

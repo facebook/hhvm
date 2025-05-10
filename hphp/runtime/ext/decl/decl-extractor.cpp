@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <memory>
 #include <string>
 
@@ -7,12 +6,10 @@
 #include <folly/json/dynamic.h>
 #include <folly/logging/xlog.h>
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
-#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/decl/decl-extractor.h"
 #include "hphp/runtime/ext/decl/exception.h"
-#include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/runtime/vm/unit-parser.h"
 
 namespace HPHP {

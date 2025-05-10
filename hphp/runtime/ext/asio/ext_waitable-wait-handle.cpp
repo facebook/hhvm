@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 #include "hphp/runtime/base/implicit-context.h"
-#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"

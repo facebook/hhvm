@@ -43,6 +43,7 @@ struct ForEachField {
  * @param f a callable that will be called for each thrift field
  */
 template <typename T, typename F>
+[[deprecated("Deprecated in favor of apache::thrift::op::for_each_ordinal.")]]
 void for_each_field(T&& t, F f) {
   apache::thrift::detail::ForEachField<folly::remove_cvref_t<T>>()(
       detail::MetadataForwarder<T, F>{std::move(f)}, static_cast<T&&>(t));
@@ -58,6 +59,7 @@ void for_each_field(T&& t, F f) {
  *   });
  */
 template <typename T1, typename T2, typename F>
+[[deprecated("Deprecated in favor of apache::thrift::op::for_each_ordinal.")]]
 void for_each_field(T1&& t1, T2&& t2, F f) {
   static_assert(
       std::is_same<folly::remove_cvref_t<T1>, folly::remove_cvref_t<T2>>::value,

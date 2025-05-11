@@ -48,6 +48,8 @@ struct VisitUnion {
  * @param f a callable that accepts all member types from union
  */
 template <typename T, typename F>
+[[deprecated(
+    "Deprecated in favor of apache::thrift::op::visit_union_with_tag.")]]
 decltype(auto) visit_union_with_metadata(T&& t, F&& f) {
   return apache::thrift::detail::VisitUnion<folly::remove_cvref_t<T>>()(
       detail::MetadataForwarder<T, F>{std::forward<F>(f)}, static_cast<T&&>(t));

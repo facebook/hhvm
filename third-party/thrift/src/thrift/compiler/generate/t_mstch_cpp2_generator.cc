@@ -1225,7 +1225,6 @@ class cpp_mstch_type : public mstch_type {
             {"type:cpp_standard_type", &cpp_mstch_type::cpp_standard_type},
             {"type:cpp_adapter", &cpp_mstch_type::cpp_adapter},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
-            {"type:cpp_template", &cpp_mstch_type::cpp_template},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
             {"type:qualified_namespace", &cpp_mstch_type::qualified_namespace},
             {"type:cpp_declare_hash", &cpp_mstch_type::cpp_declare_hash},
@@ -1320,7 +1319,6 @@ class cpp_mstch_type : public mstch_type {
   mstch::node is_string_or_binary() {
     return resolved_type_->is_string_or_binary();
   }
-  mstch::node cpp_template() { return get_cpp_template(type_); }
   mstch::node cpp_declare_hash() {
     return resolved_type_->has_unstructured_annotation(
         {"cpp.declare_hash", "cpp2.declare_hash"});

@@ -46,13 +46,11 @@ template <typename F>
 FOLLY_NOINLINE void reading(size_t iters, Cursor& cur, F f) {
   using member_sig = decltype(&F::operator());
   using sig = typename folly::member_pointer_traits<member_sig>::member_type;
-  using traits = folly::function_traits<sig>;
-  using arg_type = typename traits::template arguments<folly::tag_t>;
   while (iters--) {
-    folly::remove_cvref_t<folly::type_list_element_t<0, arg_type>> reader;
+    folly::remove_cvref_t<function_arguments_element_t<0, sig>> reader;
     reader.setInput(cur);
     compiler_must_not_elide(reader); // for baseline
-    folly::remove_cvref_t<folly::type_list_element_t<1, arg_type>> out;
+    folly::remove_cvref_t<function_arguments_element_t<1, sig>> out;
     f(reader, out);
   }
 }

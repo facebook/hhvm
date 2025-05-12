@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/io/async/AsyncTransport.h>
-#include <folly/portability/GMock.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
 #include <thrift/lib/cpp2/test/util/TestInterface.h>

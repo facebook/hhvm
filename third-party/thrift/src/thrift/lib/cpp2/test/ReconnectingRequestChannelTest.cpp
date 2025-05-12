@@ -30,8 +30,8 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/portability/GMock.h>
 
 using namespace testing;
 using namespace apache::thrift;

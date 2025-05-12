@@ -17,8 +17,8 @@
 #include <functional>
 #include <stdexcept>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/portability/GMock.h>
 
 #include <folly/coro/Baton.h>
 #include <folly/coro/GtestHelpers.h>

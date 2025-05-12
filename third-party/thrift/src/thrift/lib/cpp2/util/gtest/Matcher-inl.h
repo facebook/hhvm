@@ -21,9 +21,9 @@
 #include <type_traits>
 #include <utility>
 
+#include <gmock/gmock.h>
 #include <folly/Traits.h>
 #include <folly/lang/Pretty.h>
-#include <folly/portability/GMock.h>
 
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>

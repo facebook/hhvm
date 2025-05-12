@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/portability/GMock.h>
 
 #include <fizz/record/Extensions.h>
 #include <fizz/record/test/ExtensionTestsBase.h>

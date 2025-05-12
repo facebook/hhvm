@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/coro/GtestHelpers.h>
-#include <folly/portability/GMock.h>
 
 #include <thrift/lib/cpp2/async/ClientInterceptor.h>
 #include <thrift/lib/cpp2/async/InterceptorFrameworkMetadata.h>

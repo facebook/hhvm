@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
-#include <folly/portability/GMock.h>
 
 #include <thrift/lib/cpp2/async/GuardedRequestChannel.h>
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>

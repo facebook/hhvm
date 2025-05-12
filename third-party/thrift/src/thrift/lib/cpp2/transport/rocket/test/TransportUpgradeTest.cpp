@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <folly/fibers/FiberManagerMap.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/portability/GMock.h>
 
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>

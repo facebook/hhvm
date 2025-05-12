@@ -27,9 +27,9 @@
 #include <utility>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/io/IOBuf.h>
-#include <folly/portability/GMock.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>

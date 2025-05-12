@@ -23,9 +23,9 @@
 #include <thread>
 #include <thrift/lib/cpp/concurrency/SFQThreadManager.h>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/Synchronized.h>
-#include <folly/portability/GMock.h>
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp/concurrency/FunctionRunner.h>
 #include <thrift/lib/cpp/concurrency/SFQThreadManager.h>

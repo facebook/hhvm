@@ -18,7 +18,7 @@
 
 #include <atomic>
 
-#include <folly/portability/GMock.h>
+#include <gmock/gmock.h>
 
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <thrift/lib/cpp2/transport/core/testutil/gen-cpp2/IntermHeaderService.tcc>

@@ -18,8 +18,8 @@
 
 #include <memory>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/portability/GMock.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace std;

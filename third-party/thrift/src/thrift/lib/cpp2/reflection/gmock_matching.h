@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <folly/portability/GMock.h>
+#include <gmock/gmock.h>
 
 #include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 

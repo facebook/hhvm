@@ -16,9 +16,9 @@
 
 #include <thrift/lib/cpp2/op/Clear.h>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/io/IOBuf.h>
-#include <folly/portability/GMock.h>
 #include <thrift/lib/cpp2/op/Testing.h>
 #include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/Tag.h>

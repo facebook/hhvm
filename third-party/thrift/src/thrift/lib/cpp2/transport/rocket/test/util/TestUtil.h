@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <folly/portability/GFlags.h>
-#include <folly/portability/GMock.h>
 
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>

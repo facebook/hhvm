@@ -18,9 +18,9 @@
 
 #include <set>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/io/IOBufQueue.h>
-#include <folly/portability/GMock.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/conformance/cpp2/Testing.h>

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <folly/portability/GMock.h>
+#include <gmock/gmock.h>
 
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/gen-cpp2/NewVersion.h>

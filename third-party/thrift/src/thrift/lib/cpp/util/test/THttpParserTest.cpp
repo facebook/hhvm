@@ -19,9 +19,9 @@
 
 #include <fmt/core.h>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/String.h>
-#include <folly/portability/GMock.h>
 
 namespace {
 

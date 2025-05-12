@@ -26,6 +26,7 @@
 #include <boost/thread.hpp>
 #include <fmt/core.h>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
@@ -50,7 +51,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/test/TestSSLServer.h>
 #include <folly/observer/SimpleObservable.h>
-#include <folly/portability/GMock.h>
 #include <folly/synchronization/test/Barrier.h>
 #include <folly/system/ThreadName.h>
 #include <folly/test/TestUtils.h>

@@ -17,10 +17,10 @@
 #include <memory>
 #include <stdexcept>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/Portability.h>
 #include <folly/executors/GlobalExecutor.h>
-#include <folly/portability/GMock.h>
 #include <folly/test/TestUtils.h>
 
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>

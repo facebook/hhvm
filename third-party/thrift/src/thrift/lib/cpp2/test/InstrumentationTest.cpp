@@ -22,6 +22,7 @@
 #include <sstream>
 #include <thread>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/Format.h>
 #include <folly/ThreadLocal.h>
@@ -30,7 +31,6 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/Request.h>
-#include <folly/portability/GMock.h>
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>

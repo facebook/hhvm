@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/portability/GMock.h>
 
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressor.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorFactory.h>

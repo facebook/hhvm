@@ -18,7 +18,7 @@
 
 #include <ostream>
 
-#include <folly/portability/GMock.h>
+#include <gmock/gmock.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
 #include <thrift/lib/cpp2/util/gtest/Printer.h>

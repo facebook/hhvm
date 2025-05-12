@@ -17,8 +17,8 @@
 #include <chrono>
 #include <string_view>
 
+#include <gmock/gmock.h>
 #include <folly/coro/Baton.h>
-#include <folly/portability/GMock.h>
 #include <folly/testing/TestUtil.h>
 
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>

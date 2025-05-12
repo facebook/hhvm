@@ -13,14 +13,11 @@
 
 #include "watchman/Client.h"
 #include "watchman/CommandRegistry.h"
-#include "watchman/Logging.h"
 #include "watchman/Serde.h"
 #include "watchman/root/Root.h"
-#include "watchman/root/resolve.h"
 #include "watchman/sockname.h"
 #include "watchman/thirdparty/jansson/jansson.h"
 #include "watchman/watchman_cmd.h"
-#include "watchman/watchman_stream.h"
 
 using namespace watchman;
 

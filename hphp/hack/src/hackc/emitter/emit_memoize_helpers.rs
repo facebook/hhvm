@@ -54,7 +54,7 @@ pub fn check_memoize_possible<Ex, En>(
     if !is_method
         && params.iter().any(|param| match param.info {
             FunParamInfo::ParamVariadic => true,
-            FunParamInfo::ParamRequired | FunParamInfo::ParamOptional(_) => false,
+            FunParamInfo::ParamRequired | FunParamInfo::ParamOptional(_) => param.splat.is_some(),
         })
     {
         return Err(Error::fatal_runtime(

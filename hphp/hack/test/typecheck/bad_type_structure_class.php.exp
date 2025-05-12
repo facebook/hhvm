@@ -29,7 +29,7 @@ File "bad_type_structure_class.php", line 26, characters 3-22:
 File "bad_type_structure_class.php", line 27, characters 3-27:
   classname<T> where T as C<int>
 File "bad_type_structure_class.php", line 28, characters 3-31:
-  ?vec<mixed>
+  vec<mixed>
 File "bad_type_structure_class.php", line 31, characters 3-26:
   _
 File "bad_type_structure_class.php", line 32, characters 3-28:

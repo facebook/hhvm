@@ -21,7 +21,7 @@ File "type_structure1.php", line 37, characters 5-32:
 File "type_structure1.php", line 38, characters 5-48:
   nothing
 File "type_structure1.php", line 39, characters 5-68:
-  nothing
+  _
 File "type_structure1.php", line 42, characters 5-17:
   shape('bar' => TypeStructure<shape('x' => (num, num))>, 'foo' => TypeStructure<D>)
 File "type_structure1.php", line 43, characters 5-24:
@@ -33,6 +33,6 @@ This shape doesn't have a field `classname` (Typing[4108])
   File "typestructure.hhi", line 59, characters 31-699:
   The shape is defined here
 ERROR: File "type_structure1.php", line 39, characters 36-50:
-This shape doesn't have a field `generic_types` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-699:
-  The shape is defined here
+The field `generic_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 69, characters 6-20:
+  This is where the field was declared as optional.

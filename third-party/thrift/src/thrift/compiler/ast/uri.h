@@ -115,6 +115,8 @@ inline constexpr auto kCppDeprecatedTerseWriteUri =
     "facebook.com/thrift/annotation/cpp/DeprecatedTerseWrite";
 inline constexpr auto kCppEnableCustomTypeOrdering =
     "facebook.com/thrift/annotation/cpp/EnableCustomTypeOrdering";
+inline constexpr auto kCppGenerateServiceMethodDecorator =
+    "facebook.com/thrift/annotation/cpp/GenerateServiceMethodDecorator";
 
 // Java:
 inline constexpr auto kJavaMutableUri =

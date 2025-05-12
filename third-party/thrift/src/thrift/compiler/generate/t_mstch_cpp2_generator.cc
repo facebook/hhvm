@@ -333,6 +333,14 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return cpp_context_->resolver().get_underlying_namespaced_name(type);
     });
 
+    def.property("resolves_to_complex_return?", [](const t_type& type) {
+      return is_complex_return(&type);
+    });
+
+    def.property("cpp_type", [&](const t_type& type) {
+      return cpp_context_->resolver().get_native_type(type);
+    });
+
     return std::move(def).make();
   }
 
@@ -404,6 +412,48 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("cpp_declare_bitwise_ops", [](const t_enum& e) {
       return e.has_unstructured_annotation("cpp.declare_bitwise_ops") ||
           e.has_structured_annotation(kBitmaskEnumUri);
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_function>::ptr make_prototype_for_function(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_function(proto);
+    auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
+
+    def.property("cpp_name", [](const t_function& function) {
+      return cpp2::get_name(&function);
+    });
+
+    def.property("return_type", [&](const t_function& function) {
+      const t_type* type = function.return_type().get_type();
+      // Override the return type for compatibility with old codegen.
+      if (function.is_interaction_constructor()) {
+        // The old syntax (performs) treats an interaction as a response.
+        type = function.interaction().get_type();
+      } else if (function.sink_or_stream()) {
+        type = &t_primitive_type::t_void();
+      }
+      return proto.create<t_type>(*type);
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_service>::ptr make_prototype_for_service(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_service(proto);
+    auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
+
+    def.property(
+        "cpp_requires_method_decorator?", [](const t_service& service) {
+          return service.has_structured_annotation(
+              apache::thrift::compiler::kCppGenerateServiceMethodDecorator);
+        });
+
+    def.property("qualified_name", [](const t_service& service) {
+      return cpp2::get_service_qualified_name(service);
     });
 
     return std::move(def).make();
@@ -2643,6 +2693,11 @@ void t_mstch_cpp2_generator::generate_inline_services(
               });
         });
   };
+  auto has_method_decorator = std::any_of(
+      services.cbegin(), services.cend(), [&](const t_service* service) {
+        return service->has_structured_annotation(
+            apache::thrift::compiler::kCppGenerateServiceMethodDecorator);
+      });
 
   mstch::map context = {
       {"program", cached_program(get_program())},
@@ -2654,6 +2709,7 @@ void t_mstch_cpp2_generator::generate_inline_services(
        any_service_has_any_function([](const t_function& func) {
          return func.is_interaction_constructor() || func.interaction();
        })},
+      {"any_method_decorators?", has_method_decorator},
       {"services", std::move(mstch_services)},
   };
   const auto& module_name = get_program()->name();

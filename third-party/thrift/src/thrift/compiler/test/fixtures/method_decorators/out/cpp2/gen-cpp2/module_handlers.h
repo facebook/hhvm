@@ -12,6 +12,8 @@
 
 
 
+// For method decorators
+#include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
 
 
 namespace folly {
@@ -37,6 +39,25 @@ class DecoratedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHold
 } // namespace cpp2
 
 namespace apache::thrift {
+
+// ServiceMethodDecorator is only supported for coroutines
+#if FOLLY_HAS_COROUTINES
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService> {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  virtual std::string getName() const = 0;
+  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+};
+
+#endif // FOLLY_HAS_COROUTINES
+
 template <>
 class ServiceHandler<::cpp2::DecoratedService> : public apache::thrift::ServerInterface {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -413,6 +434,28 @@ class DecoratedService_ExtendsUndecoratedServiceServiceInfoHolder : public apach
 } // namespace cpp2
 
 namespace apache::thrift {
+
+// ServiceMethodDecorator is only supported for coroutines
+#if FOLLY_HAS_COROUTINES
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService> {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  virtual std::string getName() const = 0;
+  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
+  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
+  virtual folly::coro::Task<DecoratorData> before_extension() { co_return {}; }
+};
+
+#endif // FOLLY_HAS_COROUTINES
+
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtual public ::cpp2::UndecoratedServiceSvIf {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService_ExtendsUndecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -506,6 +549,28 @@ class DecoratedService_ExtendsDecoratedServiceServiceInfoHolder : public apache:
 } // namespace cpp2
 
 namespace apache::thrift {
+
+// ServiceMethodDecorator is only supported for coroutines
+#if FOLLY_HAS_COROUTINES
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsDecoratedService> {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  virtual std::string getName() const = 0;
+  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
+  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  // END inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
+  virtual folly::coro::Task<DecoratorData> before_extension() { co_return {}; }
+};
+
+#endif // FOLLY_HAS_COROUTINES
+
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService> : virtual public ::cpp2::DecoratedServiceSvIf {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService_ExtendsDecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -692,6 +757,31 @@ class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceServiceI
 } // namespace cpp2
 
 namespace apache::thrift {
+
+// ServiceMethodDecorator is only supported for coroutines
+#if FOLLY_HAS_COROUTINES
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  virtual std::string getName() const = 0;
+  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
+  // BEGIN inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
+  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  // END inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
+  virtual folly::coro::Task<DecoratorData> before_extension() { co_return {}; }
+  // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
+  virtual folly::coro::Task<DecoratorData> before_secondExtension( const ::std::string& /*p_input*/) { co_return {}; }
+};
+
+#endif // FOLLY_HAS_COROUTINES
+
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> : virtual public ::cpp2::UndecoratedService_ExtendsDecoratedServiceSvIf {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

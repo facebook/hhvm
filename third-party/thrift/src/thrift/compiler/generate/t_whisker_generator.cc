@@ -303,6 +303,9 @@ prototype<t_stream>::ptr t_whisker_generator::make_prototype_for_stream(
 prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_function>::extends(proto.of<t_named>());
+
+  def.property("params", mem_fn(&t_function::params, proto.of<t_paramlist>()));
+
   return std::move(def).make();
 }
 

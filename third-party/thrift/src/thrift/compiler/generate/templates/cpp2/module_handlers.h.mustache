@@ -35,12 +35,19 @@
 {{#any_sinks?}}
 // for sinks
 #include <thrift/lib/cpp2/async/Sink.h>
-{{/any_sinks?}}
+{{/any_sinks?}}{{!
 
-{{#any_streams?}}
+}}{{#any_streams?}}
+
 // for streams
 #include <thrift/lib/cpp2/async/ServerStream.h>
-{{/any_streams?}}
+{{/any_streams?}}{{!
+
+}}{{#any_method_decorators?}}
+
+// For method decorators
+#include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
+{{/any_method_decorators?}}
 
 {{#any_interactions?}}
 // for interactions

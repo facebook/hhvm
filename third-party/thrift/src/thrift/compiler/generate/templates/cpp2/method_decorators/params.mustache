@@ -1,0 +1,60 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{!
+  maybe_prefix_comma - If a param is not the first in the list, we separate them
+  with a ','.
+}}
+{{#let partial maybe_prefix_comma |index|}}
+{{#pragma ignore-newlines}}
+{{#if (int.ne? index 0)}},{{/if (int.ne? index 0)}}
+{{/let partial}}
+
+{{!
+  param_type - For params that are nontrivial, decorators will read them by
+  const ref, Otherwise for trivially copyable params like int64_t we pass them
+  by value.
+}}
+{{#let partial param_type |param|}}
+{{#pragma ignore-newlines}}
+{{#if param.type.resolves_to_complex_return?}}{{!
+}}const {{param.type.cpp_type}}&
+{{#else}}
+{{param.type.cpp_type}}
+{{/if param.type.resolves_to_complex_return?}}
+{{/let partial}}
+
+{{!
+  param_name_declaration - For declarations, the variable name is unused /
+  commented to stay consistent with the rest of the declarations.
+}}
+{{#let partial param_name_declaration |param|}}
+{{#pragma ignore-newlines}}
+/*p_{{param.cpp_name}}*/
+{{/let partial}}
+
+{{!
+  before_declaration_params - A param list for method decorator before_*
+  function declaration. Decorator before_* accepts the same arguments as the
+  method, except they only have const ref access to them.
+}}
+{{#let export partial before_declaration_params |function| captures |maybe_prefix_comma param_type param_name_declaration|}}
+{{#pragma ignore-newlines}}
+{{#each function.params.fields as |param index|}}
+{{#partial maybe_prefix_comma index=index}} {{#partial param_type param=param}} {{#partial param_name_declaration param=param}}
+{{/each}}
+{{/let partial}}

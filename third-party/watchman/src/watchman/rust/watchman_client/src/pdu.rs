@@ -685,6 +685,22 @@ pub struct UnsubscribeResponse {
     pub unsubscribe: String,
 }
 
+#[derive(Serialize, Debug)]
+pub struct GetAssertedStatesRequest(pub &'static str, pub PathBuf);
+
+#[derive(Deserialize, Debug)]
+pub struct State {
+    pub name: String,
+    pub state: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct GetAssertedStatesResponse {
+    pub version: String,
+    pub root: String,
+    pub states: Vec<State>,
+}
+
 /// A `Clock` is used to refer to a logical point in time.
 /// Internally, watchman maintains a monotonically increasing tick counter
 /// along with some additional data to detect A-B-A style situations if

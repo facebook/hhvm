@@ -179,7 +179,7 @@ void PythonAsyncProcessor::processSerializedCompressedRequestWithMetadata(
   auto serializedRequest = std::move(serializedCompressedRequest).uncompress();
   if (context->getInteractionId()) {
     std::string_view serviceName{context->getMethodName()};
-    serviceName = serviceName.substr(0, serviceName.find("."));
+    serviceName = serviceName.substr(0, serviceName.find('.'));
     if (auto interactionCreate = context->getInteractionCreate()) {
       if (interactionCreate->interactionName_ref()->view() == serviceName) {
         interactionName = serviceName;

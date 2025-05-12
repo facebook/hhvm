@@ -146,6 +146,8 @@ struct ProfDataDeserializer {
   void record(ProfDataSerializer::Id, const RepoAuthType::Array*);
   void record(ProfDataSerializer::Id, FuncId);
 
+  void setExtraDataOffset(off_t off) { extraDataOffset = off; }
+
   bool done();
 
   ProfDataSerializer::Mappers getMappers() const;
@@ -154,6 +156,14 @@ struct ProfDataDeserializer {
   int fd;
   static constexpr uint32_t buffer_size = 8192;
   uint32_t offset{buffer_size};
+
+  // Logical offset past the end of the profile data in the serialized file,
+  // which may be the start of extra data that is not part of the proper JIT
+  // profile data.
+  off_t extraDataOffset{0};
+
+  uint32_t totalBytesRead{0};
+
   char buffer[buffer_size];
 
   template <typename T>

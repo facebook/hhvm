@@ -93,6 +93,10 @@ StaticString s_invoke("__invoke");
 
 constexpr uint32_t kMagic = 0x4d564848;
 
+// The extra data field, which contains the offset where the extra data starts
+// in the file (or zero if not present), is placed right after the kMagic value.
+constexpr uint32_t kExtraDataFieldOffset = sizeof(decltype(kMagic));
+
 constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;
 constexpr uint32_t k86linitSlot = 0x80000002u;
@@ -1398,8 +1402,8 @@ ProfDataSerializer::ProfDataSerializer(const std::string& name, FileMode mode)
   if (fileMode == FileMode::Append) {
     fileName = mangleFilenameForAppendInProgress(name);
     auto const mangled = mangleFilenameForAppendStart(name);
-    fd = open(mangled.c_str(),
-              O_CLOEXEC | O_APPEND | O_WRONLY, 0644);
+    fd = open(mangled.c_str(), O_CLOEXEC | O_WRONLY, 0644);
+    lseek(fd, 0, SEEK_END);
     check(fd, mangled);
     renameFile(mangled, fileName);
   } else {
@@ -1418,6 +1422,15 @@ void ProfDataSerializer::finalize() {
   assertx(fd != -1);
   if (offset) ::write(fd, buffer, offset);
   offset = 0;
+
+  // Set the extra data field in the file header.
+  const off_t pos = lseek(fd, 0, SEEK_CUR);
+  auto const retVal = lseek(fd, kExtraDataFieldOffset, SEEK_SET);
+  always_assert_flog(retVal == kExtraDataFieldOffset,
+                     "retVal = {} ; kExtraDataFieldOffset = {}\n",
+                     retVal, kExtraDataFieldOffset);
+  ::write(fd, &pos, sizeof(pos));
+  FTRACE(2, "Writing extraDataOffset with {}\n", sizeof(pos));
   close(fd);
   fd = -1;
 
@@ -1459,10 +1472,7 @@ ProfDataDeserializer::~ProfDataDeserializer() {
 }
 
 bool ProfDataDeserializer::done() {
-  auto const pos = lseek(fd, 0, SEEK_CUR);
-  auto const end = lseek(fd, 0, SEEK_END);
-  lseek(fd, pos, SEEK_SET); // go back to original position
-  return offset == buffer_size && pos == end;
+  return totalBytesRead == extraDataOffset;
 }
 
 ProfDataSerializer::Mappers ProfDataDeserializer::getMappers() const {
@@ -1524,6 +1534,7 @@ void read_raw(ProfDataDeserializer& ser, void* data, size_t sz) {
   }
   if (sz >= ProfDataDeserializer::buffer_size) {
     auto const bytes_read = ::read(ser.fd, data, sz);
+    ser.totalBytesRead += bytes_read;
     if (bytes_read < 0 || bytes_read < sz) {
       throw std::runtime_error("Failed to read serialized data");
     }
@@ -1533,6 +1544,7 @@ void read_raw(ProfDataDeserializer& ser, void* data, size_t sz) {
   auto const bytes_read = ::read(ser.fd,
                                  ser.buffer,
                                  ProfDataDeserializer::buffer_size);
+  ser.totalBytesRead += bytes_read;
   if (bytes_read < 0 || bytes_read < sz) {
     throw std::runtime_error("Failed to read serialized data");
   }
@@ -2132,6 +2144,7 @@ std::string serializeProfData(const std::string& filename) {
     ProfDataSerializer ser{filename, ProfDataSerializer::FileMode::Create};
 
     write_raw(ser, kMagic);
+    write_raw(ser, off_t(0));
     write_raw(ser, RepoFile::globalData().Signature);
     auto schema = repoSchemaId();
     write_raw(ser, schema.size());
@@ -2292,6 +2305,10 @@ std::string deserializeProfData(const std::string& filename,
     if (read_raw<decltype(kMagic)>(ser) != kMagic) {
       throw std::runtime_error("Not a profile-data dump");
     }
+    auto const extraDataOffset = read_raw<off_t>(ser);
+    FTRACE(2, "Deserialized extraDataOffset: {}\n", extraDataOffset);
+    assertx(extraDataOffset != 0);
+    ser.setExtraDataOffset(extraDataOffset);
     auto signature = read_raw<decltype(RepoFile::globalData().Signature)>(ser);
     auto const preload_only = signature != RepoFile::globalData().Signature;
     auto size = read_raw<size_t>(ser);
@@ -2421,7 +2438,8 @@ std::string deserializeProfData(const std::string& filename,
       deserializeCachedInliningCost(ser);
     }
 
-    always_assert(ser.done());
+    always_assert_flog(ser.done(), "totalBytesRead = {} ; extraDataOffset = {}\n",
+                       ser.totalBytesRead, ser.extraDataOffset);
 
     if (isJitSerializing() && serializeOptProfEnabled()) {
       s_lastMappers = ser.getMappers();

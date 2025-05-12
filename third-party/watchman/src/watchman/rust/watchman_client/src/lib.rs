@@ -1193,6 +1193,16 @@ impl Client {
             .await?;
         Ok(response)
     }
+
+    pub async fn get_asserted_states(
+        &self,
+        root: &ResolvedRoot,
+    ) -> Result<GetAssertedStatesResponse, Error> {
+        let request = GetAssertedStatesRequest("debug-get-asserted-states", root.root.clone());
+
+        let response: GetAssertedStatesResponse = self.generic_request(request).await?;
+        Ok(response)
+    }
 }
 
 #[cfg(test)]

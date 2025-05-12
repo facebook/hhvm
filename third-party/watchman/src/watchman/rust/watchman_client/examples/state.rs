@@ -36,15 +36,22 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("resolved watch to {:?}", resolved);
 
+    let asserted_states = client.get_asserted_states(&resolved).await?;
+    println!("Asserted states: {:?}", asserted_states);
     client
         .state_enter(&resolved, "woot", SyncTimeout::Default, None)
         .await?;
     println!("asserted woot state");
     tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+    let asserted_states = client.get_asserted_states(&resolved).await?;
+    println!("Asserted states: {:?}", asserted_states);
+    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
     client
         .state_leave(&resolved, "woot", SyncTimeout::Default, None)
         .await?;
     println!("vacated woot state");
-
+    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+    let asserted_states = client.get_asserted_states(&resolved).await?;
+    println!("Asserted states: {:?}", asserted_states);
     Ok(())
 }

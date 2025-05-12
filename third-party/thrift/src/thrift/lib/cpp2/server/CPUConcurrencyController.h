@@ -60,6 +60,7 @@ class CPUConcurrencyController {
     MAX_REQUESTS,
     MAX_QPS,
     CONCURRENCY_LIMIT,
+    EXECUTION_RATE,
   };
 
   struct Config {
@@ -199,6 +200,8 @@ class CPUConcurrencyController {
   folly::observer::SimpleObservable<std::optional<uint32_t>> qpsLimit_{
       std::nullopt};
   folly::observer::SimpleObservable<std::optional<uint32_t>> concurrencyLimit_{
+      std::nullopt};
+  folly::observer::SimpleObservable<std::optional<uint32_t>> executionRate_{
       std::nullopt};
   uint32_t dryRunLimit_{0};
   apache::thrift::server::ServerConfigs& serverConfigs_;

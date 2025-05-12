@@ -228,6 +228,9 @@ void CPUConcurrencyController::schedule(std::shared_ptr<const Config> config) {
   thriftServerConfig_.setConcurrencyLimit(
       concurrencyLimit_.getObserver(),
       apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
+  thriftServerConfig_.setExecutionRate(
+      executionRate_.getObserver(),
+      apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
 
   this->setLimit(config, getConcurrencyUpperBoundInternal(config));
   scheduler_.addFunctionGenericNextRunTimeFunctor(
@@ -245,6 +248,7 @@ void CPUConcurrencyController::cancel() {
   activeRequestsLimit_.setValue(std::nullopt);
   qpsLimit_.setValue(std::nullopt);
   concurrencyLimit_.setValue(std::nullopt);
+  executionRate_.setValue(std::nullopt);
   dryRunLimit_ = 0;
   stableConcurrencySamples_.clear();
   stableEstimate_.exchange(-1);
@@ -274,6 +278,9 @@ uint32_t CPUConcurrencyController::getLimit(
         // may come from AdaptiveConcurrencyController
         limit = serverConfigs_.getConcurrencyLimit();
         break;
+      case Method::EXECUTION_RATE:
+        limit = thriftServerConfig_.getExecutionRate().get();
+        break;
       default:
         DCHECK(false);
     }
@@ -300,6 +307,9 @@ void CPUConcurrencyController::setLimit(
       case Method::CONCURRENCY_LIMIT:
         concurrencyLimit_.setValue(newLimit);
         break;
+      case Method::EXECUTION_RATE:
+        executionRate_.setValue(newLimit);
+        break;
       default:
         DCHECK(false);
     }
@@ -325,6 +335,13 @@ uint32_t CPUConcurrencyController::getLimitUsage(
       // and a token bucket for rate limiting.
       // TODO: We should exclude fb303 methods.
       return serverConfigs_.getActiveRequests();
+    case Method::EXECUTION_RATE:
+      // Note: This intentionally falls through to MAX_QPS. This is a stop-gap
+      // behavior while we're implementing executionRate as it's own separate
+      // limit from maxQps. As it is written now, this preserves identical
+      // behavior to when CPUConcurrencyController used Method::MAX_QPS with
+      // --thrift_server_enforces_max_qps flag disabled. In the future,
+      // Method::CONCURRENCY_LIMIT should use a better limit usage metric.
     case Method::MAX_QPS: {
       auto now = steady_clock::now();
       auto milliSince =
@@ -377,6 +394,8 @@ uint32_t CPUConcurrencyController::getConcurrencyUpperBoundInternal(
       return thriftServerConfig_.getMaxQps().get();
     case Method::CONCURRENCY_LIMIT:
       return thriftServerConfig_.getConcurrencyLimit().get();
+    case Method::EXECUTION_RATE:
+      return thriftServerConfig_.getExecutionRate().get();
   }
   folly::assume_unreachable();
 }
@@ -409,6 +428,8 @@ std::string_view CPUConcurrencyController::Config::methodName() const {
       return "MAX_QPS";
     case Method::CONCURRENCY_LIMIT:
       return "CONCURRENCY_LIMIT";
+    case Method::EXECUTION_RATE:
+      return "EXECUTION_RATE";
   }
   folly::assume_unreachable();
 }
@@ -434,6 +455,8 @@ std::string_view CPUConcurrencyController::Config::concurrencyUnit() const {
       return "maxQps";
     case Method::CONCURRENCY_LIMIT:
       return "concurrencyLimit";
+    case Method::EXECUTION_RATE:
+      return "executionRate";
   }
   folly::assume_unreachable();
 }

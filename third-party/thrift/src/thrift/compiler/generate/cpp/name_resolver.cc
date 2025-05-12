@@ -412,7 +412,7 @@ std::string cpp_name_resolver::gen_standard_type(const t_type& node) {
 }
 
 std::string cpp_name_resolver::gen_storage_type(
-    const std::string& native_type, cpp_reference_type& ref_type) {
+    const std::string& native_type, cpp_reference_type ref_type) {
   switch (ref_type) {
     case cpp_reference_type::unique:
       return detail::gen_template_type("::std::unique_ptr", {native_type});

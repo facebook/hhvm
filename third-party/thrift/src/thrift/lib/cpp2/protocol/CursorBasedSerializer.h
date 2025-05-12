@@ -1061,7 +1061,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
 
   void finalize() {
     checkState(State::Active);
-    visitSkippedFields<FieldId{std::numeric_limits<int16_t>::max()}>();
+    visitSkippedFields<FieldAfterLast<T>>();
     protocol_->writeFieldStop();
     protocol_->writeStructEnd();
     state_ = State::Done;
@@ -1114,7 +1114,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
   }
 
   template <FieldId MaxFieldId>
-  void visitSkippedFields() {
+  FOLLY_ALWAYS_INLINE void visitSkippedFields() {
     if constexpr (is_thrift_union_v<T>) {
       return;
     }
@@ -1124,6 +1124,11 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
       return;
     }
 
+    visitSkippedFieldsSlowPath<MaxFieldId>();
+  }
+
+  template <FieldId MaxFieldId>
+  void visitSkippedFieldsSlowPath() {
     // Slow path: iterate fields between fieldId_ and MaxFieldId.
     const auto& fieldWriters = detail::DefaultValueWriter<Tag>::fields;
     for (auto itr = std::lower_bound(

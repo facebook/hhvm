@@ -27,6 +27,22 @@
 
 namespace apache::thrift {
 
+template <typename T>
+struct LastFieldId {
+  static constexpr FieldId value = [] {
+    FieldId max = FieldId{0};
+    op::for_each_ordinal<T>([&](auto ord) {
+      using Ord = decltype(ord);
+      max = std::max(max, op::get_field_id_v<T, Ord>);
+    });
+    return max;
+  }();
+};
+
+template <typename T>
+constexpr auto FieldAfterLast =
+    FieldId{folly::to_underlying(LastFieldId<T>::value) + 1};
+
 template <typename T, typename ProtocolReader, bool Contiguous>
 class StructuredCursorReader;
 template <typename Tag, typename ProtocolReader, bool Contiguous>

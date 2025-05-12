@@ -30,11 +30,8 @@ function generate_perfect_hash_table {
   LC_ALL=C sort -u ${1?} | awk "${3?}" - "${2?}" > "${4?}"
 
   # Generate output source file.
-  # We also sub out the default 'FALLTHROUGH' comment statements as modern
-  # compilers will raise warnings unless the fallthrough is explicit.
   LC_ALL=C sort -u ${1?} | awk "${6?}" - "${5?}" | \
   ${8:-gperf} -m5 -D --output-file="${7?}"
-  perl -p -i -e "s/\/\*FALLTHROUGH\*\//[[fallthrough]];/g" "${7?}"
 
   # Here we delete one of the comment lines gperf adds to the top of the file.
   # i.e. /* Command-line: .../gperf -m5 --output-file=...  */

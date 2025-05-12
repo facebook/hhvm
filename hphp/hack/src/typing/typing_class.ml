@@ -1354,6 +1354,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       | Private -> Naming_error.Vprivate
       | Internal -> Naming_error.Vinternal
       | Protected -> Naming_error.Vprotected
+      | ProtectedInternal -> Naming_error.Vprotected_internal
     in
     let (pos, prop_name) = cv.cv_id in
     Errors.add_error

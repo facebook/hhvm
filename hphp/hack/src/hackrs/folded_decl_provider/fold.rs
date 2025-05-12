@@ -110,6 +110,10 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             Visibility::Internal => module.map_or(CeVisibility::Public, |module_name| {
                 CeVisibility::Internal(module_name)
             }),
+            Visibility::ProtectedInternal => module
+                .map_or(CeVisibility::Protected(cls), |module_name| {
+                    CeVisibility::ProtectedInternal(cls, module_name)
+                }),
         }
     }
 

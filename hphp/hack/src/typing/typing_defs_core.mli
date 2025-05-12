@@ -17,6 +17,10 @@ type ce_visibility =
   | Vprotected of string
   (* When we construct `Vinternal`, we are guaranteed to be inside a module *)
   | Vinternal of string
+  | Vprotected_internal of {
+      class_id: string;
+      module_: string;
+    }
 [@@deriving eq, ord, show]
 
 type cross_package_decl = string option [@@deriving eq, ord]

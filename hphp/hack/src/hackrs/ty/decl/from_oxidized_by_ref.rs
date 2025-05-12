@@ -51,6 +51,9 @@ impl From<obr::typing_defs::CeVisibility<'_>> for ty::CeVisibility {
             Obr::Vprivate(s) => Self::Private(s.into()),
             Obr::Vprotected(s) => Self::Protected(s.into()),
             Obr::Vinternal(s) => Self::Internal(s.into()),
+            Obr::VprotectedInternal { class_id, module__ } => {
+                Self::ProtectedInternal(class_id.into(), module__.into())
+            }
         }
     }
 }

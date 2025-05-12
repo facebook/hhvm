@@ -206,8 +206,13 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
   | (Vpublic, Vpublic)
   | (Vprotected _, Vprotected _)
   | (Vprotected _, Vpublic)
+  | (Vprotected_internal _, Vprotected _)
+  | (Vprotected_internal _, Vpublic)
   | (Vinternal _, Vpublic) ->
     ()
+  | ( Vprotected_internal { module_ = parent_m; _ },
+      Vprotected_internal { module_ = child_m; _ } )
+  | (Vprotected_internal { module_ = parent_m; _ }, Vinternal child_m)
   | (Vinternal parent_m, Vinternal child_m) ->
     let err_opt =
       match

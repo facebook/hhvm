@@ -121,6 +121,7 @@ let make_visibility = function
   | Aast.Protected -> Visibility.Protected
   | Aast.Public -> Visibility.Public
   | Aast.Internal -> Visibility.Internal
+  | Aast.ProtectedInternal -> Visibility.ProtectedInternal
 
 let make_type_const_kind = function
   | Aast.TCAbstract _ -> TypeConstKind.Abstract

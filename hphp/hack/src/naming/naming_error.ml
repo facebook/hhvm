@@ -13,6 +13,7 @@ type visibility =
   | Vpublic
   | Vinternal
   | Vprotected
+  | Vprotected_internal
 
 type return_only_hint =
   | Hvoid
@@ -30,6 +31,7 @@ let visibility_to_string = function
   | Vprivate -> "private"
   | Vinternal -> "internal"
   | Vprotected -> "protected"
+  | Vprotected_internal -> "protected internal"
 
 type t =
   | Unsupported_trait_use_as of Pos.t

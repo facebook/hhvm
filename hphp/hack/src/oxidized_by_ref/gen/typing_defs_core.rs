@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a1b5331abe3da1337534e42c804dcb4b>>
+// @generated SignedSource<<3c2865f1da2f2599ed0d9591593217d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -48,6 +48,13 @@ pub enum CeVisibility<'a> {
     Vprotected(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Vinternal(&'a str),
+    #[rust_to_ocaml(name = "Vprotected_internal")]
+    VprotectedInternal {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        class_id: &'a str,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        module__: &'a str,
+    },
 }
 impl<'a> TrivialDrop for CeVisibility<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);

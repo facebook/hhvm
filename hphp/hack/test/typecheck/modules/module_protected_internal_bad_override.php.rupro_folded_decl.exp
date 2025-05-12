@@ -1,0 +1,386 @@
+File root|module_protected_internal_bad_override.php--C.php
+--- ocaml
++++ rupro
+@@ -1,194 +1,194 @@
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|module_protected_internal_bad_override.php--C.php, 5:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     module: (
+         Pos(root|module_protected_internal_bad_override.php--C.php, 3:8-10),
+         "M1",
+     ),
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\A": A,
+     },
+     props: {
+         "bar": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\C",
+             visibility: Internal(
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "baz": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+                 "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "corge": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\A",
+             visibility: ProtectedInternal(
+                 "\\A",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "foo": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+                 "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "quux": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+                 "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "qux": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+                 "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\C",
+             visibility: Internal(
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "baz": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+                 "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "corge": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\A",
+             visibility: ProtectedInternal(
+                 "\\A",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "foo": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+-                "\\A",
++                "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "quux": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+                 "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "qux": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\C",
+             visibility: ProtectedInternal(
+                 "\\C",
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|module_protected_internal_bad_override.php--C.php, 5:7-8),
+             ty: class<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\A",
+     },
+ }
+File root|module_protected_internal_bad_override.php--D.php
+--- ocaml
++++ rupro
+@@ -1,182 +1,182 @@
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|module_protected_internal_bad_override.php--D.php, 5:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     module: (
+         Pos(root|module_protected_internal_bad_override.php--D.php, 3:8-10),
+         "M2",
+     ),
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\A": A,
+     },
+     props: {
+         "bar": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\D",
+             visibility: Internal(
+                 "M2",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "baz": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\A",
+             visibility: Internal(
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "corge": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\D",
+             visibility: Private(
+                 "\\D",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "foo": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\D",
+             visibility: ProtectedInternal(
+                 "\\D",
+                 "M2",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "quux": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\A",
+             visibility: Public,
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "qux": FoldedElement {
+             flags: ClassEltFlags(
+                 2,
+             ),
+             origin: "\\A",
+             visibility: Protected(
+                 "\\A",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\D",
+             visibility: Internal(
+                 "M2",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "baz": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\A",
+             visibility: Internal(
+                 "M1",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "corge": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\D",
+             visibility: Private(
+                 "\\D",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "foo": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\D",
+             visibility: ProtectedInternal(
+-                "\\A",
++                "\\D",
+                 "M2",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "quux": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\A",
+             visibility: Public,
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "qux": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\A",
+             visibility: Protected(
+                 "\\A",
+             ),
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|module_protected_internal_bad_override.php--D.php, 5:7-8),
+             ty: class<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\A",
+     },
+ }

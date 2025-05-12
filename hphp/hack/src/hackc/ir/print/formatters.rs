@@ -772,6 +772,7 @@ impl Display for FmtVisibility {
             Visibility::Public => "public",
             Visibility::Protected => "protected",
             Visibility::Internal => "internal",
+            Visibility::ProtectedInternal => "protected internal",
         };
         vis.fmt(f)
     }

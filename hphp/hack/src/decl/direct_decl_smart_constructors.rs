@@ -526,7 +526,15 @@ fn read_member_modifiers<'b>(modifiers: impl Iterator<Item = &'b Node>) -> Modif
     };
     for modifier in modifiers {
         if let Some(vis) = modifier.as_visibility() {
-            ret.visibility = vis;
+            match (ret.visibility, vis) {
+                (aast::Visibility::Protected, aast::Visibility::Internal) => {
+                    ret.visibility = aast::Visibility::ProtectedInternal
+                }
+                (aast::Visibility::Internal, aast::Visibility::Protected) => {
+                    ret.visibility = aast::Visibility::ProtectedInternal
+                }
+                _ => ret.visibility = vis,
+            }
         }
         match modifier.token_kind() {
             Some(TokenKind::Static) => ret.is_static = true,
@@ -3495,9 +3503,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             })
             .collect();
 
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         let is_module_newtype = module_kw_opt.is_ignored_token_with_kind(TokenKind::Module);
         let vis = match keyword.token_kind() {
             Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
@@ -3694,9 +3703,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             })
             .collect();
 
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         let typedef = TypedefType {
             module: self.module.clone(),
             pos,
@@ -3946,10 +3956,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         match header {
             Node::FunctionHeader(box header) => {
                 let is_method = false;
-                let internal = header
-                    .modifiers
-                    .iter()
-                    .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+                let internal = header.modifiers.iter().any(|m| {
+                    m.as_visibility() == Some(aast::Visibility::Internal)
+                        || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+                });
                 let ((pos, name), type_, _) =
                     match self.function_to_ty(is_method, &attributes, header, body) {
                         Some(x) => x,
@@ -5052,9 +5062,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             Some(ty) => ty,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         let key = id.1.clone();
         let consts = enumerators
             .into_iter()
@@ -5293,9 +5304,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 _ => {}
             }
         }
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         user_attributes.push(shallow_decl_defs::UserAttribute {
             name: (name.0.clone(), "__EnumClass".into()),
             params: vec![],

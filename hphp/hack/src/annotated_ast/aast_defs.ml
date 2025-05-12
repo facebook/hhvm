@@ -27,6 +27,7 @@ type visibility = Ast_defs.visibility =
   | Public
   | Protected
   | Internal
+  | ProtectedInternal
 [@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type tprim = Ast_defs.tprim =
@@ -1446,6 +1447,7 @@ let string_of_visibility vis =
   | Public -> "public"
   | Protected -> "protected"
   | Internal -> "internal"
+  | ProtectedInternal -> "protected internal"
 
 let is_wildcard_hint h =
   match h with

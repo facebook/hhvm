@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b87b4b7e40c4568114e3d6a7ac4de178>>
+// @generated SignedSource<<607cc506fd7b8645d1fd9a7dc899b89e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1518,6 +1518,7 @@ impl<'a> Node<'a> for Visibility {
             Visibility::Public => {}
             Visibility::Protected => {}
             Visibility::Internal => {}
+            Visibility::ProtectedInternal => {}
         }
     }
 }

@@ -3691,6 +3691,9 @@ fn p_modifiers<'a, F: Fn(R, modifier::Kind) -> R, R>(
             }
         }
     }
+    if kind_set.has(modifier::PROTECTED) && kind_set.has(modifier::INTERNAL) {
+        init = on_kind(init, modifier::PROTECTED_INTERNAL);
+    }
     (kind_set, init)
 }
 

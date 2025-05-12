@@ -408,6 +408,7 @@ let at_least_internal = function
   | Private ->
     true
   | Protected
+  | ProtectedInternal
   | Public ->
     false
 

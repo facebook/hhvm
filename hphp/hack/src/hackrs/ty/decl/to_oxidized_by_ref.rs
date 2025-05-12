@@ -22,6 +22,10 @@ impl<'a> ToOxidizedByRef<'a> for CeVisibility {
             CeVisibility::Private(v) => Obr::Vprivate(v.to_oxidized_by_ref(arena)),
             CeVisibility::Protected(v) => Obr::Vprotected(v.to_oxidized_by_ref(arena)),
             CeVisibility::Internal(v) => Obr::Vinternal(v.to_oxidized_by_ref(arena)),
+            CeVisibility::ProtectedInternal(ty, m) => Obr::VprotectedInternal {
+                class_id: ty.to_oxidized_by_ref(arena),
+                module__: m.to_oxidized_by_ref(arena),
+            },
         }
     }
 }

@@ -96,6 +96,7 @@ impl AsRef<str> for Visibility {
             Public => "public",
             Protected => "protected",
             Internal => "internal",
+            ProtectedInternal => "protected internal",
         }
     }
 }

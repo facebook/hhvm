@@ -35,7 +35,8 @@ let should_check_ancestor_method ancestor_class ancestor_method =
     match ancestor_method.ce_visibility with
     | Vpublic
     | Vprotected _
-    | Vinternal _ ->
+    | Vinternal _
+    | Vprotected_internal _ ->
       true
     | Vprivate _ -> false
 

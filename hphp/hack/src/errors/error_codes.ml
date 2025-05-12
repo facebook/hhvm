@@ -785,6 +785,7 @@ module Typing = struct
     | SimpliHackRunPrompt [@value 4493]
     | InvalidReifiedArgumentFIXMEable [@value 4494]
     | SimpliHackEvalError [@value 4495]
+    | ProtectedInternalMethCaller [@value 4496]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

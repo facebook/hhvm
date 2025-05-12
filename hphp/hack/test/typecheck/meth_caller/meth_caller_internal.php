@@ -1,3 +1,8 @@
+//// module_A.php
+<?hh
+new module A {}
+
+//// C.php
 <?hh
 
 module A;
@@ -10,9 +15,12 @@ class C {
     $c = new C();
     $f($c);
   }
-}
 
-<<__EntryPoint>>
-function main(): void {
-  (new C())->bar();
+  protected internal function baz(): void { echo "I am baz\n"; }
+
+  public function qux(): void {
+    $f = meth_caller(C::class, 'baz');
+    $c = new C();
+    $f($c);
+  }
 }

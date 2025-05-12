@@ -405,7 +405,8 @@ let is_private
   | Vprivate _ -> not @@ Member.has_lsb member
   | Vpublic
   | Vprotected _
-  | Vinternal _ ->
+  | Vinternal _
+  | Vprotected_internal _ ->
     false
 
 let filter_privates class_type =
@@ -428,9 +429,15 @@ let chown_private_and_protected owner class_type =
      *)
     | Vprotected _ when not (get_elt_synthesized elt) ->
       { elt with elt_visibility = Vprotected owner }
+    | Vprotected_internal { module_; _ } when not (get_elt_synthesized elt) ->
+      {
+        elt with
+        elt_visibility = Vprotected_internal { class_id = owner; module_ };
+      }
     | Vpublic
     | Vprotected _
-    | Vinternal _ ->
+    | Vinternal _
+    | Vprotected_internal _ ->
       elt
   in
   {

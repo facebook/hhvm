@@ -15,6 +15,7 @@ type visibility =
   | Vpublic
   | Vinternal
   | Vprotected
+  | Vprotected_internal
 
 type return_only_hint =
   | Hvoid

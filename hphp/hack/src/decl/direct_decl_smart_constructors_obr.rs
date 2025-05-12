@@ -584,7 +584,15 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
     };
     for modifier in modifiers {
         if let Some(vis) = modifier.as_visibility() {
-            ret.visibility = vis;
+            match (ret.visibility, vis) {
+                (aast::Visibility::Protected, aast::Visibility::Internal) => {
+                    ret.visibility = aast::Visibility::ProtectedInternal
+                }
+                (aast::Visibility::Internal, aast::Visibility::Protected) => {
+                    ret.visibility = aast::Visibility::ProtectedInternal
+                }
+                _ => ret.visibility = vis,
+            }
         }
         match modifier.token_kind() {
             Some(TokenKind::Static) => ret.is_static = true,
@@ -3704,9 +3712,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             }
         }
 
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         let is_module_newtype = module_kw_opt.is_ignored_token_with_kind(TokenKind::Module);
         let vis = match keyword.token_kind() {
             Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
@@ -3893,9 +3902,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             }
         }
 
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         let typedef = self.alloc(TypedefType {
             module: self.module,
             pos,
@@ -4158,10 +4168,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     s.push_str(msg);
                     s.into_bump_str()
                 });
-                let internal = header
-                    .modifiers
-                    .iter()
-                    .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+                let internal = header.modifiers.iter().any(|m| {
+                    m.as_visibility() == Some(aast::Visibility::Internal)
+                        || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+                });
                 let fun_elt = self.alloc(FunElt {
                     module: self.module,
                     internal,
@@ -5274,9 +5284,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(ty) => ty,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         let key = id.1;
         let consts = self.slice(enumerators.iter().filter_map(|node| match *node {
             Node::Const(const_) => Some(const_),
@@ -5518,9 +5529,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 _ => {}
             }
         }
-        let internal = modifiers
-            .iter()
-            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let internal = modifiers.iter().any(|m| {
+            m.as_visibility() == Some(aast::Visibility::Internal)
+                || m.as_visibility() == Some(aast::Visibility::ProtectedInternal)
+        });
         user_attributes.push(self.alloc(shallow_decl_defs::UserAttribute {
             name: (name.0, "__EnumClass"),
             params: &[],

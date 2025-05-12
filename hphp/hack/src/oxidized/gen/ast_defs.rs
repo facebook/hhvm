@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<51dd33892d0007914f4f12040c0135a7>>
+// @generated SignedSource<<265aa8905e3cb229faba4577f7588297>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -536,6 +536,8 @@ pub enum Visibility {
     Protected,
     #[rust_to_ocaml(attr = r#"visitors.name "visibility_Internal""#)]
     Internal,
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_ProtectedInternal""#)]
+    ProtectedInternal,
 }
 impl TrivialDrop for Visibility {}
 arena_deserializer::impl_deserialize_in_arena!(Visibility);

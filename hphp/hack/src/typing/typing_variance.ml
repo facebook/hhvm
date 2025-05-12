@@ -915,7 +915,8 @@ let class_property : Env.t -> Nast.class_var -> unit =
         | Aast.Private -> ()
         | Aast.Public
         | Aast.Protected
-        | Aast.Internal ->
+        | Aast.Internal
+        | Aast.ProtectedInternal ->
           let variance =
             make_variance Rproperty (Ast_defs.get_pos h) Ast_defs.Invariant
           in
@@ -957,7 +958,8 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
       ()
     | Aast.Public
     | Aast.Protected
-    | Aast.Internal ->
+    | Aast.Internal
+    | Aast.ProtectedInternal ->
       if (class_.Aast.c_final || m_final) && m_static then
         ()
       else

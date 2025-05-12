@@ -97,7 +97,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; members; implements_; uses; attributes; type_params; require_extends; require_implements; module_; require_class} = 
+  and to_json_key {declaration; members; implements_; uses; attributes; type_params; require_extends; require_implements; module_; require_class} =
     let fields = [
       ("declaration", TraitDeclaration.to_json declaration);
       ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
@@ -150,7 +150,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", QName.to_json name);
     ] in
@@ -208,7 +208,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; signature; visibility; is_abstract; is_async; is_final; is_static; attributes; type_params; is_readonly_this; readonly_ret} = 
+  and to_json_key {declaration; signature; visibility; is_abstract; is_async; is_final; is_static; attributes; type_params; is_readonly_this; readonly_ret} =
     let fields = [
       ("declaration", MethodDeclaration.to_json declaration);
       ("signature", Signature.to_json signature);
@@ -264,7 +264,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; container} = 
+  and to_json_key {name; container} =
     let fields = [
       ("name", Name.to_json name);
       ("container", ContainerDeclaration.to_json container);
@@ -309,7 +309,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; type_; value; type_info} = 
+  and to_json_key {declaration; type_; value; type_info} =
     let fields = [
       ("declaration", ClassConstDeclaration.to_json declaration);
     ] in
@@ -365,7 +365,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; type_; value; type_info} = 
+  and to_json_key {declaration; type_; value; type_info} =
     let fields = [
       ("declaration", GlobalConstDeclaration.to_json declaration);
       ("value", JSON_String value);
@@ -465,7 +465,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; is_abstract; is_final; members; extends_; implements_; uses; attributes; type_params; module_} = 
+  and to_json_key {declaration; is_abstract; is_final; members; extends_; implements_; uses; attributes; type_params; module_} =
     let fields = [
       ("declaration", ClassDeclaration.to_json declaration);
       ("isAbstract", JSON_Bool is_abstract);
@@ -551,7 +551,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; file; span} = 
+  and to_json_key {declaration; file; span} =
     let fields = [
       ("declaration", Declaration.to_json declaration);
       ("file", Src.File.to_json file);
@@ -591,7 +591,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", QName.to_json name);
     ] in
@@ -631,7 +631,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; namespace_} = 
+  and to_json_key {name; namespace_} =
     let fields = [
       ("name", Name.to_json name);
     ] in
@@ -673,7 +673,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", NamespaceQName.to_json name);
     ] in
@@ -719,7 +719,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; is_transparent; attributes; type_params; module_} = 
+  and to_json_key {declaration; is_transparent; attributes; type_params; module_} =
     let fields = [
       ("declaration", TypedefDeclaration.to_json declaration);
       ("isTransparent", JSON_Bool is_transparent);
@@ -795,7 +795,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; class_name} = 
+  and to_json_key {name; class_name} =
     let fields = [
       ("name", Name.to_json name);
     ] in
@@ -839,7 +839,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; container} = 
+  and to_json_key {name; container} =
     let fields = [
       ("name", Name.to_json name);
       ("container", ContainerDeclaration.to_json container);
@@ -880,7 +880,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {decl; module_} = 
+  and to_json_key {decl; module_} =
     let fields = [
       ("decl", Declaration.to_json decl);
       ("module", ModuleDeclaration.to_json module_);
@@ -921,7 +921,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {to_; from} = 
+  and to_json_key {to_; from} =
     let fields = [
       ("to", Fbthrift.Declaration.to_json to_);
       ("from", Declaration.to_json from);
@@ -964,7 +964,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; file; span} = 
+  and to_json_key {declaration; file; span} =
     let fields = [
       ("declaration", Declaration.to_json declaration);
       ("file", Src.File.to_json file);
@@ -1008,7 +1008,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; parameters; qname} = 
+  and to_json_key {name; parameters; qname} =
     let fields = [
       ("name", Name.to_json name);
       ("parameters", JSON_Array (List.map ~f:(fun x -> JSON_String x) parameters));
@@ -1065,7 +1065,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; type_; visibility; is_final; is_abstract; is_static; attributes; type_info} = 
+  and to_json_key {declaration; type_; visibility; is_final; is_abstract; is_static; attributes; type_info} =
     let fields = [
       ("declaration", PropertyDeclaration.to_json declaration);
       ("visibility", Visibility.to_json visibility);
@@ -1116,7 +1116,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", QName.to_json name);
     ] in
@@ -1156,7 +1156,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {file; declarations} = 
+  and to_json_key {file; declarations} =
     let fields = [
       ("file", Src.File.to_json file);
       ("declarations", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) declarations));
@@ -1197,7 +1197,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; parent} = 
+  and to_json_key {name; parent} =
     let fields = [
       ("name", Name.to_json name);
     ] in
@@ -1243,7 +1243,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {target; file; uses} = 
+  and to_json_key {target; file; uses} =
     let fields = [
       ("target", XRefTarget.to_json target);
       ("file", Src.File.to_json file);
@@ -1285,7 +1285,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {container; inherited_members} = 
+  and to_json_key {container; inherited_members} =
     let fields = [
       ("container", ContainerDeclaration.to_json container);
       ("inheritedMembers", JSON_Array (List.map ~f:(fun x -> MemberCluster.to_json x) inherited_members));
@@ -1326,7 +1326,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {container; child} = 
+  and to_json_key {container; child} =
     let fields = [
       ("container", ContainerDeclaration.to_json container);
       ("child", ContainerDeclaration.to_json child);
@@ -1367,7 +1367,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {target; source} = 
+  and to_json_key {target; source} =
     let fields = [
       ("target", Declaration.to_json target);
       ("source", Declaration.to_json source);
@@ -1410,7 +1410,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {base; derived; annotation} = 
+  and to_json_key {base; derived; annotation} =
     let fields = [
       ("base", MethodDeclaration.to_json base);
       ("derived", MethodDeclaration.to_json derived);
@@ -1455,7 +1455,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name_lowercase; name} = 
+  and to_json_key {name_lowercase; name} =
     let fields = [
       ("nameLowercase", JSON_String name_lowercase);
       ("name", Name.to_json name);
@@ -1494,7 +1494,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", QName.to_json name);
     ] in
@@ -1534,7 +1534,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; container} = 
+  and to_json_key {name; container} =
     let fields = [
       ("name", Name.to_json name);
       ("container", ContainerDeclaration.to_json container);
@@ -1575,7 +1575,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {from; to_} = 
+  and to_json_key {from; to_} =
     let fields = [
       ("from", Name.to_json from);
       ("to", NamespaceQName.to_json to_);
@@ -1616,7 +1616,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {attribute; definition} = 
+  and to_json_key {attribute; definition} =
     let fields = [
       ("attribute", UserAttribute.to_json attribute);
       ("definition", Definition.to_json definition);
@@ -1663,7 +1663,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; type_; kind; attributes; type_info} = 
+  and to_json_key {declaration; type_; kind; attributes; type_info} =
     let fields = [
       ("declaration", TypeConstDeclaration.to_json declaration);
       ("kind", TypeConstKind.to_json kind);
@@ -1711,7 +1711,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {members} = 
+  and to_json_key {members} =
     let fields = [
       ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
     ] in
@@ -1751,7 +1751,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {module_; decl} = 
+  and to_json_key {module_; decl} =
     let fields = [
       ("module", ModuleDeclaration.to_json module_);
       ("decl", Declaration.to_json decl);
@@ -1802,7 +1802,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {file; callee_span; call_args; callee_xref; dispatch_arg; receiver_type; callee_xrefs} = 
+  and to_json_key {file; callee_span; call_args; callee_xref; dispatch_arg; receiver_type; callee_xrefs} =
     let fields = [
       ("file", Src.File.to_json file);
       ("callee_span", Src.ByteSpan.to_json callee_span);
@@ -1857,7 +1857,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; container} = 
+  and to_json_key {name; container} =
     let fields = [
       ("name", Name.to_json name);
       ("container", ContainerDeclaration.to_json container);
@@ -1914,7 +1914,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; enum_base; enum_base_type_info; enum_constraint; enum_constraint_type_info; enumerators; attributes; includes; is_enum_class; module_} = 
+  and to_json_key {declaration; enum_base; enum_base_type_info; enum_constraint; enum_constraint_type_info; enumerators; attributes; includes; is_enum_class; module_} =
     let fields = [
       ("declaration", EnumDeclaration.to_json declaration);
       ("enumBase", Type.to_json enum_base);
@@ -1973,7 +1973,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", QName.to_json name);
     ] in
@@ -2015,7 +2015,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {attribute; declaration; file} = 
+  and to_json_key {attribute; declaration; file} =
     let fields = [
       ("attribute", UserAttribute.to_json attribute);
       ("declaration", Declaration.to_json declaration);
@@ -2059,7 +2059,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; parameter; attribute} = 
+  and to_json_key {name; parameter; attribute} =
     let fields = [
       ("name", Name.to_json name);
       ("parameter", JSON_String parameter);
@@ -2103,7 +2103,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {display_type; xrefs; hint} = 
+  and to_json_key {display_type; xrefs; hint} =
     let fields = [
       ("displayType", Type.to_json display_type);
       ("xrefs", JSON_Array (List.map ~f:(fun x -> XRef.to_json x) xrefs));
@@ -2150,7 +2150,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {derived; base; annotation} = 
+  and to_json_key {derived; base; annotation} =
     let fields = [
       ("derived", MethodDeclaration.to_json derived);
       ("base", MethodDeclaration.to_json base);
@@ -2195,7 +2195,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; attributes} = 
+  and to_json_key {declaration; attributes} =
     let fields = [
       ("declaration", ModuleDeclaration.to_json declaration);
       ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
@@ -2267,7 +2267,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {target; file; uses} = 
+  and to_json_key {target; file; uses} =
     let fields = [
       ("target", XRefTarget.to_json target);
       ("file", Src.File.to_json file);
@@ -2307,7 +2307,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", QName.to_json name);
     ] in
@@ -2347,7 +2347,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {file; xrefs} = 
+  and to_json_key {file; xrefs} =
     let fields = [
       ("file", Src.File.to_json file);
       ("xrefs", JSON_Array (List.map ~f:(fun x -> XRef.to_json x) xrefs));
@@ -2398,7 +2398,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; signature; is_async; attributes; type_params; module_; readonly_ret} = 
+  and to_json_key {declaration; signature; is_async; attributes; type_params; module_; readonly_ret} =
     let fields = [
       ("declaration", FunctionDeclaration.to_json declaration);
       ("signature", Signature.to_json signature);
@@ -2448,7 +2448,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", QName.to_json name);
     ] in
@@ -2492,7 +2492,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {returns; parameters; contexts; returns_type_info} = 
+  and to_json_key {returns; parameters; contexts; returns_type_info} =
     let fields = [
       ("parameters", JSON_Array (List.map ~f:(fun x -> Parameter.to_json x) parameters));
     ] in
@@ -2544,7 +2544,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name; enumeration} = 
+  and to_json_key {name; enumeration} =
     let fields = [
       ("name", Name.to_json name);
       ("enumeration", EnumDeclaration.to_json enumeration);
@@ -2585,7 +2585,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {from; to_} = 
+  and to_json_key {from; to_} =
     let fields = [
       ("from", Declaration.to_json from);
       ("to", Fbthrift.Declaration.to_json to_);
@@ -2636,7 +2636,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; members; extends_; attributes; type_params; require_extends; module_} = 
+  and to_json_key {declaration; members; extends_; attributes; type_params; require_extends; module_} =
     let fields = [
       ("declaration", InterfaceDeclaration.to_json declaration);
       ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
@@ -2714,7 +2714,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {source; target} = 
+  and to_json_key {source; target} =
     let fields = [
       ("source", Declaration.to_json source);
       ("target", Declaration.to_json target);
@@ -2755,7 +2755,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {namespace_; decl} = 
+  and to_json_key {namespace_; decl} =
     let fields = [
       ("namespace_", NamespaceQName.to_json namespace_);
       ("decl", Declaration.to_json decl);
@@ -2796,7 +2796,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {container; parent} = 
+  and to_json_key {container; parent} =
     let fields = [
       ("container", ContainerDeclaration.to_json container);
       ("parent", ContainerDeclaration.to_json parent);
@@ -2874,7 +2874,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; file; span} = 
+  and to_json_key {declaration; file; span} =
     let fields = [
       ("declaration", Declaration.to_json declaration);
       ("file", Src.File.to_json file);
@@ -2914,7 +2914,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {name} = 
+  and to_json_key {name} =
     let fields = [
       ("name", Name.to_json name);
     ] in
@@ -2954,7 +2954,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {decl; namespace_} = 
+  and to_json_key {decl; namespace_} =
     let fields = [
       ("decl", Declaration.to_json decl);
       ("namespace_", NamespaceQName.to_json namespace_);
@@ -2969,7 +2969,7 @@ and Hint: sig
     | Key of key
   [@@deriving ord]
 
-  and key = 
+  and key =
      | Apply of apply
      | Option of Hint.t
      | Like of Hint.t
@@ -3027,7 +3027,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key = 
+  and key =
      | Apply of apply
      | Option of Hint.t
      | Like of Hint.t
@@ -3097,7 +3097,7 @@ end = struct
      | Nothing nothing -> JSON_Object [("nothing", (ignore nothing; JSON_Object []))]
      | Other other -> JSON_Object [("other", Type.to_json other)]
 
-  and vect_or_dict_to_json {maybe_key; value_} = 
+  and vect_or_dict_to_json {maybe_key; value_} =
     let fields = [
       ("value_", Hint.to_json value_);
     ] in
@@ -3107,14 +3107,14 @@ end = struct
       | Some maybe_key -> ("maybe_key", Hint.to_json maybe_key) :: fields in
     JSON_Object fields
 
-  and shape_to_json {open_; map_} = 
+  and shape_to_json {open_; map_} =
     let fields = [
       ("open_", JSON_Bool open_);
       ("map_", JSON_Array (List.map ~f:(fun x -> ShapeKV.to_json x) map_));
     ] in
     JSON_Object fields
 
-  and tuple_to_json {req; opt; variadic} = 
+  and tuple_to_json {req; opt; variadic} =
     let fields = [
       ("req", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) req));
       ("opt", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) opt));
@@ -3125,7 +3125,7 @@ end = struct
       | Some variadic -> ("variadic", Hint.to_json variadic) :: fields in
     JSON_Object fields
 
-  and apply_to_json {class_name; values} = 
+  and apply_to_json {class_name; values} =
     let fields = [
       ("class_name", QName.to_json class_name);
       ("values", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) values));
@@ -3152,7 +3152,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {constraint_kind; type_; type_info} = 
+  let rec to_json {constraint_kind; type_; type_info} =
     let fields = [
       ("constraintKind", ConstraintKind.to_json constraint_kind);
       ("type", Type.to_json type_);
@@ -3180,7 +3180,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {target; ranges} = 
+  let rec to_json {target; ranges} =
     let fields = [
       ("target", XRefTarget.to_json target);
       ("ranges", JSON_Array (List.map ~f:(fun x -> Src.RelByteSpan.to_json x) ranges));
@@ -3204,7 +3204,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {container; name} = 
+  let rec to_json {container; name} =
     let fields = [
       ("container", QName.to_json container);
       ("name", Name.to_json name);
@@ -3214,14 +3214,14 @@ end = struct
 end
 
 and XRefTarget: sig
-  type t = 
+  type t =
      | Declaration of Declaration.t
      | Occurrence of Occurrence.t
   [@@deriving ord]
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
      | Declaration of Declaration.t
      | Occurrence of Occurrence.t
   [@@deriving ord]
@@ -3233,7 +3233,7 @@ end = struct
 end
 
 and Declaration: sig
-  type t = 
+  type t =
      | ClassConst of ClassConstDeclaration.t
      | Container of ContainerDeclaration.t
      | Enumerator of Enumerator.t
@@ -3249,7 +3249,7 @@ and Declaration: sig
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
      | ClassConst of ClassConstDeclaration.t
      | Container of ContainerDeclaration.t
      | Enumerator of Enumerator.t
@@ -3279,14 +3279,14 @@ end = struct
 end
 
 and Argument: sig
-  type t = 
+  type t =
      | Lit of StringLiteral.t
      | Xref of XRefTarget.t
   [@@deriving ord]
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
      | Lit of StringLiteral.t
      | Xref of XRefTarget.t
   [@@deriving ord]
@@ -3298,7 +3298,7 @@ end = struct
 end
 
 and Definition: sig
-  type t = 
+  type t =
      | Class_ of ClassDefinition.t
      | ClassConst of ClassConstDefinition.t
      | Enum_ of EnumDefinition.t
@@ -3315,7 +3315,7 @@ and Definition: sig
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
      | Class_ of ClassDefinition.t
      | ClassConst of ClassConstDefinition.t
      | Enum_ of EnumDefinition.t
@@ -3347,21 +3347,23 @@ end = struct
 end
 
 and Visibility: sig
-  type t = 
+  type t =
     | Private
     | Protected
     | Public
     | Internal
+    | ProtectedInternal
 
   [@@deriving ord]
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
     | Private
     | Protected
     | Public
     | Internal
+    | ProtectedInternal
 
   [@@deriving ord]
 
@@ -3370,17 +3372,18 @@ end = struct
      | Protected -> JSON_Number (string_of_int 1)
      | Public -> JSON_Number (string_of_int 2)
      | Internal -> JSON_Number (string_of_int 3)
+     | ProtectedInternal -> JSON_Number (string_of_int 4)
 
 end
 
 and Occurrence: sig
-  type t = 
+  type t =
      | Method of MethodOccurrence.t
   [@@deriving ord]
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
      | Method of MethodOccurrence.t
   [@@deriving ord]
 
@@ -3390,14 +3393,14 @@ end = struct
 end
 
 and ReadonlyKind: sig
-  type t = 
+  type t =
     | Readonly
 
   [@@deriving ord]
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
     | Readonly
 
   [@@deriving ord]
@@ -3408,7 +3411,7 @@ end = struct
 end
 
 and ContainerDeclaration: sig
-  type t = 
+  type t =
      | Class_ of ClassDeclaration.t
      | Enum_ of EnumDeclaration.t
      | Interface_ of InterfaceDeclaration.t
@@ -3417,7 +3420,7 @@ and ContainerDeclaration: sig
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
      | Class_ of ClassDeclaration.t
      | Enum_ of EnumDeclaration.t
      | Interface_ of InterfaceDeclaration.t
@@ -3433,7 +3436,7 @@ end = struct
 end
 
 and TypeConstKind: sig
-  type t = 
+  type t =
     | Abstract
     | Concrete
     | PartiallyAbstract
@@ -3442,7 +3445,7 @@ and TypeConstKind: sig
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
     | Abstract
     | Concrete
     | PartiallyAbstract
@@ -3457,7 +3460,7 @@ end = struct
 end
 
 and ReifyKind: sig
-  type t = 
+  type t =
     | Erased
     | Reified
     | SoftReified
@@ -3466,7 +3469,7 @@ and ReifyKind: sig
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
     | Erased
     | Reified
     | SoftReified
@@ -3507,7 +3510,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly} = 
+  let rec to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly} =
     let fields = [
       ("name", Name.to_json name);
       ("isInout", JSON_Bool is_inout);
@@ -3541,7 +3544,7 @@ and ShapeKV: sig
     opt: bool;
   }
   [@@deriving ord]
-  and key = 
+  and key =
      | Sf_regex_group of string
      | Sf_lit_string of string
      | Sf_class_const of FieldClassConst.t
@@ -3555,13 +3558,13 @@ end = struct
     opt: bool;
   }
   [@@deriving ord]
-  and key = 
+  and key =
      | Sf_regex_group of string
      | Sf_lit_string of string
      | Sf_class_const of FieldClassConst.t
   [@@deriving ord]
 
-  let rec to_json {key; value; opt} = 
+  let rec to_json {key; value; opt} =
     let fields = [
       ("key", key_to_json key);
       ("value", Hint.to_json value);
@@ -3577,7 +3580,7 @@ end = struct
 end
 
 and Variance: sig
-  type t = 
+  type t =
     | Contravariant
     | Covariant
     | Invariant
@@ -3586,7 +3589,7 @@ and Variance: sig
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
     | Contravariant
     | Covariant
     | Invariant
@@ -3601,7 +3604,7 @@ end = struct
 end
 
 and ConstraintKind: sig
-  type t = 
+  type t =
     | As
     | Equal
     | Super
@@ -3610,7 +3613,7 @@ and ConstraintKind: sig
 
   val to_json : t -> json
 end = struct
-  type t = 
+  type t =
     | As
     | Equal
     | Super
@@ -3645,7 +3648,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {name; variance; reify_kind; constraints; attributes} = 
+  let rec to_json {name; variance; reify_kind; constraints; attributes} =
     let fields = [
       ("name", Name.to_json name);
       ("variance", Variance.to_json variance);
@@ -3672,7 +3675,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {declaration; internal} = 
+  let rec to_json {declaration; internal} =
     let fields = [
       ("declaration", ModuleDeclaration.to_json declaration);
       ("internal", JSON_Bool internal);
@@ -3696,7 +3699,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {span; argument} = 
+  let rec to_json {span; argument} =
     let fields = [
       ("span", Src.RelByteSpan.to_json span);
     ] in
@@ -3707,5 +3710,3 @@ end = struct
     JSON_Object fields
 
 end
-
-

@@ -3902,6 +3902,17 @@ end = struct
     and reasons = lazy [(def_pos, "It is declared as `internal` here")] in
     create ~code:Error_code.InternalMethCaller ~claim ~reasons ()
 
+  let protected_internal_meth_caller use_pos def_pos =
+    let claim =
+      lazy
+        ( use_pos,
+          "You cannot access this method with `meth_caller` (even from the same module and the same class hierarchy)"
+        )
+    and reasons =
+      lazy [(def_pos, "It is declared as `protected internal` here")]
+    in
+    create ~code:Error_code.ProtectedInternalMethCaller ~claim ~reasons ()
+
   let array_cast pos =
     let claim =
       lazy
@@ -5252,6 +5263,8 @@ end = struct
       protected_meth_caller pos decl_pos
     | Internal_meth_caller { pos; decl_pos } ->
       internal_meth_caller pos decl_pos
+    | Protected_internal_meth_caller { pos; decl_pos } ->
+      protected_internal_meth_caller pos decl_pos
     | Array_cast pos -> array_cast pos
     | String_cast { pos; ty_name } -> string_cast pos @@ Lazy.force ty_name
     | Static_outside_class pos -> static_outside_class pos

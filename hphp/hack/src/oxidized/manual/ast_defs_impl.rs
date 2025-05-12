@@ -53,6 +53,7 @@ impl From<Visibility> for naming_error::Visibility {
             Visibility::Private => naming_error::Visibility::Vprivate,
             Visibility::Protected => naming_error::Visibility::Vprotected,
             Visibility::Public => naming_error::Visibility::Vpublic,
+            Visibility::ProtectedInternal => naming_error::Visibility::VprotectedInternal,
         }
     }
 }

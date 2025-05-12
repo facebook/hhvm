@@ -18,6 +18,10 @@ type ce_visibility =
   | Vprotected of string
   (* When we construct `Vinternal`, we are guaranteed to be inside a module *)
   | Vinternal of string
+  | Vprotected_internal of {
+      class_id: string;
+      module_: string;
+    }
 [@@deriving eq, ord, show]
 
 type cross_package_decl = string option
@@ -1518,6 +1522,7 @@ let string_of_visibility : ce_visibility -> string = function
   | Vprivate _ -> "private"
   | Vprotected _ -> "protected"
   | Vinternal _ -> "internal"
+  | Vprotected_internal _ -> "protected internal"
 
 (* Dedicated functions with more easily discoverable names *)
 let compare_locl_ty : ?normalize_lists:bool -> locl_ty -> locl_ty -> int =

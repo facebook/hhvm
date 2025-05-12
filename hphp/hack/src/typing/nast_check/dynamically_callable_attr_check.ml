@@ -54,6 +54,7 @@ let handler =
           | Private -> Naming_error.Vprivate
           | Protected -> Naming_error.Vprotected
           | Internal -> Naming_error.Vinternal
+          | ProtectedInternal -> Naming_error.Vprotected_internal
         in
         Errors.add_error
           Naming_error.(

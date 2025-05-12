@@ -1635,7 +1635,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     .iter()
                     .filter(|x: &S<'a>| is_visibility(x))
                     .collect();
-                if modifiers.len() > 1 {
+                // it is illegal to have multiple visibility modifiers except protected internal or internal protected combinations
+                if modifiers.len() == 2
+                    && ((modifiers[0].is_protected() && modifiers[1].is_internal())
+                        || (modifiers[0].is_internal() && modifiers[1].is_protected()))
+                {
+                    self.check_can_use_feature(
+                        modifiers.last().unwrap(),
+                        &FeatureName::ProtectedInternal,
+                    );
+                } else if modifiers.len() > 1 {
                     self.errors.push(make_error_from_node(
                         modifiers.last().unwrap(),
                         errors::multiple_visibility_modifiers_for_declaration(decl_name),

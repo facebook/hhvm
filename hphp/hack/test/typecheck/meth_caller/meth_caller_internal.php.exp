@@ -1,6 +1,8 @@
-ERROR: File "meth_caller_internal.php", line 3, characters 8-8:
-Unbound name: `A` (a module) (Naming[2049])
-ERROR: File "meth_caller_internal.php", line 9, characters 32-36:
+ERROR: File "meth_caller_internal.php--C.php", line 9, characters 32-36:
 You cannot access this method with `meth_caller` (even from the same module) (Typing[4481])
-  File "meth_caller_internal.php", line 6, characters 21-23:
+  File "meth_caller_internal.php--C.php", line 6, characters 21-23:
   It is declared as `internal` here
+ERROR: File "meth_caller_internal.php--C.php", line 17, characters 32-36:
+You cannot access this method with `meth_caller` (even from the same module and the same class hierarchy) (Typing[4496])
+  File "meth_caller_internal.php--C.php", line 14, characters 31-33:
+  It is declared as `protected internal` here

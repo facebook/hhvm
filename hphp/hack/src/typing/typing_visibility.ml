@@ -284,21 +284,27 @@ let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
     else
       "property"
   in
+  let check_protected x =
+    if is_receiver_interface then
+      Some "You cannot invoke a protected method on an interface"
+    else
+      match Env.get_self_id env with
+      | None -> Some ("You cannot access this " ^ member_ty)
+      | Some self_id -> is_protected_visible env x self_id
+  in
   match vis with
   | Vpublic -> None
   | Vprivate x ->
     (match Env.get_self_id env with
     | None -> Some ("You cannot access this " ^ member_ty)
     | Some self_id -> is_private_visible env x self_id)
-  | Vprotected x ->
-    if is_receiver_interface then
-      Some "You cannot invoke a protected method on an interface"
-    else (
-      match Env.get_self_id env with
-      | None -> Some ("You cannot access this " ^ member_ty)
-      | Some self_id -> is_protected_visible env x self_id
-    )
+  | Vprotected x -> check_protected x
   | Vinternal m -> is_internal_visible env m
+  | Vprotected_internal { class_id; module_ } ->
+    Option.merge
+      (check_protected class_id)
+      (is_internal_visible env module_)
+      ~f:(fun s1 s2 -> s1 ^ "\n" ^ s2)
 
 (* The only permitted way to access an LSB property is via
    static::, ClassName::, or $class_name:: *)
@@ -310,17 +316,24 @@ let is_lsb_permitted cid =
 
 (* LSB property accessibility is relative to the defining class *)
 let is_lsb_accessible env vis =
+  let check_protected x =
+    match Env.get_self_id env with
+    | None -> Some "You cannot access this property"
+    | Some self_id -> is_protected_visible env x self_id
+  in
   match vis with
   | Vpublic -> None
   | Vprivate x ->
     (match Env.get_self_id env with
     | None -> Some "You cannot access this property"
     | Some self_id -> is_private_visible env x self_id)
-  | Vprotected x ->
-    (match Env.get_self_id env with
-    | None -> Some "You cannot access this property"
-    | Some self_id -> is_protected_visible env x self_id)
+  | Vprotected x -> check_protected x
   | Vinternal m -> is_internal_visible env m
+  | Vprotected_internal { class_id; module_ } ->
+    Option.merge
+      (check_protected class_id)
+      (is_internal_visible env module_)
+      ~f:(fun s1 s2 -> s1 ^ "\n" ^ s2)
 
 let is_lsb_visible_for_class env vis cid =
   match is_lsb_permitted cid with
@@ -337,14 +350,8 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
       else
         "property"
     in
-    match vis with
-    | Vpublic -> None
-    | Vprivate x ->
-      (match Env.get_self_id env with
-      | None -> Some ("You cannot access this " ^ member_ty)
-      | Some self_id -> is_private_visible_for_class env x self_id cid cty)
-    | Vprotected x ->
-      (match Env.get_self_id env with
+    let check_protected x =
+      match Env.get_self_id env with
       | None -> Some ("You cannot access this " ^ member_ty)
       | Some self_id ->
         let their_class = Env.get_class env x in
@@ -353,8 +360,21 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
           ->
           Some
             "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
-        | _ -> is_protected_visible env x self_id))
+        | _ -> is_protected_visible env x self_id)
+    in
+    match vis with
+    | Vpublic -> None
+    | Vprivate x ->
+      (match Env.get_self_id env with
+      | None -> Some ("You cannot access this " ^ member_ty)
+      | Some self_id -> is_private_visible_for_class env x self_id cid cty)
+    | Vprotected x -> check_protected x
     | Vinternal m -> is_internal_visible env m
+    | Vprotected_internal { class_id; module_ } ->
+      Option.merge
+        (check_protected class_id)
+        (is_internal_visible env module_)
+        ~f:(fun s1 s2 -> s1 ^ "\n" ^ s2)
 
 let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
@@ -441,6 +461,11 @@ let check_meth_caller_access ~use_pos ~def_pos vis =
     Some
       (primary
       @@ Primary.Internal_meth_caller { decl_pos = def_pos; pos = use_pos })
+  | Vprotected_internal _ ->
+    Some
+      (primary
+      @@ Primary.Protected_internal_meth_caller
+           { decl_pos = def_pos; pos = use_pos })
   | _ -> None
 
 let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =

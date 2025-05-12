@@ -23,6 +23,7 @@ type modifier =
   | Async
   | Inout
   | Internal
+  | ProtectedInternal
 [@@deriving ord, show]
 
 type member_kind =

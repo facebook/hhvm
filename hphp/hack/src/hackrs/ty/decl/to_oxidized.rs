@@ -21,6 +21,10 @@ impl ToOxidized for CeVisibility {
             CeVisibility::Private(v) => O::Vprivate(v.to_oxidized()),
             CeVisibility::Protected(v) => O::Vprotected(v.to_oxidized()),
             CeVisibility::Internal(v) => O::Vinternal(v.to_oxidized()),
+            CeVisibility::ProtectedInternal(ty, m) => O::VprotectedInternal {
+                class_id: ty.to_oxidized(),
+                module__: m.to_oxidized(),
+            },
         }
     }
 }

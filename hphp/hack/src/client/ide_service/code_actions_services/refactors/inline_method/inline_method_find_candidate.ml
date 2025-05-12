@@ -15,7 +15,8 @@ let method_info_create (m : Tast.method_) : T.method_info =
     | Private -> true
     | Public
     | Protected
-    | Internal ->
+    | Internal
+    | ProtectedInternal ->
       false
   in
   let block = m.m_body.fb_ast in

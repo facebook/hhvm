@@ -1051,6 +1051,10 @@ module Primary : sig
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
+    | Protected_internal_meth_caller of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
+      }
     | Array_cast of Pos.t
     | String_cast of {
         pos: Pos.t;

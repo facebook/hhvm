@@ -69,6 +69,7 @@ type feature_name =
   | NoDisjointUnion
   | SimpliHack
   | PolymorphicFunctionHints
+  | ProtectedInternal
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -114,6 +115,7 @@ let feature_name_map =
       ("no_disjoint_union", NoDisjointUnion);
       ("simpli_hack", SimpliHack);
       ("polymorphic_function_hints", PolymorphicFunctionHints);
+      ("protected_internal", ProtectedInternal);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

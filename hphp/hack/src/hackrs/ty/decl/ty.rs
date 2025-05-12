@@ -82,6 +82,7 @@ pub enum CeVisibility {
     Private(TypeName),
     Protected(TypeName),
     Internal(ModuleName),
+    ProtectedInternal(TypeName, ModuleName),
 }
 
 walkable!(CeVisibility => {
@@ -89,6 +90,7 @@ walkable!(CeVisibility => {
     Self::Private(t) => [t],
     Self::Protected(t) => [t],
     Self::Internal(m) => [m],
+    Self::ProtectedInternal(t, m) => [t, m],
 });
 
 // The OCaml type `tshape_field_name` includes positions, but ignores those

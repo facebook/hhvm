@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ccc05a110553401f2ca5a43378e3cdee>>
+// @generated SignedSource<<7d483c1f95c5b6ccd78b33a08befef45>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,6 +45,11 @@ pub enum CeVisibility {
     Vprivate(String),
     Vprotected(String),
     Vinternal(String),
+    #[rust_to_ocaml(name = "Vprotected_internal")]
+    VprotectedInternal {
+        class_id: String,
+        module__: String,
+    },
 }
 
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]

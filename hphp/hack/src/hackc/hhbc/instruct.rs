@@ -271,6 +271,7 @@ pub enum Visibility {
     Public,
     Protected,
     Internal,
+    ProtectedInternal,
 }
 
 impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
@@ -281,6 +282,7 @@ impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
             ast_defs::Visibility::Public => Self::Public,
             ast_defs::Visibility::Protected => Self::Protected,
             ast_defs::Visibility::Internal => Self::Internal,
+            ast_defs::Visibility::ProtectedInternal => Self::ProtectedInternal,
         }
     }
 }
@@ -292,6 +294,7 @@ impl AsRef<str> for Visibility {
             Self::Public => "public",
             Self::Protected => "protected",
             Self::Internal => "internal",
+            Self::ProtectedInternal => "protected internal",
         }
     }
 }
@@ -307,6 +310,7 @@ impl From<Visibility> for hhvm_types_ffi::Attr {
             // modifier on top the others.
             // In order to unblock typechecker, let it be a modifier on top for now.
             Visibility::Internal => Self::AttrInternal | Self::AttrPublic,
+            Visibility::ProtectedInternal => Self::AttrInternal | Self::AttrProtected,
         }
     }
 }

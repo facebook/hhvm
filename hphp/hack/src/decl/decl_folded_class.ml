@@ -343,6 +343,10 @@ let visibility
     (match module_ with
     | Some m -> Vinternal (snd m)
     | None -> Vpublic)
+  | ProtectedInternal ->
+    (match module_ with
+    | Some m -> Vprotected_internal { class_id; module_ = snd m }
+    | None -> Vprotected class_id)
 
 let build_constructor_fun_elt
     ~(ctx : Provider_context.t)
@@ -704,6 +708,9 @@ let method_decl_eager
     | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
       ->
       parent_vis
+    | ( Some ({ elt_visibility = Vprotected_internal { class_id; _ }; _ }, _),
+        ProtectedInternal ) ->
+      visibility class_id c.sc_module m.sm_visibility
     | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
   in
   let support_dynamic_type = sm_support_dynamic_type m in

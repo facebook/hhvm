@@ -800,6 +800,7 @@ fn enum_visibility(x: oxidized_by_ref::ast_defs::Visibility) -> String {
         Visibility::Public => String::from("public"),
         Visibility::Protected => String::from("protected"),
         Visibility::Internal => String::from("internal"),
+        Visibility::ProtectedInternal => String::from("protected internal"),
     }
 }
 

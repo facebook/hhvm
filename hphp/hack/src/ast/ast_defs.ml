@@ -140,6 +140,7 @@ and visibility =
   | Public [@visitors.name "visibility_Public"]
   | Protected [@visitors.name "visibility_Protected"]
   | Internal [@visitors.name "visibility_Internal"]
+  | ProtectedInternal [@visitors.name "visibility_ProtectedInternal"]
 [@@transform.opaque]
 
 (** Literal values that can occur in XHP enum properties.

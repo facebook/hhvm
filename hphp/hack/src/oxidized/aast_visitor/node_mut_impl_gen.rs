@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<152a120fcb5b4c4151ab00e66a6b024f>>
+// @generated SignedSource<<42ca74a45078da7cd54f16e28c1d1b8f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2635,6 +2635,7 @@ impl<P: Params> NodeMut<P> for Visibility {
             Visibility::Public => Ok(()),
             Visibility::Protected => Ok(()),
             Visibility::Internal => Ok(()),
+            Visibility::ProtectedInternal => Ok(()),
         }
     }
 }

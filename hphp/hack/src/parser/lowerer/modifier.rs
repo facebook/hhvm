@@ -20,6 +20,7 @@ pub const VAR: Kind = Kind(1u32 << 7);
 pub const ASYNC: Kind = Kind(1u32 << 8);
 pub const READONLY: Kind = Kind(1u32 << 9);
 pub const INTERNAL: Kind = Kind(1u32 << 10);
+pub const PROTECTED_INTERNAL: Kind = Kind(1u32 << 11);
 
 pub fn from_token_kind(t: TK) -> Option<Kind> {
     match t {
@@ -44,6 +45,7 @@ pub fn to_visibility(kind: Kind) -> Option<Visibility> {
         PRIVATE => Some(Visibility::Private),
         PROTECTED => Some(Visibility::Protected),
         INTERNAL => Some(Visibility::Internal),
+        PROTECTED_INTERNAL => Some(Visibility::ProtectedInternal),
         _ => None,
     }
 }

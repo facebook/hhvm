@@ -683,17 +683,20 @@ let class_elt_is_private_not_lsb (elt : class_elt) : bool =
   | Vprivate _ -> not (get_ce_lsb elt)
   | Vprotected _
   | Vpublic
-  | Vinternal _ ->
+  | Vinternal _
+  | Vprotected_internal _ ->
     false
 
 let class_elt_is_private_or_protected_not_lsb elt =
   match elt.ce_visibility with
   | Vprivate _
   | Vprotected _
+  | Vprotected_internal _
     when get_ce_lsb elt ->
     false
   | Vprivate _
-  | Vprotected _ ->
+  | Vprotected _
+  | Vprotected_internal _ ->
     true
   | Vpublic
   | Vinternal _ ->

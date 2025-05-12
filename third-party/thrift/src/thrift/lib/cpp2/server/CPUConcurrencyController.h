@@ -59,6 +59,7 @@ class CPUConcurrencyController {
   enum class Method : uint8_t {
     MAX_REQUESTS,
     MAX_QPS,
+    CONCURRENCY_LIMIT,
   };
 
   struct Config {
@@ -196,6 +197,8 @@ class CPUConcurrencyController {
   folly::observer::SimpleObservable<std::optional<uint32_t>>
       activeRequestsLimit_{std::nullopt};
   folly::observer::SimpleObservable<std::optional<uint32_t>> qpsLimit_{
+      std::nullopt};
+  folly::observer::SimpleObservable<std::optional<uint32_t>> concurrencyLimit_{
       std::nullopt};
   uint32_t dryRunLimit_{0};
   apache::thrift::server::ServerConfigs& serverConfigs_;

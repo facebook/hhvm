@@ -425,3 +425,10 @@ struct AllowLegacyDeprecatedTerseWritesRef {}
 @scope.Program
 @scope.Structured
 struct EnableCustomTypeOrdering {}
+
+/**
+ * When applied to a service, this annotation will cause the thrift compiler
+ * to generate the method decorator interface for the class.
+ */
+@scope.Service
+struct GenerateServiceMethodDecorator {}

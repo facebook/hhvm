@@ -293,6 +293,17 @@ var (
 
         }
     }()
+    premadeCodecTypeSpec_cpp_GenerateServiceMethodDecorator = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "cpp.GenerateServiceMethodDecorator",
+            CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "cpp.GenerateServiceMethodDecorator",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewGenerateServiceMethodDecorator() },
+},
+
+        }
+    }()
 )
 
 // Premade struct specs
@@ -745,6 +756,20 @@ var (
     },
 }
     }()
+    premadeStructSpec_GenerateServiceMethodDecorator = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
+    Name:                 "GenerateServiceMethodDecorator",
+    ScopedName:           "cpp.GenerateServiceMethodDecorator",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
+    }()
 )
 
 // Premade slice of all struct specs
@@ -772,6 +797,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_DeprecatedTerseWrite)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowLegacyDeprecatedTerseWritesRef)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_EnableCustomTypeOrdering)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateServiceMethodDecorator)
     return fbthriftResults
 }()
 
@@ -803,6 +829,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_DeprecatedTerseWrite.FullName] = premadeCodecTypeSpec_cpp_DeprecatedTerseWrite
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_AllowLegacyDeprecatedTerseWritesRef.FullName] = premadeCodecTypeSpec_cpp_AllowLegacyDeprecatedTerseWritesRef
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_EnableCustomTypeOrdering.FullName] = premadeCodecTypeSpec_cpp_EnableCustomTypeOrdering
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_GenerateServiceMethodDecorator.FullName] = premadeCodecTypeSpec_cpp_GenerateServiceMethodDecorator
     return fbthriftTypeSpecsMap
 }()
 

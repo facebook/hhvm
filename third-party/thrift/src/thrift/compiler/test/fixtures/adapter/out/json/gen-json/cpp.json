@@ -649,6 +649,24 @@
           "column" : 35
         }
       }
+    },
+    "GenerateServiceMethodDecorator" : {
+      "lineno" : 433,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 433,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 434,
+          "column" : 41
+        }
+      }
     }
   }
 }

@@ -2345,6 +2345,78 @@ func (x *EnableCustomTypeOrdering) setDefaults() *EnableCustomTypeOrdering {
     return x
 }
 
+type GenerateServiceMethodDecorator struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*GenerateServiceMethodDecorator)(nil)
+
+func NewGenerateServiceMethodDecorator() *GenerateServiceMethodDecorator {
+    return (&GenerateServiceMethodDecorator{}).setDefaults()
+}
+
+
+
+func (x *GenerateServiceMethodDecorator) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("GenerateServiceMethodDecorator"); err != nil {
+        return thrift.PrependError("GenerateServiceMethodDecorator write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("GenerateServiceMethodDecorator write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("GenerateServiceMethodDecorator write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *GenerateServiceMethodDecorator) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("GenerateServiceMethodDecorator read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("GenerateServiceMethodDecorator field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("GenerateServiceMethodDecorator read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *GenerateServiceMethodDecorator) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *GenerateServiceMethodDecorator) setDefaults() *GenerateServiceMethodDecorator {
+    return x
+}
+
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
@@ -2373,6 +2445,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/cpp/DeprecatedTerseWrite", func() any { return NewDeprecatedTerseWrite() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/AllowLegacyDeprecatedTerseWritesRef", func() any { return NewAllowLegacyDeprecatedTerseWritesRef() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/EnableCustomTypeOrdering", func() any { return NewEnableCustomTypeOrdering() })
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/GenerateServiceMethodDecorator", func() any { return NewGenerateServiceMethodDecorator() })
 
     registry.RegisterType("facebook.com/thrift/annotation/cpp/RefType", func() any { return RefType(0) })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/EnumUnderlyingType", func() any { return EnumUnderlyingType(0) })

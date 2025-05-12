@@ -705,6 +705,23 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 425
+      },
+      "GenerateServiceMethodDecorator" : {
+        "name" : "GenerateServiceMethodDecorator",
+        "structured_annotations": {
+          "scope.Service" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Service",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "When applied to a service, this annotation will cause the thrift compiler\nto generate the method decorator interface for the class.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 433
       }
   },
   "source_path" : "thrift/annotation/cpp",

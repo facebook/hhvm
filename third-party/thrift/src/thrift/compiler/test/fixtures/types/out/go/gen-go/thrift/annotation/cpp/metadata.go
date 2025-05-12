@@ -173,6 +173,12 @@ var (
                 SetName("cpp.EnableCustomTypeOrdering"),
         )
     }()
+    premadeThriftType_cpp_GenerateServiceMethodDecorator = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.GenerateServiceMethodDecorator"),
+        )
+    }()
 )
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -211,6 +217,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.DeprecatedTerseWrite", premadeThriftType_cpp_DeprecatedTerseWrite })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.AllowLegacyDeprecatedTerseWritesRef", premadeThriftType_cpp_AllowLegacyDeprecatedTerseWritesRef })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.EnableCustomTypeOrdering", premadeThriftType_cpp_EnableCustomTypeOrdering })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.GenerateServiceMethodDecorator", premadeThriftType_cpp_GenerateServiceMethodDecorator })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
     for _, value := range thriftTypesWithFullName {

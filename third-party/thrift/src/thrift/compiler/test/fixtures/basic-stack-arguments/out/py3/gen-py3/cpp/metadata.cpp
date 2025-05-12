@@ -38,6 +38,7 @@ namespace cpp {
   ::apache::thrift::detail::md::StructMetadata<DeprecatedTerseWrite>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowLegacyDeprecatedTerseWritesRef>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<EnableCustomTypeOrdering>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<GenerateServiceMethodDecorator>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

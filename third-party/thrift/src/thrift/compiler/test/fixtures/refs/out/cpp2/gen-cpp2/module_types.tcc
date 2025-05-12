@@ -1442,7 +1442,7 @@ uint32_t RecursiveStruct::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("RecursiveStruct");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("mes", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::RecursiveStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_mes);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::RecursiveStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_mes);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

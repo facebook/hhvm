@@ -125,7 +125,7 @@ uint32_t A::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("A");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("some_map", apache::thrift::protocol::T_MAP, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>::serializedSize<false>(*prot_, this->__fbthrift_field_some_map);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>::serializedSize<true>(*prot_, this->__fbthrift_field_some_map);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

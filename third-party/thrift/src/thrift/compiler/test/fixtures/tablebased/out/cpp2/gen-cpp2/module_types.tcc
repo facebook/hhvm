@@ -189,7 +189,7 @@ uint32_t ContainerStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("fieldH", apache::thrift::protocol::T_LIST, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_fieldH);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_fieldH);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

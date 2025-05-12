@@ -3499,7 +3499,7 @@ uint32_t IncompleteMap::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("IncompleteMap");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_MAP, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>>::serializedSize<false>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>>::serializedSize<true>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3704,7 +3704,7 @@ uint32_t CompleteMap::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("CompleteMap");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_MAP, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>>::serializedSize<false>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>>::serializedSize<true>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3909,7 +3909,7 @@ uint32_t IncompleteList::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("IncompleteList");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>>::serializedSize<false>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>>::serializedSize<true>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4114,7 +4114,7 @@ uint32_t CompleteList::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("CompleteList");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>>::serializedSize<false>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>>::serializedSize<true>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4318,7 +4318,7 @@ uint32_t AdaptedList::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("AdaptedList");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<IdentityAdapter<detail::AdaptedListDep>, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::detail::AdaptedListDep>>>>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::list<::apache::thrift::type::adapted<IdentityAdapter<detail::AdaptedListDep>, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::detail::AdaptedListDep>>>>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -4564,7 +4564,7 @@ uint32_t DependentAdaptedList::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("DependentAdaptedList");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<IdentityAdapter<detail::DependentAdaptedListDep>, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>>>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::list<::apache::thrift::type::adapted<IdentityAdapter<detail::DependentAdaptedListDep>, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>>>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

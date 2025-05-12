@@ -1016,11 +1016,11 @@ uint32_t HiddenTypeFieldsStruct::serializedSizeZC(Protocol_ const* prot_) const 
   }
   {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_LIST, 2);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>>(*prot_, this->__fbthrift_field_field2);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::list<::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>>(*prot_, this->__fbthrift_field_field2);
   }
   {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_MAP, 3);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>>>(*prot_, this->__fbthrift_field_field3);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>>>(*prot_, this->__fbthrift_field_field3);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

@@ -33,6 +33,14 @@ union Union {
   1: IOBufPtr foo;
 }
 
+struct Containers {
+  1: optional list<IOBufBinary> bufList;
+  2: optional list<IOBufPtr> bufPtrList;
+  3: optional list<Union> bufPtrUnionList;
+  4: optional set<Union> bufPtrUnionSet;
+  5: optional map<i32, Union> bufPtrUnionMap;
+}
+
 service IOBufPtrTestService {
   IOBufPtr combine(1: Request req);
 }

@@ -901,7 +901,7 @@ uint32_t Person::serializedSizeZC(Protocol_ const* prot_) const {
   }
   if (this->__isset.get(9)) {
     xfer += prot_->serializedFieldSize("vehicles", apache::thrift::protocol::T_LIST, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::Vehicle>>::serializedSize<false>(*prot_, this->__fbthrift_field_vehicles);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::Vehicle>>::serializedSize<true>(*prot_, this->__fbthrift_field_vehicles);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

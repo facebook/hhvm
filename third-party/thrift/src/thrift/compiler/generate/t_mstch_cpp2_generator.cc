@@ -2213,13 +2213,8 @@ class cpp_mstch_field : public mstch_field {
                field_->type().deref(), *field_->default_value());
   }
   mstch::node zero_copy_arg() {
-    switch (field_->get_type()->get_type_value()) {
-      case t_type::type::t_binary:
-      case t_type::type::t_structured:
-        return std::string("true");
-      default:
-        return std::string("false");
-    }
+    return zero_copy_arg_impl(*field_->get_type()) ? std::string("true")
+                                                   : std::string("false");
   }
   mstch::node has_fatal_annotations() {
     return get_fatal_annotations(field_->unstructured_annotations()).size() > 0;
@@ -2284,6 +2279,26 @@ class cpp_mstch_field : public mstch_field {
   }
 
  private:
+  bool zero_copy_arg_impl(const t_type& type) {
+    const auto& true_type = *type.get_true_type();
+    switch (true_type.get_type_value()) {
+      case t_type::type::t_binary:
+      case t_type::type::t_structured:
+        return true;
+      case t_type::type::t_list:
+        return zero_copy_arg_impl(*true_type.as<t_list>().get_elem_type());
+      case t_type::type::t_set:
+        return zero_copy_arg_impl(*true_type.as<t_set>().get_elem_type());
+      case t_type::type::t_map: {
+        const auto& m = true_type.as<t_map>();
+        return zero_copy_arg_impl(*m.get_key_type()) ||
+            zero_copy_arg_impl(*m.get_val_type());
+      }
+      default:
+        return false;
+    }
+  }
+
   bool is_private() const {
     auto req = field_->get_req();
     bool isPrivate = true;

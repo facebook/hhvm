@@ -1411,7 +1411,7 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("mStringMyStruct", apache::thrift::protocol::T_MAP, 19);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>, ::std::map<::std::string, ::cpp2::MyStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_mStringMyStruct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>, ::std::map<::std::string, ::cpp2::MyStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_mStringMyStruct);
   }
   {
     xfer += prot_->serializedFieldSize("mStringBool", apache::thrift::protocol::T_MAP, 20);
@@ -1431,7 +1431,7 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("sMyStruct", apache::thrift::protocol::T_SET, 24);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::cpp2::MyStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_sMyStruct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::cpp2::MyStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_sMyStruct);
   }
   {
     xfer += prot_->serializedFieldSize("sLong", apache::thrift::protocol::T_SET, 25);
@@ -2526,7 +2526,7 @@ uint32_t defaultStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("listStructDFset", apache::thrift::protocol::T_LIST, 17);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::SimpleStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_listStructDFset);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::SimpleStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_listStructDFset);
   }
   {
     xfer += prot_->serializedFieldSize("myUnion", apache::thrift::protocol::T_STRUCT, 18);
@@ -2534,11 +2534,11 @@ uint32_t defaultStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("listUnionDFset", apache::thrift::protocol::T_LIST, 19);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::cpp2::MyUnion>>::serializedSize<false>(*prot_, this->__fbthrift_field_listUnionDFset);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::cpp2::MyUnion>>::serializedSize<true>(*prot_, this->__fbthrift_field_listUnionDFset);
   }
   {
     xfer += prot_->serializedFieldSize("mapNestlistStructDfSet", apache::thrift::protocol::T_MAP, 20);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_mapNestlistStructDfSet);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_mapNestlistStructDfSet);
   }
   {
     xfer += prot_->serializedFieldSize("mapJavaTypeDFset", apache::thrift::protocol::T_MAP, 21);
@@ -4267,7 +4267,7 @@ uint32_t ComplexNestedStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("listOfListOfMyStruct", apache::thrift::protocol::T_LIST, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_listOfListOfMyStruct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_listOfListOfMyStruct);
   }
   {
     xfer += prot_->serializedFieldSize("setOfListOfListOfLong", apache::thrift::protocol::T_SET, 4);
@@ -4279,11 +4279,11 @@ uint32_t ComplexNestedStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("mapStructListOfListOfLong", apache::thrift::protocol::T_MAP, 6);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>, ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>>::serializedSize<false>(*prot_, this->__fbthrift_field_mapStructListOfListOfLong);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>, ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>>::serializedSize<true>(*prot_, this->__fbthrift_field_mapStructListOfListOfLong);
   }
   {
     xfer += prot_->serializedFieldSize("mKeyStructValInt", apache::thrift::protocol::T_MAP, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>, ::std::map<::cpp2::MyStruct, ::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_mKeyStructValInt);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>, ::std::map<::cpp2::MyStruct, ::std::int32_t>>::serializedSize<true>(*prot_, this->__fbthrift_field_mKeyStructValInt);
   }
   {
     xfer += prot_->serializedFieldSize("listOfMapKeyIntValInt", apache::thrift::protocol::T_LIST, 8);
@@ -4291,7 +4291,7 @@ uint32_t ComplexNestedStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("listOfMapKeyStrValList", apache::thrift::protocol::T_LIST, 9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>, ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>>::serializedSize<false>(*prot_, this->__fbthrift_field_listOfMapKeyStrValList);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>, ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>>::serializedSize<true>(*prot_, this->__fbthrift_field_listOfMapKeyStrValList);
   }
   {
     xfer += prot_->serializedFieldSize("mapKeySetValLong", apache::thrift::protocol::T_MAP, 10);
@@ -4315,7 +4315,7 @@ uint32_t ComplexNestedStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("mapKeyIntValList", apache::thrift::protocol::T_MAP, 15);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_mapKeyIntValList);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_mapKeyIntValList);
   }
   {
     xfer += prot_->serializedFieldSize("mapKeyIntValSet", apache::thrift::protocol::T_MAP, 16);
@@ -6513,11 +6513,11 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("Containers");
   {
     xfer += prot_->serializedFieldSize("struct_list", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::MyStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_list);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::MyStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_list);
   }
   {
     xfer += prot_->serializedFieldSize("union_list", apache::thrift::protocol::T_LIST, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::cpp2::MyUnion>>::serializedSize<false>(*prot_, this->__fbthrift_field_union_list);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::cpp2::MyUnion>>::serializedSize<true>(*prot_, this->__fbthrift_field_union_list);
   }
   {
     xfer += prot_->serializedFieldSize("enum_list", apache::thrift::protocol::T_LIST, 3);
@@ -6525,11 +6525,11 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_set", apache::thrift::protocol::T_SET, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::cpp2::MyStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_set);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>, ::std::set<::cpp2::MyStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_set);
   }
   {
     xfer += prot_->serializedFieldSize("union_set", apache::thrift::protocol::T_SET, 5);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::std::set<::cpp2::MyUnion>>::serializedSize<false>(*prot_, this->__fbthrift_field_union_set);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::variant>, ::std::set<::cpp2::MyUnion>>::serializedSize<true>(*prot_, this->__fbthrift_field_union_set);
   }
   {
     xfer += prot_->serializedFieldSize("enum_set", apache::thrift::protocol::T_SET, 6);
@@ -6537,11 +6537,11 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_map", apache::thrift::protocol::T_MAP, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>, ::std::map<::cpp2::MyStruct, ::std::int64_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_map);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>, ::std::map<::cpp2::MyStruct, ::std::int64_t>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_map);
   }
   {
     xfer += prot_->serializedFieldSize("union_map", apache::thrift::protocol::T_MAP, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::variant, ::apache::thrift::type_class::integral>, ::std::map<::cpp2::MyUnion, ::std::int64_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_union_map);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::variant, ::apache::thrift::type_class::integral>, ::std::map<::cpp2::MyUnion, ::std::int64_t>>::serializedSize<true>(*prot_, this->__fbthrift_field_union_map);
   }
   {
     xfer += prot_->serializedFieldSize("enum_map", apache::thrift::protocol::T_MAP, 9);
@@ -6549,11 +6549,11 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_map_2", apache::thrift::protocol::T_MAP, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<::std::int32_t, ::cpp2::MyStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_map_2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<::std::int32_t, ::cpp2::MyStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_map_2);
   }
   {
     xfer += prot_->serializedFieldSize("union_map_2", apache::thrift::protocol::T_MAP, 11);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::variant>, ::std::map<::std::int32_t, ::cpp2::MyUnion>>::serializedSize<false>(*prot_, this->__fbthrift_field_union_map_2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::variant>, ::std::map<::std::int32_t, ::cpp2::MyUnion>>::serializedSize<true>(*prot_, this->__fbthrift_field_union_map_2);
   }
   {
     xfer += prot_->serializedFieldSize("enum_map_2", apache::thrift::protocol::T_MAP, 12);
@@ -6589,7 +6589,7 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("list_list_struct", apache::thrift::protocol::T_LIST, 20);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_list_list_struct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_list_list_struct);
   }
   {
     xfer += prot_->serializedFieldSize("list_set_i32", apache::thrift::protocol::T_LIST, 21);
@@ -6597,7 +6597,7 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("list_set_struct", apache::thrift::protocol::T_LIST, 22);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>>, ::std::vector<::std::set<::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_list_set_struct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>>, ::std::vector<::std::set<::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_list_set_struct);
   }
   {
     xfer += prot_->serializedFieldSize("list_map_i32_i32", apache::thrift::protocol::T_LIST, 23);
@@ -6605,11 +6605,11 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("list_map_i32_struct", apache::thrift::protocol::T_LIST, 24);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>, ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_list_map_i32_struct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>, ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_list_map_i32_struct);
   }
   {
     xfer += prot_->serializedFieldSize("list_map_struct_i32", apache::thrift::protocol::T_LIST, 25);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>::serializedSize<false>(*prot_, this->__fbthrift_field_list_map_struct_i32);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>::serializedSize<true>(*prot_, this->__fbthrift_field_list_map_struct_i32);
   }
   {
     xfer += prot_->serializedFieldSize("set_list_i32", apache::thrift::protocol::T_SET, 26);
@@ -6617,7 +6617,7 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("set_list_struct", apache::thrift::protocol::T_SET, 27);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::set<::std::vector<::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_set_list_struct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::set<::std::vector<::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_set_list_struct);
   }
   {
     xfer += prot_->serializedFieldSize("set_set_i32", apache::thrift::protocol::T_SET, 28);
@@ -6625,7 +6625,7 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("set_set_struct", apache::thrift::protocol::T_SET, 29);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>>, ::std::set<::std::set<::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_set_set_struct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>>, ::std::set<::std::set<::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_set_set_struct);
   }
   {
     xfer += prot_->serializedFieldSize("set_map_i32_i32", apache::thrift::protocol::T_SET, 30);
@@ -6633,11 +6633,11 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("set_map_i32_struct", apache::thrift::protocol::T_SET, 31);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>, ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_set_map_i32_struct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>, ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_set_map_i32_struct);
   }
   {
     xfer += prot_->serializedFieldSize("set_map_struct_i32", apache::thrift::protocol::T_SET, 32);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>, ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>>::serializedSize<false>(*prot_, this->__fbthrift_field_set_map_struct_i32);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>, ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>>::serializedSize<true>(*prot_, this->__fbthrift_field_set_map_struct_i32);
   }
   {
     xfer += prot_->serializedFieldSize("map_i32_map_i32_i32", apache::thrift::protocol::T_MAP, 33);
@@ -6645,11 +6645,11 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("map_i32_map_struct_i32", apache::thrift::protocol::T_MAP, 34);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>, ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>>::serializedSize<false>(*prot_, this->__fbthrift_field_map_i32_map_struct_i32);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>, ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>>::serializedSize<true>(*prot_, this->__fbthrift_field_map_i32_map_struct_i32);
   }
   {
     xfer += prot_->serializedFieldSize("map_i32_map_i32_struct", apache::thrift::protocol::T_MAP, 35);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>>::serializedSize<false>(*prot_, this->__fbthrift_field_map_i32_map_i32_struct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>>::serializedSize<true>(*prot_, this->__fbthrift_field_map_i32_map_i32_struct);
   }
   {
     xfer += prot_->serializedFieldSize("map_i32_map_list_i32_i32", apache::thrift::protocol::T_MAP, 36);
@@ -6657,7 +6657,7 @@ uint32_t Containers::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("map_i32_map_list_struct_i32", apache::thrift::protocol::T_MAP, 37);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>>, ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>>::serializedSize<false>(*prot_, this->__fbthrift_field_map_i32_map_list_struct_i32);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>>, ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>>::serializedSize<true>(*prot_, this->__fbthrift_field_map_i32_map_list_struct_i32);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

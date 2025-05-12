@@ -1550,11 +1550,11 @@ uint32_t Bar::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("structListField", apache::thrift::protocol::T_LIST, 3);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_structListField);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_structListField);
   }
   if (this->__isset.get(3)) {
     xfer += prot_->serializedFieldSize("optionalStructListField", apache::thrift::protocol::T_LIST, 4);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_optionalStructListField);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_optionalStructListField);
   }
   {
     xfer += prot_->serializedFieldSize("unionField", apache::thrift::protocol::T_STRUCT, 5);

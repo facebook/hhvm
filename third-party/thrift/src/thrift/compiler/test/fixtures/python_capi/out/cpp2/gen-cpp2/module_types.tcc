@@ -416,7 +416,7 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("strMappy", apache::thrift::protocol::T_MAP, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_strMappy);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<true>(*prot_, this->__fbthrift_field_strMappy);
   }
   {
     xfer += prot_->serializedFieldSize("intSetty", apache::thrift::protocol::T_SET, 8);
@@ -2327,7 +2327,7 @@ uint32_t ListStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("encoded", apache::thrift::protocol::T_LIST, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::deque<::std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_encoded);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::deque<::std::string>>::serializedSize<true>(*prot_, this->__fbthrift_field_encoded);
   }
   {
     xfer += prot_->serializedFieldSize("uidz", apache::thrift::protocol::T_LIST, 5);
@@ -2347,7 +2347,7 @@ uint32_t ListStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("buf_ptrs", apache::thrift::protocol::T_LIST, 9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::std::vector<::test::fixtures::python_capi::IOBufPtr>>::serializedSize<false>(*prot_, this->__fbthrift_field_buf_ptrs);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::std::vector<::test::fixtures::python_capi::IOBufPtr>>::serializedSize<true>(*prot_, this->__fbthrift_field_buf_ptrs);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2705,11 +2705,11 @@ uint32_t SetStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   if (this->__fbthrift_field_binnaz) {
     xfer += prot_->serializedFieldSize("binnaz", apache::thrift::protocol::T_SET, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::binary>, ::std::set<::std::string>>::serializedSize<false>(*prot_, *this->__fbthrift_field_binnaz);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::binary>, ::std::set<::std::string>>::serializedSize<true>(*prot_, *this->__fbthrift_field_binnaz);
   }
   {
     xfer += prot_->serializedFieldSize("encoded", apache::thrift::protocol::T_SET, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::binary>, std::unordered_set<::std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_encoded);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::binary>, std::unordered_set<::std::string>>::serializedSize<true>(*prot_, this->__fbthrift_field_encoded);
   }
   {
     xfer += prot_->serializedFieldSize("uidz", apache::thrift::protocol::T_SET, 5);
@@ -3149,7 +3149,7 @@ uint32_t MapStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   if (this->__fbthrift_field_binnaz) {
     xfer += prot_->serializedFieldSize("binnaz", apache::thrift::protocol::T_MAP, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::structure>, ::std::map<::std::string, ::test::fixtures::python_capi::PrimitiveStruct>>::serializedSize<false>(*prot_, *this->__fbthrift_field_binnaz);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::structure>, ::std::map<::std::string, ::test::fixtures::python_capi::PrimitiveStruct>>::serializedSize<true>(*prot_, *this->__fbthrift_field_binnaz);
   }
   {
     xfer += prot_->serializedFieldSize("encoded", apache::thrift::protocol::T_MAP, 4);
@@ -3173,7 +3173,7 @@ uint32_t MapStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("buf_map", apache::thrift::protocol::T_MAP, 9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>>::serializedSize<false>(*prot_, this->__fbthrift_field_buf_map);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>>::serializedSize<true>(*prot_, this->__fbthrift_field_buf_map);
   }
   {
     xfer += prot_->serializedFieldSize("unsigned_list_map", apache::thrift::protocol::T_MAP, 10);
@@ -3642,7 +3642,7 @@ uint32_t ComposeStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("friends", apache::thrift::protocol::T_LIST, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::python_capi::DepStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_friends);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::python_capi::DepStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_friends);
   }
   {
     xfer += prot_->serializedFieldSize("serial_union", apache::thrift::protocol::T_STRUCT, 9);
@@ -3983,7 +3983,7 @@ uint32_t Shallot::serializedSizeZC(Protocol_ const* prot_) const {
     {
       xfer += prot_->serializedFieldSize("strMap", apache::thrift::protocol::T_MAP, 9);
       if (value_.strMap) {
-        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, *value_.strMap);
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<true>(*prot_, *value_.strMap);
       } else {
         xfer += prot_->serializedSizeMapBegin(apache::thrift::protocol::T_STRING, apache::thrift::protocol::T_STRING, 0);
         xfer += prot_->serializedSizeMapEnd();

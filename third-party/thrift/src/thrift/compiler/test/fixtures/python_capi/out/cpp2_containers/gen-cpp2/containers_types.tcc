@@ -276,11 +276,11 @@ uint32_t TemplateLists::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("deque_string", apache::thrift::protocol::T_LIST, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::deque<::std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_deque_string);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::deque<::std::string>>::serializedSize<true>(*prot_, this->__fbthrift_field_deque_string);
   }
   {
     xfer += prot_->serializedFieldSize("small_vector_iobuf", apache::thrift::protocol::T_LIST, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::test::fixtures::python_capi::small_vector_iobuf>::serializedSize<false>(*prot_, this->__fbthrift_field_small_vector_iobuf);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, ::test::fixtures::python_capi::small_vector_iobuf>::serializedSize<true>(*prot_, this->__fbthrift_field_small_vector_iobuf);
   }
   {
     xfer += prot_->serializedFieldSize("nested_small_vector", apache::thrift::protocol::T_LIST, 4);
@@ -1307,7 +1307,7 @@ uint32_t IndirectionA::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("IndirectionA");
   {
     xfer += prot_->serializedFieldSize("lst", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrapped>::serializedSize<false>(*prot_, this->__fbthrift_field_lst);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrapped>::serializedSize<true>(*prot_, this->__fbthrift_field_lst);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1429,7 +1429,7 @@ uint32_t IndirectionB::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("IndirectionB");
   {
     xfer += prot_->serializedFieldSize("lst", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::VecOfWrapped>::serializedSize<false>(*prot_, this->__fbthrift_field_lst);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::VecOfWrapped>::serializedSize<true>(*prot_, this->__fbthrift_field_lst);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1551,7 +1551,7 @@ uint32_t IndirectionC::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("IndirectionC");
   {
     xfer += prot_->serializedFieldSize("lst", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrappedAlias>::serializedSize<false>(*prot_, this->__fbthrift_field_lst);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::test::fixtures::python_capi::ListOfWrappedAlias>::serializedSize<true>(*prot_, this->__fbthrift_field_lst);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

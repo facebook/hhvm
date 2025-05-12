@@ -26,12 +26,11 @@
 #include <folly/io/async/AsyncSocket.h>
 
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/test/gen-cpp2/IOBufPtrTestService.h>
 
-namespace thrift {
-namespace test {
-namespace iobufptr {
+namespace thrift::test::iobufptr {
 
 class IOBufPtrTestService
     : public apache::thrift::ServiceHandler<IOBufPtrTestService> {
@@ -148,6 +147,60 @@ TEST(IOBufPtrUnionTest, Union) {
   EXPECT_EQ(bar.foo_ref()->moveToFbString(), "meow");
 }
 
-} // namespace iobufptr
-} // namespace test
-} // namespace thrift
+TEST_F(IOBufPtrTest, ZeroCopyContainers) {
+  auto createBuf = [](size_t n) {
+    auto buf = folly::IOBuf::create(n);
+    buf->append(n);
+    return buf;
+  };
+  apache::thrift::BinaryProtocolWriter writer;
+
+  // TODO(dokwon): Add tests for set and map when the equality is fixed.
+  {
+    Containers s;
+    s.bufList().ensure().push_back(*createBuf(10000));
+    auto ssize = s.serializedSize(&writer);
+    auto szcsize = s.serializedSizeZC(&writer);
+    EXPECT_EQ(ssize, 10013);
+    EXPECT_EQ(szcsize, 13);
+  }
+  {
+    Containers s;
+    s.bufPtrList().ensure().push_back(createBuf(10000));
+    auto ssize = s.serializedSize(&writer);
+    auto szcsize = s.serializedSizeZC(&writer);
+    EXPECT_EQ(ssize, 10013);
+    EXPECT_EQ(szcsize, 13);
+  }
+  {
+    Containers s;
+    s.bufPtrUnionList().ensure().emplace_back().foo_ref().ensure() =
+        *createBuf(10000);
+    auto ssize = s.serializedSize(&writer);
+    auto szcsize = s.serializedSizeZC(&writer);
+    EXPECT_EQ(ssize, 10017);
+    EXPECT_EQ(szcsize, 17);
+  }
+  {
+    Union u;
+    u.foo_ref() = *createBuf(10000);
+    Containers s;
+    s.bufPtrUnionSet().ensure().insert(std::move(u));
+    auto ssize = s.serializedSize(&writer);
+    auto szcsize = s.serializedSizeZC(&writer);
+    EXPECT_EQ(ssize, 10017);
+    EXPECT_EQ(szcsize, 17);
+  }
+  {
+    Union u;
+    u.foo_ref() = *createBuf(10000);
+    Containers s;
+    s.bufPtrUnionMap().ensure().emplace(42, std::move(u));
+    auto ssize = s.serializedSize(&writer);
+    auto szcsize = s.serializedSizeZC(&writer);
+    EXPECT_EQ(ssize, 10022);
+    EXPECT_EQ(szcsize, 22);
+  }
+}
+
+} // namespace thrift::test::iobufptr

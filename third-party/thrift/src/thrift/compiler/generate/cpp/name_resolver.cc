@@ -247,7 +247,7 @@ const std::string& cpp_name_resolver::get_storage_type(
     return native_type;
   }
   return detail::get_or_gen(storage_type_cache_, &field, [&]() {
-    return gen_storage_type(native_type, ref_type, field);
+    return gen_storage_type(native_type, ref_type);
   });
 }
 
@@ -412,18 +412,10 @@ std::string cpp_name_resolver::gen_standard_type(const t_type& node) {
 }
 
 std::string cpp_name_resolver::gen_storage_type(
-    const std::string& native_type,
-    cpp_reference_type& ref_type,
-    const t_field& field) {
-  const std::string* cpp_template =
-      field.find_unstructured_annotation_or_null("cpp.template");
+    const std::string& native_type, cpp_reference_type& ref_type) {
   switch (ref_type) {
     case cpp_reference_type::unique:
-      if (cpp_template != nullptr) {
-        return detail::gen_template_type(*cpp_template, {native_type});
-      } else {
-        return detail::gen_template_type("::std::unique_ptr", {native_type});
-      }
+      return detail::gen_template_type("::std::unique_ptr", {native_type});
     case cpp_reference_type::shared_mutable:
       return detail::gen_template_type("::std::shared_ptr", {native_type});
     case cpp_reference_type::shared_const:

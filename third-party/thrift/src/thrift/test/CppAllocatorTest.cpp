@@ -560,16 +560,6 @@ TEST(CppAllocatorTest, AlwaysThrowAllocatorCppRef) {
   EXPECT_DEATH({ AlwaysThrowCppRefParent parent(alloc); }, "");
 }
 
-TEST(CppAllocatorTest, AlwaysThrowAllocatorCppRefCount) {
-  ScopedCountingAlloc<> alloc;
-  EXPECT_ALLOC(alloc, { CountingCppRefParent parent(alloc); });
-  CountingCppRefParent parent(alloc);
-  // check propagation of allocator for containers with shared_ptr
-  EXPECT_ALLOC(alloc, parent.allocVector_ref()->emplace_back(1));
-  op::getValueOrNull(op::get<ident::uniqueChild>(parent))->value1() = 10;
-  EXPECT_EQ(parent.uniqueChild()->value1(), 10);
-}
-
 TEST(CppAllocatorTest, CopyConstructorPropagatesAllocator) {
   ScopedStatefulAlloc<> alloc(42);
   AAStruct s1(alloc);

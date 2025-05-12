@@ -76,12 +76,6 @@ using AlwaysThrowString =
     std::basic_string<char, std::char_traits<char>, ScopedAlwaysThrowAlloc<>>;
 
 template <class T>
-using AlwaysThrowUniquePtr = std::unique_ptr<
-    T,
-    folly::allocator_delete<
-        std::scoped_allocator_adaptor<AlwaysThrowAllocator<T>>>>;
-
-template <class T>
 struct StatefulAlloc : private std::allocator<T> {
   using value_type = T;
 
@@ -279,8 +273,3 @@ struct PropagateMoveSwapAlloc : public PropagateAllocBase {
   PropagateMoveSwapAlloc& operator=(const PropagateMoveSwapAlloc&) = delete;
   PropagateMoveSwapAlloc& operator=(PropagateMoveSwapAlloc&&) = default;
 };
-
-template <class T>
-using CountingUniquePtr = std::unique_ptr<
-    T,
-    folly::allocator_delete<std::scoped_allocator_adaptor<CountingAlloc<T>>>>;

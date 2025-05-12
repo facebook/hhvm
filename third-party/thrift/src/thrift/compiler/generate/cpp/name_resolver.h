@@ -220,9 +220,7 @@ class cpp_name_resolver {
   std::string gen_standard_type(const t_type& node);
   std::string gen_standard_type(const t_type& node, type_resolve_fn resolve_fn);
   std::string gen_storage_type(
-      const std::string& native_type,
-      cpp_reference_type& ref_type,
-      const t_field&);
+      const std::string& native_type, cpp_reference_type& ref_type);
   std::string gen_container_type(
       const t_container& node,
       type_resolve_fn resolve_fn,

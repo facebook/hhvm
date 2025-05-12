@@ -47,16 +47,18 @@ def deserialize_with_length(klass, buf, cProtocol protocol=cProtocol.COMPACT, *,
     if not isinstance(buf, (IOBuf, bytes, bytearray, memoryview)) and not _is_buffer(buf):
         raise TypeError("buf must be IOBuf, bytes, bytearray, or memoryview")
     cdef IOBuf iobuf = buf if isinstance(buf, IOBuf) else IOBuf(buf)
-    inst = klass.__new__(klass)
     cdef uint32_t length
     try:
         if issubclass(klass, Struct):
+            inst = klass._fbthrift_new()
             length = (<Struct>inst)._deserialize(iobuf, protocol)
             if fully_populate_cache:
                 (<Struct>inst)._fbthrift_fully_populate_cache()
         elif issubclass(klass, Union):
+            inst = klass.__new__(klass)
             length = (<Union>inst)._deserialize(iobuf, protocol)
         else:
+            inst = klass.__new__(klass)
             length = (<GeneratedError>inst)._deserialize(iobuf, protocol)
     except Exception as e:
         raise Error.__new__(Error, *e.args) from None

@@ -857,7 +857,9 @@ cdef class StructTypeInfo(TypeInfoBase):
         raise TypeError(f"{self._class} not supported")
 
     # convert deserialized data to user format
-    cpdef to_python_value(self, object value):
+    cpdef to_python_value(self, value):
+        if value is None:
+            raise TypeError("StructTypeInfo.to_python_value requires valid internal data tuple, not None")
         return self._class._fbthrift_from_internal_data(value)
 
     def to_container_value(self, object value not None):
@@ -1040,8 +1042,8 @@ cdef class StructOrUnion:
 
 def _unpickle_struct(klass, bytes data):
     cdef IOBuf iobuf = IOBuf(data)
-    inst = klass.__new__(klass)
-    (<Struct>inst)._deserialize(iobuf, Protocol.COMPACT)
+    cdef Struct inst = klass._fbthrift_new()
+    inst._deserialize(iobuf, Protocol.COMPACT)
     return inst
 
 cdef api object _get_fbthrift_data(object struct_or_union):
@@ -1093,18 +1095,19 @@ cdef class Struct(StructOrUnion):
                 arguments during initialization.
         """
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        self._initStructTupleWithValues(kwargs)
         self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
 
     def __init__(self, **kwargs):
+        self._initStructTupleWithValues(kwargs)
         self._fbthrift_populate_primitive_fields()
 
     def __call__(self, **kwargs):
         if not kwargs:
             return self
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        tp = type(self)
-        cdef Struct new_inst = tp.__new__(tp)
+        klass = type(self)
+        # NB: optimization opportunity here: pass **kwargs to fbthrift_new
+        cdef Struct new_inst = klass._fbthrift_new()
         not_found = object()
         isset_flags = self._fbthrift_data[0]
 
@@ -1210,8 +1213,8 @@ cdef class Struct(StructOrUnion):
             return <object>cached_value
 
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        field_info = struct_info.fields[index]
-        field_id = field_info.id
+        cdef FieldInfo field_info = struct_info.fields[index]
+        cdef int field_id = field_info.id
         adapter_info = field_info.adapter_info
         data = self._fbthrift_data[index + 1]
         if data is not None:
@@ -1288,7 +1291,7 @@ cdef class Struct(StructOrUnion):
                 field_index = _get_index_if_mangled(struct_info, self, name)
                 if field_index is None:
                     raise TypeError(
-                        f"{type(self)} initialization error: unknown keyword argument "
+                        f"'{type(self).__name__}' initialization error: unknown keyword argument "
                         f"'{name}'."
                     )
 
@@ -1330,11 +1333,28 @@ cdef class Struct(StructOrUnion):
                 struct_info.cpp_obj.get().getStructInfo()
         )
 
+    # Initializes Struct _fbthrift_data from already valid internal `fbthrift_data`
+    # Used for lazy initialization of struct-type field on first access
+    # On completion:
+    #   - iternal data `_fbthrift_data` is valid
+    #   - `_fbthrift_field_cache` contains no cached values
+    #   - primitive attributes are set 
     @classmethod
-    def _fbthrift_from_internal_data(cls, data):
+    def _fbthrift_from_internal_data(cls, tuple fbthrift_data not None):
         cdef Struct inst = cls.__new__(cls)
-        inst._fbthrift_data = data
+        inst._fbthrift_data = fbthrift_data
         inst._fbthrift_populate_primitive_fields()
+        return inst
+
+    # Initializes Struct to partially valid state.
+    # On completion:
+    #   - Struct internal data `_fbthrift_data` is valid
+    #   - Struct `_fbthrift_field_cache` contains no cached values
+    #   - caller is responsible for calling `_fbthrift_populate_primitive_fields`
+    @classmethod
+    def _fbthrift_new(cls, **kwargs):
+        cdef Struct inst = cls.__new__(cls)
+        inst._initStructTupleWithValues(kwargs)
         return inst
 
     @staticmethod
@@ -1460,8 +1480,9 @@ cdef class Union(StructOrUnion):
                 f"'{field_enum.name}': {exc}"
             ) from exc
 
+    # Initializes Union _fbthrift_data from already valid internal `fbthrift_data`
     @classmethod
-    def _fbthrift_from_internal_data(cls, data):
+    def _fbthrift_from_internal_data(cls, tuple data not None):
         cdef Union inst = cls.__new__(cls)
         inst._fbthrift_data = data
         inst._fbthrift_update_current_field_attributes()

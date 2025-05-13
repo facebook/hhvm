@@ -219,6 +219,7 @@ struct node : internal::node_base<node> {
   using base = internal::node_base<node>;
 
   using base::base;
+  /* implicit */ node(const char* s) : base(std::string(s)) {}
   /* implicit */ node(std::string_view sv) : base(std::string(sv)) {}
   /* implicit */ node(std::size_t i);
 

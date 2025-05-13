@@ -1637,7 +1637,7 @@ class cpp_mstch_struct : public mstch_struct {
       }
       throw std::runtime_error("No cpp.allocator_via field \"" + *name + "\"");
     }
-    return std::string();
+    return "";
   }
   mstch::node has_lazy_fields() {
     for (const auto& field : struct_->get_members()) {
@@ -1650,10 +1650,10 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node indexing() { return has_lazy_fields(); }
   mstch::node write_lazy_field_checksum() {
     if (struct_->has_structured_annotation(kCppDisableLazyChecksumUri)) {
-      return std::string("false");
+      return "false";
     }
 
-    return std::string("true");
+    return "true";
   }
   mstch::node has_isset_fields() {
     for (const auto& field : struct_->fields()) {
@@ -2155,10 +2155,10 @@ class cpp_mstch_field : public mstch_field {
             kCppFieldInterceptorUri)) {
       if (annotation->get_value_from_structured_annotation_or_null(
               "noinline")) {
-        return std::string("FOLLY_NOINLINE");
+        return "FOLLY_NOINLINE";
       }
     }
-    return std::string("FOLLY_ERASE");
+    return "FOLLY_ERASE";
   }
 
   mstch::node cpp_adapter() {
@@ -2213,8 +2213,7 @@ class cpp_mstch_field : public mstch_field {
                field_->type().deref(), *field_->default_value());
   }
   mstch::node zero_copy_arg() {
-    return zero_copy_arg_impl(*field_->get_type()) ? std::string("true")
-                                                   : std::string("false");
+    return zero_copy_arg_impl(*field_->get_type()) ? "true" : "false";
   }
   mstch::node has_fatal_annotations() {
     return get_fatal_annotations(field_->unstructured_annotations()).size() > 0;
@@ -2227,20 +2226,18 @@ class cpp_mstch_field : public mstch_field {
   mstch::node fatal_required_qualifier() {
     switch (field_->get_req()) {
       case t_field::e_req::required:
-        return std::string("required");
+        return "required";
       case t_field::e_req::optional:
-        return std::string("optional");
+        return "optional";
       case t_field::e_req::opt_in_req_out:
-        return std::string("required_of_writer");
+        return "required_of_writer";
       case t_field::e_req::terse:
-        return std::string("terse");
+        return "terse";
     }
     throw std::runtime_error("unknown required qualifier");
   }
 
-  mstch::node visibility() {
-    return std::string(is_private() ? "private" : "public");
-  }
+  mstch::node visibility() { return is_private() ? "private" : "public"; }
 
   mstch::node metadata_name() {
     auto key = field_->get_key();

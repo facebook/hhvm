@@ -85,6 +85,30 @@ final class ThriftContextPropStateTest extends WWWTest {
 
   }
 
+  public function testOfflineJobLocalContext(): void {
+    $tcps = ThriftContextPropState::get();
+
+    $tcps->setOfflineJobLocalContext(
+      Gojira_OfflineJobLocalContext::withDefaultValues(),
+    );
+    expect($tcps->getOfflineJobLocalContext())->toNotBeNull();
+    expect($tcps->getOfflineJobLocalContext()?->platformRunId)->toBeNull();
+    expect($tcps->getOfflineJobLocalContext()?->anchorInstanceId)->toBeNull();
+    expect($tcps->getOfflineJobLocalContext()?->leafRunId)->toBeNull();
+
+    // override existing value
+    $offline_job_local_context = new Gojira_OfflineJobLocalContext(
+      Gojira_PlatformRunId::withDefaultValues(),
+      Gojira_AnchorInstanceId::withDefaultValues(),
+      Gojira_LeafRunId::withDefaultValues(),
+    );
+    $tcps->setOfflineJobLocalContext($offline_job_local_context);
+    expect($tcps->getOfflineJobLocalContext()?->platformRunId)->toNotBeNull();
+    expect($tcps->getOfflineJobLocalContext()?->anchorInstanceId)
+      ->toNotBeNull();
+    expect($tcps->getOfflineJobLocalContext()?->leafRunId)->toNotBeNull();
+  }
+
   public function testBaggage(): void {
     $tcps = ThriftContextPropState::get();
     $tcps->clear();

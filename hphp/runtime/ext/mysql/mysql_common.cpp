@@ -19,12 +19,9 @@
 
 #include <algorithm>
 #include <cassert>
-#include <unordered_set>
 #include <vector>
 
 #include <folly/Conv.h>
-#include <folly/ScopeGuard.h>
-#include <folly/String.h>
 #include <folly/portability/Sockets.h>
 
 #include "hphp/util/network.h"
@@ -41,13 +38,11 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
 
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
-#include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/server/server-stats.h"
 

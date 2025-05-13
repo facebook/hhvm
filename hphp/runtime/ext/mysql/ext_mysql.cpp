@@ -17,7 +17,6 @@
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 
 #include <folly/ScopeGuard.h>
-#include <folly/String.h>
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -26,7 +25,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

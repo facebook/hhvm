@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/server/writer.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/stats.h"

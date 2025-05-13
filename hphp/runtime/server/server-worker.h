@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
-#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/configs/debug.h"
 #include "hphp/util/job-queue.h"
@@ -79,6 +79,13 @@ struct ServerWorker
 protected:
 
   virtual void doJobImpl(JobPtr job, bool abort) {
+    ThreadHint::getInstance().updateThreadHint(
+      ThreadHint::Priority::Processing);
+    SCOPE_EXIT {
+      ThreadHint::getInstance().updateThreadHint(
+          ThreadHint::Priority::Idling);
+    };
+
     TransportTraits traits(job, this->m_context, this->m_id);
     Server *server = traits.getServer();
     Transport *transport = traits.getTransport();

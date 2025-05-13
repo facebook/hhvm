@@ -218,6 +218,10 @@ inline pid_t GetThreadPid() {
   return syscall(SYS_gettid);
 }
 
+inline int PidfdOpen(pid_t tid, int flags) {
+  return syscall(SYS_pidfd_open, tid, flags);
+}
+
 /**
  * Are we in the main thread still?
  */

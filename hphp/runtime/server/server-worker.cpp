@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/server-worker.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/timer.h"
 
 namespace HPHP {

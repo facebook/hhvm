@@ -120,7 +120,7 @@ public:
   static void SetThreadIOStatus(const char* name, const char* addr,
                                 int64_t usWallTime = -1);
   static Array GetThreadIOStatuses();
-  
+
 public:
   ServerStats();
   ~ServerStats();

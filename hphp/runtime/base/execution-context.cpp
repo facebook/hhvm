@@ -61,6 +61,7 @@
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
@@ -695,6 +696,9 @@ void ExecutionContext::onShutdownPreSend() {
 }
 
 void ExecutionContext::onShutdownPostSend() {
+  ThreadHint::getInstance().updateThreadHint(
+    ThreadHint::Priority::PostProcessing);
+
   // When host is OOMing, abort abruptly.
   if (RID().shouldOOMAbort()) return;
 

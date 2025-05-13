@@ -47,7 +47,7 @@ class ParseURL {
     return ParseURL(urlVal, strict);
   }
 
-  static bool isSupportedScheme(const std::string& location);
+  static bool isSupportedScheme(folly::StringPiece location);
 
   static folly::Optional<std::string> getRedirectDestination(
       folly::StringPiece url,

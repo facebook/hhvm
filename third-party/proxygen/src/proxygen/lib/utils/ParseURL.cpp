@@ -70,10 +70,10 @@ bool ParseURL::isSupportedScheme(const std::string& location) {
 }
 
 folly::Optional<std::string> ParseURL::getRedirectDestination(
-    const std::string& url,
-    const std::string& requestScheme,
-    const std::string& location,
-    const std::string& headerHost) noexcept {
+    folly::StringPiece url,
+    folly::StringPiece requestScheme,
+    folly::StringPiece location,
+    folly::StringPiece headerHost) noexcept {
   auto newUrl = ParseURL::parseURL(location);
   if (!newUrl) {
     DLOG(INFO) << "Unparsable location header=" << location;

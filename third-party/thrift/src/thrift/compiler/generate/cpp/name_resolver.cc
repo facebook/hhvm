@@ -82,7 +82,7 @@ const std::string& cpp_name_resolver::get_native_type(
   }
 
   // If @cpp.Adapter is used on typedef of the field, use the typedef name.
-  if (const auto* typedf = dynamic_cast<const t_typedef*>(&type)) {
+  if (const auto* typedf = type.try_as<t_typedef>()) {
     if (find_structured_adapter_annotation(*typedf)) {
       return get_namespaced_name(*typedf);
     }
@@ -391,7 +391,7 @@ std::string cpp_name_resolver::gen_standard_type(const t_type& node) {
     return *type;
   }
 
-  if (const auto* ttypedef = dynamic_cast<const t_typedef*>(&node)) {
+  if (const auto* ttypedef = node.try_as<t_typedef>()) {
     // Traverse the typedef.
     // TODO(afuller): Always traverse the adapter. There are some cpp.type and
     // cpp.template annotations that rely on the namespacing of the typedef to
@@ -435,20 +435,19 @@ std::string cpp_name_resolver::gen_storage_type(
 std::string cpp_name_resolver::gen_standard_type(
     const t_type& node, type_resolve_fn resolve_fn) {
   // Base types have fixed type mappings.
-  if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(&node)) {
+  if (const auto* tbase_type = node.try_as<t_primitive_type>()) {
     return default_type(tbase_type->primitive_type());
   }
 
   // Containers have fixed template mappings.
-  if (const auto* tcontainer = dynamic_cast<const t_container*>(&node)) {
+  if (const auto* tcontainer = node.try_as<t_container>()) {
     return gen_container_type(*tcontainer, resolve_fn);
   }
 
   // If there's a template annotation on a typedef we have to pass it to the
   // underlying container type.
   if (const auto* templte = find_template(node)) {
-    if (const auto* tcontainer =
-            dynamic_cast<const t_container*>(node.get_true_type())) {
+    if (const auto* tcontainer = node.get_true_type()->try_as<t_container>()) {
       return gen_container_type(*tcontainer, resolve_fn, templte);
     }
   }
@@ -469,15 +468,13 @@ std::string cpp_name_resolver::gen_container_type(
     case t_container::type::t_list:
       return detail::gen_template_type(
           template_name,
-          {resolve(
-              resolve_fn, *static_cast<const t_list&>(node).get_elem_type())});
+          {resolve(resolve_fn, *node.as<t_list>().get_elem_type())});
     case t_container::type::t_set:
       return detail::gen_template_type(
           template_name,
-          {resolve(
-              resolve_fn, *static_cast<const t_set&>(node).get_elem_type())});
+          {resolve(resolve_fn, *node.as<t_set>().get_elem_type())});
     case t_container::type::t_map: {
-      const auto& tmap = static_cast<const t_map&>(node);
+      const auto& tmap = node.as<t_map>();
       return detail::gen_template_type(
           template_name,
           {resolve(resolve_fn, *tmap.get_key_type()),
@@ -515,7 +512,7 @@ std::string cpp_name_resolver::gen_adapted_type(
 
 std::string cpp_name_resolver::gen_type_tag(const t_type& type) {
   std::string tag = type.is_typedef()
-      ? gen_type_tag(*static_cast<const t_typedef&>(type).get_type())
+      ? gen_type_tag(*type.as<t_typedef>().get_type())
       : gen_thrift_type_tag(type);
 
   if (cpp_name_resolver::find_type(type) ||
@@ -571,17 +568,17 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
   } else if (type.is_binary()) {
     return ns + "binary_t";
   } else if (type.is_list()) {
-    auto& list = dynamic_cast<const t_list&>(type);
+    auto& list = type.as<t_list>();
     auto& elem = *list.get_elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "list<" + elem_tag + ">";
   } else if (type.is_set()) {
-    auto& set = dynamic_cast<const t_set&>(type);
+    auto& set = type.as<t_set>();
     auto& elem = *set.get_elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "set<" + elem_tag + ">";
   } else if (type.is_map()) {
-    auto& map = dynamic_cast<const t_map&>(type);
+    auto& map = type.as<t_map>();
     auto& key = *map.get_key_type();
     auto& val = *map.get_val_type();
     auto key_tag = gen_type_tag(key);

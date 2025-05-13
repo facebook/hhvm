@@ -267,8 +267,8 @@ void CompletionsCommand::addMemberCompletions(
   // Don't execute the evaluation if the input string looks like it might
   // contain a function call. This could have side effects we don't want to
   // cause during auto complete suggestions and it's better to be safe here.
-  if (context.matchContext.find("(") != std::string::npos ||
-      context.matchContext.find(")") != std::string::npos ||
+  if (context.matchContext.find('(') != std::string::npos ||
+      context.matchContext.find(')') != std::string::npos ||
       trimString(context.matchContext).size() == 0) {
 
     return;

@@ -145,7 +145,7 @@ std::string VSCommand::trimString(const std::string str) {
 }
 
 std::string VSCommand::removeVariableNamePrefix(const std::string& str) {
-  if (str.find("$") == 0) {
+  if (str.find('$') == 0) {
     return str.substr(1);
   } else if (str.find("::$") == 0) {
     return str.substr(3);

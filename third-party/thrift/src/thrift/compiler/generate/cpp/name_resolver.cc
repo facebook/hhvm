@@ -81,13 +81,6 @@ const std::string& cpp_name_resolver::get_native_type(
     });
   }
 
-  // If @cpp.Adapter is used on typedef of the field, use the typedef name.
-  if (const auto* typedf = type.try_as<t_typedef>()) {
-    if (find_structured_adapter_annotation(*typedf)) {
-      return get_namespaced_name(*typedf);
-    }
-  }
-
   return get_native_type(type);
 }
 

@@ -30,7 +30,7 @@ const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
 
 } // namespace
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 
 bool CompressionSimulator::readInputFromFileAndSchedule(
     const string& filename) {
@@ -400,4 +400,4 @@ std::chrono::milliseconds CompressionSimulator::extraDelay() {
 uint32_t CompressionSimulator::minOOOThresh() {
   return params_.minOOOThresh;
 }
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

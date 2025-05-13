@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/codec/compress/QPACKCodec.h>
 #include <proxygen/lib/http/codec/compress/experimental/simulator/CompressionScheme.h>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 
 class QPACKScheme : public CompressionScheme {
  public:
@@ -176,4 +176,4 @@ class QPACKScheme : public CompressionScheme {
   uint16_t recvAck_{1};
 };
 
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

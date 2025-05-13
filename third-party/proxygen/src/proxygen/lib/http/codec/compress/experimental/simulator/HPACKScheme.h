@@ -13,7 +13,7 @@
 #include <proxygen/lib/http/codec/compress/experimental/simulator/CompressionScheme.h>
 #include <proxygen/lib/http/codec/compress/experimental/simulator/HPACKQueue.h>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 
 /**
  * Compression scheme for HPACK with a prepended sequence number
@@ -84,4 +84,4 @@ class HPACKScheme : public CompressionScheme {
   HPACKQueue serverQueue_{server_};
   bool allowOOO_{false};
 };
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

@@ -14,7 +14,7 @@
 #include <proxygen/lib/http/codec/compress/HPACKStreamingCallback.h>
 #include <proxygen/lib/http/codec/compress/HeaderCodec.h>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 class SimStreamingCallback : public HPACK::StreamingCallback {
  public:
   SimStreamingCallback(uint16_t index,
@@ -103,4 +103,4 @@ class SimStreamingCallback : public HPACK::StreamingCallback {
   bool acknowledge{false};
 };
 
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

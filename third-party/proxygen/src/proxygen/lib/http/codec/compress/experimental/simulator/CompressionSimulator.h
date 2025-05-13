@@ -17,7 +17,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 
 class CompressionSimulator {
  public:
@@ -71,4 +71,4 @@ class CompressionSimulator {
       static_cast<folly::Random::DefaultGenerator::result_type>(params_.seed)};
   SimStats stats_;
 };
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

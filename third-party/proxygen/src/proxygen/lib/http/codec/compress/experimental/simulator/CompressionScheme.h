@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/codec/compress/experimental/simulator/CompressionTypes.h>
 #include <proxygen/lib/http/codec/compress/experimental/simulator/SimStreamingCallback.h>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 
 class CompressionSimulator;
 
@@ -83,4 +83,4 @@ class CompressionScheme : public folly::EventBase::LoopCallback {
   CompressionSimulator* simulator_;
 };
 
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

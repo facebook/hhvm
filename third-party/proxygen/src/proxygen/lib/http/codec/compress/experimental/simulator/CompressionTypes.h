@@ -10,7 +10,7 @@
 
 #include <chrono>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 enum class SchemeType { QPACK, QMIN, HPACK };
 
 // Metadata about encoded blocks.  In a real stack, these might be
@@ -47,4 +47,4 @@ struct SimStats {
   uint64_t compressed{0};
   uint64_t packets{0};
 };
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

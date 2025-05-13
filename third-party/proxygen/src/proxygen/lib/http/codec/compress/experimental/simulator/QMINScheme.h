@@ -118,7 +118,7 @@ struct stream {
   size_t sm_read_off;
 };
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 class QMINScheme : public CompressionScheme {
  public:
   static struct stream_chunk *stream_chunk_new(size_t off,
@@ -464,4 +464,4 @@ class QMINScheme : public CompressionScheme {
     unsigned char buf[0x1000];
   } qms_ctl[2]; /* 0: enc-to-dec; 1: dec-to-enc */
 };
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

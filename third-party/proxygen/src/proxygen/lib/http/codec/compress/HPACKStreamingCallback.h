@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/codec/compress/HPACKHeaderName.h>
 #include <proxygen/lib/http/codec/compress/HeaderCodec.h>
 
-namespace proxygen { namespace HPACK {
+namespace proxygen::HPACK {
 class StreamingCallback {
  public:
   virtual ~StreamingCallback() {
@@ -26,4 +26,4 @@ class StreamingCallback {
   HeaderCodec::Stats* stats{nullptr};
 };
 
-}} // namespace proxygen::HPACK
+} // namespace proxygen::HPACK

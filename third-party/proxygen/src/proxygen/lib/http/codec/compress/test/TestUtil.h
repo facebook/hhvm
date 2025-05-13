@@ -17,7 +17,7 @@
 #include <proxygen/lib/http/codec/compress/QPACKEncoder.h>
 #include <string>
 
-namespace proxygen { namespace hpack {
+namespace proxygen::hpack {
 
 void dumpToFile(const std::string& filename, const folly::IOBuf* buf);
 
@@ -92,4 +92,4 @@ class TestHeaderCodecStats : public HeaderCodec::Stats {
   uint32_t tooLarge{0};
 };
 
-}} // namespace proxygen::hpack
+} // namespace proxygen::hpack

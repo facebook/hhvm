@@ -21,9 +21,9 @@ class IOBuf;
 class IOBufQueue;
 } // namespace folly
 
-namespace folly { namespace io {
+namespace folly::io {
 class Cursor;
-}} // namespace folly::io
+} // namespace folly::io
 
 namespace proxygen {
 

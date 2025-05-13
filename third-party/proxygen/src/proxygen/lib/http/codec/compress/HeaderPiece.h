@@ -14,7 +14,7 @@
 
 #include <folly/Range.h>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 
 /**
  * in-place representation of a header name or value
@@ -57,4 +57,4 @@ class HeaderPiece {
 
 using HeaderPieceList = std::deque<HeaderPiece>;
 
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

@@ -11,7 +11,7 @@
 #include <iosfwd>
 #include <stdint.h>
 
-namespace proxygen { namespace HPACK {
+namespace proxygen::HPACK {
 
 struct Instruction {
   uint8_t code;
@@ -91,4 +91,4 @@ enum class DecodeError : uint8_t {
 };
 
 std::ostream& operator<<(std::ostream& os, DecodeError err);
-}} // namespace proxygen::HPACK
+} // namespace proxygen::HPACK

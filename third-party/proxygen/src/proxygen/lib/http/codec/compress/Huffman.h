@@ -14,7 +14,7 @@
 #include <proxygen/lib/http/codec/compress/HPACKConstants.h>
 #include <string>
 
-namespace proxygen { namespace huffman {
+namespace proxygen::huffman {
 
 // size of the huffman tables (codes and bits)
 const uint32_t kTableSize = 256;
@@ -159,4 +159,4 @@ class HuffTree {
 
 const HuffTree& huffTree();
 
-}} // namespace proxygen::huffman
+} // namespace proxygen::huffman

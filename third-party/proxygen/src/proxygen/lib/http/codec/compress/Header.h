@@ -11,7 +11,7 @@
 #include <proxygen/lib/http/HTTPHeaders.h>
 #include <string>
 
-namespace proxygen { namespace compress {
+namespace proxygen::compress {
 
 /**
  * Helper structure used when serializing the uncompressed
@@ -48,4 +48,4 @@ struct Header {
   }
 };
 
-}} // namespace proxygen::compress
+} // namespace proxygen::compress

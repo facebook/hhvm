@@ -22,7 +22,7 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
-namespace proxygen { namespace hpack {
+namespace proxygen::hpack {
 
 void dumpToFile(const string& filename, const IOBuf* buf) {
   ofstream outfile(filename, ofstream::binary);
@@ -123,4 +123,4 @@ vector<compress::Header> basicHeaders() {
   return headers;
 }
 
-}} // namespace proxygen::hpack
+} // namespace proxygen::hpack

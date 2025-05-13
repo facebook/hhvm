@@ -14,7 +14,7 @@
 
 using std::pair;
 
-namespace proxygen { namespace huffman {
+namespace proxygen::huffman {
 
 // These constants were decided upon empirically
 constexpr static uint32_t kHuffmanDecodeSpaceNumerator = 3;
@@ -273,4 +273,4 @@ const HuffTree& huffTree() {
   return *huffTree;
 }
 
-}} // namespace proxygen::huffman
+} // namespace proxygen::huffman

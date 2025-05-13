@@ -23,17 +23,19 @@ from datetime import datetime
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
-from thrift.python.mutable_types import MutableStructOrUnion
+from thrift.python.mutable_types import MutableStructOrUnion, to_thrift_list
 
 from thrift.python.types import StructOrUnion as ImmutableStructOrUnion
 
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (
+    DefaultFieldUnion as DefaultFieldUnionMutable,
     TestStruct as TestStructMutable,
     TestUnion as TestUnionMutable,
     TestUnionAdaptedTypes as TestUnionAdaptedTypesMutable,
 )
 
 from thrift.test.thrift_python.union_test.thrift_types import (
+    DefaultFieldUnion as DefaultFieldUnionImmutable,
     TestStruct as TestStructImmutable,
     TestUnion as TestUnionImmutable,
     TestUnionAdaptedTypes as TestUnionAdaptedTypesImmutable,
@@ -637,6 +639,36 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
                 exec_body=lambda ns: ns.update(_fbthrift_SPEC=()),
             )
 
+    def test_union_default(self) -> None:
+        def assert_roundtrip(
+            u: DefaultFieldUnionImmutable, which: DefaultFieldUnionImmutable.Type
+        ) -> None:
+            roundtrip = immutable_serializer.deserialize(
+                DefaultFieldUnionImmutable, immutable_serializer.serialize(u)
+            )
+            self.assertEqual(u, roundtrip)
+            self.assertEqual(roundtrip.type, which)
+
+        assert_roundtrip(
+            DefaultFieldUnionImmutable(), DefaultFieldUnionImmutable.Type.EMPTY
+        )
+        assert_roundtrip(
+            DefaultFieldUnionImmutable(default_int=1),
+            DefaultFieldUnionImmutable.Type.default_int,
+        )
+        assert_roundtrip(
+            DefaultFieldUnionImmutable(useless_int_default=0),
+            DefaultFieldUnionImmutable.Type.useless_int_default,
+        )
+        assert_roundtrip(
+            DefaultFieldUnionImmutable(default_list=[1]),
+            DefaultFieldUnionImmutable.Type.default_list,
+        )
+        assert_roundtrip(
+            DefaultFieldUnionImmutable(useless_list_default=[1]),
+            DefaultFieldUnionImmutable.Type.useless_list_default,
+        )
+
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def setUp(self) -> None:
@@ -1176,3 +1208,35 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
                 self.assertEqual(string_field, "world!")
             case _:
                 self.fail("Expected match, got none.")
+
+    def test_union_default(self) -> None:
+        def assert_roundtrip(
+            u: DefaultFieldUnionMutable,
+            which: DefaultFieldUnionMutable.FbThriftUnionFieldEnum,
+        ) -> None:
+            roundtrip = mutable_serializer.deserialize(
+                DefaultFieldUnionMutable, mutable_serializer.serialize(u)
+            )
+            self.assertEqual(u, roundtrip)
+            self.assertEqual(roundtrip.fbthrift_current_field, which)
+
+        assert_roundtrip(
+            DefaultFieldUnionMutable(),
+            DefaultFieldUnionMutable.FbThriftUnionFieldEnum.EMPTY,
+        )
+        assert_roundtrip(
+            DefaultFieldUnionMutable(default_int=1),
+            DefaultFieldUnionMutable.FbThriftUnionFieldEnum.default_int,
+        )
+        assert_roundtrip(
+            DefaultFieldUnionMutable(useless_int_default=0),
+            DefaultFieldUnionMutable.FbThriftUnionFieldEnum.useless_int_default,
+        )
+        assert_roundtrip(
+            DefaultFieldUnionMutable(default_list=to_thrift_list([1])),
+            DefaultFieldUnionMutable.FbThriftUnionFieldEnum.default_list,
+        )
+        assert_roundtrip(
+            DefaultFieldUnionMutable(useless_list_default=to_thrift_list([1])),
+            DefaultFieldUnionMutable.FbThriftUnionFieldEnum.useless_list_default,
+        )

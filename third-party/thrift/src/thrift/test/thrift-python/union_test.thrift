@@ -88,3 +88,10 @@ union TestUnionAdaptedTypes {
 
   3: i32 non_adapted_i32;
 }
+
+union DefaultFieldUnion {
+  1: i32 default_int = 1;
+  2: i32 useless_int_default = 0;
+  4: list<i32> default_list = [1];
+  5: list<i32> useless_list_default = [];
+}

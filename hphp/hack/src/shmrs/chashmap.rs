@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::AllocError;
-use std::alloc::Allocator;
-use std::alloc::Layout;
 use std::hash::BuildHasher;
 use std::hash::Hash;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
+
+use allocator_api2::alloc::AllocError;
+use allocator_api2::alloc::Allocator;
+use allocator_api2::alloc::Layout;
 
 use crate::filealloc::FileAlloc;
 use crate::hash_builder::ShmrsHashBuilder;

@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::AllocError;
-use std::alloc::Allocator;
-use std::alloc::Layout;
 use std::ptr::NonNull;
+
+use allocator_api2::alloc::AllocError;
+use allocator_api2::alloc::Allocator;
+use allocator_api2::alloc::Layout;
 
 use crate::filealloc::FileAlloc;
 use crate::sync::RwLockRef;
@@ -347,7 +348,7 @@ impl<'shm> ShardAlloc<'shm> {
     }
 
     fn get_header(&self, ptr: &NonNull<u8>) -> *mut AllocHeader {
-        let data_ptr = ptr.as_ptr() as *mut u8;
+        let data_ptr = ptr.as_ptr();
         let header_size = std::mem::size_of::<AllocHeader>();
         let header_ptr = unsafe { data_ptr.sub(header_size) as *mut AllocHeader };
 
@@ -409,7 +410,6 @@ mod tests {
         let vec_ptr = vec.as_mut_ptr();
         let file_alloc = FileAlloc::new(vec_ptr as *mut _, FILE_ALLOC_SIZE, 0);
         f(&file_alloc);
-        drop(file_alloc);
         drop(vec);
     }
 

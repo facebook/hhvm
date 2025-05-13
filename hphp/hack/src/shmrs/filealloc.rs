@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::AllocError;
-use std::alloc::Allocator;
-use std::alloc::Layout;
 use std::ptr::NonNull;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
+
+use allocator_api2::alloc::AllocError;
+use allocator_api2::alloc::Allocator;
+use allocator_api2::alloc::Layout;
 
 /// An allocator that can allocate chunks from a file.
 pub struct FileAlloc {

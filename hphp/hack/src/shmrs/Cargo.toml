@@ -12,7 +12,8 @@ path = "shmrs.rs"
 
 [dependencies]
 ahash = { version = "0.8.11", features = ["runtime-rng"] }
-hashbrown = { version = "0.14.5", features = ["ahash", "nightly", "raw", "serde"] }
+allocator-api2 = "0.2.21"
+hashbrown = { version = "0.14.5", features = ["ahash", "raw", "serde"] }
 libc = "0.2.139"
 nohash-hasher = "0.2"
 static_assertions = "1.1.0"

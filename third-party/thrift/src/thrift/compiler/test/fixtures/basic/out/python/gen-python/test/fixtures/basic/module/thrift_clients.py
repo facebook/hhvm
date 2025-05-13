@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import typing as _typing
+import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
@@ -24,6 +25,8 @@ import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__bas
 import test.fixtures.basic.module.thrift_metadata
 
 class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.FooService"
@@ -102,6 +105,8 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
 
 
 class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.FB303Service"
@@ -198,6 +203,8 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
 
 
 class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyService"
@@ -643,6 +650,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
 
 
 class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async", "DbMixedStackArguments.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.DbMixedStackArguments"

@@ -20,6 +20,7 @@ Generated Python classes for Thrift clients
 {{> common/auto_generated_py}}
 
 import typing as _typing
+import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
@@ -62,6 +63,14 @@ import {{module_path}}
 {{#program:services}}
 
 class {{service:name}}(_fbthrift_python_Client["{{service:name}}.Async", "{{service:name}}.Sync"]):
+    annotations = _py_types.MappingProxyType({
+        {{#service:annotations}}
+            {{> common/annotation}}
+            {{#last?}}
+
+            {{/last?}}
+        {{/service:annotations}}
+    })
     {{> clients/client_body }}
 
 {{#service:interactions}}

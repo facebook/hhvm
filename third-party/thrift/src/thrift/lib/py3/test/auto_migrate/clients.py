@@ -27,7 +27,10 @@ import unittest
 
 from testing.clients import TestingService
 from testing.types import Color, easy, I32List
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
@@ -58,15 +61,16 @@ class ThriftClientTestProxy:
 
 
 class ClientTests(unittest.TestCase):
-    @brokenInAutoMigrate()  # Service annotations are different in thrift python
     def test_annotations(self) -> None:
         annotations = TestingService.annotations
         self.assertIsInstance(annotations, types.MappingProxyType)
         self.assertFalse(annotations.get("NotAnAnnotation"))
         self.assertEqual(annotations["fun_times"], "yes")
-        with self.assertRaises(TypeError):
-            # You can't set attributes on builtin/extension types
-            TestingService.annotations = {}
+        if not is_auto_migrated():
+            # thrift-python clients are mutable
+            with self.assertRaises(TypeError):
+                # You can't set attributes on builtin/extension types
+                TestingService.annotations = {}
 
     async def test_client_keyword_arguments(self) -> None:
         async with ClientEventHandlerTestHelper().get_async_client(

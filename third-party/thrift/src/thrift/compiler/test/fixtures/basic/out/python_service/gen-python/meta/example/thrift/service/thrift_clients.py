@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import typing as _typing
+import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
@@ -26,6 +27,8 @@ import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__bas
 import test.fixtures.basic.module.thrift_clients
 
 class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "service.EchoService"
@@ -126,6 +129,8 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
 
 
 class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "ExtendedEchoService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "service.ExtendedEchoService"
@@ -226,6 +231,8 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
 
 
 class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "ExtendedMyService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "service.ExtendedMyService"

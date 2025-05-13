@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import typing as _typing
+import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
@@ -24,6 +25,8 @@ import module.thrift_types as _fbthrift__module__thrift_types
 import module.thrift_metadata
 
 class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.Raiser"

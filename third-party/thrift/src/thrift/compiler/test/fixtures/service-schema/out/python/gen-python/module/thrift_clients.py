@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import typing as _typing
+import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
@@ -25,6 +26,8 @@ import module.thrift_metadata
 import include.thrift_types as _fbthrift__include__thrift_types
 
 class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "PrimitivesService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.PrimitivesService"

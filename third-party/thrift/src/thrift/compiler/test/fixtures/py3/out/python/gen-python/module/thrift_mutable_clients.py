@@ -10,6 +10,7 @@ from __future__ import annotations
 import __static__
 
 import typing as _typing
+import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
@@ -29,6 +30,8 @@ import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
 import module.thrift_metadata
 
 class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.SimpleService"
@@ -2186,6 +2189,9 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
 
 class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+            """bar""": """1""",            """foo""": """\"\"\"""",
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.DerivedService"
@@ -2280,6 +2286,8 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
 
 
 class RederivedService(_fbthrift_python_Client["RederivedService.Async", "RederivedService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.RederivedService"

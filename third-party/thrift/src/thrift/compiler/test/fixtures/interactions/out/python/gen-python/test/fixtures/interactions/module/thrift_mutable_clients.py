@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import typing as _typing
+import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
@@ -29,6 +30,8 @@ import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthri
 import test.fixtures.another_interactions.shared.thrift_mutable_clients
 
 class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyService"
@@ -515,6 +518,8 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
 
 
 class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.Factories"
@@ -1001,6 +1006,8 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
 
 
 class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.Perform"
@@ -1403,6 +1410,8 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
 
 
 class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "InteractWithShared.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.InteractWithShared"
@@ -1750,6 +1759,8 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
 
 
 class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"]):
+    annotations = _py_types.MappingProxyType({
+    })
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.BoxService"

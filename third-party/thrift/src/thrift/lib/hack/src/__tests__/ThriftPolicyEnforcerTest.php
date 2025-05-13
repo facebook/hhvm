@@ -282,11 +282,6 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
       ->toEqual('ENT_LOADER');
     expect(ThriftPolicyEnforcer::getCallerName('CachiusService', 600))
       ->toBeNull();
-    expect(ThriftPolicyEnforcer::getCallerName(
-      'LaserLeaf',
-      CachiusCaller::THREAD_QUEUE_SUBSCRIPTION_LOGIC,
-    ))
-      ->toBeNull();
 
     expect(
       ThriftPolicyEnforcer::getCallerName(

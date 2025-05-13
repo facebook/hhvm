@@ -437,7 +437,7 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
 
   template <typename Response, typename ProtocolOut, typename Result>
   static Response serializeResponseImpl(
-      const char* method,
+      std::string_view method,
       ProtocolOut* prot,
       int32_t protoSeqId,
       ContextStack* ctx,
@@ -445,7 +445,7 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
 
   template <typename ProtocolOut, typename Result>
   static LegacySerializedResponse serializeLegacyResponse(
-      const char* method,
+      std::string_view method,
       ProtocolOut* prot,
       int32_t protoSeqId,
       ContextStack* ctx,
@@ -453,7 +453,7 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
 
   template <typename ProtocolOut, typename Result>
   static SerializedResponse serializeResponse(
-      const char* method,
+      std::string_view method,
       ProtocolOut* prot,
       ContextStack* ctx,
       const Result& result);
@@ -1614,7 +1614,7 @@ void GeneratedAsyncProcessorBase::simpleDeserializeRequest(
 
 template <typename Response, typename ProtocolOut, typename Result>
 Response GeneratedAsyncProcessorBase::serializeResponseImpl(
-    const char* method,
+    std::string_view method,
     ProtocolOut* prot,
     int32_t protoSeqId,
     ContextStack* ctx,
@@ -1671,7 +1671,7 @@ Response GeneratedAsyncProcessorBase::serializeResponseImpl(
 
 template <typename ProtocolOut, typename Result>
 LegacySerializedResponse GeneratedAsyncProcessorBase::serializeLegacyResponse(
-    const char* method,
+    std::string_view method,
     ProtocolOut* prot,
     int32_t protoSeqId,
     ContextStack* ctx,
@@ -1682,7 +1682,7 @@ LegacySerializedResponse GeneratedAsyncProcessorBase::serializeLegacyResponse(
 
 template <typename ProtocolOut, typename Result>
 SerializedResponse GeneratedAsyncProcessorBase::serializeResponse(
-    const char* method,
+    std::string_view method,
     ProtocolOut* prot,
     ContextStack* ctx,
     const Result& result) {

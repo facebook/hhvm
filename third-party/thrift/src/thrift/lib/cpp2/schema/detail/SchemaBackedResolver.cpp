@@ -439,7 +439,8 @@ void SchemaIndex::updateProgramsById(
             *program.path(),
             *program.name(),
             *program.includes(),
-            std::move(definitions)));
+            std::move(definitions),
+            *program.namespaces()));
   }
 }
 

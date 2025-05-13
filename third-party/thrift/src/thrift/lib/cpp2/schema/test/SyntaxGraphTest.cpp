@@ -81,6 +81,8 @@ TEST_F(ServiceSchemaTest, Programs) {
 
   auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
   EXPECT_EQ(mainProgram->definitionsByName().size(), 13);
+  EXPECT_EQ(mainProgram->namespaces().size(), 1);
+  EXPECT_EQ(mainProgram->namespaces().at("cpp2"), "apache.thrift.schema.test");
   {
     ProgramNode::IncludesList includes = mainProgram->includes();
     EXPECT_EQ(includes.size(), 2);

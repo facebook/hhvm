@@ -1481,17 +1481,22 @@ class ProgramNode final : folly::MoveOnly,
       F14FastMap<std::string_view, folly::not_null<const DefinitionNode*>>;
   DefinitionsByName definitionsByName() const;
 
+  using Namespaces = std::map<std::string, std::string>;
+  const Namespaces& namespaces() const { return namespaces_; }
+
   ProgramNode(
       const detail::Resolver& resolver,
       std::string_view path,
       std::string_view name,
       std::vector<apache::thrift::type::ProgramId> includes,
-      Definitions definitions)
+      Definitions definitions,
+      Namespaces namespaces)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         path_(path),
         includes_(std::move(includes)),
-        definitions_(std::move(definitions)) {}
+        definitions_(std::move(definitions)),
+        namespaces_(std::move(namespaces)) {}
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -1500,6 +1505,7 @@ class ProgramNode final : folly::MoveOnly,
   std::string_view path_;
   std::vector<apache::thrift::type::ProgramId> includes_;
   Definitions definitions_;
+  Namespaces namespaces_;
 };
 
 class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {

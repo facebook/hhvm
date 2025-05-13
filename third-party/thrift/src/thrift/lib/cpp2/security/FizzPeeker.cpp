@@ -32,6 +32,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     void, setSockOptStopTLS, folly::AsyncSocketTransport&) {
   return;
 }
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void, setSockOptTLSInfo, fizz::server::AsyncFizzServer*) {
+  return;
+}
 } // namespace detail
 
 void ThriftFizzAcceptorHandshakeHelper::start(
@@ -64,6 +69,10 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
   if (handshakeLogging && handshakeLogging->clientSni) {
     tinfo_.sslServerName =
         std::make_shared<std::string>(*handshakeLogging->clientSni);
+  }
+
+  if (transport != nullptr) {
+    detail::setSockOptTLSInfo(transport);
   }
 
   // TODO(T173985721) We intend on enabling automatic rekeying for all Fizz

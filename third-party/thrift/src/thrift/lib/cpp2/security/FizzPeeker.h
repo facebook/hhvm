@@ -28,6 +28,9 @@ namespace apache::thrift {
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     void, setSockOptStopTLS, folly::AsyncSocketTransport&);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void, setSockOptTLSInfo, fizz::server::AsyncFizzServer*);
 } // namespace detail
 
 class ThriftParametersContext;

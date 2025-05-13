@@ -35,7 +35,7 @@ std::string current_executable_path() {
 std::string current_executable_directory() {
 #if defined(__linux__) 
   std::string path = current_executable_path();
-  return path.substr(0, path.find_last_of("/"));
+  return path.substr(0, path.find_last_of('/'));
 #else
   // XXX: How do you do this on your platform?
   return std::string();

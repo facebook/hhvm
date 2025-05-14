@@ -182,6 +182,10 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     context_->setAlpnMode(AlpnMode::Optional);
   }
 
+  void allowAlpnMismatch() {
+    context_->setAlpnMode(AlpnMode::AllowMismatch);
+  }
+
   void acceptCookies() {
     mockCookieCipher_ = std::make_shared<MockCookieCipher>();
     context_->setCookieCipher(mockCookieCipher_);
@@ -4454,6 +4458,7 @@ TEST_F(ServerProtocolTest, TestClientHelloDataAfter) {
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloNoAlpnAllowMismatch) {
+  allowAlpnMismatch();
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(
@@ -4466,6 +4471,7 @@ TEST_F(ServerProtocolTest, TestClientHelloNoAlpnAllowMismatch) {
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloWithAlpnAllowMismatch) {
+  allowAlpnMismatch();
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(
@@ -4483,6 +4489,7 @@ TEST_F(ServerProtocolTest, TestClientHelloWithAlpnAllowMismatch) {
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloMismatchAlpnAllowMismatch) {
+  allowAlpnMismatch();
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(

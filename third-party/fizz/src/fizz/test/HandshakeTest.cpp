@@ -534,12 +534,12 @@ TEST_F(HandshakeTest, EarlyDataRejectedResend) {
 
 TEST_F(HandshakeTest, EarlyDataRejectedDontResend) {
   clientContext_->setSendEarlyData(true);
-  clientContext_->setSupportedAlpns({"h2"});
+  clientContext_->setSupportedAlpns({"h2", "other"});
   serverContext_->setSupportedAlpns({"h2"});
   expected_.alpn = "h2";
   setupResume();
 
-  serverContext_->setSupportedAlpns({});
+  serverContext_->setSupportedAlpns({"other"});
   client_->setEarlyDataRejectionPolicy(
       EarlyDataRejectionPolicy::AutomaticResend);
 
@@ -549,7 +549,7 @@ TEST_F(HandshakeTest, EarlyDataRejectedDontResend) {
   clientWrite("early");
 
   expected_.earlyDataType = EarlyDataType::Rejected;
-  expected_.alpn = none;
+  expected_.alpn = "other";
 
   expectEarlyDataRejectError();
   expectServerSuccess();

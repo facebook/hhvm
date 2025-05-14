@@ -29,22 +29,9 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyStruct", premadeThriftType_module_MyStruct })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
     return fbthriftThriftTypesMap
 }()
 

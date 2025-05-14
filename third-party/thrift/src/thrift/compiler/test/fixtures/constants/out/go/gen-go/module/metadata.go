@@ -148,40 +148,27 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.EmptyEnum", premadeThriftType_module_EmptyEnum })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.City", premadeThriftType_module_City })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Company", premadeThriftType_module_Company })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "double", premadeThriftType_double })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Internship", premadeThriftType_module_Internship })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Range", premadeThriftType_module_Range })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.struct1", premadeThriftType_module_struct1 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.struct2", premadeThriftType_module_struct2 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.struct3", premadeThriftType_module_struct3 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "byte", premadeThriftType_byte })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.struct4", premadeThriftType_module_struct4 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.union1", premadeThriftType_module_union1 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.union2", premadeThriftType_module_union2 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyCompany", premadeThriftType_module_MyCompany })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyStringIdentifier", premadeThriftType_module_MyStringIdentifier })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyIntIdentifier", premadeThriftType_module_MyIntIdentifier })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyMapIdentifier", premadeThriftType_module_MyMapIdentifier })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module.EmptyEnum"] = premadeThriftType_module_EmptyEnum
+    fbthriftThriftTypesMap["module.City"] = premadeThriftType_module_City
+    fbthriftThriftTypesMap["module.Company"] = premadeThriftType_module_Company
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["double"] = premadeThriftType_double
+    fbthriftThriftTypesMap["module.Internship"] = premadeThriftType_module_Internship
+    fbthriftThriftTypesMap["module.Range"] = premadeThriftType_module_Range
+    fbthriftThriftTypesMap["module.struct1"] = premadeThriftType_module_struct1
+    fbthriftThriftTypesMap["module.struct2"] = premadeThriftType_module_struct2
+    fbthriftThriftTypesMap["module.struct3"] = premadeThriftType_module_struct3
+    fbthriftThriftTypesMap["byte"] = premadeThriftType_byte
+    fbthriftThriftTypesMap["module.struct4"] = premadeThriftType_module_struct4
+    fbthriftThriftTypesMap["module.union1"] = premadeThriftType_module_union1
+    fbthriftThriftTypesMap["module.union2"] = premadeThriftType_module_union2
+    fbthriftThriftTypesMap["module.MyCompany"] = premadeThriftType_module_MyCompany
+    fbthriftThriftTypesMap["module.MyStringIdentifier"] = premadeThriftType_module_MyStringIdentifier
+    fbthriftThriftTypesMap["module.MyIntIdentifier"] = premadeThriftType_module_MyIntIdentifier
+    fbthriftThriftTypesMap["module.MyMapIdentifier"] = premadeThriftType_module_MyMapIdentifier
     return fbthriftThriftTypesMap
 }()
 

@@ -39,24 +39,11 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.FooStreamEx", premadeThriftType_module_FooStreamEx })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.FooEx", premadeThriftType_module_FooEx })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.FooEx2", premadeThriftType_module_FooEx2 })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module.FooStreamEx"] = premadeThriftType_module_FooStreamEx
+    fbthriftThriftTypesMap["module.FooEx"] = premadeThriftType_module_FooEx
+    fbthriftThriftTypesMap["module.FooEx2"] = premadeThriftType_module_FooEx2
     return fbthriftThriftTypesMap
 }()
 

@@ -79,31 +79,18 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Py3Hidden", premadeThriftType_python_Py3Hidden })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.PyDeprecatedHidden", premadeThriftType_python_PyDeprecatedHidden })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Flags", premadeThriftType_python_Flags })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Name", premadeThriftType_python_Name })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Adapter", premadeThriftType_python_Adapter })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.UseCAPI", premadeThriftType_python_UseCAPI })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Py3EnableCppAdapter", premadeThriftType_python_Py3EnableCppAdapter })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.MigrationBlockingAllowInheritance", premadeThriftType_python_MigrationBlockingAllowInheritance })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["python.Py3Hidden"] = premadeThriftType_python_Py3Hidden
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["python.PyDeprecatedHidden"] = premadeThriftType_python_PyDeprecatedHidden
+    fbthriftThriftTypesMap["python.Flags"] = premadeThriftType_python_Flags
+    fbthriftThriftTypesMap["python.Name"] = premadeThriftType_python_Name
+    fbthriftThriftTypesMap["python.Adapter"] = premadeThriftType_python_Adapter
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["python.UseCAPI"] = premadeThriftType_python_UseCAPI
+    fbthriftThriftTypesMap["python.Py3EnableCppAdapter"] = premadeThriftType_python_Py3EnableCppAdapter
+    fbthriftThriftTypesMap["python.MigrationBlockingAllowInheritance"] = premadeThriftType_python_MigrationBlockingAllowInheritance
     return fbthriftThriftTypesMap
 }()
 

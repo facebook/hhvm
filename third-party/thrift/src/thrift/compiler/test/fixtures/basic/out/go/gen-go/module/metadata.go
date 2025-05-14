@@ -155,40 +155,27 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyEnum", premadeThriftType_module_MyEnum })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.HackEnum", premadeThriftType_module_HackEnum })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyDataItem", premadeThriftType_module_MyDataItem })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyDataItemAlias", premadeThriftType_module_MyDataItemAlias })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "float", premadeThriftType_float })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyStruct", premadeThriftType_module_MyStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Containers", premadeThriftType_module_Containers })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyEnumAlias", premadeThriftType_module_MyEnumAlias })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyUnion", premadeThriftType_module_MyUnion })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ReservedKeyword", premadeThriftType_module_ReservedKeyword })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.UnionToBeRenamed", premadeThriftType_module_UnionToBeRenamed })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyException", premadeThriftType_module_MyException })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyExceptionWithMessage", premadeThriftType_module_MyExceptionWithMessage })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "void", premadeThriftType_void })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module.MyEnum"] = premadeThriftType_module_MyEnum
+    fbthriftThriftTypesMap["module.HackEnum"] = premadeThriftType_module_HackEnum
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.MyDataItem"] = premadeThriftType_module_MyDataItem
+    fbthriftThriftTypesMap["module.MyDataItemAlias"] = premadeThriftType_module_MyDataItemAlias
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["float"] = premadeThriftType_float
+    fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.Containers"] = premadeThriftType_module_Containers
+    fbthriftThriftTypesMap["module.MyEnumAlias"] = premadeThriftType_module_MyEnumAlias
+    fbthriftThriftTypesMap["module.MyUnion"] = premadeThriftType_module_MyUnion
+    fbthriftThriftTypesMap["module.ReservedKeyword"] = premadeThriftType_module_ReservedKeyword
+    fbthriftThriftTypesMap["module.UnionToBeRenamed"] = premadeThriftType_module_UnionToBeRenamed
+    fbthriftThriftTypesMap["module.MyException"] = premadeThriftType_module_MyException
+    fbthriftThriftTypesMap["module.MyExceptionWithMessage"] = premadeThriftType_module_MyExceptionWithMessage
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
     return fbthriftThriftTypesMap
 }()
 

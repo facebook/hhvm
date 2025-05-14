@@ -80,30 +80,17 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.B", premadeThriftType_module_B })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.A", premadeThriftType_module_A })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.U", premadeThriftType_module_U })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Bang", premadeThriftType_module_Bang })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.lanyard", premadeThriftType_module_lanyard })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.number", premadeThriftType_module_number })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "void", premadeThriftType_void })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module.B"] = premadeThriftType_module_B
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.A"] = premadeThriftType_module_A
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.U"] = premadeThriftType_module_U
+    fbthriftThriftTypesMap["module.Bang"] = premadeThriftType_module_Bang
+    fbthriftThriftTypesMap["module.lanyard"] = premadeThriftType_module_lanyard
+    fbthriftThriftTypesMap["module.number"] = premadeThriftType_module_number
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     return fbthriftThriftTypesMap
 }()
 

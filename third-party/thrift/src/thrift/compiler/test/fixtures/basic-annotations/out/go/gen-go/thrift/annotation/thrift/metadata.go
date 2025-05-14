@@ -158,41 +158,28 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.RpcPriority", premadeThriftType_thrift_RpcPriority })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.Experimental", premadeThriftType_thrift_Experimental })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.ReserveIds", premadeThriftType_thrift_ReserveIds })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.RequiresBackwardCompatibility", premadeThriftType_thrift_RequiresBackwardCompatibility })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.TerseWrite", premadeThriftType_thrift_TerseWrite })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.Box", premadeThriftType_thrift_Box })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.Mixin", premadeThriftType_thrift_Mixin })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.SerializeInFieldIdOrder", premadeThriftType_thrift_SerializeInFieldIdOrder })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.BitmaskEnum", premadeThriftType_thrift_BitmaskEnum })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.ExceptionMessage", premadeThriftType_thrift_ExceptionMessage })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.InternBox", premadeThriftType_thrift_InternBox })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.Serial", premadeThriftType_thrift_Serial })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.Uri", premadeThriftType_thrift_Uri })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.Priority", premadeThriftType_thrift_Priority })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.DeprecatedUnvalidatedAnnotations", premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.AllowReservedIdentifier", premadeThriftType_thrift_AllowReservedIdentifier })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "thrift.AllowReservedFilename", premadeThriftType_thrift_AllowReservedFilename })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["thrift.RpcPriority"] = premadeThriftType_thrift_RpcPriority
+    fbthriftThriftTypesMap["thrift.Experimental"] = premadeThriftType_thrift_Experimental
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["thrift.ReserveIds"] = premadeThriftType_thrift_ReserveIds
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["thrift.RequiresBackwardCompatibility"] = premadeThriftType_thrift_RequiresBackwardCompatibility
+    fbthriftThriftTypesMap["thrift.TerseWrite"] = premadeThriftType_thrift_TerseWrite
+    fbthriftThriftTypesMap["thrift.Box"] = premadeThriftType_thrift_Box
+    fbthriftThriftTypesMap["thrift.Mixin"] = premadeThriftType_thrift_Mixin
+    fbthriftThriftTypesMap["thrift.SerializeInFieldIdOrder"] = premadeThriftType_thrift_SerializeInFieldIdOrder
+    fbthriftThriftTypesMap["thrift.BitmaskEnum"] = premadeThriftType_thrift_BitmaskEnum
+    fbthriftThriftTypesMap["thrift.ExceptionMessage"] = premadeThriftType_thrift_ExceptionMessage
+    fbthriftThriftTypesMap["thrift.InternBox"] = premadeThriftType_thrift_InternBox
+    fbthriftThriftTypesMap["thrift.Serial"] = premadeThriftType_thrift_Serial
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["thrift.Uri"] = premadeThriftType_thrift_Uri
+    fbthriftThriftTypesMap["thrift.Priority"] = premadeThriftType_thrift_Priority
+    fbthriftThriftTypesMap["thrift.DeprecatedUnvalidatedAnnotations"] = premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations
+    fbthriftThriftTypesMap["thrift.AllowReservedIdentifier"] = premadeThriftType_thrift_AllowReservedIdentifier
+    fbthriftThriftTypesMap["thrift.AllowReservedFilename"] = premadeThriftType_thrift_AllowReservedFilename
     return fbthriftThriftTypesMap
 }()
 

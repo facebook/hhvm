@@ -86,31 +86,18 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Metasyntactic", premadeThriftType_module_Metasyntactic })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyEnum1", premadeThriftType_module_MyEnum1 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyEnum2", premadeThriftType_module_MyEnum2 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyEnum3", premadeThriftType_module_MyEnum3 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyEnum4", premadeThriftType_module_MyEnum4 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyBitmaskEnum1", premadeThriftType_module_MyBitmaskEnum1 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyBitmaskEnum2", premadeThriftType_module_MyBitmaskEnum2 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.SomeStruct", premadeThriftType_module_SomeStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyStruct", premadeThriftType_module_MyStruct })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module.Metasyntactic"] = premadeThriftType_module_Metasyntactic
+    fbthriftThriftTypesMap["module.MyEnum1"] = premadeThriftType_module_MyEnum1
+    fbthriftThriftTypesMap["module.MyEnum2"] = premadeThriftType_module_MyEnum2
+    fbthriftThriftTypesMap["module.MyEnum3"] = premadeThriftType_module_MyEnum3
+    fbthriftThriftTypesMap["module.MyEnum4"] = premadeThriftType_module_MyEnum4
+    fbthriftThriftTypesMap["module.MyBitmaskEnum1"] = premadeThriftType_module_MyBitmaskEnum1
+    fbthriftThriftTypesMap["module.MyBitmaskEnum2"] = premadeThriftType_module_MyBitmaskEnum2
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.SomeStruct"] = premadeThriftType_module_SomeStruct
+    fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
     return fbthriftThriftTypesMap
 }()
 

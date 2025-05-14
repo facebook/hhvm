@@ -98,33 +98,20 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.FieldWrapper", premadeThriftType_hack_FieldWrapper })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Wrapper", premadeThriftType_hack_Wrapper })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Adapter", premadeThriftType_hack_Adapter })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.SkipCodegen", premadeThriftType_hack_SkipCodegen })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Name", premadeThriftType_hack_Name })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.UnionEnumAttributes", premadeThriftType_hack_UnionEnumAttributes })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.StructTrait", premadeThriftType_hack_StructTrait })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Attributes", premadeThriftType_hack_Attributes })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.StructAsTrait", premadeThriftType_hack_StructAsTrait })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.ModuleInternal", premadeThriftType_hack_ModuleInternal })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.GenerateClientMethodsWithHeaders", premadeThriftType_hack_GenerateClientMethodsWithHeaders })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["hack.FieldWrapper"] = premadeThriftType_hack_FieldWrapper
+    fbthriftThriftTypesMap["hack.Wrapper"] = premadeThriftType_hack_Wrapper
+    fbthriftThriftTypesMap["hack.Adapter"] = premadeThriftType_hack_Adapter
+    fbthriftThriftTypesMap["hack.SkipCodegen"] = premadeThriftType_hack_SkipCodegen
+    fbthriftThriftTypesMap["hack.Name"] = premadeThriftType_hack_Name
+    fbthriftThriftTypesMap["hack.UnionEnumAttributes"] = premadeThriftType_hack_UnionEnumAttributes
+    fbthriftThriftTypesMap["hack.StructTrait"] = premadeThriftType_hack_StructTrait
+    fbthriftThriftTypesMap["hack.Attributes"] = premadeThriftType_hack_Attributes
+    fbthriftThriftTypesMap["hack.StructAsTrait"] = premadeThriftType_hack_StructAsTrait
+    fbthriftThriftTypesMap["hack.ModuleInternal"] = premadeThriftType_hack_ModuleInternal
+    fbthriftThriftTypesMap["hack.GenerateClientMethodsWithHeaders"] = premadeThriftType_hack_GenerateClientMethodsWithHeaders
     return fbthriftThriftTypesMap
 }()
 

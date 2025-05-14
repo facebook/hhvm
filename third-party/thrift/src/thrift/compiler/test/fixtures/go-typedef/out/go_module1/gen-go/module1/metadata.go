@@ -164,37 +164,24 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Plate", premadeThriftType_module1_Plate })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Year", premadeThriftType_module1_Year })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Drivers", premadeThriftType_module1_Drivers })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Accessory", premadeThriftType_module1_Accessory })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.PartName", premadeThriftType_module1_PartName })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Automobile", premadeThriftType_module1_Automobile })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.MapKey", premadeThriftType_module1_MapKey })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.MapContainer", premadeThriftType_module1_MapContainer })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Car", premadeThriftType_module1_Car })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Pair", premadeThriftType_module1_Pair })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Collection", premadeThriftType_module1_Collection })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.State", premadeThriftType_module1_State })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Enum", premadeThriftType_module1_Enum })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module1.Plate"] = premadeThriftType_module1_Plate
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module1.Year"] = premadeThriftType_module1_Year
+    fbthriftThriftTypesMap["module1.Drivers"] = premadeThriftType_module1_Drivers
+    fbthriftThriftTypesMap["module1.Accessory"] = premadeThriftType_module1_Accessory
+    fbthriftThriftTypesMap["module1.PartName"] = premadeThriftType_module1_PartName
+    fbthriftThriftTypesMap["module1.Automobile"] = premadeThriftType_module1_Automobile
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["module1.MapKey"] = premadeThriftType_module1_MapKey
+    fbthriftThriftTypesMap["module1.MapContainer"] = premadeThriftType_module1_MapContainer
+    fbthriftThriftTypesMap["module1.Car"] = premadeThriftType_module1_Car
+    fbthriftThriftTypesMap["module1.Pair"] = premadeThriftType_module1_Pair
+    fbthriftThriftTypesMap["module1.Collection"] = premadeThriftType_module1_Collection
+    fbthriftThriftTypesMap["module1.State"] = premadeThriftType_module1_State
+    fbthriftThriftTypesMap["module1.Enum"] = premadeThriftType_module1_Enum
     return fbthriftThriftTypesMap
 }()
 

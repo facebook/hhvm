@@ -129,39 +129,26 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Transitive", premadeThriftType_scope_Transitive })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Program", premadeThriftType_scope_Program })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Struct", premadeThriftType_scope_Struct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Union", premadeThriftType_scope_Union })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Exception", premadeThriftType_scope_Exception })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Field", premadeThriftType_scope_Field })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Typedef", premadeThriftType_scope_Typedef })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Service", premadeThriftType_scope_Service })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Interaction", premadeThriftType_scope_Interaction })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Function", premadeThriftType_scope_Function })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.EnumValue", premadeThriftType_scope_EnumValue })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Const", premadeThriftType_scope_Const })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Enum", premadeThriftType_scope_Enum })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Structured", premadeThriftType_scope_Structured })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Interface", premadeThriftType_scope_Interface })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.RootDefinition", premadeThriftType_scope_RootDefinition })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Definition", premadeThriftType_scope_Definition })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.DisableSchemaConst", premadeThriftType_scope_DisableSchemaConst })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["scope.Transitive"] = premadeThriftType_scope_Transitive
+    fbthriftThriftTypesMap["scope.Program"] = premadeThriftType_scope_Program
+    fbthriftThriftTypesMap["scope.Struct"] = premadeThriftType_scope_Struct
+    fbthriftThriftTypesMap["scope.Union"] = premadeThriftType_scope_Union
+    fbthriftThriftTypesMap["scope.Exception"] = premadeThriftType_scope_Exception
+    fbthriftThriftTypesMap["scope.Field"] = premadeThriftType_scope_Field
+    fbthriftThriftTypesMap["scope.Typedef"] = premadeThriftType_scope_Typedef
+    fbthriftThriftTypesMap["scope.Service"] = premadeThriftType_scope_Service
+    fbthriftThriftTypesMap["scope.Interaction"] = premadeThriftType_scope_Interaction
+    fbthriftThriftTypesMap["scope.Function"] = premadeThriftType_scope_Function
+    fbthriftThriftTypesMap["scope.EnumValue"] = premadeThriftType_scope_EnumValue
+    fbthriftThriftTypesMap["scope.Const"] = premadeThriftType_scope_Const
+    fbthriftThriftTypesMap["scope.Enum"] = premadeThriftType_scope_Enum
+    fbthriftThriftTypesMap["scope.Structured"] = premadeThriftType_scope_Structured
+    fbthriftThriftTypesMap["scope.Interface"] = premadeThriftType_scope_Interface
+    fbthriftThriftTypesMap["scope.RootDefinition"] = premadeThriftType_scope_RootDefinition
+    fbthriftThriftTypesMap["scope.Definition"] = premadeThriftType_scope_Definition
+    fbthriftThriftTypesMap["scope.DisableSchemaConst"] = premadeThriftType_scope_DisableSchemaConst
     return fbthriftThriftTypesMap
 }()
 

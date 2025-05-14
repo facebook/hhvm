@@ -181,48 +181,35 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.RefType", premadeThriftType_cpp_RefType })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.EnumUnderlyingType", premadeThriftType_cpp_EnumUnderlyingType })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Name", premadeThriftType_cpp_Name })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Type", premadeThriftType_cpp_Type })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Ref", premadeThriftType_cpp_Ref })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Lazy", premadeThriftType_cpp_Lazy })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.DisableLazyChecksum", premadeThriftType_cpp_DisableLazyChecksum })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Adapter", premadeThriftType_cpp_Adapter })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.PackIsset", premadeThriftType_cpp_PackIsset })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.MinimizePadding", premadeThriftType_cpp_MinimizePadding })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.ScopedEnumAsUnionType", premadeThriftType_cpp_ScopedEnumAsUnionType })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.FieldInterceptor", premadeThriftType_cpp_FieldInterceptor })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.UseOpEncode", premadeThriftType_cpp_UseOpEncode })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.EnumType", premadeThriftType_cpp_EnumType })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Frozen2Exclude", premadeThriftType_cpp_Frozen2Exclude })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Frozen2RequiresCompleteContainerParams", premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.ProcessInEbThreadUnsafe", premadeThriftType_cpp_ProcessInEbThreadUnsafe })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.RuntimeAnnotation", premadeThriftType_cpp_RuntimeAnnotation })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.UseCursorSerialization", premadeThriftType_cpp_UseCursorSerialization })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.GenerateDeprecatedHeaderClientMethods", premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.AllowLegacyNonOptionalRef", premadeThriftType_cpp_AllowLegacyNonOptionalRef })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.DeprecatedTerseWrite", premadeThriftType_cpp_DeprecatedTerseWrite })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.AllowLegacyDeprecatedTerseWritesRef", premadeThriftType_cpp_AllowLegacyDeprecatedTerseWritesRef })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.EnableCustomTypeOrdering", premadeThriftType_cpp_EnableCustomTypeOrdering })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.GenerateServiceMethodDecorator", premadeThriftType_cpp_GenerateServiceMethodDecorator })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["cpp.RefType"] = premadeThriftType_cpp_RefType
+    fbthriftThriftTypesMap["cpp.EnumUnderlyingType"] = premadeThriftType_cpp_EnumUnderlyingType
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["cpp.Name"] = premadeThriftType_cpp_Name
+    fbthriftThriftTypesMap["cpp.Type"] = premadeThriftType_cpp_Type
+    fbthriftThriftTypesMap["cpp.Ref"] = premadeThriftType_cpp_Ref
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["cpp.Lazy"] = premadeThriftType_cpp_Lazy
+    fbthriftThriftTypesMap["cpp.DisableLazyChecksum"] = premadeThriftType_cpp_DisableLazyChecksum
+    fbthriftThriftTypesMap["cpp.Adapter"] = premadeThriftType_cpp_Adapter
+    fbthriftThriftTypesMap["cpp.PackIsset"] = premadeThriftType_cpp_PackIsset
+    fbthriftThriftTypesMap["cpp.MinimizePadding"] = premadeThriftType_cpp_MinimizePadding
+    fbthriftThriftTypesMap["cpp.ScopedEnumAsUnionType"] = premadeThriftType_cpp_ScopedEnumAsUnionType
+    fbthriftThriftTypesMap["cpp.FieldInterceptor"] = premadeThriftType_cpp_FieldInterceptor
+    fbthriftThriftTypesMap["cpp.UseOpEncode"] = premadeThriftType_cpp_UseOpEncode
+    fbthriftThriftTypesMap["cpp.EnumType"] = premadeThriftType_cpp_EnumType
+    fbthriftThriftTypesMap["cpp.Frozen2Exclude"] = premadeThriftType_cpp_Frozen2Exclude
+    fbthriftThriftTypesMap["cpp.Frozen2RequiresCompleteContainerParams"] = premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams
+    fbthriftThriftTypesMap["cpp.ProcessInEbThreadUnsafe"] = premadeThriftType_cpp_ProcessInEbThreadUnsafe
+    fbthriftThriftTypesMap["cpp.RuntimeAnnotation"] = premadeThriftType_cpp_RuntimeAnnotation
+    fbthriftThriftTypesMap["cpp.UseCursorSerialization"] = premadeThriftType_cpp_UseCursorSerialization
+    fbthriftThriftTypesMap["cpp.GenerateDeprecatedHeaderClientMethods"] = premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods
+    fbthriftThriftTypesMap["cpp.AllowLegacyNonOptionalRef"] = premadeThriftType_cpp_AllowLegacyNonOptionalRef
+    fbthriftThriftTypesMap["cpp.DeprecatedTerseWrite"] = premadeThriftType_cpp_DeprecatedTerseWrite
+    fbthriftThriftTypesMap["cpp.AllowLegacyDeprecatedTerseWritesRef"] = premadeThriftType_cpp_AllowLegacyDeprecatedTerseWritesRef
+    fbthriftThriftTypesMap["cpp.EnableCustomTypeOrdering"] = premadeThriftType_cpp_EnableCustomTypeOrdering
+    fbthriftThriftTypesMap["cpp.GenerateServiceMethodDecorator"] = premadeThriftType_cpp_GenerateServiceMethodDecorator
     return fbthriftThriftTypesMap
 }()
 

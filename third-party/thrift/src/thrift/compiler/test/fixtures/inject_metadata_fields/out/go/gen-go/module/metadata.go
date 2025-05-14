@@ -52,26 +52,13 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Fields", premadeThriftType_module_Fields })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.FieldsInjectedToEmptyStruct", premadeThriftType_module_FieldsInjectedToEmptyStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.FieldsInjectedToStruct", premadeThriftType_module_FieldsInjectedToStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.FieldsInjectedWithIncludedStruct", premadeThriftType_module_FieldsInjectedWithIncludedStruct })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.Fields"] = premadeThriftType_module_Fields
+    fbthriftThriftTypesMap["module.FieldsInjectedToEmptyStruct"] = premadeThriftType_module_FieldsInjectedToEmptyStruct
+    fbthriftThriftTypesMap["module.FieldsInjectedToStruct"] = premadeThriftType_module_FieldsInjectedToStruct
+    fbthriftThriftTypesMap["module.FieldsInjectedWithIncludedStruct"] = premadeThriftType_module_FieldsInjectedWithIncludedStruct
     return fbthriftThriftTypesMap
 }()
 

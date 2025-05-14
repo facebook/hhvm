@@ -48,25 +48,12 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "includes.Included", premadeThriftType_includes_Included })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "includes.IncludedInt64", premadeThriftType_includes_IncludedInt64 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "includes.TransitiveFoo", premadeThriftType_includes_TransitiveFoo })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["includes.Included"] = premadeThriftType_includes_Included
+    fbthriftThriftTypesMap["includes.IncludedInt64"] = premadeThriftType_includes_IncludedInt64
+    fbthriftThriftTypesMap["includes.TransitiveFoo"] = premadeThriftType_includes_TransitiveFoo
     return fbthriftThriftTypesMap
 }()
 

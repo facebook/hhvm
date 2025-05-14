@@ -140,39 +140,26 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.MyEnum", premadeThriftType_terse_write_MyEnum })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.MyStruct", premadeThriftType_terse_write_MyStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "byte", premadeThriftType_byte })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "float", premadeThriftType_float })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "double", premadeThriftType_double })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.MyUnion", premadeThriftType_terse_write_MyUnion })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.MyStructWithCustomDefault", premadeThriftType_terse_write_MyStructWithCustomDefault })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.StructLevelTerseStruct", premadeThriftType_terse_write_StructLevelTerseStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.FieldLevelTerseStruct", premadeThriftType_terse_write_FieldLevelTerseStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.MyInteger", premadeThriftType_terse_write_MyInteger })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.AdaptedFields", premadeThriftType_terse_write_AdaptedFields })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.TerseException", premadeThriftType_terse_write_TerseException })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["terse_write.MyEnum"] = premadeThriftType_terse_write_MyEnum
+    fbthriftThriftTypesMap["terse_write.MyStruct"] = premadeThriftType_terse_write_MyStruct
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["byte"] = premadeThriftType_byte
+    fbthriftThriftTypesMap["i16"] = premadeThriftType_i16
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["float"] = premadeThriftType_float
+    fbthriftThriftTypesMap["double"] = premadeThriftType_double
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
+    fbthriftThriftTypesMap["terse_write.MyUnion"] = premadeThriftType_terse_write_MyUnion
+    fbthriftThriftTypesMap["terse_write.MyStructWithCustomDefault"] = premadeThriftType_terse_write_MyStructWithCustomDefault
+    fbthriftThriftTypesMap["terse_write.StructLevelTerseStruct"] = premadeThriftType_terse_write_StructLevelTerseStruct
+    fbthriftThriftTypesMap["terse_write.FieldLevelTerseStruct"] = premadeThriftType_terse_write_FieldLevelTerseStruct
+    fbthriftThriftTypesMap["terse_write.MyInteger"] = premadeThriftType_terse_write_MyInteger
+    fbthriftThriftTypesMap["terse_write.AdaptedFields"] = premadeThriftType_terse_write_AdaptedFields
+    fbthriftThriftTypesMap["terse_write.TerseException"] = premadeThriftType_terse_write_TerseException
     return fbthriftThriftTypesMap
 }()
 

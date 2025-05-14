@@ -120,35 +120,22 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.containerTypedef", premadeThriftType_module_containerTypedef })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ComplexUnion", premadeThriftType_module_ComplexUnion })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ListUnion", premadeThriftType_module_ListUnion })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.DataUnion", premadeThriftType_module_DataUnion })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Val", premadeThriftType_module_Val })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ValUnion", premadeThriftType_module_ValUnion })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.VirtualComplexUnion", premadeThriftType_module_VirtualComplexUnion })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.NonCopyableStruct", premadeThriftType_module_NonCopyableStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.NonCopyableUnion", premadeThriftType_module_NonCopyableUnion })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["i16"] = premadeThriftType_i16
+    fbthriftThriftTypesMap["module.containerTypedef"] = premadeThriftType_module_containerTypedef
+    fbthriftThriftTypesMap["module.ComplexUnion"] = premadeThriftType_module_ComplexUnion
+    fbthriftThriftTypesMap["module.ListUnion"] = premadeThriftType_module_ListUnion
+    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
+    fbthriftThriftTypesMap["module.DataUnion"] = premadeThriftType_module_DataUnion
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.Val"] = premadeThriftType_module_Val
+    fbthriftThriftTypesMap["module.ValUnion"] = premadeThriftType_module_ValUnion
+    fbthriftThriftTypesMap["module.VirtualComplexUnion"] = premadeThriftType_module_VirtualComplexUnion
+    fbthriftThriftTypesMap["module.NonCopyableStruct"] = premadeThriftType_module_NonCopyableStruct
+    fbthriftThriftTypesMap["module.NonCopyableUnion"] = premadeThriftType_module_NonCopyableUnion
     return fbthriftThriftTypesMap
 }()
 

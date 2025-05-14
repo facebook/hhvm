@@ -121,37 +121,24 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Name", premadeThriftType_rust_Name })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Copy", premadeThriftType_rust_Copy })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.RequestContext", premadeThriftType_rust_RequestContext })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Arc", premadeThriftType_rust_Arc })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Box", premadeThriftType_rust_Box })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Exhaustive", premadeThriftType_rust_Exhaustive })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Ord", premadeThriftType_rust_Ord })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.NewType", premadeThriftType_rust_NewType })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Type", premadeThriftType_rust_Type })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Serde", premadeThriftType_rust_Serde })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Mod", premadeThriftType_rust_Mod })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Adapter", premadeThriftType_rust_Adapter })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Derive", premadeThriftType_rust_Derive })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.ServiceExn", premadeThriftType_rust_ServiceExn })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["rust.Name"] = premadeThriftType_rust_Name
+    fbthriftThriftTypesMap["rust.Copy"] = premadeThriftType_rust_Copy
+    fbthriftThriftTypesMap["rust.RequestContext"] = premadeThriftType_rust_RequestContext
+    fbthriftThriftTypesMap["rust.Arc"] = premadeThriftType_rust_Arc
+    fbthriftThriftTypesMap["rust.Box"] = premadeThriftType_rust_Box
+    fbthriftThriftTypesMap["rust.Exhaustive"] = premadeThriftType_rust_Exhaustive
+    fbthriftThriftTypesMap["rust.Ord"] = premadeThriftType_rust_Ord
+    fbthriftThriftTypesMap["rust.NewType"] = premadeThriftType_rust_NewType
+    fbthriftThriftTypesMap["rust.Type"] = premadeThriftType_rust_Type
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["rust.Serde"] = premadeThriftType_rust_Serde
+    fbthriftThriftTypesMap["rust.Mod"] = premadeThriftType_rust_Mod
+    fbthriftThriftTypesMap["rust.Adapter"] = premadeThriftType_rust_Adapter
+    fbthriftThriftTypesMap["rust.Derive"] = premadeThriftType_rust_Derive
+    fbthriftThriftTypesMap["rust.ServiceExn"] = premadeThriftType_rust_ServiceExn
     return fbthriftThriftTypesMap
 }()
 

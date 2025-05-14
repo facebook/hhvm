@@ -78,31 +78,18 @@ var (
     }()
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *metadata.ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Fiery", premadeThriftType_module_Fiery })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Serious", premadeThriftType_module_Serious })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ComplexFieldNames", premadeThriftType_module_ComplexFieldNames })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.CustomFieldNames", premadeThriftType_module_CustomFieldNames })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ExceptionWithPrimitiveField", premadeThriftType_module_ExceptionWithPrimitiveField })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ExceptionWithStructuredAnnotation", premadeThriftType_module_ExceptionWithStructuredAnnotation })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Banal", premadeThriftType_module_Banal })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "void", premadeThriftType_void })
-
-    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.Fiery"] = premadeThriftType_module_Fiery
+    fbthriftThriftTypesMap["module.Serious"] = premadeThriftType_module_Serious
+    fbthriftThriftTypesMap["module.ComplexFieldNames"] = premadeThriftType_module_ComplexFieldNames
+    fbthriftThriftTypesMap["module.CustomFieldNames"] = premadeThriftType_module_CustomFieldNames
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.ExceptionWithPrimitiveField"] = premadeThriftType_module_ExceptionWithPrimitiveField
+    fbthriftThriftTypesMap["module.ExceptionWithStructuredAnnotation"] = premadeThriftType_module_ExceptionWithStructuredAnnotation
+    fbthriftThriftTypesMap["module.Banal"] = premadeThriftType_module_Banal
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     return fbthriftThriftTypesMap
 }()
 

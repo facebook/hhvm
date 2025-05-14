@@ -56,26 +56,13 @@ var (
     {{/program:thrift_metadata_types}}
 )
 
-// Helper type to allow us to store Thrift types in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type thriftTypeWithFullName struct {
-    fullName   string
-    thriftType *{{program:metadata_qualifier}}ThriftType
-}
-
 var premadeThriftTypesMap = func() map[string]*{{program:metadata_qualifier}}ThriftType {
-    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+    fbthriftThriftTypesMap := make(map[string]*{{program:metadata_qualifier}}ThriftType)
     {{#program:thrift_metadata_types}}
     {{#type:named?}}
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "{{type:full_name}}", {{type:metadata_name}} })
+    fbthriftThriftTypesMap["{{type:full_name}}"] = {{type:metadata_name}}
     {{/type:named?}}
     {{/program:thrift_metadata_types}}
-
-    fbthriftThriftTypesMap := make(map[string]*{{program:metadata_qualifier}}ThriftType, len(thriftTypesWithFullName))
-    for _, value := range thriftTypesWithFullName {
-        fbthriftThriftTypesMap[value.fullName] = value.thriftType
-    }
     return fbthriftThriftTypesMap
 }()
 

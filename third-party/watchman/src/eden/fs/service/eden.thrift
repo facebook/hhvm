@@ -974,11 +974,18 @@ union ScmTreeOrError {
   2: EdenError error;
 }
 
+struct TreeAux {
+  1: DigestSizeOrError digestSize;
+  2: DigestHashOrError digestHash;
+}
+
 struct ScmTreeWithOrigin {
   # the SCM tree data
   1: ScmTreeOrError scmTreeData;
   # where the SCM tree was fetched from
   2: DataFetchOrigin origin;
+  # include the Tree Aux when it's available
+  3: optional TreeAux treeAux;
 }
 
 struct DebugGetScmTreeResponse {

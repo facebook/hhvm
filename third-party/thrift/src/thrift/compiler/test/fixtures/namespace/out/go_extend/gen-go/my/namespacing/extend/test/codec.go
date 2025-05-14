@@ -17,21 +17,18 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "bool",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqExtendTestServiceCheck = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqExtendTestServiceCheck = &thrift.StructSpec{
     Name:                 "reqExtendTestServiceCheck",
     ScopedName:           "extend.reqExtendTestServiceCheck",
     IsUnion:              false,
@@ -53,9 +50,7 @@ var (
         "struct1": 0,
     },
 }
-    }()
-    premadeStructSpec_respExtendTestServiceCheck = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respExtendTestServiceCheck = &thrift.StructSpec{
     Name:                 "respExtendTestServiceCheck",
     ScopedName:           "extend.respExtendTestServiceCheck",
     IsUnion:              false,
@@ -77,7 +72,6 @@ var (
         "success": 0,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

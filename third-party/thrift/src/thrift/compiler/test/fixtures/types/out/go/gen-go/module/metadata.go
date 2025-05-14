@@ -21,570 +21,430 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_has_bitwise_ops = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TEnum: &metadata.ThriftEnumType{
+    premadeThriftType_module_has_bitwise_ops = &metadata.ThriftType{
+        TEnum: &metadata.ThriftEnumType{
     Name: "module.has_bitwise_ops",
 },
 
-        }
-    }()
-    premadeThriftType_module_is_unscoped = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TEnum: &metadata.ThriftEnumType{
+    }
+    premadeThriftType_module_is_unscoped = &metadata.ThriftType{
+        TEnum: &metadata.ThriftEnumType{
     Name: "module.is_unscoped",
 },
 
-        }
-    }()
-    premadeThriftType_module_MyForwardRefEnum = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TEnum: &metadata.ThriftEnumType{
+    }
+    premadeThriftType_module_MyForwardRefEnum = &metadata.ThriftType{
+        TEnum: &metadata.ThriftEnumType{
     Name: "module.MyForwardRefEnum",
 },
 
-        }
-    }()
-    premadeThriftType_module_empty_struct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_empty_struct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.empty_struct",
 },
 
-        }
-    }()
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    }
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_decorated_struct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_decorated_struct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.decorated_struct",
 },
 
-        }
-    }()
-    premadeThriftType_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+    }
+    premadeThriftType_i32 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
 
-        }
-    }()
-    premadeThriftType_list_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_i32 = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_set_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TSet: &metadata.ThriftSetType{
+    }
+    premadeThriftType_set_i32 = &metadata.ThriftType{
+        TSet: &metadata.ThriftSetType{
     ValueType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_module_set_i32_7194 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_set_i32_7194 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.set_i32_7194",
     UnderlyingType: premadeThriftType_set_i32,
 },
 
-        }
-    }()
-    premadeThriftType_map_i32_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_i32_string = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_i32,
     ValueType: premadeThriftType_string,
 },
 
-        }
-    }()
-    premadeThriftType_module_map_i32_string_1261 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_map_i32_string_1261 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.map_i32_string_1261",
     UnderlyingType: premadeThriftType_map_i32_string,
 },
 
-        }
-    }()
-    premadeThriftType_module_ContainerStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ContainerStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ContainerStruct",
 },
 
-        }
-    }()
-    premadeThriftType_module_CppTypeStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_CppTypeStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.CppTypeStruct",
 },
 
-        }
-    }()
-    premadeThriftType_i64 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+    }
+    premadeThriftType_i64 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_VirtualStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_VirtualStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.VirtualStruct",
 },
 
-        }
-    }()
-    premadeThriftType_module_MyStructWithForwardRefEnum = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_MyStructWithForwardRefEnum = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.MyStructWithForwardRefEnum",
 },
 
-        }
-    }()
-    premadeThriftType_bool = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+    }
+    premadeThriftType_bool = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_TrivialNumeric = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_TrivialNumeric = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.TrivialNumeric",
 },
 
-        }
-    }()
-    premadeThriftType_module_TrivialNestedWithDefault = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_TrivialNestedWithDefault = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.TrivialNestedWithDefault",
 },
 
-        }
-    }()
-    premadeThriftType_map_string_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_string_i32 = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_string,
     ValueType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_module_ComplexString = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ComplexString = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ComplexString",
 },
 
-        }
-    }()
-    premadeThriftType_module_ComplexNestedWithDefault = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ComplexNestedWithDefault = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ComplexNestedWithDefault",
 },
 
-        }
-    }()
-    premadeThriftType_byte = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+    }
+    premadeThriftType_byte = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
 
-        }
-    }()
-    premadeThriftType_i16 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+    }
+    premadeThriftType_i16 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_MinPadding = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_MinPadding = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.MinPadding",
 },
 
-        }
-    }()
-    premadeThriftType_module_MinPaddingWithCustomType = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_MinPaddingWithCustomType = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.MinPaddingWithCustomType",
 },
 
-        }
-    }()
-    premadeThriftType_module_MyDataItem = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_MyDataItem = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.MyDataItem",
 },
 
-        }
-    }()
-    premadeThriftType_module_MyStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_MyStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.MyStruct",
 },
 
-        }
-    }()
-    premadeThriftType_module_Renaming = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Renaming = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Renaming",
 },
 
-        }
-    }()
-    premadeThriftType_binary = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+    }
+    premadeThriftType_binary = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_TBinary = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_TBinary = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.TBinary",
     UnderlyingType: premadeThriftType_binary,
 },
 
-        }
-    }()
-    premadeThriftType_module_TBinary_8623 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_TBinary_8623 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.TBinary_8623",
     UnderlyingType: premadeThriftType_module_TBinary,
 },
 
-        }
-    }()
-    premadeThriftType_module_SomeListOfTypeMap_2468 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_SomeListOfTypeMap_2468 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.SomeListOfTypeMap_2468",
     UnderlyingType: included.GetMetadataThriftType("included.SomeListOfTypeMap"),
 },
 
-        }
-    }()
-    premadeThriftType_module_AnnotatedTypes = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_AnnotatedTypes = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.AnnotatedTypes",
 },
 
-        }
-    }()
-    premadeThriftType_module_ForwardUsageStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ForwardUsageStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ForwardUsageStruct",
 },
 
-        }
-    }()
-    premadeThriftType_module_ForwardUsageByRef = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ForwardUsageByRef = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ForwardUsageByRef",
 },
 
-        }
-    }()
-    premadeThriftType_module_ForwardUsageRoot = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ForwardUsageRoot = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ForwardUsageRoot",
 },
 
-        }
-    }()
-    premadeThriftType_module_IncompleteMapDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_IncompleteMapDep = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.IncompleteMapDep",
 },
 
-        }
-    }()
-    premadeThriftType_map_i32_module_IncompleteMapDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_i32_module_IncompleteMapDep = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_i32,
     ValueType: premadeThriftType_module_IncompleteMapDep,
 },
 
-        }
-    }()
-    premadeThriftType_module_IncompleteMap = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_IncompleteMap = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.IncompleteMap",
 },
 
-        }
-    }()
-    premadeThriftType_module_CompleteMapDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_CompleteMapDep = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.CompleteMapDep",
 },
 
-        }
-    }()
-    premadeThriftType_map_i32_module_CompleteMapDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_i32_module_CompleteMapDep = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_i32,
     ValueType: premadeThriftType_module_CompleteMapDep,
 },
 
-        }
-    }()
-    premadeThriftType_module_CompleteMap = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_CompleteMap = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.CompleteMap",
 },
 
-        }
-    }()
-    premadeThriftType_module_IncompleteListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_IncompleteListDep = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.IncompleteListDep",
 },
 
-        }
-    }()
-    premadeThriftType_list_module_IncompleteListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_module_IncompleteListDep = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_module_IncompleteListDep,
 },
 
-        }
-    }()
-    premadeThriftType_module_IncompleteList = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_IncompleteList = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.IncompleteList",
 },
 
-        }
-    }()
-    premadeThriftType_module_CompleteListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_CompleteListDep = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.CompleteListDep",
 },
 
-        }
-    }()
-    premadeThriftType_list_module_CompleteListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_module_CompleteListDep = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_module_CompleteListDep,
 },
 
-        }
-    }()
-    premadeThriftType_module_CompleteList = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_CompleteList = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.CompleteList",
 },
 
-        }
-    }()
-    premadeThriftType_module_AdaptedListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_AdaptedListDep = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.AdaptedListDep",
 },
 
-        }
-    }()
-    premadeThriftType_list_module_AdaptedListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_module_AdaptedListDep = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_module_AdaptedListDep,
 },
 
-        }
-    }()
-    premadeThriftType_module_AdaptedList = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_AdaptedList = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.AdaptedList",
 },
 
-        }
-    }()
-    premadeThriftType_module_DependentAdaptedListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_DependentAdaptedListDep = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.DependentAdaptedListDep",
 },
 
-        }
-    }()
-    premadeThriftType_list_module_DependentAdaptedListDep = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_module_DependentAdaptedListDep = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_module_DependentAdaptedListDep,
 },
 
-        }
-    }()
-    premadeThriftType_module_DependentAdaptedList = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_DependentAdaptedList = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.DependentAdaptedList",
 },
 
-        }
-    }()
-    premadeThriftType_module_list_i32_9187 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_list_i32_9187 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.list_i32_9187",
     UnderlyingType: premadeThriftType_list_i32,
 },
 
-        }
-    }()
-    premadeThriftType_module_set_i32_7070 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_set_i32_7070 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.set_i32_7070",
     UnderlyingType: premadeThriftType_set_i32,
 },
 
-        }
-    }()
-    premadeThriftType_map_i32_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_i32_i32 = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_i32,
     ValueType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_module_map_i32_i32_9565 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_map_i32_i32_9565 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.map_i32_i32_9565",
     UnderlyingType: premadeThriftType_map_i32_i32,
 },
 
-        }
-    }()
-    premadeThriftType_module_string_5252 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_string_5252 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.string_5252",
     UnderlyingType: premadeThriftType_string,
 },
 
-        }
-    }()
-    premadeThriftType_module_i32_9314 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_i32_9314 = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.i32_9314",
     UnderlyingType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_module_AllocatorAware = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_AllocatorAware = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.AllocatorAware",
 },
 
-        }
-    }()
-    premadeThriftType_module_AllocatorAware2 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_AllocatorAware2 = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.AllocatorAware2",
 },
 
-        }
-    }()
-    premadeThriftType_module_IntTypedef = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_IntTypedef = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.IntTypedef",
     UnderlyingType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_module_UintTypedef = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_UintTypedef = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.UintTypedef",
     UnderlyingType: premadeThriftType_module_IntTypedef,
 },
 
-        }
-    }()
-    premadeThriftType_module_TypedefStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_TypedefStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.TypedefStruct",
 },
 
-        }
-    }()
-    premadeThriftType_module_StructWithDoubleUnderscores = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_StructWithDoubleUnderscores = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.StructWithDoubleUnderscores",
 },
 
-        }
-    }()
-    premadeThriftType_map_module_TBinary_i64 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_module_TBinary_i64 = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_module_TBinary,
     ValueType: premadeThriftType_i64,
 },
 
-        }
-    }()
-    premadeThriftType_list_i64 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_i64 = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_i64,
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

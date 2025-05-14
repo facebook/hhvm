@@ -15,258 +15,211 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_thrift_RpcPriority = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.RpcPriority",
-            CodecEnumSpec: &thrift.CodecEnumSpec{
+    premadeCodecTypeSpec_thrift_RpcPriority = &thrift.TypeSpec{
+        FullName: "thrift.RpcPriority",
+        CodecEnumSpec: &thrift.CodecEnumSpec{
     ScopedName: "thrift.RpcPriority",
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_Experimental = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.Experimental",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_Experimental = &thrift.TypeSpec{
+        FullName: "thrift.Experimental",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.Experimental",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewExperimental() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<i32>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
+        FullName: "list<i32>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
 	ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_i32_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<i32, i32>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, i32>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_i32,
     KeyWireType:   thrift.I32,
 	ValueWireType: thrift.I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_ReserveIds = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.ReserveIds",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_ReserveIds = &thrift.TypeSpec{
+        FullName: "thrift.ReserveIds",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.ReserveIds",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewReserveIds() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "bool",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.RequiresBackwardCompatibility",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility = &thrift.TypeSpec{
+        FullName: "thrift.RequiresBackwardCompatibility",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.RequiresBackwardCompatibility",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewRequiresBackwardCompatibility() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_TerseWrite = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.TerseWrite",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_TerseWrite = &thrift.TypeSpec{
+        FullName: "thrift.TerseWrite",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.TerseWrite",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewTerseWrite() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_Box = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.Box",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_Box = &thrift.TypeSpec{
+        FullName: "thrift.Box",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.Box",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewBox() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_Mixin = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.Mixin",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_Mixin = &thrift.TypeSpec{
+        FullName: "thrift.Mixin",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.Mixin",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewMixin() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.SerializeInFieldIdOrder",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder = &thrift.TypeSpec{
+        FullName: "thrift.SerializeInFieldIdOrder",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.SerializeInFieldIdOrder",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewSerializeInFieldIdOrder() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_BitmaskEnum = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.BitmaskEnum",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_BitmaskEnum = &thrift.TypeSpec{
+        FullName: "thrift.BitmaskEnum",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.BitmaskEnum",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewBitmaskEnum() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_ExceptionMessage = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.ExceptionMessage",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_ExceptionMessage = &thrift.TypeSpec{
+        FullName: "thrift.ExceptionMessage",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.ExceptionMessage",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewExceptionMessage() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_InternBox = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.InternBox",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_InternBox = &thrift.TypeSpec{
+        FullName: "thrift.InternBox",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.InternBox",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewInternBox() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_Serial = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.Serial",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_Serial = &thrift.TypeSpec{
+        FullName: "thrift.Serial",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.Serial",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewSerial() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_Uri = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.Uri",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_Uri = &thrift.TypeSpec{
+        FullName: "thrift.Uri",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.Uri",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewUri() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_Priority = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.Priority",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_Priority = &thrift.TypeSpec{
+        FullName: "thrift.Priority",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.Priority",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPriority() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_string_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<string, string>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_string_string = &thrift.TypeSpec{
+        FullName: "map<string, string>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_string,
 	ValueTypeSpec: premadeCodecTypeSpec_string,
     KeyWireType:   thrift.STRING,
 	ValueWireType: thrift.STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.DeprecatedUnvalidatedAnnotations",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations = &thrift.TypeSpec{
+        FullName: "thrift.DeprecatedUnvalidatedAnnotations",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.DeprecatedUnvalidatedAnnotations",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewDeprecatedUnvalidatedAnnotations() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_AllowReservedIdentifier = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.AllowReservedIdentifier",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_AllowReservedIdentifier = &thrift.TypeSpec{
+        FullName: "thrift.AllowReservedIdentifier",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.AllowReservedIdentifier",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAllowReservedIdentifier() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_thrift_AllowReservedFilename = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "thrift.AllowReservedFilename",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_thrift_AllowReservedFilename = &thrift.TypeSpec{
+        FullName: "thrift.AllowReservedFilename",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "thrift.AllowReservedFilename",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAllowReservedFilename() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Experimental = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Experimental = &thrift.StructSpec{
     Name:                 "Experimental",
     ScopedName:           "thrift.Experimental",
     IsUnion:              false,
@@ -278,9 +231,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_ReserveIds = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ReserveIds = &thrift.StructSpec{
     Name:                 "ReserveIds",
     ScopedName:           "thrift.ReserveIds",
     IsUnion:              false,
@@ -312,9 +263,7 @@ var (
         "id_ranges": 1,
     },
 }
-    }()
-    premadeStructSpec_RequiresBackwardCompatibility = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_RequiresBackwardCompatibility = &thrift.StructSpec{
     Name:                 "RequiresBackwardCompatibility",
     ScopedName:           "thrift.RequiresBackwardCompatibility",
     IsUnion:              false,
@@ -336,9 +285,7 @@ var (
         "field_name": 0,
     },
 }
-    }()
-    premadeStructSpec_TerseWrite = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_TerseWrite = &thrift.StructSpec{
     Name:                 "TerseWrite",
     ScopedName:           "thrift.TerseWrite",
     IsUnion:              false,
@@ -350,9 +297,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Box = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Box = &thrift.StructSpec{
     Name:                 "Box",
     ScopedName:           "thrift.Box",
     IsUnion:              false,
@@ -364,9 +309,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Mixin = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Mixin = &thrift.StructSpec{
     Name:                 "Mixin",
     ScopedName:           "thrift.Mixin",
     IsUnion:              false,
@@ -378,9 +321,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_SerializeInFieldIdOrder = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_SerializeInFieldIdOrder = &thrift.StructSpec{
     Name:                 "SerializeInFieldIdOrder",
     ScopedName:           "thrift.SerializeInFieldIdOrder",
     IsUnion:              false,
@@ -392,9 +333,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_BitmaskEnum = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_BitmaskEnum = &thrift.StructSpec{
     Name:                 "BitmaskEnum",
     ScopedName:           "thrift.BitmaskEnum",
     IsUnion:              false,
@@ -406,9 +345,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_ExceptionMessage = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ExceptionMessage = &thrift.StructSpec{
     Name:                 "ExceptionMessage",
     ScopedName:           "thrift.ExceptionMessage",
     IsUnion:              false,
@@ -420,9 +357,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_InternBox = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_InternBox = &thrift.StructSpec{
     Name:                 "InternBox",
     ScopedName:           "thrift.InternBox",
     IsUnion:              false,
@@ -434,9 +369,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Serial = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Serial = &thrift.StructSpec{
     Name:                 "Serial",
     ScopedName:           "thrift.Serial",
     IsUnion:              false,
@@ -448,9 +381,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Uri = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Uri = &thrift.StructSpec{
     Name:                 "Uri",
     ScopedName:           "thrift.Uri",
     IsUnion:              false,
@@ -472,9 +403,7 @@ var (
         "value": 0,
     },
 }
-    }()
-    premadeStructSpec_Priority = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Priority = &thrift.StructSpec{
     Name:                 "Priority",
     ScopedName:           "thrift.Priority",
     IsUnion:              false,
@@ -496,9 +425,7 @@ var (
         "level": 0,
     },
 }
-    }()
-    premadeStructSpec_DeprecatedUnvalidatedAnnotations = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_DeprecatedUnvalidatedAnnotations = &thrift.StructSpec{
     Name:                 "DeprecatedUnvalidatedAnnotations",
     ScopedName:           "thrift.DeprecatedUnvalidatedAnnotations",
     IsUnion:              false,
@@ -520,9 +447,7 @@ var (
         "items": 0,
     },
 }
-    }()
-    premadeStructSpec_AllowReservedIdentifier = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_AllowReservedIdentifier = &thrift.StructSpec{
     Name:                 "AllowReservedIdentifier",
     ScopedName:           "thrift.AllowReservedIdentifier",
     IsUnion:              false,
@@ -534,9 +459,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_AllowReservedFilename = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_AllowReservedFilename = &thrift.StructSpec{
     Name:                 "AllowReservedFilename",
     ScopedName:           "thrift.AllowReservedFilename",
     IsUnion:              false,
@@ -548,7 +471,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

@@ -15,34 +15,29 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_Empty = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Empty",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    premadeCodecTypeSpec_module_Empty = &thrift.TypeSpec{
+        FullName: "module.Empty",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Empty",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewEmpty() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_Nada = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Nada",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_Nada = &thrift.TypeSpec{
+        FullName: "module.Nada",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Nada",
     IsUnion:    true,
     NewFunc:    func() thrift.Struct { return NewNada() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Empty = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Empty = &thrift.StructSpec{
     Name:                 "Empty",
     ScopedName:           "module.Empty",
     IsUnion:              false,
@@ -54,9 +49,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Nada = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Nada = &thrift.StructSpec{
     Name:                 "Nada",
     ScopedName:           "module.Nada",
     IsUnion:              true,
@@ -68,7 +61,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

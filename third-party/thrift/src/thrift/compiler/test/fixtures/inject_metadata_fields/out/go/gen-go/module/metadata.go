@@ -21,44 +21,34 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_Fields = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Fields = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Fields",
 },
 
-        }
-    }()
-    premadeThriftType_module_FieldsInjectedToEmptyStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_FieldsInjectedToEmptyStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.FieldsInjectedToEmptyStruct",
 },
 
-        }
-    }()
-    premadeThriftType_module_FieldsInjectedToStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_FieldsInjectedToStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.FieldsInjectedToStruct",
 },
 
-        }
-    }()
-    premadeThriftType_module_FieldsInjectedWithIncludedStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_FieldsInjectedWithIncludedStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.FieldsInjectedWithIncludedStruct",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

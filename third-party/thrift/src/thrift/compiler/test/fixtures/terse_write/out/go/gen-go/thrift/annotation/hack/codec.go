@@ -15,152 +15,125 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_FieldWrapper = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.FieldWrapper",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_FieldWrapper = &thrift.TypeSpec{
+        FullName: "hack.FieldWrapper",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.FieldWrapper",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFieldWrapper() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_Wrapper = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.Wrapper",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_Wrapper = &thrift.TypeSpec{
+        FullName: "hack.Wrapper",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Wrapper",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewWrapper() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_Adapter = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.Adapter",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_Adapter = &thrift.TypeSpec{
+        FullName: "hack.Adapter",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Adapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_SkipCodegen = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.SkipCodegen",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_SkipCodegen = &thrift.TypeSpec{
+        FullName: "hack.SkipCodegen",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.SkipCodegen",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewSkipCodegen() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_Name = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.Name",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_Name = &thrift.TypeSpec{
+        FullName: "hack.Name",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Name",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewName() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<string>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_UnionEnumAttributes = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.UnionEnumAttributes",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_UnionEnumAttributes = &thrift.TypeSpec{
+        FullName: "hack.UnionEnumAttributes",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.UnionEnumAttributes",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewUnionEnumAttributes() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_StructTrait = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.StructTrait",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_StructTrait = &thrift.TypeSpec{
+        FullName: "hack.StructTrait",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.StructTrait",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructTrait() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_Attributes = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.Attributes",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_Attributes = &thrift.TypeSpec{
+        FullName: "hack.Attributes",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Attributes",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAttributes() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_StructAsTrait = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.StructAsTrait",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_StructAsTrait = &thrift.TypeSpec{
+        FullName: "hack.StructAsTrait",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.StructAsTrait",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructAsTrait() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_ModuleInternal = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.ModuleInternal",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_ModuleInternal = &thrift.TypeSpec{
+        FullName: "hack.ModuleInternal",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.ModuleInternal",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewModuleInternal() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hack_GenerateClientMethodsWithHeaders = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hack.GenerateClientMethodsWithHeaders",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hack_GenerateClientMethodsWithHeaders = &thrift.TypeSpec{
+        FullName: "hack.GenerateClientMethodsWithHeaders",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.GenerateClientMethodsWithHeaders",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewGenerateClientMethodsWithHeaders() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_FieldWrapper = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_FieldWrapper = &thrift.StructSpec{
     Name:                 "FieldWrapper",
     ScopedName:           "hack.FieldWrapper",
     IsUnion:              false,
@@ -182,9 +155,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Wrapper = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Wrapper = &thrift.StructSpec{
     Name:                 "Wrapper",
     ScopedName:           "hack.Wrapper",
     IsUnion:              false,
@@ -226,9 +197,7 @@ var (
         "extraNamespace": 2,
     },
 }
-    }()
-    premadeStructSpec_Adapter = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Adapter = &thrift.StructSpec{
     Name:                 "Adapter",
     ScopedName:           "hack.Adapter",
     IsUnion:              false,
@@ -250,9 +219,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_SkipCodegen = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_SkipCodegen = &thrift.StructSpec{
     Name:                 "SkipCodegen",
     ScopedName:           "hack.SkipCodegen",
     IsUnion:              false,
@@ -274,9 +241,7 @@ var (
         "reason": 0,
     },
 }
-    }()
-    premadeStructSpec_Name = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
     ScopedName:           "hack.Name",
     IsUnion:              false,
@@ -308,9 +273,7 @@ var (
         "reason": 1,
     },
 }
-    }()
-    premadeStructSpec_UnionEnumAttributes = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_UnionEnumAttributes = &thrift.StructSpec{
     Name:                 "UnionEnumAttributes",
     ScopedName:           "hack.UnionEnumAttributes",
     IsUnion:              false,
@@ -332,9 +295,7 @@ var (
         "attributes": 0,
     },
 }
-    }()
-    premadeStructSpec_StructTrait = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_StructTrait = &thrift.StructSpec{
     Name:                 "StructTrait",
     ScopedName:           "hack.StructTrait",
     IsUnion:              false,
@@ -356,9 +317,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Attributes = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Attributes = &thrift.StructSpec{
     Name:                 "Attributes",
     ScopedName:           "hack.Attributes",
     IsUnion:              false,
@@ -380,9 +339,7 @@ var (
         "attributes": 0,
     },
 }
-    }()
-    premadeStructSpec_StructAsTrait = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_StructAsTrait = &thrift.StructSpec{
     Name:                 "StructAsTrait",
     ScopedName:           "hack.StructAsTrait",
     IsUnion:              false,
@@ -394,9 +351,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_ModuleInternal = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ModuleInternal = &thrift.StructSpec{
     Name:                 "ModuleInternal",
     ScopedName:           "hack.ModuleInternal",
     IsUnion:              false,
@@ -408,9 +363,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_GenerateClientMethodsWithHeaders = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_GenerateClientMethodsWithHeaders = &thrift.StructSpec{
     Name:                 "GenerateClientMethodsWithHeaders",
     ScopedName:           "hack.GenerateClientMethodsWithHeaders",
     IsUnion:              false,
@@ -422,7 +375,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

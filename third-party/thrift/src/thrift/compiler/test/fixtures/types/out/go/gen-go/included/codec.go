@@ -15,66 +15,54 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_i32_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<i32, string>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_i32_string = &thrift.TypeSpec{
+        FullName: "map<i32, string>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_string,
     KeyWireType:   thrift.I32,
 	ValueWireType: thrift.STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_included_SomeMap = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "included.SomeMap",
-            CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    }
+    premadeCodecTypeSpec_included_SomeMap = &thrift.TypeSpec{
+        FullName: "included.SomeMap",
+        CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "included.SomeMap",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i32_string,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_included_SomeMap = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<included.SomeMap>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_included_SomeMap = &thrift.TypeSpec{
+        FullName: "list<included.SomeMap>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
 	ElementTypeSpec: premadeCodecTypeSpec_included_SomeMap,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_included_SomeListOfTypeMap = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "included.SomeListOfTypeMap",
-            CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    }
+    premadeCodecTypeSpec_included_SomeListOfTypeMap = &thrift.TypeSpec{
+        FullName: "included.SomeListOfTypeMap",
+        CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "included.SomeListOfTypeMap",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_list_included_SomeMap,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs

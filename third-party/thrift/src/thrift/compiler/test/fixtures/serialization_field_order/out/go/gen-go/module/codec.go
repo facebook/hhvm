@@ -15,43 +15,36 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_Foo = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Foo",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_Foo = &thrift.TypeSpec{
+        FullName: "module.Foo",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Foo",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFoo() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_Foo2 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Foo2",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_Foo2 = &thrift.TypeSpec{
+        FullName: "module.Foo2",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Foo2",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFoo2() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Foo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Foo = &thrift.StructSpec{
     Name:                 "Foo",
     ScopedName:           "module.Foo",
     IsUnion:              false,
@@ -93,9 +86,7 @@ var (
         "field1": 2,
     },
 }
-    }()
-    premadeStructSpec_Foo2 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Foo2 = &thrift.StructSpec{
     Name:                 "Foo2",
     ScopedName:           "module.Foo2",
     IsUnion:              false,
@@ -137,7 +128,6 @@ var (
         "field1": 2,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

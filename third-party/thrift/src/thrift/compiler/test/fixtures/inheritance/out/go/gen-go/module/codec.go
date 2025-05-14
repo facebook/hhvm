@@ -15,21 +15,18 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "void",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqMyRootDoRoot = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqMyRootDoRoot = &thrift.StructSpec{
     Name:                 "reqMyRootDoRoot",
     ScopedName:           "module.reqMyRootDoRoot",
     IsUnion:              false,
@@ -41,9 +38,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respMyRootDoRoot = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respMyRootDoRoot = &thrift.StructSpec{
     Name:                 "respMyRootDoRoot",
     ScopedName:           "module.respMyRootDoRoot",
     IsUnion:              false,
@@ -55,9 +50,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqMyNodeDoMid = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqMyNodeDoMid = &thrift.StructSpec{
     Name:                 "reqMyNodeDoMid",
     ScopedName:           "module.reqMyNodeDoMid",
     IsUnion:              false,
@@ -69,9 +62,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respMyNodeDoMid = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respMyNodeDoMid = &thrift.StructSpec{
     Name:                 "respMyNodeDoMid",
     ScopedName:           "module.respMyNodeDoMid",
     IsUnion:              false,
@@ -83,9 +74,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqMyLeafDoLeaf = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqMyLeafDoLeaf = &thrift.StructSpec{
     Name:                 "reqMyLeafDoLeaf",
     ScopedName:           "module.reqMyLeafDoLeaf",
     IsUnion:              false,
@@ -97,9 +86,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respMyLeafDoLeaf = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respMyLeafDoLeaf = &thrift.StructSpec{
     Name:                 "respMyLeafDoLeaf",
     ScopedName:           "module.respMyLeafDoLeaf",
     IsUnion:              false,
@@ -111,7 +98,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

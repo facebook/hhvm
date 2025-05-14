@@ -17,23 +17,20 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_MyStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.MyStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    premadeCodecTypeSpec_module_MyStruct = &thrift.TypeSpec{
+        FullName: "module.MyStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.MyStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewMyStruct() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_MyStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_MyStruct = &thrift.StructSpec{
     Name:                 "MyStruct",
     ScopedName:           "module.MyStruct",
     IsUnion:              false,
@@ -75,7 +72,6 @@ var (
         "MyIncludedInt": 2,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

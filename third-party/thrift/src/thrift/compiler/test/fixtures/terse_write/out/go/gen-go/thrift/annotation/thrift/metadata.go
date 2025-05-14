@@ -19,186 +19,140 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_thrift_RpcPriority = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TEnum: &metadata.ThriftEnumType{
+    premadeThriftType_thrift_RpcPriority = &metadata.ThriftType{
+        TEnum: &metadata.ThriftEnumType{
     Name: "thrift.RpcPriority",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_Experimental = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_Experimental = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.Experimental",
 },
 
-        }
-    }()
-    premadeThriftType_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+    }
+    premadeThriftType_i32 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
 
-        }
-    }()
-    premadeThriftType_list_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_i32 = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_map_i32_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_i32_i32 = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_i32,
     ValueType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_thrift_ReserveIds = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_ReserveIds = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.ReserveIds",
 },
 
-        }
-    }()
-    premadeThriftType_bool = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+    }
+    premadeThriftType_bool = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
 
-        }
-    }()
-    premadeThriftType_thrift_RequiresBackwardCompatibility = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_RequiresBackwardCompatibility = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.RequiresBackwardCompatibility",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_TerseWrite = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_TerseWrite = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.TerseWrite",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_Box = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_Box = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.Box",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_Mixin = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_Mixin = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.Mixin",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_SerializeInFieldIdOrder = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_SerializeInFieldIdOrder = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.SerializeInFieldIdOrder",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_BitmaskEnum = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_BitmaskEnum = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.BitmaskEnum",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_ExceptionMessage = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_ExceptionMessage = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.ExceptionMessage",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_InternBox = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_InternBox = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.InternBox",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_Serial = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_Serial = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.Serial",
 },
 
-        }
-    }()
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    }
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_thrift_Uri = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_Uri = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.Uri",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_Priority = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_Priority = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.Priority",
 },
 
-        }
-    }()
-    premadeThriftType_map_string_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_string_string = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_string,
     ValueType: premadeThriftType_string,
 },
 
-        }
-    }()
-    premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.DeprecatedUnvalidatedAnnotations",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_AllowReservedIdentifier = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_AllowReservedIdentifier = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.AllowReservedIdentifier",
 },
 
-        }
-    }()
-    premadeThriftType_thrift_AllowReservedFilename = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_thrift_AllowReservedFilename = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "thrift.AllowReservedFilename",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

@@ -15,138 +15,113 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "void",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<i32>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
+        FullName: "list<i32>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
 	ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_i32_list_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<i32, list<i32>>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_i32_list_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, list<i32>>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_list_i32,
     KeyWireType:   thrift.I32,
 	ValueWireType: thrift.LIST,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_set_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "set<i32>",
-            CodecSetSpec: &thrift.CodecSetSpec{
+    }
+    premadeCodecTypeSpec_set_i32 = &thrift.TypeSpec{
+        FullName: "set<i32>",
+        CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.I32,
 	ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_i32_set_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<i32, set<i32>>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, set<i32>>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_set_i32,
     KeyWireType:   thrift.I32,
 	ValueWireType: thrift.SET,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_i32_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<i32, i32>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, i32>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_i32,
     KeyWireType:   thrift.I32,
 	ValueWireType: thrift.I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_map_i32_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<map<i32, i32>>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "list<map<i32, i32>>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
 	ElementTypeSpec: premadeCodecTypeSpec_map_i32_i32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_set_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<set<i32>>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_set_i32 = &thrift.TypeSpec{
+        FullName: "list<set<i32>>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.SET,
 	ElementTypeSpec: premadeCodecTypeSpec_set_i32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_i32_map_i32_set_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<i32, map<i32, set<i32>>>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_i32_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, map<i32, set<i32>>>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_map_i32_set_i32,
     KeyWireType:   thrift.I32,
 	ValueWireType: thrift.MAP,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_map_i32_map_i32_set_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<map<i32, map<i32, set<i32>>>>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_map_i32_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "list<map<i32, map<i32, set<i32>>>>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
 	ElementTypeSpec: premadeCodecTypeSpec_map_i32_map_i32_set_i32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_list_map_i32_map_i32_set_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<list<map<i32, map<i32, set<i32>>>>>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_list_map_i32_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "list<list<map<i32, map<i32, set<i32>>>>>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.LIST,
 	ElementTypeSpec: premadeCodecTypeSpec_list_map_i32_map_i32_set_i32,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqNestedContainersMapList = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqNestedContainersMapList = &thrift.StructSpec{
     Name:                 "reqNestedContainersMapList",
     ScopedName:           "module.reqNestedContainersMapList",
     IsUnion:              false,
@@ -168,9 +143,7 @@ var (
         "foo": 0,
     },
 }
-    }()
-    premadeStructSpec_respNestedContainersMapList = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respNestedContainersMapList = &thrift.StructSpec{
     Name:                 "respNestedContainersMapList",
     ScopedName:           "module.respNestedContainersMapList",
     IsUnion:              false,
@@ -182,9 +155,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqNestedContainersMapSet = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqNestedContainersMapSet = &thrift.StructSpec{
     Name:                 "reqNestedContainersMapSet",
     ScopedName:           "module.reqNestedContainersMapSet",
     IsUnion:              false,
@@ -206,9 +177,7 @@ var (
         "foo": 0,
     },
 }
-    }()
-    premadeStructSpec_respNestedContainersMapSet = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respNestedContainersMapSet = &thrift.StructSpec{
     Name:                 "respNestedContainersMapSet",
     ScopedName:           "module.respNestedContainersMapSet",
     IsUnion:              false,
@@ -220,9 +189,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqNestedContainersListMap = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqNestedContainersListMap = &thrift.StructSpec{
     Name:                 "reqNestedContainersListMap",
     ScopedName:           "module.reqNestedContainersListMap",
     IsUnion:              false,
@@ -244,9 +211,7 @@ var (
         "foo": 0,
     },
 }
-    }()
-    premadeStructSpec_respNestedContainersListMap = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respNestedContainersListMap = &thrift.StructSpec{
     Name:                 "respNestedContainersListMap",
     ScopedName:           "module.respNestedContainersListMap",
     IsUnion:              false,
@@ -258,9 +223,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqNestedContainersListSet = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqNestedContainersListSet = &thrift.StructSpec{
     Name:                 "reqNestedContainersListSet",
     ScopedName:           "module.reqNestedContainersListSet",
     IsUnion:              false,
@@ -282,9 +245,7 @@ var (
         "foo": 0,
     },
 }
-    }()
-    premadeStructSpec_respNestedContainersListSet = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respNestedContainersListSet = &thrift.StructSpec{
     Name:                 "respNestedContainersListSet",
     ScopedName:           "module.respNestedContainersListSet",
     IsUnion:              false,
@@ -296,9 +257,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqNestedContainersTurtles = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqNestedContainersTurtles = &thrift.StructSpec{
     Name:                 "reqNestedContainersTurtles",
     ScopedName:           "module.reqNestedContainersTurtles",
     IsUnion:              false,
@@ -320,9 +279,7 @@ var (
         "foo": 0,
     },
 }
-    }()
-    premadeStructSpec_respNestedContainersTurtles = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respNestedContainersTurtles = &thrift.StructSpec{
     Name:                 "respNestedContainersTurtles",
     ScopedName:           "module.respNestedContainersTurtles",
     IsUnion:              false,
@@ -334,7 +291,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

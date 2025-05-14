@@ -15,194 +15,159 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Name = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Name",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Name = &thrift.TypeSpec{
+        FullName: "rust.Name",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Name",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewName() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Copy = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Copy",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Copy = &thrift.TypeSpec{
+        FullName: "rust.Copy",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Copy",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewCopy() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_RequestContext = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.RequestContext",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_RequestContext = &thrift.TypeSpec{
+        FullName: "rust.RequestContext",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.RequestContext",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewRequestContext() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Arc = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Arc",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Arc = &thrift.TypeSpec{
+        FullName: "rust.Arc",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Arc",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewArc() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Box = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Box",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Box = &thrift.TypeSpec{
+        FullName: "rust.Box",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Box",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewBox() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Exhaustive = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Exhaustive",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Exhaustive = &thrift.TypeSpec{
+        FullName: "rust.Exhaustive",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Exhaustive",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewExhaustive() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Ord = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Ord",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Ord = &thrift.TypeSpec{
+        FullName: "rust.Ord",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Ord",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewOrd() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_NewType = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.NewType",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_NewType = &thrift.TypeSpec{
+        FullName: "rust.NewType",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.NewType",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewNewType_() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Type = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Type",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Type = &thrift.TypeSpec{
+        FullName: "rust.Type",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Type",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewType() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "bool",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Serde = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Serde",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Serde = &thrift.TypeSpec{
+        FullName: "rust.Serde",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Serde",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewSerde() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Mod = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Mod",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Mod = &thrift.TypeSpec{
+        FullName: "rust.Mod",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Mod",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewMod() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Adapter = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Adapter",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Adapter = &thrift.TypeSpec{
+        FullName: "rust.Adapter",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Adapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<string>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_Derive = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.Derive",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_Derive = &thrift.TypeSpec{
+        FullName: "rust.Derive",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.Derive",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewDerive() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_rust_ServiceExn = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "rust.ServiceExn",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_rust_ServiceExn = &thrift.TypeSpec{
+        FullName: "rust.ServiceExn",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "rust.ServiceExn",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewServiceExn() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Name = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
     ScopedName:           "rust.Name",
     IsUnion:              false,
@@ -224,9 +189,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Copy = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Copy = &thrift.StructSpec{
     Name:                 "Copy",
     ScopedName:           "rust.Copy",
     IsUnion:              false,
@@ -238,9 +201,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_RequestContext = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_RequestContext = &thrift.StructSpec{
     Name:                 "RequestContext",
     ScopedName:           "rust.RequestContext",
     IsUnion:              false,
@@ -252,9 +213,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Arc = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Arc = &thrift.StructSpec{
     Name:                 "Arc",
     ScopedName:           "rust.Arc",
     IsUnion:              false,
@@ -266,9 +225,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Box = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Box = &thrift.StructSpec{
     Name:                 "Box",
     ScopedName:           "rust.Box",
     IsUnion:              false,
@@ -280,9 +237,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Exhaustive = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Exhaustive = &thrift.StructSpec{
     Name:                 "Exhaustive",
     ScopedName:           "rust.Exhaustive",
     IsUnion:              false,
@@ -294,9 +249,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Ord = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Ord = &thrift.StructSpec{
     Name:                 "Ord",
     ScopedName:           "rust.Ord",
     IsUnion:              false,
@@ -308,9 +261,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_NewType = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_NewType = &thrift.StructSpec{
     Name:                 "NewType",
     ScopedName:           "rust.NewType",
     IsUnion:              false,
@@ -322,9 +273,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Type = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Type = &thrift.StructSpec{
     Name:                 "Type",
     ScopedName:           "rust.Type",
     IsUnion:              false,
@@ -346,9 +295,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Serde = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Serde = &thrift.StructSpec{
     Name:                 "Serde",
     ScopedName:           "rust.Serde",
     IsUnion:              false,
@@ -370,9 +317,7 @@ var (
         "enabled": 0,
     },
 }
-    }()
-    premadeStructSpec_Mod = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Mod = &thrift.StructSpec{
     Name:                 "Mod",
     ScopedName:           "rust.Mod",
     IsUnion:              false,
@@ -394,9 +339,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Adapter = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Adapter = &thrift.StructSpec{
     Name:                 "Adapter",
     ScopedName:           "rust.Adapter",
     IsUnion:              false,
@@ -418,9 +361,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Derive = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Derive = &thrift.StructSpec{
     Name:                 "Derive",
     ScopedName:           "rust.Derive",
     IsUnion:              false,
@@ -442,9 +383,7 @@ var (
         "derives": 0,
     },
 }
-    }()
-    premadeStructSpec_ServiceExn = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ServiceExn = &thrift.StructSpec{
     Name:                 "ServiceExn",
     ScopedName:           "rust.ServiceExn",
     IsUnion:              false,
@@ -466,7 +405,6 @@ var (
         "anyhow_to_application_exn": 0,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

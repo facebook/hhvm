@@ -19,22 +19,18 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_Empty = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    premadeThriftType_module_Empty = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Empty",
 },
 
-        }
-    }()
-    premadeThriftType_module_Nada = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TUnion: &metadata.ThriftUnionType{
+    }
+    premadeThriftType_module_Nada = &metadata.ThriftType{
+        TUnion: &metadata.ThriftUnionType{
     Name: "module.Nada",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

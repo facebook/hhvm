@@ -19,26 +19,20 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+    }
+    premadeThriftType_i32 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
 
-        }
-    }()
-    premadeThriftType_shared_DoSomethingResult = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_shared_DoSomethingResult = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "shared.DoSomethingResult",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

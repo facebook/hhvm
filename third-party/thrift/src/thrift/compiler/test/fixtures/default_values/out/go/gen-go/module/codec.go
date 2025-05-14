@@ -15,54 +15,45 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_TrivialStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.TrivialStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_TrivialStruct = &thrift.TypeSpec{
+        FullName: "module.TrivialStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.TrivialStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewTrivialStruct() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.StructWithNoCustomDefaultValues",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues = &thrift.TypeSpec{
+        FullName: "module.StructWithNoCustomDefaultValues",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.StructWithNoCustomDefaultValues",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructWithNoCustomDefaultValues() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_StructWithCustomDefaultValues = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.StructWithCustomDefaultValues",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_StructWithCustomDefaultValues = &thrift.TypeSpec{
+        FullName: "module.StructWithCustomDefaultValues",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.StructWithCustomDefaultValues",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructWithCustomDefaultValues() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_TrivialStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_TrivialStruct = &thrift.StructSpec{
     Name:                 "TrivialStruct",
     ScopedName:           "module.TrivialStruct",
     IsUnion:              false,
@@ -84,9 +75,7 @@ var (
         "int_value": 0,
     },
 }
-    }()
-    premadeStructSpec_StructWithNoCustomDefaultValues = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_StructWithNoCustomDefaultValues = &thrift.StructSpec{
     Name:                 "StructWithNoCustomDefaultValues",
     ScopedName:           "module.StructWithNoCustomDefaultValues",
     IsUnion:              false,
@@ -158,9 +147,7 @@ var (
         "required_struct": 5,
     },
 }
-    }()
-    premadeStructSpec_StructWithCustomDefaultValues = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_StructWithCustomDefaultValues = &thrift.StructSpec{
     Name:                 "StructWithCustomDefaultValues",
     ScopedName:           "module.StructWithCustomDefaultValues",
     IsUnion:              false,
@@ -232,7 +219,6 @@ var (
         "required_struct": 5,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

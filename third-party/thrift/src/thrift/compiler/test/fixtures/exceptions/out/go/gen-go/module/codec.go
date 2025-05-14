@@ -15,116 +15,95 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_Fiery = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Fiery",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_Fiery = &thrift.TypeSpec{
+        FullName: "module.Fiery",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Fiery",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFiery() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_Serious = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Serious",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_Serious = &thrift.TypeSpec{
+        FullName: "module.Serious",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Serious",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewSerious() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_ComplexFieldNames = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.ComplexFieldNames",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_ComplexFieldNames = &thrift.TypeSpec{
+        FullName: "module.ComplexFieldNames",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.ComplexFieldNames",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewComplexFieldNames() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_CustomFieldNames = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.CustomFieldNames",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_CustomFieldNames = &thrift.TypeSpec{
+        FullName: "module.CustomFieldNames",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.CustomFieldNames",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewCustomFieldNames() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_ExceptionWithPrimitiveField = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.ExceptionWithPrimitiveField",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_ExceptionWithPrimitiveField = &thrift.TypeSpec{
+        FullName: "module.ExceptionWithPrimitiveField",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.ExceptionWithPrimitiveField",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewExceptionWithPrimitiveField() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.ExceptionWithStructuredAnnotation",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation = &thrift.TypeSpec{
+        FullName: "module.ExceptionWithStructuredAnnotation",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.ExceptionWithStructuredAnnotation",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewExceptionWithStructuredAnnotation() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_Banal = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Banal",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_Banal = &thrift.TypeSpec{
+        FullName: "module.Banal",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Banal",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewBanal() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "void",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Fiery = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Fiery = &thrift.StructSpec{
     Name:                 "Fiery",
     ScopedName:           "module.Fiery",
     IsUnion:              false,
@@ -146,9 +125,7 @@ var (
         "message": 0,
     },
 }
-    }()
-    premadeStructSpec_Serious = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Serious = &thrift.StructSpec{
     Name:                 "Serious",
     ScopedName:           "module.Serious",
     IsUnion:              false,
@@ -170,9 +147,7 @@ var (
         "sonnet": 0,
     },
 }
-    }()
-    premadeStructSpec_ComplexFieldNames = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ComplexFieldNames = &thrift.StructSpec{
     Name:                 "ComplexFieldNames",
     ScopedName:           "module.ComplexFieldNames",
     IsUnion:              false,
@@ -204,9 +179,7 @@ var (
         "internal_error_message": 1,
     },
 }
-    }()
-    premadeStructSpec_CustomFieldNames = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_CustomFieldNames = &thrift.StructSpec{
     Name:                 "CustomFieldNames",
     ScopedName:           "module.CustomFieldNames",
     IsUnion:              false,
@@ -238,9 +211,7 @@ var (
         "internal_error_message": 1,
     },
 }
-    }()
-    premadeStructSpec_ExceptionWithPrimitiveField = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ExceptionWithPrimitiveField = &thrift.StructSpec{
     Name:                 "ExceptionWithPrimitiveField",
     ScopedName:           "module.ExceptionWithPrimitiveField",
     IsUnion:              false,
@@ -272,9 +243,7 @@ var (
         "error_code": 1,
     },
 }
-    }()
-    premadeStructSpec_ExceptionWithStructuredAnnotation = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ExceptionWithStructuredAnnotation = &thrift.StructSpec{
     Name:                 "ExceptionWithStructuredAnnotation",
     ScopedName:           "module.ExceptionWithStructuredAnnotation",
     IsUnion:              false,
@@ -306,9 +275,7 @@ var (
         "error_code": 1,
     },
 }
-    }()
-    premadeStructSpec_Banal = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Banal = &thrift.StructSpec{
     Name:                 "Banal",
     ScopedName:           "module.Banal",
     IsUnion:              false,
@@ -320,9 +287,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqRaiserDoBland = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqRaiserDoBland = &thrift.StructSpec{
     Name:                 "reqRaiserDoBland",
     ScopedName:           "module.reqRaiserDoBland",
     IsUnion:              false,
@@ -334,9 +299,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respRaiserDoBland = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respRaiserDoBland = &thrift.StructSpec{
     Name:                 "respRaiserDoBland",
     ScopedName:           "module.respRaiserDoBland",
     IsUnion:              false,
@@ -348,9 +311,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqRaiserDoRaise = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqRaiserDoRaise = &thrift.StructSpec{
     Name:                 "reqRaiserDoRaise",
     ScopedName:           "module.reqRaiserDoRaise",
     IsUnion:              false,
@@ -362,9 +323,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respRaiserDoRaise = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respRaiserDoRaise = &thrift.StructSpec{
     Name:                 "respRaiserDoRaise",
     ScopedName:           "module.respRaiserDoRaise",
     IsUnion:              false,
@@ -406,9 +365,7 @@ var (
         "s": 2,
     },
 }
-    }()
-    premadeStructSpec_reqRaiserGet200 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqRaiserGet200 = &thrift.StructSpec{
     Name:                 "reqRaiserGet200",
     ScopedName:           "module.reqRaiserGet200",
     IsUnion:              false,
@@ -420,9 +377,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respRaiserGet200 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respRaiserGet200 = &thrift.StructSpec{
     Name:                 "respRaiserGet200",
     ScopedName:           "module.respRaiserGet200",
     IsUnion:              false,
@@ -444,9 +399,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqRaiserGet500 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqRaiserGet500 = &thrift.StructSpec{
     Name:                 "reqRaiserGet500",
     ScopedName:           "module.reqRaiserGet500",
     IsUnion:              false,
@@ -458,9 +411,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respRaiserGet500 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respRaiserGet500 = &thrift.StructSpec{
     Name:                 "respRaiserGet500",
     ScopedName:           "module.respRaiserGet500",
     IsUnion:              false,
@@ -512,7 +463,6 @@ var (
         "s": 3,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

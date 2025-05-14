@@ -15,118 +15,97 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_python_Py3Hidden = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.Py3Hidden",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    premadeCodecTypeSpec_python_Py3Hidden = &thrift.TypeSpec{
+        FullName: "python.Py3Hidden",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Py3Hidden",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPy3Hidden() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_python_PyDeprecatedHidden = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.PyDeprecatedHidden",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_python_PyDeprecatedHidden = &thrift.TypeSpec{
+        FullName: "python.PyDeprecatedHidden",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.PyDeprecatedHidden",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPyDeprecatedHidden() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_python_Flags = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.Flags",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_python_Flags = &thrift.TypeSpec{
+        FullName: "python.Flags",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Flags",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFlags() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_python_Name = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.Name",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_python_Name = &thrift.TypeSpec{
+        FullName: "python.Name",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Name",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewName() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_python_Adapter = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.Adapter",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_python_Adapter = &thrift.TypeSpec{
+        FullName: "python.Adapter",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Adapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "bool",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_python_UseCAPI = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.UseCAPI",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_python_UseCAPI = &thrift.TypeSpec{
+        FullName: "python.UseCAPI",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.UseCAPI",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewUseCAPI() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_python_Py3EnableCppAdapter = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.Py3EnableCppAdapter",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_python_Py3EnableCppAdapter = &thrift.TypeSpec{
+        FullName: "python.Py3EnableCppAdapter",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Py3EnableCppAdapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPy3EnableCppAdapter() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "python.MigrationBlockingAllowInheritance",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance = &thrift.TypeSpec{
+        FullName: "python.MigrationBlockingAllowInheritance",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.MigrationBlockingAllowInheritance",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewMigrationBlockingAllowInheritance() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Py3Hidden = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Py3Hidden = &thrift.StructSpec{
     Name:                 "Py3Hidden",
     ScopedName:           "python.Py3Hidden",
     IsUnion:              false,
@@ -138,9 +117,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_PyDeprecatedHidden = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_PyDeprecatedHidden = &thrift.StructSpec{
     Name:                 "PyDeprecatedHidden",
     ScopedName:           "python.PyDeprecatedHidden",
     IsUnion:              false,
@@ -162,9 +139,7 @@ var (
         "reason": 0,
     },
 }
-    }()
-    premadeStructSpec_Flags = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Flags = &thrift.StructSpec{
     Name:                 "Flags",
     ScopedName:           "python.Flags",
     IsUnion:              false,
@@ -176,9 +151,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_Name = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
     ScopedName:           "python.Name",
     IsUnion:              false,
@@ -200,9 +173,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Adapter = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Adapter = &thrift.StructSpec{
     Name:                 "Adapter",
     ScopedName:           "python.Adapter",
     IsUnion:              false,
@@ -234,9 +205,7 @@ var (
         "typeHint": 1,
     },
 }
-    }()
-    premadeStructSpec_UseCAPI = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_UseCAPI = &thrift.StructSpec{
     Name:                 "UseCAPI",
     ScopedName:           "python.UseCAPI",
     IsUnion:              false,
@@ -258,9 +227,7 @@ var (
         "serialize": 0,
     },
 }
-    }()
-    premadeStructSpec_Py3EnableCppAdapter = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Py3EnableCppAdapter = &thrift.StructSpec{
     Name:                 "Py3EnableCppAdapter",
     ScopedName:           "python.Py3EnableCppAdapter",
     IsUnion:              false,
@@ -272,9 +239,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_MigrationBlockingAllowInheritance = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_MigrationBlockingAllowInheritance = &thrift.StructSpec{
     Name:                 "MigrationBlockingAllowInheritance",
     ScopedName:           "python.MigrationBlockingAllowInheritance",
     IsUnion:              false,
@@ -286,7 +251,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

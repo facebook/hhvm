@@ -19,44 +19,34 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_go_Name = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_go_Name = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "go.Name",
 },
 
-        }
-    }()
-    premadeThriftType_go_Tag = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_go_Tag = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "go.Tag",
 },
 
-        }
-    }()
-    premadeThriftType_go_MinimizePadding = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_go_MinimizePadding = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "go.MinimizePadding",
 },
 
-        }
-    }()
-    premadeThriftType_go_UseReflectCodec = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_go_UseReflectCodec = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "go.UseReflectCodec",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

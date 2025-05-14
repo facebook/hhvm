@@ -15,65 +15,54 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_go_Name = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "go.Name",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_go_Name = &thrift.TypeSpec{
+        FullName: "go.Name",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "go.Name",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewName() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_go_Tag = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "go.Tag",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_go_Tag = &thrift.TypeSpec{
+        FullName: "go.Tag",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "go.Tag",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewTag() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_go_MinimizePadding = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "go.MinimizePadding",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_go_MinimizePadding = &thrift.TypeSpec{
+        FullName: "go.MinimizePadding",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "go.MinimizePadding",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewMinimizePadding() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_go_UseReflectCodec = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "go.UseReflectCodec",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_go_UseReflectCodec = &thrift.TypeSpec{
+        FullName: "go.UseReflectCodec",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "go.UseReflectCodec",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewUseReflectCodec() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Name = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
     ScopedName:           "go.Name",
     IsUnion:              false,
@@ -95,9 +84,7 @@ var (
         "name": 0,
     },
 }
-    }()
-    premadeStructSpec_Tag = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Tag = &thrift.StructSpec{
     Name:                 "Tag",
     ScopedName:           "go.Tag",
     IsUnion:              false,
@@ -119,9 +106,7 @@ var (
         "tag": 0,
     },
 }
-    }()
-    premadeStructSpec_MinimizePadding = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_MinimizePadding = &thrift.StructSpec{
     Name:                 "MinimizePadding",
     ScopedName:           "go.MinimizePadding",
     IsUnion:              false,
@@ -133,9 +118,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_UseReflectCodec = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_UseReflectCodec = &thrift.StructSpec{
     Name:                 "UseReflectCodec",
     ScopedName:           "go.UseReflectCodec",
     IsUnion:              false,
@@ -147,7 +130,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

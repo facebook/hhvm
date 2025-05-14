@@ -15,32 +15,27 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i64 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i64",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_transitive_Foo = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "transitive.Foo",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_transitive_Foo = &thrift.TypeSpec{
+        FullName: "transitive.Foo",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "transitive.Foo",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFoo() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Foo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Foo = &thrift.StructSpec{
     Name:                 "Foo",
     ScopedName:           "transitive.Foo",
     IsUnion:              false,
@@ -62,7 +57,6 @@ var (
         "a": 0,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

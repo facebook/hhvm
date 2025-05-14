@@ -17,52 +17,43 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_ShouldBeBoxed = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.ShouldBeBoxed",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_ShouldBeBoxed = &thrift.TypeSpec{
+        FullName: "module.ShouldBeBoxed",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.ShouldBeBoxed",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewShouldBeBoxed() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_CustomException = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.CustomException",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_CustomException = &thrift.TypeSpec{
+        FullName: "module.CustomException",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.CustomException",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewCustomException() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "void",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_CustomException = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_CustomException = &thrift.StructSpec{
     Name:                 "CustomException",
     ScopedName:           "module.CustomException",
     IsUnion:              false,
@@ -84,9 +75,7 @@ var (
         "message": 0,
     },
 }
-    }()
-    premadeStructSpec_ShouldBeBoxed = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_ShouldBeBoxed = &thrift.StructSpec{
     Name:                 "ShouldBeBoxed",
     ScopedName:           "module.ShouldBeBoxed",
     IsUnion:              false,
@@ -108,9 +97,7 @@ var (
         "sessionId": 0,
     },
 }
-    }()
-    premadeStructSpec_reqMyServiceFoo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqMyServiceFoo = &thrift.StructSpec{
     Name:                 "reqMyServiceFoo",
     ScopedName:           "module.reqMyServiceFoo",
     IsUnion:              false,
@@ -122,9 +109,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respMyServiceFoo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respMyServiceFoo = &thrift.StructSpec{
     Name:                 "respMyServiceFoo",
     ScopedName:           "module.respMyServiceFoo",
     IsUnion:              false,
@@ -136,9 +121,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqFactoriesFoo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqFactoriesFoo = &thrift.StructSpec{
     Name:                 "reqFactoriesFoo",
     ScopedName:           "module.reqFactoriesFoo",
     IsUnion:              false,
@@ -150,9 +133,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respFactoriesFoo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respFactoriesFoo = &thrift.StructSpec{
     Name:                 "respFactoriesFoo",
     ScopedName:           "module.respFactoriesFoo",
     IsUnion:              false,
@@ -164,9 +145,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqPerformFoo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqPerformFoo = &thrift.StructSpec{
     Name:                 "reqPerformFoo",
     ScopedName:           "module.reqPerformFoo",
     IsUnion:              false,
@@ -178,9 +157,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respPerformFoo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respPerformFoo = &thrift.StructSpec{
     Name:                 "respPerformFoo",
     ScopedName:           "module.respPerformFoo",
     IsUnion:              false,
@@ -192,9 +169,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqInteractWithSharedDoSomeSimilarThings = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqInteractWithSharedDoSomeSimilarThings = &thrift.StructSpec{
     Name:                 "reqInteractWithSharedDoSomeSimilarThings",
     ScopedName:           "module.reqInteractWithSharedDoSomeSimilarThings",
     IsUnion:              false,
@@ -206,9 +181,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respInteractWithSharedDoSomeSimilarThings = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respInteractWithSharedDoSomeSimilarThings = &thrift.StructSpec{
     Name:                 "respInteractWithSharedDoSomeSimilarThings",
     ScopedName:           "module.respInteractWithSharedDoSomeSimilarThings",
     IsUnion:              false,
@@ -230,7 +203,6 @@ var (
         "success": 0,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

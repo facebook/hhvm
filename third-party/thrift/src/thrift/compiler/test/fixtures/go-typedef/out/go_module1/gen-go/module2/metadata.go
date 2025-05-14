@@ -19,14 +19,12 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module2_Enum = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TEnum: &metadata.ThriftEnumType{
+    premadeThriftType_module2_Enum = &metadata.ThriftType{
+        TEnum: &metadata.ThriftEnumType{
     Name: "module2.Enum",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

@@ -17,65 +17,54 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_Fields = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.Fields",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_Fields = &thrift.TypeSpec{
+        FullName: "module.Fields",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Fields",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFields() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.FieldsInjectedToEmptyStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct = &thrift.TypeSpec{
+        FullName: "module.FieldsInjectedToEmptyStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.FieldsInjectedToEmptyStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFieldsInjectedToEmptyStruct() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_FieldsInjectedToStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.FieldsInjectedToStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_FieldsInjectedToStruct = &thrift.TypeSpec{
+        FullName: "module.FieldsInjectedToStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.FieldsInjectedToStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFieldsInjectedToStruct() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.FieldsInjectedWithIncludedStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct = &thrift.TypeSpec{
+        FullName: "module.FieldsInjectedWithIncludedStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.FieldsInjectedWithIncludedStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFieldsInjectedWithIncludedStruct() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Fields = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Fields = &thrift.StructSpec{
     Name:                 "Fields",
     ScopedName:           "module.Fields",
     IsUnion:              false,
@@ -97,9 +86,7 @@ var (
         "injected_field": 0,
     },
 }
-    }()
-    premadeStructSpec_FieldsInjectedToEmptyStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_FieldsInjectedToEmptyStruct = &thrift.StructSpec{
     Name:                 "FieldsInjectedToEmptyStruct",
     ScopedName:           "module.FieldsInjectedToEmptyStruct",
     IsUnion:              false,
@@ -121,9 +108,7 @@ var (
         "injected_field": 0,
     },
 }
-    }()
-    premadeStructSpec_FieldsInjectedToStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_FieldsInjectedToStruct = &thrift.StructSpec{
     Name:                 "FieldsInjectedToStruct",
     ScopedName:           "module.FieldsInjectedToStruct",
     IsUnion:              false,
@@ -155,9 +140,7 @@ var (
         "string_field": 1,
     },
 }
-    }()
-    premadeStructSpec_FieldsInjectedWithIncludedStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_FieldsInjectedWithIncludedStruct = &thrift.StructSpec{
     Name:                 "FieldsInjectedWithIncludedStruct",
     ScopedName:           "module.FieldsInjectedWithIncludedStruct",
     IsUnion:              false,
@@ -209,7 +192,6 @@ var (
         "string_field": 3,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

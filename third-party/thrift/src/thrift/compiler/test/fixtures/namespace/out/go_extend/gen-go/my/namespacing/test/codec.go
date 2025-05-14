@@ -15,32 +15,27 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i64 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i64",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_hsmodule_HsFoo = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "hsmodule.HsFoo",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_hsmodule_HsFoo = &thrift.TypeSpec{
+        FullName: "hsmodule.HsFoo",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hsmodule.HsFoo",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewHsFoo() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_HsFoo = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_HsFoo = &thrift.StructSpec{
     Name:                 "HsFoo",
     ScopedName:           "hsmodule.HsFoo",
     IsUnion:              false,
@@ -62,9 +57,7 @@ var (
         "MyInt": 0,
     },
 }
-    }()
-    premadeStructSpec_reqHsTestServiceInit = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqHsTestServiceInit = &thrift.StructSpec{
     Name:                 "reqHsTestServiceInit",
     ScopedName:           "hsmodule.reqHsTestServiceInit",
     IsUnion:              false,
@@ -86,9 +79,7 @@ var (
         "int1": 0,
     },
 }
-    }()
-    premadeStructSpec_respHsTestServiceInit = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respHsTestServiceInit = &thrift.StructSpec{
     Name:                 "respHsTestServiceInit",
     ScopedName:           "hsmodule.respHsTestServiceInit",
     IsUnion:              false,
@@ -110,7 +101,6 @@ var (
         "success": 0,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

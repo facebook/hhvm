@@ -19,41 +19,34 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_service_IncludesIncluded = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "service.IncludesIncluded",
-            CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    premadeCodecTypeSpec_service_IncludesIncluded = &thrift.TypeSpec{
+        FullName: "service.IncludesIncluded",
+        CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "service.IncludesIncluded",
 	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_service_IncludesTransitiveFoo = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "service.IncludesTransitiveFoo",
-            CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    }
+    premadeCodecTypeSpec_service_IncludesTransitiveFoo = &thrift.TypeSpec{
+        FullName: "service.IncludesTransitiveFoo",
+        CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "service.IncludesTransitiveFoo",
 	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "void",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqMyServiceQuery = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqMyServiceQuery = &thrift.StructSpec{
     Name:                 "reqMyServiceQuery",
     ScopedName:           "service.reqMyServiceQuery",
     IsUnion:              false,
@@ -85,9 +78,7 @@ var (
         "i": 1,
     },
 }
-    }()
-    premadeStructSpec_respMyServiceQuery = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respMyServiceQuery = &thrift.StructSpec{
     Name:                 "respMyServiceQuery",
     ScopedName:           "service.respMyServiceQuery",
     IsUnion:              false,
@@ -99,9 +90,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_reqMyServiceHasArgDocs = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqMyServiceHasArgDocs = &thrift.StructSpec{
     Name:                 "reqMyServiceHasArgDocs",
     ScopedName:           "service.reqMyServiceHasArgDocs",
     IsUnion:              false,
@@ -133,9 +122,7 @@ var (
         "i": 1,
     },
 }
-    }()
-    premadeStructSpec_respMyServiceHasArgDocs = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respMyServiceHasArgDocs = &thrift.StructSpec{
     Name:                 "respMyServiceHasArgDocs",
     ScopedName:           "service.respMyServiceHasArgDocs",
     IsUnion:              false,
@@ -147,7 +134,6 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

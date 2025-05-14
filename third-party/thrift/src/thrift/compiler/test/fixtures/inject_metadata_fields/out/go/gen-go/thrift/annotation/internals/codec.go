@@ -15,32 +15,27 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_internal_InjectMetadataFields = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "internal.InjectMetadataFields",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_internal_InjectMetadataFields = &thrift.TypeSpec{
+        FullName: "internal.InjectMetadataFields",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "internal.InjectMetadataFields",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewInjectMetadataFields() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_InjectMetadataFields = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_InjectMetadataFields = &thrift.StructSpec{
     Name:                 "InjectMetadataFields",
     ScopedName:           "internal.InjectMetadataFields",
     IsUnion:              false,
@@ -62,7 +57,6 @@ var (
         "type": 0,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

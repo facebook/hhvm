@@ -17,52 +17,43 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i64 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i64",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_includes_Included = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "includes.Included",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_includes_Included = &thrift.TypeSpec{
+        FullName: "includes.Included",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "includes.Included",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewIncluded() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_includes_IncludedInt64 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "includes.IncludedInt64",
-            CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    }
+    premadeCodecTypeSpec_includes_IncludedInt64 = &thrift.TypeSpec{
+        FullName: "includes.IncludedInt64",
+        CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "includes.IncludedInt64",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_includes_TransitiveFoo = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "includes.TransitiveFoo",
-            CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    }
+    premadeCodecTypeSpec_includes_TransitiveFoo = &thrift.TypeSpec{
+        FullName: "includes.TransitiveFoo",
+        CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "includes.TransitiveFoo",
 	UnderlyingTypeSpec: transitive.GetCodecTypeSpec("transitive.Foo"),
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Included = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Included = &thrift.StructSpec{
     Name:                 "Included",
     ScopedName:           "includes.Included",
     IsUnion:              false,
@@ -94,7 +85,6 @@ var (
         "MyTransitiveField": 1,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

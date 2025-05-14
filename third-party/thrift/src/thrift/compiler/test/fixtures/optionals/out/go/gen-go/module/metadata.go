@@ -19,102 +19,76 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_Animal = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TEnum: &metadata.ThriftEnumType{
+    premadeThriftType_module_Animal = &metadata.ThriftType{
+        TEnum: &metadata.ThriftEnumType{
     Name: "module.Animal",
 },
 
-        }
-    }()
-    premadeThriftType_double = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+    }
+    premadeThriftType_double = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_Color = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Color = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Color",
 },
 
-        }
-    }()
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    }
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_bool = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+    }
+    premadeThriftType_bool = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_Vehicle = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Vehicle = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Vehicle",
 },
 
-        }
-    }()
-    premadeThriftType_i64 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+    }
+    premadeThriftType_i64 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_PersonID = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_module_PersonID = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.PersonID",
     UnderlyingType: premadeThriftType_i64,
 },
 
-        }
-    }()
-    premadeThriftType_i16 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+    }
+    premadeThriftType_i16 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
 
-        }
-    }()
-    premadeThriftType_set_module_PersonID = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TSet: &metadata.ThriftSetType{
+    }
+    premadeThriftType_set_module_PersonID = &metadata.ThriftType{
+        TSet: &metadata.ThriftSetType{
     ValueType: premadeThriftType_module_PersonID,
 },
 
-        }
-    }()
-    premadeThriftType_map_module_Animal_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_module_Animal_string = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_module_Animal,
     ValueType: premadeThriftType_string,
 },
 
-        }
-    }()
-    premadeThriftType_list_module_Vehicle = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_module_Vehicle = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_module_Vehicle,
 },
 
-        }
-    }()
-    premadeThriftType_module_Person = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Person = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Person",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

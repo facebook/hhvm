@@ -19,158 +19,116 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_terse_write_MyEnum = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TEnum: &metadata.ThriftEnumType{
+    premadeThriftType_terse_write_MyEnum = &metadata.ThriftType{
+        TEnum: &metadata.ThriftEnumType{
     Name: "terse_write.MyEnum",
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_MyStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_terse_write_MyStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "terse_write.MyStruct",
 },
 
-        }
-    }()
-    premadeThriftType_bool = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+    }
+    premadeThriftType_bool = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
 
-        }
-    }()
-    premadeThriftType_byte = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+    }
+    premadeThriftType_byte = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
 
-        }
-    }()
-    premadeThriftType_i16 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+    }
+    premadeThriftType_i16 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
 
-        }
-    }()
-    premadeThriftType_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+    }
+    premadeThriftType_i32 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
 
-        }
-    }()
-    premadeThriftType_i64 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+    }
+    premadeThriftType_i64 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
 
-        }
-    }()
-    premadeThriftType_float = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
+    }
+    premadeThriftType_float = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
 
-        }
-    }()
-    premadeThriftType_double = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+    }
+    premadeThriftType_double = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
 
-        }
-    }()
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    }
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_binary = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+    }
+    premadeThriftType_binary = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
 
-        }
-    }()
-    premadeThriftType_list_i16 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TList: &metadata.ThriftListType{
+    }
+    premadeThriftType_list_i16 = &metadata.ThriftType{
+        TList: &metadata.ThriftListType{
     ValueType: premadeThriftType_i16,
 },
 
-        }
-    }()
-    premadeThriftType_set_i16 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TSet: &metadata.ThriftSetType{
+    }
+    premadeThriftType_set_i16 = &metadata.ThriftType{
+        TSet: &metadata.ThriftSetType{
     ValueType: premadeThriftType_i16,
 },
 
-        }
-    }()
-    premadeThriftType_map_i16_i16 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TMap: &metadata.ThriftMapType{
+    }
+    premadeThriftType_map_i16_i16 = &metadata.ThriftType{
+        TMap: &metadata.ThriftMapType{
     KeyType:   premadeThriftType_i16,
     ValueType: premadeThriftType_i16,
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_MyUnion = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TUnion: &metadata.ThriftUnionType{
+    }
+    premadeThriftType_terse_write_MyUnion = &metadata.ThriftType{
+        TUnion: &metadata.ThriftUnionType{
     Name: "terse_write.MyUnion",
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_MyStructWithCustomDefault = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_terse_write_MyStructWithCustomDefault = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "terse_write.MyStructWithCustomDefault",
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_StructLevelTerseStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_terse_write_StructLevelTerseStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "terse_write.StructLevelTerseStruct",
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_FieldLevelTerseStruct = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_terse_write_FieldLevelTerseStruct = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "terse_write.FieldLevelTerseStruct",
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_MyInteger = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TTypedef: &metadata.ThriftTypedefType{
+    }
+    premadeThriftType_terse_write_MyInteger = &metadata.ThriftType{
+        TTypedef: &metadata.ThriftTypedefType{
     Name:           "terse_write.MyInteger",
     UnderlyingType: premadeThriftType_i32,
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_AdaptedFields = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_terse_write_AdaptedFields = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "terse_write.AdaptedFields",
 },
 
-        }
-    }()
-    premadeThriftType_terse_write_TerseException = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_terse_write_TerseException = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "terse_write.TerseException",
 },
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

@@ -15,161 +15,130 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_GetEntityRequest = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.GetEntityRequest",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_GetEntityRequest = &thrift.TypeSpec{
+        FullName: "module.GetEntityRequest",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.GetEntityRequest",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewGetEntityRequest() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_GetEntityResponse = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.GetEntityResponse",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_GetEntityResponse = &thrift.TypeSpec{
+        FullName: "module.GetEntityResponse",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.GetEntityResponse",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewGetEntityResponse() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<string>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_NonComparableStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.NonComparableStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_NonComparableStruct = &thrift.TypeSpec{
+        FullName: "module.NonComparableStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.NonComparableStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewNonComparableStruct() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i64 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i64",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_module_NonComparableStruct_i64 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<module.NonComparableStruct, i64>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_module_NonComparableStruct_i64 = &thrift.TypeSpec{
+        FullName: "map<module.NonComparableStruct, i64>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_module_NonComparableStruct,
 	ValueTypeSpec: premadeCodecTypeSpec_i64,
     KeyWireType:   thrift.STRUCT,
 	ValueWireType: thrift.I64,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "bool",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_byte = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "byte",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_byte = &thrift.TypeSpec{
+        FullName: "byte",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BYTE,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i16 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i16",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i16 = &thrift.TypeSpec{
+        FullName: "i16",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I16,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_double = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "double",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_double = &thrift.TypeSpec{
+        FullName: "double",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_DOUBLE,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_binary = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "binary",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_binary = &thrift.TypeSpec{
+        FullName: "binary",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BINARY,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_map_string_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "map<string, string>",
-            CodecMapSpec: &thrift.CodecMapSpec{
+    }
+    premadeCodecTypeSpec_map_string_string = &thrift.TypeSpec{
+        FullName: "map<string, string>",
+        CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_string,
 	ValueTypeSpec: premadeCodecTypeSpec_string,
     KeyWireType:   thrift.STRING,
 	ValueWireType: thrift.STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_set_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "set<string>",
-            CodecSetSpec: &thrift.CodecSetSpec{
+    }
+    premadeCodecTypeSpec_set_string = &thrift.TypeSpec{
+        FullName: "set<string>",
+        CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_GetEntityRequest = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_GetEntityRequest = &thrift.StructSpec{
     Name:                 "GetEntityRequest",
     ScopedName:           "module.GetEntityRequest",
     IsUnion:              false,
@@ -191,9 +160,7 @@ var (
         "id": 0,
     },
 }
-    }()
-    premadeStructSpec_GetEntityResponse = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_GetEntityResponse = &thrift.StructSpec{
     Name:                 "GetEntityResponse",
     ScopedName:           "module.GetEntityResponse",
     IsUnion:              false,
@@ -215,9 +182,7 @@ var (
         "entity": 0,
     },
 }
-    }()
-    premadeStructSpec_NonComparableStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_NonComparableStruct = &thrift.StructSpec{
     Name:                 "NonComparableStruct",
     ScopedName:           "module.NonComparableStruct",
     IsUnion:              false,
@@ -259,9 +224,7 @@ var (
         "baz": 2,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetEntity = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetEntity = &thrift.StructSpec{
     Name:                 "reqGetEntityGetEntity",
     ScopedName:           "module.reqGetEntityGetEntity",
     IsUnion:              false,
@@ -283,9 +246,7 @@ var (
         "r": 0,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetEntity = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetEntity = &thrift.StructSpec{
     Name:                 "respGetEntityGetEntity",
     ScopedName:           "module.respGetEntityGetEntity",
     IsUnion:              false,
@@ -307,9 +268,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetBool = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetBool = &thrift.StructSpec{
     Name:                 "reqGetEntityGetBool",
     ScopedName:           "module.reqGetEntityGetBool",
     IsUnion:              false,
@@ -321,9 +280,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetBool = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetBool = &thrift.StructSpec{
     Name:                 "respGetEntityGetBool",
     ScopedName:           "module.respGetEntityGetBool",
     IsUnion:              false,
@@ -345,9 +302,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetByte = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetByte = &thrift.StructSpec{
     Name:                 "reqGetEntityGetByte",
     ScopedName:           "module.reqGetEntityGetByte",
     IsUnion:              false,
@@ -359,9 +314,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetByte = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetByte = &thrift.StructSpec{
     Name:                 "respGetEntityGetByte",
     ScopedName:           "module.respGetEntityGetByte",
     IsUnion:              false,
@@ -383,9 +336,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetI16 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetI16 = &thrift.StructSpec{
     Name:                 "reqGetEntityGetI16",
     ScopedName:           "module.reqGetEntityGetI16",
     IsUnion:              false,
@@ -397,9 +348,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetI16 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetI16 = &thrift.StructSpec{
     Name:                 "respGetEntityGetI16",
     ScopedName:           "module.respGetEntityGetI16",
     IsUnion:              false,
@@ -421,9 +370,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetI32 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetI32 = &thrift.StructSpec{
     Name:                 "reqGetEntityGetI32",
     ScopedName:           "module.reqGetEntityGetI32",
     IsUnion:              false,
@@ -435,9 +382,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetI32 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetI32 = &thrift.StructSpec{
     Name:                 "respGetEntityGetI32",
     ScopedName:           "module.respGetEntityGetI32",
     IsUnion:              false,
@@ -459,9 +404,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetI64 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetI64 = &thrift.StructSpec{
     Name:                 "reqGetEntityGetI64",
     ScopedName:           "module.reqGetEntityGetI64",
     IsUnion:              false,
@@ -473,9 +416,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetI64 = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetI64 = &thrift.StructSpec{
     Name:                 "respGetEntityGetI64",
     ScopedName:           "module.respGetEntityGetI64",
     IsUnion:              false,
@@ -497,9 +438,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetDouble = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetDouble = &thrift.StructSpec{
     Name:                 "reqGetEntityGetDouble",
     ScopedName:           "module.reqGetEntityGetDouble",
     IsUnion:              false,
@@ -511,9 +450,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetDouble = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetDouble = &thrift.StructSpec{
     Name:                 "respGetEntityGetDouble",
     ScopedName:           "module.respGetEntityGetDouble",
     IsUnion:              false,
@@ -535,9 +472,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetString = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetString = &thrift.StructSpec{
     Name:                 "reqGetEntityGetString",
     ScopedName:           "module.reqGetEntityGetString",
     IsUnion:              false,
@@ -549,9 +484,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetString = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetString = &thrift.StructSpec{
     Name:                 "respGetEntityGetString",
     ScopedName:           "module.respGetEntityGetString",
     IsUnion:              false,
@@ -573,9 +506,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetBinary = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetBinary = &thrift.StructSpec{
     Name:                 "reqGetEntityGetBinary",
     ScopedName:           "module.reqGetEntityGetBinary",
     IsUnion:              false,
@@ -587,9 +518,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetBinary = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetBinary = &thrift.StructSpec{
     Name:                 "respGetEntityGetBinary",
     ScopedName:           "module.respGetEntityGetBinary",
     IsUnion:              false,
@@ -611,9 +540,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetMap = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetMap = &thrift.StructSpec{
     Name:                 "reqGetEntityGetMap",
     ScopedName:           "module.reqGetEntityGetMap",
     IsUnion:              false,
@@ -625,9 +552,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetMap = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetMap = &thrift.StructSpec{
     Name:                 "respGetEntityGetMap",
     ScopedName:           "module.respGetEntityGetMap",
     IsUnion:              false,
@@ -649,9 +574,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetSet = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetSet = &thrift.StructSpec{
     Name:                 "reqGetEntityGetSet",
     ScopedName:           "module.reqGetEntityGetSet",
     IsUnion:              false,
@@ -663,9 +586,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetSet = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetSet = &thrift.StructSpec{
     Name:                 "respGetEntityGetSet",
     ScopedName:           "module.respGetEntityGetSet",
     IsUnion:              false,
@@ -687,9 +608,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetList = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetList = &thrift.StructSpec{
     Name:                 "reqGetEntityGetList",
     ScopedName:           "module.reqGetEntityGetList",
     IsUnion:              false,
@@ -701,9 +620,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetList = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetList = &thrift.StructSpec{
     Name:                 "respGetEntityGetList",
     ScopedName:           "module.respGetEntityGetList",
     IsUnion:              false,
@@ -725,9 +642,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetLegacyStuff = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetLegacyStuff = &thrift.StructSpec{
     Name:                 "reqGetEntityGetLegacyStuff",
     ScopedName:           "module.reqGetEntityGetLegacyStuff",
     IsUnion:              false,
@@ -769,9 +684,7 @@ var (
         "numPos": 2,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetLegacyStuff = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetLegacyStuff = &thrift.StructSpec{
     Name:                 "respGetEntityGetLegacyStuff",
     ScopedName:           "module.respGetEntityGetLegacyStuff",
     IsUnion:              false,
@@ -793,9 +706,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetCtxCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetCtxCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetCtxCollision",
     ScopedName:           "module.reqGetEntityGetCtxCollision",
     IsUnion:              false,
@@ -817,9 +728,7 @@ var (
         "ctx": 0,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetCtxCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetCtxCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetCtxCollision",
     ScopedName:           "module.respGetEntityGetCtxCollision",
     IsUnion:              false,
@@ -841,9 +750,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetCtx1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetCtx1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetCtx1Collision",
     ScopedName:           "module.reqGetEntityGetCtx1Collision",
     IsUnion:              false,
@@ -875,9 +782,7 @@ var (
         "ctx1": 1,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetCtx1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetCtx1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetCtx1Collision",
     ScopedName:           "module.respGetEntityGetCtx1Collision",
     IsUnion:              false,
@@ -899,9 +804,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetContextCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetContextCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetContextCollision",
     ScopedName:           "module.reqGetEntityGetContextCollision",
     IsUnion:              false,
@@ -923,9 +826,7 @@ var (
         "context": 0,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetContextCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetContextCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetContextCollision",
     ScopedName:           "module.respGetEntityGetContextCollision",
     IsUnion:              false,
@@ -947,9 +848,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetOutCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetOutCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetOutCollision",
     ScopedName:           "module.reqGetEntityGetOutCollision",
     IsUnion:              false,
@@ -971,9 +870,7 @@ var (
         "out": 0,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetOutCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetOutCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetOutCollision",
     ScopedName:           "module.respGetEntityGetOutCollision",
     IsUnion:              false,
@@ -995,9 +892,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetOut1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetOut1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetOut1Collision",
     ScopedName:           "module.reqGetEntityGetOut1Collision",
     IsUnion:              false,
@@ -1029,9 +924,7 @@ var (
         "out1": 1,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetOut1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetOut1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetOut1Collision",
     ScopedName:           "module.respGetEntityGetOut1Collision",
     IsUnion:              false,
@@ -1053,9 +946,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetInCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetInCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetInCollision",
     ScopedName:           "module.reqGetEntityGetInCollision",
     IsUnion:              false,
@@ -1077,9 +968,7 @@ var (
         "in": 0,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetInCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetInCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetInCollision",
     ScopedName:           "module.respGetEntityGetInCollision",
     IsUnion:              false,
@@ -1101,9 +990,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetIn1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetIn1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetIn1Collision",
     ScopedName:           "module.reqGetEntityGetIn1Collision",
     IsUnion:              false,
@@ -1135,9 +1022,7 @@ var (
         "in1": 1,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetIn1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetIn1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetIn1Collision",
     ScopedName:           "module.respGetEntityGetIn1Collision",
     IsUnion:              false,
@@ -1159,9 +1044,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetErrCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetErrCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetErrCollision",
     ScopedName:           "module.reqGetEntityGetErrCollision",
     IsUnion:              false,
@@ -1183,9 +1066,7 @@ var (
         "err": 0,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetErrCollision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetErrCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetErrCollision",
     ScopedName:           "module.respGetEntityGetErrCollision",
     IsUnion:              false,
@@ -1207,9 +1088,7 @@ var (
         "success": 0,
     },
 }
-    }()
-    premadeStructSpec_reqGetEntityGetErr1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_reqGetEntityGetErr1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetErr1Collision",
     ScopedName:           "module.reqGetEntityGetErr1Collision",
     IsUnion:              false,
@@ -1241,9 +1120,7 @@ var (
         "err1": 1,
     },
 }
-    }()
-    premadeStructSpec_respGetEntityGetErr1Collision = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_respGetEntityGetErr1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetErr1Collision",
     ScopedName:           "module.respGetEntityGetErr1Collision",
     IsUnion:              false,
@@ -1265,7 +1142,6 @@ var (
         "success": 0,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

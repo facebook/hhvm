@@ -15,52 +15,43 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module0_Accessory = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module0.Accessory",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module0_Accessory = &thrift.TypeSpec{
+        FullName: "module0.Accessory",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module0.Accessory",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAccessory() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module0_PartName = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module0.PartName",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module0_PartName = &thrift.TypeSpec{
+        FullName: "module0.PartName",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module0.PartName",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPartName() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Accessory = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Accessory = &thrift.StructSpec{
     Name:                 "Accessory",
     ScopedName:           "module0.Accessory",
     IsUnion:              false,
@@ -92,9 +83,7 @@ var (
         "Name": 1,
     },
 }
-    }()
-    premadeStructSpec_PartName = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_PartName = &thrift.StructSpec{
     Name:                 "PartName",
     ScopedName:           "module0.PartName",
     IsUnion:              false,
@@ -126,7 +115,6 @@ var (
         "Name": 1,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

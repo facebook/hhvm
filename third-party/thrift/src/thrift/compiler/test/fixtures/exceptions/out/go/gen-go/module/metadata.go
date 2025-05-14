@@ -19,80 +19,60 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+    premadeThriftType_string = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_Fiery = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Fiery = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Fiery",
 },
 
-        }
-    }()
-    premadeThriftType_module_Serious = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Serious = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Serious",
 },
 
-        }
-    }()
-    premadeThriftType_module_ComplexFieldNames = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ComplexFieldNames = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ComplexFieldNames",
 },
 
-        }
-    }()
-    premadeThriftType_module_CustomFieldNames = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_CustomFieldNames = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.CustomFieldNames",
 },
 
-        }
-    }()
-    premadeThriftType_i32 = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+    }
+    premadeThriftType_i32 = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
 
-        }
-    }()
-    premadeThriftType_module_ExceptionWithPrimitiveField = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ExceptionWithPrimitiveField = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ExceptionWithPrimitiveField",
 },
 
-        }
-    }()
-    premadeThriftType_module_ExceptionWithStructuredAnnotation = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_ExceptionWithStructuredAnnotation = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.ExceptionWithStructuredAnnotation",
 },
 
-        }
-    }()
-    premadeThriftType_module_Banal = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TStruct: &metadata.ThriftStructType{
+    }
+    premadeThriftType_module_Banal = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
     Name: "module.Banal",
 },
 
-        }
-    }()
-    premadeThriftType_void = func() *metadata.ThriftType {
-        return &metadata.ThriftType{
-            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+    }
+    premadeThriftType_void = &metadata.ThriftType{
+        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
 
-        }
-    }()
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

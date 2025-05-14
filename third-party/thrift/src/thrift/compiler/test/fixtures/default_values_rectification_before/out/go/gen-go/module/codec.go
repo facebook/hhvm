@@ -15,62 +15,51 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_EmptyStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.EmptyStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    premadeCodecTypeSpec_module_EmptyStruct = &thrift.TypeSpec{
+        FullName: "module.EmptyStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.EmptyStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewEmptyStruct() },
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "bool",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_list_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "list<i32>",
-            CodecListSpec: &thrift.CodecListSpec{
+    }
+    premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
+        FullName: "list<i32>",
+        CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
 	ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_module_TestStruct = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module.TestStruct",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_module_TestStruct = &thrift.TypeSpec{
+        FullName: "module.TestStruct",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.TestStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewTestStruct() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_EmptyStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_EmptyStruct = &thrift.StructSpec{
     Name:                 "EmptyStruct",
     ScopedName:           "module.EmptyStruct",
     IsUnion:              false,
@@ -82,9 +71,7 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    }()
-    premadeStructSpec_TestStruct = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_TestStruct = &thrift.StructSpec{
     Name:                 "TestStruct",
     ScopedName:           "module.TestStruct",
     IsUnion:              false,
@@ -176,7 +163,6 @@ var (
         "optional_struct_field": 7,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

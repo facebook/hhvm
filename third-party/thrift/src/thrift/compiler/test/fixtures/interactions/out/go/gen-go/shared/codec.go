@@ -15,41 +15,34 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "i32",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_shared_DoSomethingResult = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "shared.DoSomethingResult",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_shared_DoSomethingResult = &thrift.TypeSpec{
+        FullName: "shared.DoSomethingResult",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "shared.DoSomethingResult",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewDoSomethingResult() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_DoSomethingResult = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_DoSomethingResult = &thrift.StructSpec{
     Name:                 "DoSomethingResult",
     ScopedName:           "shared.DoSomethingResult",
     IsUnion:              false,
@@ -81,7 +74,6 @@ var (
         "i_res": 1,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

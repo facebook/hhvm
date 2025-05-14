@@ -15,32 +15,27 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "string",
-            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-        }
-    }()
-    premadeCodecTypeSpec_foo_Fields = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "foo.Fields",
-            CodecStructSpec: &thrift.CodecStructSpec{
+    }
+    premadeCodecTypeSpec_foo_Fields = &thrift.TypeSpec{
+        FullName: "foo.Fields",
+        CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "foo.Fields",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFields() },
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Fields = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
+    premadeStructSpec_Fields = &thrift.StructSpec{
     Name:                 "Fields",
     ScopedName:           "foo.Fields",
     IsUnion:              false,
@@ -82,7 +77,6 @@ var (
         "injected_unstructured_annotation_field": 2,
     },
 }
-    }()
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

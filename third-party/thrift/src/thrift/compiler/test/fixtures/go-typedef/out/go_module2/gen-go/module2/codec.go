@@ -15,15 +15,13 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module2_Enum = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "module2.Enum",
-            CodecEnumSpec: &thrift.CodecEnumSpec{
+    premadeCodecTypeSpec_module2_Enum = &thrift.TypeSpec{
+        FullName: "module2.Enum",
+        CodecEnumSpec: &thrift.CodecEnumSpec{
     ScopedName: "module2.Enum",
 },
 
-        }
-    }()
+    }
 )
 
 // Premade struct specs

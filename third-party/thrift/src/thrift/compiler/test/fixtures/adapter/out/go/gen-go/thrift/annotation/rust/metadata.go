@@ -144,21 +144,25 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if !fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-        }
-    }
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Name))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Copy))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_RequestContext))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Arc))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Box))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Exhaustive))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Ord))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_NewType))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Type))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Serde))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Mod))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Adapter))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Derive))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_ServiceExn))
     return fbthriftResults
 }()
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-        }
-    }
     return fbthriftResults
 }()
 

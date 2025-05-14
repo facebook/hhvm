@@ -78,13 +78,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct

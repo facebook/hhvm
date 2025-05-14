@@ -425,23 +425,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldWrapper)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Wrapper)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_SkipCodegen)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_UnionEnumAttributes)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructTrait)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Attributes)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructAsTrait)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ModuleInternal)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateClientMethodsWithHeaders)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string

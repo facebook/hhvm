@@ -515,19 +515,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Fiery)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Serious)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexFieldNames)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_CustomFieldNames)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ExceptionWithPrimitiveField)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ExceptionWithStructuredAnnotation)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Banal)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string

@@ -551,28 +551,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Experimental)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ReserveIds)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_RequiresBackwardCompatibility)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseWrite)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Box)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Mixin)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_SerializeInFieldIdOrder)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_BitmaskEnum)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ExceptionMessage)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_InternBox)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Serial)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Uri)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Priority)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_DeprecatedUnvalidatedAnnotations)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedIdentifier)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedFilename)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RpcPriority.FullName] = premadeCodecTypeSpec_thrift_RpcPriority

@@ -862,17 +862,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructNestedAnnotation)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyUnion)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyException)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_SecretStruct)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum.FullName] = premadeCodecTypeSpec_module_MyEnum

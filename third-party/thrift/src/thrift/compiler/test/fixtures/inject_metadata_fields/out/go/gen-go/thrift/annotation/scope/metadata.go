@@ -154,21 +154,29 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if !fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-        }
-    }
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Transitive))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Program))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Struct))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Union))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Exception))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Field))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Typedef))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Service))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Interaction))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Function))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_EnumValue))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Const))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Enum))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Structured))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Interface))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_RootDefinition))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Definition))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_DisableSchemaConst))
     return fbthriftResults
 }()
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-        }
-    }
     return fbthriftResults
 }()
 

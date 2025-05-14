@@ -289,20 +289,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3Hidden)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_PyDeprecatedHidden)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Flags)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCAPI)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3EnableCppAdapter)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_MigrationBlockingAllowInheritance)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3Hidden.FullName] = premadeCodecTypeSpec_python_Py3Hidden

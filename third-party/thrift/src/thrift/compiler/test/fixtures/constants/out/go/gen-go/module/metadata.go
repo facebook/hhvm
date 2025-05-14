@@ -174,21 +174,19 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if !fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-        }
-    }
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Internship))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Range))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct1))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct2))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct3))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct4))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_union1))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_union2))
     return fbthriftResults
 }()
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-        }
-    }
     return fbthriftResults
 }()
 

@@ -772,35 +772,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Type)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Ref)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Lazy)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_DisableLazyChecksum)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_PackIsset)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_MinimizePadding)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ScopedEnumAsUnionType)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldInterceptor)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_UseOpEncode)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_EnumType)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Frozen2Exclude)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Frozen2RequiresCompleteContainerParams)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_ProcessInEbThreadUnsafe)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_RuntimeAnnotation)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCursorSerialization)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateDeprecatedHeaderClientMethods)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowLegacyNonOptionalRef)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_DeprecatedTerseWrite)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowLegacyDeprecatedTerseWritesRef)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_EnableCustomTypeOrdering)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateServiceMethodDecorator)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_RefType.FullName] = premadeCodecTypeSpec_cpp_RefType

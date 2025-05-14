@@ -141,21 +141,19 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if !fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-        }
-    }
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_ComplexUnion))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_ListUnion))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_DataUnion))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Val))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_ValUnion))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_VirtualComplexUnion))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_NonCopyableStruct))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_NonCopyableUnion))
     return fbthriftResults
 }()
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-        }
-    }
     return fbthriftResults
 }()
 

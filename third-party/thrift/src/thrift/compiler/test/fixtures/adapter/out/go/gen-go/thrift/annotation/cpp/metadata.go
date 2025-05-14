@@ -215,21 +215,34 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if !fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-        }
-    }
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Name))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Type))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Ref))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Lazy))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_DisableLazyChecksum))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Adapter))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_PackIsset))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_MinimizePadding))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_ScopedEnumAsUnionType))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_FieldInterceptor))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_UseOpEncode))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_EnumType))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Frozen2Exclude))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Frozen2RequiresCompleteContainerParams))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_ProcessInEbThreadUnsafe))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_RuntimeAnnotation))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_UseCursorSerialization))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_GenerateDeprecatedHeaderClientMethods))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_AllowLegacyNonOptionalRef))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_DeprecatedTerseWrite))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_AllowLegacyDeprecatedTerseWritesRef))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_EnableCustomTypeOrdering))
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_GenerateServiceMethodDecorator))
     return fbthriftResults
 }()
 
 var exceptionMetadatas = func() []*metadata.ThriftException {
     fbthriftResults := make([]*metadata.ThriftException, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-        }
-    }
     return fbthriftResults
 }()
 

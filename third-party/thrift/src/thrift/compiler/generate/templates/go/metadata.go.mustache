@@ -68,21 +68,21 @@ var premadeThriftTypesMap = func() map[string]*{{program:metadata_qualifier}}Thr
 
 var structMetadatas = func() []*{{program:metadata_qualifier}}ThriftStruct {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if !fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-        }
-    }
+    {{#program:structs}}
+    {{^struct:exception?}}
+    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct({{struct:struct_spec_name}}))
+    {{/struct:exception?}}
+    {{/program:structs}}
     return fbthriftResults
 }()
 
 var exceptionMetadatas = func() []*{{program:metadata_qualifier}}ThriftException {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftException, 0)
-    for _, fbthriftStructSpec := range premadeStructSpecs {
-        if fbthriftStructSpec.IsException {
-            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-        }
-    }
+    {{#program:structs}}
+    {{#struct:exception?}}
+    fbthriftResults = append(fbthriftResults, getMetadataThriftException({{struct:struct_spec_name}}))
+    {{/struct:exception?}}
+    {{/program:structs}}
     return fbthriftResults
 }()
 

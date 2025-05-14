@@ -471,30 +471,6 @@ var (
     }()
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Transitive)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Program)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Struct)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Union)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Exception)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Field)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Typedef)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Service)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Interaction)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Function)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_EnumValue)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Const)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Enum)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Structured)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Interface)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_RootDefinition)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_Definition)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_DisableSchemaConst)
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Transitive.FullName] = premadeCodecTypeSpec_scope_Transitive

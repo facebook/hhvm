@@ -63,15 +63,6 @@ var (
     {{/program:services}}
 )
 
-// Premade slice of all struct specs
-var premadeStructSpecs = func() []*thrift.StructSpec {
-    fbthriftResults := make([]*thrift.StructSpec, 0)
-    {{#program:structs}}
-    fbthriftResults = append(fbthriftResults, {{struct:struct_spec_name}})
-    {{/program:structs}}
-    return fbthriftResults
-}()
-
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     {{#program:thrift_metadata_types}}

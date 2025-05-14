@@ -14,6 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_HASH_TABLE_INL_H_
+#error "hash-table-inl.h should only be included by hash-table.h"
+#endif
+
+#include "hphp/util/assertions.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/portability.h"
 

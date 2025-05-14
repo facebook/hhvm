@@ -20,6 +20,7 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/blob-encoder.h"
+#include "hphp/util/trace.h"
 
 #include <folly/String.h>
 

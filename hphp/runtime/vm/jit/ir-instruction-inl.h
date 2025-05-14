@@ -14,7 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_VM_JIT_INSTRUCTION_INL_H_
+#error "ir-instruction-inl.h should only be included by ir-instruction.h"
+#endif
+
 #include "hphp/runtime/vm/jit/edge.h"
+#include "hphp/util/assertions.h"
 
 #include <utility>
 

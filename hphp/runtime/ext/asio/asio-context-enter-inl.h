@@ -19,6 +19,8 @@
 #error "This should only be included by asio-context-enter.h"
 #endif
 
+#include <folly/Likely.h>
+
 namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 

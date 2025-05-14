@@ -294,5 +294,6 @@ bool isCallToExit(uint64_t address);
 
 }
 
+#define incl_HPHP_VM_ACT_REC_INL_H_
 #include "hphp/runtime/vm/act-rec-inl.h"
-
+#undef incl_HPHP_VM_ACT_REC_INL_H_

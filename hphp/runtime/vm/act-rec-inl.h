@@ -14,7 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_VM_ACT_REC_INL_H_
+#error "act-rec-inl.h should only be included by act-rec.h"
+#endif
+
+#include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
+
+#include <folly/Likely.h>
 
 namespace HPHP {
 

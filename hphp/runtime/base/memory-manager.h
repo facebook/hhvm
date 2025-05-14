@@ -1136,4 +1136,6 @@ void reset_alloc_sampling();
 
 }
 
+#define incl_HPHP_MEMORY_MANAGER_INL_H_
 #include "hphp/runtime/base/memory-manager-inl.h"
+#undef incl_HPHP_MEMORY_MANAGER_INL_H_

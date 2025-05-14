@@ -508,4 +508,6 @@ Type callCtxType(const Func* func);
 
 }
 
+#define incl_HPHP_VM_JIT_INSTRUCTION_INL_H_
 #include "hphp/runtime/vm/jit/ir-instruction-inl.h"
+#undef incl_HPHP_VM_JIT_INSTRUCTION_INL_H_

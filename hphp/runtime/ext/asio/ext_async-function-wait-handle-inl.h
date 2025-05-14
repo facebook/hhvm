@@ -19,6 +19,8 @@
 #error "This should only be included by ext_async-function-wait-handle.h"
 #endif
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

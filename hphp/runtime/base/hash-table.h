@@ -522,4 +522,6 @@ private:
 }  // namespace array
 }  // namespace HPHP
 
+#define incl_HPHP_HASH_TABLE_INL_H_
 #include "hphp/runtime/base/hash-table-inl.h"
+#undef incl_HPHP_HASH_TABLE_INL_H_

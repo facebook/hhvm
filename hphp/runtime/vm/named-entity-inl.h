@@ -18,6 +18,8 @@
 #error "named-entity-inl.h should only be included by named-entity.h"
 #endif
 
+#include <folly/Likely.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

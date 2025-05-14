@@ -18,6 +18,8 @@
 #error "preclass-inl.h should only be included by preclass.h"
 #endif
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

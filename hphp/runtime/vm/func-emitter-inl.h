@@ -18,6 +18,10 @@
 #error "func-emitter-inl.h should only be included by func-emitter.h"
 #endif
 
+#include "hphp/util/assertions.h"
+
+#include <folly/Likely.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

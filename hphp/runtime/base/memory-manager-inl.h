@@ -14,13 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#pragma once
+#ifndef incl_HPHP_MEMORY_MANAGER_INL_H_
+#error "memory-manager-inl.h should only be included by memory-manager.h"
+#endif
 
 #include <limits>
 #include <utility>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 

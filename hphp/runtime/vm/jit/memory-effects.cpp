@@ -558,22 +558,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store_kill(AEmpty, AEmpty, kills);
   }
 
-  case InlineCall:
-    return PureInlineCall {
-      AFBasePtr,
-      inst.src(0),
-
-      // Right now when we "publish" a frame by storing it in rvmfp() we
-      // implicitly depend on the AFFunc and AFMeta bits being stored. In the
-      // future we may want to track this explicitly.
-      //
-      // We also need to ensure that all of our parent frames have this stored
-      // this information. To achieve this we also register a load on AFBasePtr,
-      // forcing them to also be published. Notice that we don't actually
-      // depend on this load to properly initialize m_sfp or rvmfp().
-      AliasClass(AFFunc { inst.src(0) }) | AFMeta { inst.src(0) } | AFBasePtr
-    };
-
   case InlineSideExit: {
     auto const callee = inst.extra<InlineSideExit>()->callee;
     auto const arOffset = inst.src(1)->inst()->extra<DefCalleeFP>()->spOffset;
@@ -1695,9 +1679,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StFrameFunc:
     return PureStore { AFFunc { inst.src(0) }, nullptr };
 
-  case StFrameMeta:
-    return PureStore { AFMeta { inst.src(0) }, nullptr };
-
   case StVMFP:
     return PureStore { AVMFP, inst.src(0) };
 
@@ -2134,8 +2115,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, const MemEffects& me) {
         check(frame);
       }
     },
-    [&] (const PureInlineCall& x)   { check(x.base);
-                                      check(x.actrec); },
     [&] (const ReturnEffects& x)    { check(x.kills); }
   );
 
@@ -2180,7 +2159,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
           },
           [&] (const PureStore&)          { return fail(); },
           [&] (const ExitEffects&)        { return fail(); },
-          [&] (const PureInlineCall&)     { return fail(); },
           [&] (const IrrelevantEffects&)  { return fail(); },
           [&] (const ReturnEffects&)      { return fail(); }
         );
@@ -2209,7 +2187,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
       [&] (const PureLoad&)           { return fail(); },
       [&] (const PureStore&)          { return fail(); },
       [&] (const ExitEffects&)        { return fail(); },
-      [&] (const PureInlineCall&)     { return fail(); },
       [&] (const IrrelevantEffects&)  { return fail(); },
       [&] (const ReturnEffects&)      { return fail(); }
     );
@@ -2364,13 +2341,6 @@ MemEffects canonicalize(const MemEffects& me) {
         canonicalize(x.uninits)
       };
     },
-    [&] (const PureInlineCall& x) -> R {
-      return PureInlineCall {
-        canonicalize(x.base),
-        x.fp,
-        canonicalize(x.actrec)
-      };
-    },
     [&] (const CallEffects& x) -> R {
       return CallEffects {
         canonicalize(x.kills),
@@ -2410,12 +2380,6 @@ std::string show(const MemEffects& effects) {
         show(x.live),
         show(x.kills),
         show(x.uninits)
-      );
-    },
-    [&] (const PureInlineCall& x) {
-      return sformat("inline_call({} ; {})",
-        show(x.base),
-        show(x.actrec)
       );
     },
     [&] (const CallEffects& x) {

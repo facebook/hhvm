@@ -455,7 +455,6 @@ bool canDCE(const IRInstruction& inst) {
   case NewStructDict:
   case NewBespokeStructDict:
   case Clone:
-  case InlineCall:
   case InlineSideExit:
   case InlineSideExitSyncStack:
   case Call:
@@ -740,7 +739,6 @@ bool canDCE(const IRInstruction& inst) {
   case ProfileIsTypeStruct:
   case StFrameCtx:
   case StFrameFunc:
-  case StFrameMeta:
   case LookupClsCns:
   case LookupClsCtxCns:
   case ArrayMarkLegacyShallow:
@@ -1078,12 +1076,7 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       },
       [&] (const PureLoad& x)           { return process_stack(x.src); },
       [&] (const PureStore& x)          { return do_store(x.dst, &*inst); },
-      [&] (const ExitEffects& x)        { return process_stack(x.live); },
-      [&] (const PureInlineCall& x) {
-        return
-          process_stack(x.base) ||
-          process_stack(x.actrec);
-      }
+      [&] (const ExitEffects& x)        { return process_stack(x.live); }
     );
   }
 

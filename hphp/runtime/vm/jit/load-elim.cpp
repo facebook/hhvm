@@ -929,7 +929,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (const PureStore& m)       { flags = store(env, m.dst, m.value); },
     [&] (const PureLoad& m)        { flags = load(env, inst, m.src); },
 
-    [&] (const PureInlineCall& m)  { store(env, m.base, m.fp); },
     [&] (const GeneralEffects& m) {
       flags = handle_general_effects(env, inst, m);
     },

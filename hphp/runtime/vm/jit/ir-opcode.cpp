@@ -681,7 +681,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InitThrowableFileAndLine:
   case InitVecElem:
   case InitVecElemLoop:
-  case InlineCall:
   case InlineSideExitSyncStack:
   case InstanceOf:
   case InstanceOfBitmask:
@@ -918,7 +917,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StContArValue:
   case StFrameCtx:
   case StFrameFunc:
-  case StFrameMeta:
   case StImplicitContext:
   case StIterEnd:
   case StIterPos:

@@ -658,11 +658,6 @@ void visit(Local& env, IRInstruction& inst) {
       kill(env, l.kills);
     },
 
-    [&] (const PureInlineCall& l) {
-      store(env, l.base);
-      load(env, l.actrec);
-    },
-
     /*
      * Call instructions can potentially read any heap location or the VM
      * register state (which must be dirty), but we can be more precise about
@@ -1014,7 +1009,6 @@ void optimize_block_pre(Global& genv, Block* block,
         FTRACE(1, " Inserting store {}: {}\n", i, cinst->toString());
         auto const inst = genv.unit.clone(cinst);
         block->prepend(inst);
-        assertx(!inst->is(InlineCall));
       }
     );
   }

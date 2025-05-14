@@ -1629,19 +1629,6 @@ To string conversions:
 
   Marks the end of an inlined function. S0 is no longer a valid frame location.
 
-| InlineCall<retSPOff>, ND, S(FramePtr) S(FramePtr), NF
-
-  Sets the current vmfp for an inlined call to S0, and the m_sfp of S0 to the
-  previous vmfp, S1.
-
-  This instruction is primarily used to represent an inlined frame in the IR
-  when it cannot be eliminated during a side-exit. It performs callee-side
-  responsibilities for setting up an activation record (i.e. setting the return
-  ip, m_func and m_callOff, storing the frame pointer into D).
-
-  The caller frame pointer is passed as S1. This is used to keep track of the
-  call chain of inlined functions for simplification and dead code elimination.
-
 | InlineSideExitSyncStack<offset>, ND, S(StkPtr), NF
 
 This instruction does nothing, but has memory effects that force the stack
@@ -1897,10 +1884,6 @@ ReqBindJmp and CallFuncEntry.
 | StFrameFunc<func>, ND, S(FramePtr), NF
 
   Store the func in m_funcId/m_func for S0.
-
-| StFrameMeta<callBCOff,flags>, ND, S(FramePtr), NF
-
-  Store the m_callOffAndFlags field of S0.
 
 10. Trace exits
 

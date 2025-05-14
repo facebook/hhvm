@@ -57,6 +57,10 @@ Type callOutType(const Func* callee, uint32_t index);
  */
 void emitModuleBoundaryCheck(IRGS&, SSATmp* symbol, bool func = true);
 
+SSATmp* callFuncEntry(IRGS& env, SrcKey entry, SSATmp* objOrClass,
+                      SSATmp* calleeFP, uint32_t numArgsInclUnpack,
+                      bool asyncEagerReturn);
+
 void emitModuleBoundaryCheckKnown(IRGS&, const Class* symbol);
 void emitModuleBoundaryCheckKnown(IRGS&, const Func* symbol);
 void emitModuleBoundaryCheckKnown(IRGS&, const Class::Prop* symbol);

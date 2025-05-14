@@ -457,7 +457,6 @@ bool conflicts(const IRInstruction& instr,
     [&] (const GeneralEffects&)      { return false; },
     [&] (const PureLoad&)            { return false; },
     [&] (const PureStore&)           { return false; },
-    [&] (const PureInlineCall&)      { return false; },
     [&] (const ExitEffects&)         { return true; },
     [&] (const UnknownEffects&)      { return true; }
   );
@@ -494,7 +493,6 @@ bool conflicts(const IRInstruction& instr,
     },
     [&] (const PureLoad&)            { return false; },
     [&] (const PureStore& store)     { return load.src.maybe(store.dst); },
-    [&] (const PureInlineCall& call) { return load.src.maybe(call.base); },
     [&] (const ExitEffects&)         { return true; },
     [&] (const UnknownEffects&)      { return true; }
   );
@@ -550,7 +548,6 @@ bool conflicts(const IRInstruction& instr,
     },
     [&] (const PureLoad&)            { return false; },
     [&] (const PureStore& store)     { return test_reads(store.dst); },
-    [&] (const PureInlineCall& call) { return test_reads(call.base); },
     [&] (const ExitEffects&)         { return true; },
     [&] (const UnknownEffects&)      { return true; }
   );
@@ -594,7 +591,6 @@ bool conflicts(const IRInstruction& sinkee, const IRInstruction& barrier) {
     [&] (const ReturnEffects&)       { always_assert(false); return true; },
     [&] (const CallEffects&)         { always_assert(false); return true; },
     [&] (const PureStore&)           { always_assert(false); return true; },
-    [&] (const PureInlineCall&)      { always_assert(false); return true; },
     [&] (const ExitEffects&)         { always_assert(false); return true; },
     [&] (const UnknownEffects&)      { always_assert(false); return true; }
   );
@@ -636,7 +632,6 @@ TriBool will_conflict(const IRInstruction& inst) {
     [&] (const ReturnEffects&)       { return TriBool::Yes; },
     [&] (const CallEffects&)         { return TriBool::Maybe; },
     [&] (const PureStore&)           { return TriBool::Maybe; },
-    [&] (const PureInlineCall&)      { return TriBool::Maybe; },
     [&] (const ExitEffects&)         { return TriBool::Yes; },
     [&] (const UnknownEffects&)      { return TriBool::Yes; }
   );
@@ -1118,7 +1113,6 @@ State make_state(IRUnit& unit,
       [&] (const ReturnEffects&)       { return false; },
       [&] (const CallEffects&)         { return false; },
       [&] (const PureStore&)           { return false; },
-      [&] (const PureInlineCall&)      { return false; },
       [&] (const ExitEffects&)         { return false; },
       [&] (const UnknownEffects&)      { return false; }
     );

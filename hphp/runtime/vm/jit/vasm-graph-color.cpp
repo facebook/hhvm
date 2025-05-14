@@ -3790,7 +3790,6 @@ AliasClass mem_writes_for_inst(const Vinstr& inst) {
     [] (const GeneralEffects& e)  { return e.stores | e.kills | e.inout; },
     [] (const PureLoad&)          { return AEmpty; },
     [] (const PureStore& a)       { return a.dst; },
-    [] (const PureInlineCall& a)  { return a.base; },
     [] (const CallEffects& e)     {
       return e.kills | e.uninits | e.actrec | e.outputs | AHeapAny | ARdsAny;
     },

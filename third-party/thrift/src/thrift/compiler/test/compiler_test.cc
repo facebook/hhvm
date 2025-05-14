@@ -2325,6 +2325,16 @@ TEST(Compilertest, custom_default_values) {
         # expected-warning@-1: Explicit default value is redundant for (optional) field: `j` (in `Widget`).
         # expected-warning@-2: Optional field should not have custom default value: `j` (in `Widget`).
     }
+
+    union UnionWidget {
+      1: i32 a;
+
+      2: i32 b = 0;
+        # expected-warning@-1: Union field is implicitly optional and should not have custom default value: `b` (in union `UnionWidget`).
+
+      3: bool c = true;
+        # expected-warning@-1: Union field is implicitly optional and should not have custom default value: `c` (in union `UnionWidget`).
+    }
   )",
       {"--extra-validation", "warn_on_redundant_custom_default_values"});
 }

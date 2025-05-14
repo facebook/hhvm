@@ -667,6 +667,7 @@ std::string_view field_qualifier_to_string(t_field_qualifier qualifier) {
 
 void validate_field_default_value(sema_context& ctx, const t_field& field) {
   if (field.default_value() == nullptr) {
+    // Field does not have a default value => nothing to validate.
     return;
   }
 
@@ -679,6 +680,16 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
 
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
+
+  if (parent_node.is_union()) {
+    ctx.warning(
+        field,
+        "Union field is implicitly optional and should not have custom "
+        "default value: `{}` (in union `{}`).",
+        field.name(),
+        parent_node.name());
+    return;
+  }
 
   const t_field_qualifier field_qualifier = field.qualifier();
 

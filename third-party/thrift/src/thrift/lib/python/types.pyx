@@ -17,6 +17,7 @@ from collections.abc import Iterable, Mapping, Sequence, Set as pySet, Sized
 import warnings
 
 from folly.iobuf cimport cIOBuf, IOBuf, from_unique_ptr
+from libcpp cimport bool as cbool
 from libcpp.utility cimport move as cmove
 from libcpp.memory cimport make_unique
 from cpython cimport bool as pbool, int as pint, float as pfloat
@@ -37,6 +38,16 @@ import typing
 from folly cimport cFollyIsDebug
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.serializer cimport cserialize, cdeserialize
+
+# if True, then cinder is importable, and use_cinder = True,
+# meaning cinder functions use native extensions, not inefficient fallbacks
+cdef cbool _fbthrift_is_cinder_runtime = False
+try:
+    import cinder
+    import cinderx
+    _fbthrift_is_cinder_runtime = cinderx.is_initialized()
+except ImportError:
+    pass
 
 
 cdef extern from *:
@@ -60,6 +71,22 @@ cdef _is_py3_structured(obj):
             _fbthrift__PY3_STRUCTURED = _fbthrift_UnmatchableType
 
     return isinstance(obj, _fbthrift__PY3_STRUCTURED)
+
+
+
+cdef _make_cached_property(struct_class, int field_index, str field_name):
+    if _fbthrift_is_cinder_runtime:
+        getter_fn = lambda self: (<Struct>self)._fbthrift_get_cached_field_value(field_index)
+        return cinder.cached_property(
+            getter_fn, 
+            getattr(struct_class, field_name),
+        )
+    else:
+        # there are two cases where cinder.cached_property is not used:
+        # 1. On MacOs/Windows, cinder is not available.
+        # 2. On Linux, in python_binary where use_cinder = False (the default)
+        #    cinder is available but cinder.cached_property is very slow. 
+        return _StructCachedField(field_index, field_name)
     
 
 
@@ -1705,11 +1732,14 @@ def _make_readonly_setattr():
     return _readonly_setattr
 
 cdef class _StructCachedField:
+    """ A descriptor that enforces immutability. 
+        The _fbthrift_get_cached_field_value is responsible for the caching
+    """
     cdef int _field_index
     cdef str _field_name
 
-    def __init__(self, int field_id, str field_name):
-        self._field_index = field_id
+    def __init__(self, int field_index, str field_name):
+        self._field_index = field_index
         self._field_name = field_name
 
     def __get__(self, Struct obj, objtype):
@@ -1792,7 +1822,7 @@ class StructMeta(type):
             type.__setattr__(
                 klass,
                 field_name,
-                _StructCachedField(field_index, field_name),
+                _make_cached_property(klass, field_index, field_name),
             )
         klass.__setattr__ = _make_readonly_setattr()
         return klass
@@ -2653,3 +2683,7 @@ cdef class ServiceInterface:
 
 def get_standard_immutable_default_value_for_type(TypeInfoBase typeinfo):
     return typeinfo.to_python_value(getStandardImmutableDefaultValuePtrForType(typeinfo.get_cTypeInfo()[0]))
+
+# for fbthrift test introspection only, DO NOT USE elsewhere
+def _fbthrift__runtime_is_cinder():
+    return pbool(_fbthrift_is_cinder_runtime)

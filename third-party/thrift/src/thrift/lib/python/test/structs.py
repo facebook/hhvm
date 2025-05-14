@@ -30,6 +30,8 @@ import testing.thrift_types as immutable_test_types
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
+import thrift.python.types
+
 from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
@@ -72,7 +74,6 @@ from thrift.python.mutable_types import (
     to_thrift_map,
     to_thrift_set,
 )
-
 from thrift.python.types import isset, Struct, StructOrUnion, update_nested_field
 
 ListT = TypeVar("ListT")
@@ -466,6 +467,18 @@ class StructTestsImmutable(unittest.TestCase):
                 # and the mutation succeeds
                 # "primitive" means types where internal type same as python type
                 continue
+
+            # for both cinder and cpython, normal setattr is blocked
+            with self.assertRaisesRegex(AttributeError, field):
+                setattr(e, field, val)
+
+            # pyre-ignore[16]: private method only for thrift tests
+            if thrift.python.types._fbthrift__runtime_is_cinder():
+                # cinder cached property doesn't let us override __set__
+                continue
+
+            # we can block object.__setattr__ backdoor with
+            # our own property descriptor impl
             with self.assertRaisesRegex(AttributeError, field):
                 object.__setattr__(e, field, val)
 

@@ -20,9 +20,10 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_void = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+
+        }
     }()
 )
 
@@ -49,38 +50,44 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.MyRoot").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("do_root").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.MyRoot",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "do_root",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.MyNode").
-    SetParent(thrift.Pointerize("module.MyRoot")).
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("do_mid").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.MyNode",
+            Parent:    thrift.Pointerize("module.MyRoot"),
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "do_mid",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.MyLeaf").
-    SetParent(thrift.Pointerize("module.MyNode")).
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("do_leaf").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.MyLeaf",
+            Parent:    thrift.Pointerize("module.MyNode"),
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "do_leaf",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 

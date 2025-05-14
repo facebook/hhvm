@@ -20,61 +20,78 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+
+        }
     }()
     premadeThriftType_module_Fiery = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.Fiery"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.Fiery",
+},
+
+        }
     }()
     premadeThriftType_module_Serious = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.Serious"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.Serious",
+},
+
+        }
     }()
     premadeThriftType_module_ComplexFieldNames = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.ComplexFieldNames"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.ComplexFieldNames",
+},
+
+        }
     }()
     premadeThriftType_module_CustomFieldNames = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.CustomFieldNames"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.CustomFieldNames",
+},
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_module_ExceptionWithPrimitiveField = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.ExceptionWithPrimitiveField"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.ExceptionWithPrimitiveField",
+},
+
+        }
     }()
     premadeThriftType_module_ExceptionWithStructuredAnnotation = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.ExceptionWithStructuredAnnotation"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.ExceptionWithStructuredAnnotation",
+},
+
+        }
     }()
     premadeThriftType_module_Banal = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.Banal"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.Banal",
+},
+
+        }
     }()
     premadeThriftType_void = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+
+        }
     }()
 )
 
@@ -117,66 +134,73 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.Raiser").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("doBland").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
-            metadata.NewThriftFunction().
-    SetName("doRaise").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetExceptions(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("b").
-    SetIsOptional(true).
-    SetType(premadeThriftType_module_Banal),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("f").
-    SetIsOptional(true).
-    SetType(premadeThriftType_module_Fiery),
-            metadata.NewThriftField().
-    SetId(3).
-    SetName("s").
-    SetIsOptional(true).
-    SetType(premadeThriftType_module_Serious),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.Raiser",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "doBland",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "doRaise",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "b",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_Banal,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "f",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_Fiery,
+                        },
+                        &metadata.ThriftField{
+                            Id:         3,
+                            Name:       "s",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_Serious,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "get200",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_string,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "get500",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_string,
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "f",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_Fiery,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "b",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_Banal,
+                        },
+                        &metadata.ThriftField{
+                            Id:         3,
+                            Name:       "s",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_Serious,
+                        },
+                    },
+                },
+            },
         },
-    ),
-            metadata.NewThriftFunction().
-    SetName("get200").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_string),
-            metadata.NewThriftFunction().
-    SetName("get500").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_string).
-    SetExceptions(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("f").
-    SetIsOptional(true).
-    SetType(premadeThriftType_module_Fiery),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("b").
-    SetIsOptional(true).
-    SetType(premadeThriftType_module_Banal),
-            metadata.NewThriftField().
-    SetId(3).
-    SetName("s").
-    SetIsOptional(true).
-    SetType(premadeThriftType_module_Serious),
-        },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

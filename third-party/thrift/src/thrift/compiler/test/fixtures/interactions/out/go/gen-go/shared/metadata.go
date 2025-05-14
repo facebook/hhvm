@@ -20,20 +20,24 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_shared_DoSomethingResult = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("shared.DoSomethingResult"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "shared.DoSomethingResult",
+},
+
+        }
     }()
 )
 
@@ -63,12 +67,13 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("shared.InteractLocally").
-    SetFunctions(
-        []*metadata.ThriftFunction{
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "shared.InteractLocally",
+            Functions: []*metadata.ThriftFunction{
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 

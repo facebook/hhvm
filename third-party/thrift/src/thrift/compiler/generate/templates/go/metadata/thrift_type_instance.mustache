@@ -22,9 +22,10 @@
 {{#type:typedef?}}
 {{#type:typedef}}
 {{#typedef:defined_kind?}}
-{{program:metadata_qualifier}}NewThriftTypedefType().
-    SetName("{{typedef:scoped_name}}").
-    SetUnderlyingType({{#type:typedef_type}}{{type:metadata_thrift_type_getter}}{{/type:typedef_type}}),
+&{{program:metadata_qualifier}}ThriftTypedefType{
+    Name:           "{{typedef:scoped_name}}",
+    UnderlyingType: {{#type:typedef_type}}{{type:metadata_thrift_type_getter}}{{/type:typedef_type}},
+},
 {{/typedef:defined_kind?}}
 {{^typedef:defined_kind?}}
 {{#type:typedef_type}}
@@ -39,37 +40,43 @@ thrift.Pointerize({{program:metadata_qualifier}}ThriftPrimitiveType_{{> metadata
 {{/type:metadata_primitive?}}
 {{#type:enum?}}
 {{#type:enum}}
-{{program:metadata_qualifier}}NewThriftEnumType().
-    SetName("{{enum:scoped_name}}"),
+&{{program:metadata_qualifier}}ThriftEnumType{
+    Name: "{{enum:scoped_name}}",
+},
 {{/type:enum}}
 {{/type:enum?}}
 {{#type:struct?}}
 {{#type:struct}}
 {{#struct:union?}}
-{{program:metadata_qualifier}}NewThriftUnionType().
-    SetName("{{struct:scoped_name}}"),
+&{{program:metadata_qualifier}}ThriftUnionType{
+    Name: "{{struct:scoped_name}}",
+},
 {{/struct:union?}}
 {{^struct:union?}}
-{{program:metadata_qualifier}}NewThriftStructType().
-    SetName("{{struct:scoped_name}}"),
+&{{program:metadata_qualifier}}ThriftStructType{
+    Name: "{{struct:scoped_name}}",
+},
 {{/struct:union?}}
 {{/type:struct}}
 {{/type:struct?}}
 {{#type:list?}}
 {{#type:list_elem_type}}
-{{program:metadata_qualifier}}NewThriftListType().
-    SetValueType({{type:metadata_thrift_type_getter}}),
+&{{program:metadata_qualifier}}ThriftListType{
+    ValueType: {{type:metadata_thrift_type_getter}},
+},
 {{/type:list_elem_type}}
 {{/type:list?}}
 {{#type:map?}}
-{{program:metadata_qualifier}}NewThriftMapType().
-    SetKeyType({{#type:key_type}}{{type:metadata_thrift_type_getter}}{{/type:key_type}}).
-    SetValueType({{#type:value_type}}{{type:metadata_thrift_type_getter}}{{/type:value_type}}),
+&{{program:metadata_qualifier}}ThriftMapType{
+    KeyType:   {{#type:key_type}}{{type:metadata_thrift_type_getter}}{{/type:key_type}},
+    ValueType: {{#type:value_type}}{{type:metadata_thrift_type_getter}}{{/type:value_type}},
+},
 {{/type:map?}}
 {{#type:set?}}
 {{#type:set_elem_type}}
-{{program:metadata_qualifier}}NewThriftSetType().
-    SetValueType({{type:metadata_thrift_type_getter}}),
+&{{program:metadata_qualifier}}ThriftSetType{
+    ValueType: {{type:metadata_thrift_type_getter}},
+},
 {{/type:set_elem_type}}
 {{/type:set?}}
 {{/type:typedef?}}

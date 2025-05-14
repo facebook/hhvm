@@ -19,12 +19,12 @@
   This template defines metadata for a Thrift enum.
 
 }}
-{{program:metadata_qualifier}}NewThriftEnum().
-    SetName("{{enum:scoped_name}}").
-    SetElements(
-        map[int32]string{
-            {{#enum:values}}
-            {{enum_value:value}}: "{{enum_value:name}}",
-            {{/enum:values}}
-        },
-    )
+&{{program:metadata_qualifier}}ThriftEnum{
+    Name:     "{{enum:scoped_name}}",
+    Elements: map[int32]string{
+        {{#enum:values}}
+        {{enum_value:value}}: "{{enum_value:name}}",
+        {{/enum:values}}
+    },
+},
+{{!newline}}

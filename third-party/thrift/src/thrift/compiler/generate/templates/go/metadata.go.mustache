@@ -49,9 +49,9 @@ var _ = metadata.GoUnusedProtection__
 var (
     {{#program:thrift_metadata_types}}
     {{type:metadata_name}} = func() *{{program:metadata_qualifier}}ThriftType {
-        return {{program:metadata_qualifier}}NewThriftType().{{> metadata/thrift_type_setter}}(
-            {{> metadata/thrift_type_instance}}
-        )
+        return &{{program:metadata_qualifier}}ThriftType{
+            {{> metadata/thrift_type_setter}}: {{> metadata/thrift_type_instance}}
+        }
     }()
     {{/program:thrift_metadata_types}}
 )
@@ -89,7 +89,9 @@ var exceptionMetadatas = func() []*{{program:metadata_qualifier}}ThriftException
 var enumMetadatas = func() []*{{program:metadata_qualifier}}ThriftEnum {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftEnum, 0)
     {{#program:enums}}
-    fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_enum}})
+    fbthriftResults = append(fbthriftResults,
+        {{> metadata/thrift_metadata_enum}}
+    )
     {{/program:enums}}
     return fbthriftResults
 }()
@@ -97,7 +99,9 @@ var enumMetadatas = func() []*{{program:metadata_qualifier}}ThriftEnum {
 var serviceMetadatas = func() []*{{program:metadata_qualifier}}ThriftService {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftService, 0)
     {{#program:services}}
-    fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_service}})
+    fbthriftResults = append(fbthriftResults,
+        {{> metadata/thrift_metadata_service}}
+    )
     {{/program:services}}
     return fbthriftResults
 }()

@@ -20,131 +20,169 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_module_EmptyEnum = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.EmptyEnum"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.EmptyEnum",
+},
+
+        }
     }()
     premadeThriftType_module_City = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.City"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.City",
+},
+
+        }
     }()
     premadeThriftType_module_Company = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.Company"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.Company",
+},
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+
+        }
     }()
     premadeThriftType_double = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+
+        }
     }()
     premadeThriftType_module_Internship = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.Internship"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.Internship",
+},
+
+        }
     }()
     premadeThriftType_module_Range = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.Range"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.Range",
+},
+
+        }
     }()
     premadeThriftType_module_struct1 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.struct1"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.struct1",
+},
+
+        }
     }()
     premadeThriftType_list_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_module_struct2 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.struct2"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.struct2",
+},
+
+        }
     }()
     premadeThriftType_module_struct3 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.struct3"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.struct3",
+},
+
+        }
     }()
     premadeThriftType_byte = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+
+        }
     }()
     premadeThriftType_module_struct4 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.struct4"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.struct4",
+},
+
+        }
     }()
     premadeThriftType_module_union1 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTUnion(
-            metadata.NewThriftUnionType().
-                SetName("module.union1"),
-        )
+        return &metadata.ThriftType{
+            TUnion: &metadata.ThriftUnionType{
+    Name: "module.union1",
+},
+
+        }
     }()
     premadeThriftType_module_union2 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTUnion(
-            metadata.NewThriftUnionType().
-                SetName("module.union2"),
-        )
+        return &metadata.ThriftType{
+            TUnion: &metadata.ThriftUnionType{
+    Name: "module.union2",
+},
+
+        }
     }()
     premadeThriftType_module_MyCompany = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module.MyCompany").
-                SetUnderlyingType(premadeThriftType_module_Company),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module.MyCompany",
+    UnderlyingType: premadeThriftType_module_Company,
+},
+
+        }
     }()
     premadeThriftType_module_MyStringIdentifier = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module.MyStringIdentifier").
-                SetUnderlyingType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module.MyStringIdentifier",
+    UnderlyingType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_module_MyIntIdentifier = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module.MyIntIdentifier").
-                SetUnderlyingType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module.MyIntIdentifier",
+    UnderlyingType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_map_string_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_string).
-                SetValueType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_string,
+    ValueType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_module_MyMapIdentifier = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module.MyMapIdentifier").
-                SetUnderlyingType(premadeThriftType_map_string_string),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module.MyMapIdentifier",
+    UnderlyingType: premadeThriftType_map_string_string,
+},
+
+        }
     }()
 )
 
@@ -192,33 +230,36 @@ var exceptionMetadatas = func() []*metadata.ThriftException {
 
 var enumMetadatas = func() []*metadata.ThriftEnum {
     fbthriftResults := make([]*metadata.ThriftEnum, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.EmptyEnum").
-    SetElements(
-        map[int32]string{
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.EmptyEnum",
+            Elements: map[int32]string{
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.City").
-    SetElements(
-        map[int32]string{
-            0: "NYC",
-            1: "MPK",
-            2: "SEA",
-            3: "LON",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.City",
+            Elements: map[int32]string{
+                0: "NYC",
+                1: "MPK",
+                2: "SEA",
+                3: "LON",
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.Company").
-    SetElements(
-        map[int32]string{
-            0: "FACEBOOK",
-            1: "WHATSAPP",
-            2: "OCULUS",
-            3: "INSTAGRAM",
-            4: "__FRIEND__FEED",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.Company",
+            Elements: map[int32]string{
+                0: "FACEBOOK",
+                1: "WHATSAPP",
+                2: "OCULUS",
+                3: "INSTAGRAM",
+                4: "__FRIEND__FEED",
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 

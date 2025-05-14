@@ -22,10 +22,12 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_matching_names_IncludesAlso = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("matching_names.IncludesAlso"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "matching_names.IncludesAlso",
+},
+
+        }
     }()
 )
 

@@ -20,10 +20,12 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_module2_Enum = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module2.Enum"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module2.Enum",
+},
+
+        }
     }()
 )
 
@@ -45,15 +47,16 @@ var exceptionMetadatas = func() []*metadata.ThriftException {
 
 var enumMetadatas = func() []*metadata.ThriftEnum {
     fbthriftResults := make([]*metadata.ThriftEnum, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module2.Enum").
-    SetElements(
-        map[int32]string{
-            0: "A",
-            1: "B",
-            2: "C",
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module2.Enum",
+            Elements: map[int32]string{
+                0: "A",
+                1: "B",
+                2: "C",
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 

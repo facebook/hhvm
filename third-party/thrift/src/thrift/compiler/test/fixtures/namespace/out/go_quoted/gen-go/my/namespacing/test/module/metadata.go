@@ -20,15 +20,18 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_i64 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+
+        }
     }()
     premadeThriftType_quoted_Foo = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("quoted.Foo"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "quoted.Foo",
+},
+
+        }
     }()
 )
 
@@ -57,25 +60,26 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("quoted.TestService").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("init").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i64).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("int1").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "quoted.TestService",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "init",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i64,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "int1",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+            },
         },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

@@ -20,78 +20,100 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_void = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_list_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_map_i32_list_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_i32).
-                SetValueType(premadeThriftType_list_i32),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_i32,
+    ValueType: premadeThriftType_list_i32,
+},
+
+        }
     }()
     premadeThriftType_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTSet(
-            metadata.NewThriftSetType().
-                SetValueType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TSet: &metadata.ThriftSetType{
+    ValueType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_map_i32_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_i32).
-                SetValueType(premadeThriftType_set_i32),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_i32,
+    ValueType: premadeThriftType_set_i32,
+},
+
+        }
     }()
     premadeThriftType_map_i32_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_i32).
-                SetValueType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_i32,
+    ValueType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_list_map_i32_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_map_i32_i32),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_map_i32_i32,
+},
+
+        }
     }()
     premadeThriftType_list_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_set_i32),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_set_i32,
+},
+
+        }
     }()
     premadeThriftType_map_i32_map_i32_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_i32).
-                SetValueType(premadeThriftType_map_i32_set_i32),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_i32,
+    ValueType: premadeThriftType_map_i32_set_i32,
+},
+
+        }
     }()
     premadeThriftType_list_map_i32_map_i32_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_map_i32_map_i32_set_i32),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_map_i32_map_i32_set_i32,
+},
+
+        }
     }()
     premadeThriftType_list_list_map_i32_map_i32_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_list_map_i32_map_i32_set_i32),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_list_map_i32_map_i32_set_i32,
+},
+
+        }
     }()
 )
 
@@ -119,77 +141,78 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.NestedContainers").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("mapList").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("foo").
-    SetIsOptional(false).
-    SetType(premadeThriftType_map_i32_list_i32),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.NestedContainers",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "mapList",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_map_i32_list_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "mapSet",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_map_i32_set_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "listMap",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_list_map_i32_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "listSet",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_list_set_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "turtles",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_list_list_map_i32_map_i32_set_i32,
+                        },
+                    },
+                },
+            },
         },
-    ),
-            metadata.NewThriftFunction().
-    SetName("mapSet").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("foo").
-    SetIsOptional(false).
-    SetType(premadeThriftType_map_i32_set_i32),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("listMap").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("foo").
-    SetIsOptional(false).
-    SetType(premadeThriftType_list_map_i32_i32),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("listSet").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("foo").
-    SetIsOptional(false).
-    SetType(premadeThriftType_list_set_i32),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("turtles").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("foo").
-    SetIsOptional(false).
-    SetType(premadeThriftType_list_list_map_i32_map_i32_set_i32),
-        },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

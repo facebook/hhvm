@@ -19,19 +19,19 @@
   This template defines metadata for a Thrift service.
 
 }}
-{{program:metadata_qualifier}}NewThriftService().
-    SetName("{{service:scoped_name}}").
+&{{program:metadata_qualifier}}ThriftService{
+    Name:      "{{service:scoped_name}}",
     {{#service:extends?}}
     {{#service:extends}}
-    SetParent(thrift.Pointerize("{{service:scoped_name}}")).
+    Parent:    thrift.Pointerize("{{service:scoped_name}}"),
     {{/service:extends}}
     {{/service:extends?}}
-    SetFunctions(
-        []*{{program:metadata_qualifier}}ThriftFunction{
-            {{#service:functions}}
-            {{#function:go_server_supported?}}
-            {{> metadata/thrift_metadata_function}},
-            {{/function:go_server_supported?}}
-            {{/service:functions}}
-        },
-    )
+    Functions: []*{{program:metadata_qualifier}}ThriftFunction{
+        {{#service:functions}}
+        {{#function:go_server_supported?}}
+        {{> metadata/thrift_metadata_function}}
+        {{/function:go_server_supported?}}
+        {{/service:functions}}
+    },
+},
+{{!newline}}

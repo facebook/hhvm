@@ -19,21 +19,19 @@
   This template defines metadata for a Thrift service function.
 
 }}
-{{program:metadata_qualifier}}NewThriftFunction().
-    SetName("{{function:name}}").
-    SetIsOneway({{function:oneway?}}).
-    SetReturnType({{#function:return_type}}{{type:metadata_thrift_type_getter}}{{/function:return_type}}){{#function:args?}}.
-    SetArguments(
-        []*{{program:metadata_qualifier}}ThriftField{
-            {{#function:args}}
-            {{> metadata/thrift_metadata_field}},
-            {{/function:args}}
-        },
-    ){{/function:args?}}{{#function:exceptions?}}.
-    SetExceptions(
-        []*{{program:metadata_qualifier}}ThriftField{
-            {{#function:exceptions}}
-            {{> metadata/thrift_metadata_field}},
-            {{/function:exceptions}}
-        },
-    ){{/function:exceptions?}}
+&{{program:metadata_qualifier}}ThriftFunction{
+    Name:       "{{function:name}}",
+    IsOneway:   {{function:oneway?}},
+    ReturnType: {{#function:return_type}}{{type:metadata_thrift_type_getter}}{{/function:return_type}},{{#function:args?}}
+    Arguments:  []*{{program:metadata_qualifier}}ThriftField{
+        {{#function:args}}
+        {{> metadata/thrift_metadata_field}}
+        {{/function:args}}
+    },{{/function:args?}}{{#function:exceptions?}}
+    Exceptions: []*{{program:metadata_qualifier}}ThriftField{
+        {{#function:exceptions}}
+        {{> metadata/thrift_metadata_field}}
+        {{/function:exceptions}}
+    },{{/function:exceptions?}}
+},
+{{!newline}}

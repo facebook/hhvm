@@ -20,63 +20,80 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_module_B = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.B"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.B",
+},
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_module_A = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.A"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.A",
+},
+
+        }
     }()
     premadeThriftType_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+
+        }
     }()
     premadeThriftType_module_U = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTUnion(
-            metadata.NewThriftUnionType().
-                SetName("module.U"),
-        )
+        return &metadata.ThriftType{
+            TUnion: &metadata.ThriftUnionType{
+    Name: "module.U",
+},
+
+        }
     }()
     premadeThriftType_module_Bang = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.Bang"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.Bang",
+},
+
+        }
     }()
     premadeThriftType_module_lanyard = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module.lanyard").
-                SetUnderlyingType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module.lanyard",
+    UnderlyingType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_module_number = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module.number").
-                SetUnderlyingType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module.number",
+    UnderlyingType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_void = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+
+        }
     }()
     premadeThriftType_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTSet(
-            metadata.NewThriftSetType().
-                SetValueType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TSet: &metadata.ThriftSetType{
+    ValueType: premadeThriftType_i32,
+},
+
+        }
     }()
 )
 
@@ -109,60 +126,64 @@ var exceptionMetadatas = func() []*metadata.ThriftException {
 
 var enumMetadatas = func() []*metadata.ThriftEnum {
     fbthriftResults := make([]*metadata.ThriftEnum, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.B").
-    SetElements(
-        map[int32]string{
-            0: "HELLO",
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.B",
+            Elements: map[int32]string{
+                0: "HELLO",
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.C").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("f").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
-            metadata.NewThriftFunction().
-    SetName("thing").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_string).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("a").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i32),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("b").
-    SetIsOptional(false).
-    SetType(premadeThriftType_string),
-            metadata.NewThriftField().
-    SetId(3).
-    SetName("c").
-    SetIsOptional(false).
-    SetType(premadeThriftType_set_i32),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.C",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "f",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "thing",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_string,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "a",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "b",
+                            IsOptional: false,
+                            Type:       premadeThriftType_string,
+                        },
+                        &metadata.ThriftField{
+                            Id:         3,
+                            Name:       "c",
+                            IsOptional: false,
+                            Type:       premadeThriftType_set_i32,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "bang",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_Bang,
+                        },
+                    },
+                },
+            },
         },
-    ).
-    SetExceptions(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("bang").
-    SetIsOptional(true).
-    SetType(premadeThriftType_module_Bang),
-        },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

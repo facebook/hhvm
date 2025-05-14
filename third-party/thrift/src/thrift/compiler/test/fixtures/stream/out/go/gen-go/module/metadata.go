@@ -20,22 +20,28 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_module_FooStreamEx = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.FooStreamEx"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.FooStreamEx",
+},
+
+        }
     }()
     premadeThriftType_module_FooEx = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.FooEx"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.FooEx",
+},
+
+        }
     }()
     premadeThriftType_module_FooEx2 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.FooEx2"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.FooEx2",
+},
+
+        }
     }()
 )
 
@@ -67,12 +73,13 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.PubSubStreamingService").
-    SetFunctions(
-        []*metadata.ThriftFunction{
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.PubSubStreamingService",
+            Functions: []*metadata.ThriftFunction{
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 

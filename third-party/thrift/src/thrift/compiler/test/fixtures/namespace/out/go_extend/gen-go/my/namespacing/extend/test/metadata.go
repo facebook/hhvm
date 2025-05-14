@@ -22,9 +22,10 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_bool = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+
+        }
     }()
 )
 
@@ -51,26 +52,27 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("extend.ExtendTestService").
-    SetParent(thrift.Pointerize("hsmodule.HsTestService")).
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("check").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_bool).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("struct1").
-    SetIsOptional(false).
-    SetType(test0.GetMetadataThriftType("hsmodule.HsFoo")),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "extend.ExtendTestService",
+            Parent:    thrift.Pointerize("hsmodule.HsTestService"),
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "check",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_bool,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "struct1",
+                            IsOptional: false,
+                            Type:       test0.GetMetadataThriftType("hsmodule.HsFoo"),
+                        },
+                    },
+                },
+            },
         },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

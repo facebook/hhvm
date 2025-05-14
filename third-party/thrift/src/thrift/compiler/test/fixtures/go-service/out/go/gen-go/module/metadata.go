@@ -20,88 +20,110 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+
+        }
     }()
     premadeThriftType_module_GetEntityRequest = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.GetEntityRequest"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.GetEntityRequest",
+},
+
+        }
     }()
     premadeThriftType_module_GetEntityResponse = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.GetEntityResponse"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.GetEntityResponse",
+},
+
+        }
     }()
     premadeThriftType_list_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_module_NonComparableStruct = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.NonComparableStruct"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.NonComparableStruct",
+},
+
+        }
     }()
     premadeThriftType_i64 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+
+        }
     }()
     premadeThriftType_map_module_NonComparableStruct_i64 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_module_NonComparableStruct).
-                SetValueType(premadeThriftType_i64),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_module_NonComparableStruct,
+    ValueType: premadeThriftType_i64,
+},
+
+        }
     }()
     premadeThriftType_bool = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+
+        }
     }()
     premadeThriftType_byte = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+
+        }
     }()
     premadeThriftType_i16 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_double = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+
+        }
     }()
     premadeThriftType_binary = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+
+        }
     }()
     premadeThriftType_map_string_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_string).
-                SetValueType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_string,
+    ValueType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_set_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTSet(
-            metadata.NewThriftSetType().
-                SetValueType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TSet: &metadata.ThriftSetType{
+    ValueType: premadeThriftType_string,
+},
+
+        }
     }()
 )
 
@@ -141,229 +163,247 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.GetEntity").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("getEntity").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_module_GetEntityResponse).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("r").
-    SetIsOptional(false).
-    SetType(premadeThriftType_module_GetEntityRequest),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.GetEntity",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "getEntity",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_module_GetEntityResponse,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "r",
+                            IsOptional: false,
+                            Type:       premadeThriftType_module_GetEntityRequest,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getBool",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_bool,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getByte",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_byte,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getI16",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i16,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getI32",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getI64",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i64,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getDouble",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_double,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getString",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_string,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getBinary",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_binary,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getMap",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_map_string_string,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getSet",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_set_string,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getList",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_list_string,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getLegacyStuff",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "numPos",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                        &metadata.ThriftField{
+                            Id:         -1,
+                            Name:       "numNeg1",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                        &metadata.ThriftField{
+                            Id:         -2,
+                            Name:       "numNeg2",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getCtxCollision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "ctx",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getCtx1Collision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "ctx",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "ctx1",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getContextCollision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "context",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getOutCollision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "out",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getOut1Collision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "out",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "out1",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getInCollision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "in",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getIn1Collision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "in",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "in1",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getErrCollision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "err",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "getErr1Collision",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "err",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "err1",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+            },
         },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getBool").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_bool),
-            metadata.NewThriftFunction().
-    SetName("getByte").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_byte),
-            metadata.NewThriftFunction().
-    SetName("getI16").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i16),
-            metadata.NewThriftFunction().
-    SetName("getI32").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32),
-            metadata.NewThriftFunction().
-    SetName("getI64").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i64),
-            metadata.NewThriftFunction().
-    SetName("getDouble").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_double),
-            metadata.NewThriftFunction().
-    SetName("getString").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_string),
-            metadata.NewThriftFunction().
-    SetName("getBinary").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_binary),
-            metadata.NewThriftFunction().
-    SetName("getMap").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_map_string_string),
-            metadata.NewThriftFunction().
-    SetName("getSet").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_set_string),
-            metadata.NewThriftFunction().
-    SetName("getList").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_list_string),
-            metadata.NewThriftFunction().
-    SetName("getLegacyStuff").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("numPos").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-            metadata.NewThriftField().
-    SetId(-1).
-    SetName("numNeg1").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-            metadata.NewThriftField().
-    SetId(-2).
-    SetName("numNeg2").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getCtxCollision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("ctx").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getCtx1Collision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("ctx").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("ctx1").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getContextCollision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("context").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getOutCollision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("out").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getOut1Collision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("out").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("out1").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getInCollision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("in").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getIn1Collision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("in").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("in1").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getErrCollision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("err").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("getErr1Collision").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_i32).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("err").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("err1").
-    SetIsOptional(false).
-    SetType(premadeThriftType_i64),
-        },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

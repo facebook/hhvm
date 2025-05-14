@@ -16,12 +16,12 @@
 
 }}{{!
 
-  This template defines the mapping from an AST type to Thrift metadata type setter function name.
+  This template defines the mapping from an AST type to Thrift metadata type field name.
 
 }}{{#type:typedef?}}{{!
   }}{{#type:typedef}}{{!
     }}{{#typedef:defined_kind?}}{{!
-      }}SetTTypedef{{!
+      }}TTypedef{{!
     }}{{/typedef:defined_kind?}}{{!
     }}{{^typedef:defined_kind?}}{{!
       }}{{#type:typedef_type}}{{!
@@ -32,28 +32,28 @@
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
   }}{{#type:metadata_primitive?}}{{!
-    }}SetTPrimitive{{!
+    }}TPrimitive{{!
   }}{{/type:metadata_primitive?}}{{!
   }}{{#type:enum?}}{{!
-    }}SetTEnum{{!
+    }}TEnum{{!
   }}{{/type:enum?}}{{!
   }}{{#type:struct?}}{{!
     }}{{#type:struct}}{{!
       }}{{#struct:union?}}{{!
-        }}SetTUnion{{!
+        }}TUnion{{!
       }}{{/struct:union?}}{{!
       }}{{^struct:union?}}{{!
-        }}SetTStruct{{!
+        }}TStruct{{!
       }}{{/struct:union?}}{{!
     }}{{/type:struct}}{{!
   }}{{/type:struct?}}{{!
   }}{{#type:list?}}{{!
-    }}SetTList{{!
+    }}TList{{!
   }}{{/type:list?}}{{!
   }}{{#type:map?}}{{!
-    }}SetTMap{{!
+    }}TMap{{!
   }}{{/type:map?}}{{!
   }}{{#type:set?}}{{!
-    }}SetTSet{{!
+    }}TSet{{!
   }}{{/type:set?}}{{!
 }}{{/type:typedef?}}

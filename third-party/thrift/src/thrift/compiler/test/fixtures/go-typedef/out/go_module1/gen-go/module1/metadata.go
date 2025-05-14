@@ -24,143 +24,184 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+
+        }
     }()
     premadeThriftType_module1_Plate = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.Plate").
-                SetUnderlyingType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.Plate",
+    UnderlyingType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_module1_Year = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.Year").
-                SetUnderlyingType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.Year",
+    UnderlyingType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_list_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_module1_Drivers = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.Drivers").
-                SetUnderlyingType(premadeThriftType_list_string),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.Drivers",
+    UnderlyingType: premadeThriftType_list_string,
+},
+
+        }
     }()
     premadeThriftType_module1_Accessory = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.Accessory").
-                SetUnderlyingType(module0.GetMetadataThriftType("module0.Accessory")),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.Accessory",
+    UnderlyingType: module0.GetMetadataThriftType("module0.Accessory"),
+},
+
+        }
     }()
     premadeThriftType_list_module1_Accessory = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_module1_Accessory),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_module1_Accessory,
+},
+
+        }
     }()
     premadeThriftType_module1_PartName = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.PartName").
-                SetUnderlyingType(module0.GetMetadataThriftType("module0.PartName")),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.PartName",
+    UnderlyingType: module0.GetMetadataThriftType("module0.PartName"),
+},
+
+        }
     }()
     premadeThriftType_map_i32_module1_PartName = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_i32).
-                SetValueType(premadeThriftType_module1_PartName),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_i32,
+    ValueType: premadeThriftType_module1_PartName,
+},
+
+        }
     }()
     premadeThriftType_module1_Automobile = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module1.Automobile"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module1.Automobile",
+},
+
+        }
     }()
     premadeThriftType_i64 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+
+        }
     }()
     premadeThriftType_module1_MapKey = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module1.MapKey"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module1.MapKey",
+},
+
+        }
     }()
     premadeThriftType_map_module1_MapKey_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTMap(
-            metadata.NewThriftMapType().
-                SetKeyType(premadeThriftType_module1_MapKey).
-                SetValueType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TMap: &metadata.ThriftMapType{
+    KeyType:   premadeThriftType_module1_MapKey,
+    ValueType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_module1_MapContainer = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module1.MapContainer"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module1.MapContainer",
+},
+
+        }
     }()
     premadeThriftType_module1_Car = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.Car").
-                SetUnderlyingType(premadeThriftType_module1_Automobile),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.Car",
+    UnderlyingType: premadeThriftType_module1_Automobile,
+},
+
+        }
     }()
     premadeThriftType_module1_Pair = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module1.Pair"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module1.Pair",
+},
+
+        }
     }()
     premadeThriftType_list_module1_Automobile = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_module1_Automobile),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_module1_Automobile,
+},
+
+        }
     }()
     premadeThriftType_list_module1_Car = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTList(
-            metadata.NewThriftListType().
-                SetValueType(premadeThriftType_module1_Car),
-        )
+        return &metadata.ThriftType{
+            TList: &metadata.ThriftListType{
+    ValueType: premadeThriftType_module1_Car,
+},
+
+        }
     }()
     premadeThriftType_module1_Collection = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module1.Collection"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module1.Collection",
+},
+
+        }
     }()
     premadeThriftType_module1_State = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.State").
-                SetUnderlyingType(premadeThriftType_string),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.State",
+    UnderlyingType: premadeThriftType_string,
+},
+
+        }
     }()
     premadeThriftType_module1_Enum = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("module1.Enum").
-                SetUnderlyingType(module2.GetMetadataThriftType("module2.Enum")),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "module1.Enum",
+    UnderlyingType: module2.GetMetadataThriftType("module2.Enum"),
+},
+
+        }
     }()
 )
 
@@ -207,51 +248,52 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module1.Finder").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("byPlate").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_module1_Automobile).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("plate").
-    SetIsOptional(false).
-    SetType(premadeThriftType_module1_Plate),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module1.Finder",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "byPlate",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_module1_Automobile,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "plate",
+                            IsOptional: false,
+                            Type:       premadeThriftType_module1_Plate,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "aliasByPlate",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_module1_Car,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "plate",
+                            IsOptional: false,
+                            Type:       premadeThriftType_module1_Plate,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "previousPlate",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_module1_Plate,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "plate",
+                            IsOptional: false,
+                            Type:       premadeThriftType_module1_Plate,
+                        },
+                    },
+                },
+            },
         },
-    ),
-            metadata.NewThriftFunction().
-    SetName("aliasByPlate").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_module1_Car).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("plate").
-    SetIsOptional(false).
-    SetType(premadeThriftType_module1_Plate),
-        },
-    ),
-            metadata.NewThriftFunction().
-    SetName("previousPlate").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_module1_Plate).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("plate").
-    SetIsOptional(false).
-    SetType(premadeThriftType_module1_Plate),
-        },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

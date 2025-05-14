@@ -20,69 +20,90 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_module_Metasyntactic = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.Metasyntactic"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.Metasyntactic",
+},
+
+        }
     }()
     premadeThriftType_module_MyEnum1 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.MyEnum1"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.MyEnum1",
+},
+
+        }
     }()
     premadeThriftType_module_MyEnum2 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.MyEnum2"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.MyEnum2",
+},
+
+        }
     }()
     premadeThriftType_module_MyEnum3 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.MyEnum3"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.MyEnum3",
+},
+
+        }
     }()
     premadeThriftType_module_MyEnum4 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.MyEnum4"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.MyEnum4",
+},
+
+        }
     }()
     premadeThriftType_module_MyBitmaskEnum1 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.MyBitmaskEnum1"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.MyBitmaskEnum1",
+},
+
+        }
     }()
     premadeThriftType_module_MyBitmaskEnum2 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTEnum(
-            metadata.NewThriftEnumType().
-                SetName("module.MyBitmaskEnum2"),
-        )
+        return &metadata.ThriftType{
+            TEnum: &metadata.ThriftEnumType{
+    Name: "module.MyBitmaskEnum2",
+},
+
+        }
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+
+        }
     }()
     premadeThriftType_set_i32 = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTSet(
-            metadata.NewThriftSetType().
-                SetValueType(premadeThriftType_i32),
-        )
+        return &metadata.ThriftType{
+            TSet: &metadata.ThriftSetType{
+    ValueType: premadeThriftType_i32,
+},
+
+        }
     }()
     premadeThriftType_module_SomeStruct = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.SomeStruct"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.SomeStruct",
+},
+
+        }
     }()
     premadeThriftType_module_MyStruct = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.MyStruct"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.MyStruct",
+},
+
+        }
     }()
 )
 
@@ -115,77 +136,84 @@ var exceptionMetadatas = func() []*metadata.ThriftException {
 
 var enumMetadatas = func() []*metadata.ThriftEnum {
     fbthriftResults := make([]*metadata.ThriftEnum, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.Metasyntactic").
-    SetElements(
-        map[int32]string{
-            1: "FOO",
-            2: "BAR",
-            3: "BAZ",
-            4: "BAX",
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.Metasyntactic",
+            Elements: map[int32]string{
+                1: "FOO",
+                2: "BAR",
+                3: "BAZ",
+                4: "BAX",
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.MyEnum1").
-    SetElements(
-        map[int32]string{
-            0: "ME1_0",
-            1: "ME1_1",
-            2: "ME1_2",
-            3: "ME1_3",
-            5: "ME1_5",
-            6: "ME1_6",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.MyEnum1",
+            Elements: map[int32]string{
+                0: "ME1_0",
+                1: "ME1_1",
+                2: "ME1_2",
+                3: "ME1_3",
+                5: "ME1_5",
+                6: "ME1_6",
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.MyEnum2").
-    SetElements(
-        map[int32]string{
-            0: "ME2_0",
-            1: "ME2_1",
-            2: "ME2_2",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.MyEnum2",
+            Elements: map[int32]string{
+                0: "ME2_0",
+                1: "ME2_1",
+                2: "ME2_2",
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.MyEnum3").
-    SetElements(
-        map[int32]string{
-            0: "ME3_0",
-            1: "ME3_1",
-            -2: "ME3_N2",
-            -1: "ME3_N1",
-            9: "ME3_9",
-            10: "ME3_10",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.MyEnum3",
+            Elements: map[int32]string{
+                0: "ME3_0",
+                1: "ME3_1",
+                -2: "ME3_N2",
+                -1: "ME3_N1",
+                9: "ME3_9",
+                10: "ME3_10",
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.MyEnum4").
-    SetElements(
-        map[int32]string{
-            2147483645: "ME4_A",
-            2147483646: "ME4_B",
-            2147483647: "ME4_C",
-            -2147483648: "ME4_D",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.MyEnum4",
+            Elements: map[int32]string{
+                2147483645: "ME4_A",
+                2147483646: "ME4_B",
+                2147483647: "ME4_C",
+                -2147483648: "ME4_D",
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.MyBitmaskEnum1").
-    SetElements(
-        map[int32]string{
-            1: "ONE",
-            2: "TWO",
-            4: "FOUR",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.MyBitmaskEnum1",
+            Elements: map[int32]string{
+                1: "ONE",
+                2: "TWO",
+                4: "FOUR",
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
-    SetName("module.MyBitmaskEnum2").
-    SetElements(
-        map[int32]string{
-            1: "ONE",
-            2: "TWO",
-            4: "FOUR",
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftEnum{
+            Name:     "module.MyBitmaskEnum2",
+            Elements: map[int32]string{
+                1: "ONE",
+                2: "TWO",
+                4: "FOUR",
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 

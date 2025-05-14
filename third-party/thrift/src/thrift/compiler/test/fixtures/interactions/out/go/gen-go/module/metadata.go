@@ -22,26 +22,32 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_string = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+
+        }
     }()
     premadeThriftType_module_ShouldBeBoxed = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.ShouldBeBoxed"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.ShouldBeBoxed",
+},
+
+        }
     }()
     premadeThriftType_module_CustomException = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("module.CustomException"),
-        )
+        return &metadata.ThriftType{
+            TStruct: &metadata.ThriftStructType{
+    Name: "module.CustomException",
+},
+
+        }
     }()
     premadeThriftType_void = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+
+        }
     }()
 )
 
@@ -73,52 +79,61 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.MyService").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("foo").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.MyService",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "foo",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.Factories").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("foo").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.Factories",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "foo",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.Perform").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("foo").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void),
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.Perform",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "foo",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                },
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.InteractWithShared").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("do_some_similar_things").
-    SetIsOneway(false).
-    SetReturnType(shared.GetMetadataThriftType("shared.DoSomethingResult")),
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.InteractWithShared",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "do_some_similar_things",
+                    IsOneway:   false,
+                    ReturnType: shared.GetMetadataThriftType("shared.DoSomethingResult"),
+                },
+            },
         },
-    ))
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("module.BoxService").
-    SetFunctions(
-        []*metadata.ThriftFunction{
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "module.BoxService",
+            Functions: []*metadata.ThriftFunction{
+            },
         },
-    ))
+    )
     return fbthriftResults
 }()
 

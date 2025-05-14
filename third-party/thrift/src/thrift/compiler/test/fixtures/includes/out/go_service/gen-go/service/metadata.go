@@ -24,23 +24,28 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_service_IncludesIncluded = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("service.IncludesIncluded").
-                SetUnderlyingType(includes.GetMetadataThriftType("includes.Included")),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "service.IncludesIncluded",
+    UnderlyingType: includes.GetMetadataThriftType("includes.Included"),
+},
+
+        }
     }()
     premadeThriftType_service_IncludesTransitiveFoo = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTTypedef(
-            metadata.NewThriftTypedefType().
-                SetName("service.IncludesTransitiveFoo").
-                SetUnderlyingType(includes.GetMetadataThriftType("includes.TransitiveFoo")),
-        )
+        return &metadata.ThriftType{
+            TTypedef: &metadata.ThriftTypedefType{
+    Name:           "service.IncludesTransitiveFoo",
+    UnderlyingType: includes.GetMetadataThriftType("includes.TransitiveFoo"),
+},
+
+        }
     }()
     premadeThriftType_void = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTPrimitive(
-            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        )
+        return &metadata.ThriftType{
+            TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+
+        }
     }()
 )
 
@@ -69,48 +74,51 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
 
 var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults := make([]*metadata.ThriftService, 0)
-    fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
-    SetName("service.MyService").
-    SetFunctions(
-        []*metadata.ThriftFunction{
-            metadata.NewThriftFunction().
-    SetName("query").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("s").
-    SetIsOptional(false).
-    SetType(module.GetMetadataThriftType("module.MyStruct")),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("i").
-    SetIsOptional(false).
-    SetType(includes.GetMetadataThriftType("includes.Included")),
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftService{
+            Name:      "service.MyService",
+            Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "query",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "s",
+                            IsOptional: false,
+                            Type:       module.GetMetadataThriftType("module.MyStruct"),
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "i",
+                            IsOptional: false,
+                            Type:       includes.GetMetadataThriftType("includes.Included"),
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "has_arg_docs",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "s",
+                            IsOptional: false,
+                            Type:       module.GetMetadataThriftType("module.MyStruct"),
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "i",
+                            IsOptional: false,
+                            Type:       includes.GetMetadataThriftType("includes.Included"),
+                        },
+                    },
+                },
+            },
         },
-    ),
-            metadata.NewThriftFunction().
-    SetName("has_arg_docs").
-    SetIsOneway(false).
-    SetReturnType(premadeThriftType_void).
-    SetArguments(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("s").
-    SetIsOptional(false).
-    SetType(module.GetMetadataThriftType("module.MyStruct")),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("i").
-    SetIsOptional(false).
-    SetType(includes.GetMetadataThriftType("includes.Included")),
-        },
-    ),
-        },
-    ))
+    )
     return fbthriftResults
 }()
 

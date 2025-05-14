@@ -19,8 +19,10 @@
   This template defines metadata for a Thrift struct field.
 
 }}
-{{program:metadata_qualifier}}NewThriftField().
-    SetId({{field:key}}).
-    SetName("{{field:name}}").
-    SetIsOptional({{field:optional?}}).
-    SetType({{#field:type}}{{type:metadata_thrift_type_getter}}{{/field:type}})
+&{{program:metadata_qualifier}}ThriftField{
+    Id:         {{field:key}},
+    Name:       "{{field:name}}",
+    IsOptional: {{field:optional?}},
+    Type:       {{#field:type}}{{type:metadata_thrift_type_getter}}{{/field:type}},
+},
+{{!newline}}

@@ -483,7 +483,7 @@ class MockECHDecrypter : public ech::Decrypter {
   MOCK_METHOD(
       std::vector<ech::ECHConfig>,
       getRetryConfigs,
-      (),
+      (const folly::Optional<std::string>& maybeSni),
       (const, override));
 };
 } // namespace test

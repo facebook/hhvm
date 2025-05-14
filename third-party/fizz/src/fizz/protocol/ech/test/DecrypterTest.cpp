@@ -16,6 +16,7 @@
 #include <fizz/protocol/ech/test/TestUtil.h>
 #include <fizz/protocol/test/TestUtil.h>
 
+using namespace std::string_literals;
 using namespace fizz::test;
 
 namespace fizz {
@@ -100,6 +101,36 @@ ClientHello getChloOuterHRRWithExt(
   chloOuter.extensions.push_back(encodeExtension(echExt));
 
   return chloOuter;
+}
+
+ECHConfig makeDummyConfig(uint8_t configId, const std::string& publicName) {
+  auto content = ECHConfigContentDraft{};
+  content.key_config.config_id = configId;
+  content.public_name = folly::IOBuf::copyBuffer(publicName);
+  content.key_config.public_key = folly::IOBuf::copyBuffer("public");
+  auto config = ECHConfig{};
+  config.version = ECHVersion::Draft15;
+  config.ech_config_content = fizz::encode(std::move(content));
+  return config;
+}
+
+struct RetryConfigExpectation {
+  uint8_t id;
+  std::string name;
+};
+
+void checkRetryConfigExpectation(
+    const std::vector<RetryConfigExpectation>& expectations,
+    const std::vector<ECHConfig>& configs) {
+  ASSERT_EQ(expectations.size(), configs.size());
+  for (size_t i = 0; i < expectations.size(); ++i) {
+    const auto& config = configs[i];
+    auto cursor = folly::io::Cursor(config.ech_config_content.get());
+    auto configContent = decode<ECHConfigContentDraft>(cursor);
+    EXPECT_EQ(expectations[i].id, configContent.key_config.config_id);
+    EXPECT_EQ(
+        expectations[i].name, configContent.public_name->to<std::string>());
+  }
 }
 
 TEST(DecrypterTest, TestDecodeSuccess) {
@@ -252,6 +283,57 @@ TEST(DecrypterTest, TestDecodeMultipleDecrypterParam) {
   auto result = decrypter.decryptClientHello(chlo);
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->configId == 2);
+}
+
+TEST(DecrypterTest, TestGetRetryConfigs) {
+  auto decrypter = ECHConfigManager(std::make_shared<DefaultFactory>());
+  auto publicNames = {"a.com", "b.com", "a.com", "c.com", "b.com", "a.com"};
+  uint8_t configId = 0;
+  for (const auto& name : publicNames) {
+    decrypter.addDecryptionConfig(
+        {.echConfig = makeDummyConfig(configId++, name)});
+  }
+
+  checkRetryConfigExpectation(
+      {{0, "a.com"},
+       {2, "a.com"},
+       {5, "a.com"},
+       {1, "b.com"},
+       {3, "c.com"},
+       {4, "b.com"}},
+      decrypter.getRetryConfigs("a.com"s));
+  checkRetryConfigExpectation(
+      {{1, "b.com"},
+       {4, "b.com"},
+       {0, "a.com"},
+       {2, "a.com"},
+       {3, "c.com"},
+       {5, "a.com"}},
+      decrypter.getRetryConfigs("b.com"s));
+  checkRetryConfigExpectation(
+      {{3, "c.com"},
+       {0, "a.com"},
+       {1, "b.com"},
+       {2, "a.com"},
+       {4, "b.com"},
+       {5, "a.com"}},
+      decrypter.getRetryConfigs("c.com"s));
+  checkRetryConfigExpectation(
+      {{0, "a.com"},
+       {1, "b.com"},
+       {2, "a.com"},
+       {3, "c.com"},
+       {4, "b.com"},
+       {5, "a.com"}},
+      decrypter.getRetryConfigs("d.com"s));
+  checkRetryConfigExpectation(
+      {{0, "a.com"},
+       {1, "b.com"},
+       {2, "a.com"},
+       {3, "c.com"},
+       {4, "b.com"},
+       {5, "a.com"}},
+      decrypter.getRetryConfigs(folly::none));
 }
 
 } // namespace test

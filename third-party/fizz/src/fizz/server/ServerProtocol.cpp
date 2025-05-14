@@ -1073,9 +1073,9 @@ static std::pair<std::vector<ExtensionType>, Buf> getCertificateRequest(
       std::move(certReqExtensions), std::move(encodedCertificateRequest));
 }
 
-static std::string getSNI(const ClientHello& chlo) {
+static folly::Optional<std::string> getSNI(const ClientHello& chlo) {
+  folly::Optional<std::string> sni;
   auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
-  std::string sni;
   if (serverNameList && !serverNameList->server_name_list.empty()) {
     sni = serverNameList->server_name_list.front().hostname->to<std::string>();
   }
@@ -1185,6 +1185,7 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
     if (state.echState().has_value()) {
       echState->hpkeContext = std::move(state.echState()->hpkeContext);
       echState->cipherSuite = state.echState()->cipherSuite;
+      echState->outerSni = state.echState()->outerSni;
     }
   } else {
     bool requestedECH =
@@ -1196,14 +1197,12 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
     if (requestedECH) {
       auto echExt = getExtension<ech::OuterECHClientHello>(chlo.extensions);
       echState = ECHState{
-          echExt->cipher_suite, echExt->config_id, nullptr, folly::none};
+          echExt->cipher_suite, echExt->config_id, nullptr, getSNI(chlo)};
       if (decrypter) {
         auto gotChlo = decrypter->decryptClientHello(chlo);
         if (gotChlo.has_value()) {
-          auto outerSni = getSNI(chlo);
           echStatus = ECHStatus::Accepted;
           echState->hpkeContext = std::move(gotChlo->context);
-          echState->outerSni = outerSni;
           chlo = std::move(gotChlo->chlo);
         } else {
           echStatus = ECHStatus::Rejected;
@@ -1636,7 +1635,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     std::move(echScheduler));
               } else if (echStatus == ECHStatus::Rejected) {
                 auto decrypter = state.context()->getECHDecrypter();
-                echRetryConfigs = decrypter->getRetryConfigs();
+                DCHECK(decrypter);
+                DCHECK(echState);
+                echRetryConfigs =
+                    decrypter->getRetryConfigs(echState->outerSni);
               }
 
               auto encodedServerHello = encodeHandshake(std::move(serverHello));

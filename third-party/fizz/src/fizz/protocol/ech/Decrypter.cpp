@@ -8,6 +8,8 @@
 
 #include <fizz/protocol/ech/Decrypter.h>
 
+#include <iterator>
+
 namespace fizz {
 namespace ech {
 
@@ -180,11 +182,30 @@ ClientHello ECHConfigManager::decryptClientHelloHRR(
       *factory_, chlo, encapsulatedKey, dummy, configs_);
 }
 
-std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs() const {
+std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs(
+    const folly::Optional<std::string>& maybeSni) const {
   std::vector<ech::ECHConfig> retryConfigs;
-  for (const auto& cfg : configs_) {
-    retryConfigs.push_back(cfg.echConfig);
+  std::vector<ech::ECHConfig> nonMatchingConfigs;
+  for (const auto& config : configs_) {
+    switch (config.echConfig.version) {
+      case ECHVersion::Draft15: {
+        auto cursor =
+            folly::io::Cursor(config.echConfig.ech_config_content.get());
+        auto currentConfigDraft = decode<ECHConfigContentDraft>(cursor);
+        if (maybeSni.hasValue() &&
+            maybeSni.value() ==
+                currentConfigDraft.public_name->to<std::string>()) {
+          retryConfigs.push_back(config.echConfig);
+        } else {
+          nonMatchingConfigs.push_back(config.echConfig);
+        }
+      } break;
+    }
   }
+  retryConfigs.insert(
+      retryConfigs.end(),
+      std::make_move_iterator(nonMatchingConfigs.begin()),
+      std::make_move_iterator(nonMatchingConfigs.end()));
   return retryConfigs;
 }
 

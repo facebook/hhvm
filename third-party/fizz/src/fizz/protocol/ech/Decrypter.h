@@ -42,7 +42,8 @@ class Decrypter {
   virtual ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) = 0;
-  virtual std::vector<ech::ECHConfig> getRetryConfigs() const = 0;
+  virtual std::vector<ech::ECHConfig> getRetryConfigs(
+      const folly::Optional<std::string>& maybeSni) const = 0;
 };
 
 class ECHConfigManager : public Decrypter {
@@ -58,9 +59,10 @@ class ECHConfigManager : public Decrypter {
   ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) override;
-  std::vector<ech::ECHConfig> getRetryConfigs() const override;
+  std::vector<ech::ECHConfig> getRetryConfigs(
+      const folly::Optional<std::string>& maybeSni) const override;
 
- private:
+ protected:
   std::shared_ptr<Factory> factory_;
   std::vector<DecrypterParams> configs_;
 };

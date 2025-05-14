@@ -1488,7 +1488,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
   auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, decryptClientHello(_))
       .WillOnce(InvokeWithoutArgs([=]() { return folly::none; }));
-  EXPECT_CALL(*decrypter, getRetryConfigs())
+  EXPECT_CALL(*decrypter, getRetryConfigs(_))
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;
@@ -3343,8 +3343,15 @@ TEST_F(ServerProtocolTest, TestRetryECHMissingInnerExtension) {
 TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
   setUpExpectingClientHelloRetry();
   state_.echStatus() = ECHStatus::Rejected;
+  fizz::server::ECHState echState;
+  echState.cipherSuite.kdf_id = fizz::hpke::KDFId::Sha256;
+  echState.cipherSuite.aead_id = fizz::hpke::AeadId::TLS_AES_128_GCM_SHA256;
+  echState.configId = 0xFB;
+  echState.hpkeContext = nullptr;
+  echState.outerSni = "test.net";
+  state_.echState() = std::move(echState);
   auto decrypter = std::make_shared<MockECHDecrypter>();
-  EXPECT_CALL(*decrypter, getRetryConfigs())
+  EXPECT_CALL(*decrypter, getRetryConfigs(_))
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;

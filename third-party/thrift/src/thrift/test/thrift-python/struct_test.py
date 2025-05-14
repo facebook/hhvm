@@ -165,7 +165,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError,
             (
-                "error updating Thrift struct field 'unqualified_string': Cannot create "
+                "error .* Thrift struct field 'unqualified_string': Cannot create "
                 "internal string data representation. Expected type <class 'str'>, got: "
                 "<class 'int'>."
             ),
@@ -429,7 +429,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError,
             (
-                "error updating Thrift struct field "
+                "error .* Thrift struct field "
                 "'unqualified_adapted_i32_to_datetime': 'int' object has no attribute "
                 "'timestamp'"
             ),

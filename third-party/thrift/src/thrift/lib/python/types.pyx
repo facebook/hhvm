@@ -1106,8 +1106,8 @@ cdef class Struct(StructOrUnion):
             return self
         cdef StructInfo struct_info = self._fbthrift_struct_info
         klass = type(self)
-        # NB: optimization opportunity here: pass **kwargs to fbthrift_new
-        cdef Struct new_inst = klass._fbthrift_new()
+        # note this puts the set kwargs into new_inst._fbthrift_data
+        cdef Struct new_inst = klass._fbthrift_new(**kwargs)
         not_found = object()
         isset_flags = self._fbthrift_data[0]
 
@@ -1115,33 +1115,13 @@ cdef class Struct(StructOrUnion):
             value = kwargs.pop(field_name, not_found)
             if value is None:  # reset to default value, no change needed
                 continue
-            if value is not_found:  # copy the old value if needed
+            if value is not_found:  # borrow ref to old value
                 if isset_flags[field_index] == 0:
                     # old field not set, so keep default
                     continue
-                value_to_copy = self._fbthrift_data[field_index + 1]
-            else:  # new assigned value
-                try:
-                    field_spec = struct_info.fields[field_index]
-                    adapter_info = field_spec.adapter_info
-                    if adapter_info:
-                        adapter_class, transitive_annotation = adapter_info
-                        field_id = field_spec.id
-                        value = adapter_class.to_thrift_field(
-                            value,
-                            field_id,
-                            self,
-                            transitive_annotation=transitive_annotation(),
-                        )
-                    value_to_copy = (
-                        <TypeInfoBase>struct_info.type_infos[field_index]
-                    ).to_internal_data(value)
-                except Exception as exc:
-                    raise type(exc)(
-                        f"{type(self)}: error updating Thrift struct field "
-                        f"'{field_spec.py_name}': {exc}"
-                    ) from exc
-            set_struct_field(new_inst._fbthrift_data, field_index, value_to_copy)
+                borrowed_value = self._fbthrift_data[field_index + 1]
+                set_struct_field(new_inst._fbthrift_data, field_index, borrowed_value)
+
         if kwargs:
             raise TypeError(
                 f"'{type(self).__name__}' object does not have attribute(s): "

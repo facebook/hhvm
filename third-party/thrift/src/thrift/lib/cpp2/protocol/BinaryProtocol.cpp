@@ -49,17 +49,25 @@ namespace apache::thrift {
 template <typename T>
 void BinaryProtocolReader::readArithmeticVector(
     T* outputPtr, size_t numElements) {
-  const uint8_t* inPtr = in_.data();
-  size_t i = 0;
-  size_t loopLen = std::min(numElements, in_.length() / sizeof(T));
-  for (; i < loopLen; ++i) {
-    outputPtr[i] =
-        folly::Endian::big<T>(folly::loadUnaligned<T>(inPtr + i * sizeof(T)));
-  }
-  in_.skip(i * sizeof(T));
-  // read elements one-by-one beyond what initially fits into the buffer
-  for (; i < numElements; ++i) {
-    outputPtr[i] = in_.readBE<T>();
+  constexpr size_t size = sizeof(T);
+  for (;;) {
+    const uint8_t* inputPtr = in_.data();
+    size_t elementsInBuffer = std::min(numElements, in_.length() / size);
+    for (numElements -= elementsInBuffer; elementsInBuffer;
+         elementsInBuffer--, inputPtr += size, outputPtr++) {
+      *outputPtr = folly::Endian::big(folly::loadUnaligned<T>(inputPtr));
+    }
+
+    in_.skip(inputPtr - in_.data());
+    if (!numElements) {
+      return;
+    } else if (inputPtr == in_.data()) {
+      // skip didn't advance in_'s buffer because no elements were available to
+      // read in the current buffer. readBE to handle elements that straddle
+      // buffer boundaries, skip over empty buffers, and throw on underflow.
+      numElements--;
+      *outputPtr++ = in_.readBE<T>();
+    }
   }
 }
 

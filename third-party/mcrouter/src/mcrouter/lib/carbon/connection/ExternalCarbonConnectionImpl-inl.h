@@ -282,12 +282,6 @@ class Impl {
         return;
       }
 
-      if (client->limitRequests(1) == 0) {
-        ret = false;
-        baton.post();
-        return;
-      }
-
       auto reply = client->sendRequest(facebook::memcache::McVersionRequest());
       ret = !facebook::memcache::isErrorResult(*reply.result_ref());
       baton.post();

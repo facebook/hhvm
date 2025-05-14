@@ -321,7 +321,7 @@ let reify_kind_as_value k =
 let tyset_as_value env tys =
   Set (TySet.fold (fun t s -> SSet.add (Pr.debug env t) s) tys SSet.empty)
 
-let rec tparam_info_as_value env tpinfo =
+let tparam_info_as_value env tpinfo =
   let Typing_kinding_defs.
         {
           lower_bounds;
@@ -330,7 +330,6 @@ let rec tparam_info_as_value env tpinfo =
           enforceable;
           newable;
           require_dynamic;
-          parameters;
           rank;
         } =
     tpinfo
@@ -343,17 +342,8 @@ let rec tparam_info_as_value env tpinfo =
       ("enforceable", bool_as_value enforceable);
       ("newable", bool_as_value newable);
       ("require_dynamic", bool_as_value require_dynamic);
-      ("parameters", named_tparam_info_list_as_value env parameters);
       ("rank", string_as_value (Int.to_string rank));
     ]
-
-and named_tparam_info_list_as_value env parameters =
-  let param_values =
-    List.map parameters ~f:(fun (name, param) ->
-        list_as_value
-          [string_as_value (snd name); tparam_info_as_value env param])
-  in
-  list_as_value param_values
 
 let tpenv_as_value env tpenv =
   make_map

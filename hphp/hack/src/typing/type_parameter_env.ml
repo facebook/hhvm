@@ -95,10 +95,9 @@ let get_upper_bounds tpenv name =
   | None -> empty_bounds
   | Some { upper_bounds; _ } -> upper_bounds
 
-let get_arity tpenv name =
-  match get name tpenv with
-  | None -> 0
-  | Some { parameters; _ } -> List.length parameters
+let get_arity _tpenv _name =
+  (* TODO(T222659258) Always 0 now that higher-kinded types are being removed *)
+  0
 
 let get_reified tpenv name =
   match get name tpenv with
@@ -160,7 +159,6 @@ let add_upper_bound_ tpenv name ty =
             enforceable = false;
             newable = false;
             require_dynamic = false;
-            parameters = [];
             rank = 0;
           } )
       | Some (pos, tp) ->
@@ -185,7 +183,6 @@ let add_lower_bound_ tpenv name ty =
             enforceable = false;
             newable = false;
             require_dynamic = false;
-            parameters = [];
             rank = 0;
           } )
       | Some (pos, tp) ->
@@ -226,7 +223,6 @@ let add_upper_bound ?intersect env_tpenv name ty =
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
     let require_dynamic = get_require_dynamic env_tpenv name in
-    let parameters = [] in
     let rank = get_rank env_tpenv name in
     add
       ~def_pos
@@ -238,7 +234,6 @@ let add_upper_bound ?intersect env_tpenv name ty =
         enforceable;
         newable;
         require_dynamic;
-        parameters;
         rank;
       }
       tpenv
@@ -269,7 +264,6 @@ let add_lower_bound ?union env_tpenv name ty =
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
     let require_dynamic = get_require_dynamic env_tpenv name in
-    let parameters = [] in
     let rank = get_rank env_tpenv name in
     add
       ~def_pos
@@ -281,7 +275,6 @@ let add_lower_bound ?union env_tpenv name ty =
         enforceable;
         newable;
         require_dynamic;
-        parameters;
         rank;
       }
       tpenv
@@ -325,8 +318,8 @@ let remove tpenv name =
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
 let add_generic_parameters tpenv tparaml =
-  let rec make_param_info ast_tparam =
-    let { tp_user_attributes; tp_tparams; _ } = ast_tparam in
+  let make_param_info ast_tparam =
+    let { tp_user_attributes; _ } = ast_tparam in
     let enforceable =
       Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
@@ -336,9 +329,6 @@ let add_generic_parameters tpenv tparaml =
     let require_dynamic =
       Attributes.mem SN.UserAttributes.uaRequireDynamic tp_user_attributes
     in
-    let nested_params =
-      List.map tp_tparams ~f:(fun tp -> (tp.tp_name, make_param_info tp))
-    in
 
     {
       lower_bounds = empty_bounds;
@@ -347,7 +337,6 @@ let add_generic_parameters tpenv tparaml =
       enforceable;
       newable;
       require_dynamic;
-      parameters = nested_params;
       rank = 0;
     }
   in
@@ -358,8 +347,10 @@ let add_generic_parameters tpenv tparaml =
   in
   List.fold_left tparaml ~f:add_top ~init:tpenv
 
-let get_parameter_names tpi =
-  List.map tpi.parameters ~f:(fun (name, _) -> snd name)
+let get_parameter_names _tpi =
+  (* TODO(T222659258) Always empty now that higher-kinded types are
+     being removed *)
+  []
 
 let force_lazy_values_tparam_info (info : tparam_info) =
   Typing_kinding_defs.force_lazy_values info

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8be733e9b0946dd30f0ee749ba761a48>>
+// @generated SignedSource<<47660976ed4933977f98d2fd9c51a99d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,7 +44,6 @@ pub struct Kind {
     pub enforceable: bool,
     pub newable: bool,
     pub require_dynamic: bool,
-    pub parameters: Vec<NamedKind>,
     pub rank: isize,
 }
 

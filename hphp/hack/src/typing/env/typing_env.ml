@@ -511,7 +511,6 @@ let add_fresh_generic_parameter env pos prefix ~reified ~enforceable ~newable =
         enforceable;
         newable;
         require_dynamic = true;
-        parameters = [];
         rank = 0;
       }
   in
@@ -536,8 +535,6 @@ let get_tpenv_tparams env =
               enforceable = _;
               newable = _;
               require_dynamic = _;
-              (* FIXME what to do here? it seems dangerous to just traverse *)
-              parameters = _;
               rank = _;
             }
           acc ->

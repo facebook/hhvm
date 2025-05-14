@@ -6,7 +6,6 @@ module SN = Naming_special_names
 
 type tparam_bounds = TySet.t [@@deriving hash, show]
 
-(* TODO(T222659258) remove parameters field here *)
 type kind = {
   lower_bounds: tparam_bounds;
   upper_bounds: tparam_bounds;
@@ -14,7 +13,6 @@ type kind = {
   enforceable: bool;
   newable: bool;
   require_dynamic: bool;
-  parameters: named_kind list;
   rank: int;
 }
 
@@ -24,47 +22,18 @@ let dummy_name = (Pos_or_decl.none, "")
 
 let with_dummy_name k = (dummy_name, k)
 
-let get_arity k = List.length k.parameters
+let get_arity _k =
+  (* TODO(T222659258) Always 0 now that higher-kinded types are being removed *)
+  0
 
-let string_of_kind (kind : kind) =
-  let rec stringify toplevel k =
-    match k.parameters with
-    | [] -> "Type"
-    | params ->
-      let parts = List.map params ~f:(fun (_, pk) -> stringify false pk) in
-      let res = String.concat ~sep:" -> " parts ^ " -> Type" in
-      if toplevel then
-        res
-      else
-        "(" ^ res ^ ")"
-  in
-  stringify true kind
+let string_of_kind (_kind : kind) =
+  (* TODO(T222659258) Find and remove users of this  *) "Type"
 
-let description_of_kind kind =
-  match kind.parameters with
-  | [] -> "a fully-applied type"
-  | params
-    when List.for_all params ~f:(fun (_, param) ->
-             Int.( = ) 0 (get_arity param)) ->
-    (* no higher-order arguments *)
-    let param_count = List.length params in
-    let args_desc =
-      if Int.( = ) 1 param_count then
-        "a single (fully-applied) type argument"
-      else
-        string_of_int param_count ^ "(fully-applied) type arguments"
-    in
-    "a type constructor expecting " ^ args_desc
-  | _ -> "a type constructor of kind " ^ string_of_kind kind
+let description_of_kind _kind =
+  (* TODO(T222659258) Find and remove users of this  *) "a fully-applied type"
 
-let rec remove_bounds kind =
-  {
-    kind with
-    lower_bounds = TySet.empty;
-    upper_bounds = TySet.empty;
-    parameters =
-      List.map kind.parameters ~f:(fun (n, k) -> (n, remove_bounds k));
-  }
+let remove_bounds kind =
+  { kind with lower_bounds = TySet.empty; upper_bounds = TySet.empty }
 
 module Simple = struct
   type bounds_for_wildcard =
@@ -101,7 +70,6 @@ module Simple = struct
         enforceable;
         newable;
         require_dynamic = false;
-        parameters = [];
         rank = 0;
       },
       NonLocalized [] )
@@ -122,16 +90,7 @@ module Simple = struct
       Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     let (st, _) = fully_applied_type ~reified ~enforceable ~newable () in
-    ( tp_name,
-      {
-        st with
-        parameters = named_internal_kinds_of_decl_tparams decl_tparam.tp_tparams;
-      } )
-
-  (* not public *)
-  and named_internal_kinds_of_decl_tparams (tparams : decl_tparam list) :
-      named_full_kind list =
-    List.map tparams ~f:named_internal_kind_of_decl_tparam
+    (tp_name, st)
 
   (* public *)
   and named_kind_of_decl_tparam decl_tparam : named_kind =
@@ -144,14 +103,12 @@ module Simple = struct
   let named_kinds_of_decl_tparams decl_tparams : named_kind list =
     List.map decl_tparams ~f:named_kind_of_decl_tparam
 
-  let type_with_params_to_simple_kind ?reified ?enforceable ?newable tparams =
+  let type_with_params_to_simple_kind ?reified ?enforceable ?newable _tparams =
     let (st, _) = fully_applied_type ?reified ?enforceable ?newable () in
-    ( { st with parameters = named_internal_kinds_of_decl_tparams tparams },
-      NonLocalized [] )
+    (st, NonLocalized [])
 
   (** Returns the type parameters of the kind, more or less. *)
-  let get_named_parameter_kinds (kind, _) : named_kind list =
-    List.map kind.parameters ~f:(fun (n, fk) -> (n, (fk, NonLocalized [])))
+  let get_named_parameter_kinds (_kind, _) : named_kind list = []
 
   let from_full_kind fk =
     let wildcard_bounds =
@@ -165,7 +122,7 @@ module Simple = struct
   let with_dummy_name = with_dummy_name
 end
 
-let rec force_lazy_values (kind : kind) =
+let force_lazy_values (kind : kind) =
   let {
     lower_bounds;
     upper_bounds;
@@ -173,7 +130,6 @@ let rec force_lazy_values (kind : kind) =
     enforceable;
     newable;
     require_dynamic;
-    parameters;
     rank;
   } =
     kind
@@ -185,9 +141,5 @@ let rec force_lazy_values (kind : kind) =
     enforceable;
     newable;
     require_dynamic;
-    parameters = List.map parameters ~f:force_lazy_values_named_kind;
     rank;
   }
-
-and force_lazy_values_named_kind ((p, kind) : named_kind) =
-  (p, force_lazy_values kind)

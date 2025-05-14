@@ -8985,7 +8985,6 @@ end = struct
               enforceable;
               newable;
               require_dynamic;
-              parameters = [];
               rank;
             }
         in

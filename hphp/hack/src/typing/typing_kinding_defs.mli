@@ -25,7 +25,6 @@ type kind = {
   require_dynamic: bool;
       (** Set if class is marked <<__SupportDynamicType>> and
           generic parameter does *not* have attribute <<__NoRequireDynamic>> *)
-  parameters: named_kind list;
   rank: int;
 }
 

@@ -1004,13 +1004,6 @@ func (x *MyUnion) readField14(p thrift.Decoder) error {  // StructField
 
 
 
-// Deprecated: Use NewMyUnion().GetStructField() instead.
-func (x *MyUnion) DefaultGetStructField() *MyStruct {
-    if !x.IsSetStructField() {
-        return NewMyStruct()
-    }
-    return x.StructField
-}
 
 func (x *MyUnion) countSetFields() int {
     count := int(0)
@@ -2100,21 +2093,7 @@ func (x *StructLevelTerseStruct) readField15(p thrift.Decoder) error {  // Union
     return nil
 }
 
-// Deprecated: Use NewStructLevelTerseStruct().GetStructField() instead.
-func (x *StructLevelTerseStruct) DefaultGetStructField() *MyStruct {
-    if !x.IsSetStructField() {
-        return NewMyStruct()
-    }
-    return x.StructField
-}
 
-// Deprecated: Use NewStructLevelTerseStruct().GetUnionField() instead.
-func (x *StructLevelTerseStruct) DefaultGetUnionField() *MyUnion {
-    if !x.IsSetUnionField() {
-        return NewMyUnion()
-    }
-    return x.UnionField
-}
 
 
 
@@ -3824,37 +3803,9 @@ func (x *FieldLevelTerseStruct) readField30(p thrift.Decoder) error {  // UnionF
     return nil
 }
 
-// Deprecated: Use NewFieldLevelTerseStruct().GetTerseStructField() instead.
-func (x *FieldLevelTerseStruct) DefaultGetTerseStructField() *MyStruct {
-    if !x.IsSetTerseStructField() {
-        return NewMyStruct()
-    }
-    return x.TerseStructField
-}
 
-// Deprecated: Use NewFieldLevelTerseStruct().GetStructField() instead.
-func (x *FieldLevelTerseStruct) DefaultGetStructField() *MyStruct {
-    if !x.IsSetStructField() {
-        return NewMyStruct()
-    }
-    return x.StructField
-}
 
-// Deprecated: Use NewFieldLevelTerseStruct().GetTerseUnionField() instead.
-func (x *FieldLevelTerseStruct) DefaultGetTerseUnionField() *MyUnion {
-    if !x.IsSetTerseUnionField() {
-        return NewMyUnion()
-    }
-    return x.TerseUnionField
-}
 
-// Deprecated: Use NewFieldLevelTerseStruct().GetUnionField() instead.
-func (x *FieldLevelTerseStruct) DefaultGetUnionField() *MyUnion {
-    if !x.IsSetUnionField() {
-        return NewMyUnion()
-    }
-    return x.UnionField
-}
 
 
 

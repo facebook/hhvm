@@ -86,13 +86,6 @@ func (x *reqExtendTestServiceCheck) readField1(p thrift.Decoder) error {  // Str
     return nil
 }
 
-// Deprecated: Use newReqExtendTestServiceCheck().GetStruct1() instead.
-func (x *reqExtendTestServiceCheck) DefaultGetStruct1() *test0.HsFoo {
-    if !x.IsSetStruct1() {
-        return test0.NewHsFoo()
-    }
-    return x.Struct1
-}
 
 
 

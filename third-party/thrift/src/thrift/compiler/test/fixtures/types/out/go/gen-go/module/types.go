@@ -2188,13 +2188,6 @@ func (x *TrivialNestedWithDefault) readField2(p thrift.Decoder) error {  // N
     return nil
 }
 
-// Deprecated: Use NewTrivialNestedWithDefault().GetN() instead.
-func (x *TrivialNestedWithDefault) DefaultGetN() *TrivialNumeric {
-    if !x.IsSetN() {
-        return NewTrivialNumeric()
-    }
-    return x.N
-}
 
 
 
@@ -2597,13 +2590,6 @@ func (x *ComplexNestedWithDefault) readField2(p thrift.Decoder) error {  // N
     return nil
 }
 
-// Deprecated: Use NewComplexNestedWithDefault().GetN() instead.
-func (x *ComplexNestedWithDefault) DefaultGetN() *ComplexString {
-    if !x.IsSetN() {
-        return NewComplexString()
-    }
-    return x.N
-}
 
 
 
@@ -3491,13 +3477,6 @@ func (x *MyStruct) readField4(p thrift.Decoder) error {  // Data
     return nil
 }
 
-// Deprecated: Use NewMyStruct().GetData() instead.
-func (x *MyStruct) DefaultGetData() *MyDataItem {
-    if !x.IsSetData() {
-        return NewMyDataItem()
-    }
-    return x.Data
-}
 
 
 
@@ -4074,21 +4053,7 @@ func (x *ForwardUsageRoot) readField2(p thrift.Decoder) error {  // ForwardUsage
     return nil
 }
 
-// Deprecated: Use NewForwardUsageRoot().GetForwardUsageStruct() instead.
-func (x *ForwardUsageRoot) DefaultGetForwardUsageStruct() *ForwardUsageStruct {
-    if !x.IsSetForwardUsageStruct() {
-        return NewForwardUsageStruct()
-    }
-    return x.ForwardUsageStruct
-}
 
-// Deprecated: Use NewForwardUsageRoot().GetForwardUsageByRef() instead.
-func (x *ForwardUsageRoot) DefaultGetForwardUsageByRef() *ForwardUsageByRef {
-    if !x.IsSetForwardUsageByRef() {
-        return NewForwardUsageByRef()
-    }
-    return x.ForwardUsageByRef
-}
 
 
 
@@ -4225,13 +4190,6 @@ func (x *ForwardUsageStruct) readField1(p thrift.Decoder) error {  // Foo
     return nil
 }
 
-// Deprecated: Use NewForwardUsageStruct().GetFoo() instead.
-func (x *ForwardUsageStruct) DefaultGetFoo() *ForwardUsageRoot {
-    if !x.IsSetFoo() {
-        return NewForwardUsageRoot()
-    }
-    return x.Foo
-}
 
 
 
@@ -4363,13 +4321,6 @@ func (x *ForwardUsageByRef) readField1(p thrift.Decoder) error {  // Foo
     return nil
 }
 
-// Deprecated: Use NewForwardUsageByRef().GetFoo() instead.
-func (x *ForwardUsageByRef) DefaultGetFoo() *ForwardUsageRoot {
-    if !x.IsSetFoo() {
-        return NewForwardUsageRoot()
-    }
-    return x.Foo
-}
 
 
 
@@ -5618,13 +5569,6 @@ func (x *AdaptedListDep) readField1(p thrift.Decoder) error {  // Field
     return nil
 }
 
-// Deprecated: Use NewAdaptedListDep().GetField() instead.
-func (x *AdaptedListDep) DefaultGetField() *AdaptedList {
-    if !x.IsSetField() {
-        return NewAdaptedList()
-    }
-    return x.Field
-}
 
 
 

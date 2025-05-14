@@ -1398,21 +1398,7 @@ func (x *ValUnion) readField2(p thrift.Decoder) error {  // V2
     return nil
 }
 
-// Deprecated: Use NewValUnion().GetV1() instead.
-func (x *ValUnion) DefaultGetV1() *Val {
-    if !x.IsSetV1() {
-        return NewVal()
-    }
-    return x.V1
-}
 
-// Deprecated: Use NewValUnion().GetV2() instead.
-func (x *ValUnion) DefaultGetV2() *Val {
-    if !x.IsSetV2() {
-        return NewVal()
-    }
-    return x.V2
-}
 
 func (x *ValUnion) countSetFields() int {
     count := int(0)
@@ -1892,13 +1878,6 @@ func (x *NonCopyableUnion) readField1(p thrift.Decoder) error {  // S
     return nil
 }
 
-// Deprecated: Use NewNonCopyableUnion().GetS() instead.
-func (x *NonCopyableUnion) DefaultGetS() *NonCopyableStruct {
-    if !x.IsSetS() {
-        return NewNonCopyableStruct()
-    }
-    return x.S
-}
 
 func (x *NonCopyableUnion) countSetFields() int {
     count := int(0)

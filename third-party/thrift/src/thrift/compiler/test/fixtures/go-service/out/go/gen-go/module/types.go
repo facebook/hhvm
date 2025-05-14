@@ -629,13 +629,6 @@ func (x *reqGetEntityGetEntity) readField1(p thrift.Decoder) error {  // R
     return nil
 }
 
-// Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
-func (x *reqGetEntityGetEntity) DefaultGetR() *GetEntityRequest {
-    if !x.IsSetR() {
-        return NewGetEntityRequest()
-    }
-    return x.R
-}
 
 
 
@@ -772,13 +765,6 @@ func (x *respGetEntityGetEntity) readField0(p thrift.Decoder) error {  // Succes
     return nil
 }
 
-// Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
-func (x *respGetEntityGetEntity) DefaultGetSuccess() *GetEntityResponse {
-    if !x.IsSetSuccess() {
-        return NewGetEntityResponse()
-    }
-    return x.Success
-}
 
 
 

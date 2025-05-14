@@ -1427,29 +1427,8 @@ func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
     return nil
 }
 
-// Deprecated: Use newRespRaiserDoRaise().GetB() instead.
-func (x *respRaiserDoRaise) DefaultGetB() *Banal {
-    if !x.IsSetB() {
-        return NewBanal()
-    }
-    return x.B
-}
 
-// Deprecated: Use newRespRaiserDoRaise().GetF() instead.
-func (x *respRaiserDoRaise) DefaultGetF() *Fiery {
-    if !x.IsSetF() {
-        return NewFiery()
-    }
-    return x.F
-}
 
-// Deprecated: Use newRespRaiserDoRaise().GetS() instead.
-func (x *respRaiserDoRaise) DefaultGetS() *Serious {
-    if !x.IsSetS() {
-        return NewSerious()
-    }
-    return x.S
-}
 
 
 
@@ -2055,29 +2034,8 @@ func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
 }
 
 
-// Deprecated: Use newRespRaiserGet500().GetF() instead.
-func (x *respRaiserGet500) DefaultGetF() *Fiery {
-    if !x.IsSetF() {
-        return NewFiery()
-    }
-    return x.F
-}
 
-// Deprecated: Use newRespRaiserGet500().GetB() instead.
-func (x *respRaiserGet500) DefaultGetB() *Banal {
-    if !x.IsSetB() {
-        return NewBanal()
-    }
-    return x.B
-}
 
-// Deprecated: Use newRespRaiserGet500().GetS() instead.
-func (x *respRaiserGet500) DefaultGetS() *Serious {
-    if !x.IsSetS() {
-        return NewSerious()
-    }
-    return x.S
-}
 
 
 

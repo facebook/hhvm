@@ -175,13 +175,6 @@ func (x *Included) readField2(p thrift.Decoder) error {  // MyTransitiveField
     return nil
 }
 
-// Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
-func (x *Included) DefaultGetMyTransitiveField() *transitive.Foo {
-    if !x.IsSetMyTransitiveField() {
-        return transitive.NewFoo()
-    }
-    return x.MyTransitiveField
-}
 
 
 

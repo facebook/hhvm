@@ -43,7 +43,7 @@ class codegen_data {
   // whether to generate Thrift metadata
   bool gen_metadata = true;
   // whether to generate DefaultGet method
-  bool gen_default_get = true;
+  bool gen_default_get = false;
   // whether to use reflect codec
   bool use_reflect_codec = false;
 

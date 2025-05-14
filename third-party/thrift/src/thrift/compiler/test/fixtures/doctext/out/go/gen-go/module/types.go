@@ -1077,13 +1077,6 @@ func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
 }
 
 
-// Deprecated: Use newRespCThing().GetBang() instead.
-func (x *respCThing) DefaultGetBang() *Bang {
-    if !x.IsSetBang() {
-        return NewBang()
-    }
-    return x.Bang
-}
 
 
 

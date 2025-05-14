@@ -868,13 +868,6 @@ func (x *respInteractWithSharedDoSomeSimilarThings) readField0(p thrift.Decoder)
     return nil
 }
 
-// Deprecated: Use newRespInteractWithSharedDoSomeSimilarThings().GetSuccess() instead.
-func (x *respInteractWithSharedDoSomeSimilarThings) DefaultGetSuccess() *shared.DoSomethingResult {
-    if !x.IsSetSuccess() {
-        return shared.NewDoSomethingResult()
-    }
-    return x.Success
-}
 
 
 

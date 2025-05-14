@@ -612,13 +612,6 @@ func (x *Vehicle) readField5(p thrift.Decoder) error {  // HasAC
     return nil
 }
 
-// Deprecated: Use NewVehicle().GetColor() instead.
-func (x *Vehicle) DefaultGetColor() *Color {
-    if !x.IsSetColor() {
-        return NewColor()
-    }
-    return x.Color
-}
 
 
 
@@ -1334,13 +1327,6 @@ func (x *Person) readField10(p thrift.Decoder) error {  // Vehicles
 
 
 
-// Deprecated: Use NewPerson().GetFavoriteColor() instead.
-func (x *Person) DefaultGetFavoriteColor() *Color {
-    if !x.IsSetFavoriteColor() {
-        return NewColor()
-    }
-    return x.FavoriteColor
-}
 
 
 

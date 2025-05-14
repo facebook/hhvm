@@ -81,13 +81,6 @@ func (x *IncludesAlso) readField1(p thrift.Decoder) error {  // Also
     return nil
 }
 
-// Deprecated: Use NewIncludesAlso().GetAlso() instead.
-func (x *IncludesAlso) DefaultGetAlso() *includesAlso.Also {
-    if !x.IsSetAlso() {
-        return includesAlso.NewAlso()
-    }
-    return x.Also
-}
 
 
 

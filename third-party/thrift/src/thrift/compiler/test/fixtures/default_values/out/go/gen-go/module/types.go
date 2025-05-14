@@ -439,29 +439,8 @@ func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Decoder) error {  
 }
 
 
-// Deprecated: Use NewStructWithNoCustomDefaultValues().GetUnqualifiedStruct() instead.
-func (x *StructWithNoCustomDefaultValues) DefaultGetUnqualifiedStruct() *TrivialStruct {
-    if !x.IsSetUnqualifiedStruct() {
-        return NewTrivialStruct()
-    }
-    return x.UnqualifiedStruct
-}
 
-// Deprecated: Use NewStructWithNoCustomDefaultValues().GetOptionalStruct() instead.
-func (x *StructWithNoCustomDefaultValues) DefaultGetOptionalStruct() *TrivialStruct {
-    if !x.IsSetOptionalStruct() {
-        return NewTrivialStruct()
-    }
-    return x.OptionalStruct
-}
 
-// Deprecated: Use NewStructWithNoCustomDefaultValues().GetRequiredStruct() instead.
-func (x *StructWithNoCustomDefaultValues) DefaultGetRequiredStruct() *TrivialStruct {
-    if !x.IsSetRequiredStruct() {
-        return NewTrivialStruct()
-    }
-    return x.RequiredStruct
-}
 
 
 
@@ -863,29 +842,8 @@ func (x *StructWithCustomDefaultValues) readField6(p thrift.Decoder) error {  //
 }
 
 
-// Deprecated: Use NewStructWithCustomDefaultValues().GetUnqualifiedStruct() instead.
-func (x *StructWithCustomDefaultValues) DefaultGetUnqualifiedStruct() *TrivialStruct {
-    if !x.IsSetUnqualifiedStruct() {
-        return NewTrivialStruct()
-    }
-    return x.UnqualifiedStruct
-}
 
-// Deprecated: Use NewStructWithCustomDefaultValues().GetOptionalStruct() instead.
-func (x *StructWithCustomDefaultValues) DefaultGetOptionalStruct() *TrivialStruct {
-    if !x.IsSetOptionalStruct() {
-        return NewTrivialStruct()
-    }
-    return x.OptionalStruct
-}
 
-// Deprecated: Use NewStructWithCustomDefaultValues().GetRequiredStruct() instead.
-func (x *StructWithCustomDefaultValues) DefaultGetRequiredStruct() *TrivialStruct {
-    if !x.IsSetRequiredStruct() {
-        return NewTrivialStruct()
-    }
-    return x.RequiredStruct
-}
 
 
 

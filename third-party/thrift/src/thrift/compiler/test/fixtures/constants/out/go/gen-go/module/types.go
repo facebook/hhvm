@@ -1198,13 +1198,6 @@ func (x *Struct2) readField4(p thrift.Decoder) error {  // D
     return nil
 }
 
-// Deprecated: Use NewStruct2().GetC() instead.
-func (x *Struct2) DefaultGetC() *Struct1 {
-    if !x.IsSetC() {
-        return NewStruct1()
-    }
-    return x.C
-}
 
 
 
@@ -1437,13 +1430,6 @@ func (x *Struct3) readField3(p thrift.Decoder) error {  // C
     return nil
 }
 
-// Deprecated: Use NewStruct3().GetC() instead.
-func (x *Struct3) DefaultGetC() *Struct2 {
-    if !x.IsSetC() {
-        return NewStruct2()
-    }
-    return x.C
-}
 
 
 
@@ -2189,21 +2175,7 @@ func (x *Union2) readField4(p thrift.Decoder) error {  // U
 
 
 
-// Deprecated: Use NewUnion2().GetS() instead.
-func (x *Union2) DefaultGetS() *Struct1 {
-    if !x.IsSetS() {
-        return NewStruct1()
-    }
-    return x.S
-}
 
-// Deprecated: Use NewUnion2().GetU() instead.
-func (x *Union2) DefaultGetU() *Union1 {
-    if !x.IsSetU() {
-        return NewUnion1()
-    }
-    return x.U
-}
 
 func (x *Union2) countSetFields() int {
     count := int(0)

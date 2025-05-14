@@ -842,13 +842,6 @@ func (x *MyStruct) readField9(p thrift.Decoder) error {  // MyUnion
     return nil
 }
 
-// Deprecated: Use NewMyStruct().GetMyUnion() instead.
-func (x *MyStruct) DefaultGetMyUnion() *MyUnion {
-    if !x.IsSetMyUnion() {
-        return NewMyUnion()
-    }
-    return x.MyUnion
-}
 
 
 
@@ -1276,13 +1269,6 @@ func (x *respMyServicePing) readField1(p thrift.Decoder) error {  // MyExcept
     return nil
 }
 
-// Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
-func (x *respMyServicePing) DefaultGetMyExcept() *MyException {
-    if !x.IsSetMyExcept() {
-        return NewMyException()
-    }
-    return x.MyExcept
-}
 
 
 

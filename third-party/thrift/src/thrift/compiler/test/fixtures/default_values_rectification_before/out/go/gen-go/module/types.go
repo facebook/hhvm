@@ -552,23 +552,9 @@ func (x *TestStruct) readField8(p thrift.Decoder) error {  // OptionalStructFiel
     return nil
 }
 
-// Deprecated: Use NewTestStruct().GetUnqualifiedStructField() instead.
-func (x *TestStruct) DefaultGetUnqualifiedStructField() *EmptyStruct {
-    if !x.IsSetUnqualifiedStructField() {
-        return NewEmptyStruct()
-    }
-    return x.UnqualifiedStructField
-}
 
 
 
-// Deprecated: Use NewTestStruct().GetOptionalStructField() instead.
-func (x *TestStruct) DefaultGetOptionalStructField() *EmptyStruct {
-    if !x.IsSetOptionalStructField() {
-        return NewEmptyStruct()
-    }
-    return x.OptionalStructField
-}
 
 
 

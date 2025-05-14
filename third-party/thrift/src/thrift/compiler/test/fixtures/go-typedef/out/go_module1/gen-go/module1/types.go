@@ -1260,21 +1260,7 @@ func (x *Pair) readField2(p thrift.Decoder) error {  // Car
     return nil
 }
 
-// Deprecated: Use NewPair().GetAutomobile() instead.
-func (x *Pair) DefaultGetAutomobile() *Automobile {
-    if !x.IsSetAutomobile() {
-        return NewAutomobile()
-    }
-    return x.Automobile
-}
 
-// Deprecated: Use NewPair().GetCar() instead.
-func (x *Pair) DefaultGetCar() *Car {
-    if !x.IsSetCar() {
-        return NewCar()
-    }
-    return x.Car
-}
 
 
 
@@ -1782,13 +1768,6 @@ func (x *respFinderByPlate) readField0(p thrift.Decoder) error {  // Success
     return nil
 }
 
-// Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
-func (x *respFinderByPlate) DefaultGetSuccess() *Automobile {
-    if !x.IsSetSuccess() {
-        return NewAutomobile()
-    }
-    return x.Success
-}
 
 
 
@@ -2051,13 +2030,6 @@ func (x *respFinderAliasByPlate) readField0(p thrift.Decoder) error {  // Succes
     return nil
 }
 
-// Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
-func (x *respFinderAliasByPlate) DefaultGetSuccess() *Car {
-    if !x.IsSetSuccess() {
-        return NewCar()
-    }
-    return x.Success
-}
 
 
 

@@ -586,13 +586,6 @@ func (x *MyStruct) readField9(p thrift.Decoder) error {  // NoHackCodegenField
     return nil
 }
 
-// Deprecated: Use NewMyStruct().GetMyDataField() instead.
-func (x *MyStruct) DefaultGetMyDataField() *MyDataItemAlias {
-    if !x.IsSetMyDataField() {
-        return NewMyDataItemAlias()
-    }
-    return x.MyDataField
-}
 
 
 
@@ -1371,21 +1364,7 @@ func (x *MyUnion) readField4(p thrift.Decoder) error {  // FloatSet
 }
 
 
-// Deprecated: Use NewMyUnion().GetMyStruct() instead.
-func (x *MyUnion) DefaultGetMyStruct() *MyStruct {
-    if !x.IsSetMyStruct() {
-        return NewMyStruct()
-    }
-    return x.MyStruct
-}
 
-// Deprecated: Use NewMyUnion().GetMyDataItem() instead.
-func (x *MyUnion) DefaultGetMyDataItem() *MyDataItem {
-    if !x.IsSetMyDataItem() {
-        return NewMyDataItem()
-    }
-    return x.MyDataItem
-}
 
 func (x *MyUnion) countSetFields() int {
     count := int(0)
@@ -1691,21 +1670,7 @@ func (x *MyException) readField4(p thrift.Decoder) error {  // MyUnion
     return nil
 }
 
-// Deprecated: Use NewMyException().GetMyStruct() instead.
-func (x *MyException) DefaultGetMyStruct() *MyStruct {
-    if !x.IsSetMyStruct() {
-        return NewMyStruct()
-    }
-    return x.MyStruct
-}
 
-// Deprecated: Use NewMyException().GetMyUnion() instead.
-func (x *MyException) DefaultGetMyUnion() *MyUnion {
-    if !x.IsSetMyUnion() {
-        return NewMyUnion()
-    }
-    return x.MyUnion
-}
 
 
 
@@ -1994,21 +1959,7 @@ func (x *MyExceptionWithMessage) readField4(p thrift.Decoder) error {  // MyUnio
     return nil
 }
 
-// Deprecated: Use NewMyExceptionWithMessage().GetMyStruct() instead.
-func (x *MyExceptionWithMessage) DefaultGetMyStruct() *MyStruct {
-    if !x.IsSetMyStruct() {
-        return NewMyStruct()
-    }
-    return x.MyStruct
-}
 
-// Deprecated: Use NewMyExceptionWithMessage().GetMyUnion() instead.
-func (x *MyExceptionWithMessage) DefaultGetMyUnion() *MyUnion {
-    if !x.IsSetMyUnion() {
-        return NewMyUnion()
-    }
-    return x.MyUnion
-}
 
 
 
@@ -2709,13 +2660,6 @@ func (x *respFB303ServiceSimpleRPC) readField0(p thrift.Decoder) error {  // Suc
     return nil
 }
 
-// Deprecated: Use newRespFB303ServiceSimpleRPC().GetSuccess() instead.
-func (x *respFB303ServiceSimpleRPC) DefaultGetSuccess() *ReservedKeyword {
-    if !x.IsSetSuccess() {
-        return NewReservedKeyword()
-    }
-    return x.Success
-}
 
 
 

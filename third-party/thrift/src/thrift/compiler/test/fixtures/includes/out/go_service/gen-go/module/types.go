@@ -176,21 +176,7 @@ func (x *MyStruct) readField3(p thrift.Decoder) error {  // MyIncludedInt
     return nil
 }
 
-// Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
-func (x *MyStruct) DefaultGetMyIncludedField() *includes.Included {
-    if !x.IsSetMyIncludedField() {
-        return includes.NewIncluded()
-    }
-    return x.MyIncludedField
-}
 
-// Deprecated: Use NewMyStruct().GetMyOtherIncludedField() instead.
-func (x *MyStruct) DefaultGetMyOtherIncludedField() *includes.Included {
-    if !x.IsSetMyOtherIncludedField() {
-        return includes.NewIncluded()
-    }
-    return x.MyOtherIncludedField
-}
 
 
 

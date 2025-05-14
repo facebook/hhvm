@@ -195,21 +195,7 @@ func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
     return nil
 }
 
-// Deprecated: Use newReqMyServiceQuery().GetS() instead.
-func (x *reqMyServiceQuery) DefaultGetS() *module.MyStruct {
-    if !x.IsSetS() {
-        return module.NewMyStruct()
-    }
-    return x.S
-}
 
-// Deprecated: Use newReqMyServiceQuery().GetI() instead.
-func (x *reqMyServiceQuery) DefaultGetI() *includes.Included {
-    if !x.IsSetI() {
-        return includes.NewIncluded()
-    }
-    return x.I
-}
 
 
 
@@ -484,21 +470,7 @@ func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
     return nil
 }
 
-// Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
-func (x *reqMyServiceHasArgDocs) DefaultGetS() *module.MyStruct {
-    if !x.IsSetS() {
-        return module.NewMyStruct()
-    }
-    return x.S
-}
 
-// Deprecated: Use newReqMyServiceHasArgDocs().GetI() instead.
-func (x *reqMyServiceHasArgDocs) DefaultGetI() *includes.Included {
-    if !x.IsSetI() {
-        return includes.NewIncluded()
-    }
-    return x.I
-}
 
 
 

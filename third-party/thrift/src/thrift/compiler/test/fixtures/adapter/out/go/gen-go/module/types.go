@@ -3295,45 +3295,10 @@ func (x *Bar) readField7(p thrift.Decoder) error {  // AdaptedStructField
     return nil
 }
 
-// Deprecated: Use NewBar().GetStructField() instead.
-func (x *Bar) DefaultGetStructField() *Foo_6868 {
-    if !x.IsSetStructField() {
-        return NewFoo_6868()
-    }
-    return x.StructField
-}
 
-// Deprecated: Use NewBar().GetOptionalStructField() instead.
-func (x *Bar) DefaultGetOptionalStructField() *Foo_3943 {
-    if !x.IsSetOptionalStructField() {
-        return NewFoo_3943()
-    }
-    return x.OptionalStructField
-}
 
-// Deprecated: Use NewBar().GetUnionField() instead.
-func (x *Bar) DefaultGetUnionField() *Baz_7352 {
-    if !x.IsSetUnionField() {
-        return NewBaz_7352()
-    }
-    return x.UnionField
-}
 
-// Deprecated: Use NewBar().GetOptionalUnionField() instead.
-func (x *Bar) DefaultGetOptionalUnionField() *Baz_7352 {
-    if !x.IsSetOptionalUnionField() {
-        return NewBaz_7352()
-    }
-    return x.OptionalUnionField
-}
 
-// Deprecated: Use NewBar().GetAdaptedStructField() instead.
-func (x *Bar) DefaultGetAdaptedStructField() *DirectlyAdapted {
-    if !x.IsSetAdaptedStructField() {
-        return NewDirectlyAdapted()
-    }
-    return x.AdaptedStructField
-}
 
 
 
@@ -4268,13 +4233,6 @@ func (x *B) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
-// Deprecated: Use NewB().GetA() instead.
-func (x *B) DefaultGetA() *AdaptedA {
-    if !x.IsSetA() {
-        return NewAdaptedA()
-    }
-    return x.A
-}
 
 
 
@@ -6725,13 +6683,6 @@ func (x *AdaptTemplatedNestedTestStruct) readField1(p thrift.Decoder) error {  /
     return nil
 }
 
-// Deprecated: Use NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct() instead.
-func (x *AdaptTemplatedNestedTestStruct) DefaultGetAdaptedStruct() *AdaptTemplatedTestStruct {
-    if !x.IsSetAdaptedStruct() {
-        return NewAdaptTemplatedTestStruct()
-    }
-    return x.AdaptedStruct
-}
 
 
 
@@ -7468,37 +7419,9 @@ func (x *StructFieldAdaptedStruct) readField4(p thrift.Decoder) error {  // Type
     return nil
 }
 
-// Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedStruct() instead.
-func (x *StructFieldAdaptedStruct) DefaultGetAdaptedStruct() *AdaptedStruct {
-    if !x.IsSetAdaptedStruct() {
-        return NewAdaptedStruct()
-    }
-    return x.AdaptedStruct
-}
 
-// Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedTypedef() instead.
-func (x *StructFieldAdaptedStruct) DefaultGetAdaptedTypedef() *AdaptedTypedef {
-    if !x.IsSetAdaptedTypedef() {
-        return NewAdaptedTypedef()
-    }
-    return x.AdaptedTypedef
-}
 
-// Deprecated: Use NewStructFieldAdaptedStruct().GetDirectlyAdapted() instead.
-func (x *StructFieldAdaptedStruct) DefaultGetDirectlyAdapted() *DirectlyAdaptedStruct {
-    if !x.IsSetDirectlyAdapted() {
-        return NewDirectlyAdaptedStruct()
-    }
-    return x.DirectlyAdapted
-}
 
-// Deprecated: Use NewStructFieldAdaptedStruct().GetTypedefOfAdapted() instead.
-func (x *StructFieldAdaptedStruct) DefaultGetTypedefOfAdapted() *TypedefOfDirect {
-    if !x.IsSetTypedefOfAdapted() {
-        return NewTypedefOfDirect()
-    }
-    return x.TypedefOfAdapted
-}
 
 
 
@@ -7649,13 +7572,6 @@ func (x *CircularAdaptee) readField1(p thrift.Decoder) error {  // Field
     return nil
 }
 
-// Deprecated: Use NewCircularAdaptee().GetField() instead.
-func (x *CircularAdaptee) DefaultGetField() *CircularStruct {
-    if !x.IsSetField() {
-        return NewCircularStruct()
-    }
-    return x.Field
-}
 
 
 
@@ -7788,13 +7704,6 @@ func (x *CircularStruct) readField1(p thrift.Decoder) error {  // Field
     return nil
 }
 
-// Deprecated: Use NewCircularStruct().GetField() instead.
-func (x *CircularStruct) DefaultGetField() *AdaptedCircularAdaptee {
-    if !x.IsSetField() {
-        return NewAdaptedCircularAdaptee()
-    }
-    return x.Field
-}
 
 
 
@@ -7926,13 +7835,6 @@ func (x *ReorderedStruct) readField1(p thrift.Decoder) error {  // ReorderedDepe
     return nil
 }
 
-// Deprecated: Use NewReorderedStruct().GetReorderedDependentAdapted() instead.
-func (x *ReorderedStruct) DefaultGetReorderedDependentAdapted() *DeclaredAfterStruct {
-    if !x.IsSetReorderedDependentAdapted() {
-        return NewDeclaredAfterStruct()
-    }
-    return x.ReorderedDependentAdapted
-}
 
 
 
@@ -8447,13 +8349,6 @@ func (x *MoveOnly) readField1(p thrift.Decoder) error {  // Ptr
     return nil
 }
 
-// Deprecated: Use NewMoveOnly().GetPtr() instead.
-func (x *MoveOnly) DefaultGetPtr() *HeapAllocated {
-    if !x.IsSetPtr() {
-        return NewHeapAllocated()
-    }
-    return x.Ptr
-}
 
 
 
@@ -9541,13 +9436,6 @@ func (x *reqServiceFunc) readField3(p thrift.Decoder) error {  // Arg3
     return nil
 }
 
-// Deprecated: Use newReqServiceFunc().GetArg3() instead.
-func (x *reqServiceFunc) DefaultGetArg3() *Foo {
-    if !x.IsSetArg3() {
-        return NewFoo()
-    }
-    return x.Arg3
-}
 
 
 
@@ -9910,13 +9798,6 @@ func (x *respAdapterServiceCount) readField0(p thrift.Decoder) error {  // Succe
     return nil
 }
 
-// Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
-func (x *respAdapterServiceCount) DefaultGetSuccess() *CountingStruct {
-    if !x.IsSetSuccess() {
-        return NewCountingStruct()
-    }
-    return x.Success
-}
 
 
 
@@ -10055,13 +9936,6 @@ func (x *reqAdapterServiceAdaptedTypes) readField1(p thrift.Decoder) error {  //
     return nil
 }
 
-// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
-func (x *reqAdapterServiceAdaptedTypes) DefaultGetArg() *HeapAllocated {
-    if !x.IsSetArg() {
-        return NewHeapAllocated()
-    }
-    return x.Arg
-}
 
 
 
@@ -10198,13 +10072,6 @@ func (x *respAdapterServiceAdaptedTypes) readField0(p thrift.Decoder) error {  /
     return nil
 }
 
-// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
-func (x *respAdapterServiceAdaptedTypes) DefaultGetSuccess() *HeapAllocated {
-    if !x.IsSetSuccess() {
-        return NewHeapAllocated()
-    }
-    return x.Success
-}
 
 
 

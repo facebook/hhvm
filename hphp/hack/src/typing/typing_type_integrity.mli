@@ -27,7 +27,6 @@ module Simple : sig
     should_check_package_boundary:Typing_packages.check_reason ->
     Typing_env_types.env ->
     decl_ty ->
-    KindDefs.Simple.named_kind ->
     unit
 
   (** Traverse a type and for each encountered type argument of a type X,

@@ -7,15 +7,11 @@
  *)
 open Hh_prelude
 open Common
-open Utils
 open Typing_defs
 open Typing_kinding_defs
 module Env = Typing_env
 module Cls = Folded_class
 module KindDefs = Typing_kinding_defs
-module TGenConstraint = Typing_generic_constraint
-module TUtils = Typing_utils
-module Subst = Decl_subst
 
 (* TOOD(T222659258) This whole file needs updating once HKTs are removed *)
 
@@ -159,138 +155,6 @@ module Locl_Inst = struct
       Tsplat t_splat
 end
 
-(* TODO(T70068435)
-   This is a workaround for the problem that alias and newtype definitions do not spell out
-   the constraints they may implicitly impose on their parameters.
-   Consider:
-   class Foo<T1 as num> {...}
-   type Bar<T2> = Foo<T2>;
-
-   Here, T2 of Bar implicitly has the bound T2 as num. However, in the current design, we only
-   ever check that when expanding Bar, the argument in place of T2 satisfies all the
-   implicit bounds.
-   However, this is not feasible for using aliases and newtypes as higher-kinded types, where we
-   use them without expanding them.
-   In the long-term, we would like to be able to infer the implicit bounds and use those for
-   the purposes of kind-checking. For now, we just detect if there *are* implicit bounds, and
-   if so reject using the alias/newtype as an HK type.
-*)
-let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
-  let report_constraint violating_type used_class used_class_tparam_name =
-    let tparams_in_ty = Env.get_tparams env violating_type in
-    let tparams_of_typedef =
-      List.fold typedef_info.td_tparams ~init:SSet.empty ~f:(fun s tparam ->
-          SSet.add (snd tparam.tp_name) s)
-    in
-    let intersection = SSet.inter tparams_in_ty tparams_of_typedef in
-    if SSet.is_empty intersection then
-      (* Just violated constraints inside the typedef that do not involve
-         the type parameters of the typedef we are looking at. Nothing to report at this point *)
-      None
-    else
-      (* We choose an arbitrary element. If a constraint violation were to contain multiple
-         tparams of the typedef, we can live with only showing the user one of them. *)
-      let typedef_tparam_name = SSet.min_elt intersection in
-      let (used_class_in_def_pos, used_class_in_def_name) = used_class in
-      let typedef_pos = typedef_info.td_pos in
-      Some
-        Typing_error.(
-          Reasons_callback.always
-          @@ primary
-          @@ Primary.HKT_alias_with_implicit_constraints
-               {
-                 pos = use_pos;
-                 typedef_pos;
-                 used_class_in_def_pos;
-                 typedef_name;
-                 typedef_tparam_name;
-                 used_class_in_def_name;
-                 used_class_tparam_name;
-               })
-  in
-  let check_tapply r class_sid type_args =
-    let decl_ty = Typing_make_type.apply r class_sid type_args in
-    let ((env, ty_err_opt), locl_ty) =
-      TUtils.localize_no_subst env ~ignore_errors:true decl_ty
-    in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    match get_node (TUtils.get_base_type env locl_ty) with
-    | Tclass (cls_name, _, tyl) when not (List.is_empty tyl) ->
-      (match Env.get_class env (snd cls_name) with
-      | Decl_entry.Found cls ->
-        let tc_tparams = Cls.tparams cls in
-        let ety_env =
-          { empty_expand_env with substs = Subst.make_locl tc_tparams tyl }
-        in
-        iter2_shortest
-          begin
-            fun { tp_name = (_p, x); tp_constraints = cstrl; _ } ty ->
-              List.iter cstrl ~f:(fun (ck, cstr_ty) ->
-                  let ((env, ty_err1), cstr_ty) =
-                    TUtils.localize ~ety_env env cstr_ty
-                  in
-                  Option.iter
-                    ~f:(Typing_error_utils.add_typing_error ~env)
-                    ty_err1;
-                  let (_env, ty_err2) =
-                    TGenConstraint.check_constraint env ck ty ~cstr_ty
-                    @@ report_constraint ty cls_name x
-                  in
-                  Option.iter
-                    ty_err2
-                    ~f:(Typing_error_utils.add_typing_error ~env))
-          end
-          tc_tparams
-          tyl
-      | _ -> ())
-    | _ -> ()
-  in
-
-  let visitor =
-    object
-      inherit [unit] Type_visitor.decl_type_visitor
-
-      method! on_tapply _ r name args = check_tapply r name args
-    end
-  in
-  (match typedef_info.td_type_assignment with
-  | SimpleTypeDef (_vis, td_type) -> visitor#on_type () td_type
-  | CaseType (variant, variants) ->
-    List.iter (List.map (variant :: variants) ~f:fst) ~f:(visitor#on_type ()));
-  maybe visitor#on_type () typedef_info.td_as_constraint;
-  maybe visitor#on_type () typedef_info.td_super_constraint
-
-(* TODO(T70068435)
-   This is a workaround until we support proper kind-checking of HK types that impose constraints
-   on their arguments.
-   For now, we reject using any class as a HK type that has any constraints on its type parameters.
-*)
-let check_class_usable_as_hk_type pos class_info =
-  let class_name = Cls.name class_info in
-  let tparams = Cls.tparams class_info in
-  let has_tparam_constraints =
-    List.exists tparams ~f:(fun tp -> not (List.is_empty tp.tp_constraints))
-  in
-  if has_tparam_constraints then
-    Errors.add_error
-      Naming_error.(
-        to_user_error @@ HKT_class_with_constraints_used { pos; class_name })
-
-let report_kind_error env ~use_pos ~def_pos ~tparam_name ~expected ~actual =
-  let actual_kind = Simple.description_of_kind actual in
-  let expected_kind = Simple.description_of_kind expected in
-  Typing_error_utils.add_typing_error ~env
-  @@ Typing_error.(
-       primary
-       @@ Primary.Kind_mismatch
-            {
-              pos = use_pos;
-              decl_pos = def_pos;
-              tparam_name;
-              actual_kind;
-              expected_kind;
-            })
-
 module Simple = struct
   (* TODO(T70068435) Once we support constraints on higher-kinded types, this should only be used
      during the localization of declaration site types, everything else should be doing full
@@ -364,27 +228,9 @@ module Simple = struct
         `No
     in
     match get_node tyarg with
-    | Twildcard ->
-      let is_higher_kinded = Simple.get_arity kind > 0 in
-      if is_higher_kinded then (
-        let pos =
-          get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
-        in
-        Errors.add_error Naming_error.(to_user_error @@ HKT_wildcard pos);
-        check_well_kinded
-          ~in_signature
-          ~should_check_package_boundary
-          env
-          tyarg
-          nkind
-      )
+    | Twildcard -> ()
     | _ ->
-      check_well_kinded
-        ~in_signature
-        ~should_check_package_boundary
-        env
-        tyarg
-        nkind
+      check_well_kinded ~in_signature ~should_check_package_boundary env tyarg
 
   (** Traverse a type and for each encountered type argument of a type X,
   check that it complies with the corresponding type parameter of X (arity and kinds, but not constraints),
@@ -466,23 +312,7 @@ module Simple = struct
       List.iter ft_params ~f:(fun p ->
           check ~should_check_package_boundary:`No p.fp_type)
     (* Interesting cases--------------------------------- *)
-    | Tgeneric name -> begin
-      let targs = [] in
-      match Env.get_pos_and_kind_of_generic env name with
-      | Some (def_pos, (gen_kind : kind)) ->
-        let (tparams_named_kinds : Simple.named_kind list) =
-          Simple.from_full_kind gen_kind |> Simple.get_named_parameter_kinds
-        in
-        check_targs_well_kinded
-          ~allow_missing_targs:false
-          ~in_signature
-          ~def_pos
-          ~use_pos
-          env
-          targs
-          tparams_named_kinds
-      | None -> ()
-    end
+    | Tgeneric _ -> ()
     | Tapply ((_p, cid), argl) -> begin
       match Env.get_class_or_typedef env cid with
       | Decl_entry.Found (Env.ClassResult class_info) ->
@@ -530,72 +360,13 @@ module Simple = struct
   We use the optional arguments `in_typeconst`, `in_typehint`, `in_targ`
   and in_tp_constraint` to determine whether we should bypass package visibility check. *)
   and check_well_kinded
+      ~in_signature ~should_check_package_boundary env (ty : decl_ty) =
+    check_well_kinded_type
+      ~allow_missing_targs:false
       ~in_signature
       ~should_check_package_boundary
       env
-      (ty : decl_ty)
-      (expected_nkind : Simple.named_kind) =
-    let (expected_name, (expected_kind : Simple.kind)) = expected_nkind in
-    let r = get_reason ty in
-    let use_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
-    let kind_error actual_kind env =
-      let (def_pos, tparam_name) = expected_name in
-      report_kind_error
-        env
-        ~use_pos
-        ~def_pos
-        ~tparam_name
-        ~actual:actual_kind
-        ~expected:expected_kind
-    in
-    let check_against_tparams tparams =
-      let overall_kind = Simple.type_with_params_to_simple_kind tparams in
-      if not (is_subkind env ~sub:overall_kind ~sup:expected_kind) then
-        kind_error overall_kind env
-    in
-
-    if Int.( = ) (Simple.get_arity expected_kind) 0 then
-      check_well_kinded_type
-        ~allow_missing_targs:false
-        ~in_signature
-        ~should_check_package_boundary
-        env
-        ty
-    else
-      match get_node ty with
-      | Tapply ((_pos, name), []) -> begin
-        match Env.get_class_or_typedef env name with
-        | Decl_entry.Found (Env.ClassResult class_info) ->
-          let tparams = Cls.tparams class_info in
-          check_class_usable_as_hk_type use_pos class_info;
-          check_against_tparams tparams
-        | Decl_entry.Found (Env.TypedefResult typedef) ->
-          let tparams = typedef.td_tparams in
-          check_typedef_usable_as_hk_type env use_pos name typedef;
-          check_against_tparams tparams
-        | Decl_entry.DoesNotExist
-        | Decl_entry.NotYetAvailable ->
-          ()
-      end
-      | Tgeneric name -> begin
-        match Env.get_pos_and_kind_of_generic env name with
-        | Some (_pos, gen_kind) ->
-          let get_kind = Simple.from_full_kind gen_kind in
-          if not (is_subkind env ~sub:get_kind ~sup:expected_kind) then
-            kind_error get_kind env
-        | None -> ()
-      end
-      | Tapply (_, targs) ->
-        Errors.add_error
-          Naming_error.(
-            to_user_error
-            @@ HKT_partial_application
-                 {
-                   pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
-                   count = List.length targs;
-                 })
-      | Tany _ -> ()
-      | _ -> kind_error (Simple.fully_applied_type ()) env
+      ty
 
   let check_well_kinded_hint
       ~in_signature ~should_check_package_boundary env hint =

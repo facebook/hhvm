@@ -1358,8 +1358,7 @@ let localize_targ_with_kind
         ~in_signature:false
         ~should_check_package_boundary
         env
-        ty
-        nkind;
+        ty;
     let ety_env =
       empty_expand_env_with_on_error
         (Typing_error.Reasons_callback.invalid_type_hint hint_pos)

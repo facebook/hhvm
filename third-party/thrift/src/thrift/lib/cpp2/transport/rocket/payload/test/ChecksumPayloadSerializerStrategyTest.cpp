@@ -98,3 +98,34 @@ TEST(
       metadata.checksum().value().checksum(),
       other->metadata.checksum().value().checksum());
 }
+
+TEST(
+    ChecksumPayloadSerializerStrategyTest,
+    TestPackWithUnsupportedChecksumAlgorithm) {
+  ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy> strategy;
+  RequestRpcMetadata metadata;
+  metadata.protocol() = ProtocolId::COMPACT;
+  metadata.compression() = CompressionAlgorithm::ZSTD;
+  metadata.compressionConfig()
+      .ensure()
+      .codecConfig()
+      .ensure()
+      .zstdConfig_ref()
+      .ensure();
+
+  Checksum checksum;
+  checksum.algorithm() = (ChecksumAlgorithm)256;
+
+  metadata.checksum() = checksum;
+
+  try {
+    auto payload = strategy.packWithFds(
+        &metadata,
+        folly::IOBuf::copyBuffer("test"),
+        folly::SocketFds(),
+        false,
+        nullptr);
+  } catch (const TApplicationException& ex) {
+    EXPECT_EQ(TApplicationException::CHECKSUM_MISMATCH, ex.getType());
+  }
+}

@@ -199,8 +199,12 @@ class ChecksumPayloadSerializerStrategy final
       case apache::thrift::ChecksumAlgorithm::NONE:
         return std::nullopt;
 
-      default:
-        throw std::runtime_error("Unsupported checksum algorithm");
+      default: {
+        LOG(ERROR) << "calculateChecksum|Unsupported checksum algorithm";
+        throw TApplicationException(
+            TApplicationException::CHECKSUM_MISMATCH,
+            "Unsupported checksum algorithm");
+      }
     }
   }
 
@@ -230,8 +234,12 @@ class ChecksumPayloadSerializerStrategy final
       case apache::thrift::ChecksumAlgorithm::NONE:
         return true;
 
-      default:
-        throw std::runtime_error("Unsupported checksum algorithm");
+      default: {
+        LOG(ERROR) << "validateChecksum|Unsupported checksum algorithm";
+        throw TApplicationException(
+            TApplicationException::CHECKSUM_MISMATCH,
+            "Unsupported checksum algorithm");
+      }
     }
   }
 

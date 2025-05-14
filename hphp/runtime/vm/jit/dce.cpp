@@ -705,8 +705,8 @@ bool canDCE(const IRInstruction& inst) {
   case StMROProp:
   case CheckMROProp:
   case FinishMemberOp:
-  case BeginInlining:
-  case EndInlining:
+  case DefCalleeFP:
+  case LeaveInlineFrame:
   case EnterInlineFrame:
   case SetOpTV:
   case OutlineSetOp:
@@ -987,8 +987,8 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
     // If the catch block occurs within an inlined frame the outer stack
     // locations (those above the inlined frame) are not dead and cannot be
     // elided as we may not throw through the outer callers.
-    if (block->back().src(0)->inst()->is(BeginInlining)) {
-      auto const extra = block->back().src(0)->inst()->extra<BeginInlining>();
+    if (block->back().src(0)->inst()->is(DefCalleeFP)) {
+      auto const extra = block->back().src(0)->inst()->extra<DefCalleeFP>();
       auto const spOff = extra->spOffset;
       assertx(stackTop <= spOff);
       if (spOff < stackTop + numTrackedSlots) {

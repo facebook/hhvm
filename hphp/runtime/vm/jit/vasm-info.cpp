@@ -410,7 +410,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::prefetch:
     case Vinstr::push:
     case Vinstr::pushf:
-    case Vinstr::pushframe:
     case Vinstr::pushm:
     case Vinstr::pushp:
     case Vinstr::pushpm:

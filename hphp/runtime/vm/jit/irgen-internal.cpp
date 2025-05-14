@@ -144,6 +144,7 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
   env.irb->exceptionStackBoundary();
 
   gen(env, EnterTranslation);
+  env.lastDefFramePtr = &env.irb->curBlock()->back();
 
   if (Cfg::HHIR::GenerateAsserts &&
       !curSrcKey(env).trivialDVFuncEntry()) {

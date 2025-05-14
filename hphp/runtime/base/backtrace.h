@@ -289,7 +289,6 @@ private:
  *             ____________________                            |  inl2->base())
  *            |                    |                           |
  *            |  frame: inl2       |                           |
- *            |  pubFrame: caller  |                           |
  *            |  callOff ----------+---------------------------+
  *            |____________________|
  *
@@ -317,7 +316,6 @@ struct IFrame {
 
 struct IStack {
   IFrameID frame;     // leaf frame in this stack
-  IFrameID pubFrame;  // the last published frame to which vmfp() points to
   Offset callOff;
 
   template<class SerDe> void serde(SerDe& sd) {
@@ -346,12 +344,10 @@ struct BTFrame {
 
   // Inlined frame that does not have a materialized ActRec. IFrame backed by
   // `frameID` contains the metadata necessary to reconstruct the frame.
-  // The nearest published frame `fp` is represented by `pubFrameId`.
-  static BTFrame iframe(ActRec* fp, Offset bcOff,
-                        IFrameID frameId, IFrameID pubFrameId) {
+  static BTFrame iframe(ActRec* fp, Offset bcOff, IFrameID frameId) {
     assertx(fp != nullptr);
-    assertx(frameId != kRootIFrameID && frameId != pubFrameId);
-    return BTFrame{fp, bcOff, frameId, pubFrameId};
+    assertx(frameId != kRootIFrameID);
+    return BTFrame{fp, bcOff, frameId};
   }
 
   static BTFrame afwhTailFrame(ActRec* fp, Offset bcOff,
@@ -362,7 +358,7 @@ struct BTFrame {
   }
 
   BTFrame withFP(ActRec* fp) const {
-    return BTFrame{fp, m_bcOff, m_frameId, m_pubFrameId};
+    return BTFrame{fp, m_bcOff, m_frameId};
   }
 
   operator bool() const { return m_fp != nullptr; }
@@ -378,10 +374,6 @@ struct BTFrame {
   // instead use the helpers above.
   ActRec* fpInternal() const { return m_fp; }
   IFrameID frameIdInternal() const { return m_frameId; }
-  IFrameID pubFrameIdInternal() const {
-    assertx(m_frameId != kRootIFrameID);
-    return m_pubFrameId;
-  }
   int8_t afwhTailFrameIdxInternal() const {
     assertx(m_frameId == kRootIFrameID);
     return m_afwhTailFrameIdx;
@@ -391,8 +383,8 @@ struct BTFrame {
 
  private:
   BTFrame() = default;
-  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId, IFrameID pubFrameId)
-    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId), m_pubFrameId(pubFrameId) {}
+  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId)
+    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId) {}
   BTFrame(ActRec* fp, Offset bcOff, int8_t afwhTailFrameIdx)
     : m_fp(fp), m_bcOff(bcOff), m_frameId(kRootIFrameID)
     , m_afwhTailFrameIdx(afwhTailFrameIdx) {}
@@ -400,12 +392,9 @@ struct BTFrame {
   ActRec* m_fp{nullptr};
   Offset m_bcOff{kInvalidOffset};
   IFrameID m_frameId{kRootIFrameID};
-  union {
-    // Used if m_frameId != kRootIFrameID
-    IFrameID m_pubFrameId;
-    // Used if m_frameId == kRootIFrameID, this is afwh tail frame if >= 0
-    int8_t m_afwhTailFrameIdx;
-  };
+
+  // Used if m_frameId == kRootIFrameID, this is afwh tail frame if >= 0
+  int8_t m_afwhTailFrameIdx;
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);

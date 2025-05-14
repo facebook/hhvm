@@ -53,12 +53,12 @@ SBInvOffset BCMarker::fixupSBOff() const {
   assertx(valid());
   if (fp() == fixupFP()) return SBInvOffset{0};
   auto const begin_inlining = fp()->inst();
-  assertx(begin_inlining->is(BeginInlining));
-  auto const fpSBOffset = begin_inlining->extra<BeginInlining>()->sbOffset;
+  assertx(begin_inlining->is(DefCalleeFP));
+  auto const fpSBOffset = begin_inlining->extra<DefCalleeFP>()->sbOffset;
 
   auto const fixupFPStackBaseOffset = [&] {
-    if (fixupFP()->inst()->is(BeginInlining)) {
-      return fixupFP()->inst()->extra<BeginInlining>()->sbOffset;
+    if (fixupFP()->inst()->is(DefCalleeFP)) {
+      return fixupFP()->inst()->extra<DefCalleeFP>()->sbOffset;
     }
     assertx(fixupFP()->inst()->is(DefFP, EnterFrame));
     auto const defSP = fp()->inst()->src(0)->inst();
@@ -74,7 +74,7 @@ SrcKey BCMarker::fixupSk() const {
 
   auto curFP = fp();
   do {
-    assertx(curFP->inst()->is(BeginInlining));
+    assertx(curFP->inst()->is(DefCalleeFP));
     // Walking the FP chain created from the marker is suspect, but we aren't
     // using it to materialize the fp SSATmp, or offsets based on the begin
     // inlinings.  We are only materializing srckey info.

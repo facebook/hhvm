@@ -63,10 +63,22 @@ void cgEndGuards(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+void allocRootFrame(Vout& v, const IRInstruction* inst) {
+  assertx(v.unit().frames.empty());
+  v.unit().fpToFrame.emplace(inst->dst(), 0);
+  v.unit().frames.emplace_back(
+    inst->marker().func(), 0, SBInvOffset{0}, Vframe::Top, 0, v.weight()
+  );
+}
+}
+
 void cgDefFP(IRLS& env, const IRInstruction* inst) {
   auto const fp = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   v << defvmfp{fp};
+
+  allocRootFrame(v, inst);
 }
 
 void cgDefFrameRelSP(IRLS& env, const IRInstruction* inst) {
@@ -105,6 +117,8 @@ void cgDefFuncPrologueCtx(IRLS& env, const IRInstruction* inst) {
 void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << copy{rvmsp(), dstLoc(env, inst, 0).reg()};
+
+  allocRootFrame(v, inst);
 }
 
 void cgDefFuncEntryPrevFP(IRLS& env, const IRInstruction* inst) {

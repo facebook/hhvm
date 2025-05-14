@@ -48,8 +48,6 @@ struct Vblock {
     , weight(w) {}
 
   AreaIndex area_idx;
-  int frame{-1};
-  int pending_frames{-1};
   uint64_t weight;
   jit::vector<Vinstr> code;
 };
@@ -263,18 +261,9 @@ struct Vunit {
    */
   bool needsRegAlloc() const;
   /*
-   * Return true iff this Vunit needs to have frames computed for
-   * its blocks before being emitted.
+   * Allocate a new VFrame for a DefCalleeFP instruction.
    */
-  bool needsFramesComputed() const;
-  /*
-   * Allocate a new VFrame for an EnterInlineFrame instruction or return the
-   * id of an existing already created frame for that FP.
-   *
-   * If the frame already exists its entry weight will be increased by the
-   * weight specified here.
-   */
-  int allocFrame(const Vinstr& inst, int parent_frame, uint64_t entry_weight);
+  void allocFrame(const IRInstruction* inst);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

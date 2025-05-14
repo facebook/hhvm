@@ -62,9 +62,6 @@ struct Venv {
   Vlabel current{0};
   Vlabel next{0};
 
-  uint32_t pending_frames{0}; // unpushed inlined frames
-  int frame{-1};
-  CodeAddress framestart;
   const IRInstruction* origin;
 
   jit::vector<CodeAddress> addrs;

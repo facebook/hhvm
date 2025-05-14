@@ -1619,10 +1619,11 @@ To string conversions:
   Defines a new frame pointer for an ActRec at callBCOff for use in an inlined
   region. The frame is defined relative to S0, and S1 is the parent frame.
 
-| EnterInlineFrame, ND, S(FramePtr), NF
+| EnterInlineFrame<numInputs>, ND, S(FramePtr), NF
 
   Marks the start of an inlined function whose stack resides offset cells below
-  the SP.
+  the SP. If non-zero numInputs items will be teleported from the stack into the
+  locals.
 
 | LeaveInlineFrame, ND, S(FramePtr), NF
 
@@ -1687,11 +1688,11 @@ ReqBindJmp and CallFuncEntry.
 
 | CallFuncEntry<target,spOffset,arFlags>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Cls|Obj|Nullptr),
+|   S(FramePtr) S(FramePtr) S(Cls|Obj|Nullptr),
 |   CRc|PRc
 
   Transfer control to the func entry at `target' SrcKey, based on the pre-live
-  activation record and set of args on the stack pointed to by S0 at `spOffset'.
+  activation record and set of args in the callee frame pointed to by S0.
   S1 is the current caller frame pointer. S2 is the context (nullptr, $this or
   static::class).
 
@@ -2834,8 +2835,8 @@ ReqBindJmp and CallFuncEntry.
 
 | KillIter<iterId>, ND, S(FramePtr), NF
 
-  Mark a given ActRec, local, or iterator as being dead for the purposes of
-  memory effects. It no longer contains a meaningful value.
+  Mark a given ActRec, local, or iterator as being dead for the
+  purposes of memory effects. It no longer contains a meaningful value.
 
   These operations are used for both correctness and performance. Inserting a
   kill can help us do store-elimination; if a write is followed by a kill on

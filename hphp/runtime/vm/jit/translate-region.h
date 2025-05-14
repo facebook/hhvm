@@ -44,7 +44,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
  * Try to inline a FCall.
  */
 bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
-                         Offset asyncEagerOffset, SSATmp* calleeFP);
+                         Offset asyncEagerOffset, SSATmp* calleeFP,
+                         uint32_t argc, const std::vector<Type>& inputTypes);
 
 /*
  * Generate an IRUnit which simulates the inlining of region. This unit should

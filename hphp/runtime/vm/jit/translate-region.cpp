@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -395,11 +396,14 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
  * Otherwise, select a region for `callee' if one is not already present in
  * `retry'.  Update `inl' and return the region if it's inlinable.
  */
-irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(const irgen::IRGS& irgs,
-                                                             SrcKey entry,
-                                                             Type ctxType,
-                                                             const ProfSrcKey& psk,
-                                                             int& calleeCost) {
+irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(
+  const irgen::IRGS& irgs,
+  SrcKey entry,
+  Type ctxType,
+  const ProfSrcKey& psk,
+  int& calleeCost,
+  const std::vector<Type>& inputTypes
+) {
   assertx(entry.funcEntry());
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
     return {psk.srcKey, nullptr};
@@ -409,7 +413,9 @@ irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(const irgen::IRGS& 
   }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         irgs.unit.annotationData.get() : nullptr;
-  if (!canInlineAt(psk.srcKey, entry, annotationsPtr)) return {psk.srcKey, nullptr};
+  if (!canInlineAt(psk.srcKey, entry, annotationsPtr)) {
+    return {psk.srcKey, nullptr};
+  }
 
 
   auto const& inlineBlacklist = irgs.retryContext->inlineBlacklist;
@@ -417,11 +423,13 @@ irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(const irgen::IRGS& 
     return {psk.srcKey, nullptr};
   }
 
-  auto regionAndLazyUnit = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey);
+  auto regionAndLazyUnit = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey,
+                                              inputTypes);
   if (!regionAndLazyUnit.region()) {
     return {psk.srcKey, nullptr};
   }
-  if (!shouldInline(irgs, psk.srcKey, entry.func(), regionAndLazyUnit, calleeCost)) {
+  if (!shouldInline(irgs, psk.srcKey, entry.func(), regionAndLazyUnit,
+                    calleeCost)) {
     return {psk.srcKey, nullptr};
   }
   return regionAndLazyUnit;
@@ -878,7 +886,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 }
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
-                         Offset asyncEagerOffset, SSATmp* calleeFP) {
+                         Offset asyncEagerOffset, SSATmp* calleeFP,
+                         uint32_t argc, const std::vector<Type>& inputTypes) {
   assertx(entry.funcEntry());
   ctx = ctx ? ctx : cns(irgs, nullptr);
 
@@ -887,7 +896,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
 
   // See if we have a callee region we can inline.
   auto calleeRegionAndUnit = getInlinableCalleeRegionAndLazyUnit(
-    irgs, entry, ctx->type(), psk, calleeCost);
+    irgs, entry, ctx->type(), psk, calleeCost, inputTypes);
   auto const calleeRegion = calleeRegionAndUnit.region();
   if (!calleeRegion) return false;
 
@@ -913,8 +922,8 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
                                *unit);
   }
 
-  irgen::beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost,
-                       calleeFP);
+  emitInitFuncInputsInline(irgs, entry.func(), argc, calleeFP);
+  beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost, calleeFP);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };

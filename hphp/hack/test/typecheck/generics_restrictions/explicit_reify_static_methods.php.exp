@@ -26,9 +26,9 @@ Illegal wildcard (`_`): generic type parameter `TF` must be specified explicitly
   Definition is here
 ERROR: File "explicit_reify_static_methods.php", line 32, characters 3-14:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "explicit_reify_static_methods.php", line 13, characters 26-32:
+  File "explicit_reify_static_methods.php", line 13, characters 40-41:
   Definition is here
 ERROR: File "explicit_reify_static_methods.php", line 34, characters 3-17:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "explicit_reify_static_methods.php", line 13, characters 26-32:
+  File "explicit_reify_static_methods.php", line 13, characters 40-41:
   Definition is here

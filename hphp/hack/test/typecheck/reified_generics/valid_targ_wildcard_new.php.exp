@@ -1,6 +1,6 @@
 ERROR: File "valid_targ_wildcard_new.php", line 7, characters 3-12:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "valid_targ_wildcard_new.php", line 4, characters 7-7:
+  File "valid_targ_wildcard_new.php", line 4, characters 15-16:
   Definition is here
 ERROR: File "valid_targ_wildcard_new.php", line 8, characters 9-12:
 Invalid reified hint (Typing[4305])

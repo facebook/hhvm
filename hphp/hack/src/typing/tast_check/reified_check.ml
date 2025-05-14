@@ -152,6 +152,16 @@ let verify_call_targs ?special_code env expr_pos decl_pos tparams targs =
     let targs_length = List.length targs in
     if Int.( <> ) tparams_length targs_length then
       if Int.( = ) targs_length 0 then
+        let decl_pos =
+          Option.value
+            ~default:decl_pos
+            (List.find_map tparams ~f:(fun tparam ->
+                 if is_reified tparam then
+                   let Typing_defs_core.{ tp_name = (pos, _); _ } = tparam in
+                   Some pos
+                 else
+                   None))
+        in
         Typing_error_utils.add_typing_error
           ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
@@ -164,6 +174,16 @@ let verify_call_targs ?special_code env expr_pos decl_pos tparams targs =
     List.for_all ~f:(fun (_, h) -> Aast_defs.is_wildcard_hint h) targs
   in
   if all_wildcards && tparams_has_reified tparams then
+    let decl_pos =
+      Option.value
+        ~default:decl_pos
+        (List.find_map tparams ~f:(fun tparam ->
+             if is_reified tparam then
+               let Typing_defs_core.{ tp_name = (pos, _); _ } = tparam in
+               Some pos
+             else
+               None))
+    in
     Typing_error_utils.add_typing_error
       ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(

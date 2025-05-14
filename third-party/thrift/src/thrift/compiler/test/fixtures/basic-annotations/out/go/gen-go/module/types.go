@@ -306,7 +306,7 @@ func (x *MyUnion) CountSetFieldsMyUnion() int {
 
 func (x *MyUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("MyUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError("MyUnion write struct begin error: ", err)

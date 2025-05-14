@@ -1882,7 +1882,7 @@ func (x *Union1) CountSetFieldsUnion1() int {
 
 func (x *Union1) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("Union1 write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("union1"); err != nil {
         return thrift.PrependError("Union1 write struct begin error: ", err)
@@ -2202,7 +2202,7 @@ func (x *Union2) CountSetFieldsUnion2() int {
 
 func (x *Union2) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("Union2 write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("union2"); err != nil {
         return thrift.PrependError("Union2 write struct begin error: ", err)

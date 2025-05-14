@@ -503,7 +503,7 @@ func (x *ComplexUnion) CountSetFieldsComplexUnion() int {
 
 func (x *ComplexUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("ComplexUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("ComplexUnion"); err != nil {
         return thrift.PrependError("ComplexUnion write struct begin error: ", err)
@@ -785,7 +785,7 @@ func (x *ListUnion) CountSetFieldsListUnion() int {
 
 func (x *ListUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("ListUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("ListUnion"); err != nil {
         return thrift.PrependError("ListUnion write struct begin error: ", err)
@@ -990,7 +990,7 @@ func (x *DataUnion) CountSetFieldsDataUnion() int {
 
 func (x *DataUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("DataUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("DataUnion"); err != nil {
         return thrift.PrependError("DataUnion write struct begin error: ", err)
@@ -1419,7 +1419,7 @@ func (x *ValUnion) CountSetFieldsValUnion() int {
 
 func (x *ValUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("ValUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("ValUnion"); err != nil {
         return thrift.PrependError("ValUnion write struct begin error: ", err)
@@ -1625,7 +1625,7 @@ func (x *VirtualComplexUnion) CountSetFieldsVirtualComplexUnion() int {
 
 func (x *VirtualComplexUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("VirtualComplexUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("VirtualComplexUnion"); err != nil {
         return thrift.PrependError("VirtualComplexUnion write struct begin error: ", err)
@@ -1895,7 +1895,7 @@ func (x *NonCopyableUnion) CountSetFieldsNonCopyableUnion() int {
 
 func (x *NonCopyableUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("NonCopyableUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("NonCopyableUnion"); err != nil {
         return thrift.PrependError("NonCopyableUnion write struct begin error: ", err)

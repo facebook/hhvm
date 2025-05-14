@@ -2774,7 +2774,7 @@ func (x *Baz) CountSetFieldsBaz() int {
 
 func (x *Baz) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("Baz write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("Baz"); err != nil {
         return thrift.PrependError("Baz write struct begin error: ", err)
@@ -6888,7 +6888,7 @@ func (x *AdaptTestUnion) CountSetFieldsAdaptTestUnion() int {
 
 func (x *AdaptTestUnion) Write(p thrift.Encoder) error {
     if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+        return fmt.Errorf("AdaptTestUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("AdaptTestUnion"); err != nil {
         return thrift.PrependError("AdaptTestUnion write struct begin error: ", err)

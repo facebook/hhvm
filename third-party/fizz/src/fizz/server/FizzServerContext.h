@@ -44,7 +44,12 @@ struct ClockSkewTolerance {
  */
 enum class ClientAuthMode { None, Optional, Required };
 
-// ALPN enforcement types
+/**
+ * ALPN modes for the server:
+ * - AllowMismatch: Accept connections even if the client sends mismatched ALPN
+ * - Optional: Require protocol match if client offers ALPN
+ * - Required: Always require ALPN and matching protocol
+ */
 enum class AlpnMode { AllowMismatch, Optional, Required };
 
 class FizzServerContext {

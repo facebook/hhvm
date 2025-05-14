@@ -79,18 +79,6 @@ inline std::string get_service_qualified_name(const t_service& service) {
   return get_gen_namespace(*service.program()) + "::" + get_name(&service);
 }
 
-/*
- * This determines if a type can be ordered.
- * If the type is using any annotation for cpp2.type or cpp2.template
- * its not considered orderable, and we don't need to generate operator< methods
- */
-bool is_orderable(
-    std::unordered_map<const t_type*, bool>& memo,
-    const t_type& type,
-    bool enableCustomTypeOrderingIfStructureHasUri);
-bool is_orderable(
-    const t_type& type, bool enableCustomTypeOrderingIfStructureHasUri);
-
 /**
  * Return the cpp.type/cpp2.type attribute or empty string if nothing set.
  */

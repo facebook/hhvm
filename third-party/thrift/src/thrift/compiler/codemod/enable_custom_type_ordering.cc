@@ -19,10 +19,13 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/codemod/file_manager.h>
+#include <thrift/compiler/generate/cpp/orderable_type_utils.h>
 #include <thrift/compiler/generate/cpp/util.h>
 
 namespace apache::thrift::compiler {
 namespace {
+
+using apache::thrift::compiler::cpp2::OrderableTypeUtils;
 
 // whether type is/has set/map with custom types (cpp.Type or cpp.Adapter)
 // Nested fields don't count.
@@ -90,7 +93,7 @@ void codemod_main(source_manager& sm, t_program_bundle& bundle) {
   codemod::file_manager fm(sm, program);
   const_ast_visitor visitor;
   visitor.add_structured_definition_visitor([&](const t_structured& s) {
-    if (!cpp2::is_orderable(
+    if (!OrderableTypeUtils::is_orderable(
             s, true /* enableCustomTypeOrderingIfStructureHasUri */)) {
       // Even if custom type ordering was enabled, `s` would not be orderable.
 

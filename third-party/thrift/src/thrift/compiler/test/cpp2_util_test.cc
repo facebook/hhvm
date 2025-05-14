@@ -42,69 +42,9 @@
 #include <thrift/compiler/test/parser_test_helpers.h>
 
 namespace apache::thrift::compiler {
-using cpp2::is_orderable;
 namespace {
 
-class UtilTest : public ::testing::Test {};
-
-TEST_F(UtilTest, is_orderable_set_template) {
-  t_set t(&t_primitive_type::t_double());
-  t.set_unstructured_annotation("cpp2.template", "blah");
-  t_program p("path/to/program.thrift", "path/to/program.thrift");
-  t_struct s(&p, "struct_name");
-  s.append(std::make_unique<t_field>(&t, "set_field", 1));
-  EXPECT_FALSE(is_orderable(t, true));
-  EXPECT_FALSE(is_orderable(s, true));
-
-  s.set_uri("facebook.com/path/to/struct_name");
-  EXPECT_TRUE(is_orderable(s, true));
-  EXPECT_FALSE(is_orderable(s, false));
-
-  s.set_uri(""); // remove uri
-  EXPECT_FALSE(is_orderable(s, true));
-  EXPECT_FALSE(is_orderable(s, false));
-
-  auto builder = gen::cpp_annotation_builder::EnableCustomTypeOrdering(p);
-  s.add_structured_annotation(builder.make());
-  EXPECT_TRUE(is_orderable(s, true));
-  EXPECT_TRUE(is_orderable(s, false));
-}
-
-TEST_F(UtilTest, is_orderable_struct) {
-  t_program p("path/to/program.thrift", "path/to/program.thrift");
-  t_struct s(&p, "struct_name");
-  s.append(std::make_unique<t_field>(
-      &t_primitive_type::t_string(), "field_name", 1));
-  EXPECT_TRUE(is_orderable(s, true));
-}
-
-TEST_F(UtilTest, is_orderable_struct_self_reference) {
-  t_program p("path/to/program.thrift", "path/to/program.thrift");
-
-  t_set t(&t_primitive_type::t_double());
-  t.set_unstructured_annotation("cpp2.template", "blah");
-
-  t_struct c(&p, "C");
-  c.append(std::make_unique<t_field>(&t, "set_field", 1));
-  EXPECT_FALSE(is_orderable(c, true));
-
-  t_struct b(&p, "B");
-  t_struct a(&p, "A");
-
-  b.append(std::make_unique<t_field>(&a, "a", 1));
-  a.append(std::make_unique<t_field>(&b, "b", 1));
-  a.append(std::make_unique<t_field>(&c, "c", 2));
-
-  EXPECT_FALSE(is_orderable(a, true));
-  EXPECT_FALSE(is_orderable(b, true));
-
-  std::unordered_map<t_type const*, bool> memo;
-  EXPECT_FALSE(is_orderable(memo, a, true));
-  EXPECT_FALSE(is_orderable(memo, b, true));
-  EXPECT_FALSE(is_orderable(memo, c, true));
-}
-
-TEST_F(UtilTest, is_eligible_for_constexpr) {
+TEST(UtilTest, is_eligible_for_constexpr) {
   auto is_eligible_for_constexpr = [](const t_type* t) {
     return cpp2::is_eligible_for_constexpr()(t);
   };
@@ -172,7 +112,7 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
   EXPECT_FALSE(is_eligible_for_constexpr(&e));
 }
 
-TEST_F(UtilTest, for_each_transitive_field) {
+TEST(UtilTest, for_each_transitive_field) {
   auto program = t_program("path/to/program.thrift", "path/to/program.thrift");
   auto empty = t_struct(&program, "struct_name");
   cpp2::for_each_transitive_field(&empty, [](const t_field*) {
@@ -228,7 +168,7 @@ TEST_F(UtilTest, for_each_transitive_field) {
   EXPECT_EQ(count, depth - 1);
 }
 
-TEST_F(UtilTest, field_transitively_refers_to_unique) {
+TEST(UtilTest, field_transitively_refers_to_unique) {
   auto i = t_primitive_type::t_i32();
   auto li = t_list(&i);
   auto lli = t_list(t_list(&i));
@@ -277,14 +217,14 @@ TEST_F(UtilTest, field_transitively_refers_to_unique) {
   }
 }
 
-TEST_F(UtilTest, get_gen_type_class) {
+TEST(UtilTest, get_gen_type_class) {
   // a single example as demo
   EXPECT_EQ(
       "::apache::thrift::type_class::string",
       cpp2::get_gen_type_class(t_primitive_type::t_string()));
 }
 
-TEST_F(UtilTest, is_custom_type) {
+TEST(UtilTest, is_custom_type) {
   t_program p("path/to/program.thrift", "path/to/program.thrift");
 
   {
@@ -342,7 +282,7 @@ TEST_F(UtilTest, is_custom_type) {
   }
 }
 
-TEST_F(UtilTest, topological_sort) {
+TEST(UtilTest, topological_sort) {
   std::map<std::string, std::vector<std::string>> graph{
       {"e", {"c", "a"}},
       {"d", {"b", "c"}},
@@ -360,7 +300,7 @@ TEST_F(UtilTest, topological_sort) {
   EXPECT_EQ(std::vector<std::string>({"b", "a", "d", "c", "e"}), result);
 }
 
-TEST_F(UtilTest, lpt_slit) {
+TEST(UtilTest, lpt_slit) {
   const std::vector<size_t> in{1, 4, 8, 7, 2, 2, 9, 5, 6, 10, 20, 1, 8};
 
   // split 1
@@ -388,14 +328,14 @@ TEST_F(UtilTest, lpt_slit) {
   EXPECT_EQ(res4, res4_expected);
 }
 
-TEST_F(UtilTest, get_internal_injected_field_id) {
+TEST(UtilTest, get_internal_injected_field_id) {
   EXPECT_THROW(cpp2::get_internal_injected_field_id(-1), std::runtime_error);
   EXPECT_EQ(cpp2::get_internal_injected_field_id(0), -1000);
   EXPECT_EQ(cpp2::get_internal_injected_field_id(999), -1999);
   EXPECT_THROW(cpp2::get_internal_injected_field_id(1000), std::runtime_error);
 }
 
-TEST_F(UtilTest, gen_adapter_dependency_graph) {
+TEST(UtilTest, gen_adapter_dependency_graph) {
   t_program p("path/to/program.thrift", "path/to/program.thrift");
   std::mt19937 gen;
   auto test = [&](std::string name, std::vector<const t_type*> expected) {
@@ -449,7 +389,7 @@ TEST_F(UtilTest, gen_adapter_dependency_graph) {
   test("dependent typedef after typedef", {&t2, &t5});
 }
 
-TEST_F(UtilTest, simple_struct_dependency_graph) {
+TEST(UtilTest, simple_struct_dependency_graph) {
   auto source_mgr = source_manager();
   auto program = dedent_and_parse_to_program(source_mgr, R"(
     struct FirstStruct {
@@ -496,7 +436,7 @@ TEST_F(UtilTest, simple_struct_dependency_graph) {
 // This is the same test as the above, but where one of the structures
 // has a type that doesn't actually resolve.  The same dep graph should
 // be generated without crashing.
-TEST_F(UtilTest, struct_dependency_graph_with_bad_type) {
+TEST(UtilTest, struct_dependency_graph_with_bad_type) {
   auto source_mgr = source_manager();
   auto program = dedent_and_parse_to_program(source_mgr, R"(
     struct FirstStruct {
@@ -540,7 +480,7 @@ TEST_F(UtilTest, struct_dependency_graph_with_bad_type) {
   ASSERT_THAT(edges.at(second_node), testing::ElementsAre(first_node));
 }
 
-TEST_F(UtilTest, structs_and_typedefs_dependency_graph) {
+TEST(UtilTest, structs_and_typedefs_dependency_graph) {
   auto source_mgr = source_manager();
   auto program = dedent_and_parse_to_program(source_mgr, R"(
     struct ContainsList {
@@ -605,185 +545,6 @@ TEST_F(UtilTest, structs_and_typedefs_dependency_graph) {
       FAIL() << "Wrong graph node: " << name;
     }
   }
-}
-
-const std::string kHeaderNoUri = R"(
-include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/thrift.thrift"
-)";
-
-const std::string kHeaderWithUri =
-    kHeaderNoUri + "package \"apache.org/thrift/test\"\n";
-
-const std::string kOrderabilityTestProgram = R"(
-// There are 3 categories:
-// * Foo*: With custom set/map
-// * Bar*: Without custom set/map
-// * Baz*: Special cases
-
-@cpp.Type{template = "std::unordered_set"}
-typedef set<i32> CustomSet1;
-@cpp.Type{name = "std::unordered_set<int32_t>"}
-typedef set<i32> CustomSet2;
-@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
-typedef set<i32> CustomSet3;
-typedef set<i32> CustomSet4 (cpp.template = "std::unordered_set");
-typedef set<i32> CustomSet5 (cpp.type = "std::unordered_set<int32_t>");
-
-struct Foo1 { 1: CustomSet1 foo; }
-struct Foo2 { 1: CustomSet2 foo; }
-struct Foo3 { 1: CustomSet3 foo; }
-struct Foo4 { 1: CustomSet4 foo; }
-struct Foo5 { 1: CustomSet5 foo; }
-struct Foo6 { 1: list<CustomSet1> foo; }
-struct Foo7 {
-  @cpp.Type{template = "std::unordered_set"}
-  1: set<i32> foo;
-}
-struct Foo8 {
-  @cpp.Type{template = "std::unordered_map"}
-  1: map<i32, i32> foo;
-}
-struct Foo9 {
-  1: i32 field1;
-  2: CustomSet1 field2;
-}
-struct Foo10 {
-  @cpp.Ref{type = cpp.RefType.Unique}
-  1: optional CustomSet1 foo;
-}
-struct Foo11 {
-  @thrift.Box
-  1: optional CustomSet1 foo;
-}
-
-@cpp.Type{template = "std::deque"}
-typedef list<i32> CustomList1
-
-struct Bar1 { 1: set<i32> foo; }
-struct Bar2 { 1: CustomList1 foo; }
-struct Bar3 { 1: Foo1 foo; }
-struct Bar4 { 1: map<i32, Foo4> foo; }
-
-// Weirdly field adapter doesn't count as custom type, probably a bug.
-struct Baz1 {
-  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
-  1: set<i32> baz;
-}
-
-// Always unorderable due to the lack of URI
-@thrift.Uri{value = ""}
-struct Baz2 {
-  @cpp.Type{template = "std::unordered_set"}
-  1: set<i32> foo;
-}
-
-// Has URI, but still unorderable since it contains unorderable field.
-@thrift.Uri{value = "apache.org/thrift/Baz3"}
-struct Baz3 {
-  1: Baz2 foo;
-}
-
-// Already enabled custom type ordering
-@cpp.EnableCustomTypeOrdering
-struct Baz4 {
-  @cpp.Type{template = "std::unordered_set"}
-  1: set<i32> foo;
-}
-)";
-
-const t_structured& get(const t_program& p, std::string_view name) {
-  for (auto i : p.structured_definitions()) {
-    if (i->name() == name) {
-      return *i;
-    }
-  }
-  throw std::logic_error("Foo not found");
-}
-
-TEST_F(UtilTest, CustomSetOrderabilityWithoutUri) {
-  static auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(
-      source_mgr, kHeaderNoUri + kOrderabilityTestProgram);
-
-  EXPECT_FALSE(is_orderable(get(*program, "Foo1"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo2"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo3"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo4"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo5"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo6"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo7"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo8"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo9"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo10"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo11"), true));
-
-  EXPECT_TRUE(is_orderable(get(*program, "Bar1"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Bar2"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Bar3"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Bar4"), true));
-
-  EXPECT_TRUE(is_orderable(get(*program, "Baz1"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Baz2"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Baz3"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Baz4"), true));
-}
-
-// The orderability should be the same as previous test case
-TEST_F(UtilTest, CustomSetOrderabilityWithUriButPreservedOldBehavior) {
-  static auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(
-      source_mgr, kHeaderWithUri + kOrderabilityTestProgram);
-
-  EXPECT_FALSE(is_orderable(get(*program, "Foo1"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo2"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo3"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo4"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo5"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo6"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo7"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo8"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo9"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo10"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Foo11"), false));
-
-  EXPECT_TRUE(is_orderable(get(*program, "Bar1"), false));
-  EXPECT_TRUE(is_orderable(get(*program, "Bar2"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Bar3"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Bar4"), false));
-
-  EXPECT_TRUE(is_orderable(get(*program, "Baz1"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Baz2"), false));
-  EXPECT_FALSE(is_orderable(get(*program, "Baz3"), false));
-  EXPECT_TRUE(is_orderable(get(*program, "Baz4"), false));
-}
-
-TEST_F(UtilTest, CustomSetOrderabilityWithUri) {
-  static auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(
-      source_mgr, kHeaderWithUri + kOrderabilityTestProgram);
-
-  EXPECT_TRUE(is_orderable(get(*program, "Foo1"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo2"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo3"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo4"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo5"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo6"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo7"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo8"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo9"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo10"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Foo11"), true));
-
-  EXPECT_TRUE(is_orderable(get(*program, "Bar1"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Bar2"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Bar3"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Bar4"), true));
-
-  EXPECT_TRUE(is_orderable(get(*program, "Baz1"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Baz2"), true));
-  EXPECT_FALSE(is_orderable(get(*program, "Baz3"), true));
-  EXPECT_TRUE(is_orderable(get(*program, "Baz4"), true));
 }
 
 } // namespace

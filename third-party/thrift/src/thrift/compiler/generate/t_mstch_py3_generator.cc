@@ -24,8 +24,8 @@
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
+#include <thrift/compiler/generate/cpp/orderable_type_utils.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
-#include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
@@ -984,7 +984,7 @@ class py3_mstch_struct : public mstch_struct {
   }
 
   mstch::node isStructOrderable() {
-    return cpp2::is_orderable(
+    return cpp2::OrderableTypeUtils::is_orderable(
                *struct_,
                !context_.options.count(
                    "disable_custom_type_ordering_if_structure_has_uri")) &&

@@ -31,7 +31,7 @@
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
-#include <thrift/compiler/generate/cpp/util.h>
+#include <thrift/compiler/generate/cpp/orderable_type_utils.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/sema/ast_validator.h>
@@ -228,7 +228,7 @@ class cpp2_generator_context {
   bool is_orderable(
       const t_type& type, bool enableCustomTypeOrderingIfStructureHasUri) {
     auto& memo = is_orderable_memo_;
-    return cpp2::is_orderable(
+    return cpp2::OrderableTypeUtils::is_orderable(
         memo, type, enableCustomTypeOrderingIfStructureHasUri);
   }
 

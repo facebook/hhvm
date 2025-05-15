@@ -1074,10 +1074,35 @@ let lsp_range_to_ide (range : Lsp.range) : Ide_api_types.range =
       ed = lsp_position_to_ide range.end_;
     }
 
-let hack_symbol_definition_to_lsp_construct_location
+(** For LSP textDocument/documentSymbol, pos starts where the name starts,
+  * skipping over stuff like user attributes.
+  * This is expected behavior for IDE functionality like sticky scroll (T224080471 for more information).
+  * Only classlikes/functionlikes can have long bodies and need this tweaking for sticky scroll.
+  * This adaptor logic is here because FileOutline.ml (calculates symbol positions)
+  * is used for all sorts of things, including "safe rename", but the logic
+  * here is for outlines, sticky headers, and breadcrumbs.
+  *)
+let document_symbol_location_of_symbol
     (symbol : string SymbolDefinition.t) ~(default_path : string) :
     Lsp.Location.t =
-  hack_pos_to_lsp_location symbol.SymbolDefinition.span ~default_path
+  let full_pos = symbol.span in
+  (* By convention, symbol.pos is the position of the name. See FileOutline.ml *)
+  let line_with_name_pos = Pos.set_col_start 0 symbol.pos in
+  let pos =
+    (* By convention, symbol.span position of the full decl, including attributes. *)
+    if Pos.start_offset line_with_name_pos < Pos.start_offset symbol.span then
+      (* Rare case where another symbol is defined on the same line. *)
+      symbol.span
+    else
+      (*
+        <<__UserAttributeHere>>
+        class C {// this is the start of the position we will provide
+        }
+       *)
+      Pos.btw (Pos.to_relative line_with_name_pos) (Pos.to_relative full_pos)
+      |> Pos.to_absolute
+  in
+  hack_pos_to_lsp_location pos ~default_path
 
 let hack_pos_definition_to_lsp_identifier_location
     (sid : Pos.absolute * string) ~(default_path : string) :
@@ -2599,7 +2624,7 @@ let do_workspaceSymbol
   in
   Lwt.return (List.map results ~f:hack_symbol_to_lsp)
 
-let rec hack_symbol_tree_to_lsp
+let rec lsp_document_symbols_of_outline
     ~(filename : string)
     ~(accu : Lsp.SymbolInformation.t list)
     ~(container_name : string option)
@@ -2632,14 +2657,12 @@ let rec hack_symbol_tree_to_lsp
     (* We never return a param from a document-symbol-search *)
     | SymbolDefinition.Module -> SymbolInformation.Module
   in
-  let hack_symbol_to_lsp definition containerName =
+  let lsp_of_symbol definition containerName =
     {
       SymbolInformation.name = definition.name;
       kind = hack_to_lsp_kind definition.kind;
       location =
-        hack_symbol_definition_to_lsp_construct_location
-          definition
-          ~default_path:filename;
+        document_symbol_location_of_symbol definition ~default_path:filename;
       containerName;
       detail = definition.detail;
     }
@@ -2653,15 +2676,15 @@ let rec hack_symbol_tree_to_lsp
       | Classish { members; _ } -> members
       | _ -> []
     in
-    let accu = hack_symbol_to_lsp def container_name :: accu in
+    let accu = lsp_of_symbol def container_name :: accu in
     let accu =
-      hack_symbol_tree_to_lsp
+      lsp_document_symbols_of_outline
         ~filename
         ~accu
         ~container_name:(Some def.name)
         children
     in
-    hack_symbol_tree_to_lsp ~filename ~accu ~container_name defs
+    lsp_document_symbols_of_outline ~filename ~accu ~container_name defs
 
 let do_documentSymbol
     (ide_service : ClientIdeService.t)
@@ -2681,7 +2704,11 @@ let do_documentSymbol
     ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
   in
   let converted =
-    hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
+    lsp_document_symbols_of_outline
+      ~filename
+      ~accu:[]
+      ~container_name:None
+      outline
   in
   Lwt.return converted
 

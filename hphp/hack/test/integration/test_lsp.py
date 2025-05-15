@@ -2356,131 +2356,132 @@ class TestLsp(LspTestBase):
                 params={"textDocument": {"uri": "${php_file_uri}"}},
                 result=[
                     {
-                        "name": "First",
+                        "name": "has_anno",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 63, "character": 0},
+                                "end": {"line": 65, "character": 1},
+                            },
+                        },
+                        "detail": "function(): void { // span should start on this line",
+                    },
+                    {
+                        "name": "prop",
+                        "kind": 7,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 60, "character": 14},
+                                "end": {"line": 60, "character": 23},
+                            },
+                        },
+                        "detail": "int $prop",
+                        "containerName": "HasAnnos",
+                    },
+                    {
+                        "name": "foo",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 57, "character": 0},
+                                "end": {"line": 57, "character": 32},
+                            },
+                        },
+                        "detail": "function(): void",
+                        "containerName": "HasAnnos",
+                    },
+                    {
+                        "name": "HasAnnos",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 55, "character": 0},
+                                "end": {"line": 61, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "Second",
                         "kind": 14,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 50, "character": 18},
-                                "end": {"line": 50, "character": 47},
+                                "start": {"line": 51, "character": 18},
+                                "end": {"line": 51, "character": 48},
                             },
                         },
                         "containerName": "MyEnumClass",
                     },
                     {
-                        "name": "MyEnumClass",
-                        "kind": 10,
+                        "name": "MyEnumClassKind",
+                        "kind": 5,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 49, "character": 0},
-                                "end": {"line": 52, "character": 1},
+                                "start": {"line": 48, "character": 0},
+                                "end": {"line": 48, "character": 24},
                             },
                         },
                     },
                     {
-                        "name": "testClassMemberInsideConstructorInvocation",
+                        "name": "test",
                         "kind": 12,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 44, "character": 0},
-                                "end": {"line": 46, "character": 1},
+                                "start": {"line": 28, "character": 0},
+                                "end": {"line": 34, "character": 1},
                             },
                         },
                         "detail": "function(): void",
                     },
                     {
-                        "name": "MyString",
-                        "kind": 14,
-                        "location": {
-                            "uri": "${php_file_uri}",
-                            "range": {
-                                "start": {"line": 41, "character": 8},
-                                "end": {"line": 41, "character": 29},
-                            },
-                        },
-                        "detail": 'MyString = "myString"',
-                        "containerName": "HasString",
-                    },
-                    {
-                        "name": "HasString",
+                        "name": "DD",
                         "kind": 5,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 40, "character": 0},
-                                "end": {"line": 42, "character": 1},
+                                "start": {"line": 17, "character": 0},
+                                "end": {"line": 18, "character": 1},
                             },
                         },
                     },
                     {
-                        "name": "__construct",
-                        "kind": 6,
+                        "name": "b_definition",
+                        "kind": 12,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 37, "character": 2},
-                                "end": {"line": 37, "character": 43},
+                                "start": {"line": 6, "character": 0},
+                                "end": {"line": 8, "character": 1},
                             },
                         },
-                        "detail": "function(string $s)",
-                        "containerName": "TakesString",
+                        "detail": "function(): int",
                     },
                     {
-                        "name": "TakesString",
+                        "name": "a_definition",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 4, "character": 1},
+                            },
+                        },
+                        "detail": "function(): int",
+                    },
+                    {
+                        "name": "BB",
                         "kind": 5,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 36, "character": 0},
-                                "end": {"line": 38, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "FF",
-                        "kind": 5,
-                        "location": {
-                            "uri": "${php_file_uri}",
-                            "range": {
-                                "start": {"line": 26, "character": 0},
-                                "end": {"line": 26, "character": 11},
-                            },
-                        },
-                    },
-                    {
-                        "name": "__construct",
-                        "kind": 6,
-                        "location": {
-                            "uri": "${php_file_uri}",
-                            "range": {
-                                "start": {"line": 21, "character": 2},
-                                "end": {"line": 23, "character": 3},
-                            },
-                        },
-                        "detail": "function()",
-                        "containerName": "EE",
-                    },
-                    {
-                        "name": "EE",
-                        "kind": 5,
-                        "location": {
-                            "uri": "${php_file_uri}",
-                            "range": {
-                                "start": {"line": 20, "character": 0},
-                                "end": {"line": 24, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "CC",
-                        "kind": 5,
-                        "location": {
-                            "uri": "${php_file_uri}",
-                            "range": {
-                                "start": {"line": 14, "character": 0},
-                                "end": {"line": 15, "character": 1},
+                                "start": {"line": 10, "character": 0},
+                                "end": {"line": 12, "character": 1},
                             },
                         },
                     },
@@ -2498,85 +2499,146 @@ class TestLsp(LspTestBase):
                         "containerName": "BB",
                     },
                     {
-                        "name": "BB",
+                        "name": "CC",
                         "kind": 5,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 10, "character": 0},
-                                "end": {"line": 12, "character": 1},
+                                "start": {"line": 14, "character": 0},
+                                "end": {"line": 15, "character": 1},
                             },
                         },
                     },
                     {
-                        "name": "a_definition",
-                        "kind": 12,
-                        "location": {
-                            "uri": "${php_file_uri}",
-                            "range": {
-                                "start": {"line": 2, "character": 0},
-                                "end": {"line": 4, "character": 1},
-                            },
-                        },
-                        "detail": "function(): int",
-                    },
-                    {
-                        "name": "b_definition",
-                        "kind": 12,
-                        "location": {
-                            "uri": "${php_file_uri}",
-                            "range": {
-                                "start": {"line": 6, "character": 0},
-                                "end": {"line": 8, "character": 1},
-                            },
-                        },
-                        "detail": "function(): int",
-                    },
-                    {
-                        "name": "DD",
+                        "name": "EE",
                         "kind": 5,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 17, "character": 0},
-                                "end": {"line": 18, "character": 1},
+                                "start": {"line": 20, "character": 0},
+                                "end": {"line": 24, "character": 1},
                             },
                         },
                     },
                     {
-                        "name": "test",
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 21, "character": 2},
+                                "end": {"line": 23, "character": 3},
+                            },
+                        },
+                        "detail": "function()",
+                        "containerName": "EE",
+                    },
+                    {
+                        "name": "FF",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 26, "character": 0},
+                                "end": {"line": 26, "character": 11},
+                            },
+                        },
+                    },
+                    {
+                        "name": "TakesString",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 36, "character": 0},
+                                "end": {"line": 38, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 37, "character": 2},
+                                "end": {"line": 37, "character": 43},
+                            },
+                        },
+                        "detail": "function(string $s)",
+                        "containerName": "TakesString",
+                    },
+                    {
+                        "name": "HasString",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 40, "character": 0},
+                                "end": {"line": 42, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "MyString",
+                        "kind": 14,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 41, "character": 8},
+                                "end": {"line": 41, "character": 29},
+                            },
+                        },
+                        "detail": 'MyString = "myString"',
+                        "containerName": "HasString",
+                    },
+                    {
+                        "name": "testClassMemberInsideConstructorInvocation",
                         "kind": 12,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 28, "character": 0},
-                                "end": {"line": 34, "character": 1},
+                                "start": {"line": 44, "character": 0},
+                                "end": {"line": 46, "character": 1},
                             },
                         },
                         "detail": "function(): void",
                     },
                     {
-                        "name": "MyEnumClassKind",
-                        "kind": 5,
+                        "name": "MyEnumClass",
+                        "kind": 10,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 48, "character": 0},
-                                "end": {"line": 48, "character": 24},
+                                "start": {"line": 49, "character": 0},
+                                "end": {"line": 52, "character": 1},
                             },
                         },
                     },
                     {
-                        "name": "Second",
+                        "name": "First",
                         "kind": 14,
                         "location": {
                             "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 51, "character": 18},
-                                "end": {"line": 51, "character": 48},
+                                "start": {"line": 50, "character": 18},
+                                "end": {"line": 50, "character": 47},
                             },
                         },
                         "containerName": "MyEnumClass",
+                    },
+                    {
+                        "name": "bar",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 60, "character": 25},
+                                "end": {"line": 60, "character": 69},
+                            },
+                        },
+                        "detail": "function(): void",
+                        "containerName": "HasAnnos",
                     },
                 ],
                 powered_by="serverless_ide",

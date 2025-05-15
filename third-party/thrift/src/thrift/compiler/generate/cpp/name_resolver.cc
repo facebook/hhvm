@@ -67,6 +67,7 @@ const std::string& cpp_name_resolver::get_native_type(
     const t_field& field, const t_structured& parent) {
   const t_type& type = *field.type();
 
+  // Handle @cpp.Adapter on field.
   if (auto* annotation =
           field.find_structured_annotation_or_null(kCppAdapterUri)) {
     if (auto* adapted_type =
@@ -79,6 +80,25 @@ const std::string& cpp_name_resolver::get_native_type(
     return detail::get_or_gen(field_type_cache_, &field, [&]() {
       return gen_field_type(field.id(), type, parent, &adapter_on_field);
     });
+  }
+
+  // Handle @cpp.Type on field.
+  if (auto* annotation =
+          field.find_structured_annotation_or_null(kCppTypeUri)) {
+    if (auto name =
+            annotation->get_value_from_structured_annotation_or_null("name")) {
+      return detail::get_or_gen(
+          field_type_cache_, &field, [&]() { return name->get_string(); });
+    } else {
+      auto& tmplate =
+          annotation->get_value_from_structured_annotation("template");
+      return detail::get_or_gen(field_type_cache_, &field, [&]() {
+        return gen_container_type(
+            type.get_true_type()->as<t_container>(),
+            &cpp_name_resolver::get_native_type,
+            &tmplate.get_string());
+      });
+    }
   }
 
   return get_native_type(type);

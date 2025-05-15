@@ -2246,7 +2246,8 @@ class cpp_mstch_field : public mstch_field {
   }
 
   mstch::node type_tag() {
-    return cpp_context_->resolver().get_type_tag(*field_);
+    return cpp_context_->resolver().get_type_tag(
+        *field_, *field_context_->strct);
   }
 
   mstch::node raw_binary() {

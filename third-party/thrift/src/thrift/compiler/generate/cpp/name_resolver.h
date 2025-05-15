@@ -88,9 +88,11 @@ class cpp_name_resolver {
   }
 
   // Returns C++ type tag of given thrift type
-  const std::string& get_type_tag(const t_field& node) {
-    return detail::get_or_gen(
-        field_type_tag_cache_, &node, [&] { return gen_type_tag(node); });
+  const std::string& get_type_tag(
+      const t_field& node, const t_structured& parent) {
+    return detail::get_or_gen(field_type_tag_cache_, &node, [&] {
+      return gen_type_tag(node, parent);
+    });
   }
 
   // Returns C++ namespace for the given program.
@@ -234,8 +236,10 @@ class cpp_name_resolver {
       const t_structured& parent);
 
   std::string gen_thrift_type_tag(const t_type&);
-  std::string gen_type_tag(const t_type&);
-  std::string gen_type_tag(const t_field&);
+  // TODO(dokwon): Remove ignored_cpp_type once cpp.type lowering migration is
+  // complete.
+  std::string gen_type_tag(const t_type&, bool ignore_cpp_type = false);
+  std::string gen_type_tag(const t_field&, const t_structured&);
   std::string gen_reference_type(const t_field& node);
 
   const std::string& resolve(type_resolve_fn resolve_fn, const t_type& node) {

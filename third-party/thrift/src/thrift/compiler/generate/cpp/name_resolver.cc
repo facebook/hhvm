@@ -523,13 +523,15 @@ std::string cpp_name_resolver::gen_adapted_type(
             });
 }
 
-std::string cpp_name_resolver::gen_type_tag(const t_type& type) {
+std::string cpp_name_resolver::gen_type_tag(
+    const t_type& type, bool ignore_cpp_type) {
   std::string tag = type.is_typedef()
       ? gen_type_tag(*type.as<t_typedef>().get_type())
       : gen_thrift_type_tag(type);
 
-  if (cpp_name_resolver::find_type(type) ||
-      cpp_name_resolver::find_template(type)) {
+  if (!ignore_cpp_type &&
+      (cpp_name_resolver::find_type(type) ||
+       cpp_name_resolver::find_template(type))) {
     return fmt::format(
         "::apache::thrift::type::cpp_type<{}, {}>", get_native_type(type), tag);
   }
@@ -545,9 +547,24 @@ std::string cpp_name_resolver::gen_type_tag(const t_type& type) {
   return tag;
 }
 
-std::string cpp_name_resolver::gen_type_tag(const t_field& field) {
-  std::string type_tag = gen_type_tag(*field.type());
-  if (const std::string* adapter = find_structured_adapter_annotation(field)) {
+std::string cpp_name_resolver::gen_type_tag(
+    const t_field& field, const t_structured& parent) {
+  std::string type_tag;
+
+  const std::string* adapter = find_structured_adapter_annotation(field);
+
+  // TODO(dokwon): Remove allowing both @cpp.Type and @cpp.Adapter on a field
+  // once @scope.Transitive bug is fixed.
+  if (field.find_structured_annotation_or_null(kCppTypeUri)) {
+    type_tag = fmt::format(
+        "::apache::thrift::type::cpp_type<{}, {}>",
+        adapter ? get_native_type(*field.type())
+                : get_native_type(field, parent),
+        gen_type_tag(*field.type(), true));
+  } else {
+    type_tag = gen_type_tag(*field.type());
+  }
+  if (adapter) {
     return fmt::format(
         "::apache::thrift::type::adapted<{}, {}>", *adapter, type_tag);
   }

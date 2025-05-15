@@ -46,7 +46,9 @@ try:
     import cinder
     import cinderx
     _fbthrift_is_cinder_runtime = cinderx.is_initialized()
-except ImportError:
+# ImportError for non-linux
+# AttributeError for pins to old cinder, via third-party
+except (ImportError, AttributeError):
     pass
 
 

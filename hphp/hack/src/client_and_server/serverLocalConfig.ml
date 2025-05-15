@@ -81,6 +81,32 @@ module Watchman = struct
     }
 end
 
+module EdenfsFileWatcher = struct
+  type t = {
+    enabled: bool;
+    debug_logging: bool;
+  }
+
+  let default = { debug_logging = false; enabled = false }
+
+  let load ~current_version ~default config =
+    let enabled =
+      bool_if_min_version
+        "edenfs_file_watcher_enabled"
+        ~default:default.enabled
+        ~current_version
+        config
+    in
+    let debug_logging =
+      bool_if_min_version
+        "edenfs_file_watcher_debug_logging"
+        ~default:default.debug_logging
+        ~current_version
+        config
+    in
+    { debug_logging; enabled }
+end
+
 (** Allows to typecheck only a certain quantile of the workload. *)
 type quantile = {
   count: int;
@@ -215,6 +241,7 @@ type t = {
   allow_unstable_features: bool;
       (** Allows unstable features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   watchman: Watchman.t;
+  edenfs_file_watcher: EdenfsFileWatcher.t;
   workload_quantile: quantile option;
       (** Allows to typecheck only a certain quantile of the workload. *)
   rollout_group: string option;

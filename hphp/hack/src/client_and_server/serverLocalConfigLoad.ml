@@ -86,6 +86,7 @@ let default =
     go_to_implementation = true;
     allow_unstable_features = false;
     watchman = Watchman.default;
+    edenfs_file_watcher = EdenfsFileWatcher.default;
     workload_quantile = None;
     rollout_group = None;
     specify_manifold_api_key = false;
@@ -534,6 +535,12 @@ let load_
   let watchman =
     Watchman.load ~current_version ~default:default.watchman config
   in
+  let edenfs_file_watcher =
+    EdenfsFileWatcher.load
+      ~current_version
+      ~default:default.edenfs_file_watcher
+      config
+  in
   let enable_naming_table_fallback =
     bool_if_min_version
       "enable_naming_table_fallback"
@@ -918,6 +925,7 @@ let load_
     go_to_implementation;
     allow_unstable_features;
     watchman;
+    edenfs_file_watcher;
     workload_quantile;
     rollout_group;
     specify_manifold_api_key;

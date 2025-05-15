@@ -11,7 +11,7 @@
 #include <folly/portability/GTest.h>
 #include <string>
 
-namespace proxygen { namespace StructuredHeaders {
+namespace proxygen::StructuredHeaders {
 
 class StructuredHeadersUtilitiesTest : public testing::Test {};
 
@@ -174,4 +174,4 @@ TEST_F(StructuredHeadersUtilitiesTest, TestItemTypeMatchesContentBad) {
   EXPECT_FALSE(itemTypeMatchesContent(item));
 }
 
-}} // namespace proxygen::StructuredHeaders
+} // namespace proxygen::StructuredHeaders

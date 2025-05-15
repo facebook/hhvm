@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace proxygen { namespace StructuredHeaders {
+namespace proxygen::StructuredHeaders {
 
 static const int kMaxValidIntegerLength = 19;
 static const int kMaxValidFloatLength = 16;
@@ -107,4 +107,4 @@ static const std::map<EncodeError, std::string> encodeErrorDescription{
     {EncodeError::ITEM_TYPE_MISMATCH, "Item type mismatch"},
     {EncodeError::ENCODING_NULL_ITEM, "Tried to encode null item"}};
 
-}} // namespace proxygen::StructuredHeaders
+} // namespace proxygen::StructuredHeaders

@@ -11,7 +11,7 @@
 
 #pragma once
 
-namespace proxygen { namespace StructuredHeaders {
+namespace proxygen::StructuredHeaders {
 
 bool isLcAlpha(char c);
 
@@ -33,4 +33,4 @@ std::string decodeBase64(const std::string& encoded);
 
 std::string encodeBase64(const std::string& input);
 
-}} // namespace proxygen::StructuredHeaders
+} // namespace proxygen::StructuredHeaders

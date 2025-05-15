@@ -10,7 +10,7 @@
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersConstants.h>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersUtilities.h>
 
-namespace proxygen { namespace StructuredHeaders {
+namespace proxygen::StructuredHeaders {
 
 bool isLcAlpha(char c) {
   return c >= 0x61 && c <= 0x7A;
@@ -96,4 +96,4 @@ bool itemTypeMatchesContent(const StructuredHeaderItem& input) {
   return false;
 }
 
-}} // namespace proxygen::StructuredHeaders
+} // namespace proxygen::StructuredHeaders

@@ -333,6 +333,7 @@
  (wrapped false)
  (modules serverNotifier)
  (libraries
+   edenfs_watcher_stubs
    server_command_types
    server_files
    server_notifier_types

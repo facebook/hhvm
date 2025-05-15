@@ -39,6 +39,14 @@ type t =
       local_config: ServerLocalConfig.t;
       num_workers: int;
     }
+  | EdenfsFileWatcher of {
+      instance: Edenfs_watcher.instance;
+      tmp_watchman_instance: t;
+          (** Currently, the Edenfs_watcher-backed implementation is work in
+          progress and can't actually provide any of the ServerNotifier
+          functionality. In order to be able to do some basic testing, we
+          actually forward all requests to this Watchman instance. *)
+    }
   | MockChanges of {
       get_changes_async: unit -> changes;
       get_changes_sync: unit -> SSet.t;
@@ -48,7 +56,7 @@ type indexer = (string -> bool) -> unit -> string list
 
 (** This returns an "indexer", i.e. unit -> string list, which when invoked
 will return all files under root. *)
-let indexer (t : t) (filter : string -> bool) : unit -> string list =
+let rec indexer (t : t) (filter : string -> bool) : unit -> string list =
   match t with
   | Dfind { root; _ }
   | IndexOnly { root; _ } ->
@@ -57,18 +65,23 @@ let indexer (t : t) (filter : string -> bool) : unit -> string list =
   | Watchman { wenv; num_workers; _ } ->
     let files = Watchman.get_all_files wenv in
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
+  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
+    indexer tmp_watchman_instance filter
 
 let init
     (options : ServerArgs.options)
     (local_config : ServerLocalConfig.t)
     ~(num_workers : int) : t * indexer =
   let root = ServerArgs.root options in
-  let ServerLocalConfig.Watchman.
-        { enabled; sockname; subscribe; init_timeout; debug_logging; _ } =
-    local_config.ServerLocalConfig.watchman
+  let watchman_config = local_config.ServerLocalConfig.watchman in
+  let watchman_enabled = watchman_config.ServerLocalConfig.Watchman.enabled in
+  let edenfs_watcher_config =
+    local_config.ServerLocalConfig.edenfs_file_watcher
+  in
+  let edenfs_watcher_enabled =
+    edenfs_watcher_config.ServerLocalConfig.EdenfsFileWatcher.enabled
   in
 
-  (* helper to construct Dfind *)
   let init_dfind () =
     Hh_logger.log "Using dfind";
     let in_fd = Daemon.null_fd () in
@@ -86,6 +99,11 @@ let init
   (* helper to try to construct Watchman, or return None if failed *)
   let try_init_watchman () =
     Hh_logger.log "Using watchman";
+    let ServerLocalConfig.Watchman.
+          { sockname; subscribe; init_timeout; debug_logging; _ } =
+      watchman_config
+    in
+
     let wenv =
       Watchman.init
         {
@@ -116,16 +134,51 @@ let init
           })
   in
 
+  let try_init_edenfs_watcher () : t option =
+    Hh_logger.log "Using EdenFS file watcher";
+    let init_settings = { Edenfs_watcher.root } in
+    match Edenfs_watcher.init init_settings with
+    | Result.Error (Edenfs_watcher_types.EdenfsWatcherError msg) ->
+      Hh_logger.log
+        "Failed to initialize EdenFS watcher, failed with message:\n%s"
+        msg;
+      None
+    | Result.Ok instance -> begin
+      (* TODO(frankemrich): Add use_edenfs_file_watcher to hh_server_events
+         table and HackEventLogger *)
+      (* HackEventLogger.set_use_edenfs_file_watcher (); *)
+
+      (* This is just temporary:
+         For now, we also carry around a nested instance using Watchman. *)
+      let watchman = try_init_watchman () in
+      Option.map watchman ~f:(fun tmp_watchman_instance ->
+          EdenfsFileWatcher { instance; tmp_watchman_instance })
+    end
+  in
+
   let notifier =
-    if ServerArgs.check_mode options then begin
-      Hh_logger.log "Not using dfind or watchman";
+    match
+      (ServerArgs.check_mode options, edenfs_watcher_enabled, watchman_enabled)
+    with
+    | (true, _, _) ->
+      (* check_mode *)
+      Hh_logger.log "Not using any file watching mechanism";
       IndexOnly { root }
-    end else if not enabled then
-      init_dfind ()
-    else
-      match try_init_watchman () with
+    | (false, true, _) ->
+      (* Whenever EdenFS file watching is requested it takes precedence
+         over Watchman, but there is no fallback *)
+      if watchman_enabled then
+        Hh_logger.warn
+          "Both Watchman and EdenFS file watching enabled in server config";
+      (match try_init_edenfs_watcher () with
       | Some t -> t
-      | None -> init_dfind ()
+      | None ->
+        failwith "EdenFS file watching enabled, but failed to initialize.")
+    | (false, false, true) ->
+      (match try_init_watchman () with
+      | Some t -> t
+      | None -> init_dfind ())
+    | (false, false, false) -> init_dfind ()
   in
   (notifier, indexer notifier)
 
@@ -154,6 +207,9 @@ let wait_until_ready (t : t) : unit =
     (* The initial watch-project command blocks until watchman's crawl is
        done, so we don't have anything else to wait for here. *)
     ()
+  | EdenfsFileWatcher _ ->
+    (* Same as for Watchman *)
+    ()
 
 (** Helper conversion function, from a single watchman-changes to a set of changed
     files. Also handles informing ServerRevisionTracker about changes *)
@@ -179,7 +235,7 @@ let convert_watchman_changes
     ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
     changes
 
-let get_changes_sync (t : t) : SSet.t * clock option =
+let rec get_changes_sync (t : t) : SSet.t * clock option =
   match t with
   | IndexOnly _ -> (SSet.empty, None)
   | MockChanges { get_changes_sync; _ } -> (get_changes_sync (), None)
@@ -210,8 +266,11 @@ let get_changes_sync (t : t) : SSet.t * clock option =
     in
     let clock = Watchman.get_clock !watchman in
     (changes, Some (Watchman clock))
+  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
+    (* Actually use Watchman for now to allow some basic testing *)
+    get_changes_sync tmp_watchman_instance
 
-let get_changes_async (t : t) : changes * clock option =
+let rec get_changes_async (t : t) : changes * clock option =
   match t with
   | IndexOnly _ -> (SyncChanges SSet.empty, None)
   | MockChanges { get_changes_async; _ } -> (get_changes_async (), None)
@@ -235,11 +294,17 @@ let get_changes_async (t : t) : changes * clock option =
     in
     let clock = Watchman.get_clock !watchman in
     (changes, Some (Watchman clock))
+  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
+    (* Actually use Watchman for now to allow some basic testing *)
+    get_changes_async tmp_watchman_instance
 
-let async_reader_opt (t : t) : Buffered_line_reader.t option =
+let rec async_reader_opt (t : t) : Buffered_line_reader.t option =
   match t with
   | Dfind _
   | IndexOnly _ ->
     None
   | MockChanges _ -> None
   | Watchman { watchman; _ } -> Watchman.get_reader !watchman
+  | EdenfsFileWatcher { tmp_watchman_instance; _ } ->
+    (* Actually use Watchman for now to allow some basic testing *)
+    async_reader_opt tmp_watchman_instance

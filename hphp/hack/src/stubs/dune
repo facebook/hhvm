@@ -179,3 +179,11 @@
  (modules file_scuba_logger_ffi_externs)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name edenfs_watcher_stubs)
+ (wrapped false)
+ (modules edenfs_watcher edenfs_watcher_types)
+ (libraries sys_utils utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

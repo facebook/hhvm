@@ -353,6 +353,7 @@ void scheduleSerializeOptProf() {
 extern "C" void __gcov_reset() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
 extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
+extern "C" void __roar_api_trigger_warmup() __attribute__((__weak__));
 
 /*
  * This is the main driver for the profile-guided retranslation of all the
@@ -513,10 +514,19 @@ void retranslateAll(bool skipSerialize) {
     }
     __gcov_reset();
   }
-  // If running with ROAR, this calls into the profiling runtime included with
-  // ROAR. ROAR expects to be in full control of the runtime, so this has to be
-  // disabled.
-#ifndef __roar__
+  // If running with ROAR, we call __roar_api_trigger_warmup(), which will reset
+  // ROAR's profile counters and start collecting profile data for the specified
+  // collection period before optimizing the code.
+#ifdef __roar__
+  if (__roar_api_trigger_warmup) {
+    if (serverMode) {
+      Logger::Info(
+        "Calling __roar_api_trigger_warmup (retranslateAll finished)"
+      );
+    }
+    __roar_api_trigger_warmup();
+  }
+#else
   if (__llvm_profile_reset_counters) {
     if (serverMode) {
       Logger::Info("Calling __llvm_profile_reset_counters (retranslateAll "

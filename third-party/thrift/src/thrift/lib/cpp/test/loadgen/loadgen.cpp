@@ -22,9 +22,7 @@
 
 using namespace boost;
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 void runLoadGen(
     WorkerFactory* factory,
@@ -43,6 +41,4 @@ void runLoadGen(
       config->getNumWorkerThreads(), config->getMaxWorkerThreads(), interval);
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

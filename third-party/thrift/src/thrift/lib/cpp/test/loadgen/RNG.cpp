@@ -23,9 +23,7 @@
 
 #include <folly/ThreadLocal.h>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 const bool RNG::has_fixed_range;
 
@@ -104,6 +102,4 @@ double RNG::getLogNormal(double mean, double sigma) {
   return gen();
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

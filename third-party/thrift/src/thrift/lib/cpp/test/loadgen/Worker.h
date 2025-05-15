@@ -26,9 +26,7 @@
 
 #include <memory>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /**
  * Main Worker implementation
@@ -276,8 +274,6 @@ class SimpleWorkerFactory : public WorkerFactory {
   std::shared_ptr<ConfigT> config_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_WORKER_H_

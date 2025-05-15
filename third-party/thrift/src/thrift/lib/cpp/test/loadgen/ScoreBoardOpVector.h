@@ -23,9 +23,7 @@
 #include <stddef.h>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /**
  * A vector of per-operation scoreboard data.
@@ -111,8 +109,6 @@ class ScoreBoardOpVector {
   DataVector opData_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_SCOREBOARDOPVECTOR_H_

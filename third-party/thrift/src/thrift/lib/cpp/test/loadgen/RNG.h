@@ -19,9 +19,7 @@
 
 #include <boost/random/mersenne_twister.hpp>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /**
  * A random number generator to use for load tests.
@@ -127,8 +125,6 @@ class RNG {
   BoostRNG* rng_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_RNG_H_

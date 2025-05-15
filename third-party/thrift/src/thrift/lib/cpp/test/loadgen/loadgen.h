@@ -19,8 +19,7 @@
 
 #include <thrift/lib/cpp/test/loadgen/Worker.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace concurrency {
 
@@ -82,7 +81,6 @@ void runLoadGen(
 }
 
 } // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_TEST_LOADGEN_LOADGEN_H_

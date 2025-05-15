@@ -22,9 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 class OpEnabledState;
 
@@ -53,8 +51,6 @@ class WeightedLoadConfig : public LoadConfig {
   std::vector<std::string> names_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_WEIGHTEDLOADCONFIG_H_

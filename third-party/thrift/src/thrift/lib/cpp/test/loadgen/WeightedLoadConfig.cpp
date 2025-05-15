@@ -24,9 +24,7 @@
 
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 WeightedLoadConfig::WeightedLoadConfig(uint32_t numOps) : weightsSum_(0) {
   weights_.resize(numOps, 0);
@@ -97,6 +95,4 @@ void WeightedLoadConfig::configureEnabledState(OpEnabledState* state) const {
   }
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

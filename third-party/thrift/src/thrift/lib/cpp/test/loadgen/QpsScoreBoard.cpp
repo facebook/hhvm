@@ -16,9 +16,7 @@
 
 #include <thrift/lib/cpp/test/loadgen/QpsScoreBoard.h>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 void QpsScoreBoard::opStarted(uint32_t /* opType */) {}
 
@@ -48,6 +46,4 @@ void QpsScoreBoard::accumulate(const QpsScoreBoard* other) {
   opData_.accumulate(&other->opData_);
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

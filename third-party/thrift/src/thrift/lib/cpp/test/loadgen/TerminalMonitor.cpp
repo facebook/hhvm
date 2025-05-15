@@ -20,9 +20,7 @@
 
 #include <sys/ioctl.h>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 TerminalMonitor::TerminalMonitor() : screenHeight_(-1), linesPrinted_(0) {
   // Determine the screen height
@@ -55,6 +53,4 @@ int32_t TerminalMonitor::getScreenHeight() {
   return size.ws_row;
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

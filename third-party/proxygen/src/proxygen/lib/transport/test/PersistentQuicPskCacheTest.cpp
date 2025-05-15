@@ -16,7 +16,7 @@
 using namespace testing;
 using namespace quic;
 
-namespace proxygen { namespace test {
+namespace proxygen::test {
 
 class PersistentQuicPskCacheTest : public Test {
  public:
@@ -298,4 +298,4 @@ TEST_F(PersistentQuicPskCacheTest, TestGetPskUses) {
   cache_->getPsk("facebook.com");
   EXPECT_EQ(std::nullopt, cache_->getPskUses("facebook.com"));
 }
-}} // namespace proxygen::test
+} // namespace proxygen::test

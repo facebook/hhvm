@@ -84,6 +84,7 @@ pub use gen::decl_defs;
 pub use gen::decl_fold_options;
 pub use gen::decl_parser_options;
 pub use gen::decl_reference;
+pub use gen::edenfs_watcher_types;
 pub use gen::error_codes;
 pub use gen::error_message;
 pub use gen::errors;

@@ -63,6 +63,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/errors/warnings_saved_state.ml                                \
   hphp/hack/src/errors/error_codes.ml                                         \
   hphp/hack/src/errors/message.ml                                             \
+  hphp/hack/src/facebook/edenfs_watcher/edenfs_watcher_types.ml               \
   hphp/hack/src/naming/name_context.ml                                        \
   hphp/hack/src/naming/naming_error.ml                                        \
   hphp/hack/src/typing/nast_check/nast_check_error.ml                         \

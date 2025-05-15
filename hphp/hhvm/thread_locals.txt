@@ -110,6 +110,7 @@ HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unitEmitter
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unit
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_indexer
 HPHP::extern_worker::g_in_job
+HPHP::ThreadHint::s_threadData
 
 # Native Facts is not request-scoped.
 HPHP::Facts::(anonymous namespace)::t_adb

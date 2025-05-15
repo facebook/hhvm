@@ -250,6 +250,7 @@ cdef class Struct(StructOrUnion):
     cdef uint32_t _deserialize(
         Struct self, folly.iobuf.IOBuf buf, Protocol proto
     ) except? 0
+    cdef _fbthrift_py_value_from_internal_data(self, int16_t index)
     cdef _fbthrift_get_cached_field_value(Struct self, int16_t index)
     cdef _fbthrift_populate_primitive_fields(Struct self)
     cdef _fbthrift_fully_populate_cache(Struct self)

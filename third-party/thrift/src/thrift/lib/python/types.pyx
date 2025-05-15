@@ -78,7 +78,7 @@ cdef _is_py3_structured(obj):
 
 cdef _make_cached_property(struct_class, int field_index, str field_name):
     if _fbthrift_is_cinder_runtime:
-        getter_fn = lambda self: (<Struct>self)._fbthrift_get_cached_field_value(field_index)
+        getter_fn = lambda self: (<Struct>self)._fbthrift_py_value_from_internal_data(field_index)
         return cinder.cached_property(
             getter_fn, 
             getattr(struct_class, field_name),
@@ -1124,7 +1124,11 @@ cdef class Struct(StructOrUnion):
                 arguments during initialization.
         """
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
+        if _fbthrift_is_cinder_runtime:
+            # in cinder, caching happens in property layer
+            self._fbthrift_field_cache = None
+        else:
+            self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
 
     def __init__(self, **kwargs):
         self._initStructTupleWithValues(kwargs)
@@ -1214,13 +1218,7 @@ cdef class Struct(StructOrUnion):
         self._fbthrift_populate_primitive_fields()
         return len
 
-    cdef _fbthrift_get_cached_field_value(self, int16_t index):
-        cdef PyObject* cached_value = PyTuple_GET_ITEM(
-            self._fbthrift_field_cache, index
-        )
-        if cached_value != NULL:
-            return <object>cached_value
-
+    cdef _fbthrift_py_value_from_internal_data(self, int16_t index):
         cdef StructInfo struct_info = self._fbthrift_struct_info
         cdef FieldInfo field_info = struct_info.fields[index]
         cdef int field_id = field_info.id
@@ -1240,6 +1238,17 @@ cdef class Struct(StructOrUnion):
                 )
         else:
             py_value = None
+
+        return py_value
+
+    cdef _fbthrift_get_cached_field_value(self, int16_t index):
+        cdef PyObject* cached_value = PyTuple_GET_ITEM(
+            self._fbthrift_field_cache, index
+        )
+        if cached_value != NULL:
+            return <object>cached_value
+
+        py_value = self._fbthrift_py_value_from_internal_data(index)
 
         PyTuple_SET_ITEM(self._fbthrift_field_cache, index, py_value)
         Py_INCREF(py_value)

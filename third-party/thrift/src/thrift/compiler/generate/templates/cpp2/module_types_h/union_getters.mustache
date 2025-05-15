@@ -19,7 +19,7 @@
  private:
 {{/struct:legacy_api?}}
   {{> common/field_docblock}}
-  {{!deprecated}}{{^field:boxed_ref?}}{{field:cpp_storage_type}}{{/field:boxed_ref?}}{{#field:boxed_ref?}}{{type:cpp_type}}{{/field:boxed_ref?}} const& get_{{field:cpp_name}}() const {
+  {{!deprecated}}{{^field:boxed_ref?}}{{field:cpp_storage_type}}{{/field:boxed_ref?}}{{#field:boxed_ref?}}{{field:cpp_type}}{{/field:boxed_ref?}} const& get_{{field:cpp_name}}() const {
     if (getType() != Type::{{field:cpp_name}}) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

@@ -31,9 +31,7 @@
 #include <thrift/lib/cpp/concurrency/Exception.h>
 #include <thrift/lib/cpp/thrift_config.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 using std::shared_ptr;
 using std::weak_ptr;
@@ -378,6 +376,4 @@ Thread::id_t PosixThreadFactory::getCurrentThreadId() const {
   return impl_->getCurrentThreadId();
 }
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency

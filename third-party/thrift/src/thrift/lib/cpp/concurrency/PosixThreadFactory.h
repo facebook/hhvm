@@ -27,9 +27,7 @@
 
 #include <thrift/lib/cpp/concurrency/Thread.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 class PthreadThread : public Thread {
  public:
@@ -235,8 +233,6 @@ class PosixThreadFactory : public ThreadFactory {
   std::shared_ptr<Impl> impl_;
 };
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency
 
 #endif // #ifndef _THRIFT_CONCURRENCY_POSIXTHREADFACTORY_H_

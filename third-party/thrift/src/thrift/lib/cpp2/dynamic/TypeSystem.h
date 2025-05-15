@@ -123,10 +123,13 @@ class TypeSystem {
    * Generates a set of all user-defined type URIs currently known to the type
    * system.
    *
-   * Note: The TypeSystem can be extended with new types at any time, so this
-   * set is not guaranteed to be exhaustive. However, it is guaranteed to
-   * resolve all types that were known to the TypeSystem at the time of this
-   * call.
+   * For every URI returned by this method, `getUserDefinedType` must succeed.
+   * However, the converse is not true — `getUserDefinedType` may succeed for
+   * types whose URI is not returned by this method.
+   *
+   * In practice, many `TypeSystem` implementations will have a direct 1:1
+   * mapping between `getKnownUris` and `getUserDefinedType`. This is a useful
+   * guarantee because it allows the caller to traverse the full `TypeSystem`.
    */
   virtual folly::F14FastSet<Uri> getKnownUris() const = 0;
 };

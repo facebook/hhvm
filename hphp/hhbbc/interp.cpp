@@ -5467,6 +5467,11 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
 }
 
 void in(ISS& env, const bc::VerifyTypeTS& /*op*/) {
+  if (!Cfg::Eval::CheckedUnsafeCast) {
+    reduce(env, bc::PopC {});
+    return;
+  }
+
   auto const a = topC(env);
   if (!a.couldBe(BDict)) {
     unreachable(env);

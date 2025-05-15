@@ -325,6 +325,7 @@ void VerifyReifiedReturnTypeImpl(TypedValue value, ArrayData* ts,
 
 void VerifyTypeImpl(TypedValue value, ArrayData* ts,
                                  const Class* ctx, const Func* func) {
+  assertx(Cfg::Eval::CheckedUnsafeCast);
   req::vector<Array> tsList;
   std::string givenType, expectedType, errorKey;
   auto resolved_ts = resolveAndVerifyTypeStructure<false>(

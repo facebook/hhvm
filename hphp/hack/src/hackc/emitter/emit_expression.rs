@@ -3578,10 +3578,7 @@ fn emit_call_expr(
             ]))
         }
         (Expr_::Id(id), args, None)
-            if id.1 == pseudo_functions::UNSAFE_CAST
-                && !args.is_empty()
-                && targs.len() == 2
-                && e.options().hhbc.checked_unsafe_cast =>
+            if id.1 == pseudo_functions::UNSAFE_CAST && !args.is_empty() && targs.len() == 2 =>
         {
             let target_type = &targs[1].1;
             emit_checked_unsafe_cast(

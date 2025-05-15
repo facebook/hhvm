@@ -499,6 +499,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Treats caseType int | bool as mixed
 
+- bool Eval.CheckedUnsafeCast = false, UNKNOWN, globaldata|unitcacheflag|compileroption(CheckedUnsafeCast)
+
+  Semantics of UNSAFE_CAST. If set, warn when target type doesn't match runtime type.
+
 - bool Eval.DiamondTraitMethods = false, UNKNOWN, globaldata|unitcacheflag
 
   Enable a method defined in a trait to be imported multiple times
@@ -1511,10 +1515,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Disables PHP's constant function
   Valid values are 0 => enabled (default), 1 => warning, 2 => error
-
-- bool Hack.Lang.CheckedUnsafeCast = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
-
-  Semantics of UNSAFE_CAST. If set, warn when target type doesn't match runtime type.
 
 # GC (Eval.)
 

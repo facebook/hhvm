@@ -4738,10 +4738,12 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 // Verify that the type of an expression matches a type structure
 OPTBLD_INLINE void iopVerifyTypeTS() {
   auto const cell = vmStack().indC(1);
-  auto const ts = maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, true, false);
-  std::string givenType, expectedType, errorKey;
-  if (!checkForVerifyTypeStructureMatchesTV(ts, *cell, givenType, expectedType, errorKey)) {
-    raise_inline_typehint_error(givenType, expectedType, errorKey);
+  if (Cfg::Eval::CheckedUnsafeCast) {
+    auto const ts = maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, true, false);
+    std::string givenType, expectedType, errorKey;
+    if (!checkForVerifyTypeStructureMatchesTV(ts, *cell, givenType, expectedType, errorKey)) {
+      raise_inline_typehint_error(givenType, expectedType, errorKey);
+    }
   }
   vmStack().popC();
 }

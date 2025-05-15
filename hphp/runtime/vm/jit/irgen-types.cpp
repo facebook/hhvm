@@ -1673,6 +1673,10 @@ void emitVerifyRetTypeTS(IRGS& env) {
 }
 
 void emitVerifyTypeTS(IRGS& env) {
+  if (!Cfg::Eval::CheckedUnsafeCast) {
+    popDecRef(env);
+    return;
+  }
   if (!topC(env)->isA(TDict)) return interpOne(env);
   auto const ts = topC(env);
   auto const cell = topC(env, BCSPRelOffset{1});

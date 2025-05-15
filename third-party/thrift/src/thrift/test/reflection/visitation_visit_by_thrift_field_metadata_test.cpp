@@ -22,8 +22,7 @@
 
 #include <typeindex>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 namespace {
 template <class T>
 auto idToThriftField(int32_t id) {
@@ -60,5 +59,4 @@ TEST(struct1, modify_field) {
       apache::thrift::InvalidThriftId);
 }
 } // namespace
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

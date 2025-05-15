@@ -23,9 +23,7 @@
 #include <thrift/test/gen-cpp2/UnionFieldRef_visit_by_thrift_field_metadata.h>
 #include <thrift/test/gen-cpp2/UnionFieldRef_visit_union.h>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 namespace {
 
 struct VisitUnionAdapter {
@@ -196,6 +194,4 @@ TEST(VisitUnionTest, NonVoid) {
 }
 
 } // namespace
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

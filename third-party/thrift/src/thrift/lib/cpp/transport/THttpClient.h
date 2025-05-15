@@ -19,9 +19,7 @@
 
 #include <thrift/lib/cpp/transport/THttpTransport.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 class THttpClient : public THttpTransport {
   using StringToStringMap = std::map<std::string, std::string>;
@@ -96,8 +94,6 @@ class THttpClient : public THttpTransport {
   void endParsingHeaders() override;
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef THRIFT_TRANSPORT_THTTPCLIENT_H_

@@ -24,9 +24,7 @@
 
 #include <thrift/lib/cpp/transport/TSocket.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 using std::string;
 
@@ -176,6 +174,4 @@ void THttpClient::setUserAgent(const std::string& userAgent) {
   setHeader(kUserAgentHeader, userAgent);
 }
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

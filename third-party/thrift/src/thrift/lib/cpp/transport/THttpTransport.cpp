@@ -16,9 +16,7 @@
 
 #include <thrift/lib/cpp/transport/THttpTransport.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 using namespace std;
 
@@ -251,6 +249,4 @@ void THttpTransport::write(const uint8_t* buf, uint32_t len) {
   writeBuffer_.write(buf, len);
 }
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

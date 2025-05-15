@@ -22,9 +22,7 @@
 
 #include <thrift/lib/cpp/transport/TSocket.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 using namespace std;
 
@@ -137,6 +135,4 @@ std::string THttpServer::getTimeRFC1123() {
   return std::string(buff);
 }
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

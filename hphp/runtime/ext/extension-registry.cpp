@@ -3,10 +3,7 @@
 #include <sstream>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/version.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/system/systemlib.h"
 
 #ifdef HAVE_LIBDL
 # include <dlfcn.h>

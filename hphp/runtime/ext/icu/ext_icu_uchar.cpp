@@ -1,7 +1,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/tv-refcount.h"
 
 #include <unicode/uchar.h>
 

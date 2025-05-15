@@ -30,8 +30,6 @@
 #include <fastlz.h>
 #include <zlib.h>
 
-#include "hphp/system/systemlib.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

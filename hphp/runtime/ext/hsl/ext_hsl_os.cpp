@@ -29,10 +29,8 @@
 #include <folly/functional/Invoke.h>
 #include <type_traits>
 
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <stdio.h>
 #include <sys/file.h>
 #include <sys/socket.h>

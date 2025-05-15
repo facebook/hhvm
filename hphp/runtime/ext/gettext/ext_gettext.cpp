@@ -16,10 +16,7 @@
  */
 #include "hphp/runtime/ext/gettext/ext_gettext.h"
 
-#include <stdio.h>
-
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
 
 #include <libintl.h>

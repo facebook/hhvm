@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
 
-#include <chrono>
 #include <exception>
 #include <filesystem>
 #include <memory>
@@ -25,18 +24,15 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <tuple>
 #include <utility>
 #include <vector>
 
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
-#include <folly/container/F14Map.h>
 #include <folly/json/dynamic.h>
 #include <folly/json/json.h>
 #include <folly/logging/LogStreamProcessor.h>
@@ -46,11 +42,9 @@
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/sqlite-key.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/hash-map.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/sqlite-wrapper-helpers.h"
 #include "hphp/util/sqlite-wrapper.h"
-#include "hphp/util/thread-local.h"
 
 namespace fs = std::filesystem;
 

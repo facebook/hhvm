@@ -29,9 +29,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/configs/hacklang.h"
-#include "hphp/util/exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

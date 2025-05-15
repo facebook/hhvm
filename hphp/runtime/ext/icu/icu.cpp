@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/util/rds-local.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 

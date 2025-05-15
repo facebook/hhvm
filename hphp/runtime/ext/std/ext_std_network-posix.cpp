@@ -18,14 +18,10 @@
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/std/ext_std_network-internal.h"
 
-#include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <netdb.h>
 #include <netinet/in.h>
 #include <resolv.h>
-#include <sys/socket.h>
 
-#include <folly/IPAddress.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/server/server-stats.h"

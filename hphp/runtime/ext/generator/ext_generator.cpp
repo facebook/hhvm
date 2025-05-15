@@ -16,14 +16,12 @@
 */
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
 

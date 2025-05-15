@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/random/ext_random.h"
-#include "hphp/system/systemlib.h"
 #include <folly/Random.h>
 
 namespace HPHP {

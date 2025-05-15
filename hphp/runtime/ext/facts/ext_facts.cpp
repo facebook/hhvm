@@ -30,8 +30,6 @@
 #include <folly/json/json.h>
 #include <folly/logging/xlog.h>
 
-#include <watchman/cppclient/WatchmanClient.h>
-
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/autoload-map.h"
@@ -52,7 +50,6 @@
 #include "hphp/runtime/ext/facts/static-watcher.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/watchman-watcher.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/configs/autoload.h"

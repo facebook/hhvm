@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/cli-server.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 namespace {

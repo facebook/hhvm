@@ -14,7 +14,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "hphp/runtime/ext/extension.h"

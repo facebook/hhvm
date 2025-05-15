@@ -16,7 +16,6 @@
 */
 #include "hphp/runtime/ext/std/ext_std_options.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
 #include <stdio.h>
@@ -37,7 +36,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-array-like.h"
@@ -51,7 +49,6 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/user-info.h"

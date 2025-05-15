@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 namespace {

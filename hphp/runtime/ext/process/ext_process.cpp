@@ -26,7 +26,6 @@
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
 
-#include <fcntl.h>
 #include <signal.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -34,7 +33,6 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request-info.h"

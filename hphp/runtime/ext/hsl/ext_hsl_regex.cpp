@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 namespace {

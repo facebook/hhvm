@@ -17,11 +17,6 @@
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <folly/json/json.h>
-#include <folly/Random.h>
 #include <folly/synchronization/AtomicNotification.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -39,7 +34,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/code-coverage-util.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -53,7 +47,6 @@
 #include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/file.h"
 #include "hphp/util/match.h"
 #include "hphp/util/text-util.h"
 

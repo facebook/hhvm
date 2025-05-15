@@ -31,7 +31,6 @@
 
 #include "hphp/runtime/ext/facts/sqlite-key.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/optional.h"
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/user-info.h"
 

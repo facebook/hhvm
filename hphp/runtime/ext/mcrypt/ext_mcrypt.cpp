@@ -20,8 +20,6 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 
 #define NON_FREE

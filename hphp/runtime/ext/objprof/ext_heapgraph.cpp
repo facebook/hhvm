@@ -34,7 +34,6 @@
 
 #include <array>
 #include <vector>
-#include <boost/dynamic_bitset.hpp>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"

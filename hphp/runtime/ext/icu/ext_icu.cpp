@@ -19,7 +19,6 @@
 #include <vector>
 #include <string>
 #include <boost/scoped_ptr.hpp>
-#include <unicode/rbbi.h>
 #include <unicode/translit.h>
 #include <unicode/uregex.h>
 #include <unicode/ustring.h>

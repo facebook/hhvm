@@ -19,11 +19,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/type-alias.h"
 

@@ -16,7 +16,6 @@
 */
 #include "hphp/runtime/ext/gd/ext_gd.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -39,7 +38,6 @@
 #include "hphp/runtime/ext/gd/libgd/gdfontl.h"  /* 4 Large font */
 #include "hphp/runtime/ext/gd/libgd/gdfontg.h"  /* 5 Giant font */
 #include <zlib.h>
-#include <set>
 
 #include <folly/ScopeGuard.h>
 #include <folly/portability/Stdlib.h>

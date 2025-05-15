@@ -33,7 +33,6 @@
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
-#include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlsave.h>
 #include <libxml/xmlversion.h>

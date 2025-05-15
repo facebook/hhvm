@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/native-data.h"

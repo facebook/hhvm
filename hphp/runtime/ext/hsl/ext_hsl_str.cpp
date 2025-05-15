@@ -27,13 +27,8 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
 
-#include <functional>
-
 #include <unicode/locid.h>
 #include <unicode/unistr.h>
-#include <unicode/uchar.h>
-
-#include <ctype.h>
 
 namespace HPHP {
 namespace {

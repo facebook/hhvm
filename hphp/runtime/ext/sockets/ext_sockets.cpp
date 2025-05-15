@@ -17,7 +17,6 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/base/zend-php-config.h"
 
-#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -43,7 +42,6 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
 #define PHP_NORMAL_READ 0x0001

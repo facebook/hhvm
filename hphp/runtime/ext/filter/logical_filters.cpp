@@ -17,8 +17,6 @@
 
 #include "hphp/runtime/ext/filter/logical_filters.h"
 
-#include <pcre.h>
-
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/array-init.h"

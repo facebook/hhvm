@@ -19,7 +19,6 @@
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"

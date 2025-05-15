@@ -18,8 +18,6 @@
 #include "hphp/runtime/ext/hh/ext_implicit_context.h"
 
 #include <cstdint>
-#include <folly/Likely.h>
-#include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
@@ -33,7 +31,6 @@
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/base/init-fini-node.h"
 
 namespace HPHP {

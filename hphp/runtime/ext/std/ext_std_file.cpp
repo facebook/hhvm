@@ -34,7 +34,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/ext/hash/ext_hash.h"
 #if ENABLE_EXTENSION_POSIX
 #include "hphp/runtime/ext/posix/ext_posix.h"
@@ -53,10 +52,7 @@
 #include <folly/portability/Dirent.h>
 #include <folly/portability/SysFile.h>
 
-#include <sys/types.h>
-
 #include <glob.h>
-#include <sys/vfs.h>
 #include <utime.h>
 #include <grp.h>
 #include <pwd.h>

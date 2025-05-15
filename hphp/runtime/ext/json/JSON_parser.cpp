@@ -32,7 +32,6 @@ SOFTWARE.
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/init-fini-node.h"

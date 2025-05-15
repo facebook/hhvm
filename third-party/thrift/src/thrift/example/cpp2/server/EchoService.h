@@ -18,13 +18,11 @@
 
 #include <thrift/example/if/gen-cpp2/Echo.h>
 
-namespace example {
-namespace chatroom {
+namespace example::chatroom {
 
 class EchoHandler : virtual public apache::thrift::ServiceHandler<Echo> {
  public:
   void echo(
       std::string& response, std::unique_ptr<std::string> message) override;
 };
-} // namespace chatroom
-} // namespace example
+} // namespace example::chatroom

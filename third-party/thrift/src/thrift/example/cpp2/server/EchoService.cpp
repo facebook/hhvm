@@ -16,12 +16,10 @@
 
 #include <thrift/example/cpp2/server/EchoService.h>
 
-namespace example {
-namespace chatroom {
+namespace example::chatroom {
 
 void EchoHandler::echo(
     std::string& response, std::unique_ptr<std::string> message) {
   response = *message;
 }
-} // namespace chatroom
-} // namespace example
+} // namespace example::chatroom

@@ -20,8 +20,7 @@
 #include <folly/SocketAddress.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2ConnContext;
 
@@ -105,5 +104,4 @@ class CppContextData {
   std::string headerEx_;
   std::string headerExWhat_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

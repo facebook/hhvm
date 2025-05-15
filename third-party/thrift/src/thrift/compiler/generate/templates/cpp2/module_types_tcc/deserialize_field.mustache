@@ -45,7 +45,7 @@ if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<{{field:cpp_fi
 {{/field:cpp_first_adapter}}
 {{^field:cpp_first_adapter}}
 {{^field:cpp_ref?}}{{#type:resolves_to_container?}}
-{{> field/member}} = {{type:cpp_type}}({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});
+{{> field/member}} = {{field:cpp_type}}({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});
 {{/type:resolves_to_container?}}{{/field:cpp_ref?}}
 {{> module_types_tcc/pm}}::readWithContext(*iprot, {{> module_types_tcc/member_or_ptr}}, _readState);
 {{/field:cpp_first_adapter}}

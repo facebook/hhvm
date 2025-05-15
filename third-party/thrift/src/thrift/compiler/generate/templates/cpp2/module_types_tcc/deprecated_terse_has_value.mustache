@@ -31,7 +31,7 @@
 }}{{^field:cpp_ref?}}{{^type:resolves_to_container?}}{{^field:raw_string_or_binary?}}{{!
   }}{{#field:cpp_first_adapter}}{{!
     // Must check against the default constructor (ignoring any IDL-specified default).
-    }}!::apache::thrift::op::equal<{{> field/tag}}>({{> field/member}}, {{type:cpp_type}}()){{!
+    }}!::apache::thrift::op::equal<{{> field/tag}}>({{> field/member}}, {{field:cpp_type}}()){{!
   }}{{/field:cpp_first_adapter}}{{!
   }}{{^field:cpp_first_adapter}}{{!
     // For all other cases, must not equal the default.

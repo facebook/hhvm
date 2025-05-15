@@ -27,7 +27,6 @@
 #include "hphp/runtime/ext/facts/attribute-argument-map.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
-#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 
 namespace HPHP {
@@ -35,12 +34,13 @@ namespace Facts {
 
 template <typename Key>
 struct AttributeMap {
-  using KeyToAttrMap = LazyTwoWayMap<Key, Symbol<SymKind::Type>>;
+  using KeyToAttrMap = LazyTwoWayMap<Key, Path, Symbol<SymKind::Type>>;
 
   using TypeDefs = typename KeyToAttrMap::Keys;
   using Attrs = typename KeyToAttrMap::Values;
 
-  explicit AttributeMap(std::shared_ptr<PathVersions> versions)
+  explicit AttributeMap(
+      std::shared_ptr<LazyTwoWayMapVersionProvider<Path>> versions)
       : m_attrMap{std::move(versions)} {}
 
   /**

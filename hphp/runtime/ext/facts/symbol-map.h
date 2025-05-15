@@ -37,20 +37,33 @@
 #include "hphp/runtime/ext/facts/inheritance-info.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
 #include "hphp/runtime/ext/facts/path-symbols-map.h"
-#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/sha1.h"
-#include "hphp/util/sqlite-wrapper.h"
 
 namespace HPHP {
 
 struct StringData;
 
 namespace Facts {
+
+template <>
+inline const Path& getVersionKey<Path, Path>(const Path& path) {
+  return path;
+}
+
+template <>
+inline const Path& getVersionKey<TypeDecl, Path>(const TypeDecl& type) {
+  return type.m_path;
+}
+
+template <>
+inline const Path& getVersionKey<MethodDecl, Path>(const MethodDecl& method) {
+  return method.m_type.m_path;
+}
 
 struct UpdateDBWorkItem {
   Clock m_since;
@@ -463,7 +476,7 @@ struct SymbolMap {
      * the facts in our data structures which have version numbers older than
      * the ones in this map.
      */
-    std::shared_ptr<PathVersions> m_versions;
+    std::shared_ptr<LazyTwoWayMapVersionProvider<Path>> m_versions;
 
     /**
      * Maps between symbols and the paths defining them.

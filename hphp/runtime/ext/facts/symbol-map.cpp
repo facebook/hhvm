@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/sqlite-wrapper.h"
 
 namespace fs = std::filesystem;
 
@@ -1653,7 +1654,7 @@ typename PathToSymbolsMap<k>::PathSymbolMap::Values SymbolMap::getPathSymbols(
 }
 
 SymbolMap::Data::Data()
-    : m_versions{std::make_shared<PathVersions>()},
+    : m_versions{std::make_shared<LazyTwoWayMapVersionProvider<Path>>()},
       m_typePath{m_versions},
       m_functionPath{m_versions},
       m_constantPath{m_versions},

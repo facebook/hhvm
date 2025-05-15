@@ -20,30 +20,32 @@
 #include <memory>
 #include <vector>
 
-#include <folly/hash/Hash.h>
-
-#include "hphp/runtime/ext/facts/path-versions.h"
-#include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/util/hash-map.h"
-#include "hphp/util/hash-set.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 namespace Facts {
 
-namespace detail {
+template <typename Key, typename VersionKey>
+const VersionKey& getVersionKey(const Key& key);
 
-inline const Path& getPathFromKey(const Path& path) {
-  return path;
-}
-inline const Path& getPathFromKey(const MethodDecl& methodDecl) {
-  return methodDecl.m_type.m_path;
-}
-template <typename Key>
-const Path& getPathFromKey(const Key& key) {
-  return key.m_path;
-}
+template <typename VersionKey>
+struct LazyTwoWayMapVersionProvider {
+  void bumpVersion(VersionKey key) noexcept {
+    auto& version = ++m_versionMap[key];
+    always_assert(version != 0);
+  }
 
-} // namespace detail
+  std::uint64_t getVersion(VersionKey key) const noexcept {
+    auto const versionIt = m_versionMap.find(key);
+    if (versionIt == m_versionMap.end()) {
+      return 0;
+    }
+    return versionIt->second;
+  }
+
+  hphp_hash_map<VersionKey, std::uint64_t> m_versionMap;
+};
 
 /**
  * A map representing a many-to-many relationship between keys and values.
@@ -51,11 +53,10 @@ const Path& getPathFromKey(const Key& key) {
  * This data structure overlays a source DB which contains stale data.
  */
 template <
-    // Must have std::hash and operator== defined. Must either be a Path, or
-    // have a field which contains a Path.
-    typename Key,
-    // Must also have std::hash and operator== defined
-    typename Value>
+    typename Key, // Must have std::hash and operator== defined.
+    typename VersionKey,
+    typename Value // Must also have std::hash and operator== defined
+    >
 struct LazyTwoWayMap {
   using Keys = std::vector<Key>;
   using Values = std::vector<Value>;
@@ -65,7 +66,8 @@ struct LazyTwoWayMap {
     hphp_hash_map<Key, uint64_t> m_keys;
   };
 
-  explicit LazyTwoWayMap(std::shared_ptr<PathVersions> versions)
+  explicit LazyTwoWayMap(
+      std::shared_ptr<LazyTwoWayMapVersionProvider<VersionKey>> versions)
       : m_versions{std::move(versions)} {}
 
   /**
@@ -86,9 +88,12 @@ struct LazyTwoWayMap {
     }
     return valuesIt->second;
   }
+
+  // Gets the set of values associated for a key.  If the values have not been
+  // previously populated, they will be initialized with the provided values
+  // from the source.  The source is always considered to be more stale than
+  // values that are already in the map.
   Values getValuesForKey(Key key, const Values& valuesFromSource) noexcept {
-    // Data from the DB is always considered to be more stale than data in the
-    // map, and gets a version number of 0.
     if (getVersion(key) == 0) {
       setValuesForKey(key, valuesFromSource);
     } else {
@@ -186,7 +191,7 @@ struct LazyTwoWayMap {
 
  private:
   uint64_t getVersion(const Key& key) const noexcept {
-    return m_versions->getVersion(detail::getPathFromKey(key));
+    return m_versions->getVersion(getVersionKey<Key, VersionKey>(key));
   }
 
   void removeStaleKeys(VersionedKeys& versionedKeys) const noexcept {
@@ -203,7 +208,7 @@ struct LazyTwoWayMap {
 
   hphp_hash_map<Key, Values> m_keyToValues;
   hphp_hash_map<Value, VersionedKeys> m_valueToKeys;
-  std::shared_ptr<PathVersions> m_versions;
+  std::shared_ptr<LazyTwoWayMapVersionProvider<VersionKey>> m_versions;
 };
 
 } // namespace Facts

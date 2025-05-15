@@ -18,9 +18,7 @@
 
 #include <folly/hash/Hash.h>
 
-#include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
-#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 
 namespace HPHP {
@@ -92,16 +90,23 @@ struct std::hash<HPHP::Facts::SubtypeQuery> {
 namespace HPHP {
 namespace Facts {
 
+template <>
+inline const Path& getVersionKey<EdgeToSupertype, Path>(
+    const EdgeToSupertype& edge) {
+  return edge.m_path;
+}
+
 /**
  * Information about which types use, extend, or implement which other types.
  */
 struct InheritanceInfo {
-  using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype, SubtypeQuery>;
+  using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype, Path, SubtypeQuery>;
 
   using TypeDefs = typename TypeToBaseTypesMap::Keys;
   using Types = typename TypeToBaseTypesMap::Values;
 
-  explicit InheritanceInfo(std::shared_ptr<PathVersions> versions)
+  explicit InheritanceInfo(
+      std::shared_ptr<LazyTwoWayMapVersionProvider<Path>> versions)
       : m_baseTypesMap{std::move(versions)} {}
 
   /**

@@ -19,40 +19,40 @@
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value()` instead of `FOO.get_{{field:cpp_name}}()`")]]
-  const {{type:cpp_type}}* get_{{field:cpp_name}}() const&;
+  const {{field:cpp_storage_type}}* get_{{field:cpp_name}}() const&;
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value()` instead of `FOO.get_{{field:cpp_name}}()`")]]
-  {{type:cpp_type}}* get_{{field:cpp_name}}() &;
+  {{field:cpp_storage_type}}* get_{{field:cpp_name}}() &;
 
-  {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
+  {{field:cpp_storage_type}}* get_{{field:cpp_name}}() && = delete;
 {{#else}}
   {{#if type:resolves_to_fixed_size?}}
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value()` instead of `FOO.get_{{field:cpp_name}}()`")]]
-  {{type:cpp_type}} get_{{field:cpp_name}}() const;
+  {{field:cpp_storage_type}} get_{{field:cpp_name}}() const;
   {{#else if type:resolves_to_container_or_struct?}}
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value()` instead of `FOO.get_{{field:cpp_name}}()`")]]
-  const {{type:cpp_type}}& get_{{field:cpp_name}}() const&;
+  const {{field:cpp_storage_type}}& get_{{field:cpp_name}}() const&;
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value()` instead of `FOO.get_{{field:cpp_name}}()`")]]
-  {{type:cpp_type}} get_{{field:cpp_name}}() &&;
+  {{field:cpp_storage_type}} get_{{field:cpp_name}}() &&;
   {{#else}}
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value()` instead of `FOO.get_{{field:cpp_name}}()`")]]
-  const {{type:cpp_type}}& get_{{field:cpp_name}}() const& {
+  const {{field:cpp_storage_type}}& get_{{field:cpp_name}}() const& {
     return {{field:cpp_storage_name}};
   }
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value()` instead of `FOO.get_{{field:cpp_name}}()`")]]
-  {{type:cpp_type}} get_{{field:cpp_name}}() && {
-    return static_cast<{{type:cpp_type}}&&>({{field:cpp_storage_name}});
+  {{field:cpp_storage_type}} get_{{field:cpp_name}}() && {
+    return static_cast<{{field:cpp_storage_type}}&&>({{field:cpp_storage_name}});
   }
   {{/if type:resolves_to_fixed_size?}}
 {{/if field:optional?}}
@@ -60,12 +60,12 @@
 {{#if type:resolves_to_fixed_size?}}
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}() = BAR` instead of `FOO.set_{{field:cpp_name}}(BAR)`")]]
-  {{type:cpp_type}}& set_{{field:cpp_name}}({{type:cpp_type}} {{field:cpp_name}}_);
+  {{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_storage_type}} {{field:cpp_name}}_);
 {{#else}}
   {{> common/field_docblock}}
-  template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{type:cpp_type}}>
+  template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{field:cpp_storage_type}}>
   [[deprecated("Use `FOO.{{field:cpp_name}}() = BAR` instead of `FOO.set_{{field:cpp_name}}(BAR)`")]]
-  {{type:cpp_type}}& set_{{field:cpp_name}}(T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter&& {{field:cpp_name}}_) {
+  {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter&& {{field:cpp_name}}_) {
     {{field:cpp_name}}_ref() = std::forward<T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter>({{field:cpp_name}}_);
     return {{field:cpp_storage_name}};
   }

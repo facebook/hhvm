@@ -682,9 +682,9 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
     static auto const counter = ServiceData::createCounter("loadhint.new");
     auto const loadhint = counter->getValue();
     if (loadhint >= 0) {
-      char buf[16];
-      std::snprintf(buf, sizeof(buf), "%d", static_cast<int>(loadhint));
-      addHeaderImpl("X-FB-Server-Load", buf);
+      // Load balancers only look at lower 32 bits.
+      addHeaderImpl("X-FB-Server-Load",
+                    std::to_string(static_cast<uint32_t>(loadhint)).c_str());
     }
   }
 }

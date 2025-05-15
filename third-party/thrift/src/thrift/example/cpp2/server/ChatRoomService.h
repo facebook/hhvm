@@ -21,8 +21,7 @@
 
 #include <thrift/example/if/gen-cpp2/ChatRoomService.h>
 
-namespace example {
-namespace chatroom {
+namespace example::chatroom {
 
 class ChatRoomServiceHandler
     : virtual public apache::thrift::ServiceHandler<ChatRoomService> {
@@ -45,5 +44,4 @@ class ChatRoomServiceHandler
   folly::Synchronized<std::vector<Message>> messageBuffer_ =
       folly::Synchronized<std::vector<Message>>();
 };
-} // namespace chatroom
-} // namespace example
+} // namespace example::chatroom

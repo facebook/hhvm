@@ -20,8 +20,7 @@
 
 DEFINE_int32(max_messages_per_get, 1000, "Maximum number of messages to fetch");
 
-namespace example {
-namespace chatroom {
+namespace example::chatroom {
 
 void ChatRoomServiceHandler::getMessages(
     GetMessagesResponse& resp, std::unique_ptr<GetMessagesRequest> req) {
@@ -58,5 +57,4 @@ void ChatRoomServiceHandler::sendMessage(
     lockedMessage.push_back(msg);
   });
 }
-} // namespace chatroom
-} // namespace example
+} // namespace example::chatroom

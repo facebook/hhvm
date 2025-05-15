@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, ABCMeta
 from typing import Generic, Type, TypeVar
 
 from thrift.python.client.async_client import AsyncClient
@@ -26,7 +26,17 @@ TAsyncClient = TypeVar("TAsyncClient", bound=AsyncClient, covariant=True)
 TSyncClient = TypeVar("TSyncClient", bound=SyncClient, covariant=True)
 
 
-class Client(Generic[TAsyncClient, TSyncClient], ABC):
+class ImmutableClassAnnotations(ABCMeta):
+    def __setattr__(cls, attr: str, value: object) -> None:
+        if attr == "annotations":
+            raise TypeError(f"Can't set {attr} of class {cls}")
+
+        super().__setattr__(attr, value)
+
+
+class Client(
+    Generic[TAsyncClient, TSyncClient], ABC, metaclass=ImmutableClassAnnotations
+):
     Async: Type[TAsyncClient]
     Sync: Type[TSyncClient]
 

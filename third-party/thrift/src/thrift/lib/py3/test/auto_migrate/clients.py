@@ -27,10 +27,7 @@ import unittest
 
 from testing.clients import TestingService
 from testing.types import Color, easy, I32List
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
-    brokenInAutoMigrate,
-    is_auto_migrated,
-)
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
@@ -66,11 +63,13 @@ class ClientTests(unittest.TestCase):
         self.assertIsInstance(annotations, types.MappingProxyType)
         self.assertFalse(annotations.get("NotAnAnnotation"))
         self.assertEqual(annotations["fun_times"], "yes")
-        if not is_auto_migrated():
-            # thrift-python clients are mutable
-            with self.assertRaises(TypeError):
-                # You can't set attributes on builtin/extension types
-                TestingService.annotations = {}
+        with self.assertRaises(TypeError):
+            # we override __setattr__ of class to prevent this
+            TestingService.annotations = {}
+
+        with self.assertRaises(TypeError):
+            # pyre-ignore[16]: for test
+            TestingService.annotations["new_annotation"] = "no"
 
     async def test_client_keyword_arguments(self) -> None:
         async with ClientEventHandlerTestHelper().get_async_client(

@@ -48,16 +48,19 @@ class TestCase(unittest.TestCase, Generic[T]):
 
     @classmethod
     def setUpClass(cls) -> None:
+        print("running TestCase.setUpClass")
         cls._test_driver = cls.get_test_driver()
         cls._test_driver.setUpClass(cls.get_template_repo())
 
     @classmethod
     def tearDownClass(cls) -> None:
+        print("running TestCase.tearDownClass")
         test_driver = cls._test_driver
         assert test_driver is not None
         test_driver.tearDownClass()
 
     def setUp(self) -> None:
+        print("running TestCase.setUp")
         # These scripts assume working directory fbcode.
         cwd = os.path.basename(os.getcwd())
         if cwd == "fbcode":
@@ -72,6 +75,7 @@ class TestCase(unittest.TestCase, Generic[T]):
         self.test_driver.setUp()
 
     def tearDown(self) -> None:
+        print("running TestCase.tearDown")
         if self.undo_chdir is not None:
             # If we chdir then TPX/Buck2 get confused, so make sure we
             # put things back to how they were.

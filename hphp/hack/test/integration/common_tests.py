@@ -41,6 +41,7 @@ class CommonTestDriver(TestDriver):
 
     @classmethod
     def setUpClass(cls, template_repo: str) -> None:
+        print("running CommonTestDriver.setUpClass")
         cls.template_repo = template_repo
         cls.maxDiff = 2000
         cls.base_tmp_dir = tempfile.mkdtemp()
@@ -71,6 +72,7 @@ class CommonTestDriver(TestDriver):
 
     @classmethod
     def tearDownClass(cls) -> None:
+        print("running CommonTestDriver.tearDownClass")
         shutil.rmtree(cls.base_tmp_dir)
         shutil.rmtree(cls.bin_dir)
         shutil.rmtree(cls.hh_tmp_dir)
@@ -118,6 +120,7 @@ class CommonTestDriver(TestDriver):
             self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
 
     def setUp(self) -> None:
+        print("running CommonTestDriver.setUp")
         shutil.copytree(self.template_repo, self.repo_dir)
 
     def tearDownWithRetries(self, retries: int = 3) -> None:
@@ -125,6 +128,7 @@ class CommonTestDriver(TestDriver):
         shutil.rmtree(self.repo_dir)
 
     def tearDown(self) -> None:
+        print("running CommonTestDriver.tearDown")
         self.tearDownWithRetries()
 
     @classmethod

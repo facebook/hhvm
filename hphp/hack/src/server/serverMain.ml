@@ -1390,7 +1390,8 @@ let time f =
  *)
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   assert (not (ServerArgs.check_mode options));
-  Folly.ensure_folly_init ();
+  (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
+  Startup_initializer.init ();
   Printexc.record_backtrace true;
 
   Hh_logger.log "ServerMain daemon starting.";

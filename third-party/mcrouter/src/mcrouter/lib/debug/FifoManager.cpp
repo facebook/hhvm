@@ -8,9 +8,7 @@
 #include "FifoManager.h"
 
 #include <signal.h>
-#include <sys/stat.h>
 #include <sys/syscall.h>
-#include <sys/types.h>
 
 #include <mutex>
 

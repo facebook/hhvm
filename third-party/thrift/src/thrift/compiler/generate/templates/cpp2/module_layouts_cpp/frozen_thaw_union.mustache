@@ -28,7 +28,7 @@
         only do a pointer copy}}
 
         {{! Use an empty value to set "type_" via the set_field() setter}}
-        {{type:cpp_type}} emptyValue;
+        {{field:cpp_type}} emptyValue;
         out.set_{{field:cpp_name}}(std::move(emptyValue));
 
         {{! Now use "mutable_field() = smart_pointer" setter to pass the real
@@ -38,7 +38,7 @@
         out.mutable_{{field:cpp_name}}() = std::move(ref);
 {{/field:cpp_ref?}}
 {{^field:cpp_ref?}}
-        {{type:cpp_type}} fieldValue;
+        {{field:cpp_type}} fieldValue;
         thawField(self, this->{{field:cpp_name}}Field, fieldValue);
         out.set_{{field:cpp_name}}(std::move(fieldValue));
 {{/field:cpp_ref?}}

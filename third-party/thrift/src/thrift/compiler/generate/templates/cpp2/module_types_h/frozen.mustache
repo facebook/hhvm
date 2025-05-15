@@ -27,7 +27,7 @@ struct Frozen<{{struct:cpp_fullname}}, void> {
   bool {{field:cpp_name}} : 1;
 {{/type:bool?}}
 {{^type:bool?}}
-  typename Freezer<{{type:cpp_type}}>::FrozenType {{field:cpp_name}};
+  typename Freezer<{{field:cpp_type}}>::FrozenType {{field:cpp_name}};
 {{/type:bool?}}
 {{/field:type}}
 {{/struct:fields}}

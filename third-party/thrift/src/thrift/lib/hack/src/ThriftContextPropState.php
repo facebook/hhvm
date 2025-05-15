@@ -480,6 +480,23 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
+  public function getOfflineJobCompactLocalContext(
+  )[]: ?Gojira_OfflineJobCompactLocalContext {
+    return $this->getBaggage()?->offline_job_compact_local_context;
+  }
+
+  public function setOfflineJobCompactLocalContext(
+    Gojira_OfflineJobCompactLocalContext $offline_job_compact_local_context,
+  ): void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+
+    $baggage = $this->storage->baggage as nonnull;
+    $baggage->offline_job_compact_local_context =
+      $offline_job_compact_local_context;
+    $this->dirty();
+  }
+
   public function getTraceContext()[]: ?ContextProp\TraceContext {
     if ($this->storage->baggage is nonnull) {
       $trace_context = $this->storage->baggage?->trace_context;

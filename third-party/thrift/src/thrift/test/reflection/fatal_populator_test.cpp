@@ -23,8 +23,7 @@
 #include <thrift/test/reflection/gen-cpp2/simple_reflection_types.h>
 #include <thrift/test/reflection/gen-cpp2/simple_reflection_types_custom_protocol.h>
 
-namespace test_cpp2 {
-namespace simple_cpp_reflection {
+namespace test_cpp2::simple_cpp_reflection {
 
 using namespace apache::thrift;
 using namespace apache::thrift::test;
@@ -155,5 +154,4 @@ TYPED_TEST(MultiProtocolTest, test_populating_recursive_type) {
   // `recursive1`s and one additonal default-initialized `recursive1` at the end
   ASSERT_EQ(opts.recursion_limit + 1, count);
 }
-} // namespace simple_cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::simple_cpp_reflection

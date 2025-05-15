@@ -25,12 +25,7 @@
     }}{{> common/iterate_const_values}}{{!
 }}{{/field:value}}{{!
 }}{{^field:value}}{{!
-  }}{{#type:string_or_binary?}}{{!
-    }}apache::thrift::StringTraits<{{type:cpp_standard_type}}>::fromStringLiteral(""){{!
-  }}{{/type:string_or_binary?}}{{!
-  }}{{^type:string_or_binary?}}{{!
-    }}{{type:cpp_standard_type}}(){{!
-  }}{{/type:string_or_binary?}}{{!
+  }}{{> field/intrinsic_default}}{{!
 }}{{/field:value}}{{!
 }}{{#field:cpp_first_adapter}}{{!
 }}{{^field:cpp_exactly_one_adapter?}}{{> types/adapter_post}}{{/field:cpp_exactly_one_adapter?}}{{!

@@ -88,6 +88,7 @@ Variant HHVM_FUNCTION(hphp_get_this) {
 Variant HHVM_FUNCTION(class_implements, const Variant& obj,
                                         bool autoload /* = true */) {
   Class* cls;
+  // TODO(T199606412) consider killing string support
   if (obj.isString() || obj.isLazyClass()) {
     auto const name = obj.isString() ? obj.getStringData() :
                                        obj.toLazyClassVal().name();
@@ -111,8 +112,7 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
   Array ret(Array::CreateDict());
   const Class::InterfaceMap& ifaces = cls->allInterfaces();
   for (int i = 0, size = ifaces.size(); i < size; i++) {
-    ret.set(ifaces[i]->nameStr(),
-            make_tv<KindOfPersistentString>(ifaces[i]->name()));
+    ret.set(ifaces[i]->nameStr(), make_tv<KindOfClass>(ifaces[i]));
   }
   return ret;
 }
@@ -120,6 +120,7 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
 Variant HHVM_FUNCTION(class_parents, const Variant& obj,
                                      bool autoload /* = true */) {
   Class* cls;
+  // TODO(T199606412) consider killing string support
   if (obj.isString() || obj.isLazyClass()) {
     auto const name = obj.isString() ? obj.getStringData() :
                                        obj.toLazyClassVal().name();
@@ -142,7 +143,7 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
   }
   Array ret(Array::CreateDict());
   for (cls = cls->parent(); cls; cls = cls->parent()) {
-    ret.set(cls->nameStr(), make_tv<KindOfPersistentString>(cls->name()));
+    ret.set(cls->nameStr(), make_tv<KindOfClass>(cls));
   }
   return ret;
 }

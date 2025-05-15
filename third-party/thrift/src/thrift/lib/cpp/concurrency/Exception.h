@@ -21,9 +21,7 @@
 
 #include <thrift/lib/cpp/Thrift.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 class FOLLY_EXPORT NoSuchTaskException
     : public apache::thrift::TLibraryException {};
@@ -67,8 +65,6 @@ class FOLLY_EXPORT SystemResourceException
       : TLibraryException(message) {}
 };
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency
 
 #endif // #ifndef _THRIFT_CONCURRENCY_EXCEPTION_H_

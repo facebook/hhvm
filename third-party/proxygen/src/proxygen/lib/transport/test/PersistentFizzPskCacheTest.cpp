@@ -15,7 +15,7 @@
 
 using namespace testing;
 
-namespace proxygen { namespace test {
+namespace proxygen::test {
 
 class PersistentFizzPskCacheTest : public Test {
  public:
@@ -311,4 +311,4 @@ TEST_F(PersistentFizzPskCacheTest, TestPeekPsk) {
   cache_->getPsk("facebook.com");
   EXPECT_EQ(2u, cache_->getPskUses("facebook.com"));
 }
-}} // namespace proxygen::test
+} // namespace proxygen::test

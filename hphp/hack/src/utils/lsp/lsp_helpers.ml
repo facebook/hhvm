@@ -157,33 +157,6 @@ let hack_pos_to_lsp_range_adjusted (p : 'a Pos.pos) : range =
   in
   { start = start_position; end_ = end_position }
 
-let symbol_to_lsp_call_item
-    (sym_occ : Relative_path.t SymbolOccurrence.t)
-    (sym_def_opt : Relative_path.t SymbolDefinition.t option) :
-    CallHierarchyItem.t =
-  let open CallHierarchyItem in
-  let open SymbolOccurrence in
-  let (selectionRange_, range_, file_pos) =
-    match sym_def_opt with
-    | None ->
-      let sym_range = hack_pos_to_lsp_range_adjusted sym_occ.pos in
-      (sym_range, sym_range, sym_occ.pos)
-    | Some sym_def ->
-      ( hack_pos_to_lsp_range_adjusted sym_def.SymbolDefinition.pos,
-        hack_pos_to_lsp_range_adjusted sym_def.SymbolDefinition.span,
-        sym_def.SymbolDefinition.pos )
-  in
-  let filename_ = Pos.to_absolute file_pos |> Pos.filename in
-  let uri_ = path_string_to_lsp_uri filename_ ~default_path:"www" in
-  {
-    name = sym_occ.name;
-    kind = sym_occ_kind_to_lsp_sym_info_kind sym_occ.type_;
-    detail = None;
-    uri = uri_;
-    range = range_;
-    selectionRange = selectionRange_;
-  }
-
 (************************************************************************)
 (* Range calculations                                                   *)
 (************************************************************************)

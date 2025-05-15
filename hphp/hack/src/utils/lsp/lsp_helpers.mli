@@ -73,11 +73,6 @@ val hack_pos_to_lsp_range : equal:('a -> 'a -> bool) -> 'a Pos.pos -> Lsp.range
  * where `r` is a range produced by [hack_pos_to_lsp_range] *)
 val hack_pos_to_lsp_range_adjusted : 'a Pos.pos -> Lsp.range
 
-val symbol_to_lsp_call_item :
-  Relative_path.t SymbolOccurrence.t ->
-  Relative_path.t SymbolDefinition.t option ->
-  Lsp.CallHierarchyItem.t
-
 val pos_compare : Lsp.position -> Lsp.position -> int
 
 type range_overlap =

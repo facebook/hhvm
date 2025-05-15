@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp/test/loadgen/IntervalTimer.h>
 #include <thrift/lib/cpp/test/loadgen/LoadConfig.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace concurrency {
 
@@ -74,7 +73,6 @@ class Controller {
 };
 
 } // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_TEST_LOADGEN_CONTROLLER_H_

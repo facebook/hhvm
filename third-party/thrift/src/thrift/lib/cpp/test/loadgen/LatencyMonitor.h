@@ -23,9 +23,7 @@
 
 #include <chrono>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 class LoadConfig;
 
@@ -132,8 +130,6 @@ class LatencyMonitor : public TerminalMonitor {
   uint64_t currentQps_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_LATENCYMONITOR_H_

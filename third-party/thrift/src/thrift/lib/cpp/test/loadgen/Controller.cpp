@@ -25,9 +25,7 @@ using apache::thrift::concurrency::PosixThreadFactory;
 using apache::thrift::concurrency::Thread;
 using std::shared_ptr;
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 class Controller::WorkerRunner : public concurrency::Runnable {
  public:
@@ -189,6 +187,4 @@ shared_ptr<WorkerIf> Controller::createWorker() {
   return worker;
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

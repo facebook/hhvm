@@ -30,9 +30,7 @@ DEFINE_double(
 
 using std::shared_ptr;
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 enum {
   US_PER_S = std::micro::den,
@@ -545,6 +543,4 @@ bool LatencyMonitor::isFieldInUse(FieldEnum field) {
   return false;
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

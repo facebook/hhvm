@@ -24,9 +24,7 @@
 
 #include <chrono>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /**
  * A ScoreBoard that tracks number of queries per second, as well as
@@ -101,8 +99,6 @@ class LatencyScoreBoard : public ScoreBoard {
   ScoreBoardOpVector<OpData> opData_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_LATENCYSCOREBOARD_H_

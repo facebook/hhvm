@@ -22,9 +22,7 @@
 
 DEFINE_int64(thriftLatencyBucketMax, 5000, "Maximum latency bucket in ms.");
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /*
  * LatencyScoreBoard::OpData methods
@@ -165,6 +163,4 @@ void LatencyScoreBoard::accumulate(const LatencyScoreBoard* other) {
   opData_.accumulate(&other->opData_);
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

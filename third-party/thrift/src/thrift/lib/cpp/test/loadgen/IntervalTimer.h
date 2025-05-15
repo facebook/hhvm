@@ -25,9 +25,7 @@
 #include <mutex>
 #include <thread>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /**
  * IntervalTimer helps perform tasks at a desired rate.
@@ -152,8 +150,6 @@ class IntervalTimer {
   std::mutex mutex_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_INTERVALTIMER_H_

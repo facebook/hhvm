@@ -21,9 +21,7 @@
 #include <cassert>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /**
  * This class tracks a boolean for each operation type, to tell if an operation
@@ -72,8 +70,6 @@ class OpEnabledState {
   std::vector<bool> enabled_;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_OPENABLEDSTATE_H_

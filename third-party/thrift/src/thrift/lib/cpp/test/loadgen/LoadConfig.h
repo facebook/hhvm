@@ -21,9 +21,7 @@
 #include <string>
 #include <boost/random.hpp>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 class LoadConfig {
  public:
@@ -68,8 +66,6 @@ class LoadConfig {
   virtual uint32_t getMaxWorkerThreads() const { return getNumWorkerThreads(); }
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_LOADCONFIG_H_

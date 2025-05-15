@@ -23,9 +23,7 @@
 #include <glog/logging.h>
 #include <thrift/lib/cpp/test/loadgen/RNG.h>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 GaussianMixtureModel::GaussianMixtureModel(const folly::dynamic& cfgDict) {
   auto gmmCfgDict = cfgDict["gmm"];
@@ -80,6 +78,4 @@ double GaussianMixtureModel::getSample() {
   return 0;
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

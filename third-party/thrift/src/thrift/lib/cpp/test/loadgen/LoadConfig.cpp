@@ -20,9 +20,7 @@
 
 #include <stdio.h>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 std::string LoadConfig::getOpName(uint32_t opType) {
   char buf[16];
@@ -30,6 +28,4 @@ std::string LoadConfig::getOpName(uint32_t opType) {
   return std::string(buf);
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

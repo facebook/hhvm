@@ -23,9 +23,7 @@
 #include <folly/dynamic.h>
 #include <thrift/lib/cpp/test/loadgen/RNG.h>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 /**
  * A Gaussian Mixture Model (GMM) that relies on the loadgen::RNG and
@@ -120,6 +118,4 @@ class GaussianMixtureModel {
   folly::ThreadLocal<TGaussianGenerators> threadLocalGaussianGenerators;
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

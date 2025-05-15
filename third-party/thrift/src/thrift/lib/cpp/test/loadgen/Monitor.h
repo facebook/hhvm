@@ -21,9 +21,7 @@
 #include <memory>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 class ScoreBoard;
 
@@ -72,8 +70,6 @@ class Monitor {
   virtual uint64_t getCurrentQps() { return 0; }
 };
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen
 
 #endif // THRIFT_TEST_LOADGEN_MONITOR_H_

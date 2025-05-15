@@ -26,9 +26,7 @@
 
 using namespace boost;
 
-namespace apache {
-namespace thrift {
-namespace loadgen {
+namespace apache::thrift::loadgen {
 
 enum {
   US_PER_S = std::micro::den,
@@ -177,6 +175,4 @@ void QpsMonitor::computeAggregate(QpsScoreBoard* scoreboard) {
   }
 }
 
-} // namespace loadgen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::loadgen

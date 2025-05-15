@@ -22,9 +22,7 @@
 #include <memory>
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 class Thread;
 
@@ -151,8 +149,6 @@ class ThreadFactory {
   virtual Thread::id_t getCurrentThreadId() const = 0;
 };
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency
 
 #endif // #ifndef _THRIFT_CONCURRENCY_THREAD_H_

@@ -29,9 +29,7 @@
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 class SFQThreadManagerConfig {
  public:
@@ -186,6 +184,4 @@ class SFQThreadManager : public ThreadManagerExecutorAdapter {
   folly::FunctionScheduler perturbationSchedule_;
 };
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency

@@ -65,17 +65,11 @@ class IOBuf;
 class IOBufQueue;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 class THttpClientParser;
 }
-} // namespace thrift
-} // namespace apache
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 namespace detail {
 /**
@@ -589,8 +583,6 @@ class THeader final {
   TriviallyCopiable c_;
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef THRIFT_TRANSPORT_THEADER_H_

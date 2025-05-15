@@ -23,9 +23,7 @@
 
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 void TFDTransport::close() {
   if (!isOpen()) {
@@ -79,6 +77,4 @@ void TFDTransport::write(const uint8_t* buf, uint32_t len) {
   }
 }
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

@@ -22,9 +22,7 @@
 
 using std::string;
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 void TBufferedTransport::putBack(uint8_t* buf, uint32_t len) {
   assert(len < rBufSize_);
@@ -484,6 +482,4 @@ const uint8_t* TMemoryBuffer::borrowSlow(uint8_t* /*buf*/, uint32_t* len) {
   return nullptr;
 }
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

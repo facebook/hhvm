@@ -26,9 +26,7 @@
 #include <thrift/lib/cpp/transport/TTransport.h>
 #include <thrift/lib/cpp/transport/TVirtualTransport.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 /**
  * Base class for all transports that use read/write buffers for performance.
@@ -962,8 +960,6 @@ class TMemoryBuffer : public TVirtualTransport<TMemoryBuffer, TBufferBase> {
   // you add new members.
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef THRIFT_TRANSPORT_TBUFFERTRANSPORTS_H_

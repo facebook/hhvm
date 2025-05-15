@@ -51,9 +51,7 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 namespace {
 const THeader::StringToStringMap& kEmptyMap() {
   static const THeader::StringToStringMap& map =
@@ -1117,6 +1115,4 @@ bool THeader::isClientLoggingEnabled() const {
   }
   return false;
 }
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

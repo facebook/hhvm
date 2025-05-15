@@ -24,9 +24,7 @@
 #include <thrift/lib/cpp/transport/TTransport.h>
 #include <thrift/lib/cpp/transport/TVirtualTransport.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 /**
  * Dead-simple wrapper around a file descriptor.
@@ -66,8 +64,6 @@ class TFDTransport : public TVirtualTransport<TFDTransport> {
   ClosePolicy close_policy_;
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef _THRIFT_TRANSPORT_TFDTRANSPORT_H_

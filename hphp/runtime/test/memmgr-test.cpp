@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/request-info.h"
 
 #include "hphp/util/async-func.h"

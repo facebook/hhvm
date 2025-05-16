@@ -19,8 +19,6 @@
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/native-data.h"

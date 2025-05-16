@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP::thrift {
 

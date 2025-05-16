@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 namespace HPHP {

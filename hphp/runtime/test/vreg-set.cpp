@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm-reg.h"
-#include "hphp/runtime/vm/jit/vasm-print.h"
 
 #include <folly/Lazy.h>
 #include <folly/portability/GTest.h>

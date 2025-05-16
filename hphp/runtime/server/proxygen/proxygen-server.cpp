@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
 
 #include <folly/portability/Unistd.h>

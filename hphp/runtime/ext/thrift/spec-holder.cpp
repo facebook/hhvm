@@ -28,9 +28,6 @@
 #include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/util/configs/eval.h"
 
-#include <folly/concurrency/ConcurrentHashMap.h>
-#include <folly/Portability.h>
-
 namespace HPHP::thrift {
 
 namespace {

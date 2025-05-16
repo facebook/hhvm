@@ -18,7 +18,6 @@
 #include "hphp/runtime/vm/as-base-hhas.h"
 
 #include <folly/gen/Base.h>
-#include <folly/gen/String.h>
 
 namespace HPHP {
 

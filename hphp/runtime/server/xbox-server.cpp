@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"

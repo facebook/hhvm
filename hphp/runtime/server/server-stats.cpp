@@ -17,7 +17,6 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"

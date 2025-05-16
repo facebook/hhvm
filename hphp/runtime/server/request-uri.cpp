@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/server/request-uri.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <folly/portability/Unistd.h>

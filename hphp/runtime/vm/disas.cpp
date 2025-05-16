@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc-codec.h"

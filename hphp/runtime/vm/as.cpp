@@ -72,7 +72,6 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/bind.hpp>
 
 #include <folly/Conv.h>
@@ -98,7 +97,6 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 #include "hphp/runtime/vm/unit-parser.h"
-#include "hphp/system/systemlib.h"
 #include "hphp/zend/zend-string.h"
 
 TRACE_SET_MOD(hhas)

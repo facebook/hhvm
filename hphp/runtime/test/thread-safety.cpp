@@ -22,7 +22,6 @@
 #include "hphp/util/process.h"
 
 #include <atomic>
-#include <chrono>
 #include <thread>
 
 namespace HPHP {

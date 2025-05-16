@@ -18,9 +18,6 @@
 #include <stdio.h>
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
-
-#include "hphp/runtime/vm/jit/translator.h"
-
 #include "hphp/runtime/vm/debug/elfwriter.h"
 
 namespace HPHP {

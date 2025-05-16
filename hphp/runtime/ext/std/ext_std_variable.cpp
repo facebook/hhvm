@@ -28,9 +28,6 @@
 
 #include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/logger.h"
-
-#include <folly/Likely.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

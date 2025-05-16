@@ -18,9 +18,7 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/json/JSON_parser.h"
 

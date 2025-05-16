@@ -17,11 +17,9 @@
 
 #include "hphp/runtime/ext/thrift/adapter.h"
 
-#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/thrift/util.h"
-#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 namespace thrift {

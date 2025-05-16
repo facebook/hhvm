@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/native.h"
 
 namespace HPHP {
 

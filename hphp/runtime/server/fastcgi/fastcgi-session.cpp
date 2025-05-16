@@ -18,7 +18,6 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 #include "hphp/util/logger.h"
 
-#include <folly/Memory.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 

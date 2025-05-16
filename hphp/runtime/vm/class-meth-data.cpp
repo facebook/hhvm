@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/class-meth-data.h"
 
-#include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/hash-map.h"

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/server/warmup-request-handler.h"
 
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"

@@ -38,13 +38,8 @@
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
-#include "hphp/util/logger.h"
-
 #include <folly/portability/Sockets.h>
 #include <folly/portability/Unistd.h>
-
-#include <sys/types.h>
-#include <stdexcept>
 
 namespace HPHP::thrift {
 /////////////////////////////////////////////////////////////////////////////

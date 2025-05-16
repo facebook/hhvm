@@ -41,7 +41,6 @@
 #include "hphp/util/rds-local.h"
 
 #include <cstdint>
-#include <folly/AtomicHashMap.h>
 #include <folly/Bits.h>
 #include <folly/Format.h>
 #include <folly/Likely.h>

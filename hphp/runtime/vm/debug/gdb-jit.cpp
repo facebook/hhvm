@@ -15,9 +15,7 @@
 */
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/execution-context.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include <folly/portability/SysMman.h>

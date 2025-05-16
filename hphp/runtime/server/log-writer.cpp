@@ -18,7 +18,6 @@
 
 #include <cctype>
 #include <sstream>
-#include <map>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/init-fini-node.h"

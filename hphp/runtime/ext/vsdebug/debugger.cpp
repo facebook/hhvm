@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/watchman-connection.h"

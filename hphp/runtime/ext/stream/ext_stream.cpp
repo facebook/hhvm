@@ -29,16 +29,13 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/stream-wrapper.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/system/systemlib.h"
 #include "hphp/util/network.h"
 
 #include <algorithm>
 #include <memory>
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <folly/portability/Sockets.h>

@@ -17,8 +17,6 @@
 #include <folly/portability/GTest.h>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
 
 namespace HPHP {

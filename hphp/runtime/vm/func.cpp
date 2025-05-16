@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
@@ -32,20 +31,16 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/func-emitter.h"
-#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/source-location.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/system/systemlib.h"
 

@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -53,8 +52,6 @@
 #include "hphp/util/logger.h"
 
 #include <folly/Bits.h>
-#include <folly/MapUtil.h>
-#include <folly/Random.h>
 #include <folly/synchronization/EventCount.h>
 
 #include <algorithm>

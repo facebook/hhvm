@@ -17,7 +17,6 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/base/preg.h"
-#include <signal.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics

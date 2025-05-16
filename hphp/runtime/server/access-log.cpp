@@ -20,12 +20,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <time.h>
-#include <stdio.h>
-
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/server/log-writer.h"
-#include "hphp/runtime/server/request-uri.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

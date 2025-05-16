@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <libxml/tree.h>
-#include <libxml/uri.h>
 #include <libxml/xmlwriter.h>
 
 namespace HPHP {

@@ -33,7 +33,6 @@
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
-#include "hphp/util/compatibility.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/hardware-counter.h"

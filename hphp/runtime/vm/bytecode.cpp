@@ -50,7 +50,6 @@
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/package.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"

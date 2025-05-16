@@ -136,6 +136,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   using Base::assign;
   using Base::clear;
 
+ private:
   /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
@@ -147,8 +148,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   ///       void ensureAny(const AnyStruct&);
   ///     }
   ///
-  template <typename Visitor>
-  void customVisit(Visitor&& v) const {
+  template <typename Self, typename Visitor>
+  static void customVisitImpl(Self&& self, Visitor&& v) {
     if (false) {
       // Test whether the required methods exist in Visitor
       v.assign(type::AnyStruct{});
@@ -156,23 +157,33 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       v.patchIfTypeIs(type::Type{}, protocol::DynamicPatch{});
       v.ensureAny(type::AnyStruct{});
     }
-    if (!Base::customVisitAssignAndClear(v)) {
+    if (!std::forward<Self>(self).customVisitAssignAndClear(
+            std::forward<Visitor>(v))) {
       // patchIfTypeIsPrior
-      for (const auto& [type, patch] : data_.patchIfTypeIsPrior().value()) {
-        v.patchIfTypeIs(type, patch);
+      for (auto&& [type, patch] :
+           std::forward<Self>(self).data_.patchIfTypeIsPrior().value()) {
+        std::forward<Visitor>(v).patchIfTypeIs(
+            folly::forward_like<Self>(type), folly::forward_like<Self>(patch));
       }
 
       // ensureAny
-      if (data_.ensureAny().has_value()) {
-        v.ensureAny(data_.ensureAny().value());
+      if (self.data_.ensureAny().has_value()) {
+        std::forward<Visitor>(v).ensureAny(
+            std::forward<Self>(self).data_.ensureAny().value());
       }
 
       // patchIfTypeIsAfter
-      for (const auto& [type, patch] : data_.patchIfTypeIsAfter().value()) {
-        v.patchIfTypeIs(type, patch);
+      for (auto&& [type, patch] :
+           std::forward<Self>(self).data_.patchIfTypeIsAfter().value()) {
+        std::forward<Visitor>(v).patchIfTypeIs(
+            folly::forward_like<Self>(type), folly::forward_like<Self>(patch));
       }
     }
   }
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
 
   void apply(type::AnyStruct& val) const;
 

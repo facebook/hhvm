@@ -253,6 +253,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
                   ErrorCode::INVALID_SETUP,
                   "Error in implementation of custom connection handler."));
         }
+        invokeServiceInterceptorsOnConnection(connection);
         return;
       }
     }

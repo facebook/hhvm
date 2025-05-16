@@ -19,6 +19,7 @@ Build-Depends:
   git,
   gperf,
   libboost-all-dev,
+  libbpf-dev,
   libbz2-dev,
   libc-client-dev,
   libc-client2007e-dev,

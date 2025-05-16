@@ -123,6 +123,10 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     if(CLANG_FORCE_LIBCPP)
       list(APPEND GENERAL_CXX_OPTIONS "stdlib=libc++")
     endif()
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 20)
+      list(APPEND GENERAL_OPTIONS "Wno-nontrivial-memcall")
+    endif()
   else() # using GCC
     list(APPEND DISABLED_NAMED_WARNINGS
       "deprecated-declarations"

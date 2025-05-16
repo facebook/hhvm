@@ -44,8 +44,8 @@ include_directories(${LIBEVENT_INCLUDE_DIR})
 set(CMAKE_REQUIRED_LIBRARIES "${LIBEVENT_LIB}")
 CHECK_FUNCTION_EXISTS("evhttp_bind_socket_with_fd" HAVE_CUSTOM_LIBEVENT)
 if(HAVE_CUSTOM_LIBEVENT)
-        message("Using custom LIBEVENT")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUSTOM_LIBEVENT")
+  message("Using custom LIBEVENT")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUSTOM_LIBEVENT")
 endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
@@ -280,6 +280,7 @@ endif()
 
 if (LINUX)
   find_package(LibUnwind REQUIRED)
+  find_package(Bpf REQUIRED)
 endif()
 
 # This is required by Homebrew's libc. See
@@ -344,7 +345,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} glog)
 
   if (LINUX)
-    target_link_libraries(${target} ${VISIBILITY} ${LIBUNWIND_LIBRARIES})
+    target_link_libraries(${target} ${VISIBILITY} ${LIBUNWIND_LIBRARIES} ${BPF_LIBRARIES})
   endif()
 
   if (LIBINOTIFY_LIBRARY)
@@ -453,9 +454,9 @@ macro(hphp_link target)
 
   if (ENABLE_XED)
     if (LibXed_FOUND)
-        target_link_libraries(${target} ${VISIBILITY} ${LibXed_LIBRARY})
+      target_link_libraries(${target} ${VISIBILITY} ${LibXed_LIBRARY})
     else()
-        target_link_libraries(${target} ${VISIBILITY} xed)
+      target_link_libraries(${target} ${VISIBILITY} xed)
     endif()
   endif()
 

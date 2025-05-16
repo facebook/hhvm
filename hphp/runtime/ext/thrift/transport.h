@@ -65,6 +65,7 @@ extern const StaticString
   s_collection,
   s_harray,
   s_TProtocolException,
+  s_TTransportException,
   s_TApplicationException;
 
 const size_t SIZE = 8192;

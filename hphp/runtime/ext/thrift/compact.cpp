@@ -1487,6 +1487,8 @@ Object compact_deserialize_from_string(
       folly::io::Cursor(&iobuf),
       options);
     return reader.readStruct(thrift_typename);
+  } catch (const std::out_of_range& e) {
+    thrift_transport_error(e.what(), TTransportError::END_OF_FILE);
   } catch (const std::exception& e) {
     thrift_error(e.what(), ERR_UNKNOWN);
   } catch (...) {

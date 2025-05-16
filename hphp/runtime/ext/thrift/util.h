@@ -28,8 +28,16 @@ enum TError {
   ERR_BAD_VERSION = 4
 };
 
+enum class TTransportError {
+  END_OF_FILE = 4,
+};
+
 [[noreturn]] inline void thrift_error(const String& what, TError why) {
   throw_object(s_TProtocolException, make_vec_array(what, why));
+}
+
+[[noreturn]] inline void thrift_transport_error(const String& what, TTransportError why) {
+  throw_object(s_TTransportException, make_vec_array(what, static_cast<int>(why)));
 }
 
 inline void set_with_intish_key_cast(

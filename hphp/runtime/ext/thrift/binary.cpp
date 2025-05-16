@@ -56,6 +56,7 @@ const StaticString
   s_collection("collection"),
   s_harray("harray"),
   s_TProtocolException("TProtocolException"),
+  s_TTransportException("TTransportException"),
   s_TApplicationException("TApplicationException");
 
 ///////////////////////////////////////////////////////////////////////////////

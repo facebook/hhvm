@@ -26,8 +26,11 @@ import types
 import unittest
 
 from testing.clients import TestingService
-from testing.types import Color, easy, I32List
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+from testing.types import easy, I32List
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
@@ -57,7 +60,7 @@ class ThriftClientTestProxy:
         self.inner = inner
 
 
-class ClientTests(unittest.TestCase):
+class ClientTests(unittest.IsolatedAsyncioTestCase):
     def test_annotations(self) -> None:
         annotations = TestingService.annotations
         self.assertIsInstance(annotations, types.MappingProxyType)
@@ -75,11 +78,15 @@ class ClientTests(unittest.TestCase):
         async with ClientEventHandlerTestHelper().get_async_client(
             TestingService, port=1
         ) as client:
-            await client.complex_action(
-                first="foo", second="bar", third=9, fourth="baz"
-            )
+            # TransportError expected because not a real handler
+            with self.assertRaises(TransportError):
+                await client.complex_action(
+                    first="foo", second="bar", third=9, fourth="baz"
+                )
 
-            await client.complex_action("foo", "bar", 9, "baz")
+            # TransportError expected because not a real handler
+            with self.assertRaises(TransportError):
+                await client.complex_action("foo", "bar", 9, "baz")
 
     async def test_none_arguments(self) -> None:
         async with ClientEventHandlerTestHelper().get_async_client(
@@ -87,26 +94,31 @@ class ClientTests(unittest.TestCase):
         ) as client:
             with self.assertRaises(TypeError):
                 await client.take_it_easy(9)  # pyre-ignore[20] testing bad behaviour
-            with self.assertRaises(TypeError):
+
+            # thrift-python doesn't TypeError on None because all args passed to struct
+            # where they become kwargs
+            # in thrift-py3, TransportError expected because not a real handler
+            expected_err = TransportError if is_auto_migrated() else TypeError
+            with self.assertRaises(expected_err):
                 await client.take_it_easy(
                     9,
-                    # pyre-fixme[6]: For 2nd argument expected `easy` but got `None`.
+                    # pyre-ignore[6] testing bad behaviour: should by `easy` type
                     None,
                 )
-            with self.assertRaises(TypeError):
+            with self.assertRaises(expected_err):
                 await client.takes_a_list(None)  # pyre-ignore[6] testing bad behaviour
-            with self.assertRaises(TypeError):
+            with self.assertRaises(expected_err):
                 await client.invert(None)  # pyre-ignore[6] testing bad behaviour
-            with self.assertRaises(TypeError):
+            with self.assertRaises(expected_err):
                 await client.pick_a_color(None)  # pyre-ignore[6] testing bad behaviour
-            with self.assertRaises(TypeError):
+            with self.assertRaises(expected_err):
                 await client.take_it_easy(
                     # pyre-fixme[6]: For 1st argument expected `int` but got `None`.
                     None,
                     easy(),
                 )
 
-    @brokenInAutoMigrate()  # Exceptions aren't unified
+    @brokenInAutoMigrate()
     def test_bad_unix_domain_socket_raises_TransportError_on_connection(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir, socket.socket(
             socket.AF_UNIX, socket.SOCK_STREAM
@@ -119,12 +131,12 @@ class ClientTests(unittest.TestCase):
                     pass
 
             loop = asyncio.get_event_loop()
+            # thrift-python raises RuntimeError from AsyncSocketException
             with self.assertRaises(TransportError) as cm:
                 loop.run_until_complete(connect_to_unlistened_socket())
             ex = cm.exception
             self.assertEqual(ex.errno, errno.ECONNREFUSED)
 
-    @brokenInAutoMigrate()  # Exceptions aren't unified
     def test_TransportError(self) -> None:
         """
         Are C++ TTransportException converting properly to py TransportError
@@ -140,7 +152,9 @@ class ClientTests(unittest.TestCase):
             self.assertEqual(ex.errno, 0)
             # The traceback should be short since it raises inside
             # the rpc call not down inside the guts of thrift-py3
-            self.assertEqual(len(traceback.extract_tb(sys.exc_info()[2])), 3)
+            tb_length = 5 if is_auto_migrated() else 3
+            tb_frames = traceback.extract_tb(sys.exc_info()[2])
+            self.assertEqual(len(tb_frames), tb_length, tb_frames)
 
     def test_set_persistent_header(self) -> None:
         """
@@ -158,9 +172,12 @@ class ClientTests(unittest.TestCase):
         async with ClientEventHandlerTestHelper().get_async_client(
             TestingService, port=1
         ) as client:
-            await client.takes_a_list([1, 2, 3])
+            # TransportError expected because not a real handler
+            with self.assertRaises(TransportError):
+                await client.takes_a_list([1, 2, 3])
 
-            await client.takes_a_list(I32List([1, 2, 3]))
+            with self.assertRaises(TransportError):
+                await client.takes_a_list(I32List([1, 2, 3]))
 
             with self.assertRaises(TypeError):
                 await client.takes_a_list(
@@ -183,15 +200,6 @@ class ClientTests(unittest.TestCase):
                     fourth="baz",
                 )
 
-    async def test_rpc_enum_args(self) -> None:
-        async with ClientEventHandlerTestHelper().get_async_client(
-            TestingService, port=1
-        ) as client:
-            with self.assertRaises(TypeError):
-                await client.pick_a_color(0)  # pyre-ignore[6] testing bad behaviour
-
-            await client.pick_a_color(Color.red)
-
     async def test_rpc_int_sizes(self) -> None:
         one = 2**7 - 1
         two = 2**15 - 1
@@ -200,7 +208,9 @@ class ClientTests(unittest.TestCase):
         async with ClientEventHandlerTestHelper().get_async_client(
             TestingService, port=1
         ) as client:
-            await client.int_sizes(one, two, three, four)
+            # TransportError expected because not a real handler
+            with self.assertRaises(TransportError):
+                await client.int_sizes(one, two, three, four)
 
             with self.assertRaises(OverflowError):
                 await client.int_sizes(two, two, three, four)

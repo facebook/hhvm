@@ -313,9 +313,9 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
     ) -> None:
         with HijackTestHelper():
             async with get_client(TestService, host="localhost", port=1) as client:
+                options = RpcOptions()
+                options.timeout = 12.5
                 with self.assertRaises(HijackTestException) as context:
-                    options = RpcOptions()
-                    options.timeout = 12.5
                     await client.add(1, 2, rpc_options=options)
                 self.assertEqual(context.exception.timeout, 12.5)
 

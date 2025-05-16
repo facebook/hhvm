@@ -31,9 +31,7 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp/util/PausableTimer.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 using namespace std;
 
@@ -979,6 +977,4 @@ bool TSocket::getUseLowMinRto() {
   return useLowMinRto_;
 }
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

@@ -28,9 +28,7 @@ using namespace apache::thrift;
 using namespace folly;
 using namespace apache::thrift::transport;
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 TEST(THeaderTest, largetransform) {
   THeader header;
@@ -221,6 +219,4 @@ TEST(THeaderTest, clientLoggingEnabled3) {
   ASSERT_FALSE(header.isClientLoggingEnabled());
 }
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport

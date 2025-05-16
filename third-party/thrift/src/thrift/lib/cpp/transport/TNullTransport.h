@@ -21,9 +21,7 @@
 
 #include <thrift/lib/cpp/transport/TVirtualTransport.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 /**
  * The null transport is a dummy transport that doesn't actually do anything.
@@ -45,8 +43,6 @@ class TNullTransport : public TVirtualTransport<TNullTransport> {
   void write(const uint8_t* /* buf */, uint32_t /* len */) { return; }
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef _THRIFT_TRANSPORT_TNULLTRANSPORT_H_

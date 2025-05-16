@@ -22,9 +22,7 @@
 
 #include <thrift/lib/cpp/Thrift.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 /**
  * Class to encapsulate all the possible types of transport errors that may
@@ -200,8 +198,6 @@ class FOLLY_EXPORT TTransportException
   int options_;
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef _THRIFT_TRANSPORT_TTRANSPORTEXCEPTION_H_

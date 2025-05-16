@@ -23,9 +23,7 @@ namespace folly {
 class SocketAddress;
 }
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 /**
  * A TRpcTransport adds a getPeerAddress() method to the base TTransport
@@ -44,8 +42,6 @@ class TRpcTransport : public TTransport {
   virtual const folly::SocketAddress* getPeerAddress() = 0;
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // THRIFT_TRANSPORT_TRPCTRANSPORT_H_

@@ -23,9 +23,7 @@
 
 struct z_stream_s;
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 class TZlibTransportException : public TTransportException {
  public:
@@ -252,8 +250,6 @@ class TFramedZlibTransportFactory : public TTransportFactory {
   }
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef _THRIFT_TRANSPORT_TZLIBTRANSPORT_H_

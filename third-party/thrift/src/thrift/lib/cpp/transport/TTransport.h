@@ -24,9 +24,7 @@
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 /**
  * Helper template to hoist readAll implementation out of TTransport
@@ -350,8 +348,6 @@ class TDualTransportFactory : public TDuplexTransportFactory {
   std::shared_ptr<TTransportFactory> outputFactory_;
 };
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef THRIFT_TRANSPORT_TTRANSPORT_H

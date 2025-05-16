@@ -24,9 +24,7 @@
 #include <thrift/lib/cpp/transport/TRpcTransport.h>
 #include <thrift/lib/cpp/transport/TVirtualTransport.h>
 
-namespace apache {
-namespace thrift {
-namespace transport {
+namespace apache::thrift::transport {
 
 /**
  * TCP Socket implementation of the TTransport interface.
@@ -383,8 +381,6 @@ class TSocket
 
 std::ostream& operator<<(std::ostream& os, const TSocket::Options& o);
 
-} // namespace transport
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::transport
 
 #endif // #ifndef _THRIFT_TRANSPORT_TSOCKET_H_

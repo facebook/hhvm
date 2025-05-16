@@ -17,9 +17,3 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 
 using std::string;
-
-namespace apache {
-namespace thrift {
-namespace transport {}
-} // namespace thrift
-} // namespace apache

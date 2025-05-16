@@ -42,23 +42,6 @@ struct WrappedTypeMethod : WrappedType<T> {
   FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(rawAccessor());
 };
 
-template <typename Value>
-using SmallSortedVectorSet = folly::sorted_vector_set<
-    Value,
-    std::less<Value>,
-    std::allocator<Value>,
-    void,
-    folly::small_vector<Value, 1>>;
-
-template <typename Key, typename Mapped>
-using SmallSortedVectorMap = folly::sorted_vector_map<
-    Key,
-    Mapped,
-    std::less<Key>,
-    std::allocator<std::pair<Key, Mapped>>,
-    void,
-    folly::small_vector<std::pair<Key, Mapped>, 1>>;
-
 } // namespace test
 } // namespace thrift
 } // namespace apache

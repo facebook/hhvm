@@ -605,8 +605,8 @@ TEST_F(StructTest, less_refs_shared) {
 }
 
 TEST_F(StructTest, small_sorted_vector) {
-  using Set = SmallSortedVectorSet<int32_t>;
-  using Map = SmallSortedVectorMap<int32_t, int32_t>;
+  using Set = folly::small_sorted_vector_set<int32_t>;
+  using Map = folly::small_sorted_vector_map<int32_t, int32_t>;
   using serializer = apache::thrift::BinarySerializer;
   using Type = HasSmallSortedVector;
   EXPECT_TRUE(

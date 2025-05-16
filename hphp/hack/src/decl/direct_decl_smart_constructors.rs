@@ -1049,14 +1049,7 @@ impl Node {
             match node {
                 Node::Decl(box (name, decl)) => acc.add(name, decl),
                 Node::List(_) => node.into_iter().for_each(|n| flatten(acc, n)),
-                node => {
-                    if !node.is_ignored() {
-                        panic!(
-                            "Top-level Script node has a child that is not a Decl: {:?}",
-                            node
-                        )
-                    }
-                }
+                _ => {}
             };
         }
         flatten(&mut decls, self);

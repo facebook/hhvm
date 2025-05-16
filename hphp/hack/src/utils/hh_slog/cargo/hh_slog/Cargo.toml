@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../hh_slog.rs"
 
 [dependencies]
-chrono = { version = "0.4", features = ["clock", "serde", "std"], default-features = false }
+chrono = { version = "=0.4.39", features = ["clock", "serde", "std"], default-features = false }
 locked_file_drain = { version = "0.0.0", path = "../locked_file_drain" }
 slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
 slog-async = { version = "2.3", features = ["nested-values"] }

@@ -351,13 +351,10 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             del w.unqualified_string
         self.assertEqual(w.unqualified_string, "hello, world!")
 
-        # pyre-ignore[16]: private method only for thrift tests
-        if not thrift.python.types._fbthrift__runtime_is_cinder():
-            # deleting after setting is no longer a no-op;
-            # in cpython, we raise AttributeError,
-            # except in cinder due to usage of cached_prop
-            with self.assertRaisesRegex(AttributeError, "unqualified_string"):
-                del w.unqualified_string
+        # deleting after setting is no longer a no-op;
+        # it consistently raises AttributeError
+        with self.assertRaisesRegex(AttributeError, "unqualified_string"):
+            del w.unqualified_string
 
         self.assertEqual(w.unqualified_string, "hello, world!")
 

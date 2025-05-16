@@ -1733,14 +1733,18 @@ cdef _make_fget_union(field_id, adapter_info):
     return property(lambda self: (<Union>self)._fbthrift_get_cached_field_value(field_id))
 
 
-def _make_readonly_setattr():
+def _make_readonly_mutate_attr():
     """
-    Returns a setter for read-only attributes, always throws AttributeError.
+    Returns a setter and deleter for read-only attributes, always throws AttributeError.
     """
     def _readonly_setattr(self, name, _value):
         raise AttributeError(f"Cannot set attribute '{name}' in Thrift struct '{type(self)}'.")
 
-    return _readonly_setattr
+    def _readonly_delattr(self, name):
+        raise AttributeError(f"Cannot delete attribute '{name}' in Thrift struct '{type(self)}'.")
+
+    return _readonly_setattr, _readonly_delattr
+
 
 cdef class _StructCachedField:
     """ A descriptor that enforces immutability. 
@@ -1835,7 +1839,7 @@ class StructMeta(type):
                 field_name,
                 _make_cached_property(klass, field_index, field_name),
             )
-        klass.__setattr__ = _make_readonly_setattr()
+        klass.__setattr__, klass.__delattr__ = _make_readonly_mutate_attr()
         return klass
 
     def _fbthrift_fill_spec(cls):

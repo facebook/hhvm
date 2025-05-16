@@ -15,34 +15,32 @@
 namespace facebook {
 namespace db {
 
-void ConnectionContextBase::collectNormalValues(
-    const AddNormalValueFunction& add) const {
-  add("is_ssl", folly::to<std::string>(isSslConnection));
-  add("is_ssl_session_reused", folly::to<std::string>(sslSessionReused));
+void ConnectionContextBase::collectValues(
+    const AddIntValueFunction& addInt,
+    const AddNormalValueFunction& addNormal) const {
+  addInt("ssl_server_cert_validated", isServerCertValidated ? 1 : 0);
+  addInt("ssl_client_identity_cert", isIdentityClientCert ? 1 : 0);
+  if (certCacheSize.has_value()) {
+    addInt("ssl_cert_cache_size", certCacheSize.value());
+  }
+  addNormal("is_ssl", folly::to<std::string>(isSslConnection));
+  addNormal("is_ssl_session_reused", folly::to<std::string>(sslSessionReused));
   if (!sslVersion.empty()) {
-    add("ssl_version", sslVersion);
+    addNormal("ssl_version", sslVersion);
   }
   if (sslCertCn.hasValue()) {
-    add("ssl_server_cert_cn", sslCertCn.value());
+    addNormal("ssl_server_cert_cn", sslCertCn.value());
   }
   if (sslCertSan.hasValue() && !sslCertSan.value().empty()) {
-    add("ssl_server_cert_san", folly::join(',', sslCertSan.value()));
+    addNormal("ssl_server_cert_san", folly::join(',', sslCertSan.value()));
   }
   if (sslCertIdentities.hasValue() && !sslCertIdentities.value().empty()) {
-    add("ssl_server_cert_identities",
+    addNormal(
+        "ssl_server_cert_identities",
         folly::join(',', sslCertIdentities.value()));
   }
   if (!endpointVersion.empty()) {
-    add("endpoint_version", endpointVersion);
-  }
-}
-
-void ConnectionContextBase::collectIntValues(
-    const AddIntValueFunction& add) const {
-  add("ssl_server_cert_validated", isServerCertValidated ? 1 : 0);
-  add("ssl_client_identity_cert", isIdentityClientCert ? 1 : 0);
-  if (certCacheSize.has_value()) {
-    add("ssl_cert_cache_size", certCacheSize.value());
+    addNormal("endpoint_version", endpointVersion);
   }
 }
 

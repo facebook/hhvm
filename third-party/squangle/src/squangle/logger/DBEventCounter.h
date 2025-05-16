@@ -35,8 +35,9 @@ class ConnectionContextBase {
   ConnectionContextBase& operator=(const ConnectionContextBase&) = default;
   ConnectionContextBase& operator=(ConnectionContextBase&&) = default;
   virtual ~ConnectionContextBase() = default;
-  virtual void collectNormalValues(const AddNormalValueFunction& add) const;
-  virtual void collectIntValues(const AddIntValueFunction& add) const;
+  virtual void collectValues(
+      const AddIntValueFunction&,
+      const AddNormalValueFunction&) const;
   virtual std::unique_ptr<ConnectionContextBase> copy() const {
     return std::make_unique<ConnectionContextBase>(*this);
   }

@@ -1788,6 +1788,11 @@ void ThriftServer::callOnStartServing() {
 #if FOLLY_HAS_COROUTINES
   {
     ServiceInterceptorBase::InitParams initParams;
+#ifdef THRIFT_SCHEMA_AVAILABLE
+    initParams.serviceSchema =
+        decoratedProcessorFactory_->getServiceSchemaNodes();
+#endif
+
     std::vector<folly::coro::Task<void>> tasks;
     for (const auto& interceptor : getServiceInterceptors()) {
       tasks.emplace_back(interceptor->co_onStartServing(initParams));

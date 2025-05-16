@@ -19,7 +19,9 @@
 #include <variant>
 
 #include <folly/coro/Task.h>
+#include <folly/memory/not_null.h>
 
+#include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 
@@ -56,7 +58,14 @@ class ServiceInterceptorBase {
    */
   virtual const ServiceInterceptorQualifiedName& getQualifiedName() const = 0;
 
-  struct InitParams {};
+  struct InitParams {
+#ifdef THRIFT_SCHEMA_AVAILABLE
+    using ServiceSchema =
+        std::vector<folly::not_null<const schema::ServiceNode*>>;
+    ServiceSchema serviceSchema;
+#endif
+  };
+
   virtual folly::coro::Task<void> co_onStartServing(InitParams);
 
   struct ConnectionInfo {

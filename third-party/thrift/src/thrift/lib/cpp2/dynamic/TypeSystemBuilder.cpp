@@ -485,9 +485,9 @@ void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
         addType(uri, std::move(*def.opaqueAliasDef_ref()));
         break;
       default:
+        folly::assume_unreachable();
         break;
     }
-    folly::assume_unreachable();
   }
 }
 

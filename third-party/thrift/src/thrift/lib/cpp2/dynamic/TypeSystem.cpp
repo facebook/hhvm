@@ -24,6 +24,34 @@
 
 namespace apache::thrift::dynamic {
 
+StructuredNode::StructuredNode(
+    Uri uri, std::vector<FieldNode> fields, bool isSealed)
+    : uri_(std::move(uri)), fields_(std::move(fields)), isSealed_(isSealed) {
+  std::uint16_t ordinal = 1;
+  for (const FieldNode& field : fields_) {
+    bool emplaced =
+        fieldHandleById_
+            .emplace(field.identity().id(), FastFieldHandle(ordinal))
+            .second;
+    if (!emplaced) {
+      folly::throw_exception<InvalidTypeError>(fmt::format(
+          "duplicate field id '{}' in struct '{}'",
+          field.identity().id(),
+          uri_));
+    }
+    emplaced = fieldHandleByName_
+                   .emplace(field.identity().name(), FastFieldHandle(ordinal))
+                   .second;
+    if (!emplaced) {
+      folly::throw_exception<InvalidTypeError>(fmt::format(
+          "duplicate field name '{}' in struct '{}'",
+          field.identity().name(),
+          uri_));
+    }
+    ++ordinal;
+  }
+}
+
 StructNode::StructNode(Uri uri, std::vector<FieldNode> fields, bool isSealed)
     : StructuredNode(std::move(uri), std::move(fields), isSealed) {}
 

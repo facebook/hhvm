@@ -31,6 +31,8 @@
 #include <folly/lang/Exception.h>
 #include <folly/memory/not_null.h>
 
+#include <fmt/core.h>
+
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -484,76 +486,119 @@ class FieldNode final : folly::MoveOnly {
   std::optional<SerializableRecord> customDefaultValue_;
 };
 
+/**
+ * A transparent handle that refers to a field within a `StructuredNode` using a
+ * 1-based index. Rather than a map lookup (either field ID or field name), this
+ * handle allows very fast array-based lookup.
+ *
+ * A FastFieldHandle is only valid for the StructuredNode instance (either
+ * StructNode or UnionNode) that created it. Using a FastFieldHandle with a
+ * different instance produces undefined behavior.
+ */
+struct FastFieldHandle {
+  /**
+   * The 1-based index into a StructuredNode's fields array.
+   */
+  std::uint16_t ordinal;
+
+  /**
+   * This is a sentinel value that indicates an invalid handle — i.e. a field is
+   * not present.
+   */
+  static constexpr FastFieldHandle invalid() noexcept {
+    return FastFieldHandle{0};
+  }
+  bool valid() const noexcept { return ordinal != 0; }
+  explicit operator bool() const noexcept { return valid(); }
+
+  friend bool operator==(
+      const FastFieldHandle& lhs, const FastFieldHandle& rhs) {
+    return lhs.ordinal == rhs.ordinal;
+  }
+  friend bool operator!=(
+      const FastFieldHandle& lhs, const FastFieldHandle& rhs) {
+    return !(lhs == rhs);
+  }
+};
+
 class StructuredNode {
  public:
   const Uri& uri() const noexcept { return uri_; }
   folly::span<const FieldNode> fields() const noexcept { return fields_; }
   bool isSealed() const noexcept { return isSealed_; }
 
-  const FieldNode& at(FieldId id) const { return at(tryFieldIdToOrdinal(id)); }
+  /**
+   * Looks up a field by ID.
+   *
+   * Throws:
+   *   - std::out_of_range if the field ID is not present.
+   */
+  const FieldNode& at(FieldId id) const { return at(fieldHandleFor(id)); }
+  /**
+   * Looks up a field by name.
+   *
+   * Throws:
+   *   - std::out_of_range if the field ID is not present.
+   */
   const FieldNode& at(std::string_view name) const {
-    return at(tryFieldNameToOrdinal(name));
+    return at(fieldHandleFor(name));
   }
-  const FieldNode& at(FieldOrdinal ordinal) const {
-    if (ordinal == FieldOrdinal{0} ||
-        folly::to_underlying(ordinal) > fields_.size()) {
-      folly::throw_exception<std::out_of_range>("invalid ordinal");
+  /**
+   * Looks up a field by a fast field handle, previously obtained from
+   * fieldHandleFor(...);
+   *
+   * Preconditions:
+   *   - The provided handle was obtained by calling fieldHandleFor(...) on this
+   *     instance.
+   *
+   * Throws:
+   *   - std::out_of_range if the field handle is invalid or out of range.
+   */
+  const FieldNode& at(FastFieldHandle handle) const {
+    if (!handle.valid() || handle.ordinal > fields_.size()) {
+      folly::throw_exception<std::out_of_range>(
+          fmt::format("invalid field handle: {}", handle.ordinal));
     }
-    return fields_.at(folly::to_underlying(ordinal) - 1);
+    return fields_.at(handle.ordinal - 1);
   }
 
-  bool hasField(FieldId id) const { return idToOrdinal_.contains(id); }
-  bool hasField(std::string_view name) const {
-    return nameToOrdinal_.contains(name);
+  bool hasField(FieldId id) const noexcept {
+    return fieldHandleById_.contains(id);
+  }
+  bool hasField(std::string_view name) const noexcept {
+    return fieldHandleByName_.contains(name);
   }
 
-  // Returns FieldOrdinal{0} if the field is not found.
-  FieldOrdinal tryFieldIdToOrdinal(FieldId id) const {
-    if (auto* ptr = folly::get_ptr(idToOrdinal_, id)) {
-      return *ptr;
+  /**
+   * Returns a field handle for the given field ID, if it exists, returning
+   * `FastFieldHandle::invalid()` otherwise.
+   */
+  FastFieldHandle fieldHandleFor(FieldId id) const noexcept {
+    if (const FastFieldHandle* handle = folly::get_ptr(fieldHandleById_, id)) {
+      return *handle;
     }
-    return FieldOrdinal{0};
+    return FastFieldHandle::invalid();
   }
-  FieldOrdinal tryFieldNameToOrdinal(std::string_view name) const {
-    if (auto* ptr = folly::get_ptr(nameToOrdinal_, name)) {
-      return *ptr;
+  /**
+   * Returns a field handle for the given field name, if it exists, returning
+   * `FastFieldHandle::invalid()` otherwise.
+   */
+  FastFieldHandle fieldHandleFor(std::string_view name) const {
+    if (const FastFieldHandle* handle =
+            folly::get_ptr(fieldHandleByName_, name)) {
+      return *handle;
     }
-    return FieldOrdinal{0};
+    return FastFieldHandle::invalid();
   }
 
  protected:
   Uri uri_;
   std::vector<FieldNode> fields_;
-  folly::F14FastMap<FieldId, FieldOrdinal> idToOrdinal_;
-  folly::F14FastMap<std::string_view, FieldOrdinal> nameToOrdinal_;
+  folly::F14FastMap<FieldId, FastFieldHandle> fieldHandleById_;
+  folly::F14FastMap<std::string_view, FastFieldHandle> fieldHandleByName_;
   bool isSealed_;
 
-  StructuredNode(Uri uri, std::vector<FieldNode> fields, bool isSealed)
-      : uri_(std::move(uri)), fields_(std::move(fields)), isSealed_(isSealed) {
-    std::uint32_t ord = 1;
-    for (auto& field : fields_) {
-      auto emplaced =
-          idToOrdinal_.emplace(field.identity().id(), FieldOrdinal(ord)).second;
-      if (!emplaced) {
-        folly::throw_exception<InvalidTypeError>(fmt::format(
-            "duplicate field id {} in struct {}",
-            (int)field.identity().id(),
-            uri_));
-      }
-      emplaced =
-          nameToOrdinal_.emplace(field.identity().name(), FieldOrdinal(ord))
-              .second;
-      if (!emplaced) {
-        folly::throw_exception<InvalidTypeError>(fmt::format(
-            "duplicate field name {} in struct {}",
-            field.identity().name(),
-            uri_));
-      }
-      ++ord;
-    }
-  }
-
-  friend class DefinitionNode;
+  StructuredNode(Uri uri, std::vector<FieldNode> fields, bool isSealed);
 };
 
 class StructNode final : folly::MoveOnly, public StructuredNode {

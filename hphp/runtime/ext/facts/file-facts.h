@@ -24,7 +24,7 @@
 #include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/json/dynamic.h>
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/compiler_ffi.rs.h"
 
 namespace HPHP {
 namespace Facts {
@@ -152,7 +152,7 @@ struct fmt::formatter<HPHP::Facts::Clock> {
   }
 
   template <typename FormatContext>
-  auto format(const HPHP::Facts::Clock& c, FormatContext& ctx)
+  auto format(const HPHP::Facts::Clock& c, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return format_to(ctx.out(), "Clock({}, {})", c.m_clock, c.m_mergebase);
   }

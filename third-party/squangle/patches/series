@@ -1,2 +1,0 @@
-0001-only-disable-SSL-mode-if-we-have-a-MySQL-client-lib-.patch
-do-not-set-MYSQL_OPT_TOS-if-undefined.patch

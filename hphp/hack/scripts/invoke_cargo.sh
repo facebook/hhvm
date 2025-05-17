@@ -54,6 +54,8 @@ BUILD_PARAMS+=(--target-dir "${TARGET_DIR}")
 BUILD_PARAMS+=(--package "$pkg")
 BUILD_PARAMS+=("$profile_flags")
 
+export RUSTFLAGS="-A non-local-definitions"
+
 ( # add CARGO_BIN to PATH so that rustc and other tools can be invoked
   [[ -n "$CARGO_BIN" ]] && PATH="$CARGO_BIN:$PATH";
   # note: --manifest-path doesn't work with custom toolchain, so do cd

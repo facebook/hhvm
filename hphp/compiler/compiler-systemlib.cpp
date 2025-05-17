@@ -16,7 +16,7 @@
 
 #include "hphp/compiler/compiler-systemlib.h"
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/compiler_ffi.rs.h"
 
 #include "hphp/hhvm/process-init.h"
 
@@ -35,7 +35,7 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
 
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/string_file.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -228,7 +228,7 @@ bool process(CompilerOptions &po) {
 
   for (auto extension : ExtensionRegistry::getExtensions()) {
     for (auto file : extension->hackFiles()) {
-      if (!files.contains(file)) {
+      if (!files.contains("ext_" + file)) {
         Logger::Error(
           "Error while compiling stdlib: %s not found in input files - did you add an extension without any hack files? If so, override hackFiles to return an empty vector.", file.c_str());
       }

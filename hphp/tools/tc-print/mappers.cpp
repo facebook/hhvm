@@ -17,11 +17,7 @@
 
 #include <cstdio>
 #include <string>
-#include <assert.h>
 #include <algorithm>
-#include <iomanip>
-
-#include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/tc-print.h"

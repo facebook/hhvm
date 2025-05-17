@@ -15,22 +15,15 @@
 */
 #include "hphp/runtime/vm/iter.h"
 
-#include <algorithm>
-
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-
-#include "hphp/runtime/base/vanilla-dict-defs.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 

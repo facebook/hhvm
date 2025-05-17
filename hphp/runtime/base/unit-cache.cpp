@@ -44,9 +44,10 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
+#ifdef USE_JEMALLOC
 #include "hphp/util/configs/stats.h"
+#endif
 #include "hphp/util/mutex.h"
-#include "hphp/util/process.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
@@ -57,7 +58,6 @@
 #include <thread>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <folly/AtomicHashMap.h>
 #include <folly/FileUtil.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/task_queue/PriorityUnboundedBlockingQueue.h>

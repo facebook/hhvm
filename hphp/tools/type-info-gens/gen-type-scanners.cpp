@@ -26,7 +26,6 @@
 #include <folly/Hash.h>
 #include <folly/Memory.h>
 #include <folly/Singleton.h>
-#include <folly/String.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 

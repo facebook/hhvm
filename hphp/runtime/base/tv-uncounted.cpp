@@ -22,9 +22,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/vanilla-keyset.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/func.h"
 
 namespace HPHP {

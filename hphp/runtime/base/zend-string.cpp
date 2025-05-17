@@ -32,7 +32,6 @@
 
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-error.h"

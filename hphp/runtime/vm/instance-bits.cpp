@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP::InstanceBits {
 

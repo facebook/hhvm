@@ -16,7 +16,6 @@
 */
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/intl-convert.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-iterator.h"

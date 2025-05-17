@@ -23,7 +23,6 @@
 #include <sys/stat.h>
 
 #include "hphp/tools/tc-print/tc-print.h"
-#include "hphp/tools/tc-print/offline-trans-data.h"
 
 
 #define MAX_SYM_LEN       10240

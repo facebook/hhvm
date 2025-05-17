@@ -15,22 +15,17 @@
 */
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 
-#include <folly/Format.h>
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/apc-array.h"
-#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -38,7 +33,6 @@
 
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/packed-block.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 namespace HPHP {
 

@@ -17,7 +17,6 @@
 #include "hphp/tools/tc-print/tc-print.h"
 
 #include <stdio.h>
-#include <assert.h>
 #include <unistd.h>
 
 #include <cstdint>

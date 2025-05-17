@@ -22,8 +22,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/zend/zend-string.h"
 

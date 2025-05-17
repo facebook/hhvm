@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
-#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -43,7 +42,6 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/exception.h"
 #include "hphp/util/rds-local.h"
 
 #include <cmath>

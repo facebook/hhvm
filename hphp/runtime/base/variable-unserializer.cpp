@@ -44,7 +44,6 @@
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/runtime/vm/jit/perf-counters.h"

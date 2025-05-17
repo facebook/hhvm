@@ -17,13 +17,8 @@
 #include "hphp/runtime/base/type-object.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
-
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 

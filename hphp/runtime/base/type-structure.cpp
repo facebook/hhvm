@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
-#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 

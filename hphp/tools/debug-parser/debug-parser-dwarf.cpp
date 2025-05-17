@@ -20,17 +20,13 @@
 #include <folly/Format.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
-#include <folly/String.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 #include <folly/portability/Unistd.h>
 
-#include <sys/types.h>
-
 #include "llvm/DebugInfo/DWARF/DWARFContext.h"
 #include "llvm/DebugInfo/DWARF/DWARFExpression.h"
 #include "llvm/DebugInfo/DWARF/DWARFFormValue.h"
-#include "llvm/DebugInfo/DWARF/DWARFTypeUnit.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/job-queue.h"

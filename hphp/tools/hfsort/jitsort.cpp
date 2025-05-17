@@ -20,7 +20,6 @@
 #include "hphp/util/light-process.h"
 #endif
 #include "hphp/util/logger.h"
-#include "hphp/util/string-vsnprintf.h"
 
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
@@ -28,7 +27,6 @@
 #include "hphp/tools/hfsort/hfutil.h"
 
 #include <assert.h>
-#include <zlib.h>
 #include <ctype.h>
 
 namespace HPHP { namespace hfsort {

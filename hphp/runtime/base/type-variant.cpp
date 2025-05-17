@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/req-root.h"

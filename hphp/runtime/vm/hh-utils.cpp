@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/system/systemlib.h"
 #include "hphp/util/configs/hacklang.h"
 #include "hphp/util/rds-local.h"
 

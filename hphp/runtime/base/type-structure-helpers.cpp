@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/unit-cache.h"
 
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/type-constraint.h"

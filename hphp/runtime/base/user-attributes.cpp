@@ -18,8 +18,6 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/vm/disas.h"
 
-#include <folly/Hash.h>
-
 #include <tbb/concurrent_unordered_set.h>
 
 namespace HPHP {

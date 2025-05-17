@@ -20,7 +20,6 @@
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
-#include "hphp/runtime/base/php-globals.h"
 
 namespace HPHP {
 

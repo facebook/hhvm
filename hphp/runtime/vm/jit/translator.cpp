@@ -34,9 +34,7 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen-basic.h"
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
@@ -47,9 +45,6 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 

@@ -137,15 +137,17 @@ TEST(TypeSystemTest, NestedStructs) {
 
   // Define a nested struct
   Uri outerStructUri = "meta.com/thrift/test/OuterStruct";
+  Uri innerStructUri = "meta.com/thrift/test/InnerStruct";
+
   builder.addType(
       outerStructUri,
       makeStruct({
           makeField(
               identity(1, "innerStruct"),
               optional,
-              TypeIds::uri("meta.com/thrift/test/InnerStruct")),
+              TypeIds::uri(innerStructUri)),
       }));
-  Uri innerStructUri = "meta.com/thrift/test/InnerStruct";
+
   builder.addType(
       innerStructUri,
       makeStruct({
@@ -173,32 +175,30 @@ TEST(TypeSystemTest, NestedStructs) {
 TEST(TypeSystemTest, RecursiveStructAndUnion) {
   TypeSystemBuilder builder;
 
+  Uri recursiveStructUri = "meta.com/thrift/test/RecursiveStruct";
+  Uri recursiveUnionUri = "meta.com/thrift/test/RecursiveUnion";
+
   // Define a recursive struct
   builder.addType(
-      "meta.com/thrift/test/RecursiveStruct",
+      recursiveStructUri,
       makeStruct({
           makeField(
-              identity(1, "self"),
-              optional,
-              TypeIds::uri("meta.com/thrift/test/RecursiveStruct")),
+              identity(1, "self"), optional, TypeIds::uri(recursiveStructUri)),
       }));
 
   // Define a recursive union
   builder.addType(
-      "meta.com/thrift/test/RecursiveUnion",
+      recursiveUnionUri,
       makeUnion({
           makeField(
-              identity(1, "self"),
-              optional,
-              TypeIds::uri("meta.com/thrift/test/RecursiveUnion")),
+              identity(1, "self"), optional, TypeIds::uri(recursiveUnionUri)),
       }));
 
   auto typeSystem = std::move(builder).build();
 
   // Check the recursive struct
-  DefinitionRef structDef = typeSystem->getUserDefinedType(
-      Uri("meta.com/thrift/test/RecursiveStruct"));
-  EXPECT_EQ(structDef.uri(), "meta.com/thrift/test/RecursiveStruct");
+  DefinitionRef structDef = typeSystem->getUserDefinedType(recursiveStructUri);
+  EXPECT_EQ(structDef.uri(), recursiveStructUri);
   EXPECT_EQ(structDef.asStruct().fields().size(), 1);
   const FieldNode& structField = structDef.asStruct().fields()[0];
   EXPECT_EQ(structField.identity(), identity(1, "self"));
@@ -208,9 +208,8 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
       std::addressof(structDef.asStruct()));
 
   // Check the recursive union
-  DefinitionRef unionDef = typeSystem->getUserDefinedType(
-      Uri("meta.com/thrift/test/RecursiveUnion"));
-  EXPECT_EQ(unionDef.uri(), "meta.com/thrift/test/RecursiveUnion");
+  DefinitionRef unionDef = typeSystem->getUserDefinedType(recursiveUnionUri);
+  EXPECT_EQ(unionDef.uri(), recursiveUnionUri);
   EXPECT_EQ(unionDef.asUnion().fields().size(), 1);
   const FieldNode& unionField = unionDef.asUnion().fields()[0];
   EXPECT_EQ(unionField.identity(), identity(1, "self"));

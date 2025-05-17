@@ -388,14 +388,9 @@ class RowBlock {
   time_t getDateField(size_t row, size_t field_num) const;
 
   bool isDate(size_t /*row*/, size_t field_num) const {
-    switch (getFieldType(field_num)) {
-      case MYSQL_TYPE_TIMESTAMP:
-      case MYSQL_TYPE_DATETIME:
-      case MYSQL_TYPE_DATE:
-        return true;
-      default:
-        return false;
-    }
+    const auto fieldType = getFieldType(field_num);
+    return (fieldType == MYSQL_TYPE_TIMESTAMP) ||
+        (fieldType == MYSQL_TYPE_DATETIME) || (fieldType == MYSQL_TYPE_DATE);
   }
 
   std::vector<StorageRow> rows_;

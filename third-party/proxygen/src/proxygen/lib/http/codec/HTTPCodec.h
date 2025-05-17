@@ -380,6 +380,10 @@ class HTTPCodec {
       case CodecProtocol::HTTP_3:
         // This doesn't factor out of order stream arrival...
         return id / 4;
+      case CodecProtocol::HTTP_BINARY:
+        [[fallthrough]];
+      case CodecProtocol::TUNNEL_LITE:
+        [[fallthrough]];
       default:
         LOG(FATAL) << "Unreachable";
         return std::numeric_limits<size_t>::max();

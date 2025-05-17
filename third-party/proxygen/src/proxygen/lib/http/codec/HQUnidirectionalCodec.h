@@ -39,6 +39,8 @@ folly::Optional<Ret> withType(uint64_t typeval,
     case UnidirectionalStreamType::QPACK_DECODER:
     case UnidirectionalStreamType::WEBTRANSPORT:
       return functor(casted);
+    case UnidirectionalStreamType::GREASE:
+      [[fallthrough]];
     default:
       if (isGreaseId(typeval)) {
         return functor(UnidirectionalStreamType::GREASE);

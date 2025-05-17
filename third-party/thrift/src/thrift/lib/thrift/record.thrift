@@ -74,7 +74,22 @@ union SerializableRecord {
    * as the element of set types. Therefore, we use a list to instead.
    */
   14: list<SerializableRecordMapEntry> mapDatum;
-  // TODO(praihan): Add anyDatum
+  // Thrift's object model defines "Any" as a record kind. But we are choosing
+  // to omit the ability to represent such records in the serializable data format.
+  //
+  // The rationale for the omissions include:
+  //   - SerializableRecord is primarily used in type_system.thrift to encode
+  //     the definition of Thrift schema, specifically custom default values
+  //     for fields, and structured annotations. These are not expected to be
+  //     "Any" records.
+  //   - The existing any.Any deviates from the strict object model definition
+  //     in some small ways. It is unclear whether any.Any should be forked
+  //     *just* for SerializableRecord.
+  //   - A future revision may relax this restriction since adding a field
+  //     to a union is a common-field-preserving change. There is no reason to
+  //     rush the inclusion of "Any" here.
+  //
+  // 15: ??? anyDatum;
 }
 
 struct SerializableRecordMapEntry {

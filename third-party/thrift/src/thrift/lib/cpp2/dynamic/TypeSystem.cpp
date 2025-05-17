@@ -155,43 +155,74 @@ TypeId TypeRef::id() const {
       });
 }
 
-bool operator==(const TypeRef& lhs, const TypeRef& rhs) {
-  return lhs.visit(
+bool TypeRef::isEqualIdentityTo(const TypeRef& rhs) const noexcept {
+  if (this == std::addressof(rhs)) {
+    return true;
+  }
+  return visit(
       // For non-primitive types, we are able to compare by the address of the
-      // definition. This is because:
+      // definition for TypeRef within one TypeSystem. This is because:
       //   * Two types cannot have the same URI, and
       //   * There can only be one definition per type.
+      //
+      // For TypeRef across TypeSystem instances, we have to fallback to
+      // TypeId-based comparison.
       [&](const StructNode& structDef) {
-        return rhs.isStruct() &&
-            std::addressof(structDef) == std::addressof(rhs.asStruct());
+        if (!rhs.isStruct()) {
+          return false;
+        }
+        const StructNode& other = rhs.asStruct();
+        if (std::addressof(structDef) == std::addressof(other)) {
+          return true;
+        }
+        return structDef.uri() == other.uri();
       },
       [&](const UnionNode& unionDef) {
-        return rhs.isUnion() &&
-            std::addressof(unionDef) == std::addressof(rhs.asUnion());
+        if (!rhs.isUnion()) {
+          return false;
+        }
+        const UnionNode& other = rhs.asUnion();
+        if (std::addressof(unionDef) == std::addressof(other)) {
+          return true;
+        }
+        return unionDef.uri() == other.uri();
       },
       [&](const EnumNode& enumDef) {
-        return rhs.isEnum() &&
-            std::addressof(enumDef) == std::addressof(rhs.asEnum());
+        if (!rhs.isEnum()) {
+          return false;
+        }
+        const EnumNode& other = rhs.asEnum();
+        if (std::addressof(enumDef) == std::addressof(other)) {
+          return true;
+        }
+        return enumDef.uri() == other.uri();
       },
       [&](const OpaqueAliasNode& opaqueAliasDef) {
-        return rhs.isOpaqueAlias() &&
-            std::addressof(opaqueAliasDef) ==
-            std::addressof(rhs.asOpaqueAlias());
+        if (!rhs.isOpaqueAlias()) {
+          return false;
+        }
+        const OpaqueAliasNode& other = rhs.asOpaqueAlias();
+        if (std::addressof(opaqueAliasDef) == std::addressof(other)) {
+          return true;
+        }
+        return opaqueAliasDef.uri() == other.uri();
       },
       // Container types
       [&](const TypeRef::List& list) {
-        return rhs.isList() && list.elementType() == rhs.asList().elementType();
+        return rhs.isList() &&
+            list.elementType().isEqualIdentityTo(rhs.asList().elementType());
       },
       [&](const TypeRef::Set& set) {
-        return rhs.isSet() && set.elementType() == rhs.asSet().elementType();
+        return rhs.isSet() &&
+            set.elementType().isEqualIdentityTo(rhs.asSet().elementType());
       },
       [&](const TypeRef::Map& map) {
         if (!rhs.isMap()) {
           return false;
         }
         const TypeRef::Map& other = rhs.asMap();
-        return std::tie(map.keyType(), map.valueType()) ==
-            std::tie(other.keyType(), other.valueType());
+        return map.keyType().isEqualIdentityTo(other.keyType()) &&
+            map.valueType().isEqualIdentityTo(other.valueType());
       },
       // Primitive types
       [&](const TypeRef::Bool&) { return rhs.isBool(); },

@@ -653,4 +653,63 @@ TEST(TypeSystemTest, EnumWithNegativeValues) {
   EXPECT_EQ(def.asEnum().values()[1].i32, -2);
 }
 
+TEST(TypeSystemTest, TypeRefIsEqualIdentityTo) {
+  const auto makeTypeSystem = []() -> std::unique_ptr<TypeSystem> {
+    TypeSystemBuilder builder;
+
+    builder.addType(
+        "meta.com/thrift/test/OuterStruct",
+        makeStruct({
+            makeField(
+                identity(1, "innerStruct"),
+                optional,
+                TypeIds::uri("meta.com/thrift/test/InnerStruct")),
+        }));
+    builder.addType(
+        "meta.com/thrift/test/InnerStruct",
+        makeStruct({
+            makeField(identity(1, "field1"), optional, TypeIds::I32),
+        }));
+    builder.addType(
+        "meta.com/thrift/test/Alias",
+        makeOpaqueAlias(
+            TypeIds::list(TypeIds::uri("meta.com/thrift/test/OuterStruct"))));
+
+    return std::move(builder).build();
+  };
+
+  auto ts1 = makeTypeSystem();
+  auto ts2 = makeTypeSystem();
+
+  {
+    auto lhs = TypeRef::fromDefinition(
+        ts1->getUserDefinedType("meta.com/thrift/test/Alias"));
+    auto rhs = TypeRef::fromDefinition(
+        ts2->getUserDefinedType("meta.com/thrift/test/Alias"));
+
+    EXPECT_TRUE(lhs.isEqualIdentityTo(lhs));
+    EXPECT_TRUE(lhs.isEqualIdentityTo(rhs));
+  }
+
+  {
+    auto lhs = TypeRef::fromDefinition(
+        ts1->getUserDefinedType("meta.com/thrift/test/OuterStruct"));
+    auto rhs = TypeRef::fromDefinition(
+        ts2->getUserDefinedType("meta.com/thrift/test/OuterStruct"));
+
+    EXPECT_TRUE(lhs.isEqualIdentityTo(lhs));
+    EXPECT_TRUE(lhs.isEqualIdentityTo(rhs));
+  }
+
+  {
+    auto lhs = TypeRef::fromDefinition(
+        ts1->getUserDefinedType("meta.com/thrift/test/OuterStruct"));
+    auto rhs = TypeRef::fromDefinition(
+        ts1->getUserDefinedType("meta.com/thrift/test/Alias"));
+
+    EXPECT_FALSE(lhs.isEqualIdentityTo(rhs));
+    EXPECT_FALSE(lhs.isEqualIdentityTo(rhs));
+  }
+}
+
 } // namespace apache::thrift::dynamic

@@ -383,12 +383,16 @@ class TypeRef final {
   TypeId id() const;
 
   /**
-   * Two types are equal iff they have the same identity.
+   * Returns true if the other TypeRef has the same TypeId as this type.
+   *
+   * The other TypeRef object is allowed to originate from a different
+   * TypeSystem instance. This function does not perform a deep equality to
+   * compare that the type definitions match in this case.
+   *
+   * Equivalent to:
+   *     this->id() == other.id() (but more efficient)
    */
-  friend bool operator==(const TypeRef& lhs, const TypeRef& rhs);
-  friend bool operator!=(const TypeRef& lhs, const TypeRef& rhs) {
-    return !(lhs == rhs);
-  }
+  bool isEqualIdentityTo(const TypeRef& other) const noexcept;
 
   /**
    * An `std::visit`-like API for pattern-matching on the active variant

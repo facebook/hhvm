@@ -47,6 +47,7 @@ static inline const char* mc_protocol_to_string(const mc_protocol_t value) {
     case mc_thrift_protocol:
       return "thrift";
     case mc_unknown_protocol:
+    case mc_nprotocols:
     default:
       return "unknown-protocol";
   }

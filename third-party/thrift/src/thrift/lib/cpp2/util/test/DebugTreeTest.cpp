@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 #include <folly/String.h>
-#include <thrift/lib/cpp2/util/DebugTree.h>
 #include <thrift/lib/cpp2/util/test/gen-cpp2/gen_patch_DebugTree_types.h>
 
 namespace apache::thrift::detail {

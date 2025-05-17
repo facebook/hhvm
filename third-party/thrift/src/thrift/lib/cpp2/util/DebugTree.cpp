@@ -211,7 +211,7 @@ OptionalTypeRef TypeFinder::findType(const Uri& uri) const {
 OptionalTypeRef TypeFinder::findTypeInAny(const type::Type& type) const {
   const type::TypeUri* uri = nullptr;
   const auto& name = *type.toThrift().name();
-  switch (auto t = name.getType()) {
+  switch (name.getType()) {
     case type::TypeName::Type::structType:
       uri = &*name.structType_ref();
       break;

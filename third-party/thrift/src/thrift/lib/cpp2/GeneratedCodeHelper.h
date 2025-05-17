@@ -1061,6 +1061,10 @@ void execute(
       return recursiveProcess<CompactProtocolReader>(
           processor, std::move(request));
     }
+    case protocol::T_JSON_PROTOCOL:
+    case protocol::T_DEBUG_PROTOCOL:
+    case protocol::T_VIRTUAL_PROTOCOL:
+    case protocol::T_SIMPLE_JSON_PROTOCOL:
     default:
       LOG(ERROR) << "invalid protType: " << folly::to_underlying(protType);
       return;
@@ -1087,6 +1091,10 @@ void process(
       return recursiveProcess<CompactProtocolReader>(
           processor, std::move(req), std::move(serializedRequest), ctx, eb, tm);
     }
+    case protocol::T_JSON_PROTOCOL:
+    case protocol::T_DEBUG_PROTOCOL:
+    case protocol::T_VIRTUAL_PROTOCOL:
+    case protocol::T_SIMPLE_JSON_PROTOCOL:
     default:
       LOG(ERROR) << "invalid protType: " << folly::to_underlying(protType);
       return;
@@ -1163,6 +1171,10 @@ void process(
           eb,
           tm);
     }
+    case protocol::T_JSON_PROTOCOL:
+    case protocol::T_DEBUG_PROTOCOL:
+    case protocol::T_VIRTUAL_PROTOCOL:
+    case protocol::T_SIMPLE_JSON_PROTOCOL:
     default:
       LOG(ERROR) << "invalid protType: " << folly::to_underlying(protType);
       return;
@@ -1198,6 +1210,10 @@ void execute(
           folly::tag<CompactProtocolReader>, methodMetadata.processFuncs);
       (processor->*pfn)(std::move(request));
     } break;
+    case protocol::T_JSON_PROTOCOL:
+    case protocol::T_DEBUG_PROTOCOL:
+    case protocol::T_VIRTUAL_PROTOCOL:
+    case protocol::T_SIMPLE_JSON_PROTOCOL:
     default:
       LOG(ERROR) << "invalid protType: " << folly::to_underlying(protType);
       return;

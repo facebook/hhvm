@@ -80,13 +80,12 @@ inline Buf OpenSSLSelfCertImpl<KeyType::P256>::sign(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
-  switch (scheme) {
-    case SignatureScheme::ecdsa_secp256r1_sha256:
-      return signature_.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
-          signData->coalesce());
-    default:
-      throw std::runtime_error("Unsupported signature scheme");
+  if (scheme == SignatureScheme::ecdsa_secp256r1_sha256) {
+    return signature_.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
+        signData->coalesce());
   }
+
+  throw std::runtime_error("Unsupported signature scheme");
 }
 
 template <>
@@ -95,13 +94,12 @@ inline Buf OpenSSLSelfCertImpl<KeyType::P384>::sign(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
-  switch (scheme) {
-    case SignatureScheme::ecdsa_secp384r1_sha384:
-      return signature_.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
-          signData->coalesce());
-    default:
-      throw std::runtime_error("Unsupported signature scheme");
+  if (scheme == SignatureScheme::ecdsa_secp384r1_sha384) {
+    return signature_.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
+        signData->coalesce());
   }
+
+  throw std::runtime_error("Unsupported signature scheme");
 }
 
 template <>
@@ -110,13 +108,12 @@ inline Buf OpenSSLSelfCertImpl<KeyType::P521>::sign(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
-  switch (scheme) {
-    case SignatureScheme::ecdsa_secp521r1_sha512:
-      return signature_.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
-          signData->coalesce());
-    default:
-      throw std::runtime_error("Unsupported signature scheme");
+  if (scheme == SignatureScheme::ecdsa_secp521r1_sha512) {
+    return signature_.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
+        signData->coalesce());
   }
+
+  throw std::runtime_error("Unsupported signature scheme");
 }
 
 template <>
@@ -125,12 +122,11 @@ inline Buf OpenSSLSelfCertImpl<KeyType::ED25519>::sign(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
-  switch (scheme) {
-    case SignatureScheme::ed25519:
-      return signature_.sign<SignatureScheme::ed25519>(signData->coalesce());
-    default:
-      throw std::runtime_error("Unsupported signature scheme");
+  if (scheme == SignatureScheme::ed25519) {
+    return signature_.sign<SignatureScheme::ed25519>(signData->coalesce());
   }
+
+  throw std::runtime_error("Unsupported signature scheme");
 }
 
 template <>
@@ -139,13 +135,12 @@ inline Buf OpenSSLSelfCertImpl<KeyType::RSA>::sign(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
-  switch (scheme) {
-    case SignatureScheme::rsa_pss_sha256:
-      return signature_.sign<SignatureScheme::rsa_pss_sha256>(
-          signData->coalesce());
-    default:
-      throw std::runtime_error("Unsupported signature scheme");
+  if (scheme == SignatureScheme::rsa_pss_sha256) {
+    return signature_.sign<SignatureScheme::rsa_pss_sha256>(
+        signData->coalesce());
   }
+
+  throw std::runtime_error("Unsupported signature scheme");
 }
 
 template <KeyType T>

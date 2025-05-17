@@ -231,6 +231,9 @@ std::optional<std::string> detect_starting_command(pid_t ppid) {
 // child process.
 static void close_random_fds() {
 #ifndef _WIN32
+#ifdef HAVE_CLOSE_RANGE
+  close_range(STDERR_FILENO + 1, INT_MAX, 0);
+#else
   struct rlimit limit;
   long open_max = 0;
   int max_fd;
@@ -260,11 +263,17 @@ static void close_random_fds() {
   if (limit.rlim_cur > (rlim_t)open_max) {
     open_max = limit.rlim_cur;
   }
-
+  // Closing too many fds can be too slow. Limit the `open_max` to avoid slow
+  // startup.
+  auto reasonable_fd_max = Configuration().getInt("reasonable_fd_max", 2500000);
+  if (open_max > reasonable_fd_max) {
+    open_max = reasonable_fd_max;
+  }
   for (max_fd = open_max; max_fd > STDERR_FILENO; --max_fd) {
     folly::fileops::close(max_fd);
   }
-#endif
+#endif // ndef HAVE_CLOSE_RANGE
+#endif // ndef _WIN32
 }
 
 [[noreturn]] static void run_service_in_foreground() {

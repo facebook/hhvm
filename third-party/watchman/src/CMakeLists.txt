@@ -209,6 +209,7 @@ foreach(wat_func
     backtrace
     backtrace_symbols
     backtrace_symbols_fd
+    close_range
     fdopendir
     getattrlistbulk
     inotify_init

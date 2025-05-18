@@ -946,11 +946,11 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   case AssertStk:
     flags = handle_assert(env, inst);
     break;
-  case LeaveInlineFrame:
+  case EndInlining:
     if (Cfg::HHIR::InliningAssertMemoryEffects) {
-      assertx(inst.src(0)->inst()->is(DefCalleeFP));
+      assertx(inst.src(0)->inst()->is(BeginInlining));
       auto const fp = inst.src(0);
-      auto const callee = fp->inst()->extra<DefCalleeFP>()->func;
+      auto const callee = fp->inst()->extra<BeginInlining>()->func;
 
       auto const assertDead = [&] (AliasClass acls, const char* what) {
         auto const canon = canonicalize(acls);
@@ -958,7 +958,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
         always_assert_flog(
           (env.state.avail & mustBeDead).none(),
           "Detected that {} locations were still live after accounting for all "
-          "effects at an LeaveInlineFrame position\n    Locations: {}\n",
+          "effects at an EndInlining position\n    Locations: {}\n",
           what,
           show(mustBeDead)
         );

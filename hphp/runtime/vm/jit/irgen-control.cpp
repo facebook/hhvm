@@ -410,7 +410,7 @@ void emitExceptionHandler(IRGS& env, Offset ehOffset, SSATmp* exc) {
     [&] {
       // We are throwing a C++ exception, bypassing catch handlers, which would
       // normally clean up iterators. Kill them here, so that once we reach
-      // LeaveInlineFrame, it won't trigger assertions in load-elim.
+      // EndInlining, it won't trigger assertions in load-elim.
       auto const numIterators = curFunc(env)->numIterators();
       for (auto i = 0U; i < numIterators; ++i) {
         gen(env, KillIter, IterId{i}, fp(env));

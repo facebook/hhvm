@@ -147,7 +147,7 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
 
 const Func* funcFromFP(const SSATmp* fp) {
   auto const inst = canonical(fp)->inst();
-  if (inst->is(DefCalleeFP)) return inst->extra<DefCalleeFP>()->func;
+  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->func;
   always_assert(inst->is(DefFP, DefFuncEntryFP, EnterFrame));
   return inst->marker().func();
 }
@@ -155,8 +155,8 @@ const Func* funcFromFP(const SSATmp* fp) {
 uint32_t frameDepthIndex(const SSATmp* fp) {
   always_assert(fp->isA(TFramePtr));
   fp = canonical(fp);
-  if (fp->inst()->is(DefCalleeFP)) {
-    auto const extra = fp->inst()->extra<DefCalleeFP>();
+  if (fp->inst()->is(BeginInlining)) {
+    auto const extra = fp->inst()->extra<BeginInlining>();
     return extra->depth;
   }
   return 0;
@@ -165,7 +165,7 @@ uint32_t frameDepthIndex(const SSATmp* fp) {
 Optional<IRSPRelOffset> offsetOfFrame(const SSATmp *fp) {
   assertx(fp->isA(TFramePtr));
   auto const inst = canonical(fp)->inst();
-  if (inst->is(DefCalleeFP)) return inst->extra<DefCalleeFP>()->spOffset;
+  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->spOffset;
   if (inst->is(DefFP)) return inst->extra<DefFP>()->offset;
   if (inst->is(EnterFrame)) return IRSPRelOffset { 0 };
   always_assert(false);

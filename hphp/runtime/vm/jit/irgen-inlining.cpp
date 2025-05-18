@@ -34,7 +34,7 @@ particularly the DefinlineFP. Below is an annotated version of this setup.
                 # effectively popping them. These loads and the preceding
                 # stores are generally elided by load and store elimination.
 
-  DefCalleeFP # Sets up memory effects for the inlined frame and returns a new
+  BeginInlining # Sets up memory effects for the inlined frame and returns a new
                 # fp that can be used for stores into the frame.
 
   StLoc ...     # At this point the arguments are stored back to the frame
@@ -52,10 +52,9 @@ value moved into the caller. The sequence for this is annotated below.
   ty := LdFrameThis     # The context is DecRef'ed
   DecRef ty
 
-  LeaveInlineFrame # This instruction marks the end of the inlined region,
-                   # beyond this point the frame should no longer considered to
-                   # be live. The locals and context have been explicitly
-                   # decrefed.
+  EndInlining     # This instruction marks the end of the inlined region, beyond
+                  # this point the frame should no longer considered to be live.
+                  # The locals and context have been explicitly decrefed.
 
 Side exits from inlined code must publish the frames using the InlineCall
 instruction.
@@ -82,7 +81,7 @@ tCallee := DefLabel   # The callee region may suspend from multiple locations,
                       # execution of the caller at the opcode following FCall,
                       # usually an Await.
 
-LeaveInlineFrame      # The return sequence looks the same as a regular call but
+EndInlining           # The return sequence looks the same as a regular call but
                       # rather than killing the frame it has been teleported to
                       # the heap.
 
@@ -112,9 +111,9 @@ which may be elided by the DCE and simplifier passes.
 Inlined regions maintain the following invariants, which later optimization
 passes may depend on (most notably DCE and partial-DCE):
 
-  - Every callee region must contain a single DefCalleeFP
-  - DefCalleeFP must dominate every instruction within the callee.
-  - Excluding side-exits and early returns, LeaveInlineFrame must post-dominate
+  - Every callee region must contain a single BeginInlining
+  - BeginInlining must dominate every instruction within the callee.
+  - Excluding side-exits and early returns, EndInlining must post-dominate
     every instruction in the callee.
   - The callee must contain a return or await.
 
@@ -141,7 +140,7 @@ Outer:                                 | Inner:
            v
 +-------------------+
 | ...               |
-| DefCalleeFP     |
+| BeginInlining     |
 | StLoc             |
 | ...               |
 +-------------------+
@@ -160,13 +159,13 @@ Outer:                                 | Inner:
 | ... // aeo2       |               |                          v
 | Jmp returnTarget  |               v               +---------------------+
 +-------------------+    +---------------------+    | tb = LdStk          |
-           |             | tb = LdStk          |    | LeaveInlineFrame    |
+           |             | tb = LdStk          |    | EndInlining         |
            v             | InlineSuspend       |    | StStk tb            |
 +-------------------+    | StStk tb            |    +---------------------+
 | DecRef Locals     |    | tc = LdStk          |               |
 | DecRef This       |    | te = LdWhState tc   |               v
 | tr = LdStk        |    | JmpZero te          |--------->*Side Exit*
-| LeaveInlineFrame  |    +---------------------+
+| EndInlining       |    +---------------------+
 | StStk tr          |               |
 | CreateSSWH (*)    |               |
 +-------------------+               v
@@ -232,13 +231,10 @@ uint16_t inlineDepth(const IRGS& env) {
 }
 
 SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
-  assertx(env.lastDefFramePtr);
-
-  auto const block = env.lastDefFramePtr->block();
-  auto const def = env.unit.gen(
-    DefCalleeFP,
-    env.irb->nextBCContext(),
-    DefCalleeFPData{
+  return gen(
+    env,
+    BeginInlining,
+    BeginInliningData{
       {}, // calleeAROff
       callee,
       static_cast<uint32_t>(inlineDepth(env) + 1),
@@ -247,13 +243,8 @@ SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
       {}, // returnSPOff
       0   // cost
     },
-    sp(env),
-    fp(env)
+    sp(env)
   );
-
-  block->insert(++block->iteratorTo(env.lastDefFramePtr), def);
-  env.lastDefFramePtr = def;
-  return def->dst();
 }
 
 void beginInlining(IRGS& env,
@@ -301,7 +292,7 @@ void beginInlining(IRGS& env,
   // they do).
 
   // The top of the stack now points to the space for ActRec.
-  auto const extra   = calleeFP->inst()->extra<DefCalleeFP>();
+  auto const extra   = calleeFP->inst()->extra<BeginInlining>();
   extra->spOffset    = spOffBCFromIRSP(env);
   extra->sbOffset    = extra->spOffset - callee->numSlotsInFrame();
   extra->returnSPOff = spOffBCFromStackBase(env) - kNumActRecCells + 1;
@@ -422,7 +413,7 @@ InlineFrameSave implInlineReturn(IRGS& env) {
   assertx(resumeMode(env) == ResumeMode::None);
 
   // Return to the caller function.
-  gen(env, LeaveInlineFrame, fp(env));
+  gen(env, EndInlining, fp(env));
 
   return popInlineFrame(env);
 }

@@ -135,12 +135,6 @@ struct IRGS {
   SSATmp* funcEntryArFlags{nullptr};
   SSATmp* funcEntryCalleeId{nullptr};
   SSATmp* funcEntryCtx{nullptr};
-
-  /*
-   * We put DefCalleeFP instructions at the head of the translation to avoid
-   * interfering with control flow.
-   */
-  IRInstruction* lastDefFramePtr{nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////

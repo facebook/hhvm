@@ -2545,8 +2545,8 @@ struct ProfileCallTargetData : IRExtraData {
   rds::Handle handle;
 };
 
-struct DefCalleeFPData : IRExtraData {
-  DefCalleeFPData(IRSPRelOffset offset, const Func* func, unsigned depth,
+struct BeginInliningData : IRExtraData {
+  BeginInliningData(IRSPRelOffset offset, const Func* func, unsigned depth,
                     SrcKey returnSk, IRSPRelOffset sbOffset,
                     SBInvOffset returnSPOff, int cost)
     : spOffset(offset)
@@ -2575,7 +2575,7 @@ struct DefCalleeFPData : IRExtraData {
     );
   }
 
-  bool equals(const DefCalleeFPData& o) const {
+  bool equals(const BeginInliningData& o) const {
     return
       spOffset == o.spOffset && func == o.func && depth == o.depth &&
       returnSk == o.returnSk && sbOffset == o.sbOffset &&
@@ -3117,7 +3117,7 @@ X(DefRegSP,                     DefStackData);
 X(LdStk,                        IRSPRelOffsetData);
 X(LdStkAddr,                    IRSPRelOffsetData);
 X(StFrameMeta,                  StFrameMetaData);
-X(DefCalleeFP,                  DefCalleeFPData);
+X(BeginInlining,                BeginInliningData);
 X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqInterpBBNoTranslate,       ReqBindJmpData);
 X(ReqRetranslate,               IRSPRelOffsetData);

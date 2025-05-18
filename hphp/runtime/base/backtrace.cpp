@@ -134,7 +134,10 @@ TypedValue* BTFrame::local(int n) const {
 
   if (m_frameId != kRootIFrameID) {
     auto const ifr = jit::getInlineFrame(m_frameId);
-    auto const rootSB = Stack::anyFrameStackBase(m_fp);
+    auto const pubSB = Stack::anyFrameStackBase(m_fp);
+    auto const rootSB = m_pubFrameId != kRootIFrameID
+      ? pubSB + jit::getInlineFrame(m_pubFrameId).sbToRootSbOff
+      : pubSB;
     auto const mySB = rootSB - ifr.sbToRootSbOff;
     auto const fp = (ActRec*)(mySB + ifr.func->numSlotsInFrame());
     return frame_local(fp, n);
@@ -221,9 +224,10 @@ BTFrame initBTFrameAt(jit::CTCA ip, BTFrame frm) {
 
   if (auto const stk = jit::inlineStackAt(ip)) {
     FTRACE_MOD(Trace::fixup, 3,
-               "IStack fp={} ip={} frame={} callOff={}\n",
-               frm.fpInternal(), ip, stk->frame, stk->callOff);
-    return BTFrame::iframe(frm.fpInternal(), stk->callOff, stk->frame);
+               "IStack fp={} ip={} frame={} pubFrame={} callOff={}\n",
+               frm.fpInternal(), ip, stk->frame, stk->pubFrame, stk->callOff);
+    return BTFrame::iframe(
+      frm.fpInternal(), stk->callOff, stk->frame, stk->pubFrame);
   }
 
   if (frm.bcOff() != kInvalidOffset) return frm;
@@ -248,12 +252,13 @@ BTFrame getPrevActRec(
                fp, frm.frameIdInternal(), ifr.parent,
                ifr.func->fullName()->data(), ifr.callOff, ifr.sbToRootSbOff);
 
-    if (ifr.parent == kRootIFrameID) {
+    if (ifr.parent == frm.pubFrameIdInternal()) {
       // Reached published frame, continue following the FP chain.
       return BTFrame::regular(fp, ifr.callOff);
     }
 
-    return BTFrame::iframe(fp, ifr.callOff, ifr.parent);
+    return BTFrame::iframe(
+      fp, ifr.callOff, ifr.parent, frm.pubFrameIdInternal());
   }
 
   // Handle AsyncFunctionWaitHandle tail frame.

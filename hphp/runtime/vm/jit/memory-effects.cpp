@@ -105,7 +105,7 @@ jit::vector<AliasClass> backtrace_locals(const IRInstruction& inst) {
       auto const [func, depth] = func_and_depth_from_fp(fp);
       auto ac = fn(fp, func, depth);
       if (ac != AEmpty) acs.push_back(std::move(ac));
-      if (fp->inst()->is(DefCalleeFP)) {
+      if (fp->inst()->is(BeginInlining)) {
         // Walking the marker fp chain in this manner is suspect, but here we
         // are careful to only materialize func, depth pair using it.
         fp = fp->inst()->marker().fp();
@@ -210,8 +210,8 @@ GeneralEffects may_reenter(const IRInstruction& inst, const GeneralEffects& x) {
 
     auto const offset = [&]() -> IRSPRelOffset {
       auto const fp = canonical(inst.marker().fp());
-      if (fp->inst()->is(DefCalleeFP)) {
-        auto const extra = fp->inst()->extra<DefCalleeFP>();
+      if (fp->inst()->is(BeginInlining)) {
+        auto const extra = fp->inst()->extra<BeginInlining>();
         auto const fpOffset = extra->spOffset;
         auto const numSlotsInFrame = extra->func->numSlotsInFrame();
         auto const numStackElems = inst.marker().bcSPOff() - SBInvOffset{0};
@@ -483,16 +483,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   /*
-   * DefCalleeFP must always be the first instruction in the inlined call. It
+   * BeginInlining must always be the first instruction in the inlined call. It
    * defines a new FP for the callee but does not perform any stores or
    * otherwise initialize the FP.
    */
-  case DefCalleeFP:
+  case BeginInlining:
     return IrrelevantEffects {};
 
   /*
    * EnterInlineFrame marks that an inline frame pointer allocated using
-   * DefCalleeFP is now live. The frame pointer should not be accessed
+   * BeginInlining is now live. The frame pointer should not be accessed
    * prior to this instruction as it may alias locations that overlap with
    * live stack locations in the caller.
    */
@@ -501,7 +501,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * SP relative offset of the firstin the inlined call.
      */
     auto inlineStackOff =
-      inst.src(0)->inst()->extra<DefCalleeFP>()->spOffset + kNumActRecCells;
+      inst.src(0)->inst()->extra<BeginInlining>()->spOffset + kNumActRecCells;
     return may_load_store_kill(
       AEmpty,
       AEmpty,
@@ -515,10 +515,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
   }
 
-  case LeaveInlineFrame: {
-    assertx(inst.src(0)->inst()->is(DefCalleeFP));
+  case EndInlining: {
+    assertx(inst.src(0)->inst()->is(BeginInlining));
     auto const fp = inst.src(0);
-    auto const callee = fp->inst()->extra<DefCalleeFP>()->func;
+    auto const callee = fp->inst()->extra<BeginInlining>()->func;
     const AliasClass ar = AActRec { fp };
     auto const locals = [&] () -> AliasClass {
       if (!callee->numLocals()) return AEmpty;
@@ -552,7 +552,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case InlineSideExit: {
     auto const callee = inst.extra<InlineSideExit>()->callee;
-    auto const arOffset = inst.src(1)->inst()->extra<DefCalleeFP>()->spOffset;
+    auto const arOffset = inst.src(1)->inst()->extra<BeginInlining>()->spOffset;
     return CallEffects {
       // Kills. Stack was already handled by InlineSideExitSyncStack.
       AVMRegAny,
@@ -744,8 +744,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto fpInst = fp->inst();
     auto const frame = [&] () -> AliasClass {
       if (fpInst->is(DefFP, EnterFrame)) return ALocalAny | AIterAny;
-      assertx(fpInst->is(DefCalleeFP));
-      auto const func = fpInst->extra<DefCalleeFP>()->func;
+      assertx(fpInst->is(BeginInlining));
+      auto const func = fpInst->extra<BeginInlining>()->func;
       return frame_locals(func, fp) | frame_iterators(func, fp);
     }();
     return may_load_store_move(

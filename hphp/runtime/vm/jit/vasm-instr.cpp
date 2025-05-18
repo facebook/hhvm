@@ -121,6 +121,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::phijmp:
     case Vinstr::inlinestart:
     case Vinstr::inlineend:
+    case Vinstr::pushframe:
     case Vinstr::recordstack:
     case Vinstr::recordbasenativesp:
     case Vinstr::unrecordbasenativesp:

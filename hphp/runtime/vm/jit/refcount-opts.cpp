@@ -1357,7 +1357,7 @@ bool irrelevant_inst(const IRInstruction& inst) {
     // Inlining related instructions can manipulate the frame but don't
     // observe reference counts.
     [&] (const GeneralEffects& g) {
-      if (inst.is(LeaveInlineFrame, InlineCall, EnterInlineFrame)) {
+      if (inst.is(EndInlining, InlineCall, EnterInlineFrame)) {
         return true;
       }
       if (inst.consumesReferences()) return false;
@@ -2081,7 +2081,7 @@ void analyze_mem_effects(Env& env,
       // Various inline related instructions have non-empty stores to
       // prevent store sinking, but don't actually change any
       // refcounts, so we don't need to reduce lower bounds.
-      auto const may_decref = !inst.is(LeaveInlineFrame, EnterInlineFrame);
+      auto const may_decref = !inst.is(EndInlining, EnterInlineFrame);
       if (may_decref && (x.stores != AEmpty || x.inout != AEmpty)) {
         observe_unbalanced_decrefs(env, state, add_node);
       }
@@ -2340,10 +2340,10 @@ void rc_analyze_step(Env& env,
   mrinfo_step(env, inst, state.avail);
   assertx(check_state(state));
 
-  if (Cfg::HHIR::InliningAssertMemoryEffects && inst.is(LeaveInlineFrame)) {
-    assertx(inst.src(0)->inst()->is(DefCalleeFP));
+  if (Cfg::HHIR::InliningAssertMemoryEffects && inst.is(EndInlining)) {
+    assertx(inst.src(0)->inst()->is(BeginInlining));
     auto const fp = inst.src(0);
-    auto const callee = fp->inst()->extra<DefCalleeFP>()->func;
+    auto const callee = fp->inst()->extra<BeginInlining>()->func;
 
     auto const assertDead = [&] (AliasClass acls, const char* what) {
       auto const canon = canonicalize(acls);
@@ -2354,7 +2354,7 @@ void rc_analyze_step(Env& env,
           always_assert_flog(
             state.support_map[id] == -1,
             "Detected that {} location was still used as reference support "
-            "after accounting for all effects at an LeaveInlineFrame position\n"
+            "after accounting for all effects at an EndInlining position\n"
             "    Locations: {}\n",
             what,
             show(mustBeDead)
@@ -2512,9 +2512,9 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     case BespokeIterGetKey:
     case BespokeIterGetVal:
     case IntAsPtrToElem:
-    case DefCalleeFP:
+    case BeginInlining:
     case EnterInlineFrame:
-    case LeaveInlineFrame:
+    case EndInlining:
     case InlineCall:
     case FinishMemberOp:
     case Nop:        return true;

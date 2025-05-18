@@ -64,11 +64,6 @@ void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
   if (Cfg::HHIR::GenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, dst + AROFF(m_thisUnsafe));
   }
-
-  assertx(v.unit().fpToFrame.count(inst->src(0)) &&
-          v.unit().fpToFrame[inst->src(0)] == 0);
-
-  v.unit().fpToFrame.emplace(inst->dst(), 0);
 }
 
 void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {

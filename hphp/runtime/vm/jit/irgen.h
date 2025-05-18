@@ -218,11 +218,11 @@ uint16_t inlineDepth(const IRGS& env);
  *   // ... normal stuff happens ...
  *   // ... probably some StStks due to argument expressions
  *   // FCall*:
- *     fp2   = DefCalleeFP<offset,func,cost,numArgs> sp fp
+ *     fp2   = BeginInlining<offset,func,cost,numArgs> sp fp
  *
  *         // ... callee body ...
  *
- *     LeaveInlineFrame fp2
+ *     EndInlining fp2
  */
 void beginInlining(IRGS& env,
                    SrcKey entry,

@@ -25,40 +25,39 @@ namespace HPHP::jit {
 constexpr int Vframe::Top;
 constexpr int Vframe::Root;
 
-void Vunit::allocFrame(const IRInstruction* origin) {
-  assertx(origin->is(DefCalleeFP));
+int Vunit::allocFrame(const Vinstr& inst, int parent_frame,
+                      uint64_t entry_weight) {
+  assertx(inst.op == Vinstr::inlinestart);
+  assertx(inst.origin->is(EnterInlineFrame));
 
-  auto const parentFp = origin->src(1);
-  auto const parentIt = fpToFrame.find(parentFp);
-  assertx(parentIt != fpToFrame.end());
-
-  auto const parent_frame = parentIt->second;
-  auto const extra = origin->extra<DefCalleeFP>();
-  auto const fp = origin->dst();
+  auto const fp = inst.origin->src(0);
   auto const [it, inserted] = fpToFrame.emplace(fp, frames.size());
   if (!inserted) {
     always_assert(frames[it->second].parent == parent_frame);
-    return;
+    frames[it->second].entry_weight += entry_weight;
+    return it->second;
   }
 
   for (auto f = parent_frame; f != Vframe::Top; f = frames[f].parent) {
-    frames[f].inclusive_cost += extra->cost;
+    frames[f].inclusive_cost += inst.inlinestart_.cost;
     frames[f].num_inner_frames++;
   }
 
   auto const sbToRootSbOff =
     frames[parent_frame].sbToRootSbOff +
-    extra->returnSPOff.offset + kNumActRecCells - 1 +
-    extra->func->numSlotsInFrame();
+    inst.origin->marker().bcSPOff().offset +
+    inst.inlinestart_.func->numSlotsInFrame();
 
   frames.emplace_back(
-    extra->func,
-    origin->marker().bcOff(),
+    inst.inlinestart_.func,
+    inst.origin->marker().bcOff(),
     sbToRootSbOff,
     parent_frame,
-    extra->cost,
-    0
+    inst.inlinestart_.cost,
+    entry_weight
   );
+
+  return it->second;
 }
 
 Vlabel Vunit::makeBlock(AreaIndex area, uint64_t weight) {
@@ -119,6 +118,10 @@ bool Vunit::needsRegAlloc() const {
   }
 
   return false;
+}
+
+bool Vunit::needsFramesComputed() const {
+  return frames.empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

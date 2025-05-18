@@ -305,7 +305,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   switch (inst->op()) {
   case EnterInlineFrame: trackEnterInlineFrame(inst); break;
-  case LeaveInlineFrame: trackLeaveInlineFrame(); break;
+  case EndInlining:      trackEndInlining(); break;
   case InlineCall:       trackInlineCall(inst); break;
   case InlineSideExit:   trackInlineSideExit(inst); break;
   case InlineSideExitSyncStack:
@@ -1008,7 +1008,7 @@ void FrameStateMgr::trackEnterInlineFrame(const IRInstruction* inst) {
   assertx(inst->is(EnterInlineFrame));
   assertx(cur().checkMInstrStateDead());
 
-  auto const extra = inst->src(0)->inst()->extra<DefCalleeFP>();
+  auto const extra = inst->src(0)->inst()->extra<BeginInlining>();
   auto const callee = extra->func;
   auto const spOffset = extra->spOffset;
   assertx(cur().bcSPOff == spOffset.to<SBInvOffset>(irSPOff()));
@@ -1053,11 +1053,11 @@ void FrameStateMgr::trackEnterInlineFrame(const IRInstruction* inst) {
   auto const irSPOff = SBInvOffset{spOffset.offset - callee->numSlotsInFrame()};
   auto const bcSPOff = SBInvOffset{0};
   initStack(caller().spValue, irSPOff, bcSPOff);
-  ITRACE(6, "DefCalleeFP setting irSPOff: {}\n", irSPOff.offset);
+  ITRACE(6, "BeginInlining setting irSPOff: {}\n", irSPOff.offset);
 }
 
-void FrameStateMgr::trackLeaveInlineFrame() {
-  // LeaveInlineFrame is not allowed after InlineCall
+void FrameStateMgr::trackEndInlining() {
+  // EndInlining is not allowed after InlineCall
   assertx(caller().fixupFPValue == cur().fixupFPValue);
 
   // Inlining may not change spValue
@@ -1076,7 +1076,7 @@ void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
 
 void FrameStateMgr::trackInlineSideExit(const IRInstruction* inst) {
   auto const callee = inst->extra<InlineSideExit>()->callee;
-  auto const arOffset = inst->src(1)->inst()->extra<DefCalleeFP>()->spOffset;
+  auto const arOffset = inst->src(1)->inst()->extra<BeginInlining>()->spOffset;
 
   // The callee frame was already popped from the frame state. The only thing
   // left is to set the type of out parameter locations.

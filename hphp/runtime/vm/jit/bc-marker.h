@@ -123,7 +123,7 @@ struct BCMarker {
 
   // Normally, the fixup SrcKey is the same as the SrcKey for the marker,
   // however, when inlining has dropped an inner frame the fixup SrcKey will
-  // be inside the parent frame (corresponding to the DefCalleeFP of the first
+  // be inside the parent frame (corresponding to the BeginInlining of the first
   // unpublished frame) so that its offset is relative to the live ActRec.
   SrcKey fixupSk() const;
 

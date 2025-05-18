@@ -88,6 +88,7 @@ struct Vunit;
   O(conjureuse, Inone, U(c), Dn)\
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
+  O(pushframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
   O(recordbasenativesp, Inone, Un, Dn)\
   O(unrecordbasenativesp, Inone, Un, Dn)\
@@ -607,12 +608,18 @@ struct ssaalias { Vreg s; Vreg d; };
  * whose Vcost was computed to be cost. Id is a post computed index into a table
  * of frames stored on Vunit.
  */
-struct inlinestart {};
+struct inlinestart { const Func* func; int cost; int id; };
 
 /*
  * Marks a return target or exit from the current inlined frame.
  */
 struct inlineend {};
+
+/*
+ * Indicate that an inline frame has been added or removed to/from the rbp
+ * chain for record keeping.
+ */
+struct pushframe {};
 
 /*
  * Record the current inline stack as though it were materialized for a call at

@@ -51,14 +51,12 @@ struct FuncId {
   static FuncId fromInt(Int num) {
     return FuncId{Id(reinterpret_cast<const Func*>(num))};
   }
-  Int toStableInt() const;
 #else
   using Id = uint32_t;
   Int toInt() const { return m_id; }
   constexpr static FuncId fromInt(Int num) {
     return FuncId{num};
   }
-  Int toStableInt() const { return toInt(); }
 #endif
 
   bool isInvalid() const { return m_id == Invalid.m_id; }

@@ -258,12 +258,6 @@ struct Func final {
    */
   FuncId getFuncId() const;
 
-  /*
-   * Get a function ID that is guaranteed not to be reused during the lifetime
-   * of the process.
-   */
-  uint32_t getStableId() const;
-
 #ifndef USE_LOWPTR
   static constexpr size_t funcIdOffset() {
     return offsetof(Func, m_funcId);

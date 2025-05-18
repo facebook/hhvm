@@ -594,7 +594,7 @@ struct ProfData {
 
     /* implicit */ operator uint64_t() const {
       assertx(nArgs >= 0);
-      return (uint64_t(func.toStableInt()) << 32) | nArgs;
+      return (uint64_t(func.toInt()) << 32) | nArgs;
     }
   };
 

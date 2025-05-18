@@ -28,9 +28,7 @@
 #include <thrift/lib/cpp/concurrency/Exception.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 /**
  * Convenient implementation of Runnable that will execute arbitrary callbacks.
@@ -167,8 +165,6 @@ class FunctionRunner : public virtual Runnable {
   folly::Baton<> repFinished_;
 };
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency
 
 #endif // #ifndef _THRIFT_CONCURRENCY_FUNCTION_RUNNER_H

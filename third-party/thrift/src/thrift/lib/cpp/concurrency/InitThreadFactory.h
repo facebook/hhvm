@@ -22,9 +22,7 @@
 
 #include <thrift/lib/cpp/concurrency/Thread.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 /**
  * Thread factory with initializer functions.
@@ -56,8 +54,6 @@ class InitThreadFactory : public ThreadFactory {
   std::function<void()> threadFinalizer_{nullptr};
 };
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency
 
 #endif // #ifndef THRIFT_CONCURRENCY_INITTHREADFACTORY_H_

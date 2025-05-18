@@ -21,9 +21,7 @@
 
 #include <folly/ScopeGuard.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 namespace {
 
@@ -76,6 +74,4 @@ std::shared_ptr<Thread> InitThreadFactory::newThread(
       detachState);
 }
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency

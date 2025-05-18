@@ -76,6 +76,12 @@ void sideExitFromInlined(IRGS&, SSATmp* target);
 void endCatchFromInlined(IRGS&, EndCatchData::CatchMode mode, SSATmp* exc);
 
 /*
+ * Make sure all inlined frames are written on the stack and a part of the FP
+ * chain. Returns true iff any frames were spilled.
+ */
+bool spillInlinedFrames(IRGS& env);
+
+/*
  * Construct a FP that can be used to inline callee. Must be used while the
  * FCall bytecode is being translated.
  */

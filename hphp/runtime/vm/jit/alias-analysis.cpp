@@ -73,7 +73,9 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (const PureStore& x)         { visit(x.dst); },
         [&] (const ExitEffects& x)       { visit(x.live);
                                            visit(x.kills);
-                                           visit(x.uninits); }
+                                           visit(x.uninits); },
+        [&] (const PureInlineCall& x)    { visit(x.base);
+                                           visit(x.actrec); }
       );
     }
   }

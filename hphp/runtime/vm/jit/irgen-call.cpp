@@ -280,6 +280,34 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   );
 }
 
+SSATmp* callFuncEntry(IRGS& env, SrcKey entry, SSATmp* objOrClass,
+                      SSATmp* calleeFP, uint32_t numArgsInclUnpack,
+                      bool asyncEagerReturn) {
+  assertx(entry.funcEntry());
+  if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
+  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
+
+  auto const pubFP = env.irb->fs()[0].fp();
+  auto pubBcOff = bcOff(env);
+  if (env.irb->fs().inlineDepth()) {
+    auto const firstUnpubFP = env.irb->fs()[1].fp();
+    pubBcOff = firstUnpubFP->inst()->marker().sk().offset();
+  }
+
+  auto const arFlags = ActRec::encodeCallOffsetAndFlags(
+    pubBcOff,
+    asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
+  );
+
+  auto const data = CallFuncEntryData {
+    entry,
+    numArgsInclUnpack,
+    arFlags,
+    env.formingRegion
+  };
+  return gen(env, CallFuncEntry, data, calleeFP, pubFP, objOrClass);
+}
+
 void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
                       Offset asyncEagerOffset, bool unlikely) {
   // Insert a debugger interrupt check after returning from a call
@@ -1334,34 +1362,6 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 }
 
 } // namespace
-
-SSATmp* callFuncEntry(IRGS& env, SrcKey entry, SSATmp* objOrClass,
-                      SSATmp* calleeFP, uint32_t numArgsInclUnpack,
-                      bool asyncEagerReturn) {
-  assertx(entry.funcEntry());
-  if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
-  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
-
-  auto const pubFP = env.irb->fs()[0].fp();
-  auto pubBcOff = bcOff(env);
-  if (env.irb->fs().inlineDepth()) {
-    auto const firstUnpubFP = env.irb->fs()[1].fp();
-    pubBcOff = firstUnpubFP->inst()->marker().sk().offset();
-  }
-
-  auto const arFlags = ActRec::encodeCallOffsetAndFlags(
-    pubBcOff,
-    asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
-  );
-
-  auto const data = CallFuncEntryData {
-    entry,
-    numArgsInclUnpack,
-    arFlags,
-    env.formingRegion
-  };
-  return gen(env, CallFuncEntry, data, calleeFP, pubFP, objOrClass);
-}
 
 void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
   if (!Cfg::Eval::EnforceDeployment) return;

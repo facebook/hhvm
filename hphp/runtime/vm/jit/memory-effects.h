@@ -111,6 +111,14 @@ struct PureLoad       { AliasClass src; };
 struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
 
 /*
+ * The effect of simulating a Call to an inlined function. This effect is a pure
+ * store of fp into the AFBasePtr location, base. The instruction also simulates
+ * a load of fields of ActRec which may be read by the VM once fp is live (e.g.
+ * the AFFunc and AFMeta locations).
+ */
+struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
+
+/*
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `kills' set are locations that cannot be read by this instruction unless
@@ -187,6 +195,7 @@ struct UnknownEffects {};
 using MemEffects = std::variant< GeneralEffects
                                , PureLoad
                                , PureStore
+                               , PureInlineCall
                                , CallEffects
                                , ReturnEffects
                                , ExitEffects

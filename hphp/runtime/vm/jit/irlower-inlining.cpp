@@ -64,6 +64,31 @@ void cgEnterInlineFrame(IRLS& env, const IRInstruction* inst) {
   v << inlinestart{};
 }
 
+void cgInlineCall(IRLS& env, const IRInstruction* inst) {
+  auto const calleeFP = srcLoc(env, inst, 0).reg();
+  auto const callerFP = srcLoc(env, inst, 1).reg();
+  auto const calleeFPInst = inst->src(0)->inst();
+  assertx(calleeFPInst->is(DefCalleeFP));
+  auto const extra = calleeFPInst->extra<DefCalleeFP>();
+  auto& v = vmain(env);
+
+  auto const off = [&] () -> int32_t {
+    auto const callerFPOff = offsetOfFrame(inst->src(1));
+    if (!callerFPOff) return 0;
+
+    auto const calleeFPOff = extra->spOffset;
+    return *callerFPOff - calleeFPOff;
+  }();
+
+  // Do roughly the same work as an HHIR Call.
+  v << store{callerFP, calleeFP[AROFF(m_sfp)]};
+
+  auto const retAddr = v.makeReg();
+  v << ldbindretaddr{extra->returnSk, extra->returnSPOff, retAddr};
+  v << store{retAddr, calleeFP[AROFF(m_savedRip)]};
+  v << pushvmfp{calleeFP, cellsToBytes(off)};
+}
+
 void cgLeaveInlineFrame(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();

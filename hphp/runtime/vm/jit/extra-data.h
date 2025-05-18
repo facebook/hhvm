@@ -1168,6 +1168,31 @@ struct ReqBindJmpData : IRExtraData {
   bool popFrame;
 };
 
+struct StFrameMetaData : IRExtraData {
+  std::string show() const {
+    return folly::to<std::string>(
+      callBCOff, ',',
+      asyncEagerReturn
+    );
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      std::hash<Offset>()(callBCOff),
+      std::hash<bool>()(asyncEagerReturn)
+    );
+  }
+
+  bool equals(const StFrameMetaData& o) const {
+    return callBCOff == o.callBCOff && asyncEagerReturn == o.asyncEagerReturn;
+  }
+
+
+  Offset callBCOff;
+  bool isInlined;
+  bool asyncEagerReturn;
+};
+
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            const Func* callee)
@@ -3116,6 +3141,7 @@ X(DefFrameRelSP,                DefStackData);
 X(DefRegSP,                     DefStackData);
 X(LdStk,                        IRSPRelOffsetData);
 X(LdStkAddr,                    IRSPRelOffsetData);
+X(StFrameMeta,                  StFrameMetaData);
 X(DefCalleeFP,                  DefCalleeFPData);
 X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqInterpBBNoTranslate,       ReqBindJmpData);

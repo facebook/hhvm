@@ -285,8 +285,7 @@ void beginInlining(IRGS& env,
     irgen::defBlock(env, Block::Hint::Unused),  // endCatchTarget
     irgen::defBlock(env, Block::Hint::Unused),  // endCatchLocalsDecRefdTarget
     asyncEagerOffset,
-    env.inlineState.cost,
-    ctx
+    env.inlineState.cost
   };
 
   FTRACE(1, "[[[ begin inlining: {}\n", callee->fullName()->data());
@@ -685,21 +684,27 @@ void sideExitFromInlined(IRGS& env, SrcKey target) {
   assertx(isInlining(env));
 
   if (target.funcEntry()) {
-    auto const calleeFp = fp(env);
-    env.irb->fs().endInliningForSideExit();
-    auto const inlineFrame = popInlineFrame(env);
-    SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
+    // FIXME: Func entries may contain guards that might fail. Ideally we would
+    // CallFuncEntry in these situations, but CallFuncEntry accepts arguments on
+    // the stack and we already converted them to the locals.
+    spillInlinedFrames(env);
 
-    auto const ret = callFuncEntry(env, target, inlineFrame.frame.ctx, calleeFp,
-                                   target.numEntryArgs(), false);
-    push(env, ret);
-    gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-  } else {
     auto const invSP = spOffBCFromStackBase(env);
-    auto const bindData = LdBindAddrData { target, invSP };
-    auto const targetAddr = gen(env, LdBindAddr, bindData);
-    sideExitFromInlined(env, targetAddr);
+    auto const irSP = spOffBCFromIRSP(env);
+    gen(
+      env,
+      ReqBindJmp,
+      ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
+      sp(env),
+      fp(env)
+    );
+    return;
   }
+
+  auto const invSP = spOffBCFromStackBase(env);
+  auto const bindData = LdBindAddrData { target, invSP };
+  auto const targetAddr = gen(env, LdBindAddr, bindData);
+  sideExitFromInlined(env, targetAddr);
 }
 
 void sideExitFromInlined(IRGS& env, SSATmp* target) {
@@ -733,6 +738,37 @@ void endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc) {
     ? env.inlineState.frames.back().endCatchTarget
     : env.inlineState.frames.back().endCatchLocalsDecRefdTarget;
   gen(env, Jmp, target, exc);
+}
+
+bool spillInlinedFrames(IRGS& env) {
+  assertx(inlineDepth(env) == env.irb->fs().inlineDepth());
+
+  // Nothing to spill.
+  if (!isInlining(env)) return false;
+
+  auto const fixupFP = env.irb->fs().fixupFP();
+  bool spilled = false;
+  for (size_t depth = 0; depth < env.irb->fs().inlineDepth(); depth++) {
+    auto const parentFP = env.irb->fs()[depth].fp();
+    if (parentFP == fixupFP) spilled = true;
+    if (spilled) {
+      auto const fp = env.irb->fs()[depth + 1].fp();
+
+      // Inline return stub doesn't support async eager return.
+      StFrameMetaData meta;
+      meta.callBCOff = fp->inst()->marker().sk().offset();
+      meta.isInlined = true;
+      meta.asyncEagerReturn = false;
+      gen(env, StFrameMeta, meta, fp);
+
+      auto const func = env.irb->fs()[depth + 1].curFunc;
+      gen(env, StFrameFunc, FuncData { func }, fp);
+
+      gen(env, InlineCall, fp, parentFP);
+      updateMarker(env);
+    }
+  }
+  return spilled;
 }
 
 void fixCalleeUnit(const IRGS& env, IRUnit& unit) {

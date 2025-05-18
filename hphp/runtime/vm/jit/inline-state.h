@@ -67,11 +67,6 @@ struct InlineFrame {
    * Saved cost.
    */
   int savedCost;
-
-  /*
-   * Callee context (TCls, TObj, TNullptr)
-   */
-  SSATmp* ctx;
 };
 
 struct InlineState {

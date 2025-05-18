@@ -306,6 +306,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   switch (inst->op()) {
   case EnterInlineFrame: trackEnterInlineFrame(inst); break;
   case LeaveInlineFrame: trackLeaveInlineFrame(); break;
+  case InlineCall:       trackInlineCall(inst); break;
   case InlineSideExit:   trackInlineSideExit(inst); break;
   case InlineSideExitSyncStack:
     assertx(cur().bcSPOff ==
@@ -763,6 +764,7 @@ void FrameStateMgr::handleConservatively(const IRInstruction* inst) {
       store(x.outputs);
     },
     [&] (const PureStore& x)       { store(x.dst); },
+    [&] (const PureInlineCall& x)  { store(x.base); },
     [&] (const UnknownEffects&)    { store(AUnknown); },
     [&] (const ReturnEffects&)     {},
     [&] (const ExitEffects&)       {},
@@ -1069,6 +1071,11 @@ void FrameStateMgr::trackLeaveInlineFrame() {
   m_stack.pop_back();
   assertx(!m_stack.empty());
   assertx(cur().checkMInstrStateDead());
+}
+
+void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
+  assertx(cur().fixupFPValue == inst->src(1));
+  cur().fixupFPValue = inst->src(0);
 }
 
 void FrameStateMgr::trackInlineSideExit(const IRInstruction* inst) {

@@ -151,6 +151,20 @@ void cgStFrameCtx(IRLS& env, const IRInstruction* inst) {
   vmain(env) << store{ctx, fp[AROFF(m_thisUnsafe)]};
 }
 
+void cgStFrameMeta(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<StFrameMeta>();
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  // Set m_callOffAndFlags.
+  auto const coaf = safe_cast<int32_t>(ActRec::encodeCallOffsetAndFlags(
+    extra->callBCOff,
+    (extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0) |
+      (extra->isInlined ? (1 << ActRec::IsInlined) : 0)
+  ));
+  v << storeli{coaf, fp[AROFF(m_callOffAndFlags)]};
+}
+
 void cgStFrameFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();

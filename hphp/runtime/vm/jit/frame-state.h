@@ -515,6 +515,7 @@ private:
   void uninitStack();
   void trackEnterInlineFrame(const IRInstruction* inst);
   void trackLeaveInlineFrame();
+  void trackInlineCall(const IRInstruction* inst);
   void trackInlineSideExit(const IRInstruction* inst);
 
   void pointerLoad(SSATmp*, SSATmp*);

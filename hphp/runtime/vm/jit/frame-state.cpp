@@ -347,17 +347,20 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       assertx(cur().checkMInstrStateDead());
       auto const extra = inst->extra<CallFuncEntry>();
       auto const callee = extra->target.func();
-      auto const defCalleeFP = inst->src(0)->inst();
-      assertx(defCalleeFP->is(DefCalleeFP));
-
+      // Remove tracked state for the slots for argc and the actrec.
+      uint32_t numCells = kNumActRecCells + callee->numFuncEntryInputs();
+      for (auto i = uint32_t{0}; i < numCells; ++i) {
+        setValue(stk(extra->spOffset + i), nullptr);
+      }
       // Set the type of out parameter locations.
-      auto const base =
-        defCalleeFP->extra<DefCalleeFP>()->spOffset + kNumActRecCells;
+      auto const base = extra->spOffset + numCells;
       for (auto i = uint32_t{0}; i < callee->numInOutParams(); ++i) {
         setType(stk(base + i), irgen::callOutType(callee, i));
       }
       // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().bcSPOff());
+      assertx(cur().bcSPOff.offset >= numCells);
+      cur().bcSPOff -= numCells;
     }
     break;
 
@@ -495,20 +498,16 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case StLoc:
   case StLocMeta:
-    if (inst->src(0) == cur().fp()) {
-      setValueAndSyncMBase(
-        loc(inst->extra<LocalId>()->locId),
-        inst->src(1),
-        false
-      );
-    }
+    setValueAndSyncMBase(
+      loc(inst->extra<LocalId>()->locId),
+      inst->src(1),
+      false
+    );
     break;
 
   case LdLoc: {
-    if (inst->src(0) == cur().fp()) {
-      auto const id = inst->extra<LdLoc>()->locId;
-      setValueAndSyncMBase(loc(id), inst->dst(), true);
-    }
+    auto const id = inst->extra<LdLoc>()->locId;
+    setValueAndSyncMBase(loc(id), inst->dst(), true);
     break;
   }
 
@@ -1012,17 +1011,14 @@ void FrameStateMgr::trackEnterInlineFrame(const IRInstruction* inst) {
   auto const extra = inst->src(0)->inst()->extra<DefCalleeFP>();
   auto const callee = extra->func;
   auto const spOffset = extra->spOffset;
-  auto const adjust = inst->extra<EnterInlineFrame>()->copy
-    ? callee->numFuncEntryInputs()
-    : 0;
-  assertx(cur().bcSPOff - adjust == spOffset.to<SBInvOffset>(irSPOff()));
+  assertx(cur().bcSPOff == spOffset.to<SBInvOffset>(irSPOff()));
 
   // Remove space from callee's frame from the caller's stack.
-  for (auto i = uint32_t{0}; i < kNumActRecCells + adjust; ++i) {
-    setValue(stk(spOffset - adjust + i), nullptr);
+  for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
+    setValue(stk(spOffset + i), nullptr);
   }
   assertx(cur().bcSPOff.offset >= kNumActRecCells);
-  cur().bcSPOff -= kNumActRecCells + adjust;
+  cur().bcSPOff -= kNumActRecCells;
 
   if (callee->isCPPBuiltin()) {
     auto const inout = callee->numInOutParams();

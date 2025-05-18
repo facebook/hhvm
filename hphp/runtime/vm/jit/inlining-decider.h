@@ -103,8 +103,7 @@ int costOfInlining(SrcKey callerSk,
 irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
                                             SrcKey entry,
                                             Type ctxType,
-                                            SrcKey callerSk,
-                                            std::vector<Type> inputTypes);
+                                            SrcKey callerSk);
 
 void setInliningMetadata(uint64_t baseProfCount, 
                          const jit::hash_map<FuncId, uint32_t>& funcTargetCounts);

@@ -85,7 +85,7 @@ bool spillInlinedFrames(IRGS& env);
  * Construct a FP that can be used to inline callee. Must be used while the
  * FCall bytecode is being translated.
  */
-SSATmp* genCalleeFP(IRGS& env, const Func* callee, int argc);
+SSATmp* genCalleeFP(IRGS& env, const Func* callee);
 
 /**
  * Stitch callee's IRUnit into caller's IRGS.

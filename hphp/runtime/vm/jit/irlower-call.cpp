@@ -197,7 +197,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
-  auto const calleeFP = srcLoc(env, inst, 0).reg();
+  auto const sp = srcLoc(env, inst, 0).reg();
   auto const ctx = srcLoc(env, inst, 2).reg();
   auto const extra = inst->extra<CallFuncEntry>();
   auto const callee = extra->target.func();
@@ -212,7 +212,12 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     setCtxReg(v, callee, inst->src(2), ctx, r_func_entry_ctx());
 
   // Make vmsp() point to the future vmfp().
-  v << syncvmsp{calleeFP};
+  auto const ssp = v.makeReg();
+  v << lea{
+    sp[cellsToBytes(extra->spOffset.offset + callee->numFuncEntryInputs())],
+    ssp
+  };
+  v << syncvmsp{ssp};
 
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
@@ -224,7 +229,8 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
   // all inputs, ActRec and empty space reserved for inouts.
   auto const marker = inst->marker();
   auto const fixupBcOff = marker.fixupBcOff();
-  auto const fixupSpOff = marker.fixupBcSPOff() - callee->numInOutParams();
+  auto const fixupSpOff = marker.fixupBcSPOff()
+    - callee->numFuncEntryInputs() - kNumActRecCells - callee->numInOutParams();
   v << syncpoint{Fixup::direct(fixupBcOff, fixupSpOff)};
   v << unwind{done, label(env, inst->taken())};
   v = done;

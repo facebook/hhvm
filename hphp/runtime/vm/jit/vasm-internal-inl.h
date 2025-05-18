@@ -137,7 +137,6 @@ inline bool emit(Venv&, const inlineend&) {
 inline void record_frame(Venv& env, TCA start) {
   if (!env.origin ||
       !env.origin->marker().valid() ||
-      env.origin->marker().sk().prologue() ||
       !env.origin->marker().fp()) return;
 
   auto const& block = env.unit.blocks[env.current];

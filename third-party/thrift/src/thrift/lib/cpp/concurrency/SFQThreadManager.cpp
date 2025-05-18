@@ -26,9 +26,7 @@
 #include <thrift/lib/cpp/concurrency/SFQThreadManager.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 static constexpr uint64_t kDefaultTenantId{0};
 
@@ -97,6 +95,4 @@ size_t SFQThreadManager::pendingUpstreamTaskCount() const {
   return count;
 }
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency

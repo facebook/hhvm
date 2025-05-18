@@ -51,9 +51,7 @@
 FOLLY_GFLAGS_DEFINE_bool(
     codel_enabled, false, "Enable codel queue timeout algorithm");
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 namespace {
 /* Translates from wangle priorities (normal at 0, higher is higher)
@@ -1745,6 +1743,4 @@ PriorityThreadManager::newPriorityThreadManager(size_t normalThreadsCount) {
   return newPriorityThreadManager({{2, 2, 2, normalThreadsCount, 2}});
 }
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency

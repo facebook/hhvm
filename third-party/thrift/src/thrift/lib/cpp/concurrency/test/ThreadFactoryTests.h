@@ -33,10 +33,7 @@
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp/thrift_config.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
-namespace test {
+namespace apache::thrift::concurrency::test {
 
 using std::shared_ptr;
 using namespace apache::thrift::concurrency;
@@ -427,7 +424,4 @@ class ThreadFactoryTests {
 
 const double ThreadFactoryTests::ERROR = .20;
 
-} // namespace test
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency::test

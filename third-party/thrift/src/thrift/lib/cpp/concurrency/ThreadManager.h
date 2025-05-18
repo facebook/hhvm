@@ -41,9 +41,7 @@
 
 FOLLY_GFLAGS_DECLARE_bool(codel_enabled);
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 class Runnable;
 class ThreadFactory;
@@ -553,6 +551,4 @@ inline std::shared_ptr<ThreadFactory> Factory(
   return std::make_shared<PosixThreadFactory>(PosixThreadFactory::OTHER, prio);
 }
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency

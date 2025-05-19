@@ -134,6 +134,13 @@ class TypeSystem {
    * guarantee because it allows the caller to traverse the full `TypeSystem`.
    */
   virtual folly::F14FastSet<Uri> getKnownUris() const = 0;
+
+  /**
+   * Resolves an arbitrary type-id ito a TypeRef. Resolution will fail if TypeId
+   * references user-defined-types not contained within this TypeSystem
+   * instance.
+   */
+  TypeRef resolveTypeId(const TypeId& typeId);
 };
 
 /**

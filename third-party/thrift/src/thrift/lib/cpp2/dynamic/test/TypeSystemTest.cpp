@@ -97,6 +97,19 @@ void expectKnownUris(
   EXPECT_EQ(expectedUris, knownUris);
 }
 
+constexpr auto kEmptyStructUri = "meta.com/thrift/test/EmptyStruct";
+constexpr auto kEmptyUnionUri = "meta.com/thrift/test/EmptyUnion";
+constexpr auto kEmptyEnumUri = "meta.com/thrift/test/EmptyEnum";
+
+std::unique_ptr<TypeSystem> typeSystemWithEmpties() {
+  TypeSystemBuilder builder;
+  builder.addType(kEmptyStructUri, makeStruct({}));
+  builder.addType(kEmptyUnionUri, makeUnion({}));
+  builder.addType(kEmptyEnumUri, makeEnum({}));
+
+  return std::move(builder).build();
+}
+
 } // namespace
 
 TEST(TypeSystemTest, EmptyStruct) {
@@ -742,11 +755,7 @@ TEST(TypeSystemTest, ToTType) {
       ToTTypeFn{}(TypeRef::Map::of(TypeRef::I32(), TypeRef::String())),
       TType::T_MAP);
 
-  TypeSystemBuilder builder;
-  builder.addType("meta.com/thrift/test/EmptyStruct", makeStruct({}));
-  builder.addType("meta.com/thrift/test/EmptyUnion", makeUnion({}));
-  builder.addType("meta.com/thrift/test/EmptyEnum", makeEnum({}));
-  auto typeSystem = std::move(builder).build();
+  auto typeSystem = typeSystemWithEmpties();
 
   EXPECT_EQ(
       ToTTypeFn{}(
@@ -764,5 +773,35 @@ TEST(TypeSystemTest, ToTType) {
           typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyEnum"))
               .asEnum()),
       TType::T_I32);
+}
+
+TEST(TypeSystemTest, TypeResolution) {
+  auto ts = typeSystemWithEmpties();
+
+  auto echoTest = [&](const auto& typeId) {
+    SCOPED_TRACE(fmt::format("echoTest({})", typeId));
+    EXPECT_EQ(typeId, ts->resolveTypeId(typeId).id());
+  };
+  auto echoTests = [&](const auto&... typeIds) { (echoTest(typeIds), ...); };
+
+  echoTests(
+      TypeIds::Bool,
+      TypeIds::Byte,
+      TypeIds::I16,
+      TypeIds::I32,
+      TypeIds::I64,
+      TypeIds::Double,
+      TypeIds::Float,
+      TypeIds::String,
+      TypeIds::Binary,
+      TypeIds::Any,
+      TypeIds::uri(kEmptyStructUri),
+      TypeIds::uri(kEmptyUnionUri),
+      TypeIds::uri(kEmptyEnumUri),
+      TypeIds::list(TypeIds::I32),
+      TypeIds::list(TypeIds::uri(kEmptyStructUri)),
+      TypeIds::set(TypeIds::I64),
+      TypeIds::set(TypeIds::uri(kEmptyStructUri)),
+      TypeIds::map(TypeIds::I32, TypeIds::uri(kEmptyEnumUri)));
 }
 } // namespace apache::thrift::dynamic

@@ -325,4 +325,77 @@ const Uri& DefinitionRef::uri() const noexcept {
   return "<unknown>";
 }
 
+namespace {
+struct TypeIdResolver {
+  TypeSystem& typeSystem_;
+
+  TypeRef operator()(const TypeId& typeId) const { return typeId.visit(*this); }
+
+  TypeRef operator()(const TypeId::Bool&) const {
+    return TypeRef(TypeRef::Bool());
+  }
+  TypeRef operator()(const TypeId::Byte&) const {
+    return TypeRef(TypeRef::Byte());
+  }
+
+  TypeRef operator()(const TypeId::I16&) const {
+    return TypeRef(TypeRef::I16());
+  }
+
+  TypeRef operator()(const TypeId::I32&) const {
+    return TypeRef(TypeRef::I32());
+  }
+
+  TypeRef operator()(const TypeId::I64&) const {
+    return TypeRef(TypeRef::I64());
+  }
+
+  TypeRef operator()(const TypeId::Float&) const {
+    return TypeRef(TypeRef::Float());
+  }
+
+  TypeRef operator()(const TypeId::Double&) const {
+    return TypeRef(TypeRef::Double());
+  }
+
+  TypeRef operator()(const TypeId::String&) const {
+    return TypeRef(TypeRef::String());
+  }
+
+  TypeRef operator()(const TypeId::Binary&) const {
+    return TypeRef(TypeRef::Binary());
+  }
+
+  TypeRef operator()(const TypeId::Any&) const {
+    return TypeRef(TypeRef::Any());
+  }
+
+  TypeRef operator()(const TypeId::Uri& uriId) const {
+    auto defn = typeSystem_.getUserDefinedType(uriId);
+    return TypeRef::fromDefinition(std::move(defn));
+  }
+
+  TypeRef operator()(const TypeId::List& listId) const {
+    auto elementType = (*this)(listId.elementType());
+    return TypeRef(TypeRef::List(std::move(elementType)));
+  }
+
+  TypeRef operator()(const TypeId::Set& setId) const {
+    auto elementType = (*this)(setId.elementType());
+    return TypeRef(TypeRef::Set(std::move(elementType)));
+  }
+
+  TypeRef operator()(const TypeId::Map& mapId) const {
+    auto keyType = (*this)(mapId.keyType());
+    auto valueType = (*this)(mapId.valueType());
+    return TypeRef(TypeRef::Map(std::move(keyType), std::move(valueType)));
+  }
+};
+
+} // namespace
+
+TypeRef TypeSystem::resolveTypeId(const TypeId& typeId) {
+  return TypeIdResolver{*this}(typeId);
+}
+
 } // namespace apache::thrift::dynamic

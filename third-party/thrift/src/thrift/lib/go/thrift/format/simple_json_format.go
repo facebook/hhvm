@@ -157,17 +157,17 @@ func mismatch(expected, actual string) error {
 
 func (p *simpleJSONFormat) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
 	p.resetContextStack() // THRIFT-3735
-	if e := p.OutputListBegin(); e != nil {
-		return e
+	if err := p.OutputListBegin(); err != nil {
+		return err
 	}
-	if e := p.WriteString(name); e != nil {
-		return e
+	if err := p.WriteString(name); err != nil {
+		return err
 	}
-	if e := p.WriteByte(byte(typeID)); e != nil {
-		return e
+	if err := p.WriteByte(byte(typeID)); err != nil {
+		return err
 	}
-	if e := p.WriteI32(seqID); e != nil {
-		return e
+	if err := p.WriteI32(seqID); err != nil {
+		return err
 	}
 	return nil
 }
@@ -177,8 +177,8 @@ func (p *simpleJSONFormat) WriteMessageEnd() error {
 }
 
 func (p *simpleJSONFormat) WriteStructBegin(name string) error {
-	if e := p.OutputObjectBegin(); e != nil {
-		return e
+	if err := p.OutputObjectBegin(); err != nil {
+		return err
 	}
 	return nil
 }
@@ -188,8 +188,8 @@ func (p *simpleJSONFormat) WriteStructEnd() error {
 }
 
 func (p *simpleJSONFormat) WriteFieldBegin(name string, typeID types.Type, id int16) error {
-	if e := p.WriteString(name); e != nil {
-		return e
+	if err := p.WriteString(name); err != nil {
+		return err
 	}
 	return nil
 }
@@ -202,14 +202,14 @@ func (p *simpleJSONFormat) WriteFieldEnd() error {
 func (p *simpleJSONFormat) WriteFieldStop() error { return nil }
 
 func (p *simpleJSONFormat) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
-	if e := p.OutputListBegin(); e != nil {
-		return e
+	if err := p.OutputListBegin(); err != nil {
+		return err
 	}
-	if e := p.WriteByte(byte(keyType)); e != nil {
-		return e
+	if err := p.WriteByte(byte(keyType)); err != nil {
+		return err
 	}
-	if e := p.WriteByte(byte(valueType)); e != nil {
-		return e
+	if err := p.WriteByte(byte(valueType)); err != nil {
+		return err
 	}
 	return p.WriteI32(int32(size))
 }
@@ -271,24 +271,24 @@ func (p *simpleJSONFormat) WriteBinary(v []byte) error {
 	// not an arbitrary byte array, to ensure bytes are transmitted
 	// efficiently we must convert this into a valid JSON string
 	// therefore we use base64 encoding to avoid excessive escaping/quoting
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
-	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_QUOTE_BYTES); err != nil {
+		return types.NewProtocolException(err)
 	}
 	if len(v) > 0 {
 		writer := base64.NewEncoder(base64.StdEncoding, p.writer)
-		if _, e := writer.Write(v); e != nil {
+		if _, err := writer.Write(v); err != nil {
 			p.writer.Reset(p.buffer) // THRIFT-3735
-			return types.NewProtocolException(e)
+			return types.NewProtocolException(err)
 		}
-		if e := writer.Close(); e != nil {
-			return types.NewProtocolException(e)
+		if err := writer.Close(); err != nil {
+			return types.NewProtocolException(err)
 		}
 	}
-	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_QUOTE_BYTES); err != nil {
+		return types.NewProtocolException(err)
 	}
 	return p.OutputPostValue()
 }
@@ -561,12 +561,12 @@ func (p *simpleJSONFormat) OutputPreValue() error {
 	}
 	switch cxt {
 	case _CONTEXT_IN_LIST, _CONTEXT_IN_OBJECT_NEXT_KEY:
-		if _, e := p.write(JSON_COMMA); e != nil {
-			return types.NewProtocolException(e)
+		if _, err := p.write(JSON_COMMA); err != nil {
+			return types.NewProtocolException(err)
 		}
 	case _CONTEXT_IN_OBJECT_NEXT_VALUE:
-		if _, e := p.write(JSON_COLON); e != nil {
-			return types.NewProtocolException(e)
+		if _, err := p.write(JSON_COLON); err != nil {
+			return types.NewProtocolException(err)
 		}
 	}
 	return nil
@@ -595,8 +595,8 @@ func (p *simpleJSONFormat) OutputPostValue() error {
 }
 
 func (p *simpleJSONFormat) OutputBool(value bool) error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
 	var v string
 	if value {
@@ -612,25 +612,25 @@ func (p *simpleJSONFormat) OutputBool(value bool) error {
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		v = jsonQuote(v)
 	}
-	if e := p.OutputStringData(v); e != nil {
-		return e
+	if err := p.OutputStringData(v); err != nil {
+		return err
 	}
 	return p.OutputPostValue()
 }
 
 func (p *simpleJSONFormat) OutputNull() error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
-	if _, e := p.write(JSON_NULL); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_NULL); err != nil {
+		return types.NewProtocolException(err)
 	}
 	return p.OutputPostValue()
 }
 
 func (p *simpleJSONFormat) OutputF64(value float64) error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
 	var v string
 	if math.IsNaN(value) {
@@ -650,15 +650,15 @@ func (p *simpleJSONFormat) OutputF64(value float64) error {
 			v = string(JSON_QUOTE) + v + string(JSON_QUOTE)
 		}
 	}
-	if e := p.OutputStringData(v); e != nil {
-		return e
+	if err := p.OutputStringData(v); err != nil {
+		return err
 	}
 	return p.OutputPostValue()
 }
 
 func (p *simpleJSONFormat) OutputF32(value float32) error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
 	var v string
 	if math.IsNaN(float64(value)) {
@@ -678,15 +678,15 @@ func (p *simpleJSONFormat) OutputF32(value float32) error {
 			v = string(JSON_QUOTE) + v + string(JSON_QUOTE)
 		}
 	}
-	if e := p.OutputStringData(v); e != nil {
-		return e
+	if err := p.OutputStringData(v); err != nil {
+		return err
 	}
 	return p.OutputPostValue()
 }
 
 func (p *simpleJSONFormat) OutputI64(value int64) error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
 	cxt, ok := p.dumpContext.peek()
 	if !ok {
@@ -697,30 +697,30 @@ func (p *simpleJSONFormat) OutputI64(value int64) error {
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		v = jsonQuote(v)
 	}
-	if e := p.OutputStringData(v); e != nil {
-		return e
+	if err := p.OutputStringData(v); err != nil {
+		return err
 	}
 	return p.OutputPostValue()
 }
 
 func (p *simpleJSONFormat) OutputString(s string) error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
-	if e := p.OutputStringData(jsonQuote(s)); e != nil {
-		return e
+	if err := p.OutputStringData(jsonQuote(s)); err != nil {
+		return err
 	}
 	return p.OutputPostValue()
 }
 
 func (p *simpleJSONFormat) OutputStringData(s string) error {
-	_, e := p.write([]byte(s))
-	return types.NewProtocolException(e)
+	_, err := p.write([]byte(s))
+	return types.NewProtocolException(err)
 }
 
 func (p *simpleJSONFormat) OutputObjectBegin() error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
 	if _, e := p.write(JSON_LBRACE); e != nil {
 		return types.NewProtocolException(e)
@@ -730,53 +730,53 @@ func (p *simpleJSONFormat) OutputObjectBegin() error {
 }
 
 func (p *simpleJSONFormat) OutputObjectEnd() error {
-	if _, e := p.write(JSON_RBRACE); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_RBRACE); err != nil {
+		return types.NewProtocolException(err)
 	}
 	_, ok := p.dumpContext.pop()
 	if !ok {
 		return errEmptyJSONContextStack
 	}
-	if e := p.OutputPostValue(); e != nil {
-		return e
+	if err := p.OutputPostValue(); err != nil {
+		return err
 	}
 	return nil
 }
 
 func (p *simpleJSONFormat) OutputListBegin() error {
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
-	if _, e := p.write(JSON_LBRACKET); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_LBRACKET); err != nil {
+		return types.NewProtocolException(err)
 	}
 	p.dumpContext.push(_CONTEXT_IN_LIST_FIRST)
 	return nil
 }
 
 func (p *simpleJSONFormat) OutputListEnd() error {
-	if _, e := p.write(JSON_RBRACKET); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_RBRACKET); err != nil {
+		return types.NewProtocolException(err)
 	}
 	_, ok := p.dumpContext.pop()
 	if !ok {
 		return errEmptyJSONContextStack
 	}
-	if e := p.OutputPostValue(); e != nil {
-		return e
+	if err := p.OutputPostValue(); err != nil {
+		return err
 	}
 	return nil
 }
 
 func (p *simpleJSONFormat) OutputElemListBegin(elemType types.Type, size int) error {
-	if e := p.OutputListBegin(); e != nil {
-		return e
+	if err := p.OutputListBegin(); err != nil {
+		return err
 	}
-	if e := p.WriteByte(byte(elemType)); e != nil {
-		return e
+	if err := p.WriteByte(byte(elemType)); err != nil {
+		return err
 	}
-	if e := p.WriteI64(int64(size)); e != nil {
-		return e
+	if err := p.WriteI64(int64(size)); err != nil {
+		return err
 	}
 	return nil
 }
@@ -842,8 +842,8 @@ func (p *simpleJSONFormat) ParsePreValue() error {
 }
 
 func (p *simpleJSONFormat) ParsePostValue() error {
-	if e := p.readNonSignificantWhitespace(); e != nil {
-		return types.NewProtocolException(e)
+	if err := p.readNonSignificantWhitespace(); err != nil {
+		return types.NewProtocolException(err)
 	}
 	cxt, ok := p.parseContextStack.peek()
 	if !ok {

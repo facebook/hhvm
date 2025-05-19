@@ -79,23 +79,23 @@ type binaryEncoder struct {
 func (p *binaryEncoder) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
 	if p.strictWrite {
 		version := uint32(types.VERSION_1) | uint32(typeID)
-		e := p.WriteI32(int32(version))
-		if e != nil {
-			return e
+		err := p.WriteI32(int32(version))
+		if err != nil {
+			return err
 		}
-		e = p.WriteString(name)
-		if e != nil {
-			return e
+		err = p.WriteString(name)
+		if err != nil {
+			return err
 		}
 		return p.WriteI32(seqID)
 	} else {
-		e := p.WriteString(name)
-		if e != nil {
-			return e
+		err := p.WriteString(name)
+		if err != nil {
+			return err
 		}
-		e = p.WriteByte(byte(typeID))
-		if e != nil {
-			return e
+		err = p.WriteByte(byte(typeID))
+		if err != nil {
+			return err
 		}
 		return p.WriteI32(seqID)
 	}
@@ -114,9 +114,9 @@ func (p *binaryEncoder) WriteStructEnd() error {
 }
 
 func (p *binaryEncoder) WriteFieldBegin(name string, typeID types.Type, id int16) error {
-	e := p.WriteByte(byte(typeID))
-	if e != nil {
-		return e
+	err := p.WriteByte(byte(typeID))
+	if err != nil {
+		return err
 	}
 	return p.WriteI16(id)
 }
@@ -130,13 +130,13 @@ func (p *binaryEncoder) WriteFieldStop() error {
 }
 
 func (p *binaryEncoder) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
-	e := p.WriteByte(byte(keyType))
-	if e != nil {
-		return e
+	err := p.WriteByte(byte(keyType))
+	if err != nil {
+		return err
 	}
-	e = p.WriteByte(byte(valueType))
-	if e != nil {
-		return e
+	err = p.WriteByte(byte(valueType))
+	if err != nil {
+		return err
 	}
 	return p.WriteI32(int32(size))
 }
@@ -146,9 +146,9 @@ func (p *binaryEncoder) WriteMapEnd() error {
 }
 
 func (p *binaryEncoder) WriteListBegin(elemType types.Type, size int) error {
-	e := p.WriteByte(byte(elemType))
-	if e != nil {
-		return e
+	err := p.WriteByte(byte(elemType))
+	if err != nil {
+		return err
 	}
 	return p.WriteI32(int32(size))
 }
@@ -158,9 +158,9 @@ func (p *binaryEncoder) WriteListEnd() error {
 }
 
 func (p *binaryEncoder) WriteSetBegin(elemType types.Type, size int) error {
-	e := p.WriteByte(byte(elemType))
-	if e != nil {
-		return e
+	err := p.WriteByte(byte(elemType))
+	if err != nil {
+		return err
 	}
 	return p.WriteI32(int32(size))
 }
@@ -177,8 +177,8 @@ func (p *binaryEncoder) WriteBool(value bool) error {
 }
 
 func (p *binaryEncoder) WriteByte(value byte) error {
-	e := writeByte(p.writer, value)
-	return types.NewProtocolException(e)
+	err := writeByte(p.writer, value)
+	return types.NewProtocolException(err)
 }
 
 func (p *binaryEncoder) WriteI16(value int16) error {
@@ -211,11 +211,11 @@ func (p *binaryEncoder) WriteFloat(value float32) error {
 }
 
 func (p *binaryEncoder) WriteString(value string) error {
-	e := p.WriteI32(int32(len(value)))
-	if e != nil {
-		return e
+	err := p.WriteI32(int32(len(value)))
+	if err != nil {
+		return err
 	}
-	_, err := p.writer.Write([]byte(value))
+	_, err = p.writer.Write([]byte(value))
 	return types.NewProtocolException(err)
 }
 

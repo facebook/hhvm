@@ -329,9 +329,9 @@ func (p *compactJSONFormat) ReadMapBegin() (types.Type /* kType */, types.Type /
 }
 
 func (p *compactJSONFormat) ReadMapEnd() error {
-	e := p.ParseObjectEnd()
-	if e != nil {
-		return e
+	err := p.ParseObjectEnd()
+	if err != nil {
+		return err
 	}
 	return p.ParseListEnd()
 }

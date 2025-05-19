@@ -38,7 +38,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
         with:
           context: .
           file: proxygen/httpserver/samples/hq/quic-interop/Dockerfile

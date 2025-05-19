@@ -88,12 +88,13 @@ struct BootStats {
   static void set(const std::string& name, int64_t value);
 
   struct Block {
-    explicit Block(const std::string& name, bool enabled);
+    explicit Block(const std::string& name, bool enabled, bool publishWallTime = false);
     ~Block();
 
    private:
     std::string m_name;
     bool m_enabled{false};
+    bool m_publishWallTime{false};
     ResourceUsage m_start;
   };
 

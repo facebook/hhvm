@@ -416,7 +416,7 @@ void retranslateAll(bool skipSerialize) {
   {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
     BootStats::Block timer("RTA_translate_and_relocate",
-                           Cfg::Server::Mode);
+                           Cfg::Server::Mode, true);
     auto const runParallelRetranslate = [&] {
       {
         Treadmill::Session session(Treadmill::SessionKind::Retranslate);
@@ -687,7 +687,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
     s_retranslateAllThread = std::thread([skipSerialize] {
       folly::setThreadName("jit.rta");
       BootStats::Block timer("retranslateall",
-                             Cfg::Server::Mode);
+                             Cfg::Server::Mode, true);
       rds::local::init();
       zend_get_bigint_data();
       SCOPE_EXIT { rds::local::fini(); };

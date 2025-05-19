@@ -103,10 +103,11 @@ ResourceUsage BootStats::Impl::computeDeltaFromLast() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BootStats::Block::Block(const std::string& name, bool enabled) {
+BootStats::Block::Block(const std::string& name, bool enabled, bool publishWallTime) {
   if (!enabled) return;
   m_name = name;
   m_enabled = true;
+  m_publishWallTime = publishWallTime;
   m_start = ResourceUsage::sinceEpoch();
   Logger::FInfo("BootStats: {}...", name);
 }
@@ -116,6 +117,10 @@ BootStats::Block::~Block() {
   auto total = ResourceUsage::sinceEpoch() - m_start;
   Logger::FInfo("BootStats: {} block done, took {}", m_name, total.toString());
   BootStats::add(m_name, total);
+  if (m_publishWallTime) {
+    auto const counter = ServiceData::createCounter("bootstats." + m_name + ".time");
+    counter->setValue(std::chrono::duration_cast<std::chrono::milliseconds>(total.wall()).count());     
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

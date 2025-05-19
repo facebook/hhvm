@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/dynamic/TypeId.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
 
 #include <cstdint>
 #include <optional>
@@ -717,4 +718,51 @@ TEST(TypeSystemTest, TypeRefIsEqualIdentityTo) {
   }
 }
 
+TEST(TypeSystemTest, ToTType) {
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::Bool()), TType::T_BOOL);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::Byte()), TType::T_BYTE);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::I16()), TType::T_I16);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::I32()), TType::T_I32);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::I64()), TType::T_I64);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::Double()), TType::T_DOUBLE);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::Float()), TType::T_FLOAT);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::String()), TType::T_STRING);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::Binary()), TType::T_STRING);
+
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::List::of(TypeRef::I32())), TType::T_LIST);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::List::of(TypeRef::String())), TType::T_LIST);
+
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::Set::of(TypeRef::I32())), TType::T_SET);
+  EXPECT_EQ(ToTTypeFn{}(TypeRef::Set::of(TypeRef::Any())), TType::T_SET);
+
+  EXPECT_EQ(
+      ToTTypeFn{}(TypeRef::Map::of(TypeRef::I32(), TypeRef::I32())),
+      TType::T_MAP);
+  EXPECT_EQ(
+      ToTTypeFn{}(TypeRef::Map::of(TypeRef::I32(), TypeRef::String())),
+      TType::T_MAP);
+
+  TypeSystemBuilder builder;
+  builder.addType("meta.com/thrift/test/EmptyStruct", makeStruct({}));
+  builder.addType("meta.com/thrift/test/EmptyUnion", makeUnion({}));
+  builder.addType("meta.com/thrift/test/EmptyEnum", makeEnum({}));
+  auto typeSystem = std::move(builder).build();
+
+  EXPECT_EQ(
+      ToTTypeFn{}(
+          typeSystem
+              ->getUserDefinedType(Uri("meta.com/thrift/test/EmptyStruct"))
+              .asStruct()),
+      TType::T_STRUCT);
+  EXPECT_EQ(
+      ToTTypeFn{}(
+          typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyUnion"))
+              .asUnion()),
+      TType::T_STRUCT);
+  EXPECT_EQ(
+      ToTTypeFn{}(
+          typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/EmptyEnum"))
+              .asEnum()),
+      TType::T_I32);
+}
 } // namespace apache::thrift::dynamic

@@ -17,7 +17,6 @@
 package stats
 
 import (
-	"math"
 	"runtime"
 	"sync"
 	"testing"
@@ -136,10 +135,8 @@ func TestBasicTimeseries(t *testing.T) {
 	summary, err := ts.Summarize(10 * time.Second)
 	require.NoError(t, err)
 	require.Len(t, testData, int(summary.Count))
-	// verify error is < 10x precision
-	if want, got := avg, summary.Average.Seconds(); !inEpsilon(want, got, config.Precision.Seconds()*10.) {
-		t.Fatalf("verify error is < 10x precision: want %v got %v", want, got)
-	}
+	// verify avg error is < 10x precision
+	require.InEpsilon(t, avg, summary.Average.Seconds(), config.Precision.Seconds()*10.0)
 }
 
 func TestMultiThreadedTimeseries(t *testing.T) {
@@ -194,33 +191,18 @@ func TestMultiThreadedTimeseries(t *testing.T) {
 	require.NoError(t, err)
 	avg := sum / float64(len(testData)*repeatDataN)
 
-	if want, got := int(len(testData)*repeatDataN), int(summary.Count); want != got {
-		t.Fatalf("verify the correct number of data points: want %v got %v", want, got)
-	}
-	if want, got := avg, summary.Average.Seconds(); !inEpsilon(want, got, config.Precision.Seconds()*10.) {
-		t.Fatalf("verify avg error is < 10x precision: want %v got %v", want, got)
-	}
-	if want, got := min, summary.Minimum.Seconds(); !inEpsilon(want, got, config.Precision.Seconds()) {
-		t.Fatalf("verify min within precision: want %v got %v", want, got)
-	}
-	if want, got := max, summary.Maximum.Seconds(); !inEpsilon(want, got, config.Precision.Seconds()) {
-		t.Fatalf("verify max within precision: want %v got %v", want, got)
-	}
-	if want, got := config.History, summary.Period; want != got {
-		t.Fatalf("verify period correctly reported: want %v got %v", want, got)
-	}
-	if want, got := uint64(0), summary.Success; want != got {
-		t.Fatalf("verify success is zero when not in use: want %v got %v", want, got)
-	}
-	if want, got := uint64(0), summary.Fail; want != got {
-		t.Fatalf("verify fail is zero when not in use: want %v got %v", want, got)
-	}
-}
-
-func inEpsilon(a, b, epsilon float64) bool {
-	if a == 0 {
-		return false
-	}
-	actual := math.Abs(a-b) / math.Abs(a)
-	return actual < epsilon
+	// verify the correct number of data points
+	require.Equal(t, int(len(testData)*repeatDataN), int(summary.Count))
+	// verify avg error is < 10x precision
+	require.InEpsilon(t, avg, summary.Average.Seconds(), config.Precision.Seconds()*10.0)
+	// verify min within precision
+	require.InEpsilon(t, min, summary.Minimum.Seconds(), config.Precision.Seconds())
+	// verify max within precision
+	require.InEpsilon(t, max, summary.Maximum.Seconds(), config.Precision.Seconds())
+	// verify period correctly reported
+	require.Equal(t, config.History, summary.Period)
+	// verify success is zero when not in use
+	require.Equal(t, uint64(0), summary.Success)
+	// verify fail is zero when not in use
+	require.Equal(t, uint64(0), summary.Fail)
 }

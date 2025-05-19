@@ -54,14 +54,8 @@ var serviceMetadatas = func() []*metadata.ThriftService {
     return fbthriftResults
 }()
 
-// GetMetadataThriftType (INTERNAL USE ONLY).
-// Returns metadata ThriftType for a given full type name.
-func GetMetadataThriftType(fullName string) *metadata.ThriftType {
-    return premadeThriftTypesMap[fullName]
-}
-
-// GetThriftMetadata returns complete Thrift metadata for current and imported packages.
-func GetThriftMetadata() *metadata.ThriftMetadata {
+// Thrift metadata for this package, as well as all of its recursive imports.
+var packageThriftMetadata = func() *metadata.ThriftMetadata {
     allEnumsMap := make(map[string]*metadata.ThriftEnum)
     allStructsMap := make(map[string]*metadata.ThriftStruct)
     allExceptionsMap := make(map[string]*metadata.ThriftException)
@@ -100,13 +94,22 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
         SetStructs(allStructsMap).
         SetExceptions(allExceptionsMap).
         SetServices(allServicesMap)
+}()
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
+}
+
+// GetThriftMetadata returns complete Thrift metadata for current and imported packages.
+func GetThriftMetadata() *metadata.ThriftMetadata {
+    return packageThriftMetadata
 }
 
 // GetThriftMetadataForService returns Thrift metadata for the given service.
 func GetThriftMetadataForService(scopedServiceName string) *metadata.ThriftMetadata {
-    thriftMetadata := GetThriftMetadata()
-
-    allServicesMap := thriftMetadata.GetServices()
+    allServicesMap := packageThriftMetadata.GetServices()
     relevantServicesMap := make(map[string]*metadata.ThriftService)
 
     serviceMetadata := allServicesMap[scopedServiceName]
@@ -120,9 +123,11 @@ func GetThriftMetadataForService(scopedServiceName string) *metadata.ThriftMetad
         }
     }
 
-    thriftMetadata.SetServices(relevantServicesMap)
-
-    return thriftMetadata
+    return metadata.NewThriftMetadata().
+        SetEnums(packageThriftMetadata.GetEnums()).
+        SetStructs(packageThriftMetadata.GetStructs()).
+        SetExceptions(packageThriftMetadata.GetExceptions()).
+        SetServices(relevantServicesMap)
 }
 
 func getMetadataThriftPrimitiveType(s *thrift.CodecPrimitiveSpec) *metadata.ThriftPrimitiveType {

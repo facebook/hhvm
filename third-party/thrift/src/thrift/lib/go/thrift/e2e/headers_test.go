@@ -58,8 +58,6 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 		clientTransportOption = thrift.WithUpgradeToRocket()
 	case thrift.TransportIDRocket:
 		clientTransportOption = thrift.WithRocket()
-	default:
-		panic("unsupported transport!")
 	}
 
 	addr, stopServer := startE2EServer(t, serverTransport, thrift.WithNumWorkers(10))

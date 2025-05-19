@@ -413,7 +413,8 @@ TEST(TypeSystemTest, ListTypeRef) {
   EXPECT_EQ(listField.identity(), identity(1, "listField"));
   EXPECT_EQ(listField.presence(), optional);
   EXPECT_TRUE(listField.type().isList());
-  EXPECT_EQ(listField.type().asList().elementType().id(), TypeIds::I32);
+  EXPECT_EQ(listField.type().asList().id(), TypeIds::list(TypeIds::I32));
+  EXPECT_EQ(listField.type().id(), TypeRef::List::of(TypeRef::I32()).id());
 }
 
 TEST(TypeSystemTest, SetTypeRef) {
@@ -438,7 +439,8 @@ TEST(TypeSystemTest, SetTypeRef) {
   EXPECT_EQ(setField.identity(), identity(1, "setField"));
   EXPECT_EQ(setField.presence(), optional);
   EXPECT_TRUE(setField.type().isSet());
-  EXPECT_EQ(setField.type().asSet().elementType().id(), TypeIds::I32);
+  EXPECT_EQ(setField.type().asSet().id(), TypeIds::set(TypeIds::I32));
+  EXPECT_EQ(setField.type().id(), TypeRef::Set::of(TypeRef::I32()).id());
 }
 
 TEST(TypeSystemTest, MapTypeRef) {
@@ -465,8 +467,12 @@ TEST(TypeSystemTest, MapTypeRef) {
   EXPECT_EQ(mapField.identity(), identity(1, "mapField"));
   EXPECT_EQ(mapField.presence(), optional);
   EXPECT_TRUE(mapField.type().isMap());
-  EXPECT_EQ(mapField.type().asMap().keyType().id(), TypeIds::I32);
-  EXPECT_EQ(mapField.type().asMap().valueType().id(), TypeIds::String);
+  EXPECT_EQ(
+      mapField.type().asMap().id(),
+      TypeIds::map(TypeIds::I32, TypeIds::String));
+  EXPECT_EQ(
+      mapField.type().id(),
+      TypeRef::Map::of(TypeRef::I32(), TypeRef::String()).id());
 }
 
 TEST(TypeSystemTest, OpaqueAliasTypeRef) {

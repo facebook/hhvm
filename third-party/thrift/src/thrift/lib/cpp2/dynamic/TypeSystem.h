@@ -161,11 +161,19 @@ class ListTypeRef final {
 
   const TypeRef& elementType() const { return *elementType_; }
 
+  // Helper to construct a ListTypeRef from a type-system node
+  // e.g. ListTypeRef::of(TypeRef::Bool())
+  template <typename T>
+  static ListTypeRef of(T&&);
+
   ~ListTypeRef() noexcept = default;
   ListTypeRef(const ListTypeRef&);
   ListTypeRef& operator=(const ListTypeRef&);
   ListTypeRef(ListTypeRef&&) noexcept = default;
   ListTypeRef& operator=(ListTypeRef&&) noexcept = default;
+
+  // See TypeRef::id()
+  TypeId id() const;
 
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
@@ -181,11 +189,19 @@ class SetTypeRef final {
 
   const TypeRef& elementType() const { return *elementType_; }
 
+  // Helper to construct a SetTypeRef from a type-system node
+  // e.g. SetTypeRef::of(TypeRef::Bool())
+  template <typename T>
+  static SetTypeRef of(T&&);
+
   ~SetTypeRef() noexcept = default;
   SetTypeRef(const SetTypeRef&);
   SetTypeRef& operator=(const SetTypeRef&);
   SetTypeRef(SetTypeRef&&) noexcept = default;
   SetTypeRef& operator=(SetTypeRef&&) noexcept = default;
+
+  // See TypeRef::id()
+  TypeId id() const;
 
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
@@ -202,11 +218,19 @@ class MapTypeRef final {
   const TypeRef& keyType() const { return *keyType_; }
   const TypeRef& valueType() const { return *valueType_; }
 
+  // Helpers to construct a MapTypeRef from type-system nodes
+  // e.g. MapTypeRef::of(TypeRef::I32(), TypeRef::String())
+  template <typename K, typename V>
+  static MapTypeRef of(K&&, V&&);
+
   ~MapTypeRef() noexcept = default;
   MapTypeRef(const MapTypeRef&);
   MapTypeRef& operator=(const MapTypeRef&);
   MapTypeRef(MapTypeRef&&) noexcept = default;
   MapTypeRef& operator=(MapTypeRef&&) noexcept = default;
+
+  // See TypeRef::id()
+  TypeId id() const;
 
  private:
   // Heap usage prevents mutual recursion with `TypeRef`.
@@ -782,5 +806,25 @@ decltype(auto) TypeRef::visit(F&&... visitors) const {
         return overloaded(primitive);
       });
 }
+
+namespace detail {
+
+template <typename T>
+/* static */ ListTypeRef ListTypeRef::of(T&& element) {
+  return ListTypeRef(TypeRef(std::forward<T>(element)));
+}
+
+template <typename T>
+/* static */ SetTypeRef SetTypeRef::of(T&& element) {
+  return SetTypeRef(TypeRef(std::forward<T>(element)));
+}
+
+template <typename K, typename V>
+/* static */ MapTypeRef MapTypeRef::of(K&& key, V&& value) {
+  return MapTypeRef(
+      TypeRef(std::forward<K>(key)), TypeRef(std::forward<V>(value)));
+}
+
+} // namespace detail
 
 } // namespace apache::thrift::dynamic

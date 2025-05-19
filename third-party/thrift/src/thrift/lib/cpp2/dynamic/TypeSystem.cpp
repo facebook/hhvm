@@ -78,6 +78,10 @@ ListTypeRef& ListTypeRef::operator=(const ListTypeRef& other) {
   return *this;
 }
 
+TypeId ListTypeRef::id() const {
+  return TypeIds::list(elementType().id());
+}
+
 SetTypeRef::SetTypeRef(TypeRef elementType)
     : elementType_(folly::copy_to_unique_ptr(std::move(elementType))) {}
 
@@ -87,6 +91,10 @@ SetTypeRef::SetTypeRef(const SetTypeRef& other)
 SetTypeRef& SetTypeRef::operator=(const SetTypeRef& other) {
   elementType_ = folly::copy_to_unique_ptr(other.elementType());
   return *this;
+}
+
+TypeId SetTypeRef::id() const {
+  return TypeIds::set(elementType().id());
 }
 
 MapTypeRef::MapTypeRef(TypeRef keyType, TypeRef valueType)
@@ -101,6 +109,10 @@ MapTypeRef& MapTypeRef::operator=(const MapTypeRef& other) {
   keyType_ = folly::copy_to_unique_ptr(other.keyType());
   valueType_ = folly::copy_to_unique_ptr(other.valueType());
   return *this;
+}
+
+TypeId MapTypeRef::id() const {
+  return TypeIds::map(keyType().id(), valueType().id());
 }
 
 [[noreturn]] void throwTypeRefAccessInactiveKind(std::string_view actualKind) {
@@ -148,11 +160,9 @@ TypeId TypeRef::id() const {
       [](const OpaqueAliasNode& opaqueAliasDef) {
         return TypeIds::uri(opaqueAliasDef.uri());
       },
-      [](const List& list) { return TypeIds::list(list.elementType().id()); },
-      [](const Set& set) { return TypeIds::set(set.elementType().id()); },
-      [](const Map& map) {
-        return TypeIds::map(map.keyType().id(), map.valueType().id());
-      });
+      [](const List& list) { return list.id(); },
+      [](const Set& set) { return set.id(); },
+      [](const Map& map) { return map.id(); });
 }
 
 bool TypeRef::isEqualIdentityTo(const TypeRef& rhs) const noexcept {

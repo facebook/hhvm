@@ -192,19 +192,13 @@ func ReadBool(t testing.TB, p types.Format) {
 	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
-		if thetype != thetype2 {
-			t.Fatalf("%s: %T type %s != type %s", "ReadBool", p, thetype, thetype2)
-		}
-		if thelen != thelen2 {
-			t.Fatalf("%s: %T len %d != len %d", "ReadBool", p, thelen, thelen2)
-		}
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
 	}
-	for k, v := range boolValues {
+	for _, v := range boolValues {
 		value, err := p.ReadBool()
 		require.NoError(t, err)
-		if v != value {
-			t.Fatalf("%s: index %d %q %q %t != %t", "ReadBool", k, p, v, value)
-		}
+		require.Equal(t, v, value)
 	}
 	err = p.ReadListEnd()
 	require.NoError(t, err)
@@ -215,11 +209,9 @@ func WriteBool(t testing.TB, p types.Format) {
 	thelen := len(boolValues)
 	err := p.WriteListBegin(thetype, thelen)
 	require.NoError(t, err)
-	for k, v := range boolValues {
+	for _, v := range boolValues {
 		err = p.WriteBool(v)
-		if err != nil {
-			t.Fatalf("%s: %T %q Error writing bool in list at index %d: %t", "WriteBool", p, err, k, v)
-		}
+		require.NoError(t, err)
 	}
 	err = p.WriteListEnd()
 	require.NoError(t, err)
@@ -237,11 +229,9 @@ func WriteByte(t testing.TB, p types.Format) {
 	thelen := len(byteValues)
 	err := p.WriteListBegin(thetype, thelen)
 	require.NoError(t, err)
-	for k, v := range byteValues {
+	for _, v := range byteValues {
 		err = p.WriteByte(v)
-		if err != nil {
-			t.Fatalf("%s: %T %q Error writing byte in list at index %d: %q", "WriteByte", p, err, k, v)
-		}
+		require.NoError(t, err)
 	}
 	err = p.WriteListEnd()
 	require.NoError(t, err)
@@ -256,21 +246,13 @@ func ReadByte(t testing.TB, p types.Format) {
 	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
-		if thetype != thetype2 {
-			t.Fatalf("%s: %T type %s != type %s", "ReadByte", p, thetype, thetype2)
-		}
-		if thelen != thelen2 {
-			t.Fatalf("%s: %T len %d != len %d", "ReadByte", p, thelen, thelen2)
-		}
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
 	}
-	for k, v := range byteValues {
+	for _, v := range byteValues {
 		value, err := p.ReadByte()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading byte at index %d: %q", "ReadByte", p, err, k, v)
-		}
-		if v != value {
-			t.Fatalf("%s: %T %d != %d", "ReadByte", p, v, value)
-		}
+		require.NoError(t, err)
+		require.Equal(t, v, value)
 	}
 	err = p.ReadListEnd()
 	require.NoError(t, err)
@@ -299,21 +281,13 @@ func ReadI16(t testing.TB, p types.Format) {
 	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
-		if thetype != thetype2 {
-			t.Fatalf("%s: %T type %s != type %s", "ReadI16", p, thetype, thetype2)
-		}
-		if thelen != thelen2 {
-			t.Fatalf("%s: %T len %d != len %d", "ReadI16", p, thelen, thelen2)
-		}
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
 	}
-	for k, v := range int16Values {
+	for _, v := range int16Values {
 		value, err := p.ReadI16()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading int16 at index %d: %q", "ReadI16", p, err, k, v)
-		}
-		if v != value {
-			t.Fatalf("%s: %T %d != %d", "ReadI16", p, v, value)
-		}
+		require.NoError(t, err)
+		require.Equal(t, v, value)
 	}
 	err = p.ReadListEnd()
 	require.NoError(t, err)
@@ -342,25 +316,16 @@ func ReadI32(t testing.TB, p types.Format) {
 	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
-		if thetype != thetype2 {
-			t.Fatalf("%s: %T type %s != type %s", "ReadI32", p, thetype, thetype2)
-		}
-		if thelen != thelen2 {
-			t.Fatalf("%s: %T len %d != len %d", "ReadI32", p, thelen, thelen2)
-		}
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
 	}
-	for k, v := range int32Values {
+	for _, v := range int32Values {
 		value, err := p.ReadI32()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading int32 at index %d: %q", "ReadI32", p, err, k, v)
-		}
-		if v != value {
-			t.Fatalf("%s: %T %d != %d", "ReadI32", p, v, value)
-		}
+		require.NoError(t, err)
+		require.Equal(t, v, value)
 	}
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadI32", p, err)
-	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
 }
 
 func ReadWriteI32(t testing.TB, p types.Format) {
@@ -386,25 +351,16 @@ func ReadI64(t testing.TB, p types.Format) {
 	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
-		if thetype != thetype2 {
-			t.Fatalf("%s: %T type %s != type %s", "ReadI64", p, thetype, thetype2)
-		}
-		if thelen != thelen2 {
-			t.Fatalf("%s: %T len %d != len %d", "ReadI64", p, thelen, thelen2)
-		}
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
 	}
-	for k, v := range int64Values {
+	for _, v := range int64Values {
 		value, err := p.ReadI64()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading int64 at index %d: %q", "ReadI64", p, err, k, v)
-		}
-		if v != value {
-			t.Fatalf("%s: %T %q != %q", "ReadI64", p, v, value)
-		}
+		require.NoError(t, err)
+		require.Equal(t, v, value)
 	}
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadI64", p, err)
-	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
 }
 
 func ReadWriteI64(t testing.TB, p types.Format) {
@@ -431,23 +387,15 @@ func ReadDouble(t testing.TB, p types.Format) {
 	thelen := len(doubleValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	require.NoError(t, err)
-	if thetype != thetype2 {
-		t.Fatalf("%s: %T type %s != type %s", "ReadDouble", p, thetype, thetype2)
-	}
-	if thelen != thelen2 {
-		t.Fatalf("%s: %T len %d != len %d", "ReadDouble", p, thelen, thelen2)
-	}
-	for k, v := range doubleValues {
+	require.Equal(t, thetype, thetype2)
+	require.Equal(t, thelen, thelen2)
+	for _, v := range doubleValues {
 		value, err := p.ReadDouble()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading double at index %d: %f", "ReadDouble", p, err, k, v)
-		}
+		require.NoError(t, err)
 		if math.IsNaN(v) {
-			if !math.IsNaN(value) {
-				t.Fatalf("%s: %T math.IsNaN(%f) != math.IsNaN(%f)", "ReadDouble", p, v, value)
-			}
-		} else if v != value {
-			t.Fatalf("%s: %T %f != %f", "ReadDouble", p, v, value)
+			require.True(t, math.IsNaN(value))
+		} else {
+			require.Equal(t, v, value)
 		}
 	}
 	err = p.ReadListEnd()
@@ -481,30 +429,19 @@ func ReadFloat(t testing.TB, p types.Format) {
 
 	thetype2, thelen2, err := p.ReadListBegin()
 	require.NoError(t, err)
-	if thetype != thetype2 {
-		t.Fatalf("%s: %T type %s != type %s", "ReadFloat", p, thetype, thetype2)
-	}
-	if thelen != thelen2 {
-		t.Fatalf("%s: %T len %d != len %d", "ReadFloat", p, thelen, thelen2)
-	}
-	for k, v := range floatValues {
+	require.Equal(t, thetype, thetype2)
+	require.Equal(t, thelen, thelen2)
+	for _, v := range floatValues {
 		value, err := p.ReadFloat()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading double at index %d: %f", "ReadFloat", p, err, k, v)
-		}
+		require.NoError(t, err)
 		if math.IsNaN(float64(v)) {
-			if !math.IsNaN(float64(value)) {
-				t.Fatalf("%s: %T math.IsNaN(%f) != math.IsNaN(%f)", "ReadFloat", p, v, value)
-			}
-		} else if v != value {
-			t.Fatalf("%s: %T %f != %f", "ReadFloat", p, v, value)
+			require.True(t, math.IsNaN(float64(value)))
+		} else {
+			require.Equal(t, v, value)
 		}
 	}
 	err = p.ReadListEnd()
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadFloat", p, err)
-	}
-
+	require.NoError(t, err)
 }
 
 func ReadWriteFloat(t testing.TB, p types.Format) {
@@ -528,30 +465,19 @@ func ReadString(t testing.TB, p types.Format) {
 	thelen := len(stringValues)
 
 	thetype2, thelen2, err := p.ReadListBegin()
-	if err != nil {
-		t.Fatalf("%s: %T %q Error reading list: %q", "ReadString", p, err, stringValues)
-	}
+	require.NoError(t, err)
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
-		if thetype != thetype2 {
-			t.Fatalf("%s: %T type %s != type %s", "ReadString", p, thetype, thetype2)
-		}
-		if thelen != thelen2 {
-			t.Fatalf("%s: %T len %d != len %d", "ReadString", p, thelen, thelen2)
-		}
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
 	}
-	for k, v := range stringValues {
+	for _, v := range stringValues {
 		value, err := p.ReadString()
-		if err != nil {
-			t.Fatalf("%s: %T %q Error reading string at index %d: %q", "ReadString", p, err, k, v)
-		}
-		if v != value {
-			t.Fatalf("%s: %T %s != %s", "ReadString", p, v, value)
-		}
+		require.NoError(t, err)
+		require.Equal(t, v, value)
 	}
-	if err != nil {
-		t.Fatalf("%s: %T Unable to read list end: %q", "ReadString", p, err)
-	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
 }
 
 func ReadWriteString(t testing.TB, p types.Format) {
@@ -569,16 +495,10 @@ func ReadBinary(t testing.TB, p types.Format) {
 	v := protocolBdata
 	value, err := p.ReadBinary()
 	require.NoError(t, err)
-	if len(v) != len(value) {
-		t.Fatalf("%s: %T len(v) != len(value)... %d != %d", "ReadBinary", p, len(v), len(value))
-	} else {
-		for i := 0; i < len(v); i++ {
-			if v[i] != value[i] {
-				t.Fatalf("%s: %T %s != %s", "ReadBinary", p, v, value)
-			}
-		}
+	require.Equal(t, len(v), len(value))
+	for i := 0; i < len(v); i++ {
+		require.Equal(t, v[i], value[i])
 	}
-
 }
 
 func ReadWriteBinary(t testing.TB, p types.Format) {
@@ -608,36 +528,24 @@ func ReadStruct(t testing.TB, p types.Format) {
 	require.NoError(t, err)
 	_, typeID, id, err := p.ReadFieldBegin()
 	require.NoError(t, err)
-	if v.fields[0].typ != typeID {
-		t.Fatalf("%s: %T type (%d) != (%d)", "ReadStruct", p, v.fields[0].typ, typeID)
-	}
-	if v.fields[0].id != id {
-		t.Fatalf("%s: %T id (%d) != (%d)", "ReadStruct", p, v.fields[0].id, id)
-	}
+	require.Equal(t, v.fields[0].typ, typeID)
+	require.Equal(t, v.fields[0].id, id)
 
 	val, err := p.ReadBool()
 	require.NoError(t, err)
-	if v.fields[0].value != val {
-		t.Fatalf("%s: %T value (%v) != (%v)", "ReadStruct", p, v.fields[0].value, val)
-	}
+	require.Equal(t, v.fields[0].value, val)
 
 	err = p.ReadFieldEnd()
 	require.NoError(t, err)
 
 	_, typeID, id, err = p.ReadFieldBegin()
 	require.NoError(t, err)
-	if v.fields[1].typ != typeID {
-		t.Fatalf("%s: %T type (%d) != (%d)", "ReadStruct", p, v.fields[1].typ, typeID)
-	}
-	if v.fields[1].id != id {
-		t.Fatalf("%s: %T id (%d) != (%d)", "ReadStruct", p, v.fields[1].id, id)
-	}
+	require.Equal(t, v.fields[1].typ, typeID)
+	require.Equal(t, v.fields[1].id, id)
 
 	strVal, err := p.ReadString()
 	require.NoError(t, err)
-	if v.fields[1].value != strVal {
-		t.Fatalf("%s: %T value %T (%s) != (%s)", "ReadStruct", p, v.fields[1].value, strVal)
-	}
+	require.Equal(t, v.fields[1].value, strVal)
 
 	err = p.ReadFieldEnd()
 	require.NoError(t, err)

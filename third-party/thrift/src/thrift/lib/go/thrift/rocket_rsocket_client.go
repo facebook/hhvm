@@ -34,8 +34,19 @@ import (
 // RSocketClient is a client that uses a rsocket library.
 type RSocketClient interface {
 	SendSetup(ctx context.Context) error
-	FireAndForget(messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) error
-	RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error)
+	FireAndForget(
+		messageName string,
+		protoID types.ProtocolID,
+		headers map[string]string,
+		dataBytes []byte,
+	) error
+	RequestResponse(
+		ctx context.Context,
+		messageName string,
+		protoID types.ProtocolID,
+		headers map[string]string,
+		dataBytes []byte,
+	) (map[string]string, []byte, error)
 	Close() error
 }
 

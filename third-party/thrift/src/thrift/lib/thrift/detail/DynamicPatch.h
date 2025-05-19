@@ -463,6 +463,253 @@ class DynamicSetPatch : public DynamicPatchBase {
   }
 };
 
+/// Schema-less Patch.
+///
+/// When Static Patch is unavailable, Dynamic Patch offers a schema-less patch
+/// apply, merge, and introspection (requires advanced knowledge of Thrift
+/// Patch).
+class DynamicPatch {
+ public:
+  /// @cond
+  DynamicPatch();
+  DynamicPatch(const DynamicPatch&);
+  DynamicPatch& operator=(const DynamicPatch&);
+  DynamicPatch(DynamicPatch&&) noexcept;
+  DynamicPatch& operator=(DynamicPatch&&) noexcept;
+  ~DynamicPatch();
+  /// @endcond
+
+  template <class T>
+  explicit DynamicPatch(T t) : patch_(std::make_unique<Patch>(std::move(t))) {}
+
+  /// Convert DynamicPatch to Protocol Object
+  Object toObject() &&;
+  Object toObject() const&;
+
+  /// Returns if the patch is no-op.
+  [[nodiscard]] bool empty() const;
+
+  /// Applies the patch to the given value. Throws if the patch is not
+  /// applicable to the value.
+  void apply(Value&) const;
+  /// Applies the patch to the given Thrift Any. Throws if the patch is not
+  /// applicable.
+  void applyToDataFieldInsideAny(type::AnyStruct&) const;
+  /// @brief Applies the patch to the given blob and returns the result as a
+  /// blob. Throws if the patch is not applicable.
+  ///
+  /// Note, this method uses introspection API `extractMaskFromPatch` to avoid
+  /// full deserialization when applying Thrift Patch to serialized structured
+  /// object in a blob.
+  template <type::StandardProtocol Protocol>
+  std::unique_ptr<folly::IOBuf> applyToSerializedObject(
+      const folly::IOBuf& buf) const;
+
+  /// Converts SafePatch stored in Thrift Any to DynamicPatch.
+  [[nodiscard]] static DynamicPatch fromSafePatch(const type::AnyStruct& any);
+  /// Stores DynamicPatch as SafePatch in Thrift Any with the provided type
+  /// using CompactProtocol.
+  type::AnyStruct toSafePatch(type::Type type) const;
+
+  /// Merges another patch into this patch. After the merge
+  /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
+  /// `next.apply(patch.apply(value))`.
+  template <class Other>
+  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
+
+  /// Convert Patch stored in Protocol Object to DynamicPatch.
+  [[nodiscard]] static DynamicPatch fromObject(Object);
+
+  /// Retrieves the stored patch by the specified tag. Can be used to assert the
+  /// type of DynamicUnknownPatch. Throws if the patch cannot be retrieved with
+  /// the specified tag.
+  template <class Tag>
+  auto& getStoredPatchByTag() {
+    return getStoredPatchByTag(Tag{});
+  }
+
+  /// Returns if the patch type is ambiguous.
+  [[nodiscard]] bool isPatchTypeAmbiguous() const;
+
+  /// @brief Constructs read and write Thrift Masks that only contain fields
+  /// that are read / written to respectively by the Patch. The read mask
+  /// specifies entries that must be known in advance to correctly apply Thrift
+  /// Patch. The write mask specifies entries that are potentially affected by
+  /// the patch.
+  ///
+  /// It constructs nested Mask for map, struct, union, and any patches. For
+  /// map, it only supports integer or string key. If the type of key map is not
+  /// integer or string, it throws.
+  ///
+  /// Disclaimer: Mask-extraction only guarentees recall (i.e. all fields that
+  /// are read/written to *will* be selected). However, it provides only a
+  /// best-effort guarentee of precision (selected fields are not guarenteed to
+  /// be relevant to a given patch). If high precision is important, the user is
+  /// advised to use visitPatch or customVisit to introspect the patch directly.
+  ExtractedMasksFromPatch extractMaskFromPatch() const;
+
+  /// Convert Patch stored in Thrift Any to DynamicPatch.
+  [[nodiscard]] static DynamicPatch fromPatch(const type::AnyStruct& any);
+  /// Stores DynamicPatch as Patch in Thrift Any with the provided type
+  /// using CompactProtocol.
+  type::AnyStruct toPatch(type::Type type) const;
+
+  /// @cond
+  template <typename Protocol>
+  std::uint32_t encode(Protocol& prot) const;
+  template <typename Protocol>
+  std::unique_ptr<folly::IOBuf> encode() const;
+
+  template <typename Protocol>
+  void decode(Protocol& prot);
+  template <typename Protocol>
+  void decode(const folly::IOBuf& buf);
+
+  template <class T>
+  bool holds_alternative(detail::Badge) const {
+    return std::get_if<T>(patch_.get()) != nullptr;
+  }
+
+  template <class PatchType>
+  PatchType* get_if() {
+    return std::get_if<PatchType>(patch_.get());
+  }
+  template <class PatchType>
+  const PatchType* get_if() const {
+    return std::get_if<PatchType>(patch_.get());
+  }
+
+  template <class PatchType>
+  PatchType& get() {
+    // std::unique_ptr::operator* requires complete type.
+    return std::get<PatchType>(*patch_.get());
+  }
+  template <class PatchType>
+  const PatchType& get() const {
+    return std::get<PatchType>(*patch_.get());
+  }
+
+  /// @endcond
+
+ private:
+  DynamicListPatch& getStoredPatchByTag(type::list_c);
+  DynamicSetPatch& getStoredPatchByTag(type::set_c);
+  DynamicMapPatch& getStoredPatchByTag(type::map_c);
+  DynamicStructPatch& getStoredPatchByTag(type::struct_c);
+  DynamicUnionPatch& getStoredPatchByTag(type::union_c);
+  template <class T, class Tag>
+  auto& getStoredPatchByTag(type::cpp_type<T, Tag>) {
+    return getStoredPatchByTag(Tag{});
+  }
+  op::I32Patch& getStoredPatchByTag(type::enum_c);
+  op::AnyPatch& getStoredPatchByTag(type::struct_t<type::AnyStruct>);
+  template <class Tag>
+  std::enable_if_t<type::is_a_v<Tag, type::primitive_c>, op::patch_type<Tag>&>
+  getStoredPatchByTag(Tag) {
+    return getStoredPatch<op::patch_type<Tag>>();
+  }
+
+  template <class Patch>
+  Patch& getStoredPatch() {
+    // patch already has the correct type, return it directly.
+    if (auto p = get_if<Patch>()) {
+      return *p;
+    }
+
+    // Use merge to change patch's type.
+    merge(DynamicPatch{Patch{}});
+    return get<Patch>();
+  }
+
+  template <class Self, class Visitor>
+  static decltype(auto) visitPatchImpl(Self&& self, Visitor&& visitor) {
+    return std::visit(
+        std::forward<Visitor>(visitor), *std::forward<Self>(self).patch_);
+  }
+
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
+    std::forward<Self>(self).visitPatch([&](auto&& patch) {
+      using PatchType = folly::remove_cvref_t<decltype(patch)>;
+      if constexpr (__FBTHRIFT_IS_VALID(
+                        patch,
+                        std::forward<PatchType>(patch).customVisit(
+                            badge, std::forward<Visitor>(v)))) {
+        std::forward<PatchType>(patch).customVisit(
+            badge, std::forward<Visitor>(v));
+      } else {
+        std::forward<PatchType>(patch).customVisit(std::forward<Visitor>(v));
+      }
+    });
+  }
+
+  // A SafePatch storage for DynamicPatch.
+  class DynamicSafePatch {
+   public:
+    DynamicSafePatch() = default;
+    DynamicSafePatch(std::int32_t version, std::unique_ptr<folly::IOBuf> data)
+        : version_(version), data_(std::move(data)) {}
+    DynamicSafePatch(const DynamicSafePatch&) = delete;
+    DynamicSafePatch& operator=(const DynamicSafePatch&) = delete;
+    DynamicSafePatch(DynamicSafePatch&&) = default;
+    DynamicSafePatch& operator=(DynamicSafePatch&&) = default;
+    ~DynamicSafePatch() = default;
+
+    template <typename Protocol>
+    std::uint32_t encode(Protocol& prot) const;
+    template <typename Protocol>
+    void decode(Protocol& prot);
+    template <typename Protocol>
+    std::unique_ptr<folly::IOBuf> encode() const {
+      folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+      Protocol prot;
+      prot.setOutput(&queue);
+      encode(prot);
+      return queue.move();
+    }
+    template <typename Protocol>
+    void decode(const folly::IOBuf& buf) {
+      Protocol prot;
+      prot.setInput(&buf);
+      return decode(prot);
+    }
+
+    std::int32_t version() const { return version_; }
+    const std::unique_ptr<folly::IOBuf>& data() const { return data_; }
+
+   private:
+    std::int32_t version_;
+    std::unique_ptr<folly::IOBuf> data_;
+  };
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      visitPatch, visitPatchImpl);
+
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
+
+ private:
+  using Patch = std::variant<
+      DynamicUnknownPatch,
+      op::BoolPatch,
+      op::BytePatch,
+      op::I16Patch,
+      op::I32Patch,
+      op::I64Patch,
+      op::FloatPatch,
+      op::DoublePatch,
+      op::StringPatch,
+      op::BinaryPatch,
+      op::AnyPatch,
+      DynamicListPatch,
+      DynamicSetPatch,
+      DynamicMapPatch,
+      DynamicStructPatch,
+      DynamicUnionPatch>;
+  std::unique_ptr<Patch> patch_;
+};
+
 /// DynamicPatch for a Thrift map.
 ///
 /// It consists of the following operations: `assign`, `clear`, `putMulti`,
@@ -722,253 +969,6 @@ class DynamicUnionPatch : public DynamicStructurePatch<true> {
  private:
   // Hide `remove` operation since we can't remove field from union
   using DynamicStructurePatch::remove;
-};
-
-/// Schema-less Patch.
-///
-/// When Static Patch is unavailable, Dynamic Patch offers a schema-less patch
-/// apply, merge, and introspection (requires advanced knowledge of Thrift
-/// Patch).
-class DynamicPatch {
- public:
-  /// @cond
-  DynamicPatch();
-  DynamicPatch(const DynamicPatch&);
-  DynamicPatch& operator=(const DynamicPatch&);
-  DynamicPatch(DynamicPatch&&) noexcept;
-  DynamicPatch& operator=(DynamicPatch&&) noexcept;
-  ~DynamicPatch();
-  /// @endcond
-
-  template <class T>
-  explicit DynamicPatch(T t) : patch_(std::make_unique<Patch>(std::move(t))) {}
-
-  /// Convert DynamicPatch to Protocol Object
-  Object toObject() &&;
-  Object toObject() const&;
-
-  /// Returns if the patch is no-op.
-  [[nodiscard]] bool empty() const;
-
-  /// Applies the patch to the given value. Throws if the patch is not
-  /// applicable to the value.
-  void apply(Value&) const;
-  /// Applies the patch to the given Thrift Any. Throws if the patch is not
-  /// applicable.
-  void applyToDataFieldInsideAny(type::AnyStruct&) const;
-  /// @brief Applies the patch to the given blob and returns the result as a
-  /// blob. Throws if the patch is not applicable.
-  ///
-  /// Note, this method uses introspection API `extractMaskFromPatch` to avoid
-  /// full deserialization when applying Thrift Patch to serialized structured
-  /// object in a blob.
-  template <type::StandardProtocol Protocol>
-  std::unique_ptr<folly::IOBuf> applyToSerializedObject(
-      const folly::IOBuf& buf) const;
-
-  /// Converts SafePatch stored in Thrift Any to DynamicPatch.
-  [[nodiscard]] static DynamicPatch fromSafePatch(const type::AnyStruct& any);
-  /// Stores DynamicPatch as SafePatch in Thrift Any with the provided type
-  /// using CompactProtocol.
-  type::AnyStruct toSafePatch(type::Type type) const;
-
-  /// Merges another patch into this patch. After the merge
-  /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
-  /// `next.apply(patch.apply(value))`.
-  template <class Other>
-  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
-
-  /// Convert Patch stored in Protocol Object to DynamicPatch.
-  [[nodiscard]] static DynamicPatch fromObject(Object);
-
-  /// Retrieves the stored patch by the specified tag. Can be used to assert the
-  /// type of DynamicUnknownPatch. Throws if the patch cannot be retrieved with
-  /// the specified tag.
-  template <class Tag>
-  auto& getStoredPatchByTag() {
-    return getStoredPatchByTag(Tag{});
-  }
-
-  /// Returns if the patch type is ambiguous.
-  [[nodiscard]] bool isPatchTypeAmbiguous() const;
-
-  /// @brief Constructs read and write Thrift Masks that only contain fields
-  /// that are read / written to respectively by the Patch. The read mask
-  /// specifies entries that must be known in advance to correctly apply Thrift
-  /// Patch. The write mask specifies entries that are potentially affected by
-  /// the patch.
-  ///
-  /// It constructs nested Mask for map, struct, union, and any patches. For
-  /// map, it only supports integer or string key. If the type of key map is not
-  /// integer or string, it throws.
-  ///
-  /// Disclaimer: Mask-extraction only guarentees recall (i.e. all fields that
-  /// are read/written to *will* be selected). However, it provides only a
-  /// best-effort guarentee of precision (selected fields are not guarenteed to
-  /// be relevant to a given patch). If high precision is important, the user is
-  /// advised to use visitPatch or customVisit to introspect the patch directly.
-  ExtractedMasksFromPatch extractMaskFromPatch() const;
-
-  /// Convert Patch stored in Thrift Any to DynamicPatch.
-  [[nodiscard]] static DynamicPatch fromPatch(const type::AnyStruct& any);
-  /// Stores DynamicPatch as Patch in Thrift Any with the provided type
-  /// using CompactProtocol.
-  type::AnyStruct toPatch(type::Type type) const;
-
-  /// @cond
-  template <typename Protocol>
-  std::uint32_t encode(Protocol& prot) const;
-  template <typename Protocol>
-  std::unique_ptr<folly::IOBuf> encode() const;
-
-  template <typename Protocol>
-  void decode(Protocol& prot);
-  template <typename Protocol>
-  void decode(const folly::IOBuf& buf);
-
-  template <class T>
-  bool holds_alternative(detail::Badge) const {
-    return std::get_if<T>(patch_.get()) != nullptr;
-  }
-
-  template <class PatchType>
-  PatchType* get_if() {
-    return std::get_if<PatchType>(patch_.get());
-  }
-  template <class PatchType>
-  const PatchType* get_if() const {
-    return std::get_if<PatchType>(patch_.get());
-  }
-
-  template <class PatchType>
-  PatchType& get() {
-    // std::unique_ptr::operator* requires complete type.
-    return std::get<PatchType>(*patch_.get());
-  }
-  template <class PatchType>
-  const PatchType& get() const {
-    return std::get<PatchType>(*patch_.get());
-  }
-
-  /// @endcond
-
- private:
-  DynamicListPatch& getStoredPatchByTag(type::list_c);
-  DynamicSetPatch& getStoredPatchByTag(type::set_c);
-  DynamicMapPatch& getStoredPatchByTag(type::map_c);
-  DynamicStructPatch& getStoredPatchByTag(type::struct_c);
-  DynamicUnionPatch& getStoredPatchByTag(type::union_c);
-  template <class T, class Tag>
-  auto& getStoredPatchByTag(type::cpp_type<T, Tag>) {
-    return getStoredPatchByTag(Tag{});
-  }
-  op::I32Patch& getStoredPatchByTag(type::enum_c);
-  op::AnyPatch& getStoredPatchByTag(type::struct_t<type::AnyStruct>);
-  template <class Tag>
-  std::enable_if_t<type::is_a_v<Tag, type::primitive_c>, op::patch_type<Tag>&>
-  getStoredPatchByTag(Tag) {
-    return getStoredPatch<op::patch_type<Tag>>();
-  }
-
-  template <class Patch>
-  Patch& getStoredPatch() {
-    // patch already has the correct type, return it directly.
-    if (auto p = get_if<Patch>()) {
-      return *p;
-    }
-
-    // Use merge to change patch's type.
-    merge(DynamicPatch{Patch{}});
-    return get<Patch>();
-  }
-
-  template <class Self, class Visitor>
-  static decltype(auto) visitPatchImpl(Self&& self, Visitor&& visitor) {
-    return std::visit(
-        std::forward<Visitor>(visitor), *std::forward<Self>(self).patch_);
-  }
-
-  template <class Self, class Visitor>
-  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
-    std::forward<Self>(self).visitPatch([&](auto&& patch) {
-      using PatchType = folly::remove_cvref_t<decltype(patch)>;
-      if constexpr (__FBTHRIFT_IS_VALID(
-                        patch,
-                        std::forward<PatchType>(patch).customVisit(
-                            badge, std::forward<Visitor>(v)))) {
-        std::forward<PatchType>(patch).customVisit(
-            badge, std::forward<Visitor>(v));
-      } else {
-        std::forward<PatchType>(patch).customVisit(std::forward<Visitor>(v));
-      }
-    });
-  }
-
-  // A SafePatch storage for DynamicPatch.
-  class DynamicSafePatch {
-   public:
-    DynamicSafePatch() = default;
-    DynamicSafePatch(std::int32_t version, std::unique_ptr<folly::IOBuf> data)
-        : version_(version), data_(std::move(data)) {}
-    DynamicSafePatch(const DynamicSafePatch&) = delete;
-    DynamicSafePatch& operator=(const DynamicSafePatch&) = delete;
-    DynamicSafePatch(DynamicSafePatch&&) = default;
-    DynamicSafePatch& operator=(DynamicSafePatch&&) = default;
-    ~DynamicSafePatch() = default;
-
-    template <typename Protocol>
-    std::uint32_t encode(Protocol& prot) const;
-    template <typename Protocol>
-    void decode(Protocol& prot);
-    template <typename Protocol>
-    std::unique_ptr<folly::IOBuf> encode() const {
-      folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-      Protocol prot;
-      prot.setOutput(&queue);
-      encode(prot);
-      return queue.move();
-    }
-    template <typename Protocol>
-    void decode(const folly::IOBuf& buf) {
-      Protocol prot;
-      prot.setInput(&buf);
-      return decode(prot);
-    }
-
-    std::int32_t version() const { return version_; }
-    const std::unique_ptr<folly::IOBuf>& data() const { return data_; }
-
-   private:
-    std::int32_t version_;
-    std::unique_ptr<folly::IOBuf> data_;
-  };
-
- public:
-  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
-      visitPatch, visitPatchImpl);
-
-  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
-      customVisit, customVisitImpl);
-
- private:
-  using Patch = std::variant<
-      DynamicUnknownPatch,
-      op::BoolPatch,
-      op::BytePatch,
-      op::I16Patch,
-      op::I32Patch,
-      op::I64Patch,
-      op::FloatPatch,
-      op::DoublePatch,
-      op::StringPatch,
-      op::BinaryPatch,
-      op::AnyPatch,
-      DynamicListPatch,
-      DynamicSetPatch,
-      DynamicMapPatch,
-      DynamicStructPatch,
-      DynamicUnionPatch>;
-  std::unique_ptr<Patch> patch_;
 };
 
 template <class Self, class Visitor>

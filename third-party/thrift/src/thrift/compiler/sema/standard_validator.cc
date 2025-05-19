@@ -1479,7 +1479,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       }
       if (v.from == deprecated_annotation_value::origin::unstructured &&
           ctx.sema_parameters().forbid_unstructured_annotations) {
-        ctx.error("Unstructured annotations are not allowed.");
+        ctx.error("Unstructured annotations are not allowed: `{}`.", k);
       }
       continue;
     }

@@ -335,3 +335,32 @@ def validate_that_root_path_is_a_dir(root_path: Path) -> None:
                 """
             )
         )
+
+
+def apply_postprocessing(
+    fixture_output_root_dir_abspath: Path,
+) -> None:
+    """
+    Walks through the output directory and applies postprocessing to each file.
+
+    Current steps:
+      - Parts of lines between `@fbthrift_strip_from_fixtures` are replaced with `<truncated>`.
+
+    Args:
+        fixture_output_root_dir_abspath: The root directory of the fixture outputs.
+    """
+    for root, _, files in os.walk(fixture_output_root_dir_abspath):
+        for file in files:
+            file_path = Path(root) / file
+            with open(file_path, "r+", encoding="utf-8") as f:
+                changed = False
+                content = f.readlines()
+                for i, line in enumerate(content):
+                    if "@fbthrift_strip_from_fixtures" in line:
+                        parts = line.split("@fbthrift_strip_from_fixtures")
+                        content[i] = parts[0] + "<truncated>" + parts[2]
+                        changed = True
+                if changed:
+                    f.seek(0)
+                    f.writelines(content)
+                    f.truncate()

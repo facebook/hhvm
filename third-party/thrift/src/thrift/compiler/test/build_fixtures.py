@@ -96,7 +96,13 @@ def _build_parser():
 has_errors = False
 
 
-async def _run_subprocess(sem: asyncio.Semaphore, cmd: list[str], *, cwd: Path) -> None:
+async def _run_subprocess(
+    sem: asyncio.Semaphore,
+    cmd: list[str],
+    *,
+    cwd: Path,
+    outdir: Path,
+) -> None:
     """Runs a subprocess for the given `cmd`.
 
     If the subprocess fails (i.e., returns a non-0 code), sets the global
@@ -121,6 +127,8 @@ async def _run_subprocess(sem: asyncio.Semaphore, cmd: list[str], *, cwd: Path) 
             global has_errors
             has_errors = True
             sys.stderr.write(err.decode(sys.stderr.encoding))
+
+        fixture_utils.apply_postprocessing(outdir)
 
 
 def _add_processes_for_fixture(
@@ -167,12 +175,14 @@ def _add_processes_for_fixture(
         thrift_bin_path,
         thrift2ast_bin_path,
     ):
-        os.mkdir(fixture_output_root_dir_abspath / fixture_cmd.unique_name)
+        outdir = fixture_output_root_dir_abspath / fixture_cmd.unique_name
+        os.mkdir(outdir)
         processes.append(
             _run_subprocess(
                 subprocess_semaphore,
                 fixture_cmd.build_command_args,
                 cwd=repo_root_dir_abspath,
+                outdir=outdir,
             )
         )
 

@@ -127,13 +127,16 @@ class FixtureTest(unittest.TestCase):
 
         # Run thrift compiler and generate files
         for fixture_cmd in fixture_cmds:
-            os.mkdir(fixture_output_root_dir_abspath / fixture_cmd.unique_name)
+            outdir = fixture_output_root_dir_abspath / fixture_cmd.unique_name
+            os.mkdir(outdir)
 
             subprocess.check_call(
                 fixture_cmd.build_command_args,
                 close_fds=True,
                 cwd=repo_root_dir_abspath,
             )
+
+            fixture_utils.apply_postprocessing(outdir)
 
         # Compare generated code to fixture code
         self._compare_code(

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.facebook.thrift.server;
+package com.facebook.thrift.loadbalancing;
 
 import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
 import com.facebook.thrift.payload.Writer;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import com.facebook.thrift.server.RpcServerHandler;
+import io.netty.util.internal.StringUtil;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.StreamPayloadMetadata;
 import org.reactivestreams.Publisher;
@@ -33,44 +32,76 @@ import reactor.core.publisher.Mono;
 
 /** Adds load information to ResponseRpcMetadata */
 public final class LoadHeaderRpcServerHandler implements RpcServerHandler {
-  private static final long START_IN_MILLIS = System.currentTimeMillis();
-
   private static final String LOAD_HEADER = "load";
+  private static final String DEFAULT_LOAD = "default";
 
-  private static final long MIN_DECAY_SECS = 1;
-
-  private final AtomicLong outstandingRequests;
   private final RpcServerHandler delegate;
-  private final long decayInSeconds;
+  private final Function<String, Long> counterProvider;
+  private final LoadHeaderSupplier loadSupplier;
 
-  public LoadHeaderRpcServerHandler(RpcServerHandler delegate) {
-    this(delegate, Duration.ofSeconds(240));
+  public LoadHeaderRpcServerHandler(
+      RpcServerHandler delegate, Function<String, Long> counterProvider) {
+    this(delegate, counterProvider, new OutstandingRequestLoadSupplier());
   }
 
-  public LoadHeaderRpcServerHandler(RpcServerHandler delegate, Duration decay) {
+  public LoadHeaderRpcServerHandler(
+      RpcServerHandler delegate,
+      Function<String, Long> counterProvider,
+      LoadHeaderSupplier loadSupplier) {
     this.delegate = delegate;
-    this.outstandingRequests = new AtomicLong();
-    this.decayInSeconds = calculateDecay(decay);
-  }
-
-  private long calculateDecay(Duration decay) {
-    return Math.max(MIN_DECAY_SECS, decay.get(ChronoUnit.SECONDS));
+    this.counterProvider = counterProvider;
+    this.loadSupplier = loadSupplier;
   }
 
   @Override
   public Mono<ServerResponsePayload> singleRequestSingleResponse(ServerRequestPayload payload) {
-    long scaledLoad = getScaledLoad();
-    return delegate
-        .singleRequestSingleResponse(payload)
-        .map(
-            serverResponsePayload ->
-                (ServerResponsePayload)
-                    new LoadHeaderServerResponsePayloadWrapper(serverResponsePayload, scaledLoad))
-        .doFinally(s -> outstandingRequests.decrementAndGet());
+    if (payload.getRequestContext().getRequestHeader().containsKey(LOAD_HEADER)) {
+      String loadHeader = payload.getRequestContext().getRequestHeader().get(LOAD_HEADER);
+
+      if (DEFAULT_LOAD.equals(loadHeader)) {
+        // Default, uses the loadSupplier class which can be default outstanding requests, or
+        // customized supplier
+        loadSupplier.onRequest();
+        return delegate
+            .singleRequestSingleResponse(payload)
+            .map(applyDefaultLoadHeader())
+            .doFinally(s -> loadSupplier.doFinally());
+      } else if (!StringUtil.isNullOrEmpty(loadHeader)) {
+        // If client passes "load":"foo", then we attempt to load the "foo" counter from the counter
+        // provider supplying the client with the arbitrary counter requested
+        return delegate.singleRequestSingleResponse(payload).map(applyCustomLoadHeader(loadHeader));
+      }
+    }
+
+    // Default returns no load header at all
+    return delegate.singleRequestSingleResponse(payload);
   }
 
-  long getScaledLoad() {
-    return Math.round(getScalingFactor() * outstandingRequests.incrementAndGet());
+  /**
+   * Applies load header to the server response payload from the load supplier class, this by
+   * default is the number of active and queue requests, but can be a custom load supplier that
+   * server owner may pass to service framework
+   *
+   * @return LoadHeaderServerResponsePayloadWrapper with load header applied
+   */
+  private Function<ServerResponsePayload, ServerResponsePayload> applyDefaultLoadHeader() {
+    return (serverResponsePayload) ->
+        new LoadHeaderServerResponsePayloadWrapper(serverResponsePayload, loadSupplier.getLoad());
+  }
+
+  /**
+   * Applies load header to the server response payload via the counter provider. When the client
+   * sends a custom value via the header field this value is looked up via the counter provider,
+   * which by default is the fb303 service registered with service framework.
+   *
+   * @param loadHeader String, fb303 key that will be returned as the load value
+   * @return LoadHeaderServerResponsePayloadWrapper with load header applied
+   */
+  private Function<ServerResponsePayload, ServerResponsePayload> applyCustomLoadHeader(
+      String loadHeader) {
+    return (serverResponsePayload) ->
+        new LoadHeaderServerResponsePayloadWrapper(
+            serverResponsePayload, counterProvider.apply(loadHeader));
   }
 
   @Override
@@ -94,30 +125,7 @@ public final class LoadHeaderRpcServerHandler implements RpcServerHandler {
     return delegate.getMethodMap();
   }
 
-  private static long getTimeSinceStartInSeconds() {
-    return TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - START_IN_MILLIS);
-  }
-
-  /**
-   * Use a decay function y = 100 e^(-0.05x) + 1, where y is the scaling factor and x is time in
-   * seconds. The limit is 1, crosses y axis a 101. It has a 6x load factor at 1 minute and 1.25x
-   * load factor at 2 minutes and ~1x load factor at decayInSeconds.
-   *
-   * @return a decaying scaling factor for load. A higher number means we'll receive less traffic.
-   *     Inversely the longer the service runs, the more decay and the closer the value will get to
-   *     1. When 1 is returned, the server will return a load header matching it's exact load
-   */
-  double getScalingFactor() {
-    long upTimeSec = getTimeSinceStartInSeconds();
-
-    if (upTimeSec >= 0 && upTimeSec < decayInSeconds) {
-      return (100 * Math.exp(-0.05 * upTimeSec)) + 1.0;
-    } else {
-      return 1;
-    }
-  }
-
-  private class LoadHeaderServerResponsePayloadWrapper implements ServerResponsePayload {
+  private static class LoadHeaderServerResponsePayloadWrapper implements ServerResponsePayload {
     private final ServerResponsePayload delegate;
     private final ResponseRpcMetadata responseRpcMetadata;
 

@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * Implemetation of StatsSource to capture Thrift Server Counters. It tracks following counters:
+ * Implementation of StatsSource to capture Thrift Server Counters. It tracks following counters:
  * received_requests, sent_replies, active_requests, queued_requests, accepted_connections,
  * dropped_connections and rejected_connections. More details for these counters:
  * https://our.internmc.facebook.com/intern/wiki/Thrift/FB303_Counters/ .To fetch connection related

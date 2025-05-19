@@ -91,7 +91,7 @@ let default =
     enable_class_pointer_hint = true;
     disallow_non_annotated_memoize = false;
     treat_non_annotated_memoize_as_kbic = false;
-    use_oxidized_by_ref_decls = true;
+    use_oxidized_by_ref_decls = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

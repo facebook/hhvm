@@ -310,7 +310,7 @@ let parse_options () =
   let enable_class_pointer_hint = ref true in
   let disallow_non_annotated_memoize = ref false in
   let treat_non_annotated_memoize_as_kbic = ref false in
-  let use_oxidized_by_ref_decls = ref true in
+  let use_oxidized_by_ref_decls = ref false in
   let options =
     [
       ( "--config",

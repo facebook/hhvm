@@ -336,7 +336,19 @@ let fun_ tenv f =
   let errs =
     FunUtils.check_params ~from_abstract_method:false tenv.decl_env f.f_params
   in
-  List.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) errs;
+  let splat_err =
+    match List.rev f.f_params with
+    | {
+        param_splat = Some Ast_defs.Splat;
+        param_pos;
+        param_type_hint = (_, Some h);
+        _;
+      }
+      :: _ ->
+      check_splat_hint env param_pos h
+    | _ -> []
+  in
+  List.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) (splat_err @ errs);
   type_hint env f.f_ret @ fun_params env f.f_params
 
 let fun_def tenv fd =

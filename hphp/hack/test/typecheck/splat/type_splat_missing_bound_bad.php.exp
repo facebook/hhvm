@@ -1,0 +1,36 @@
+ERROR: File "type_splat_missing_bound_bad.php", line 5, characters 20-20:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_missing_bound_bad.php", line 5, characters 22-23:
+  Expected `(mixed...)`
+  File "type_splat_missing_bound_bad.php", line 5, characters 20-20:
+  But got `T`
+ERROR: File "type_splat_missing_bound_bad.php", line 5, characters 20-20:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_missing_bound_bad.php", line 5, characters 22-23:
+  Expected `(mixed...)`
+  File "type_splat_missing_bound_bad.php", line 5, characters 20-20:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "type_splat_missing_bound_bad.php", line 6, characters 32-32:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_missing_bound_bad.php", line 6, characters 19-39:
+  Expected `(mixed...)`
+  File "type_splat_missing_bound_bad.php", line 6, characters 32-32:
+  But got `T`
+ERROR: File "type_splat_missing_bound_bad.php", line 6, characters 32-32:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_missing_bound_bad.php", line 6, characters 19-39:
+  Expected `(mixed...)`
+  File "type_splat_missing_bound_bad.php", line 6, characters 32-32:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "type_splat_missing_bound_bad.php", line 7, characters 30-30:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_missing_bound_bad.php", line 7, characters 17-37:
+  Expected `(mixed...)`
+  File "type_splat_missing_bound_bad.php", line 7, characters 30-30:
+  But got `T`
+ERROR: File "type_splat_missing_bound_bad.php", line 7, characters 30-30:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_missing_bound_bad.php", line 7, characters 17-37:
+  Expected `(mixed...)`
+  File "type_splat_missing_bound_bad.php", line 7, characters 30-30:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type

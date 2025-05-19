@@ -30,7 +30,7 @@ var (
         FullName: "module1.Plate",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.Plate",
-    UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
@@ -45,7 +45,7 @@ var (
         FullName: "module1.Year",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.Year",
-    UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
@@ -53,7 +53,7 @@ var (
         FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
-    ElementTypeSpec: premadeCodecTypeSpec_string,
+	ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
@@ -61,7 +61,7 @@ var (
         FullName: "module1.Drivers",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.Drivers",
-    UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
+	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
 },
 
     }
@@ -69,7 +69,7 @@ var (
         FullName: "module1.Accessory",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.Accessory",
-    UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
+	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
 },
 
     }
@@ -77,7 +77,7 @@ var (
         FullName: "list<module1.Accessory>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRUCT,
-    ElementTypeSpec: premadeCodecTypeSpec_module1_Accessory,
+	ElementTypeSpec: premadeCodecTypeSpec_module1_Accessory,
 },
 
     }
@@ -85,17 +85,17 @@ var (
         FullName: "module1.PartName",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.PartName",
-    UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
+	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
 },
 
     }
     premadeCodecTypeSpec_map_i32_module1_PartName = &thrift.TypeSpec{
         FullName: "map<i32, module1.PartName>",
         CodecMapSpec: &thrift.CodecMapSpec{
-    KeyTypeSpec:   premadeCodecTypeSpec_i32,
-    ValueTypeSpec: premadeCodecTypeSpec_module1_PartName,
+	KeyTypeSpec:   premadeCodecTypeSpec_i32,
+	ValueTypeSpec: premadeCodecTypeSpec_module1_PartName,
     KeyWireType:   thrift.I32,
-    ValueWireType: thrift.STRUCT,
+	ValueWireType: thrift.STRUCT,
 },
 
     }
@@ -127,10 +127,10 @@ var (
     premadeCodecTypeSpec_map_module1_MapKey_string = &thrift.TypeSpec{
         FullName: "map<module1.MapKey, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
-    KeyTypeSpec:   premadeCodecTypeSpec_module1_MapKey,
-    ValueTypeSpec: premadeCodecTypeSpec_string,
+	KeyTypeSpec:   premadeCodecTypeSpec_module1_MapKey,
+	ValueTypeSpec: premadeCodecTypeSpec_string,
     KeyWireType:   thrift.STRUCT,
-    ValueWireType: thrift.STRING,
+	ValueWireType: thrift.STRING,
 },
 
     }
@@ -147,7 +147,7 @@ var (
         FullName: "module1.Car",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.Car",
-    UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+	UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
 },
 
     }
@@ -164,7 +164,7 @@ var (
         FullName: "list<module1.Automobile>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRUCT,
-    ElementTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+	ElementTypeSpec: premadeCodecTypeSpec_module1_Automobile,
 },
 
     }
@@ -172,7 +172,7 @@ var (
         FullName: "list<module1.Car>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRUCT,
-    ElementTypeSpec: premadeCodecTypeSpec_module1_Car,
+	ElementTypeSpec: premadeCodecTypeSpec_module1_Car,
 },
 
     }
@@ -189,7 +189,7 @@ var (
         FullName: "module1.State",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.State",
-    UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
@@ -197,7 +197,7 @@ var (
         FullName: "module1.Enum",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module1.Enum",
-    UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
+	UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
 },
 
     }

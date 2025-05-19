@@ -75,30 +75,6 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module1.PartName",
     UnderlyingType: module0.GetMetadataThriftType("module0.PartName"),
-    StructuredAnnotations: []*metadata.ThriftConstStruct{
-        &metadata.ThriftConstStruct{
-            Type: &metadata.ThriftStructType{
-                Name: "go.Name",
-            },
-            Fields: map[string]*metadata.ThriftConstValue{
-                "name":
-                    &metadata.ThriftConstValue{
-                        CvMap: []*metadata.ThriftConstValuePair{
-                            &metadata.ThriftConstValuePair{
-                                Key: &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("name"),
-                            },
-                            
-                                Value: &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("CarPartName"),
-                            },
-                            
-                            },
-                        },
-                    },
-            },
-        },
-    },
 },
 
     }

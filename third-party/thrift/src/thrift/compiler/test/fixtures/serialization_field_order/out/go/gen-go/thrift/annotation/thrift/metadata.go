@@ -188,22 +188,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Program",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Definition",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -224,22 +208,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_map_i32_i32,
                 },
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Structured",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Enum",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -254,22 +222,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_bool,
                 },
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Structured",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "thrift.Experimental",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -277,36 +229,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "thrift.TerseWrite",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Program",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Struct",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Exception",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Field",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
             },
         },
     )
@@ -316,15 +238,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Field",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -332,15 +245,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "thrift.Mixin",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Field",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
             },
         },
     )
@@ -350,22 +254,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Struct",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "thrift.Experimental",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -373,15 +261,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "thrift.BitmaskEnum",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Enum",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
             },
         },
     )
@@ -391,15 +270,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Field",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -408,22 +278,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Field",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "thrift.Experimental",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -431,15 +285,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "thrift.Serial",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Interaction",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
             },
         },
     )
@@ -453,15 +298,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "value",
                     IsOptional: false,
                     Type:       premadeThriftType_string,
-                },
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Definition",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
                 },
             },
         },
@@ -478,15 +314,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_thrift_RpcPriority,
                 },
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Function",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -501,15 +328,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_map_string_string,
                 },
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Definition",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -518,15 +336,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Definition",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -534,15 +343,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "thrift.AllowReservedFilename",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Program",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
             },
         },
     )

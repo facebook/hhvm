@@ -68,7 +68,9 @@ var structMetadatas = func() []*{{program:metadata_qualifier}}ThriftStruct {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
     {{#program:structs}}
     {{^struct:exception?}}
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct({{struct:struct_spec_name}}))
+    fbthriftResults = append(fbthriftResults,
+        {{> metadata/thrift_metadata_struct}}
+    )
     {{/struct:exception?}}
     {{/program:structs}}
     return fbthriftResults
@@ -78,7 +80,9 @@ var exceptionMetadatas = func() []*{{program:metadata_qualifier}}ThriftException
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftException, 0)
     {{#program:structs}}
     {{#struct:exception?}}
-    fbthriftResults = append(fbthriftResults, getMetadataThriftException({{struct:struct_spec_name}}))
+    fbthriftResults = append(fbthriftResults,
+        {{> metadata/thrift_metadata_exception}}
+    )
     {{/struct:exception?}}
     {{/program:structs}}
     return fbthriftResults
@@ -181,124 +185,4 @@ func GetThriftMetadataForService(scopedServiceName string) *{{program:metadata_q
         SetStructs(packageThriftMetadata.GetStructs()).
         SetExceptions(packageThriftMetadata.GetExceptions()).
         SetServices(relevantServicesMap)
-}
-
-func getMetadataThriftPrimitiveType(s *thrift.CodecPrimitiveSpec) *{{program:metadata_qualifier}}ThriftPrimitiveType {
-	var value {{program:metadata_qualifier}}ThriftPrimitiveType
-
-	switch s.PrimitiveType {
-	case thrift.CODEC_PRIMITIVE_TYPE_BYTE:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_BYTE_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_BOOL:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_BOOL_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_I16:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_I16_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_I32:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_I32_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_I64:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_I64_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_FLOAT:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_FLOAT_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_DOUBLE:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_DOUBLE_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_BINARY:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_BINARY_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_STRING:
-		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_STRING_TYPE
-	}
-
-	return thrift.Pointerize(value)
-}
-
-func getMetadataThriftEnumType(s *thrift.CodecEnumSpec) *{{program:metadata_qualifier}}ThriftEnumType {
-	return {{program:metadata_qualifier}}NewThriftEnumType().
-		SetName(s.ScopedName)
-}
-
-func getMetadataThriftSetType(s *thrift.CodecSetSpec) *{{program:metadata_qualifier}}ThriftSetType {
-	return {{program:metadata_qualifier}}NewThriftSetType().
-		SetValueType(getMetadataThriftType(s.ElementTypeSpec))
-}
-
-func getMetadataThriftListType(s *thrift.CodecListSpec) *{{program:metadata_qualifier}}ThriftListType {
-	return {{program:metadata_qualifier}}NewThriftListType().
-		SetValueType(getMetadataThriftType(s.ElementTypeSpec))
-}
-
-func getMetadataThriftMapType(s *thrift.CodecMapSpec) *{{program:metadata_qualifier}}ThriftMapType {
-	return {{program:metadata_qualifier}}NewThriftMapType().
-		SetKeyType(getMetadataThriftType(s.KeyTypeSpec)).
-		SetValueType(getMetadataThriftType(s.ValueTypeSpec))
-}
-
-func getMetadataThriftTypedefType(s *thrift.CodecTypedefSpec) *{{program:metadata_qualifier}}ThriftTypedefType {
-	return {{program:metadata_qualifier}}NewThriftTypedefType().
-		SetName(s.ScopedName).
-		SetUnderlyingType(getMetadataThriftType(s.UnderlyingTypeSpec))
-}
-
-func getMetadataThriftStructType(s *thrift.CodecStructSpec) *{{program:metadata_qualifier}}ThriftStructType {
-	return {{program:metadata_qualifier}}NewThriftStructType().
-		SetName(s.ScopedName)
-}
-
-func getMetadataThriftUnionType(s *thrift.CodecStructSpec) *{{program:metadata_qualifier}}ThriftUnionType {
-	return {{program:metadata_qualifier}}NewThriftUnionType().
-		SetName(s.ScopedName)
-}
-
-func getMetadataThriftType(s *thrift.TypeSpec) *{{program:metadata_qualifier}}ThriftType {
-	thriftType := {{program:metadata_qualifier}}NewThriftType()
-	switch {
-	case s.CodecPrimitiveSpec != nil:
-		thriftType.SetTPrimitive(getMetadataThriftPrimitiveType(s.CodecPrimitiveSpec))
-	case s.CodecEnumSpec != nil:
-		thriftType.SetTEnum(getMetadataThriftEnumType(s.CodecEnumSpec))
-	case s.CodecSetSpec != nil:
-		thriftType.SetTSet(getMetadataThriftSetType(s.CodecSetSpec))
-	case s.CodecListSpec != nil:
-		thriftType.SetTList(getMetadataThriftListType(s.CodecListSpec))
-	case s.CodecMapSpec != nil:
-		thriftType.SetTMap(getMetadataThriftMapType(s.CodecMapSpec))
-	case s.CodecTypedefSpec != nil:
-		thriftType.SetTTypedef(getMetadataThriftTypedefType(s.CodecTypedefSpec))
-	case s.CodecStructSpec != nil:
-		if s.CodecStructSpec.IsUnion {
-			thriftType.SetTUnion(getMetadataThriftUnionType(s.CodecStructSpec))
-		} else {
-			thriftType.SetTStruct(getMetadataThriftStructType(s.CodecStructSpec))
-		}
-	}
-	return thriftType
-}
-
-func getMetadataThriftField(s *thrift.FieldSpec) *{{program:metadata_qualifier}}ThriftField {
-	return {{program:metadata_qualifier}}NewThriftField().
-		SetId(int32(s.ID)).
-		SetName(s.Name).
-		SetIsOptional(s.IsOptional).
-		SetType(getMetadataThriftType(s.ValueTypeSpec))
-}
-
-func getMetadataThriftStruct(s *thrift.StructSpec) *{{program:metadata_qualifier}}ThriftStruct {
-	metadataThriftFields := make([]*{{program:metadata_qualifier}}ThriftField, len(s.FieldSpecs), len(s.FieldSpecs))
-	for i, fieldSpec := range s.FieldSpecs {
-		metadataThriftFields[i] = getMetadataThriftField(&fieldSpec)
-	}
-
-	return {{program:metadata_qualifier}}NewThriftStruct().
-		SetName(s.ScopedName).
-		SetIsUnion(s.IsUnion).
-		SetFields(metadataThriftFields)
-}
-
-func getMetadataThriftException(s *thrift.StructSpec) *{{program:metadata_qualifier}}ThriftException {
-	metadataThriftFields := make([]*{{program:metadata_qualifier}}ThriftField, len(s.FieldSpecs), len(s.FieldSpecs))
-	for i, fieldSpec := range s.FieldSpecs {
-		metadataThriftFields[i] = getMetadataThriftField(&fieldSpec)
-	}
-
-	return {{program:metadata_qualifier}}NewThriftException().
-		SetName(s.ScopedName).
-		SetFields(metadataThriftFields)
 }

@@ -170,14 +170,220 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Internship))
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_Range))
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct1))
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct2))
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct3))
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_struct4))
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_union1))
-    fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(premadeStructSpec_union2))
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.Internship",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "weeks",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "title",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "employer",
+                    IsOptional: true,
+                    Type:       premadeThriftType_module_Company,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "compensation",
+                    IsOptional: true,
+                    Type:       premadeThriftType_double,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "school",
+                    IsOptional: true,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.Range",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "min",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "max",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.struct1",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "a",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "b",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.struct2",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "a",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "b",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "c",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_struct1,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "d",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_i32,
+                },
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.struct3",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "a",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "b",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "c",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_struct2,
+                },
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.struct4",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "a",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "b",
+                    IsOptional: true,
+                    Type:       premadeThriftType_double,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "c",
+                    IsOptional: true,
+                    Type:       premadeThriftType_byte,
+                },
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.union1",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "i",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "d",
+                    IsOptional: false,
+                    Type:       premadeThriftType_double,
+                },
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "module.union2",
+            IsUnion: true,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "i",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "d",
+                    IsOptional: false,
+                    Type:       premadeThriftType_double,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "s",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_struct1,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "u",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_union1,
+                },
+            },
+        },
+    )
     return fbthriftResults
 }()
 
@@ -300,124 +506,4 @@ func GetThriftMetadataForService(scopedServiceName string) *metadata.ThriftMetad
         SetStructs(packageThriftMetadata.GetStructs()).
         SetExceptions(packageThriftMetadata.GetExceptions()).
         SetServices(relevantServicesMap)
-}
-
-func getMetadataThriftPrimitiveType(s *thrift.CodecPrimitiveSpec) *metadata.ThriftPrimitiveType {
-	var value metadata.ThriftPrimitiveType
-
-	switch s.PrimitiveType {
-	case thrift.CODEC_PRIMITIVE_TYPE_BYTE:
-		value = metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_BOOL:
-		value = metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_I16:
-		value = metadata.ThriftPrimitiveType_THRIFT_I16_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_I32:
-		value = metadata.ThriftPrimitiveType_THRIFT_I32_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_I64:
-		value = metadata.ThriftPrimitiveType_THRIFT_I64_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_FLOAT:
-		value = metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_DOUBLE:
-		value = metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_BINARY:
-		value = metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE
-	case thrift.CODEC_PRIMITIVE_TYPE_STRING:
-		value = metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE
-	}
-
-	return thrift.Pointerize(value)
-}
-
-func getMetadataThriftEnumType(s *thrift.CodecEnumSpec) *metadata.ThriftEnumType {
-	return metadata.NewThriftEnumType().
-		SetName(s.ScopedName)
-}
-
-func getMetadataThriftSetType(s *thrift.CodecSetSpec) *metadata.ThriftSetType {
-	return metadata.NewThriftSetType().
-		SetValueType(getMetadataThriftType(s.ElementTypeSpec))
-}
-
-func getMetadataThriftListType(s *thrift.CodecListSpec) *metadata.ThriftListType {
-	return metadata.NewThriftListType().
-		SetValueType(getMetadataThriftType(s.ElementTypeSpec))
-}
-
-func getMetadataThriftMapType(s *thrift.CodecMapSpec) *metadata.ThriftMapType {
-	return metadata.NewThriftMapType().
-		SetKeyType(getMetadataThriftType(s.KeyTypeSpec)).
-		SetValueType(getMetadataThriftType(s.ValueTypeSpec))
-}
-
-func getMetadataThriftTypedefType(s *thrift.CodecTypedefSpec) *metadata.ThriftTypedefType {
-	return metadata.NewThriftTypedefType().
-		SetName(s.ScopedName).
-		SetUnderlyingType(getMetadataThriftType(s.UnderlyingTypeSpec))
-}
-
-func getMetadataThriftStructType(s *thrift.CodecStructSpec) *metadata.ThriftStructType {
-	return metadata.NewThriftStructType().
-		SetName(s.ScopedName)
-}
-
-func getMetadataThriftUnionType(s *thrift.CodecStructSpec) *metadata.ThriftUnionType {
-	return metadata.NewThriftUnionType().
-		SetName(s.ScopedName)
-}
-
-func getMetadataThriftType(s *thrift.TypeSpec) *metadata.ThriftType {
-	thriftType := metadata.NewThriftType()
-	switch {
-	case s.CodecPrimitiveSpec != nil:
-		thriftType.SetTPrimitive(getMetadataThriftPrimitiveType(s.CodecPrimitiveSpec))
-	case s.CodecEnumSpec != nil:
-		thriftType.SetTEnum(getMetadataThriftEnumType(s.CodecEnumSpec))
-	case s.CodecSetSpec != nil:
-		thriftType.SetTSet(getMetadataThriftSetType(s.CodecSetSpec))
-	case s.CodecListSpec != nil:
-		thriftType.SetTList(getMetadataThriftListType(s.CodecListSpec))
-	case s.CodecMapSpec != nil:
-		thriftType.SetTMap(getMetadataThriftMapType(s.CodecMapSpec))
-	case s.CodecTypedefSpec != nil:
-		thriftType.SetTTypedef(getMetadataThriftTypedefType(s.CodecTypedefSpec))
-	case s.CodecStructSpec != nil:
-		if s.CodecStructSpec.IsUnion {
-			thriftType.SetTUnion(getMetadataThriftUnionType(s.CodecStructSpec))
-		} else {
-			thriftType.SetTStruct(getMetadataThriftStructType(s.CodecStructSpec))
-		}
-	}
-	return thriftType
-}
-
-func getMetadataThriftField(s *thrift.FieldSpec) *metadata.ThriftField {
-	return metadata.NewThriftField().
-		SetId(int32(s.ID)).
-		SetName(s.Name).
-		SetIsOptional(s.IsOptional).
-		SetType(getMetadataThriftType(s.ValueTypeSpec))
-}
-
-func getMetadataThriftStruct(s *thrift.StructSpec) *metadata.ThriftStruct {
-	metadataThriftFields := make([]*metadata.ThriftField, len(s.FieldSpecs), len(s.FieldSpecs))
-	for i, fieldSpec := range s.FieldSpecs {
-		metadataThriftFields[i] = getMetadataThriftField(&fieldSpec)
-	}
-
-	return metadata.NewThriftStruct().
-		SetName(s.ScopedName).
-		SetIsUnion(s.IsUnion).
-		SetFields(metadataThriftFields)
-}
-
-func getMetadataThriftException(s *thrift.StructSpec) *metadata.ThriftException {
-	metadataThriftFields := make([]*metadata.ThriftField, len(s.FieldSpecs), len(s.FieldSpecs))
-	for i, fieldSpec := range s.FieldSpecs {
-		metadataThriftFields[i] = getMetadataThriftField(&fieldSpec)
-	}
-
-	return metadata.NewThriftException().
-		SetName(s.ScopedName).
-		SetFields(metadataThriftFields)
 }

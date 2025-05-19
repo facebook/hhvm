@@ -33,17 +33,17 @@ var (
         FullName: "list<i32>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
-	ElementTypeSpec: premadeCodecTypeSpec_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
     premadeCodecTypeSpec_map_i32_list_i32 = &thrift.TypeSpec{
         FullName: "map<i32, list<i32>>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_i32,
-	ValueTypeSpec: premadeCodecTypeSpec_list_i32,
+    KeyTypeSpec:   premadeCodecTypeSpec_i32,
+    ValueTypeSpec: premadeCodecTypeSpec_list_i32,
     KeyWireType:   thrift.I32,
-	ValueWireType: thrift.LIST,
+    ValueWireType: thrift.LIST,
 },
 
     }
@@ -51,27 +51,27 @@ var (
         FullName: "set<i32>",
         CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.I32,
-	ElementTypeSpec: premadeCodecTypeSpec_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
     premadeCodecTypeSpec_map_i32_set_i32 = &thrift.TypeSpec{
         FullName: "map<i32, set<i32>>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_i32,
-	ValueTypeSpec: premadeCodecTypeSpec_set_i32,
+    KeyTypeSpec:   premadeCodecTypeSpec_i32,
+    ValueTypeSpec: premadeCodecTypeSpec_set_i32,
     KeyWireType:   thrift.I32,
-	ValueWireType: thrift.SET,
+    ValueWireType: thrift.SET,
 },
 
     }
     premadeCodecTypeSpec_map_i32_i32 = &thrift.TypeSpec{
         FullName: "map<i32, i32>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_i32,
-	ValueTypeSpec: premadeCodecTypeSpec_i32,
+    KeyTypeSpec:   premadeCodecTypeSpec_i32,
+    ValueTypeSpec: premadeCodecTypeSpec_i32,
     KeyWireType:   thrift.I32,
-	ValueWireType: thrift.I32,
+    ValueWireType: thrift.I32,
 },
 
     }
@@ -79,7 +79,7 @@ var (
         FullName: "list<map<i32, i32>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
-	ElementTypeSpec: premadeCodecTypeSpec_map_i32_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_map_i32_i32,
 },
 
     }
@@ -87,17 +87,17 @@ var (
         FullName: "list<set<i32>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.SET,
-	ElementTypeSpec: premadeCodecTypeSpec_set_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_set_i32,
 },
 
     }
     premadeCodecTypeSpec_map_i32_map_i32_set_i32 = &thrift.TypeSpec{
         FullName: "map<i32, map<i32, set<i32>>>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_i32,
-	ValueTypeSpec: premadeCodecTypeSpec_map_i32_set_i32,
+    KeyTypeSpec:   premadeCodecTypeSpec_i32,
+    ValueTypeSpec: premadeCodecTypeSpec_map_i32_set_i32,
     KeyWireType:   thrift.I32,
-	ValueWireType: thrift.MAP,
+    ValueWireType: thrift.MAP,
 },
 
     }
@@ -105,7 +105,7 @@ var (
         FullName: "list<map<i32, map<i32, set<i32>>>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
-	ElementTypeSpec: premadeCodecTypeSpec_map_i32_map_i32_set_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_map_i32_map_i32_set_i32,
 },
 
     }
@@ -113,7 +113,7 @@ var (
         FullName: "list<list<map<i32, map<i32, set<i32>>>>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.LIST,
-	ElementTypeSpec: premadeCodecTypeSpec_list_map_i32_map_i32_set_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_list_map_i32_map_i32_set_i32,
 },
 
     }

@@ -37,7 +37,7 @@ var (
         FullName: "includes.IncludedInt64",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "includes.IncludedInt64",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
 },
 
     }
@@ -45,7 +45,7 @@ var (
         FullName: "includes.TransitiveFoo",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "includes.TransitiveFoo",
-	UnderlyingTypeSpec: transitive.GetCodecTypeSpec("transitive.Foo"),
+    UnderlyingTypeSpec: transitive.GetCodecTypeSpec("transitive.Foo"),
 },
 
     }

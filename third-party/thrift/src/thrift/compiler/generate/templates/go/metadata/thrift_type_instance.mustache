@@ -25,6 +25,17 @@
 &{{program:metadata_qualifier}}ThriftTypedefType{
     Name:           "{{typedef:scoped_name}}",
     UnderlyingType: {{#type:typedef_type}}{{type:metadata_thrift_type_getter}}{{/type:typedef_type}},
+    {{#typedef:structured_annotations?}}
+    StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
+        {{#typedef:structured_annotations}}
+        {{#structured_annotation:const}}
+        {{#constant:value}}
+        {{> metadata/thrift_metadata_const_struct}}
+        {{/constant:value}}
+        {{/structured_annotation:const}}
+        {{/typedef:structured_annotations}}
+    },
+    {{/typedef:structured_annotations?}}
 },
 {{/typedef:defined_kind?}}
 {{^typedef:defined_kind?}}

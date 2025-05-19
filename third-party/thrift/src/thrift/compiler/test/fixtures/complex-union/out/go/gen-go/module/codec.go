@@ -33,7 +33,7 @@ var (
         FullName: "list<i64>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I64,
-	ElementTypeSpec: premadeCodecTypeSpec_i64,
+    ElementTypeSpec: premadeCodecTypeSpec_i64,
 },
 
     }
@@ -41,7 +41,7 @@ var (
         FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
-	ElementTypeSpec: premadeCodecTypeSpec_string,
+    ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
@@ -55,10 +55,10 @@ var (
     premadeCodecTypeSpec_map_i16_string = &thrift.TypeSpec{
         FullName: "map<i16, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_i16,
-	ValueTypeSpec: premadeCodecTypeSpec_string,
+    KeyTypeSpec:   premadeCodecTypeSpec_i16,
+    ValueTypeSpec: premadeCodecTypeSpec_string,
     KeyWireType:   thrift.I16,
-	ValueWireType: thrift.STRING,
+    ValueWireType: thrift.STRING,
 },
 
     }
@@ -66,7 +66,7 @@ var (
         FullName: "module.containerTypedef",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module.containerTypedef",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i16_string,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_map_i16_string,
 },
 
     }

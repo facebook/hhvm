@@ -242,6 +242,15 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
                 2: "TWO",
                 4: "FOUR",
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "thrift.BitmaskEnum",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -251,6 +260,15 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
                 1: "ONE",
                 2: "TWO",
                 4: "FOUR",
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "thrift.BitmaskEnum",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
             },
         },
     )

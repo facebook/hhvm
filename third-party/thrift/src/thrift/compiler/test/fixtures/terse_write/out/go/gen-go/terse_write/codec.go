@@ -98,7 +98,7 @@ var (
         FullName: "list<i16>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I16,
-	ElementTypeSpec: premadeCodecTypeSpec_i16,
+    ElementTypeSpec: premadeCodecTypeSpec_i16,
 },
 
     }
@@ -106,17 +106,17 @@ var (
         FullName: "set<i16>",
         CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.I16,
-	ElementTypeSpec: premadeCodecTypeSpec_i16,
+    ElementTypeSpec: premadeCodecTypeSpec_i16,
 },
 
     }
     premadeCodecTypeSpec_map_i16_i16 = &thrift.TypeSpec{
         FullName: "map<i16, i16>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_i16,
-	ValueTypeSpec: premadeCodecTypeSpec_i16,
+    KeyTypeSpec:   premadeCodecTypeSpec_i16,
+    ValueTypeSpec: premadeCodecTypeSpec_i16,
     KeyWireType:   thrift.I16,
-	ValueWireType: thrift.I16,
+    ValueWireType: thrift.I16,
 },
 
     }
@@ -160,7 +160,7 @@ var (
         FullName: "terse_write.MyInteger",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "terse_write.MyInteger",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }

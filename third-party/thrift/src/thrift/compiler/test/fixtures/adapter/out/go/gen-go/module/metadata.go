@@ -62,6 +62,74 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.SetWithAdapter",
     UnderlyingType: premadeThriftType_set_string,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "hack.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("\\Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "rust.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -69,6 +137,74 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.StringWithAdapter",
     UnderlyingType: premadeThriftType_string,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "hack.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("\\Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "rust.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -89,6 +225,74 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.ListWithElemAdapter_withAdapter",
     UnderlyingType: premadeThriftType_module_ListWithElemAdapter,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "hack.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("\\Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "rust.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -132,6 +336,107 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.MyI64",
     UnderlyingType: premadeThriftType_i64,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "rust.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "module.MyAnnotation",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "signature":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("signature"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("MyI64"),
+                            },
+                            
+                            },
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("color"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                            },
+                            
+                            },
+                        },
+                    },
+                "color":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("signature"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("MyI64"),
+                            },
+                            
+                            },
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("color"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -210,6 +515,74 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.FooWithAdapter",
     UnderlyingType: premadeThriftType_module_Foo,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "hack.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("\\Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "rust.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -273,6 +646,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedA",
     UnderlyingType: premadeThriftType_module_A,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -298,6 +695,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.DurationMs",
     UnderlyingType: premadeThriftType_i64,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::AdaptTestMsAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -305,6 +726,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.IOBuf",
     UnderlyingType: premadeThriftType_binary,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Type",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::folly::IOBuf"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -312,6 +757,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.CustomProtocolType",
     UnderlyingType: premadeThriftType_module_IOBuf,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::CustomProtocolAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -319,6 +788,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.IndirectionString",
     UnderlyingType: premadeThriftType_string,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -330,6 +823,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedBool",
     UnderlyingType: premadeThriftType_bool,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -337,6 +854,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedInteger",
     UnderlyingType: premadeThriftType_i32,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -354,6 +895,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedByte",
     UnderlyingType: premadeThriftType_byte,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -365,6 +930,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedShort",
     UnderlyingType: premadeThriftType_i16,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -372,6 +961,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedLong",
     UnderlyingType: premadeThriftType_i64,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -383,6 +996,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedDouble",
     UnderlyingType: premadeThriftType_double,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -390,6 +1027,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedString",
     UnderlyingType: premadeThriftType_string,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -416,6 +1077,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedEnum",
     UnderlyingType: premadeThriftType_module_ThriftAdaptedEnum,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -460,6 +1145,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedTypedef",
     UnderlyingType: premadeThriftType_module_AdaptedStruct,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -492,6 +1201,65 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.AdaptedCircularAdaptee",
     UnderlyingType: premadeThriftType_module_CircularAdaptee,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::MemberAccessAdapter"),
+                            },
+                            
+                            },
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("adaptedType"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>"),
+                            },
+                            
+                            },
+                        },
+                    },
+                "adaptedType":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::MemberAccessAdapter"),
+                            },
+                            
+                            },
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("adaptedType"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -553,6 +1321,30 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.CountingInt",
     UnderlyingType: premadeThriftType_i64,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::apache::thrift::test::CountingAdapter<true, int>"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -584,6 +1376,74 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.MyI32",
     UnderlyingType: premadeThriftType_i32,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "hack.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("\\Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "rust.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter1"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -591,6 +1451,52 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.StructWithAdapter",
     UnderlyingType: premadeThriftType_module_Bar,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "hack.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("\\Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -598,6 +1504,52 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "module.UnionWithAdapter",
     UnderlyingType: premadeThriftType_module_Baz,
+    StructuredAnnotations: []*metadata.ThriftConstStruct{
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "hack.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("\\Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+        &metadata.ThriftConstStruct{
+            Type: &metadata.ThriftStructType{
+                Name: "cpp.Adapter",
+            },
+            Fields: map[string]*metadata.ThriftConstValue{
+                "name":
+                    &metadata.ThriftConstValue{
+                        CvMap: []*metadata.ThriftConstValuePair{
+                            &metadata.ThriftConstValuePair{
+                                Key: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("name"),
+                            },
+                            
+                                Value: &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("::my::Adapter2"),
+                            },
+                            
+                            },
+                        },
+                    },
+            },
+        },
+    },
 },
 
     }
@@ -722,6 +1674,72 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "color",
                     IsOptional: false,
                     Type:       premadeThriftType_module_Color,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "python.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.module.Adapter2"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("typeHint"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.another.module.AdaptedType2[]"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "typeHint":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.module.Adapter2"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("typeHint"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.another.module.AdaptedType2[]"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Transitive",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
                 },
             },
         },
@@ -924,6 +1942,87 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_i32,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::my::Adapter"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "python.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.module.Adapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("typeHint"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.another.module.AdaptedType"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "typeHint":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.module.Adapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("typeHint"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.another.module.AdaptedType"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -936,6 +2035,65 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "field",
                     IsOptional: false,
                     Type:       premadeThriftType_i32,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::my::Adapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("adaptedType"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::my::Type"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "adaptedType":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::my::Adapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("adaptedType"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::my::Type"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
                 },
             },
         },
@@ -1030,6 +2188,101 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "path",
                     IsOptional: false,
                     Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("MyVarAdapter"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "python.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.ConfigAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("typeHint"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.ConfiguredVar[]"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "typeHint":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.ConfigAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("typeHint"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("my.ConfiguredVar[]"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Transitive",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "thrift.Experimental",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
                 },
             },
         },
@@ -1294,6 +2547,30 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_module_CustomProtocolType,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "value":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("value"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("ThriftAdaptTestUnion"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -1308,6 +2585,30 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_i64,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Name",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "value":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("value"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("ThriftAdaptedStruct"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -1320,6 +2621,30 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "data",
                     IsOptional: false,
                     Type:       premadeThriftType_i64,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
                 },
             },
         },
@@ -1404,6 +2729,30 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -1416,6 +2765,65 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "data",
                     IsOptional: false,
                     Type:       premadeThriftType_i64,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("underlyingName"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("UnderlyingRenamedStruct"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "underlyingName":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("underlyingName"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("UnderlyingRenamedStruct"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
                 },
             },
         },
@@ -1432,6 +2840,120 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_i64,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("underlyingName"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("UnderlyingSameNamespaceStruct"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("extraNamespace"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize(""),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "underlyingName":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("underlyingName"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("UnderlyingSameNamespaceStruct"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("extraNamespace"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize(""),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "extraNamespace":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("underlyingName"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("UnderlyingSameNamespaceStruct"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("extraNamespace"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize(""),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -1439,6 +2961,65 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "module.HeapAllocated",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::MoveOnlyAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("moveOnly"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvBool: thrift.Pointerize(true),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "moveOnly":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::MoveOnlyAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("moveOnly"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvBool: thrift.Pointerize(true),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
             },
         },
     )
@@ -1476,6 +3057,37 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Transitive",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -1483,6 +3095,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "module.TransitiveAdapted",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "module.ApplyAdapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
             },
         },
     )
@@ -1524,6 +3145,37 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_string,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::VariableAdapter"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Transitive",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -1550,6 +3202,65 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "field",
                     IsOptional: false,
                     Type:       premadeThriftType_i32,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "cpp.Adapter",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "name":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::StructAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("underlyingName"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("Renamed"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                        "underlyingName":
+                            &metadata.ThriftConstValue{
+                                CvMap: []*metadata.ThriftConstValuePair{
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("name"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("::apache::thrift::test::StructAdapter"),
+                                    },
+                                    
+                                    },
+                                    &metadata.ThriftConstValuePair{
+                                        Key: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("underlyingName"),
+                                    },
+                                    
+                                        Value: &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("Renamed"),
+                                    },
+                                    
+                                    },
+                                },
+                            },
+                    },
                 },
             },
         },

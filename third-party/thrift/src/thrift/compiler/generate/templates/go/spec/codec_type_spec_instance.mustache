@@ -24,7 +24,7 @@
 {{#typedef:defined_kind?}}
 &thrift.CodecTypedefSpec{
     ScopedName:         "{{typedef:scoped_name}}",
-	UnderlyingTypeSpec: {{#type:typedef_type}}{{type:codec_type_spec_getter}}{{/type:typedef_type}},
+    UnderlyingTypeSpec: {{#type:typedef_type}}{{type:codec_type_spec_getter}}{{/type:typedef_type}},
 },
 {{/typedef:defined_kind?}}
 {{^typedef:defined_kind?}}
@@ -59,21 +59,21 @@
 {{#type:list?}}
 &thrift.CodecListSpec{
     ElementWireType: {{#type:list_elem_type}}{{> common/ttype}}{{/type:list_elem_type}},
-	ElementTypeSpec: {{#type:list_elem_type}}{{type:codec_type_spec_getter}}{{/type:list_elem_type}},
+    ElementTypeSpec: {{#type:list_elem_type}}{{type:codec_type_spec_getter}}{{/type:list_elem_type}},
 },
 {{/type:list?}}
 {{#type:map?}}
 &thrift.CodecMapSpec{
-	KeyTypeSpec:   {{#type:key_type}}{{type:codec_type_spec_getter}}{{/type:key_type}},
-	ValueTypeSpec: {{#type:value_type}}{{type:codec_type_spec_getter}}{{/type:value_type}},
+    KeyTypeSpec:   {{#type:key_type}}{{type:codec_type_spec_getter}}{{/type:key_type}},
+    ValueTypeSpec: {{#type:value_type}}{{type:codec_type_spec_getter}}{{/type:value_type}},
     KeyWireType:   {{#type:key_type}}{{> common/ttype}}{{/type:key_type}},
-	ValueWireType: {{#type:value_type}}{{> common/ttype}}{{/type:value_type}},
+    ValueWireType: {{#type:value_type}}{{> common/ttype}}{{/type:value_type}},
 },
 {{/type:map?}}
 {{#type:set?}}
 &thrift.CodecSetSpec{
     ElementWireType: {{#type:set_elem_type}}{{> common/ttype}}{{/type:set_elem_type}},
-	ElementTypeSpec: {{#type:set_elem_type}}{{type:codec_type_spec_getter}}{{/type:set_elem_type}},
+    ElementTypeSpec: {{#type:set_elem_type}}{{type:codec_type_spec_getter}}{{/type:set_elem_type}},
 },
 {{/type:set?}}
 {{/type:typedef?}}

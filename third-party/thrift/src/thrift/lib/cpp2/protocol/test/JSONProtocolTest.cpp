@@ -198,6 +198,18 @@ TEST_F(JSONProtocolTest, writeString) {
   EXPECT_EQ(expected, writing_cpp2([](W& p) { p.writeString("foobar"); }));
 }
 
+TEST_F(JSONProtocolTest, writeBigString) {
+  string expected;
+  expected.resize(2000000);
+  expected[0] = '"';
+  expected.back() = '"';
+  for (size_t i = 1; i < expected.size() - 1; ++i) {
+    expected[i] = '0' + (i % 32);
+  }
+  string input(expected.data() + 1, 2000000 - 2);
+  EXPECT_EQ(expected, writing_cpp2([&input](W& p) { p.writeString(input); }));
+}
+
 TEST_F(JSONProtocolTest, writeBinary) {
   auto expected = R"("Zm9vYmFy")";
   EXPECT_EQ(

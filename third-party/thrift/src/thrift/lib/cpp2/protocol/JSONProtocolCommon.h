@@ -80,8 +80,7 @@ class JSONProtocolWriterCommon : public detail::ProtocolBase {
       folly::IOBufQueue* queue,
       size_t maxGrowth = std::numeric_limits<size_t>::max()) {
     // Allocate 16KB at a time; leave some room for the IOBuf overhead
-    constexpr size_t kDesiredGrowth = (1 << 14) - 64;
-    out_.reset(queue, std::min(maxGrowth, kDesiredGrowth));
+    out_.reset(queue, std::min(maxGrowth, kDesiredQueueGrowth));
   }
 
   inline void setOutput(folly::io::QueueAppender&& output) {
@@ -128,8 +127,12 @@ class JSONProtocolWriterCommon : public detail::ProtocolBase {
   uint32_t endContext();
   uint32_t writeContext();
   uint32_t writeJSONEscapeChar(uint8_t ch);
+  void writeJSONEscapeChar(uint8_t* p, uint8_t ch);
   uint32_t writeJSONChar(uint8_t ch);
   uint32_t writeJSONString(folly::StringPiece);
+  void writeJSONStringChar(uint8_t*& p, uint8_t ch);
+  uint32_t writeJSONStringLarge(folly::StringPiece);
+  uint32_t writeJSONStringSmall(folly::StringPiece);
   uint32_t writeJSONBase64(folly::ByteRange);
   uint32_t writeJSONBool(bool val);
   uint32_t writeJSONInt(int64_t num);
@@ -142,6 +145,8 @@ class JSONProtocolWriterCommon : public detail::ProtocolBase {
   void base64_encode(const uint8_t* in, uint32_t len, uint8_t* buf) {
     protocol::base64_encode(in, len, buf);
   }
+
+  static constexpr size_t kDesiredQueueGrowth = (1 << 14) - 64;
 
   /**
    * Cursor to write the data out to.

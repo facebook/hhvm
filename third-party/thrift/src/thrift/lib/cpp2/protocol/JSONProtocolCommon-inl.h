@@ -276,45 +276,107 @@ inline uint32_t JSONProtocolWriterCommon::writeContext() {
   return 0;
 }
 
-inline uint32_t JSONProtocolWriterCommon::writeJSONEscapeChar(uint8_t ch) {
+inline void JSONProtocolWriterCommon::writeJSONEscapeChar(
+    uint8_t* p, uint8_t ch) {
   DCHECK(apache::thrift::detail::json::kJSONEscapePrefix.size() == 4);
-  out_.push(
-      (const uint8_t*)apache::thrift::detail::json::kJSONEscapePrefix.data(),
-      4);
-  out_.write(hexChar(ch >> 4));
-  out_.write(hexChar(ch));
+  memcpy(p, apache::thrift::detail::json::kJSONEscapePrefix.data(), 4);
+  p[4] = hexChar(ch >> 4);
+  p[5] = hexChar(ch);
+}
+
+inline uint32_t JSONProtocolWriterCommon::writeJSONEscapeChar(uint8_t ch) {
+  out_.ensure(6);
+  uint8_t* p = out_.writableData();
+  writeJSONEscapeChar(p, ch);
+  out_.append(6);
   return 6;
+}
+
+inline void JSONProtocolWriterCommon::writeJSONStringChar(
+    uint8_t*& p, uint8_t ch) {
+  // Only special characters >= 32 are '\' and '"'
+  if (ch == apache::thrift::detail::json::kJSONBackslash ||
+      ch == apache::thrift::detail::json::kJSONStringDelimiter) {
+    *p++ = apache::thrift::detail::json::kJSONBackslash;
+  }
+  if (ch >= 32) {
+    *p++ = ch;
+  } else {
+    uint8_t outCh = kJSONCharTable[ch];
+    // Check if regular character, backslash escaped, or JSON escaped
+    if (outCh != 0) {
+      p[0] = apache::thrift::detail::json::kJSONBackslash;
+      p[1] = outCh;
+      p += 2;
+    } else {
+      writeJSONEscapeChar(p, ch);
+      p += 6;
+    }
+  }
+}
+
+// Writes a string that fits the queue's initial growth strategy
+// Having this specialization improves throughput of small strings by 25% to 33%
+inline uint32_t JSONProtocolWriterCommon::writeJSONStringSmall(
+    folly::StringPiece str) {
+  out_.ensure(str.size() * 6 + 2);
+  uint8_t* p = out_.writableData();
+  uint8_t* start = p;
+  *p++ = apache::thrift::detail::json::kJSONStringDelimiter;
+  for (uint8_t ch : str) {
+    writeJSONStringChar(p, ch);
+  }
+  *p++ = apache::thrift::detail::json::kJSONStringDelimiter;
+  size_t len = p - start;
+  out_.append(len);
+  return static_cast<uint32_t>(len);
+}
+
+// Writes a string requiring an allocation bigger than the growth strategy
+inline uint32_t JSONProtocolWriterCommon::writeJSONStringLarge(
+    folly::StringPiece str) {
+  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
+  size_t totalBytesWritten = 2; // Two delimiters
+  size_t i = 0;
+  size_t bytesDesired = str.size() * 2;
+  do {
+    out_.ensureWithinMaxGrowth(bytesDesired);
+    uint8_t* p = out_.writableData();
+    uint8_t* start = p;
+    // do-while is correct, empty strings are processed by writeJSONStringSmall
+    assert(str.size() > 0);
+    size_t outstandingBufferLen = out_.length();
+    size_t bytesWrittenOnAlloc = 0;
+    do {
+      size_t charsGuaranteed = outstandingBufferLen / 6;
+      size_t indexLimit = std::min<size_t>(i + charsGuaranteed, str.size());
+      do {
+        uint8_t ch = str[i];
+        writeJSONStringChar(p, ch);
+        i += 1;
+      } while (i < indexLimit);
+      size_t bytesWrittenInIteration = p - start;
+      bytesWrittenOnAlloc += bytesWrittenInIteration;
+      outstandingBufferLen -= bytesWrittenInIteration;
+      start = p;
+    } while (i < str.size() && outstandingBufferLen > 5);
+    out_.append(bytesWrittenOnAlloc);
+    totalBytesWritten += bytesWrittenOnAlloc;
+  } while (i < str.size());
+  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
+  return static_cast<uint32_t>(totalBytesWritten);
 }
 
 inline uint32_t JSONProtocolWriterCommon::writeJSONString(
     folly::StringPiece str) {
-  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
-  uint32_t ret = 2;
-  for (uint8_t ch : str) {
-    // Only special characters >= 32 are '\' and '"'
-    if (ch == apache::thrift::detail::json::kJSONBackslash ||
-        ch == apache::thrift::detail::json::kJSONStringDelimiter) {
-      out_.write(apache::thrift::detail::json::kJSONBackslash);
-      ret += 1;
-    }
-    if (ch >= 32) {
-      out_.write(ch);
-      ret += 1;
-    } else {
-      uint8_t outCh = kJSONCharTable[ch];
-      // Check if regular character, backslash escaped, or JSON escaped
-      if (outCh != 0) {
-        out_.write(apache::thrift::detail::json::kJSONBackslash);
-        out_.write(outCh);
-        ret += 2;
-      } else {
-        ret += writeJSONEscapeChar(ch);
-      }
-    }
+  // We need 2 bytes for the delimiters, plus at most 6 bytes per char
+  constexpr size_t kMaxStringLengthFittingGrowthStrategy =
+      (kDesiredQueueGrowth - 2) / 6;
+  if (LIKELY(str.size() <= kMaxStringLengthFittingGrowthStrategy)) {
+    return writeJSONStringSmall(str);
+  } else {
+    return writeJSONStringLarge(str);
   }
-  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
-
-  return ret;
 }
 
 inline uint32_t JSONProtocolWriterCommon::writeJSONBase64(folly::ByteRange v) {

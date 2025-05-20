@@ -65,7 +65,7 @@ class ReflectionClass implements Reflector {
   public function getMethod(string $name)[]: ReflectionMethod;
   public function getMethods(?int $filter = null)[]: varray<ReflectionMethod>;
   public function getModifiers()[]: int;
-  public function getName()[]: string;
+  public function getName()[]: classname<mixed>;
   public function getNamespaceName()[]: string;
   public function isInternalToModule()[]: bool;
   public function getModule()[]: ?string;

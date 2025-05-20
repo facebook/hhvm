@@ -1,6 +1,5 @@
 Errors:
   [9:22-27] Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class
-  [110:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [123:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [128:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [131:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
@@ -425,14 +424,6 @@ Errors:
          { fb_ast =
            [([108:3-11], (Expr ((nothing), [108:3-10], (Class_get (((Foo), [108:3-6], (CI ([108:3-6], "\\Foo"))), (CGstring ([108:8-10], "$x")), Is_prop)))));
              ([109:3-10], (Expr ((dynamic), [109:3-9], (Class_get (((dynamic), [109:3-5], (CIexpr ((dynamic), [109:3-5], (Lvar ([109:3-5], $x))))), (CGstring ([109:7-9], "$x")), Is_prop)))));
-             ([110:3-12],
-              (Expr
-                 ((dynamic), [110:3-11],
-                  (Call
-                     { func =
-                       ((dynamic), [110:3-9],
-                        (Class_get (((dynamic), [110:3-5], (CIexpr ((dynamic), [110:3-5], (Lvar ([110:3-5], $x))))), (CGexpr ((dynamic), [110:7-9], (Lvar ([110:7-9], $x)))), Is_method)));
-                       targs = []; args = []; unpacked_arg = None }))));
              ([112:3-13], (Expr ((nothing), [112:4-11], (Class_get (((Foo), [112:4-7], (CI ([112:4-7], "\\Foo"))), (CGstring ([112:9-11], "$x")), Is_prop)))));
              ([113:3-14], (Expr ((dynamic), [113:5-11], (Class_get (((dynamic), [113:5-7], (CIexpr ((dynamic), [113:5-7], (Lvar ([113:5-7], $x))))), (CGstring ([113:9-11], "$x")), Is_prop)))));
              ([114:3-19],

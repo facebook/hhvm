@@ -1,2 +1,2 @@
 ERROR: File "dynamic_static_method.php", line 10, characters 5-20:
-Dynamic calls to static methods may only have the form `$d1::$d2()` (Parsing[1002])
+Dynamic calls to static methods are banned. (Parsing[1002])

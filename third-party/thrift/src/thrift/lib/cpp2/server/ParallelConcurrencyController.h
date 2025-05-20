@@ -25,11 +25,13 @@
 
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerBase.h>
+#include <thrift/lib/cpp2/server/RequestExpirationDelegate.h>
 #include <thrift/lib/cpp2/server/RequestPileInterface.h>
 
 namespace apache::thrift {
 
-class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase {
+class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase,
+                                          public RequestExpirationDelegate {
  public:
   enum class RequestExecutionMode : uint8_t {
     // Requests are executed in the order they are enqueued, but coroutines are
@@ -74,6 +76,8 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase {
   uint64_t numPendingDequeRequest() const final {
     return counters_.load().pendingDequeCalls;
   }
+
+  void processExpiredRequest(ServerRequest&& request) override;
 
  protected:
   const RequestExecutionMode requestExecutionMode_;

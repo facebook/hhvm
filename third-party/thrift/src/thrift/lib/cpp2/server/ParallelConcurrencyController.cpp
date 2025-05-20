@@ -200,6 +200,15 @@ void ParallelConcurrencyControllerBase::executeRequest(
   }
 }
 
+void ParallelConcurrencyControllerBase::processExpiredRequest(
+    ServerRequest&& request) {
+  using namespace apache::thrift::detail;
+  auto eb = ServerRequestHelper::eventBase(request);
+  auto req = ServerRequestHelper::request(std::move(request));
+  HandlerCallbackBase::releaseRequest(std::move(req), eb);
+  onExecuteFinish(true);
+}
+
 void ParallelConcurrencyControllerBase::stop() {}
 
 std::string ParallelConcurrencyController::describe() const {

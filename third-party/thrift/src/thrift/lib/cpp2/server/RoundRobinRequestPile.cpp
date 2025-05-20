@@ -54,7 +54,7 @@ RoundRobinRequestPile::Consumer::operator()(
     ServerRequest&& request, std::shared_ptr<folly::RequestContext>&&) {
   // If Executor for expiring requests is NOT provided, we return even expired
   // requests to the user
-  if (requestsExpirationExecutor_ == nullptr) {
+  if (requestExpirationDelegate_ == nullptr) {
     carrier_ = std::move(request);
     return folly::AtomicNotificationQueueTaskStatus::CONSUMED;
   }
@@ -67,14 +67,9 @@ RoundRobinRequestPile::Consumer::operator()(
 
   if (request.request() != nullptr && !request.request()->isActive()) {
     // NOTE that if request()->isActive() returns false we know *for sure* that
-    // request has expired, but if it returns false then request might be
+    // request has expired, but if it returns true then request MIGHT be
     // expired or not.
-    requestsExpirationExecutor_->add([request = std::move(request)]() mutable {
-      auto eb = ServerRequestHelper::eventBase(request);
-      auto req = ServerRequestHelper::request(std::move(request));
-      HandlerCallbackBase::releaseRequest(std::move(req), eb);
-    });
-
+    requestExpirationDelegate_->processExpiredRequest(std::move(request));
     return folly::AtomicNotificationQueueTaskStatus::DISCARD;
   }
 
@@ -128,23 +123,13 @@ RoundRobinRequestPile::RoundRobinRequestPile(Options opts)
       requestQueues_[i][j].arm();
     }
   }
-
-  if (opts.expireRequestsOnDequeue) {
-    requestsExpirationExecutor_ =
-        std::make_unique<folly::CPUThreadPoolExecutor>(
-            1,
-            std::make_shared<folly::NamedThreadFactory>(
-                "RoundRobinRequestPile-RequestsExpiration"));
-  }
 }
 
 std::optional<ServerRequest> RoundRobinRequestPile::dequeueImpl(
     unsigned pri, unsigned bucket) {
-  Consumer consumer(
-      requestsExpirationExecutor_ ? requestsExpirationExecutor_.get()
-                                  : nullptr);
+  Consumer consumer(requestExpirationDelegate_);
   auto& queue = requestQueues_[pri][bucket];
-  bool dequeued = queue.drive(consumer);
+  queue.drive(consumer);
 
   // Schedule a callback from the consumer thread iff
   // there is something remaining in the queue
@@ -153,9 +138,9 @@ std::optional<ServerRequest> RoundRobinRequestPile::dequeueImpl(
     retrievalIndexQueues_[pri]->enqueue(bucket);
   }
 
-  if (dequeued) {
-    RequestPileBase::onDequeued(consumer.carrier_);
-    return std::move(consumer.carrier_);
+  if (consumer.carrier_) {
+    RequestPileBase::onDequeued(*consumer.carrier_);
+    return std::move(*consumer.carrier_);
   } else {
     return std::nullopt;
   }

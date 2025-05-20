@@ -226,6 +226,9 @@ class RpcOptions {
 
   // Metrics to be sent back to the client
   std::shared_ptr<void> metricsToCollect_;
+
+  // Optional identifier for phase routing to web services
+  std::string webPhaseRoutingIdentifier_;
 };
 
 } // namespace apache::thrift

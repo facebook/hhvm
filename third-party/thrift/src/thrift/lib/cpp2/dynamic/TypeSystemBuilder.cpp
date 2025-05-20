@@ -291,6 +291,11 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
                     "Definition for uri '{}' for annotation is not struct.",
                     k));
               }
+              // Validate if the value is a struct.
+              if (!v.fieldSetDatum_ref().has_value()) {
+                throw InvalidTypeError(fmt::format(
+                    "Value for uri '{}' for annotation is not a struct.", k));
+              }
               ret.emplace(
                   std::move(k), SerializableRecord::fromThrift(std::move(v)));
             });

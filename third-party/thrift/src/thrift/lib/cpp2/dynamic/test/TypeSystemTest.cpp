@@ -465,7 +465,7 @@ TEST(TypeSystemTest, Annotations) {
                  .values()[0]);
 }
 
-TEST(TypeSystemTest, MissingAnnotationType) {
+TEST(TypeSystemTest, WrongAnnotationTypeUri) {
   TypeSystemBuilder builder;
 
   folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
@@ -495,7 +495,37 @@ TEST(TypeSystemTest, MissingAnnotationType) {
   EXPECT_THROW(std::move(builder).build(), InvalidTypeError);
 }
 
-TEST(TypeSystemTest, WrongAnnotationType) {
+TEST(TypeSystemTest, WrongAnnotationTypeValue) {
+  TypeSystemBuilder builder;
+
+  // Value is not a FieldSetDatum.
+  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
+      {"meta.com/thrift/test/MyAnnot",
+       SerializableRecord::toThrift({SerializableRecord::Int32(42)})}};
+
+  // @MyAnnot{field1=42}
+  // struct MyStruct{
+  //   @MyAnnot{field1=42}
+  //   1: optional i32 field1;
+  // }
+  builder.addType(
+      "meta.com/thrift/test/MyAnnot",
+      makeStruct({makeField(identity(1, "field1"), optional, TypeIds::I32)}));
+  builder.addType(
+      "meta.com/thrift/test/MyStruct",
+      makeStruct(
+          {makeField(
+              identity(1, "field1"),
+              optional,
+              TypeIds::I32,
+              std::nullopt,
+              annots)},
+          false,
+          annots));
+  EXPECT_THROW(std::move(builder).build(), InvalidTypeError);
+}
+
+TEST(TypeSystemTest, MissingAnnotationType) {
   TypeSystemBuilder builder;
 
   folly::F14FastMap<Uri, SerializableRecordUnion> annots = {

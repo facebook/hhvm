@@ -472,13 +472,13 @@ class TypeRef final {
   explicit TypeRef(Map map) noexcept : type_(std::move(map)) {}
 
   // TypeRef to definitions
-  explicit TypeRef(const StructNode& structDef)
+  explicit TypeRef(const StructNode& structDef) noexcept
       : type_(std::in_place_type<StructPtr>, &structDef) {}
-  explicit TypeRef(const UnionNode& unionDef)
+  explicit TypeRef(const UnionNode& unionDef) noexcept
       : type_(std::in_place_type<UnionPtr>, &unionDef) {}
-  explicit TypeRef(const EnumNode& enumDef)
+  explicit TypeRef(const EnumNode& enumDef) noexcept
       : type_(std::in_place_type<EnumPtr>, &enumDef) {}
-  explicit TypeRef(const OpaqueAliasNode& opaqueAliasDef)
+  explicit TypeRef(const OpaqueAliasNode& opaqueAliasDef) noexcept
       : type_(std::in_place_type<OpaqueAliasPtr>, &opaqueAliasDef) {}
 
   /**

@@ -32,12 +32,14 @@ const VersionKey& getVersionKey(const Key& key);
 
 template <typename VersionKey>
 struct LazyTwoWayMapVersionProvider {
-  void bumpVersion(VersionKey key) noexcept {
+  virtual ~LazyTwoWayMapVersionProvider() {}
+
+  virtual void bumpVersion(const VersionKey& key) noexcept {
     auto& version = ++m_versionMap[key];
     always_assert(version != 0);
   }
 
-  std::uint64_t getVersion(VersionKey key) const noexcept {
+  virtual std::uint64_t getVersion(const VersionKey& key) const noexcept {
     auto const versionIt = m_versionMap.find(key);
     if (versionIt == m_versionMap.end()) {
       return 0;

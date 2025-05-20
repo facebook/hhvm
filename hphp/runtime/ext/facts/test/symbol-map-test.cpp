@@ -35,6 +35,7 @@
 #include "hphp/runtime/ext/facts/sqlite-key.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
+#include "hphp/runtime/ext/facts/test/string-data-test.h"
 #include "hphp/util/bstring.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"
@@ -51,137 +52,15 @@ using ::testing::SaveArg;
 using ::testing::SizeIs;
 using ::testing::UnorderedElementsAre;
 
-/**
- * Implements our StringPtr class in terms of std::string.
- *
- * For unit-testing purposes only. By contrast, see
- * string_data_ptr.cpp, which implements this class in terms of
- * HPHP::StringData for production use.
- */
-
 namespace fs = std::filesystem;
 
 namespace HPHP {
-
-struct StringData {
- public:
-  // These two constructions allow implicit construction for convenience
-  // in unit tests.
-  /* implicit */ StringData(const char* s) : m_impl{s} {}
-  /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {}
-
-  explicit StringData(std::string_view s) : m_impl{s} {}
-
-  std::string* impl() const {
-    return &m_impl;
-  }
-  std::string_view slice() const noexcept {
-    return std::string_view{m_impl};
-  }
-  bool empty() const {
-    return m_impl.empty();
-  }
-  size_t size() const {
-    return m_impl.size();
-  }
-  strhash_t hash() const noexcept {
-    strhash_t h = hash_string_i_unsafe(m_impl.c_str(), m_impl.size());
-    assertx(h >= 0);
-    return h;
-  }
-  bool same(const StringData& o) const noexcept {
-    return m_impl == o.m_impl;
-  }
-  bool tsame(const StringData& o) const noexcept {
-    auto lower = [](const std::string& _s) {
-      std::string s = _s;
-      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-      return s;
-    };
-    return lower(m_impl) == lower(o.m_impl);
-  }
-  bool fsame(const StringData& o) const noexcept {
-    return same(o);
-  }
-
- private:
-  mutable std::string m_impl;
-};
-
 namespace Facts {
 
 /**
  * Insert-only store of static pointers
  */
 folly::ConcurrentHashMap<StringPtr, std::unique_ptr<StringData>> s_stringTable;
-
-std::string_view StringPtr::StringPtr::slice() const noexcept {
-  assertx(m_impl != nullptr);
-  return std::string_view{*m_impl->impl()};
-}
-
-int StringPtr::StringPtr::size() const noexcept {
-  assertx(m_impl != nullptr);
-  return m_impl->impl()->size();
-}
-
-bool StringPtr::StringPtr::empty() const noexcept {
-  assertx(m_impl != nullptr);
-  return m_impl->impl()->empty();
-}
-
-strhash_t StringPtr::StringPtr::hash() const noexcept {
-  assertx(m_impl != nullptr);
-  return hash_string_i(m_impl->impl()->c_str(), m_impl->impl()->size());
-}
-
-bool StringPtr::StringPtr::same(const StringPtr& s) const noexcept {
-  if (m_impl->impl() == s.m_impl->impl()) {
-    return true;
-  }
-  if (m_impl->impl() == nullptr || s.m_impl->impl() == nullptr) {
-    return false;
-  }
-  return *m_impl->impl() == *s.m_impl->impl();
-}
-
-bool StringPtr::StringPtr::tsame(const StringPtr& s) const noexcept {
-  if (m_impl->impl() == s.m_impl->impl()) {
-    return true;
-  }
-  if (m_impl->impl() == nullptr || s.m_impl->impl() == nullptr) {
-    return false;
-  }
-  if (m_impl->impl()->size() != s.m_impl->impl()->size()) {
-    return false;
-  }
-  return bstrcaseeq(
-      m_impl->impl()->c_str(),
-      s.m_impl->impl()->c_str(),
-      m_impl->impl()->size());
-}
-
-bool StringPtr::StringPtr::fsame(const StringPtr& s) const noexcept {
-  return same(s);
-}
-
-bool StringPtr::tsame_slice(std::string_view a, std::string_view b) noexcept {
-  auto lower = [](std::string_view t) {
-    std::string s{t};
-    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-    return s;
-  };
-  return lower(a) == lower(b);
-}
-
-bool StringPtr::fsame_slice(std::string_view a, std::string_view b) noexcept {
-  auto lower = [](std::string_view t) {
-    std::string s{t};
-    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-    return s;
-  };
-  return lower(a) == lower(b);
-}
 
 StringPtr makeStringPtr(const StringData& s) {
   auto it = s_stringTable.find(StringPtr{&s});

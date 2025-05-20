@@ -25,13 +25,13 @@ namespace Facts {
 
 template <SymKind k>
 struct PathToSymbolsMap {
-  using PathSymbolMap = LazyTwoWayMap<Path, Path, Symbol<k>>;
+  using PathSymbolMap = LazyTwoWayMap<Path, Symbol<k>>;
 
   using Symbols = typename PathSymbolMap::Values;
   using Paths = typename PathSymbolMap::Keys;
 
   explicit PathToSymbolsMap(
-      std::shared_ptr<LazyTwoWayMapVersionProvider<Path>> versions)
+      std::shared_ptr<LazyTwoWayMapVersionProvider> versions)
       : m_pathSymbolMap{std::move(versions)} {}
 
   /**

@@ -16,9 +16,13 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <string_view>
 
+#include <folly/concurrency/ConcurrentHashMap.h>
+
+#include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/util/hash.h"
 
 namespace HPHP {
@@ -48,4 +52,41 @@ struct StringData {
   mutable std::string m_impl;
 };
 
+namespace Facts {
+
+struct TestStringTable {
+ private:
+  TestStringTable(){};
+
+ public:
+  static TestStringTable* getInstance() {
+    static TestStringTable* const instance = new TestStringTable();
+    return instance;
+  }
+
+  StringPtr get(const StringData& s) {
+    auto it = stringTable_.find(StringPtr{&s});
+    if (it != stringTable_.end()) {
+      return it->first;
+    }
+
+    auto staticStr = std::make_unique<StringData>(s);
+    auto strKey = StringPtr{staticStr.get()};
+    return StringPtr{
+        stringTable_.insert(strKey, std::move(staticStr)).first->first};
+  }
+
+ private:
+  folly::ConcurrentHashMap<StringPtr, std::unique_ptr<StringData>> stringTable_;
+};
+
+/**
+ * Insert-only store of static pointers
+ */
+
+StringPtr makeStringPtr(const StringData& s);
+StringPtr makeStringPtr(std::string_view sv);
+std::ostream& operator<<(std::ostream& os, const StringPtr& s);
+
+} // namespace Facts
 } // namespace HPHP

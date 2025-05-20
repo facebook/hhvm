@@ -18,28 +18,27 @@
 
 #include <algorithm>
 #include <memory>
-#include <tuple>
 #include <vector>
 
+#include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/optional.h"
 
 namespace HPHP {
 namespace Facts {
 
-template <typename Key, typename VersionKey>
-const VersionKey& getVersionKey(const Key& key);
+template <typename Key>
+const StringPtr& getVersionKey(const Key& key);
 
-template <typename VersionKey>
 struct LazyTwoWayMapVersionProvider {
   virtual ~LazyTwoWayMapVersionProvider() {}
 
-  virtual void bumpVersion(const VersionKey& key) noexcept {
+  virtual void bumpVersion(const StringPtr& key) noexcept {
     auto& version = ++m_versionMap[key];
     always_assert(version != 0);
   }
 
-  virtual std::uint64_t getVersion(const VersionKey& key) const noexcept {
+  virtual std::uint64_t getVersion(const StringPtr& key) const noexcept {
     auto const versionIt = m_versionMap.find(key);
     if (versionIt == m_versionMap.end()) {
       return 0;
@@ -47,7 +46,7 @@ struct LazyTwoWayMapVersionProvider {
     return versionIt->second;
   }
 
-  hphp_hash_map<VersionKey, std::uint64_t> m_versionMap;
+  hphp_hash_map<StringPtr, std::uint64_t> m_versionMap;
 };
 
 /**
@@ -57,7 +56,6 @@ struct LazyTwoWayMapVersionProvider {
  */
 template <
     typename Key, // Must have std::hash and operator== defined.
-    typename VersionKey,
     typename Value // Must also have std::hash and operator== defined
     >
 struct LazyTwoWayMap {
@@ -69,8 +67,7 @@ struct LazyTwoWayMap {
     hphp_hash_map<Key, uint64_t> m_keys;
   };
 
-  explicit LazyTwoWayMap(
-      std::shared_ptr<LazyTwoWayMapVersionProvider<VersionKey>> versions)
+  explicit LazyTwoWayMap(std::shared_ptr<LazyTwoWayMapVersionProvider> versions)
       : m_versions{std::move(versions)} {}
 
   /**
@@ -198,7 +195,7 @@ struct LazyTwoWayMap {
 
  private:
   uint64_t getVersion(const Key& key) const noexcept {
-    return m_versions->getVersion(getVersionKey<Key, VersionKey>(key));
+    return m_versions->getVersion(getVersionKey<Key>(key));
   }
 
   void removeStaleKeys(VersionedKeys& versionedKeys) const noexcept {
@@ -215,7 +212,7 @@ struct LazyTwoWayMap {
 
   hphp_hash_map<Key, Values> m_keyToValues;
   hphp_hash_map<Value, VersionedKeys> m_valueToKeys;
-  std::shared_ptr<LazyTwoWayMapVersionProvider<VersionKey>> m_versions;
+  std::shared_ptr<LazyTwoWayMapVersionProvider> m_versions;
 };
 
 } // namespace Facts

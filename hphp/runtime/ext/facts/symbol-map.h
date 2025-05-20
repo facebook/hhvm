@@ -51,18 +51,18 @@ struct StringData;
 namespace Facts {
 
 template <>
-inline const Path& getVersionKey<Path, Path>(const Path& path) {
-  return path;
+inline const StringPtr& getVersionKey<Path>(const Path& path) {
+  return path.m_path;
 }
 
 template <>
-inline const Path& getVersionKey<TypeDecl, Path>(const TypeDecl& type) {
-  return type.m_path;
+inline const StringPtr& getVersionKey<TypeDecl>(const TypeDecl& type) {
+  return type.m_path.m_path;
 }
 
 template <>
-inline const Path& getVersionKey<MethodDecl, Path>(const MethodDecl& method) {
-  return method.m_type.m_path;
+inline const StringPtr& getVersionKey<MethodDecl>(const MethodDecl& method) {
+  return method.m_type.m_path.m_path;
 }
 
 struct UpdateDBWorkItem {
@@ -476,7 +476,7 @@ struct SymbolMap {
      * the facts in our data structures which have version numbers older than
      * the ones in this map.
      */
-    std::shared_ptr<LazyTwoWayMapVersionProvider<Path>> m_versions;
+    std::shared_ptr<LazyTwoWayMapVersionProvider> m_versions;
 
     /**
      * Maps between symbols and the paths defining them.

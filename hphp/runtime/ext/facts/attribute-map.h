@@ -34,13 +34,12 @@ namespace Facts {
 
 template <typename Key>
 struct AttributeMap {
-  using KeyToAttrMap = LazyTwoWayMap<Key, Path, Symbol<SymKind::Type>>;
+  using KeyToAttrMap = LazyTwoWayMap<Key, Symbol<SymKind::Type>>;
 
   using TypeDefs = typename KeyToAttrMap::Keys;
   using Attrs = typename KeyToAttrMap::Values;
 
-  explicit AttributeMap(
-      std::shared_ptr<LazyTwoWayMapVersionProvider<Path>> versions)
+  explicit AttributeMap(std::shared_ptr<LazyTwoWayMapVersionProvider> versions)
       : m_attrMap{std::move(versions)} {}
 
   /**

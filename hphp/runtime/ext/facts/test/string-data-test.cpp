@@ -132,5 +132,20 @@ bool StringPtr::fsame_slice(std::string_view a, std::string_view b) noexcept {
   return lower(a) == lower(b);
 }
 
+StringPtr makeStringPtr(const StringData& s) {
+  return TestStringTable::getInstance()->get(s);
+}
+
+StringPtr makeStringPtr(std::string_view sv) {
+  return makeStringPtr(StringData{sv});
+}
+
+std::ostream& operator<<(std::ostream& os, const StringPtr& s) {
+  if (s.get()->impl() == nullptr) {
+    return os << "<nullptr>";
+  }
+  return os << *s.get()->impl();
+}
+
 } // namespace Facts
 } // namespace HPHP

@@ -1654,7 +1654,7 @@ typename PathToSymbolsMap<k>::PathSymbolMap::Values SymbolMap::getPathSymbols(
 }
 
 SymbolMap::Data::Data()
-    : m_versions{std::make_shared<LazyTwoWayMapVersionProvider<Path>>()},
+    : m_versions{std::make_shared<LazyTwoWayMapVersionProvider>()},
       m_typePath{m_versions},
       m_functionPath{m_versions},
       m_constantPath{m_versions},
@@ -1670,7 +1670,7 @@ void SymbolMap::Data::updatePath(
     Path path,
     FileFacts facts,
     const hphp_vector_set<Symbol<SymKind::Type>>& indexedMethodAttrs) {
-  m_versions->bumpVersion(path);
+  m_versions->bumpVersion(getVersionKey<Path>(path));
 
   typename PathToSymbolsMap<SymKind::Type>::Symbols types;
   for (auto& type : facts.types) {
@@ -1767,7 +1767,7 @@ void SymbolMap::Data::updatePath(
 }
 
 void SymbolMap::Data::removePath(Path path) {
-  m_versions->bumpVersion(path);
+  m_versions->bumpVersion(getVersionKey<Path>(path));
   m_fileExistsMap.insert_or_assign(path, false);
 }
 

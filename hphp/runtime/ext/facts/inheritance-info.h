@@ -91,22 +91,22 @@ namespace HPHP {
 namespace Facts {
 
 template <>
-inline const Path& getVersionKey<EdgeToSupertype, Path>(
+inline const StringPtr& getVersionKey<EdgeToSupertype>(
     const EdgeToSupertype& edge) {
-  return edge.m_path;
+  return edge.m_path.m_path;
 }
 
 /**
  * Information about which types use, extend, or implement which other types.
  */
 struct InheritanceInfo {
-  using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype, Path, SubtypeQuery>;
+  using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype, SubtypeQuery>;
 
   using TypeDefs = typename TypeToBaseTypesMap::Keys;
   using Types = typename TypeToBaseTypesMap::Values;
 
   explicit InheritanceInfo(
-      std::shared_ptr<LazyTwoWayMapVersionProvider<Path>> versions)
+      std::shared_ptr<LazyTwoWayMapVersionProvider> versions)
       : m_baseTypesMap{std::move(versions)} {}
 
   /**

@@ -57,34 +57,6 @@ namespace fs = std::filesystem;
 namespace HPHP {
 namespace Facts {
 
-/**
- * Insert-only store of static pointers
- */
-folly::ConcurrentHashMap<StringPtr, std::unique_ptr<StringData>> s_stringTable;
-
-StringPtr makeStringPtr(const StringData& s) {
-  auto it = s_stringTable.find(StringPtr{&s});
-  if (it != s_stringTable.end()) {
-    return it->first;
-  }
-
-  auto staticStr = std::make_unique<StringData>(s);
-  auto strKey = StringPtr{staticStr.get()};
-  return StringPtr{
-      s_stringTable.insert(strKey, std::move(staticStr)).first->first};
-}
-
-StringPtr makeStringPtr(std::string_view sv) {
-  return makeStringPtr(StringData{sv});
-}
-
-std::ostream& operator<<(std::ostream& os, const StringPtr& s) {
-  if (s.get()->impl() == nullptr) {
-    return os << "<nullptr>";
-  }
-  return os << *s.get()->impl();
-}
-
 template <SymKind k>
 void PrintTo(const Symbol<k>& symbol, ::std::ostream* os) {
   *os << symbol.slice();

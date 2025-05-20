@@ -52,22 +52,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_string,
                 },
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "scope.Struct",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "thrift.Experimental",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                    },
-                },
-            },
         },
     )
     return fbthriftResults

@@ -89,19 +89,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_string,
                 },
             },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "internal.InjectMetadataFields",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                        "type":
-                            &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("Fields"),
-                            },
-                    },
-                },
-            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -120,19 +107,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "string_field",
                     IsOptional: false,
                     Type:       premadeThriftType_string,
-                },
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "internal.InjectMetadataFields",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                        "type":
-                            &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("Fields"),
-                            },
-                    },
                 },
             },
         },
@@ -165,19 +139,6 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "string_field",
                     IsOptional: false,
                     Type:       premadeThriftType_string,
-                },
-            },
-            StructuredAnnotations: []*metadata.ThriftConstStruct{
-                &metadata.ThriftConstStruct{
-                    Type: &metadata.ThriftStructType{
-                        Name: "internal.InjectMetadataFields",
-                    },
-                    Fields: map[string]*metadata.ThriftConstValue{
-                        "type":
-                            &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("foo.Fields"),
-                            },
-                    },
                 },
             },
         },

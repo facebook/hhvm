@@ -26,16 +26,5 @@
         {{enum_value:value}}: "{{enum_value:name}}",
         {{/enum:values}}
     },
-    {{#enum:structured_annotations?}}
-    StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
-        {{#enum:structured_annotations}}
-        {{#structured_annotation:const}}
-        {{#constant:value}}
-        {{> metadata/thrift_metadata_const_struct}}
-        {{/constant:value}}
-        {{/structured_annotation:const}}
-        {{/enum:structured_annotations}}
-    },
-    {{/enum:structured_annotations?}}
 },
 {{!newline}}

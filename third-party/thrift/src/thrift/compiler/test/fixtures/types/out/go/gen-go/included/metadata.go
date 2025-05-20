@@ -38,19 +38,6 @@ var (
         TTypedef: &metadata.ThriftTypedefType{
     Name:           "included.SomeMap",
     UnderlyingType: premadeThriftType_map_i32_string,
-    StructuredAnnotations: []*metadata.ThriftConstStruct{
-        &metadata.ThriftConstStruct{
-            Type: &metadata.ThriftStructType{
-                Name: "cpp.Type",
-            },
-            Fields: map[string]*metadata.ThriftConstValue{
-                "template":
-                    &metadata.ThriftConstValue{
-                        CvString: thrift.Pointerize("std::unordered_map"),
-                    },
-            },
-        },
-    },
 },
 
     }

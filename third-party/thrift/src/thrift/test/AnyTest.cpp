@@ -79,6 +79,7 @@ TEST(AnyTest, BaseApi) {
   builder.data() = folly::IOBuf::wrapBufferAsValue("hi", 2);
 
   AnyData any(builder);
+  EXPECT_TRUE(any.hasValue());
   EXPECT_TRUE(any.contains<type::i16_t>());
   EXPECT_FALSE(any.contains<type::i32_t>());
   EXPECT_EQ(any.type(), Type::get<i16_t>());
@@ -98,6 +99,7 @@ TYPED_TEST_SUITE(AnyTestFixture, Tags);
 TYPED_TEST(AnyTestFixture, ToAny) {
   const auto& value = tagToValue<TypeParam>;
   AnyData any;
+  EXPECT_FALSE(any.hasValue());
   native_type<TypeParam> v1, v2;
 
   if constexpr (

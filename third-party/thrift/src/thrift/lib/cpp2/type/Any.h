@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
@@ -89,6 +90,14 @@ class AnyData : public detail::Wrap<AnyStruct> {
   }
 
   bool isValid() const noexcept { return isValid(data_); }
+
+  // This is different from `AnyData::empty` method that has `op::empty`
+  // semantic where `AnyData::empty` always return false due to unqualified
+  // fields. This is different from `AnyData::isValid` since AnyData can
+  // have an invalid value or be empty which is valid.
+  bool hasValue() const noexcept {
+    return data_ != op::getDefault<struct_t<AnyStruct>>();
+  }
 
   static bool isValid(const AnyStruct& any) noexcept;
 

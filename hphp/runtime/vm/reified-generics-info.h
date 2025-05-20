@@ -36,13 +36,17 @@ struct TypeParamInfo {
  * or class
  */
 struct ReifiedGenericsInfo {
-  // Whether it has any soft generics
-  bool m_hasSoftGenerics;
-  // Bitmap used to compare whether generics match in terms of parity in the
-  // fast path of CheckFunReifiedGenericMismatch
-  uint32_t m_bitmap;
-  // Information regarding each type parameter
   std::vector<TypeParamInfo> m_typeParamInfo;
+
+  bool hasSoft() const {
+    return std::any_of(
+      m_typeParamInfo.begin(),
+      m_typeParamInfo.end(),
+      [](TypeParamInfo t) {
+        return t.m_isSoft;
+      }
+    );
+  }
 
   bool allGenericsSoft() const {
     return !std::any_of(m_typeParamInfo.begin(), m_typeParamInfo.end(),

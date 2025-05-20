@@ -93,8 +93,9 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   assertx(func->hasReifiedGenerics());
   auto& v = vmain(env);
 
-  auto const info = func->getReifiedGenericsInfo();
-  if (info.m_hasSoftGenerics || info.m_typeParamInfo.size() > 15) {
+  auto const& info = func->getReifiedGenericsInfo();
+  if (info.hasSoft() || info.m_typeParamInfo.size() > 15) {
+    // Punt checks to CheckFunReifiedGenericMismatch
     v << copy{v.cns(0), dst};
     return;
   }
@@ -107,7 +108,10 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
 
   // Higher order 16 bits contain the tag in a compact tagged pointer
   // Tag contains ((1 << number-of-parameters) | bitmap)
-  auto const bitmapImmed = static_cast<int16_t>(info.m_bitmap);
+  int16_t bitmapImmed = 0;
+  for (auto const& tp : info.m_typeParamInfo) {
+    bitmapImmed = (bitmapImmed << 1) | (tp.m_isReified ? 1 : 0);
+  }
   auto const topBit = 1u << info.m_typeParamInfo.size();
 
   auto const sf = v.makeReg();

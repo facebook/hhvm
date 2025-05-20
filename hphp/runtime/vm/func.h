@@ -1462,11 +1462,12 @@ private:
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
+    // (2 bytes unused)
     int64_t m_dynCallSampleRate;
     LowStringPtr m_docComment;
     LowStringPtr m_originalModuleName;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 248 : 288>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 240 : 280>(), "");
 
   /*
    * SharedData accessors for internal use.

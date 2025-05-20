@@ -291,6 +291,13 @@ void AsyncFizzClientT<SM>::connectErr(
 }
 
 template <typename SM>
+void AsyncFizzClientT<SM>::preConnect(folly::NetworkSocket fd) {
+  if (auto* cb = callback_->asAsyncSocketConnCallbackPtr()) {
+    cb->preConnect(fd);
+  }
+}
+
+template <typename SM>
 void AsyncFizzClientT<SM>::writeAppData(
     folly::AsyncTransportWrapper::WriteCallback* callback,
     std::unique_ptr<folly::IOBuf>&& buf,

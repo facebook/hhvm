@@ -223,6 +223,7 @@ class AsyncFizzClientT : public AsyncFizzBase,
 
   void connectErr(const folly::AsyncSocketException& ex) noexcept override;
   void connectSuccess() noexcept override;
+  void preConnect(folly::NetworkSocket fd) override;
 
   folly::Optional<folly::AsyncSocketException> handleEarlyReject();
 

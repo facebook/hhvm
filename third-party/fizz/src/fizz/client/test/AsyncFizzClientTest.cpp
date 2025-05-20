@@ -41,6 +41,7 @@ class MockConnectCallback : public AsyncSocket::ConnectCallback {
  public:
   MOCK_METHOD(void, _connectSuccess, ());
   MOCK_METHOD(void, _connectErr, (const AsyncSocketException&));
+  MOCK_METHOD(void, _preConnect, (NetworkSocket));
 
   void connectSuccess() noexcept override {
     _connectSuccess();
@@ -48,6 +49,10 @@ class MockConnectCallback : public AsyncSocket::ConnectCallback {
 
   void connectErr(const AsyncSocketException& ex) noexcept override {
     _connectErr(ex);
+  }
+
+  void preConnect(folly::NetworkSocket fd) override {
+    _preConnect(fd);
   }
 };
 
@@ -496,7 +501,7 @@ TEST_F(AsyncFizzClientTest, TestSocketConnect) {
 
   machine_ = MockClientStateMachineInstance::instance;
   auto server = std::make_unique<TestServer>();
-
+  EXPECT_CALL(cb, _preConnect(_)).Times(1);
   EXPECT_CALL(*machine_, _processConnect(_, _, _, _, _, _, _))
       .WillOnce(InvokeWithoutArgs([]() {
         return detail::actions(ReportHandshakeSuccess(), WaitForData());
@@ -517,6 +522,7 @@ TEST_F(AsyncFizzClientTest, TestSocketConnect) {
 
 TEST_F(AsyncFizzClientTest, TestSocketConnectWithUnsupportedTransport) {
   MockConnectCallback cb;
+  EXPECT_CALL(cb, _preConnect(_)).Times(0);
   EXPECT_CALL(cb, _connectErr(_))
       .WillOnce(Invoke([](const AsyncSocketException& ex) {
         EXPECT_THAT(ex.what(), HasSubstr("could not find underlying socket"));

@@ -23,9 +23,7 @@
 #include <folly/compression/Compression.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 /**
  * TBD.
@@ -63,6 +61,4 @@ class CompressionManager {
       CompressionAlgorithm compressionAlgorithm);
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

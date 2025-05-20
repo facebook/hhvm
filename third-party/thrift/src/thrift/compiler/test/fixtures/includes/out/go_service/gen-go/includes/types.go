@@ -247,7 +247,7 @@ func (x *Included) String() string {
 
 func (x *Included) setDefaults() *Included {
     return x.
-        SetMyIntFieldNonCompat(0).
+        SetMyIntFieldNonCompat(int64(0)).
         SetMyTransitiveFieldNonCompat(
               transitive.ExampleFoo,
           )

@@ -560,7 +560,7 @@ func (x *StructWithCustomDefaultValues) GetUnqualifiedInteger() int32 {
 
 func (x *StructWithCustomDefaultValues) GetOptionalInteger() int32 {
     if !x.IsSetOptionalInteger() {
-        return 43
+        return int32(43)
     }
     return *x.OptionalInteger
 }
@@ -936,20 +936,20 @@ func (x *StructWithCustomDefaultValues) String() string {
 
 func (x *StructWithCustomDefaultValues) setDefaults() *StructWithCustomDefaultValues {
     return x.
-        SetUnqualifiedIntegerNonCompat(42).
-        SetOptionalIntegerNonCompat(43).
-        SetRequiredIntegerNonCompat(44).
+        SetUnqualifiedIntegerNonCompat(int32(42)).
+        SetOptionalIntegerNonCompat(int32(43)).
+        SetRequiredIntegerNonCompat(int32(44)).
         SetUnqualifiedStructNonCompat(
               NewTrivialStruct().
-    SetIntValueNonCompat(123),
+    SetIntValueNonCompat(int32(123)),
           ).
         SetOptionalStructNonCompat(
               NewTrivialStruct().
-    SetIntValueNonCompat(456),
+    SetIntValueNonCompat(int32(456)),
           ).
         SetRequiredStructNonCompat(
               NewTrivialStruct().
-    SetIntValueNonCompat(789),
+    SetIntValueNonCompat(int32(789)),
           )
 }
 

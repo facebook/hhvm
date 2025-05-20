@@ -15,4 +15,4 @@ var _ = thrift.VOID
 var GoUnusedProtection__ int
 
 var ExampleFoo *Foo = NewFoo().
-    SetANonCompat(2)
+    SetANonCompat(int64(2))

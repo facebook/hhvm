@@ -1308,7 +1308,7 @@ func (x *MyStructWithCustomDefault) String() string {
 
 func (x *MyStructWithCustomDefault) setDefaults() *MyStructWithCustomDefault {
     return x.
-        SetField1NonCompat(1)
+        SetField1NonCompat(int64(1))
 }
 
 type StructLevelTerseStruct struct {

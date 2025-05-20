@@ -15,16 +15,16 @@ var _ = thrift.VOID
 var GoUnusedProtection__ int
 
 const FLAG bool = true
-const OFFSET int8 = -10
-const COUNT int16 = 200
-const MASK int32 = 16388846
-const E float64 = 2.718281828459
+const OFFSET int8 = int8(-10)
+const COUNT int16 = int16(200)
+const MASK int32 = int32(16388846)
+const E float64 = float64(2.718281828459)
 const DATE string = "June 28, 2017"
 var AList []int32 = []int32{
-    2,
-    3,
-    5,
-    7,
+    int32(2),
+    int32(3),
+    int32(5),
+    int32(7),
 }
 var ASet []string = []string{
     "foo",
@@ -33,14 +33,14 @@ var ASet []string = []string{
 }
 var AMap map[string][]int32 = map[string][]int32{
     "foo": []int32{
-    1,
-    2,
-    3,
-    4,
+    int32(1),
+    int32(2),
+    int32(3),
+    int32(4),
 },
     "bar": []int32{
-    10,
-    32,
-    54,
+    int32(10),
+    int32(32),
+    int32(54),
 },
 }

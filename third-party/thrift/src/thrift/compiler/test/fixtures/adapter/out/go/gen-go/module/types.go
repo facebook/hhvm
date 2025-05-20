@@ -2457,7 +2457,7 @@ func (x *Foo) String() string {
 func (x *Foo) setDefaults() *Foo {
     return x.
         SetIntFieldNonCompat(NewI32_5137()).
-        SetIntFieldWithDefaultNonCompat(13).
+        SetIntFieldWithDefaultNonCompat(int32(13)).
         SetSetFieldNonCompat(NewSetWithAdapter()).
         SetMapFieldNonCompat(NewMapString_ListWithElemAdapterWithAdapter_8454()).
         SetBinaryFieldNonCompat(NewBinary_5673()).
@@ -5344,7 +5344,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedEnum() AdaptedEnum {
 func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     if !x.IsSetAdaptedListDefault() {
         return []int64{
-    1,
+    int64(1),
 }
     }
     return x.AdaptedListDefault
@@ -5353,7 +5353,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
 func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     if !x.IsSetAdaptedSetDefault() {
         return []int64{
-    1,
+    int64(1),
 }
     }
     return x.AdaptedSetDefault
@@ -5362,7 +5362,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
 func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     if !x.IsSetAdaptedMapDefault() {
         return map[int64]int64{
-    1: 1,
+    int64(1): int64(1),
 }
     }
     return x.AdaptedMapDefault
@@ -6594,28 +6594,28 @@ func (x *AdaptTemplatedTestStruct) setDefaults() *AdaptTemplatedTestStruct {
         SetAdaptedSetNonCompat(make([]int64, 0)).
         SetAdaptedMapNonCompat(make(map[int64]int64)).
         SetAdaptedBoolDefaultNonCompat(true).
-        SetAdaptedByteDefaultNonCompat(1).
-        SetAdaptedShortDefaultNonCompat(2).
-        SetAdaptedIntegerDefaultNonCompat(3).
-        SetAdaptedLongDefaultNonCompat(4).
-        SetAdaptedDoubleDefaultNonCompat(5.0).
+        SetAdaptedByteDefaultNonCompat(int8(1)).
+        SetAdaptedShortDefaultNonCompat(int16(2)).
+        SetAdaptedIntegerDefaultNonCompat(int32(3)).
+        SetAdaptedLongDefaultNonCompat(int64(4)).
+        SetAdaptedDoubleDefaultNonCompat(float64(5.0)).
         SetAdaptedStringDefaultNonCompat("6").
         SetAdaptedEnumNonCompat(
               ThriftAdaptedEnum_One,
           ).
         SetAdaptedListDefaultNonCompat(
               []int64{
-    1,
+    int64(1),
 },
           ).
         SetAdaptedSetDefaultNonCompat(
               []int64{
-    1,
+    int64(1),
 },
           ).
         SetAdaptedMapDefaultNonCompat(
               map[int64]int64{
-    1: 1,
+    int64(1): int64(1),
 },
           ).
         SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())

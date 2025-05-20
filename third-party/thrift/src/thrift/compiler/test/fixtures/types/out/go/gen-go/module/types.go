@@ -2260,10 +2260,10 @@ func (x *TrivialNestedWithDefault) String() string {
 
 func (x *TrivialNestedWithDefault) setDefaults() *TrivialNestedWithDefault {
     return x.
-        SetZNonCompat(4).
+        SetZNonCompat(int32(4)).
         SetNNonCompat(
               NewTrivialNumeric().
-    SetANonCompat(3).
+    SetANonCompat(int32(3)).
     SetBNonCompat(true),
           )
 }
@@ -2668,7 +2668,7 @@ func (x *ComplexNestedWithDefault) setDefaults() *ComplexNestedWithDefault {
     SetANonCompat("3").
     SetBNonCompat(
         map[string]int32{
-    "a": 3,
+    "a": int32(3),
 },
     ),
           )

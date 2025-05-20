@@ -20,9 +20,9 @@ const FOO string = "foo"
 // Multi-
 // line
 // slash comment
-const BAR int32 = 123
+const BAR int32 = int32(123)
 
 // BIFF has your mail
-const BIFF int32 = 0
+const BIFF int32 = int32(0)
 
-const SHOUTY int32 = 11
+const SHOUTY int32 = int32(11)

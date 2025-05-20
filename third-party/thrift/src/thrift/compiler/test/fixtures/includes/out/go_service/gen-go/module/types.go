@@ -258,7 +258,7 @@ func (x *MyStruct) setDefaults() *MyStruct {
               includes.ExampleIncluded,
           ).
         SetMyOtherIncludedFieldNonCompat(includes.NewIncluded()).
-        SetMyIncludedIntNonCompat(42)
+        SetMyIncludedIntNonCompat(int64(42))
 }
 
 

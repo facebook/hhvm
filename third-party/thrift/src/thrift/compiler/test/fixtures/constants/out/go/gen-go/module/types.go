@@ -973,7 +973,7 @@ func (x *Struct1) String() string {
 
 func (x *Struct1) setDefaults() *Struct1 {
     return x.
-        SetANonCompat(1234567).
+        SetANonCompat(int32(1234567)).
         SetBNonCompat("<uninitialized>")
 }
 

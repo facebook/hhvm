@@ -133,7 +133,7 @@ func (x *Foo) String() string {
 
 func (x *Foo) setDefaults() *Foo {
     return x.
-        SetANonCompat(2)
+        SetANonCompat(int64(2))
 }
 
 

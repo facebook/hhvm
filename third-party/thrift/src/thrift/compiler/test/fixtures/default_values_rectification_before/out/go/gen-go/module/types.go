@@ -131,7 +131,7 @@ func (x *TestStruct) GetUnqualifiedStructField() *EmptyStruct {
 
 func (x *TestStruct) GetOptionalIntField() int32 {
     if !x.IsSetOptionalIntField() {
-        return 42
+        return int32(42)
     }
     return *x.OptionalIntField
 }
@@ -146,8 +146,8 @@ func (x *TestStruct) GetOptionalBoolField() bool {
 func (x *TestStruct) GetOptionalListField() []int32 {
     if !x.IsSetOptionalListField() {
         return []int32{
-    1,
-    2,
+    int32(1),
+    int32(2),
 }
     }
     return x.OptionalListField
@@ -657,7 +657,7 @@ func (x *TestStruct) String() string {
 
 func (x *TestStruct) setDefaults() *TestStruct {
     return x.
-        SetUnqualifiedIntFieldNonCompat(0).
+        SetUnqualifiedIntFieldNonCompat(int32(0)).
         SetUnqualifiedBoolFieldNonCompat(false).
         SetUnqualifiedListFieldNonCompat(
               []int32{
@@ -666,12 +666,12 @@ func (x *TestStruct) setDefaults() *TestStruct {
         SetUnqualifiedStructFieldNonCompat(
               NewEmptyStruct(),
           ).
-        SetOptionalIntFieldNonCompat(42).
+        SetOptionalIntFieldNonCompat(int32(42)).
         SetOptionalBoolFieldNonCompat(true).
         SetOptionalListFieldNonCompat(
               []int32{
-    1,
-    2,
+    int32(1),
+    int32(2),
 },
           ).
         SetOptionalStructFieldNonCompat(

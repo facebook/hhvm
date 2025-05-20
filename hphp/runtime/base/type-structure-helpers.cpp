@@ -454,27 +454,26 @@ bool typeStructureIsTypeList(
   assertx(inputL && typeL);
   auto const size = typeL->size();
   if (inputL->size() != size) return false;
-  std::vector<TypeParamInfo> tpinfo;
-  bool found = false;
+  const VMFixedVector<TypeParamInfo>* tpinfo = nullptr;
   if (!strict && clsname) {
-    if (auto const cls = Class::load(clsname)) {
-      found = true;
-      tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
-      if (tpinfo.size() == 0) return true;
-      if (tpinfo.size() != size) return false;
+    auto const cls = Class::load(clsname);
+    if (cls->hasReifiedGenerics()) {
+      tpinfo = &cls->getReifiedGenericsInfo().m_typeParamInfo;
+      if (tpinfo->size() == 0) return true;
+      if (tpinfo->size() != size) return false;
     }
   }
   // If any of the generics will warn, we need to keep track of it and only warn
   // if none of the other ones raise an error
   bool willWarn = false;
   for (size_t i = 0; i < size; ++i) {
-    if (found && !tpinfo[i].m_isReified) continue;
+    if (tpinfo && !(*tpinfo)[i].m_isReified) continue;
     auto const inputElem = inputL->get(i);
     auto const typeElem = typeL->get(i);
     assertx(tvIsDict(inputElem) && tvIsDict(typeElem));
     if (!typeStructureIsType(inputElem.val().parr, typeElem.val().parr,
                              warn, strict)) {
-      if (warn || (found && (tpinfo[i].m_isWarn ||
+      if (warn || (tpinfo && ((*tpinfo)[i].m_isWarn ||
                              is_ts_soft(typeElem.val().parr)))) {
         willWarn = true;
         warn = false;
@@ -547,7 +546,7 @@ bool checkReifiedGenericsMatch(
       continue;
     }
     if (!typeStructureIsType(objrg.val().parr, tsvalue, warn, opkind == CheckOpKind::Deep)) {
-      auto const tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
+      auto const& tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
       assertx(tpinfo.size() == size);
       if (warn || tpinfo[i].m_isWarn || is_ts_soft(tsvalue)) {
         willWarn = true;

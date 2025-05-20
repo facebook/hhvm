@@ -891,7 +891,7 @@ namespace {
 
 const Array reified_generics_info_to_array(const ReifiedGenericsInfo& info) {
   VecInit arr(info.m_typeParamInfo.size());
-  for (auto tparam : info.m_typeParamInfo) {
+  for (auto const& tparam: info.m_typeParamInfo) {
     DictInit tparamArr(3);
     tparamArr.set(s_is_reified, make_tv<KindOfBoolean>(tparam.m_isReified));
     tparamArr.set(s_is_soft, make_tv<KindOfBoolean>(tparam.m_isSoft));

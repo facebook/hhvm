@@ -101,7 +101,7 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   );
   // Insert the non reified ones at the end
   tpList.insert(tpList.end(), len - cur, {});
-  return {tpList};
+  return ReifiedGenericsInfo(std::move(tpList));
 }
 
 // Raises a runtime error if the location of reified generics of f does not

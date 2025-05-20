@@ -43,13 +43,14 @@ ArrayData* addToTypeReifiedGenericsTable(const StringData* mangledName,
 // If the cls does not have any reified generics, then returns nullptr
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 
-// Returns a ReifiedGenericsInfo that contains number of reified generics
-// and a list of TypeParamInfo which specifies whether each generic is
-// reified, soft and warn only
-// Format of the input is a list of integers where the first one is the count
-// of reified generics and the following numbers are their indices and whether
-// they are soft or not and whether to error or warn interleaved
-ReifiedGenericsInfo extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
+// Returns a ReifiedGenericsInfo that contains a vector of TypeParamInfo
+// which specifies whether each generic param is reified, soft or warn
+// only. Format of the input is a list of integers where the first one
+// is the count of reified generics and the following numbers are their
+// indices and whether they are soft or not and whether to error or warn
+// interleaved
+ReifiedGenericsInfo
+extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
 
 // Raises a runtime error if the location of reified generics of f/c does not
 // match the location of reified_generics
@@ -78,11 +79,11 @@ void checkClassReifiedGenericsSoft(const Class* cls);
 
 
 /*
- * Attempt to invoke 86reifiedinit on the given object. 
+ * Attempt to invoke 86reifiedinit on the given object.
  * Will setReifiedGenerics iff the class has a reified parent.
- * The function throws if the class has reified generics and 
- * any reified generics on the class are not soft. 
- * If no reified generics are passed in, AND all 
+ * The function throws if the class has reified generics and
+ * any reified generics on the class are not soft.
+ * If no reified generics are passed in, AND all
  * reified generics on the class are soft, then raises an error.
 */
 void tryClassReifiedInit(Class* cls, ArrayData* generics, ObjectData* obj);

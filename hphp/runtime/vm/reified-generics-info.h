@@ -18,7 +18,8 @@
 
 #include <algorithm>
 #include <stdint.h>
-#include <vector>
+
+#include "hphp/runtime/vm/containers.h"
 
 namespace HPHP {
 
@@ -36,7 +37,10 @@ struct TypeParamInfo {
  * or class
  */
 struct ReifiedGenericsInfo {
-  std::vector<TypeParamInfo> m_typeParamInfo;
+  ReifiedGenericsInfo() : m_typeParamInfo() {}
+  explicit ReifiedGenericsInfo(std::vector<TypeParamInfo>&& info)
+    : m_typeParamInfo(std::move(info)) {}
+  VMFixedVector<TypeParamInfo> m_typeParamInfo;
 
   bool hasSoft() const {
     return std::any_of(

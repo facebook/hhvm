@@ -43,20 +43,22 @@ int main(int argc, char** argv) {
 
   auto c = std::make_shared<WatchmanConnection>(eb);
   c->connect()
-      .thenValue([&](folly::dynamic version) {
+      .thenValue([&](const folly::dynamic& version) {
         std::cout << "Connected to watchman: " << version << std::endl;
         std::cout << "Going to run " << cmd << std::endl;
         return c->run(cmd);
       })
-      .thenValue(
-          [](folly::dynamic result) { LOG(INFO) << "Result: " << result; })
+      .thenValue([](const folly::dynamic& result) {
+        LOG(INFO) << "Result: " << result;
+      })
       .thenError([](const folly::exception_wrapper& ex) {
         std::cerr << "Failed: " << ex.what() << std::endl;
       })
       .wait();
 
   c->run(folly::dynamic::array("watch-list"))
-      .thenValue([](folly::dynamic res) { std::cout << res << std::endl; })
+      .thenValue(
+          [](const folly::dynamic& res) { std::cout << res << std::endl; })
       .wait();
   c->close();
 

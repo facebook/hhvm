@@ -64,7 +64,7 @@ class WatchmanConnection
   // be passed as part of the extended version command and should
   // be used to list required capabilities for the session
   folly::Future<folly::dynamic> connect(
-      folly::dynamic versionArgs = folly::dynamic::object(
+      const folly::dynamic& versionArgs = folly::dynamic::object(
           "required",
           folly::dynamic::array("relative_root")));
 

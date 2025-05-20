@@ -10,6 +10,8 @@
 #include <fmt/core.h>
 #include <glog/logging.h>
 
+#include <utility>
+
 namespace watchman {
 
 using namespace folly;
@@ -33,7 +35,7 @@ WatchmanClient::WatchmanClient(
                 connectionCallback(std::move(data));
               }),
           cpuExecutor)),
-      errorCallback_(errorCallback) {}
+      errorCallback_(std::move(errorCallback)) {}
 
 void WatchmanClient::connectionCallback(Try<dynamic>&& try_data) {
   // If an exception occurs notify all subscription callbacks. Other outstanding
@@ -84,7 +86,7 @@ void WatchmanClient::connectionCallback(Try<dynamic>&& try_data) {
 }
 
 SemiFuture<dynamic> WatchmanClient::connect(dynamic versionArgs) {
-  return conn_->connect(versionArgs);
+  return conn_->connect(std::move(versionArgs));
 }
 
 void WatchmanClient::close() {

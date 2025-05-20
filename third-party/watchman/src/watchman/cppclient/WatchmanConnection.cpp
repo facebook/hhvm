@@ -116,7 +116,7 @@ folly::Future<std::string> WatchmanConnection::getSockPath() {
   });
 }
 
-Future<dynamic> WatchmanConnection::connect(folly::dynamic versionArgs) {
+Future<dynamic> WatchmanConnection::connect(const folly::dynamic& versionArgs) {
   if (!versionArgs.isObject()) {
     throw WatchmanError("versionArgs must be object");
   }

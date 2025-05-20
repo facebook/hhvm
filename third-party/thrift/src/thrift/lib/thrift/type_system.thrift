@@ -61,6 +61,12 @@ struct SerializableFieldDefinition {
   2: PresenceQualifier presence;
   3: type_id.TypeId type;
   4: optional record.SerializableRecord customDefaultValue;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  5: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 /**
@@ -75,6 +81,12 @@ struct SerializableStructDefinition {
    * breaking backward compatibility.
    */
   3: bool isSealed;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  4: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 /**
@@ -90,15 +102,33 @@ struct SerializableUnionDefinition {
    * breaking backward compatibility.
    */
   3: bool isSealed;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  4: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 struct SerializableEnumValueDefinition {
   1: string name;
   2: i32 datum;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 struct SerializableEnumDefinition {
   2: list<SerializableEnumValueDefinition> values;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 /**
@@ -111,6 +141,12 @@ struct SerializableOpaqueAliasDefinition {
    * must not be a URI.
    */
   2: type_id.TypeId targetType;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 union SerializableTypeDefinition {

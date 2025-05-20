@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 namespace detail {
 
 template <typename Metadata>
@@ -122,6 +120,4 @@ std::unique_ptr<folly::IOBuf> CompressionManager::uncompressBuffer(
   return rocket::uncompressBuffer(std::move(buffer), compressionAlgorithm);
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

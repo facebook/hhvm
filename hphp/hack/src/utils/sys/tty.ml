@@ -110,8 +110,7 @@ let should_color color_mode =
   | Color_Auto -> supports_color () || force_color
 
 (* See https://github.com/yarnpkg/yarn/issues/405. *)
-let supports_emoji () =
-  (not (String.equal Sys.os_type "Win32")) && supports_color ()
+let supports_emoji () = supports_color ()
 
 let apply_color ?(color_mode = Color_Auto) c s : string =
   if should_color color_mode then

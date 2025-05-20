@@ -7,10 +7,6 @@
  *
  *)
 
-(* On Win32, unwrap the handle from the 'abstract block' representing
-   the file descriptor otherwise it can't be marshalled or passed as
-   an integer command-line argument. *)
-
 type handle = int
 
 external raw_get_handle : Unix.file_descr -> handle
@@ -30,19 +26,11 @@ let init =
 
 let () = Lazy.force init
 
-let () = assert (Sys.win32 || Obj.is_int (Obj.repr Unix.stdin))
+let () = assert (Obj.is_int (Obj.repr Unix.stdin))
 
-let get_handle =
-  if Sys.win32 then
-    raw_get_handle
-  else
-    Obj.magic
+let get_handle = Obj.magic
 
-let wrap_handle =
-  if Sys.win32 then
-    raw_wrap_handle
-  else
-    Obj.magic
+let wrap_handle = Obj.magic
 
 let to_in_channel h = wrap_handle h |> Unix.in_channel_of_descr
 

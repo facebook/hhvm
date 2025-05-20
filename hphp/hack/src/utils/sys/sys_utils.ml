@@ -28,24 +28,14 @@ let get_env name =
 
 (** Get the user from the $USER or $USERNAME or $LOGNAME environment variable. *)
 let getenv_user () =
-  let user_var =
-    if Sys.win32 then
-      "USERNAME"
-    else
-      "USER"
-  in
+  let user_var = "USER" in
   let logname_var = "LOGNAME" in
   let user = get_env user_var in
   let logname = get_env logname_var in
   Option.first_some user logname
 
 let getenv_home () =
-  let home_var =
-    if Sys.win32 then
-      "APPDATA"
-    else
-      "HOME"
-  in
+  let home_var = "HOME" in
   get_env home_var
 
 let getenv_term () =
@@ -53,23 +43,11 @@ let getenv_term () =
   (* This variable does not exist on windows. *)
   get_env term_var
 
-let path_sep =
-  if Sys.win32 then
-    ";"
-  else
-    ":"
+let path_sep = ":"
 
-let null_path =
-  if Sys.win32 then
-    "nul"
-  else
-    "/dev/null"
+let null_path = "/dev/null"
 
-let temp_dir_name =
-  if Sys.win32 then
-    Stdlib.Filename.get_temp_dir_name ()
-  else
-    "/tmp"
+let temp_dir_name = "/tmp"
 
 let getenv_path () =
   let path_var = "PATH" in
@@ -255,12 +233,6 @@ let with_umask umask f =
       ())
     ~do_:f
 
-let with_umask umask f =
-  if Sys.win32 then
-    f ()
-  else
-    with_umask umask f
-
 let read_stdin_to_string () =
   let buf = Buffer.create 4096 in
   try
@@ -406,11 +378,8 @@ let unlink_no_fail fn =
   | Unix.Unix_error (Unix.ENOENT, _, _) -> ()
 
 let readlink_no_fail fn =
-  if Sys.win32 && Sys.file_exists fn then
-    cat fn
-  else
-    try Unix.readlink fn with
-    | _ -> fn
+  try Unix.readlink fn with
+  | _ -> fn
 
 let filemtime file = (Unix.stat file).Unix.st_mtime
 
@@ -458,18 +427,11 @@ let deterministic_behavior_for_tests () = not (prod_telemetry ())
 
 let sleep ~seconds = ignore @@ Unix.select [] [] [] seconds
 
-let symlink =
-  (* Dummy implementation of `symlink` on Windows: we create a text
-     file containing the targeted-file's path. Symlink are available
-     on Windows since Vista, but until Seven (included), one should
-     have administratrive rights in order to create symlink. *)
-  let win32_symlink source dest = write_file ~file:dest source in
-  if Sys.win32 then
-    win32_symlink
-  else
+let symlink
     (* 4.03 adds an optional argument to Unix.symlink that we want to ignore
      *)
-    fun source dest ->
+      source
+    dest =
   Unix.symlink source dest
 
 let make_link_of_timestamped linkname =
@@ -499,27 +461,11 @@ let make_link_of_timestamped linkname =
     symlink filename linkname;
     filename)
 
-let setsid =
-  (* Not implemented on Windows. Let's just return the pid *)
-  if Sys.win32 then
-    Unix.getpid
-  else
-    Unix.setsid
+let setsid = Unix.setsid
 
-let set_signal =
-  if not Sys.win32 then
-    Sys.set_signal
-  else
-    fun _ _ ->
-  ()
+let set_signal = Sys.set_signal
 
-let signal =
-  if not Sys.win32 then
-    fun a b ->
-  ignore (Sys.signal a b)
-  else
-    fun _ _ ->
-  ()
+let signal a b = ignore (Sys.signal a b)
 
 type sysinfo = {
   uptime: int;
@@ -555,15 +501,7 @@ external handle_of_pid_for_termination : int -> int
 
 let terminate_process pid = Unix.kill pid Sys.sigkill
 
-let lstat path =
-  (* WTF, on Windows `lstat` fails if a directory path ends with an
-     '/' (or a '\', whatever) *)
-  Unix.lstat
-  @@
-  if Sys.win32 && String.is_suffix path ~suffix:Filename.dir_sep then
-    String.sub path ~pos:0 ~len:(String.length path - 1)
-  else
-    path
+let lstat = Unix.lstat
 
 let normalize_filename_dir_sep =
   let dir_sep_char = Filename.dir_sep.[0] in

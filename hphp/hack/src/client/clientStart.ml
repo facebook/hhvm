@@ -20,12 +20,7 @@ let get_hhserver_path () =
     Hh_logger.log "For hh_server path, using HH_SERVER_PATH=%s" p;
     p
   | None ->
-    let exe_name =
-      if Sys.win32 then
-        "hh_server.exe"
-      else
-        "hh_server"
-    in
+    let exe_name = "hh_server" in
     (* Path.executable_name is an alias for Sys.executable_name. Its documentation is quite vague:
        "This name may be absolute or relative to the current directory, depending on the platform
        and whether the program was compiled to bytecode or a native executable." In my testing

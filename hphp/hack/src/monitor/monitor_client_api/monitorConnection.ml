@@ -54,13 +54,7 @@ let get_sockaddr config =
   let sock_name =
     Socket.make_valid_socket_path config.MonitorUtils.socket_file
   in
-  if Sys.win32 then (
-    let ic = In_channel.create ~binary:true sock_name in
-    let port = Option.value_exn (In_channel.input_binary_int ic) in
-    In_channel.close ic;
-    Unix.(ADDR_INET (inet_addr_loopback, port))
-  ) else
-    Unix.ADDR_UNIX sock_name
+  Unix.ADDR_UNIX sock_name
 
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages

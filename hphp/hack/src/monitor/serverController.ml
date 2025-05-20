@@ -32,10 +32,7 @@ let start_server_daemon
       let log_file = Sys_utils.make_link_of_timestamped log_link in
       Hh_logger.log
         "About to spawn typechecker daemon. Logs will go to %s\n%!"
-        (if Sys.win32 then
-          log_file
-        else
-          log_link);
+        log_link;
       let fd = Daemon.fd_of_path log_file in
       (in_fd, fd, fd)
     ) else (

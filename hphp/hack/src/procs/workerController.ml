@@ -75,8 +75,7 @@ let () =
          (failure_to_string failure))
   | _ -> None
 
-(* Should we 'prespawn' the worker ? *)
-let use_prespawned = not Sys.win32
+let use_prespawned = true
 
 (* The maximum amount of workers *)
 let max_workers = 1000

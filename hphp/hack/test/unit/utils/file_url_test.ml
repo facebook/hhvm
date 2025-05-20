@@ -148,17 +148,9 @@ let test_create () =
      on POSIX, `\` is a normal character and so it gets %-encoded to %5C. *)
   let examples =
     [
-      ( "c:\\autoexec.bat",
-        if Sys.win32 then
-          "file:///c%3A/autoexec.bat"
-        else
-          "file:///c%3A%5Cautoexec.bat" );
+      ("c:\\autoexec.bat", "file:///c%3A%5Cautoexec.bat");
       ("c:/autoexec.bat", "file:///c%3A/autoexec.bat");
-      ( "c:\\\\autoexec.bat",
-        if Sys.win32 then
-          "file:///c%3A//autoexec.bat"
-        else
-          "file:///c%3A%5C%5Cautoexec.bat" );
+      ("c:\\\\autoexec.bat", "file:///c%3A%5C%5Cautoexec.bat");
       ("c://autoexec.bat", "file:///c%3A//autoexec.bat");
       ("/etc/dollar$dollar", "file:///etc/dollar$dollar");
       ("/etc/hash#hash", "file:///etc/hash%23hash");

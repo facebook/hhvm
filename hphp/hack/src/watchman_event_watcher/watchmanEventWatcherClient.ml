@@ -48,15 +48,7 @@ module Client_actual = struct
     let socket_file = Config.socket_file root in
     let sock_path = Socket.make_valid_socket_path socket_file in
     (* Copied wholesale from MonitorConnection *)
-    let sockaddr =
-      if Sys.win32 then (
-        let ic = In_channel.create ~binary:true sock_path in
-        let port = Option.value_exn (In_channel.input_binary_int ic) in
-        In_channel.close ic;
-        Unix.(ADDR_INET (inet_addr_loopback, port))
-      ) else
-        Unix.ADDR_UNIX sock_path
-    in
+    let sockaddr = Unix.ADDR_UNIX sock_path in
     try
       let (ic, _oc) = Unix.open_connection sockaddr in
       let reader = Buffered_line_reader.create @@ Unix.descr_of_in_channel ic in

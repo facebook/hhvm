@@ -18,8 +18,6 @@ open Hh_prelude
 
 let percent_re = Str.regexp {|%\([0-9a-fA-F]?[0-9a-fA-F]?\)|}
 
-let slash_re = Str.regexp {|/|} (* matches a single slash *)
-
 let dos_url_re =
   (* e.g. c:\ or z|/ *)
   Str.regexp {|^\([a-zA-Z]\)[:|]\([/\].*\)$|}
@@ -48,11 +46,7 @@ let decode s =
     if code < 32 || code > 127 then failwith ("only 7bit ascii allowed in " ^ s);
     String.make 1 (Char.of_int_exn code)
   in
-  let s = Str.global_substitute percent_re subst s in
-  if Sys.win32 then
-    Str.global_replace slash_re {|\\|} s
-  else
-    s
+  Str.global_substitute percent_re subst s
 
 (**
  * Escapes characters that are not allowed in URIs using %-escaping, and
@@ -63,9 +57,7 @@ let decode s =
 let encode ~(safe_chars : string) (s : string) : string =
   let buf = Buffer.create (String.length s * 2) in
   let f (c : char) : unit =
-    if Sys.win32 && Char.equal c '\\' then
-      Buffer.add_char buf '/'
-    else if String.contains safe_chars c then
+    if String.contains safe_chars c then
       Buffer.add_char buf c
     else
       let code = Char.to_int c in

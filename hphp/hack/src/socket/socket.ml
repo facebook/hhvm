@@ -13,12 +13,7 @@ let unix_socket sock_name =
     Sys_utils.with_umask 0o111 (fun () ->
         Sys_utils.mkdir_no_fail (Filename.dirname sock_name);
         if Sys.file_exists sock_name then Sys.remove sock_name;
-        let (domain, addr) =
-          if Sys.win32 then
-            Unix.(PF_INET, Unix.ADDR_INET (inet_addr_loopback, 0))
-          else
-            Unix.(PF_UNIX, Unix.ADDR_UNIX sock_name)
-        in
+        let (domain, addr) = Unix.(PF_UNIX, Unix.ADDR_UNIX sock_name) in
         let sock = Unix.socket domain Unix.SOCK_STREAM 0 in
         let () = Unix.set_close_on_exec sock in
         let () = Unix.setsockopt sock Unix.SO_REUSEADDR true in

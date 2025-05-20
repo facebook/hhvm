@@ -35,11 +35,7 @@ let to_string = function
   | Pgrep -> "pgrep"
   | Ps -> "ps"
   | Pstack -> "pstack"
-  | Shell ->
-    if Sys.win32 then
-      "cmd.exe"
-    else
-      "/bin/sh"
+  | Shell -> "/bin/sh"
   | Strobeclient -> "strobeclient"
   | Watchman -> "watchman"
   | Watchman_diag -> "watchman-diag"

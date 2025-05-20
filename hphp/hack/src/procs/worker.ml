@@ -258,13 +258,6 @@ let process_job_and_exit ic oc =
     exit 0
   | `Controller_has_died -> `Controller_has_died
 
-let win32_worker_main restore (state, _controller_fd) (ic, oc) =
-  (* On Windows, there is no clone process, the worker does the job
-     directly and exits when it is done. *)
-  restore state;
-  match process_job_and_exit ic oc with
-  | `Controller_has_died -> exit 0
-
 let maybe_send_status_to_controller fd status =
   match fd with
   | None -> ()

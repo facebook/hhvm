@@ -36,6 +36,9 @@ namespace apache::thrift::test {
 struct SchemaTest : public testing::Test {
   auto getMergedSchema(SchemaRegistry& reg) { return reg.getMergedSchema(); }
   auto getMergedSchema() { return SchemaRegistry::get().getMergedSchema(); }
+  auto getSyntaxGraphDefinitionNodeByUri(std::string_view uri) {
+    return SchemaRegistry::get().getSyntaxGraphDefinitionNodeByUri(uri);
+  }
 };
 TEST_F(SchemaTest, not_linked) {
   auto schemaPtr = getMergedSchema();
@@ -188,6 +191,24 @@ TEST_F(SchemaTest, schema_data_traits) {
       handler.getServiceSchema()->definitions[0],
       TSchemaAssociation<
           facebook::thrift::test::schema::TestService>::definitionKey);
+}
+
+TEST_F(SchemaTest, getSyntaxGraphDefinitionNodeByUri) {
+  auto& registry = SchemaRegistry::get();
+
+  auto uri = "facebook.com/thrift/test/schema/Empty";
+
+  const DefinitionNode* dynamicNode = getSyntaxGraphDefinitionNodeByUri(uri);
+  // Data isn't available until after static access (yet!).
+  EXPECT_FALSE(dynamicNode);
+
+  const DefinitionNode& staticNode =
+      registry.getDefinitionNode<facebook::thrift::test::schema::Empty>();
+  EXPECT_EQ(uri, staticNode.asStruct().uri());
+
+  dynamicNode = getSyntaxGraphDefinitionNodeByUri(uri);
+  EXPECT_TRUE(dynamicNode);
+  EXPECT_EQ(dynamicNode, &staticNode);
 }
 
 } // namespace apache::thrift::test

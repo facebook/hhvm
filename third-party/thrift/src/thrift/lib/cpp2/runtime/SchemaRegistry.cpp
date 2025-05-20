@@ -85,6 +85,11 @@ SchemaRegistry::Ptr SchemaRegistry::getMergedSchema() {
   return mergedSchema_;
 }
 
+const schema::DefinitionNode* SchemaRegistry::getSyntaxGraphDefinitionNodeByUri(
+    const std::string_view uri) const {
+  return resolver_->getDefinitionNodeByUri(uri);
+}
+
 } // namespace apache::thrift
 
 #endif

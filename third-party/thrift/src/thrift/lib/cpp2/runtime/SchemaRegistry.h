@@ -97,6 +97,10 @@ class SchemaRegistry {
   // Access all data registered
   Ptr getMergedSchema();
 
+  // Look up a definition by URI. Returns nullptr if not found.
+  const schema::DefinitionNode* getSyntaxGraphDefinitionNodeByUri(
+      const std::string_view uri) const;
+
   BaseSchemaRegistry& base_;
   Ptr mergedSchema_;
   folly::relaxed_atomic<bool> mergedSchemaAccessed_{false};

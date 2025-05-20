@@ -43,6 +43,13 @@ class IncrementalResolver : public Resolver {
   template <typename T>
   const DefinitionNode& getDefinitionNode() const;
 
+  /**
+   * Gets node for given definition, or returns nullptr if not present in
+   * schema.
+   */
+  const schema::DefinitionNode* getDefinitionNodeByUri(
+      const std::string_view uri) const;
+
   const ProgramNode& programOf(const type::ProgramId& id) const override;
   const protocol::Value& valueOf(const type::ValueId& id) const override;
   const DefinitionNode* definitionOf(

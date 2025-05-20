@@ -117,6 +117,12 @@ class SchemaIndex {
       DefinitionKeyHash,
       DefinitionKeyEqual>;
 
+  // An index of URI to definition key, to allow layering type system over
+  // syntax graph.
+  using DefinitionKeysByUri =
+      folly::F14FastMap<std::string_view, DefinitionKeyRef>;
+  DefinitionKeysByUri definitionKeysByUri_;
+
   void updateProgramsById(
       ProgramsById&, const type::Schema&, const DefinitionsByKey&);
   void updateValuesById(ValuesById&, const type::Schema& schema);
@@ -125,6 +131,8 @@ class SchemaIndex {
       const type::Schema&);
   void updateDefinitionsByKey(
       DefinitionsByKey&, const type::Schema&, const ProgramIdsByDefinitionKey&);
+
+  void updateDefinitionKeysByUri(DefinitionKeysByUri&, const DefinitionsByKey&);
 
   DefinitionNode createDefinition(
       const ProgramIdsByDefinitionKey&,
@@ -194,6 +202,7 @@ class SchemaIndex {
   const ProgramNode& programOf(const type::ProgramId&) const;
   const protocol::Value& valueOf(const type::ValueId&) const;
   const DefinitionNode* definitionOf(const type::DefinitionKey&) const;
+  const DefinitionNode* definitionForUri(std::string_view uri) const;
   ProgramNode::IncludesList programs() const;
 
   void updateIndices(const type::Schema& schema) {
@@ -201,6 +210,7 @@ class SchemaIndex {
         definitionsByKey_, schema, createProgramIdsByDefinitionKey(schema));
     updateProgramsById(programsById_, schema, definitionsByKey_);
     updateValuesById(valuesById_, schema);
+    updateDefinitionKeysByUri(definitionKeysByUri_, definitionsByKey_);
   }
 };
 
@@ -409,6 +419,15 @@ const DefinitionNode* SchemaIndex::definitionOf(
   return folly::get_ptr(definitionsByKey_, definitionKey);
 }
 
+const DefinitionNode* SchemaIndex::definitionForUri(
+    std::string_view uri) const {
+  auto definitionKey = folly::get_ptr(definitionKeysByUri_, uri);
+  if (!definitionKey) {
+    return nullptr;
+  }
+  return definitionOf(*definitionKey);
+}
+
 ProgramNode::IncludesList SchemaIndex::programs() const {
   ProgramNode::IncludesList programs;
   for (const auto& [_, program] : programsById_) {
@@ -510,6 +529,28 @@ void SchemaIndex::updateDefinitionsByKey(
             definitionAttrs,
             std::move(alternative),
             schema));
+  }
+}
+
+void SchemaIndex::updateDefinitionKeysByUri(
+    SchemaIndex::DefinitionKeysByUri& result,
+    const SchemaIndex::DefinitionsByKey& definitionsByKey) {
+  for (const auto& [definitionKey, definition] : definitionsByKey) {
+    auto uri = definition.visit([](const auto& def) {
+      if constexpr (std::is_base_of_v<
+                        detail::WithUri,
+                        std::decay_t<decltype(def)>>) {
+        return def.uri();
+      } else {
+        return std::string_view{};
+      }
+    });
+
+    if (uri.empty() || result.contains(uri)) {
+      continue;
+    }
+
+    result.emplace(uri, definitionKey);
   }
 }
 
@@ -874,6 +915,11 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode(
   }
   folly::throw_exception<std::out_of_range>(
       fmt::format("Definition `{}` does not have bundled schema.", name));
+}
+
+const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
+    std::string_view uri) const {
+  return index_->definitionForUri(uri);
 }
 
 } // namespace apache::thrift::schema::detail

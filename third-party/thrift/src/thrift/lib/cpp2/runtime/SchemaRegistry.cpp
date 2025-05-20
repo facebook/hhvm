@@ -52,7 +52,10 @@ SchemaRegistry::Ptr SchemaRegistry::getMergedSchema() {
 
   mergedSchema_ = std::make_shared<type::Schema>();
   for (auto& [name, data] : base_.rawSchemas_) {
-    if (auto schema = schema::detail::readSchema(data.data)) {
+    if (data.data.empty()) {
+      continue;
+    }
+    if (auto schema = schema::detail::readSchema(data.data[0])) {
       schema::detail::mergeInto(
           *mergedSchema_,
           std::move(*schema),

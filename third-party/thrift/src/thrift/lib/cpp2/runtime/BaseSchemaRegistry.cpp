@@ -22,7 +22,9 @@
 namespace apache::thrift {
 
 void BaseSchemaRegistry::registerSchema(
-    std::string_view name, std::string_view data, std::string_view path) {
+    std::string_view name,
+    folly::span<const std::string_view> data,
+    std::string_view path) {
   std::lock_guard lock(mutex_);
   if (auto it = rawSchemas_.find(name); it != rawSchemas_.end()) {
     if (it->second.path != path) { // Needed to support dynamic linking
@@ -34,8 +36,8 @@ void BaseSchemaRegistry::registerSchema(
     return;
   }
   rawSchemas_[name] = {data, path};
-  if (insertCallback_) {
-    insertCallback_(data);
+  if (insertCallback_ && !data.empty()) {
+    insertCallback_(data[0]);
   }
 }
 

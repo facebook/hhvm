@@ -21,6 +21,7 @@
 #include <folly/Function.h>
 #include <folly/SharedMutex.h>
 #include <folly/container/F14Map.h>
+#include <folly/container/span.h>
 
 namespace apache::thrift {
 
@@ -30,13 +31,15 @@ class BaseSchemaRegistry {
   static BaseSchemaRegistry& get();
 
   void registerSchema(
-      std::string_view name, std::string_view data, std::string_view path);
+      std::string_view name,
+      folly::span<const std::string_view> data,
+      std::string_view path);
 
   using Callback = folly::Function<void(std::string_view) const>;
 
  private:
   struct RawSchema {
-    std::string_view data;
+    folly::span<const std::string_view> data;
     std::string_view path;
   };
   folly::F14FastMap<std::string_view, RawSchema> rawSchemas_;

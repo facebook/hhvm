@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <folly/Singleton.h>
@@ -1003,7 +1004,7 @@ bool AsyncMysqlConnection::isValidConnection() {
 
 Object AsyncMysqlConnection::query(
     ObjectData* this_,
-    am::Query query,
+    const am::Query& query,
     int64_t timeout_micros /* = -1 */,
     const AttributeMap& queryAttributes /*  = AttributeMap() */) {
   verifyValidConnection();
@@ -1679,7 +1680,7 @@ FieldIndex::FieldIndex(const am::RowFields* row_fields) {
   }
 }
 
-size_t FieldIndex::getFieldIndex(String field_name) const {
+size_t FieldIndex::getFieldIndex(const String& field_name) const {
   auto it = field_name_map_.find(field_name);
   if (it == field_name_map_.end()) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -1963,7 +1964,7 @@ Object AsyncMysqlRowBlockIterator::newInstance(Object row_block,
                                                size_t row_number) {
   Object ret{classof()};
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(ret);
-  data->m_row_block = row_block;
+  data->m_row_block = std::move(row_block);
   data->m_row_number = row_number;
   return ret;
 }
@@ -2009,7 +2010,7 @@ static void HHVM_METHOD(AsyncMysqlRowBlockIterator, rewind) {
 Object AsyncMysqlRow::newInstance(Object row_block, size_t row_number) {
   Object ret{classof()};
   auto* data = Native::data<AsyncMysqlRow>(ret);
-  data->m_row_block = row_block;
+  data->m_row_block = std::move(row_block);
   data->m_row_number = row_number;
   return ret;
 }
@@ -2067,7 +2068,7 @@ Object AsyncMysqlRowIterator::newInstance(Object row,
                                           size_t field_number) {
   Object ret{classof()};
   auto* data = Native::data<AsyncMysqlRowIterator>(ret);
-  data->m_row = row;
+  data->m_row = std::move(row);
   data->m_field_number = field_number;
   return ret;
 }

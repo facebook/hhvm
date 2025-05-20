@@ -74,7 +74,7 @@ struct AsyncMysqlConnection : SystemLib::ClassLoader<"AsyncMysqlConnection"> {
   using AttributeMap = am::AttributeMap;
   Object query(
       ObjectData* this_,
-      am::Query query,
+      const am::Query& query,
       int64_t timeout_micros = -1,
       const AttributeMap& queryAttributes = AttributeMap());
 
@@ -218,7 +218,7 @@ struct AsyncMysqlQueryErrorResult :
 struct FieldIndex {
   explicit FieldIndex(const am::RowFields* row_fields);
 
-  size_t getFieldIndex(String field_name) const;
+  size_t getFieldIndex(const String& field_name) const;
   String getFieldString(size_t field_index) const;
 
  private:

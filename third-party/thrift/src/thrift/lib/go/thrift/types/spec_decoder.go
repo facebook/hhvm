@@ -22,7 +22,7 @@ import (
 	"reflect"
 )
 
-// ReadStructSpec readsa struct from the goven Decoder.
+// ReadStructSpec reads a struct from the given Decoder.
 func ReadStructSpec(d Decoder, dstStruct Struct, spec *StructSpec) error {
 	dstValue := reflect.ValueOf(dstStruct)
 	dstConcreteValue := dstValue.Elem()
@@ -75,7 +75,8 @@ func ReadStructSpec(d Decoder, dstStruct Struct, spec *StructSpec) error {
 	return nil
 }
 
-func readTypeSpec(d Decoder, dstValue reflect.Value, spec *TypeSpec) error {
+// ReadTypeSpec reads a value from the given decoder according to the given TypeSpec.
+func ReadTypeSpec(d Decoder, dstValue reflect.Value, spec *TypeSpec) error {
 	switch {
 	case spec.CodecPrimitiveSpec != nil:
 		return readCodecPrimitiveSpec(d, dstValue, spec.CodecPrimitiveSpec)
@@ -169,7 +170,7 @@ func readCodecSetSpec(d Decoder, dstValue reflect.Value, spec *CodecSetSpec) err
 	dstValue.Set(reflect.MakeSlice(dstValue.Type(), size, size))
 
 	for i := range size {
-		err := readTypeSpec(d, dstValue.Index(i), spec.ElementTypeSpec)
+		err := ReadTypeSpec(d, dstValue.Index(i), spec.ElementTypeSpec)
 		if err != nil {
 			return err
 		}
@@ -194,7 +195,7 @@ func readCodecListSpec(d Decoder, dstValue reflect.Value, spec *CodecListSpec) e
 	dstValue.Set(reflect.MakeSlice(dstValue.Type(), size, size))
 
 	for i := range size {
-		err := readTypeSpec(d, dstValue.Index(i), spec.ElementTypeSpec)
+		err := ReadTypeSpec(d, dstValue.Index(i), spec.ElementTypeSpec)
 		if err != nil {
 			return err
 		}
@@ -252,12 +253,12 @@ func readCodecMapSpec(d Decoder, dstValue reflect.Value, spec *CodecMapSpec) err
 	// Read keys and values into temporary slices.
 	for i := range size {
 		passedKeyReflectValue := keysSlice.Index(i)
-		err := readTypeSpec(d, passedKeyReflectValue, spec.KeyTypeSpec)
+		err := ReadTypeSpec(d, passedKeyReflectValue, spec.KeyTypeSpec)
 		if err != nil {
 			return err
 		}
 		valueReflectValue := valuesSlice.Index(i)
-		err = readTypeSpec(d, valueReflectValue, spec.ValueTypeSpec)
+		err = ReadTypeSpec(d, valueReflectValue, spec.ValueTypeSpec)
 		if err != nil {
 			return err
 		}
@@ -283,7 +284,7 @@ func readCodecMapSpec(d Decoder, dstValue reflect.Value, spec *CodecMapSpec) err
 
 func readCodecTypedefSpec(d Decoder, dstValue reflect.Value, spec *CodecTypedefSpec) error {
 	// Pass-through using the underlying type spec.
-	return readTypeSpec(d, dstValue, spec.UnderlyingTypeSpec)
+	return ReadTypeSpec(d, dstValue, spec.UnderlyingTypeSpec)
 }
 
 func readCodecStructSpec(d Decoder, dstValue reflect.Value, spec *CodecStructSpec) error {
@@ -315,7 +316,7 @@ func readFieldSpec(d Decoder, fieldDstValue reflect.Value, fieldSpec *FieldSpec)
 		passedReflectValue = fieldDstValue.Elem()
 	}
 
-	fieldReadErr := readTypeSpec(d, passedReflectValue, fieldSpec.ValueTypeSpec)
+	fieldReadErr := ReadTypeSpec(d, passedReflectValue, fieldSpec.ValueTypeSpec)
 	if fieldReadErr != nil {
 		return fieldReadErr
 	}

@@ -66,7 +66,8 @@ func WriteStructSpec(d Encoder, srcStruct Struct, spec *StructSpec) error {
 	return nil
 }
 
-func writeTypeSpec(d Encoder, srcValue reflect.Value, spec *TypeSpec) error {
+// WriteTypeSpec writes a value to the given encoder according to the given TypeSpec.
+func WriteTypeSpec(d Encoder, srcValue reflect.Value, spec *TypeSpec) error {
 	switch {
 	case spec.CodecPrimitiveSpec != nil:
 		return writeCodecPrimitiveSpec(d, srcValue, spec.CodecPrimitiveSpec)
@@ -139,7 +140,7 @@ func writeCodecSetSpec(d Encoder, srcValue reflect.Value, spec *CodecSetSpec) er
 	}
 
 	for i := range srcValue.Len() {
-		err := writeTypeSpec(d, srcValue.Index(i), spec.ElementTypeSpec)
+		err := WriteTypeSpec(d, srcValue.Index(i), spec.ElementTypeSpec)
 		if err != nil {
 			return err
 		}
@@ -159,7 +160,7 @@ func writeCodecListSpec(d Encoder, srcValue reflect.Value, spec *CodecListSpec) 
 	}
 
 	for i := range srcValue.Len() {
-		err := writeTypeSpec(d, srcValue.Index(i), spec.ElementTypeSpec)
+		err := WriteTypeSpec(d, srcValue.Index(i), spec.ElementTypeSpec)
 		if err != nil {
 			return err
 		}
@@ -206,12 +207,12 @@ func writeCodecMapSpec(d Encoder, srcValue reflect.Value, spec *CodecMapSpec) er
 			passedKeyReflectValue = iter.Key().Elem()
 		}
 
-		err := writeTypeSpec(d, passedKeyReflectValue, spec.KeyTypeSpec)
+		err := WriteTypeSpec(d, passedKeyReflectValue, spec.KeyTypeSpec)
 		if err != nil {
 			return err
 		}
 
-		err = writeTypeSpec(d, iter.Value(), spec.ValueTypeSpec)
+		err = WriteTypeSpec(d, iter.Value(), spec.ValueTypeSpec)
 		if err != nil {
 			return err
 		}
@@ -226,7 +227,7 @@ func writeCodecMapSpec(d Encoder, srcValue reflect.Value, spec *CodecMapSpec) er
 
 func writeCodecTypedefSpec(d Encoder, srcValue reflect.Value, spec *CodecTypedefSpec) error {
 	// Pass-through using the underlying type spec.
-	return writeTypeSpec(d, srcValue, spec.UnderlyingTypeSpec)
+	return WriteTypeSpec(d, srcValue, spec.UnderlyingTypeSpec)
 }
 
 func writeCodecStructSpec(d Encoder, srcValue reflect.Value, spec *CodecStructSpec) error {
@@ -251,7 +252,7 @@ func writeFieldSpec(d Encoder, fieldSrcValue reflect.Value, fieldSpec *FieldSpec
 		passedReflectValue = fieldSrcValue.Elem()
 	}
 
-	fieldWriteErr := writeTypeSpec(d, passedReflectValue, fieldSpec.ValueTypeSpec)
+	fieldWriteErr := WriteTypeSpec(d, passedReflectValue, fieldSpec.ValueTypeSpec)
 	if fieldWriteErr != nil {
 		return fieldWriteErr
 	}

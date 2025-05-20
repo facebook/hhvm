@@ -515,7 +515,7 @@ class VisitationTracker {
 };
 
 /**
- * CTRP base class to implement debug printing for node types.
+ * CRTP base class to implement debug printing for node types.
  *
  * The "Self" type is expected to have a member function with the following
  * signature:

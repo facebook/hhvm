@@ -44,7 +44,7 @@ var (
         FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
-	ElementTypeSpec: premadeCodecTypeSpec_string,
+    ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
@@ -67,10 +67,10 @@ var (
     premadeCodecTypeSpec_map_module_NonComparableStruct_i64 = &thrift.TypeSpec{
         FullName: "map<module.NonComparableStruct, i64>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_module_NonComparableStruct,
-	ValueTypeSpec: premadeCodecTypeSpec_i64,
+    KeyTypeSpec:   premadeCodecTypeSpec_module_NonComparableStruct,
+    ValueTypeSpec: premadeCodecTypeSpec_i64,
     KeyWireType:   thrift.STRUCT,
-	ValueWireType: thrift.I64,
+    ValueWireType: thrift.I64,
 },
 
     }
@@ -119,10 +119,10 @@ var (
     premadeCodecTypeSpec_map_string_string = &thrift.TypeSpec{
         FullName: "map<string, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_string,
-	ValueTypeSpec: premadeCodecTypeSpec_string,
+    KeyTypeSpec:   premadeCodecTypeSpec_string,
+    ValueTypeSpec: premadeCodecTypeSpec_string,
     KeyWireType:   thrift.STRING,
-	ValueWireType: thrift.STRING,
+    ValueWireType: thrift.STRING,
 },
 
     }
@@ -130,7 +130,7 @@ var (
         FullName: "set<string>",
         CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.STRING,
-	ElementTypeSpec: premadeCodecTypeSpec_string,
+    ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }

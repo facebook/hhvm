@@ -128,6 +128,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_string,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Field",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -154,6 +163,29 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_string,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Typedef",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Struct",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Field",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -168,6 +200,22 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_string,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Typedef",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Field",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -180,6 +228,29 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "reason",
                     IsOptional: false,
                     Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Typedef",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Field",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Function",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
                 },
             },
         },
@@ -202,6 +273,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_string,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Definition",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -216,6 +296,15 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Type:       premadeThriftType_list_string,
                 },
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Union",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -228,6 +317,29 @@ var structMetadatas = func() []*metadata.ThriftStruct {
                     Name:       "name",
                     IsOptional: false,
                     Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Struct",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Union",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Exception",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
                 },
             },
         },
@@ -252,6 +364,29 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Struct",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Union",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Exception",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -260,6 +395,57 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Struct",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Union",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Enum",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Field",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Typedef",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Function",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Service",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+            },
         },
     )
     fbthriftResults = append(fbthriftResults,
@@ -267,6 +453,22 @@ var structMetadatas = func() []*metadata.ThriftStruct {
             Name:    "hack.GenerateClientMethodsWithHeaders",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Service",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "scope.Function",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                    },
+                },
             },
         },
     )

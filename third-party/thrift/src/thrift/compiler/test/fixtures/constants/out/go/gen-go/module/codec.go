@@ -88,7 +88,7 @@ var (
         FullName: "list<i32>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
-	ElementTypeSpec: premadeCodecTypeSpec_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
@@ -148,7 +148,7 @@ var (
         FullName: "module.MyCompany",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module.MyCompany",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_module_Company,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_module_Company,
 },
 
     }
@@ -156,7 +156,7 @@ var (
         FullName: "module.MyStringIdentifier",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module.MyStringIdentifier",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
@@ -164,17 +164,17 @@ var (
         FullName: "module.MyIntIdentifier",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module.MyIntIdentifier",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
     premadeCodecTypeSpec_map_string_string = &thrift.TypeSpec{
         FullName: "map<string, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_string,
-	ValueTypeSpec: premadeCodecTypeSpec_string,
+    KeyTypeSpec:   premadeCodecTypeSpec_string,
+    ValueTypeSpec: premadeCodecTypeSpec_string,
     KeyWireType:   thrift.STRING,
-	ValueWireType: thrift.STRING,
+    ValueWireType: thrift.STRING,
 },
 
     }
@@ -182,7 +182,7 @@ var (
         FullName: "module.MyMapIdentifier",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module.MyMapIdentifier",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_string,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_string,
 },
 
     }

@@ -56,7 +56,7 @@ var (
         FullName: "module.MyDataItemAlias",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module.MyDataItemAlias",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyDataItem,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyDataItem,
 },
 
     }
@@ -78,7 +78,7 @@ var (
         FullName: "set<float>",
         CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.FLOAT,
-	ElementTypeSpec: premadeCodecTypeSpec_float,
+    ElementTypeSpec: premadeCodecTypeSpec_float,
 },
 
     }
@@ -102,7 +102,7 @@ var (
         FullName: "list<i32>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
-	ElementTypeSpec: premadeCodecTypeSpec_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
@@ -110,17 +110,17 @@ var (
         FullName: "set<string>",
         CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.STRING,
-	ElementTypeSpec: premadeCodecTypeSpec_string,
+    ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
     premadeCodecTypeSpec_map_string_i64 = &thrift.TypeSpec{
         FullName: "map<string, i64>",
         CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_string,
-	ValueTypeSpec: premadeCodecTypeSpec_i64,
+    KeyTypeSpec:   premadeCodecTypeSpec_string,
+    ValueTypeSpec: premadeCodecTypeSpec_i64,
     KeyWireType:   thrift.STRING,
-	ValueWireType: thrift.I64,
+    ValueWireType: thrift.I64,
 },
 
     }
@@ -137,7 +137,7 @@ var (
         FullName: "module.MyEnumAlias",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "module.MyEnumAlias",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyEnum,
+    UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyEnum,
 },
 
     }

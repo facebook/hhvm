@@ -22,16 +22,31 @@
 &{{program:metadata_qualifier}}ThriftFunction{
     Name:       "{{function:name}}",
     IsOneway:   {{function:oneway?}},
-    ReturnType: {{#function:return_type}}{{type:metadata_thrift_type_getter}}{{/function:return_type}},{{#function:args?}}
+    ReturnType: {{#function:return_type}}{{type:metadata_thrift_type_getter}}{{/function:return_type}},
+    {{#function:args?}}
     Arguments:  []*{{program:metadata_qualifier}}ThriftField{
         {{#function:args}}
         {{> metadata/thrift_metadata_field}}
         {{/function:args}}
-    },{{/function:args?}}{{#function:exceptions?}}
+    },
+    {{/function:args?}}
+    {{#function:exceptions?}}
     Exceptions: []*{{program:metadata_qualifier}}ThriftField{
         {{#function:exceptions}}
         {{> metadata/thrift_metadata_field}}
         {{/function:exceptions}}
-    },{{/function:exceptions?}}
+    },
+    {{/function:exceptions?}}
+    {{#function:structured_annotations?}}
+    StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
+        {{#function:structured_annotations}}
+        {{#structured_annotation:const}}
+        {{#constant:value}}
+        {{> metadata/thrift_metadata_const_struct}}
+        {{/constant:value}}
+        {{/structured_annotation:const}}
+        {{/function:structured_annotations}}
+    },
+    {{/function:structured_annotations?}}
 },
 {{!newline}}

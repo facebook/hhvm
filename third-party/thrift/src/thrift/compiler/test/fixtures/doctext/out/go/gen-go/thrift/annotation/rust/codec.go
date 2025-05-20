@@ -141,7 +141,7 @@ var (
         FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
-	ElementTypeSpec: premadeCodecTypeSpec_string,
+    ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }

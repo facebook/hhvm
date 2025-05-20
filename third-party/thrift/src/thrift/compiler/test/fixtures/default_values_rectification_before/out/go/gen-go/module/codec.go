@@ -42,7 +42,7 @@ var (
         FullName: "list<i32>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
-	ElementTypeSpec: premadeCodecTypeSpec_i32,
+    ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }

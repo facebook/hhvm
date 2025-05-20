@@ -243,16 +243,6 @@ void swap([[maybe_unused]] TrivialTypesStruct& a, [[maybe_unused]] TrivialTypesS
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void TrivialTypesStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t TrivialTypesStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t TrivialTypesStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t TrivialTypesStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void TrivialTypesStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t TrivialTypesStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t TrivialTypesStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t TrivialTypesStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 template void TrivialTypesStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t TrivialTypesStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t TrivialTypesStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
@@ -477,16 +467,6 @@ void swap([[maybe_unused]] ContainerStruct& a, [[maybe_unused]] ContainerStruct&
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void ContainerStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t ContainerStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ContainerStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ContainerStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ContainerStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ContainerStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ContainerStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ContainerStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 template void ContainerStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ContainerStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ContainerStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
@@ -672,16 +652,6 @@ void swap(ExampleUnion& a, ExampleUnion& b) {
   b = std::move(temp);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void ExampleUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t ExampleUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ExampleUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ExampleUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ExampleUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ExampleUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ExampleUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ExampleUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 template void ExampleUnion::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t ExampleUnion::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t ExampleUnion::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;

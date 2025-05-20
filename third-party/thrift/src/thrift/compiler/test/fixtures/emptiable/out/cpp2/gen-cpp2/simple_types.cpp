@@ -89,16 +89,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void MyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace apache::thrift::test
@@ -438,16 +428,6 @@ void swap([[maybe_unused]] EmptiableStruct& a, [[maybe_unused]] EmptiableStruct&
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void EmptiableStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t EmptiableStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t EmptiableStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t EmptiableStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void EmptiableStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t EmptiableStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t EmptiableStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t EmptiableStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -636,16 +616,6 @@ void swap([[maybe_unused]] EmptiableTerseStruct& a, [[maybe_unused]] EmptiableTe
   swap(a.__fbthrift_field_struct_field, b.__fbthrift_field_struct_field);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void EmptiableTerseStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t EmptiableTerseStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t EmptiableTerseStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t EmptiableTerseStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void EmptiableTerseStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t EmptiableTerseStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t EmptiableTerseStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t EmptiableTerseStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -974,16 +944,6 @@ void swap([[maybe_unused]] NotEmptiableStruct& a, [[maybe_unused]] NotEmptiableS
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void NotEmptiableStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t NotEmptiableStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t NotEmptiableStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t NotEmptiableStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void NotEmptiableStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t NotEmptiableStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t NotEmptiableStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t NotEmptiableStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

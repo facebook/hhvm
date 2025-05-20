@@ -114,16 +114,6 @@ void swap([[maybe_unused]] DoSomethingResult& a, [[maybe_unused]] DoSomethingRes
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void DoSomethingResult::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t DoSomethingResult::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t DoSomethingResult::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t DoSomethingResult::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void DoSomethingResult::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t DoSomethingResult::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t DoSomethingResult::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t DoSomethingResult::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace thrift::shared_interactions

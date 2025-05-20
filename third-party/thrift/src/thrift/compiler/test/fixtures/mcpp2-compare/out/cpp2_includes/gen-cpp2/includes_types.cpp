@@ -105,16 +105,6 @@ void swap([[maybe_unused]] AStruct& a, [[maybe_unused]] AStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void AStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t AStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t AStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t AStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void AStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t AStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t AStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 template void AStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t AStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t AStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
@@ -204,16 +194,6 @@ void swap([[maybe_unused]] AStructB& a, [[maybe_unused]] AStructB& b) {
   swap(a.__fbthrift_field_FieldA, b.__fbthrift_field_FieldA);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void AStructB::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t AStructB::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t AStructB::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t AStructB::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void AStructB::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t AStructB::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t AStructB::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AStructB::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 template void AStructB::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t AStructB::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t AStructB::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;

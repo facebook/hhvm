@@ -98,16 +98,6 @@ void swap([[maybe_unused]] Mixin1& a, [[maybe_unused]] Mixin1& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void Mixin1::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t Mixin1::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t Mixin1::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t Mixin1::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Mixin1::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Mixin1::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Mixin1::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Mixin1::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -219,16 +209,6 @@ void swap([[maybe_unused]] Mixin2& a, [[maybe_unused]] Mixin2& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void Mixin2::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t Mixin2::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t Mixin2::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t Mixin2::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Mixin2::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Mixin2::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Mixin2::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Mixin2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -324,16 +304,6 @@ void swap([[maybe_unused]] Mixin3Base& a, [[maybe_unused]] Mixin3Base& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void Mixin3Base::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t Mixin3Base::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t Mixin3Base::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t Mixin3Base::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Mixin3Base::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Mixin3Base::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Mixin3Base::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Mixin3Base::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -451,16 +421,6 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void Foo::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t Foo::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t Foo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t Foo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Foo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Foo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Foo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

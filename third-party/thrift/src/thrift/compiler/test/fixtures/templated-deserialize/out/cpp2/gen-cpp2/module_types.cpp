@@ -118,16 +118,6 @@ void swap([[maybe_unused]] SmallStruct& a, [[maybe_unused]] SmallStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void SmallStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t SmallStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t SmallStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t SmallStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void SmallStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t SmallStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t SmallStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t SmallStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -471,16 +461,6 @@ void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct&
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void containerStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t containerStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t containerStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void containerStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t containerStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t containerStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

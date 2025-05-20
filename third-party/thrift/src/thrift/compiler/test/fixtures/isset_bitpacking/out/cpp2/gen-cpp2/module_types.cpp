@@ -169,16 +169,6 @@ void swap([[maybe_unused]] Default& a, [[maybe_unused]] Default& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void Default::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t Default::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t Default::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t Default::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Default::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Default::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Default::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Default::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -339,16 +329,6 @@ void swap([[maybe_unused]] NonAtomic& a, [[maybe_unused]] NonAtomic& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void NonAtomic::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t NonAtomic::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t NonAtomic::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t NonAtomic::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void NonAtomic::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t NonAtomic::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t NonAtomic::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t NonAtomic::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -509,16 +489,6 @@ void swap([[maybe_unused]] Atomic& a, [[maybe_unused]] Atomic& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void Atomic::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t Atomic::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t Atomic::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t Atomic::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void Atomic::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t Atomic::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Atomic::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t Atomic::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -679,16 +649,6 @@ void swap([[maybe_unused]] AtomicFoo& a, [[maybe_unused]] AtomicFoo& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void AtomicFoo::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t AtomicFoo::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t AtomicFoo::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t AtomicFoo::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void AtomicFoo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t AtomicFoo::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t AtomicFoo::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AtomicFoo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2

@@ -115,16 +115,6 @@ void swap([[maybe_unused]] MyStructNestedAnnotation& a, [[maybe_unused]] MyStruc
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void MyStructNestedAnnotation::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MyStructNestedAnnotation::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MyStructNestedAnnotation::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MyStructNestedAnnotation::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyStructNestedAnnotation::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyStructNestedAnnotation::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyStructNestedAnnotation::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyStructNestedAnnotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -231,16 +221,6 @@ void swap(YourUnion& a, YourUnion& b) {
   b = std::move(temp);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void YourUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t YourUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t YourUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t YourUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void YourUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t YourUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t YourUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t YourUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace detail
@@ -319,16 +299,6 @@ void swap([[maybe_unused]] YourException& a, [[maybe_unused]] YourException& b) 
   using ::std::swap;
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void YourException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t YourException::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t YourException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t YourException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void YourException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t YourException::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t YourException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t YourException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace detail
@@ -521,16 +491,6 @@ void swap([[maybe_unused]] YourStruct& a, [[maybe_unused]] YourStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void YourStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t YourStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t YourStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t YourStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void YourStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t YourStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t YourStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t YourStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -643,16 +603,6 @@ void swap([[maybe_unused]] SecretStruct& a, [[maybe_unused]] SecretStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void SecretStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t SecretStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t SecretStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t SecretStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void SecretStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t SecretStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t SecretStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t SecretStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2

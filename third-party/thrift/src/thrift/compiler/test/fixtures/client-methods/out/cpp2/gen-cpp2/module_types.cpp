@@ -98,16 +98,6 @@ void swap([[maybe_unused]] EchoRequest& a, [[maybe_unused]] EchoRequest& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void EchoRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t EchoRequest::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t EchoRequest::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t EchoRequest::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void EchoRequest::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t EchoRequest::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t EchoRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t EchoRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2
@@ -197,16 +187,6 @@ void swap([[maybe_unused]] EchoResponse& a, [[maybe_unused]] EchoResponse& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_INSTANTIATE_COMPACT_BINARY_PROTOCOL_IN_SEPARATE_TU
-template void EchoResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t EchoResponse::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t EchoResponse::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t EchoResponse::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void EchoResponse::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t EchoResponse::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t EchoResponse::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t EchoResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2

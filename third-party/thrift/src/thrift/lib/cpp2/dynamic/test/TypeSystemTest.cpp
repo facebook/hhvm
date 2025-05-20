@@ -258,6 +258,22 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
   expectKnownUris(*typeSystem, {structDef.uri(), unionDef.uri()});
 }
 
+TEST(TypeSystemTest, IncompleteTypeSystem) {
+  // Missing MyUnion
+  TypeSystemBuilder builder;
+
+  builder.addType(
+      "meta.com/thrift/test/MyStruct",
+      makeStruct({
+          makeField(identity(1, "field1"), optional, TypeIds::I32),
+          makeField(
+              identity(2, "field2"),
+              unqualified,
+              TypeIds::uri("meta.com/thrift/test/MyUnion")),
+      }));
+  EXPECT_THROW(std::move(builder).build(), InvalidTypeError);
+}
+
 TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
   TypeSystemBuilder builder;
 

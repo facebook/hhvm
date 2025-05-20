@@ -24,6 +24,7 @@ namespace js thrift.annotation.thrift
 namespace py.asyncio facebook_thrift_asyncio.annotation.thrift
 namespace go thrift.annotation.thrift
 namespace py thrift.annotation.thrift
+namespace hs2 facebook.thrift.annotation.thrift
 
 // start
 
@@ -249,3 +250,10 @@ struct AllowReservedIdentifier {}
 
 @scope.Program
 struct AllowReservedFilename {}
+
+/**
+ * Applies to structured annotation that need to be accessed runtime in TypeSystem
+ * and C++ always-on reflection.
+ */
+@scope.Struct
+struct RuntimeAnnotation {}

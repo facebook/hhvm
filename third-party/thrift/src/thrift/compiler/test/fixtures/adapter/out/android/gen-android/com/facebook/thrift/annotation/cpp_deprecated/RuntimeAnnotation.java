@@ -24,7 +24,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Applies to structured annotation that need to be accessed in Runtime.
+ * Applies to structured annotation that need to be accessed in always-on reflection.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class RuntimeAnnotation implements TBase, java.io.Serializable, Cloneable {

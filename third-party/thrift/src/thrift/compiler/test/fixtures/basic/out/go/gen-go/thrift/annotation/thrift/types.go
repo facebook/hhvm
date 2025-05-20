@@ -1639,6 +1639,78 @@ func (x *AllowReservedFilename) setDefaults() *AllowReservedFilename {
     return x
 }
 
+type RuntimeAnnotation struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*RuntimeAnnotation)(nil)
+
+func NewRuntimeAnnotation() *RuntimeAnnotation {
+    return (&RuntimeAnnotation{}).setDefaults()
+}
+
+
+
+func (x *RuntimeAnnotation) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("RuntimeAnnotation"); err != nil {
+        return thrift.PrependError("RuntimeAnnotation write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("RuntimeAnnotation write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("RuntimeAnnotation write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *RuntimeAnnotation) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("RuntimeAnnotation read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("RuntimeAnnotation field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("RuntimeAnnotation read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *RuntimeAnnotation) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *RuntimeAnnotation) setDefaults() *RuntimeAnnotation {
+    return x
+}
+
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
@@ -1661,6 +1733,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/DeprecatedUnvalidatedAnnotations", func() any { return NewDeprecatedUnvalidatedAnnotations() })
     registry.RegisterType("facebook.com/thrift/annotation/AllowReservedIdentifier", func() any { return NewAllowReservedIdentifier() })
     registry.RegisterType("facebook.com/thrift/annotation/AllowReservedFilename", func() any { return NewAllowReservedFilename() })
+    registry.RegisterType("facebook.com/thrift/annotation/RuntimeAnnotation", func() any { return NewRuntimeAnnotation() })
 
     registry.RegisterType("facebook.com/thrift/annotation/RpcPriority", func() any { return RpcPriority(0) })
 }

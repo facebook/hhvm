@@ -1804,7 +1804,7 @@ class ProcessInEbThreadUnsafe implements \IThriftSyncStruct, \IThriftStructMetad
 }
 
 /**
- * Applies to structured annotation that need to be accessed in Runtime.
+ * Applies to structured annotation that need to be accessed in always-on reflection.
  *
  * Original thrift struct:-
  * RuntimeAnnotation

@@ -1691,7 +1691,7 @@ class ProcessInEbThreadUnsafe:
 
 class RuntimeAnnotation:
   r"""
-  Applies to structured annotation that need to be accessed in Runtime.
+  Applies to structured annotation that need to be accessed in always-on reflection.
   """
 
   thrift_spec = None

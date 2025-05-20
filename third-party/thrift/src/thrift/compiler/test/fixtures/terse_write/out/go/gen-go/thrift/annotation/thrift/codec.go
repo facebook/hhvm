@@ -215,6 +215,15 @@ var (
 },
 
     }
+    premadeCodecTypeSpec_thrift_RuntimeAnnotation = &thrift.TypeSpec{
+        FullName: "thrift.RuntimeAnnotation",
+        CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "thrift.RuntimeAnnotation",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewRuntimeAnnotation() },
+},
+
+    }
 )
 
 // Premade struct specs
@@ -471,6 +480,18 @@ var (
     FieldSpecNameToIndex: map[string]int{
     },
 }
+    premadeStructSpec_RuntimeAnnotation = &thrift.StructSpec{
+    Name:                 "RuntimeAnnotation",
+    ScopedName:           "thrift.RuntimeAnnotation",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -495,6 +516,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations.FullName] = premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedIdentifier.FullName] = premadeCodecTypeSpec_thrift_AllowReservedIdentifier
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedFilename.FullName] = premadeCodecTypeSpec_thrift_AllowReservedFilename
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RuntimeAnnotation.FullName] = premadeCodecTypeSpec_thrift_RuntimeAnnotation
     return fbthriftTypeSpecsMap
 }()
 

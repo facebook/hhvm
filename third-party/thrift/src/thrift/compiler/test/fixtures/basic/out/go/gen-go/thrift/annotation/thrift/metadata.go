@@ -153,6 +153,12 @@ var (
 },
 
     }
+    premadeThriftType_thrift_RuntimeAnnotation = &metadata.ThriftType{
+        TStruct: &metadata.ThriftStructType{
+    Name: "thrift.RuntimeAnnotation",
+},
+
+    }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
@@ -177,6 +183,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["thrift.DeprecatedUnvalidatedAnnotations"] = premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations
     fbthriftThriftTypesMap["thrift.AllowReservedIdentifier"] = premadeThriftType_thrift_AllowReservedIdentifier
     fbthriftThriftTypesMap["thrift.AllowReservedFilename"] = premadeThriftType_thrift_AllowReservedFilename
+    fbthriftThriftTypesMap["thrift.RuntimeAnnotation"] = premadeThriftType_thrift_RuntimeAnnotation
     return fbthriftThriftTypesMap
 }()
 
@@ -341,6 +348,14 @@ var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults = append(fbthriftResults,
         &metadata.ThriftStruct{
             Name:    "thrift.AllowReservedFilename",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+            },
+        },
+    )
+    fbthriftResults = append(fbthriftResults,
+        &metadata.ThriftStruct{
+            Name:    "thrift.RuntimeAnnotation",
             IsUnion: false,
             Fields:  []*metadata.ThriftField{
             },

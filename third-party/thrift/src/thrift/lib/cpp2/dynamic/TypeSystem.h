@@ -631,7 +631,7 @@ class StructuredNode {
    * Returns a field handle for the given field name, if it exists, returning
    * `FastFieldHandle::invalid()` otherwise.
    */
-  FastFieldHandle fieldHandleFor(std::string_view name) const {
+  FastFieldHandle fieldHandleFor(std::string_view name) const noexcept {
     if (const FastFieldHandle* handle =
             folly::get_ptr(fieldHandleByName_, name)) {
       return *handle;

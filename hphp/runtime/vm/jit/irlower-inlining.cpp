@@ -41,30 +41,33 @@ TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginInlining(IRLS& env, const IRInstruction* inst) {
+void cgDefCalleeFP(IRLS& env, const IRInstruction* inst) {
   auto const callerSP = srcLoc(env, inst, 0).reg();
   auto const calleeFP = dstLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<BeginInlining>();
+  auto const extra = inst->extra<DefCalleeFP>();
   auto& v = vmain(env);
 
   // We could use callerFP in a non-resumed context but vasm-copy should clean
   // this up for us since callerSP was computed as an lea{} from rvmfp.
   v << lea{callerSP[cellsToBytes(extra->spOffset.offset)], calleeFP};
+  v.unit().allocFrame(inst);
 }
 
 void cgEnterInlineFrame(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->src(0)->inst()->extra<BeginInlining>();
   auto& v = vmain(env);
+  auto const it = v.unit().fpToFrame.find(inst->src(0));
+  assertx(it != v.unit().fpToFrame.end());
+  v.unit().frames[it->second].entry_weight = vmain(env).weight();
 
-  v << inlinestart{extra->func, extra->cost};
+  v << inlinestart{};
 }
 
 void cgInlineCall(IRLS& env, const IRInstruction* inst) {
   auto const calleeFP = srcLoc(env, inst, 0).reg();
   auto const callerFP = srcLoc(env, inst, 1).reg();
   auto const calleeFPInst = inst->src(0)->inst();
-  assertx(calleeFPInst->is(BeginInlining));
-  auto const extra = calleeFPInst->extra<BeginInlining>();
+  assertx(calleeFPInst->is(DefCalleeFP));
+  auto const extra = calleeFPInst->extra<DefCalleeFP>();
   auto& v = vmain(env);
 
   auto const off = [&] () -> int32_t {
@@ -82,10 +85,9 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
   v << ldbindretaddr{extra->returnSk, extra->returnSPOff, retAddr};
   v << store{retAddr, calleeFP[AROFF(m_savedRip)]};
   v << pushvmfp{calleeFP, cellsToBytes(off)};
-  v << pushframe{};
 }
 
-void cgEndInlining(IRLS& env, const IRInstruction* inst) {
+void cgLeaveInlineFrame(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
 

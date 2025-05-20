@@ -502,7 +502,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AsyncGenYieldR:
   case AsyncSwitchFast:
   case BeginCatch:
-  case BeginInlining:
+  case DefCalleeFP:
   case BespokeEscalateToVanilla:
   case BespokeGet:
   case BespokeIterEnd:
@@ -627,7 +627,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EndBlock:
   case EndCatch:
   case EndGuards:
-  case EndInlining:
+  case LeaveInlineFrame:
   case EnterFrame:
   case EnterInlineFrame:
   case EnterPrologue:

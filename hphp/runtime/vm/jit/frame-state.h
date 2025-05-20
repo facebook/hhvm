@@ -347,12 +347,12 @@ struct FrameStateMgr final {
   unsigned inlineDepth() const { return m_stack.size() - 1; }
 
   /*
-   * Perform the frame state effects of EndInlining, without actually using
-   * the instruction. InlineSideExit contains the other effects of EndInlining,
+   * Perform the frame state effects of LeaveInlineFrame, without actually using
+   * the instruction. InlineSideExit contains the other effects of LeaveInlineFrame,
    * but it can't include the frame state ones, as they are needed for its own
    * catch block.
    */
-  void endInliningForSideExit() { trackEndInlining(); }
+  void endInliningForSideExit() { trackLeaveInlineFrame(); }
 
   /*
    * Get the irSPOff for the parent frame of the most-inlined frame.
@@ -514,7 +514,7 @@ private:
   void initStack(SSATmp* sp, SBInvOffset irSPOff, SBInvOffset bcSPOff);
   void uninitStack();
   void trackEnterInlineFrame(const IRInstruction* inst);
-  void trackEndInlining();
+  void trackLeaveInlineFrame();
   void trackInlineCall(const IRInstruction* inst);
   void trackInlineSideExit(const IRInstruction* inst);
 

@@ -81,6 +81,8 @@ static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicLowPtrVector(
     Func::s_funcVec, Cfg::Eval::FuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
+#else
+folly::ConcurrentHashMap<uint32_t, uint32_t> s_stableFuncIDs;
 #endif
 
 static ServiceData::ExportedCounter* s_funcid_counter =
@@ -384,8 +386,21 @@ FuncId::Int Func::maxFuncIdNum() {
 
 #ifdef USE_LOWPTR
 void Func::setNewFuncId() {
-  s_nextFuncId.fetch_add(1, std::memory_order_acq_rel);
+  auto const id = s_nextFuncId.fetch_add(1, std::memory_order_acq_rel);
   s_funcid_counter->increment();
+
+  if (!Cfg::Repo::Authoritative) {
+    s_stableFuncIDs.insert_or_assign(
+      static_cast<uint32_t>(reinterpret_cast<intptr_t>(this)), id);
+  }
+}
+
+uint32_t Func::getStableId() const {
+  if (Cfg::Repo::Authoritative) return getFuncId().toInt();
+  auto const it = s_stableFuncIDs.find(
+    static_cast<uint32_t>(reinterpret_cast<intptr_t>(this)));
+  assertx(it != s_stableFuncIDs.end());
+  return it->second;
 }
 
 const Func* Func::fromFuncId(FuncId id) {
@@ -406,6 +421,10 @@ void Func::setNewFuncId() {
   s_funcVec.ensureSize(m_funcId.toInt() + 1);
   assertx(s_funcVec.get(m_funcId.toInt()) == nullptr);
   s_funcVec.set(m_funcId.toInt(), this);
+}
+
+uint32_t Func::getStableId() const {
+  return getFuncId().toInt();
 }
 
 const Func* Func::fromFuncId(FuncId id) {

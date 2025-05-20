@@ -86,11 +86,9 @@ void insertStacks(
   IFrameID start, const std::vector<std::pair<TCA,IStack>>& stacks
 ) {
   for (auto& stk : stacks) {
-    assertx(stk.second.frame != stk.second.pubFrame);
     auto off = stackAddrToOffset(stk.first);
     auto val = stk.second;
     val.frame += start;
-    if (val.pubFrame != kRootIFrameID) val.pubFrame += start;
 
     if (auto pos = s_inlineStacks.find(off)) {
       *pos = val;

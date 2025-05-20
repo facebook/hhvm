@@ -104,6 +104,11 @@ struct Vout {
   void addWeightScale(uint64_t);
 
   /*
+   * Current block weight.
+   */
+  uint64_t weight() const { return m_unit.blocks[m_block].weight; }
+
+  /*
    * Vunit delegations.
    */
   Vreg makeReg();

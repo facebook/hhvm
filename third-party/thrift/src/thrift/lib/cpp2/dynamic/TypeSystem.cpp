@@ -25,8 +25,14 @@
 namespace apache::thrift::dynamic {
 
 StructuredNode::StructuredNode(
-    Uri uri, std::vector<FieldNode> fields, bool isSealed)
-    : uri_(std::move(uri)), fields_(std::move(fields)), isSealed_(isSealed) {
+    Uri uri,
+    std::vector<FieldNode> fields,
+    bool isSealed,
+    AnnotationsMap annotations)
+    : uri_(std::move(uri)),
+      fields_(std::move(fields)),
+      isSealed_(isSealed),
+      annotations_(std::move(annotations)) {
   std::uint16_t ordinal = 1;
   for (const FieldNode& field : fields_) {
     bool emplaced =
@@ -52,11 +58,22 @@ StructuredNode::StructuredNode(
   }
 }
 
-StructNode::StructNode(Uri uri, std::vector<FieldNode> fields, bool isSealed)
-    : StructuredNode(std::move(uri), std::move(fields), isSealed) {}
+StructNode::StructNode(
+    Uri uri,
+    std::vector<FieldNode> fields,
+    bool isSealed,
+    AnnotationsMap annotations)
+    : StructuredNode(
+          std::move(uri), std::move(fields), isSealed, std::move(annotations)) {
+}
 
-UnionNode::UnionNode(Uri uri, std::vector<FieldNode> fields, bool isSealed)
-    : StructuredNode(std::move(uri), std::move(fields), isSealed) {
+UnionNode::UnionNode(
+    Uri uri,
+    std::vector<FieldNode> fields,
+    bool isSealed,
+    AnnotationsMap annotations)
+    : StructuredNode(
+          std::move(uri), std::move(fields), isSealed, std::move(annotations)) {
   for (const FieldNode& field : this->fields()) {
     if (field.presence() != PresenceQualifier::OPTIONAL) {
       folly::throw_exception<InvalidTypeError>(fmt::format(

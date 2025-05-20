@@ -28,6 +28,19 @@ namespace apache::thrift::dynamic {
 
 using UriView = std::string_view;
 
+namespace detail {
+struct UriHeterogeneousHash {
+  using is_transparent = void;
+
+  std::size_t operator()(const Uri& uri) const noexcept {
+    return std::hash<UriView>{}(uri);
+  }
+  std::size_t operator()(const UriView& uri) const noexcept {
+    return std::hash<UriView>{}(uri);
+  }
+};
+} // namespace detail
+
 /**
  * A class containing helpers to author TypeId objects.
  */

@@ -197,22 +197,11 @@ class LazyInitDefinition final {
 
 class TypeSystemImpl final : public TypeSystem {
  private:
-  struct UriHeterogeneousHash {
-    using is_transparent = void;
-
-    std::size_t operator()(const Uri& uri) const noexcept {
-      return std::hash<UriView>{}(uri);
-    }
-    std::size_t operator()(const UriView& uri) const noexcept {
-      return std::hash<UriView>{}(uri);
-    }
-  };
-
  public:
   using DefinitionsMap = folly::F14FastMap<
       Uri,
       LazyInitDefinition,
-      UriHeterogeneousHash,
+      detail::UriHeterogeneousHash,
       std::equal_to<>>;
   DefinitionsMap definitions;
 
@@ -288,6 +277,26 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
     typeSystem->definitions.emplace(uri, std::move(uninitDef));
   }
 
+  const auto makeAnnots =
+      [&](folly::F14FastMap<Uri, SerializableRecordUnion> annotations) {
+        AnnotationsMap ret;
+        ret.reserve(annotations.size());
+        annotations.eraseInto(
+            annotations.begin(), annotations.end(), [&](auto&& k, auto&& v) {
+              // Validate uri exists in the type system and resolve to struct
+              // type.
+              auto typeref = typeSystem->typeOf(k);
+              if (!typeref.isStruct()) {
+                throw InvalidTypeError(fmt::format(
+                    "Definition for uri '{}' for annotation is not struct.",
+                    k));
+              }
+              ret.emplace(
+                  std::move(k), SerializableRecord::fromThrift(std::move(v)));
+            });
+        return ret;
+      };
+
   const auto makeFields = [&](std::vector<SerializableFieldDefinition> fields)
       -> std::vector<FieldNode> {
     std::vector<FieldNode> result;
@@ -300,7 +309,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
           field.customDefaultValue().has_value()
               ? std::optional{SerializableRecord::fromThrift(
                     std::move(*field.customDefaultValue()))}
-              : std::nullopt);
+              : std::nullopt,
+          makeAnnots(std::move(*field.annotations())));
     }
     return result;
   };
@@ -318,30 +328,39 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
         uninitDef.asType<StructNode>().emplace(
             uri,
             makeFields(std::move(*structDef.fields())),
-            *structDef.isSealed());
+            *structDef.isSealed(),
+            makeAnnots(std::move(*structDef.annotations())));
       } break;
       case SerializableTypeDefinition::Type::unionDef: {
         SerializableUnionDefinition& unionDef = *def.unionDef_ref();
         uninitDef.asType<UnionNode>().emplace(
             uri,
             makeFields(std::move(*unionDef.fields())),
-            *unionDef.isSealed());
+            *unionDef.isSealed(),
+            makeAnnots(std::move(*unionDef.annotations())));
       } break;
       case SerializableTypeDefinition::Type::enumDef: {
         SerializableEnumDefinition& enumDef = *def.enumDef_ref();
         std::vector<EnumNode::Value> values;
         values.reserve(enumDef.values()->size());
         for (SerializableEnumValueDefinition& mapping : *enumDef.values()) {
-          values.emplace_back(
-              EnumNode::Value(std::move(*mapping.name()), *mapping.datum()));
+          values.emplace_back(EnumNode::Value(
+              std::move(*mapping.name()),
+              *mapping.datum(),
+              makeAnnots(std::move(*mapping.annotations()))));
         }
-        uninitDef.asType<EnumNode>().emplace(uri, std::move(values));
+        uninitDef.asType<EnumNode>().emplace(
+            uri,
+            std::move(values),
+            makeAnnots(std::move(*enumDef.annotations())));
       } break;
       case SerializableTypeDefinition::Type::opaqueAliasDef: {
         SerializableOpaqueAliasDefinition& opaqueAliasDef =
             *def.opaqueAliasDef_ref();
         uninitDef.asType<OpaqueAliasNode>().emplace(
-            uri, typeSystem->typeOf(*opaqueAliasDef.targetType()));
+            uri,
+            typeSystem->typeOf(*opaqueAliasDef.targetType()),
+            makeAnnots(std::move(*opaqueAliasDef.annotations())));
       } break;
       default:
         break;

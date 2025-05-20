@@ -157,6 +157,12 @@ class InvalidTypeError : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
+using AnnotationsMap = folly::F14FastMap<
+    Uri,
+    SerializableRecord,
+    detail::UriHeterogeneousHash,
+    std::equal_to<>>;
+
 namespace detail {
 
 /**
@@ -499,11 +505,13 @@ class FieldNode final : folly::MoveOnly {
       FieldIdentity identity,
       PresenceQualifier presence,
       TypeRef type,
-      std::optional<SerializableRecord> customDefaultValue)
+      std::optional<SerializableRecord> customDefaultValue,
+      AnnotationsMap annotations)
       : identity_(std::move(identity)),
         presence_(presence),
         type_(std::move(type)),
-        customDefaultValue_(std::move(customDefaultValue)) {}
+        customDefaultValue_(std::move(customDefaultValue)),
+        annotations_(std::move(annotations)) {}
 
   const FieldIdentity& identity() const { return identity_; }
   PresenceQualifier presence() const { return presence_; }
@@ -514,11 +522,16 @@ class FieldNode final : folly::MoveOnly {
         : nullptr;
   }
 
+  const SerializableRecord* getAnnotationOrNull(UriView uri) const {
+    return folly::get_ptr(annotations_, uri);
+  }
+
  private:
   FieldIdentity identity_;
   PresenceQualifier presence_;
   TypeRef type_;
   std::optional<SerializableRecord> customDefaultValue_;
+  AnnotationsMap annotations_;
 };
 
 /**
@@ -626,24 +639,35 @@ class StructuredNode {
     return FastFieldHandle::invalid();
   }
 
+  const SerializableRecord* getAnnotationOrNull(UriView uri) const {
+    return folly::get_ptr(annotations_, uri);
+  }
+
  protected:
   Uri uri_;
   std::vector<FieldNode> fields_;
   folly::F14FastMap<FieldId, FastFieldHandle> fieldHandleById_;
   folly::F14FastMap<std::string_view, FastFieldHandle> fieldHandleByName_;
   bool isSealed_;
+  AnnotationsMap annotations_;
 
-  StructuredNode(Uri uri, std::vector<FieldNode> fields, bool isSealed);
+  StructuredNode(
+      Uri uri,
+      std::vector<FieldNode> fields,
+      bool isSealed,
+      AnnotationsMap annotations);
 };
 
 class StructNode final : folly::MoveOnly, public StructuredNode {
  public:
-  StructNode(Uri, std::vector<FieldNode>, bool isSealed);
+  StructNode(
+      Uri, std::vector<FieldNode>, bool isSealed, AnnotationsMap annotations);
 };
 
 class UnionNode final : folly::MoveOnly, public StructuredNode {
  public:
-  UnionNode(Uri, std::vector<FieldNode>, bool isSealed);
+  UnionNode(
+      Uri, std::vector<FieldNode>, bool isSealed, AnnotationsMap annotations);
 };
 
 class EnumNode final : folly::MoveOnly {
@@ -651,6 +675,7 @@ class EnumNode final : folly::MoveOnly {
   struct Value {
     std::string name;
     std::int32_t i32;
+    AnnotationsMap annotations_;
 
     friend bool operator==(const Value& lhs, const Value& rhs) noexcept {
       return std::tie(lhs.name, lhs.i32) == std::tie(rhs.name, rhs.i32);
@@ -658,17 +683,28 @@ class EnumNode final : folly::MoveOnly {
     friend bool operator!=(const Value& lhs, const Value& rhs) noexcept {
       return !(lhs == rhs);
     }
+    const SerializableRecord* getAnnotationOrNull(UriView uri) const {
+      return folly::get_ptr(annotations_, uri);
+    }
   };
 
   const Uri& uri() const noexcept { return uri_; }
   folly::span<const Value> values() const noexcept { return values_; }
 
-  explicit EnumNode(Uri uri, std::vector<Value> values)
-      : uri_(std::move(uri)), values_(std::move(values)) {}
+  const SerializableRecord* getAnnotationOrNull(UriView uri) const {
+    return folly::get_ptr(annotations_, uri);
+  }
+
+  explicit EnumNode(
+      Uri uri, std::vector<Value> values, AnnotationsMap annotations)
+      : uri_(std::move(uri)),
+        values_(std::move(values)),
+        annotations_(std::move(annotations)) {}
 
  private:
   Uri uri_;
   std::vector<Value> values_;
+  AnnotationsMap annotations_;
 };
 
 class OpaqueAliasNode final : folly::MoveOnly {
@@ -676,12 +712,20 @@ class OpaqueAliasNode final : folly::MoveOnly {
   const Uri& uri() const noexcept { return uri_; }
   const TypeRef& targetType() const noexcept { return targetType_; }
 
-  explicit OpaqueAliasNode(Uri uri, TypeRef targetType)
-      : uri_(std::move(uri)), targetType_(std::move(targetType)) {}
+  const SerializableRecord* getAnnotationOrNull(UriView uri) const {
+    return folly::get_ptr(annotations_, uri);
+  }
+
+  explicit OpaqueAliasNode(
+      Uri uri, TypeRef targetType, AnnotationsMap annotations)
+      : uri_(std::move(uri)),
+        targetType_(std::move(targetType)),
+        annotations_(std::move(annotations)) {}
 
  private:
   Uri uri_;
   TypeRef targetType_;
+  AnnotationsMap annotations_;
 };
 
 class DefinitionRef final {

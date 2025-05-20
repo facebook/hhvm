@@ -36,6 +36,7 @@ namespace {
 
 constexpr inline PresenceQualifier optional = PresenceQualifier::OPTIONAL;
 constexpr inline PresenceQualifier unqualified = PresenceQualifier::UNQUALIFIED;
+using RawAnnotationsMap = folly::F14FastMap<Uri, SerializableRecordUnion>;
 
 FieldIdentity identity(std::int16_t id, std::string_view name) {
   return FieldIdentity{FieldId{id}, std::string(name)};
@@ -45,7 +46,8 @@ SerializableFieldDefinition makeField(
     FieldIdentity identity,
     PresenceQualifier presence,
     TypeId type,
-    std::optional<SerializableRecord> customDefault = std::nullopt) {
+    std::optional<SerializableRecord> customDefault = std::nullopt,
+    RawAnnotationsMap annotations = {}) {
   SerializableFieldDefinition def;
   def.identity() = std::move(identity);
   def.presence() = presence;
@@ -53,40 +55,61 @@ SerializableFieldDefinition makeField(
   if (customDefault.has_value()) {
     def.customDefaultValue() = SerializableRecord::toThrift(*customDefault);
   }
+  def.annotations() = std::move(annotations);
   return def;
 }
 
 SerializableStructDefinition makeStruct(
-    std::vector<SerializableFieldDefinition> fields, bool isSealed = false) {
+    std::vector<SerializableFieldDefinition> fields,
+    bool isSealed = false,
+    RawAnnotationsMap annotations = {}) {
   SerializableStructDefinition def;
   def.fields() = fields;
   def.isSealed() = isSealed;
+  def.annotations() = std::move(annotations);
   return def;
 }
 
 SerializableUnionDefinition makeUnion(
-    std::vector<SerializableFieldDefinition> fields, bool isSealed = false) {
+    std::vector<SerializableFieldDefinition> fields,
+    bool isSealed = false,
+    RawAnnotationsMap annotations = {}) {
   SerializableUnionDefinition def;
   def.fields() = fields;
   def.isSealed() = isSealed;
+  def.annotations() = std::move(annotations);
   return def;
 }
 
+struct EnumValue {
+  std::string name;
+  std::int32_t value;
+  RawAnnotationsMap annotations;
+
+  EnumValue(std::string n, std::int32_t v) : name{std::move(n)}, value{v} {}
+  EnumValue(std::string n, std::int32_t v, RawAnnotationsMap m)
+      : name{std::move(n)}, value{v}, annotations(std::move(m)) {}
+};
+
 SerializableEnumDefinition makeEnum(
-    std::vector<std::pair<std::string, std::int32_t>> values) {
+    std::vector<EnumValue> values, RawAnnotationsMap annotations = {}) {
   SerializableEnumDefinition enumDef;
-  for (auto& [name, value] : values) {
+  for (auto& [name, value, annotations] : values) {
     SerializableEnumValueDefinition v;
     v.name() = std::move(name);
     v.datum() = value;
+    v.annotations() = std::move(annotations);
     enumDef.values()->emplace_back(std::move(v));
   }
+  enumDef.annotations() = std::move(annotations);
   return enumDef;
 }
 
-SerializableOpaqueAliasDefinition makeOpaqueAlias(TypeId targetType) {
+SerializableOpaqueAliasDefinition makeOpaqueAlias(
+    TypeId targetType, RawAnnotationsMap annotations = {}) {
   SerializableOpaqueAliasDefinition def;
   def.targetType() = targetType;
+  def.annotations() = std::move(annotations);
   return def;
 }
 
@@ -336,6 +359,151 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   EXPECT_EQ(fieldWithoutDefault.presence(), optional);
   EXPECT_EQ(fieldWithoutDefault.type().id(), TypeIds::I64);
   EXPECT_EQ(fieldWithoutDefault.customDefault(), nullptr);
+}
+
+TEST(TypeSystemTest, Annotations) {
+  TypeSystemBuilder builder;
+  builder.addType(
+      "meta.com/thrift/test/MyAnnot",
+      makeStruct({makeField(identity(1, "field1"), optional, TypeIds::I32)}));
+
+  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
+      {"meta.com/thrift/test/MyAnnot",
+       SerializableRecord::toThrift({SerializableRecord::FieldSet(
+           {{FieldId(1), SerializableRecord::Int32(42)}})})}};
+
+  // @MyAnnot{field1=42}
+  // struct MyStruct{
+  //   @MyAnnot{field1=42}
+  //   1: optional i32 field1;
+  // }
+  builder.addType(
+      "meta.com/thrift/test/MyStruct",
+      makeStruct(
+          {makeField(
+              identity(1, "field1"),
+              optional,
+              TypeIds::I32,
+              std::nullopt,
+              annots)},
+          false,
+          annots));
+
+  // @MyAnnot{field1=42}
+  // union MyUnion{
+  //   @MyAnnot{field1=42}
+  //   1: i32 field1;
+  // }
+  builder.addType(
+      "meta.com/thrift/test/MyUnion",
+      makeUnion(
+          {makeField(
+              identity(1, "int64"),
+              optional,
+              TypeIds::I64,
+              std::nullopt,
+              annots)},
+          false,
+          annots));
+
+  // @MyAnnot{field1=42}
+  // typedef i32 MyI32
+  builder.addType(
+      "meta.com/thrift/test/MyI32", makeOpaqueAlias(TypeIds::I32, annots));
+
+  // @MyAnnot{field1=42}
+  // enum MyEnum {
+  //   @MyAnnot{field1=42}
+  //   VALUE = 1,
+  // }
+  builder.addType(
+      "meta.com/thrift/test/MyEnum", makeEnum({{"VALUE1", 1, annots}}, annots));
+
+  auto typeSystem = std::move(builder).build();
+
+  auto checkAnnot = [](const auto& node) {
+    const auto* annot =
+        node.getAnnotationOrNull("meta.com/thrift/test/MyAnnot");
+    ASSERT_TRUE(annot != nullptr);
+    EXPECT_EQ(annot->asFieldSet().at(FieldId{1}).asInt32(), 42);
+  };
+
+  checkAnnot(
+      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyStruct"))
+          .asStruct());
+  checkAnnot(
+      typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyStruct"))
+          .asStruct()
+          .at(FieldId{1}));
+  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyUnion"))
+                 .asUnion());
+  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyUnion"))
+                 .asUnion()
+                 .at(FieldId{1}));
+  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyI32"))
+                 .asOpaqueAlias());
+  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyEnum"))
+                 .asEnum());
+  checkAnnot(typeSystem->getUserDefinedType(Uri("meta.com/thrift/test/MyEnum"))
+                 .asEnum()
+                 .values()[0]);
+}
+
+TEST(TypeSystemTest, MissingAnnotationType) {
+  TypeSystemBuilder builder;
+
+  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
+      {"meta.com/thrift/test/MyAnnot",
+       SerializableRecord::toThrift({SerializableRecord::FieldSet(
+           {{FieldId(1), SerializableRecord::Int32(42)}})})}};
+
+  // @MyAnnot{field1=42}
+  // struct MyStruct{
+  //   @MyAnnot{field1=42}
+  //   1: optional i32 field1;
+  // }
+  builder.addType(
+      "meta.com/thrift/test/MyAnnot",
+      makeUnion({makeField(identity(1, "field1"), optional, TypeIds::I32)}));
+  builder.addType(
+      "meta.com/thrift/test/MyStruct",
+      makeStruct(
+          {makeField(
+              identity(1, "field1"),
+              optional,
+              TypeIds::I32,
+              std::nullopt,
+              annots)},
+          false,
+          annots));
+  EXPECT_THROW(std::move(builder).build(), InvalidTypeError);
+}
+
+TEST(TypeSystemTest, WrongAnnotationType) {
+  TypeSystemBuilder builder;
+
+  folly::F14FastMap<Uri, SerializableRecordUnion> annots = {
+      {"meta.com/thrift/test/MyAnnot",
+       SerializableRecord::toThrift({SerializableRecord::FieldSet(
+           {{FieldId(1), SerializableRecord::Int32(42)}})})}};
+
+  // @MyAnnot{field1=42}
+  // struct MyStruct{
+  //   @MyAnnot{field1=42}
+  //   1: optional i32 field1;
+  // }
+  builder.addType(
+      "meta.com/thrift/test/MyStruct",
+      makeStruct(
+          {makeField(
+              identity(1, "field1"),
+              optional,
+              TypeIds::I32,
+              std::nullopt,
+              annots)},
+          false,
+          annots));
+  EXPECT_THROW(std::move(builder).build(), InvalidTypeError);
 }
 
 TEST(TypeSystemTest, UnionFieldsMustBeOptional) {

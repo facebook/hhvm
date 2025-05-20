@@ -19,19 +19,12 @@ function h(): void {
   // prop $bar
   hh_show(Foo::$bar);
   hh_show(Foo::{$bar});
-  hh_show(Foo::{'ba'.'r'});
 
   $foo = Foo::class as dynamic;
-
-  // $baz undefined
-  hh_show($foo::{$baz}());
 
   $baz = 'bar';
 
   // invoke prop $baz
   hh_show((Foo::$baz)());
   hh_show((Foo::{$baz})());
-
-  // invoke static meth named in $baz
-  hh_show($foo::{$baz}());
 }

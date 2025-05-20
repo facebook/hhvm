@@ -120,75 +120,9 @@ function class_get(dynamic $x): void {
 
   Foo::{$x};
   (Foo::{$x});
-  Foo::{$x}();
   (Foo::{$x})();
 
   Foo::{$_};
   (Foo::{$_});
-  Foo::{$_}();
   (Foo::{$_})();
-
-  Foo::{bar()}();
-  Foo::{vsprintf('%s', 'wow')}();
-  Foo::{(string)(123 + 456)}();
-
-  Foo::{'ba'."r"}();
-
-  Foo::{"bar\\".'baz'}();
-
-  Foo::{"$x"}();
-
-  Foo::{"$_"}();
-
-  Foo::{"ba$x"}();
-
-  Foo::{"ba$_"}();
-
-  Foo::{$x()}();
-
-  Foo::{$_()}();
-
-  Foo::{<<<EOD
-$much doge
-EOD
-  }();
-}
-
-function invalid_exprs(dynamic $x): void {
-  // Foo::'bar';
-  // (Foo::"bar");
-  // Foo::"bar"();
-  // (Foo::'bar')();
-
-  Foo::{bar()};
-  (Foo::{bar().baz()});
-  (Foo::{vsprintf('%s', 'wow')})();
-
-  Foo::{'ba'."r"};
-  (Foo::{'ba'."r"});
-  (Foo::{"b".'ar'})();
-
-  Foo::{"$x"};
-  (Foo::{"$x"});
-  (Foo::{"$x"})();
-
-  Foo::{"$_"};
-  (Foo::{"$_"});
-  (Foo::{"$_"})();
-
-  Foo::{"ba$x"};
-  (Foo::{"ba$x"});
-  (Foo::{"ba$x"})();
-
-  Foo::{"ba$_"};
-  (Foo::{"ba$_"});
-  (Foo::{"ba$_"})();
-
-  Foo::{$x()};
-  (Foo::{$x()});
-  (Foo::{$x()})();
-
-  Foo::{$_()};
-  (Foo::{$_()});
-  (Foo::{$_()})();
 }

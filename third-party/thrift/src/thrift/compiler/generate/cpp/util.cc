@@ -74,6 +74,7 @@ bool is_custom_type(const t_type& type) {
 
 bool is_custom_type(const t_field& field) {
   return cpp_name_resolver::find_first_adapter(field) ||
+      field.has_structured_annotation(kCppTypeUri) ||
       is_custom_type(*field.get_type());
 }
 

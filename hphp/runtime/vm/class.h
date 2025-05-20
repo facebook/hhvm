@@ -1660,7 +1660,7 @@ private:
     /*
      * Cache for reified generics info
      */
-    ReifiedGenericsInfo m_reifiedGenericsInfo{0, false, 0, {}};
+    ReifiedGenericsInfo m_reifiedGenericsInfo{false, 0, {}};
 
     /*
      * Cache for Closure subclass scopings.

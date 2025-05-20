@@ -1859,7 +1859,7 @@ void Class::setInstanceBitsIndex(unsigned int bit) {
 }
 
 namespace {
-const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, false, 0, {}};
+const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{false, 0, {}};
 } // namespace
 
 const ReifiedGenericsInfo& Class::getReifiedGenericsInfo() const {

@@ -71,7 +71,7 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
 
 ReifiedGenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
-  size_t len = 0, cur = 0, numReified = 0;
+  size_t len = 0, cur = 0;
   bool isReified = false, isSoft = false, hasAnySoft = false;
   uint32_t bitmap = 0;
   std::vector<TypeParamInfo> tpList;
@@ -96,7 +96,6 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
           hasAnySoft |= isSoft;
         } else {
           // k.m_data.num % 3 == 0
-          numReified++;
           cur++;
           tpList.push_back({isReified, isSoft, (bool) v.m_data.num});
         }
@@ -106,7 +105,7 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   // Insert the non reified ones at the end
   tpList.insert(tpList.end(), len - cur, {});
   bitmap = bitmap << (len - cur);
-  return {numReified, hasAnySoft, bitmap, tpList};
+  return {hasAnySoft, bitmap, tpList};
 }
 
 // Raises a runtime error if the location of reified generics of f does not

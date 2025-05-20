@@ -36,8 +36,6 @@ struct TypeParamInfo {
  * or class
  */
 struct ReifiedGenericsInfo {
-  // Number of reified generics
-  size_t m_numReifiedGenerics;
   // Whether it has any soft generics
   bool m_hasSoftGenerics;
   // Bitmap used to compare whether generics match in terms of parity in the

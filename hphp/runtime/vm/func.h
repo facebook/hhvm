@@ -1466,7 +1466,7 @@ private:
     LowStringPtr m_docComment;
     LowStringPtr m_originalModuleName;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 256 : 296>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 248 : 288>(), "");
 
   /*
    * SharedData accessors for internal use.

@@ -76,10 +76,11 @@ pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> 
                 })
             }
         }
-        Hint_::Hsoft(h) | Hint_::Hlike(h) | Hint_::HclassPtr(_, h) | Hint_::Hoption(h) => {
+        Hint_::Hsoft(h) | Hint_::Hlike(h) | Hint_::Hoption(h) => {
             has_reified_type_constraint(env, h)
         }
-        Hint_::Hprim(_)
+        Hint_::HclassPtr(_, _) // TODO(T199611023) track reified when enforcing inner
+        | Hint_::Hprim(_)
         | Hint_::Hmixed
         | Hint_::Hwildcard
         | Hint_::Hnonnull

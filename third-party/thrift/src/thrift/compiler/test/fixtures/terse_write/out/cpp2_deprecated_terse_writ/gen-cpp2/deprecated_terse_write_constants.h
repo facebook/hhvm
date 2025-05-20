@@ -16,6 +16,7 @@ namespace deprecated_terse_write_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_2bc1aa064d438e85();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_2bc1aa064d438e85_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_2bc1aa064d438e85_uris();
 
 } // namespace deprecated_terse_write_constants
 } // namespace facebook::thrift::test::terse_write::deprecated

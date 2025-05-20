@@ -6,11 +6,11 @@
  */
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.tcc"
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 
 template void CustomException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t CustomException::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t CustomException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t CustomException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-} // namespace cpp2
+} // namespace facebook::thrift::test

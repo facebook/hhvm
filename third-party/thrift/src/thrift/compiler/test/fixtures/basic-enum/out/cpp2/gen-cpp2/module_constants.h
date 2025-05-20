@@ -26,6 +26,7 @@ namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_42852c5394bb7dbf();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_42852c5394bb7dbf_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_42852c5394bb7dbf_uris();
 
 } // namespace module_constants
 } // namespace test::fixtures::enumstrict

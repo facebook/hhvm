@@ -80,6 +80,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_ede9a07f0329a15a_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_ede9a07f0329a15a_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace py3::simple

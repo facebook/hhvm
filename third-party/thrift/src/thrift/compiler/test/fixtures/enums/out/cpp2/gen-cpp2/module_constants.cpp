@@ -20,6 +20,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_aee2267ce76e558f_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_aee2267ce76e558f_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace test::fixtures::enums

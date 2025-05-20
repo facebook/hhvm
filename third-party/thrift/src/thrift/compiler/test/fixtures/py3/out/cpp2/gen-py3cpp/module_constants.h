@@ -100,6 +100,7 @@ namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_ede9a07f0329a15a();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_ede9a07f0329a15a_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_ede9a07f0329a15a_uris();
 
 } // namespace module_constants
 } // namespace py3::simple

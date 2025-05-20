@@ -267,6 +267,20 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
     }
     return object();
   });
+  def.property("uris", [](const t_program& self) {
+    array::raw result;
+    for (const auto& def : self.structured_definitions()) {
+      if (!def->uri().empty()) {
+        result.emplace_back(def->uri());
+      }
+    }
+    for (const auto& def : self.enums()) {
+      if (!def->uri().empty()) {
+        result.emplace_back(def->uri());
+      }
+    }
+    return array::of(std::move(result));
+  });
   return std::move(def).make();
 }
 

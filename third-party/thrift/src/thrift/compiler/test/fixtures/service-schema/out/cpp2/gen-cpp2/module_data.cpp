@@ -12,31 +12,31 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::CustomException>::name = "CustomException";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::cpp2::CustomException>::fields_names = { {
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::CustomException>::name = "CustomException";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::fields_names = { {
   "name"sv,
   "result"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::cpp2::CustomException>::fields_ids = { {
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::CustomException>::fields_types = { {
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::CustomException>::isset_indexes = { {
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::isset_indexes = { {
   0,
   1,
 }};
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::CustomException, false>::bundle)() =
-    &::cpp2::module_constants::_fbthrift_schema_b747839c13cb3aa5_includes;
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::CustomException, false>::bundle)() =
+    &::facebook::thrift::test::module_constants::_fbthrift_schema_af7deaffee96429a_includes;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Result, true>::bundle)() =
-    &::cpp2::module_constants::_fbthrift_schema_b747839c13cb3aa5_includes;
+::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::Result, true>::bundle)() =
+    &::facebook::thrift::test::module_constants::_fbthrift_schema_af7deaffee96429a_includes;
 
 } // namespace detail
 } // namespace apache::thrift

@@ -73,6 +73,18 @@ namespace {{program:name}}_constants {
   return {};
 {{/if program:schema_includes_const?}}
 }
+::folly::Range<const ::std::string_view*> {{program:schema_name}}_uris() {
+{{#if program:schema_includes_const?}}
+  static const ::std::array<::std::string_view, {{(array.len program:self.uris)}}> uris = {
+    {{#program:self.uris}}
+    "{{ . }}",
+    {{/program:self.uris}}
+  };
+  return ::folly::range(uris);
+{{#else}}
+  return {};
+{{/if program:schema_includes_const?}}
+}
 
 } // namespace {{program:name}}_constants
 } // namespace {{program:qualified_namespace}}

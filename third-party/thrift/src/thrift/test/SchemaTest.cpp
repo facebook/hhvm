@@ -131,7 +131,7 @@ TEST_F(SchemaTest, merged_schema_add_after_access) {
   BaseSchemaRegistry base;
   SchemaRegistry registry(base);
   auto schemaPtr = getMergedSchema(registry);
-  base.registerSchema("schema", {{data}}, "schema.thrift");
+  base.registerSchema("schema", {{data}}, "schema.thrift", {}, {});
   auto newSchemaPtr = getMergedSchema(registry);
   // Data is not reused after access.
   EXPECT_EQ(schemaPtr->programs()->size(), 0);

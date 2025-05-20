@@ -6,10 +6,13 @@
  *  @generated
  */
 
+namespace facebook\thrift\test;
+
 /**
  * Original thrift service:-
  * PrimitivesService
  */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
 interface PrimitivesServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
@@ -25,20 +28,22 @@ interface PrimitivesServiceAsyncIf extends \IThriftAsyncIf {
    *   method_that_throws()
    *   throws (1: CustomException e);
    */
-  public function method_that_throws(): Awaitable<Result>;
+  public function method_that_throws(): Awaitable<\facebook\thrift\test\Result>;
 
   /**
    * Original thrift definition:-
    * void
-   *   return_void_method(1: i64 id);
+   *   return_void_method(1: i64 id,
+   *                      2: include.I i);
    */
-  public function return_void_method(int $id): Awaitable<void>;
+  public function return_void_method(int $id, ?\I $i): Awaitable<void>;
 }
 
 /**
  * Original thrift service:-
  * PrimitivesService
  */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
 interface PrimitivesServiceIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
@@ -54,20 +59,22 @@ interface PrimitivesServiceIf extends \IThriftSyncIf {
    *   method_that_throws()
    *   throws (1: CustomException e);
    */
-  public function method_that_throws(): Result;
+  public function method_that_throws(): \facebook\thrift\test\Result;
 
   /**
    * Original thrift definition:-
    * void
-   *   return_void_method(1: i64 id);
+   *   return_void_method(1: i64 id,
+   *                      2: include.I i);
    */
-  public function return_void_method(int $id): void;
+  public function return_void_method(int $id, ?\I $i): void;
 }
 
 /**
  * Original thrift service:-
  * PrimitivesService
  */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
 interface PrimitivesServiceAsyncClientIf extends PrimitivesServiceAsyncIf {
 }
 
@@ -75,6 +82,7 @@ interface PrimitivesServiceAsyncClientIf extends PrimitivesServiceAsyncIf {
  * Original thrift service:-
  * PrimitivesService
  */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
 interface PrimitivesServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
@@ -90,14 +98,15 @@ interface PrimitivesServiceClientIf extends \IThriftSyncIf {
    *   method_that_throws()
    *   throws (1: CustomException e);
    */
-  public function method_that_throws(): Awaitable<Result>;
+  public function method_that_throws(): Awaitable<\facebook\thrift\test\Result>;
 
   /**
    * Original thrift definition:-
    * void
-   *   return_void_method(1: i64 id);
+   *   return_void_method(1: i64 id,
+   *                      2: include.I i);
    */
-  public function return_void_method(int $id): Awaitable<void>;
+  public function return_void_method(int $id, ?\I $i): Awaitable<void>;
 }
 
 /**
@@ -115,13 +124,13 @@ trait PrimitivesServiceClientBase {
    */
   public async function init(int $param0, int $param1): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_init_args::fromShape(shape(
+    $args = \facebook\thrift\test\PrimitivesService_init_args::fromShape(shape(
       'param0' => $param0,
       'param1' => $param1,
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -130,27 +139,29 @@ trait PrimitivesServiceClientBase {
    *   method_that_throws()
    *   throws (1: CustomException e);
    */
-  public async function method_that_throws(): Awaitable<Result> {
+  public async function method_that_throws(): Awaitable<\facebook\thrift\test\Result> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_method_that_throws_args::withDefaultValues();
+    $args = \facebook\thrift\test\PrimitivesService_method_that_throws_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "method_that_throws", $args);
     $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
    * Original thrift definition:-
    * void
-   *   return_void_method(1: i64 id);
+   *   return_void_method(1: i64 id,
+   *                      2: include.I i);
    */
-  public async function return_void_method(int $id): Awaitable<void> {
+  public async function return_void_method(int $id, ?\I $i): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_return_void_method_args::fromShape(shape(
+    $args = \facebook\thrift\test\PrimitivesService_return_void_method_args::fromShape(shape(
       'id' => $id,
+      'i' => $i,
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "return_void_method", $args);
     $currentseqid = $this->sendImplHelper($args, "return_void_method", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\facebook\thrift\test\PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -219,27 +230,27 @@ class PrimitivesService_init_args implements \IThriftSyncStruct, \IThriftStructM
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.init_args",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "param0",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "param1",
@@ -306,16 +317,16 @@ class PrimitivesService_init_result extends \ThriftSyncStructWithResult implemen
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.PrimitivesService_init_result",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "success",
@@ -371,7 +382,7 @@ class PrimitivesService_method_that_throws_args implements \IThriftSyncStruct, \
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.method_that_throws_args",
         "is_union" => false,
@@ -396,18 +407,18 @@ class PrimitivesService_method_that_throws_args implements \IThriftSyncStruct, \
 class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = Result;
+  const type TResult = \facebook\thrift\test\Result;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
-      'enum' => Result::class,
+      'enum' => \facebook\thrift\test\Result::class,
     ),
     1 => shape(
       'var' => 'e',
       'type' => \TType::STRUCT,
-      'class' => CustomException::class,
+      'class' => \facebook\thrift\test\CustomException::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -417,14 +428,14 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
 
   const type TConstructorShape = shape(
     ?'success' => ?this::TResult,
-    ?'e' => ?CustomException,
+    ?'e' => ?\facebook\thrift\test\CustomException,
   );
 
   const int STRUCTURAL_ID = 8885166390166279584;
   public ?this::TResult $success;
-  public ?CustomException $e;
+  public ?\facebook\thrift\test\CustomException $e;
 
-  public function __construct(?this::TResult $success = null, ?CustomException $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?\facebook\thrift\test\CustomException $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -445,16 +456,16 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.PrimitivesService_method_that_throws_result",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_enum" => tmeta_ThriftEnumType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "module.Result",
                     )
@@ -464,12 +475,12 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
               "name" => "success",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.CustomException",
                     )
@@ -505,7 +516,7 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
   }
   
   public function setException(\Exception $e): bool {
-    if ($e is CustomException) {
+    if ($e is \facebook\thrift\test\CustomException) {
       $this->e = $e;
       return true;
     }
@@ -521,20 +532,29 @@ class PrimitivesService_return_void_method_args implements \IThriftSyncStruct, \
       'var' => 'id',
       'type' => \TType::I64,
     ),
+    2 => shape(
+      'var' => 'i',
+      'type' => \TType::STRUCT,
+      'class' => \I::class,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'id' => 1,
+    'i' => 2,
   ];
 
   const type TConstructorShape = shape(
     ?'id' => ?int,
+    ?'i' => ?\I,
   );
 
-  const int STRUCTURAL_ID = 3807211151619655933;
+  const int STRUCTURAL_ID = 3392731265008629035;
   public int $id;
+  public ?\I $i;
 
-  public function __construct(?int $id = null)[] {
+  public function __construct(?int $id = null, ?\I $i = null)[] {
     $this->id = $id ?? 0;
+    $this->i = $i;
   }
 
   public static function withDefaultValues()[]: this {
@@ -544,6 +564,7 @@ class PrimitivesService_return_void_method_args implements \IThriftSyncStruct, \
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'id'),
+      Shapes::idx($shape, 'i'),
     );
   }
 
@@ -552,19 +573,34 @@ class PrimitivesService_return_void_method_args implements \IThriftSyncStruct, \
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.return_void_method_args",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "id",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "include.I",
+                    )
+                  ),
+                )
+              ),
+              "name" => "i",
             )
           ),
         ],
@@ -617,7 +653,7 @@ class PrimitivesService_return_void_method_result extends \ThriftSyncStructWitho
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.PrimitivesService_return_void_method_result",
         "is_union" => false,
@@ -643,36 +679,36 @@ class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'PrimitivesService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
-    return tmeta_ThriftService::fromShape(
+    return \tmeta_ThriftService::fromShape(
       shape(
         "name" => "module.PrimitivesService",
         "functions" => vec[
-          tmeta_ThriftFunction::fromShape(
+          \tmeta_ThriftFunction::fromShape(
             shape(
               "name" => "init",
-              "return_type" => tmeta_ThriftType::fromShape(
+              "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "arguments" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                       )
                     ),
                     "name" => "param0",
                   )
                 ),
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 2,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                       )
                     ),
                     "name" => "param1",
@@ -681,12 +717,12 @@ class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               ],
             )
           ),
-          tmeta_ThriftFunction::fromShape(
+          \tmeta_ThriftFunction::fromShape(
             shape(
               "name" => "method_that_throws",
-              "return_type" => tmeta_ThriftType::fromShape(
+              "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_enum" => tmeta_ThriftEnumType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "module.Result",
                     )
@@ -694,12 +730,12 @@ class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                 )
               ),
               "exceptions" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_struct" => tmeta_ThriftStructType::fromShape(
+                        "t_struct" => \tmeta_ThriftStructType::fromShape(
                           shape(
                             "name" => "module.CustomException",
                           )
@@ -712,24 +748,39 @@ class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               ],
             )
           ),
-          tmeta_ThriftFunction::fromShape(
+          \tmeta_ThriftFunction::fromShape(
             shape(
               "name" => "return_void_method",
-              "return_type" => tmeta_ThriftType::fromShape(
+              "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
                 )
               ),
               "arguments" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                       )
                     ),
                     "name" => "id",
+                  )
+                ),
+                \tmeta_ThriftField::fromShape(
+                  shape(
+                    "id" => 2,
+                    "type" => \tmeta_ThriftType::fromShape(
+                      shape(
+                        "t_struct" => \tmeta_ThriftStructType::fromShape(
+                          shape(
+                            "name" => "include.I",
+                          )
+                        ),
+                      )
+                    ),
+                    "name" => "i",
                   )
                 ),
               ],
@@ -756,12 +807,13 @@ class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
         'metadata' => \tmeta_ThriftMetadata::fromShape(
           shape(
             'enums' => dict[
-              'module.Result' => Result_TEnumStaticMetadata::getEnumMetadata(),
+              'module.Result' => \facebook\thrift\test\Result_TEnumStaticMetadata::getEnumMetadata(),
             ],
             'structs' => dict[
+              'include.I' => \I::getStructMetadata(),
             ],
             'exceptions' => dict[
-              'module.CustomException' => CustomException::getExceptionMetadata(),
+              'module.CustomException' => \facebook\thrift\test\CustomException::getExceptionMetadata(),
             ],
             'services' => dict[
             ],

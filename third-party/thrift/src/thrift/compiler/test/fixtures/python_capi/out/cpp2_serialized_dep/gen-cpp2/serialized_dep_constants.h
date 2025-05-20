@@ -16,6 +16,7 @@ namespace serialized_dep_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_b748ca241bc21635();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_uris();
 
 } // namespace serialized_dep_constants
 } // namespace test::fixtures::python_capi

@@ -129,6 +129,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_54513f84fd7e96ac_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_54513f84fd7e96ac_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace facebook::thrift::test

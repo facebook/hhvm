@@ -20,6 +20,9 @@ namespace containers_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_474acde4c63234cd_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_474acde4c63234cd_uris() {
+  return {};
+}
 
 } // namespace containers_constants
 } // namespace test::fixtures::python_capi

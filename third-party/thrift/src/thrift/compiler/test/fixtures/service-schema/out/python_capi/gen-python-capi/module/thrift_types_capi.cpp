@@ -20,7 +20,7 @@ namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
-      ::import_module__thrift_types_capi));
+      ::import_facebook__thrift__test__module__thrift_types_capi));
   return import();
 }
   static constexpr std::int16_t _fbthrift__CustomException__tuple_pos[2] = {
@@ -28,31 +28,31 @@ bool ensure_module_imported() {
   };
 } // namespace
 
-ExtractorResult<::cpp2::CustomException>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::CustomException>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a CustomException");
       }
-      return extractorError<::cpp2::CustomException>(
+      return extractorError<::facebook::thrift::test::CustomException>(
           "Marshal error: CustomException");
   }
   StrongRef fbThriftData(getExceptionThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::CustomException, ::module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::cpp2::CustomException>
+ExtractorResult<::facebook::thrift::test::CustomException>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::CustomException, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::CustomException cpp;
+    ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::CustomException cpp;
   std::optional<std::string_view> error;
   Extractor<Bytes>{}.extractInto(
       cpp.name_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__CustomException__tuple_pos[0]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedEnum<::cpp2::Result>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::Result>>{}.extractInto(
       cpp.result_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__CustomException__tuple_pos[1]),
       error);
@@ -63,13 +63,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module module import error");
+      "Module facebook.thrift.test.module import error");
   }
   int result =
-      can_extract__module__CustomException(obj);
+      can_extract__facebook__thrift__test__module__CustomException(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: CustomException");
@@ -78,24 +78,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomExc
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::module::NamespaceTag>>::operator()(
-    const ::cpp2::CustomException& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::CustomException& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException, ::module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__module__CustomException(*fbthrift_data);
+  return init__facebook__thrift__test__module__CustomException(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException, ::module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::cpp2::CustomException& val) {
+        ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::CustomException& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__name(
     Constructor<Bytes>{}
@@ -108,7 +108,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__result(
-    Constructor<::apache::thrift::python::capi::ComposedEnum<::cpp2::Result>>{}
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::Result>>{}
     .constructFrom(val.result_ref()));
   if (!_fbthrift__result ||
       setStructField(
@@ -121,23 +121,23 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::cpp2::Result>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Result, ::module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::Result>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Result, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
-    return extractorError<::cpp2::Result>(
+    return extractorError<::facebook::thrift::test::Result>(
         "Error getting python int value: Result");
   }
-  return static_cast<::cpp2::Result>(val);
+  return static_cast<::facebook::thrift::test::Result>(val);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Result, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Result, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module module import error");
+      "Module facebook.thrift.test.module import error");
   }
   int result =
-      can_extract__module__Result(obj);
+      can_extract__facebook__thrift__test__module__Result(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Result");
@@ -146,13 +146,13 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Result, :
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Result, ::module::NamespaceTag>>::operator()(
-    ::cpp2::Result val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Result, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
+    ::facebook::thrift::test::Result val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__module__Result(
+  auto ptr = construct__facebook__thrift__test__module__Result(
       static_cast<int64_t>(val));
   if (!ptr) {
     CHECK(PyErr_Occurred());

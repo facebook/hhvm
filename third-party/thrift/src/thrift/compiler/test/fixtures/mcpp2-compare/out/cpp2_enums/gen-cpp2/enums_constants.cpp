@@ -42,6 +42,9 @@ namespace enums_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_uris() {
+  return {};
+}
 
 } // namespace enums_constants
 } // namespace facebook::ns::qwerty

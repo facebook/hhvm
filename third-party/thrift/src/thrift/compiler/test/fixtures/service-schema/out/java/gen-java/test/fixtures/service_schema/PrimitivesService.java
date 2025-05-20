@@ -100,16 +100,19 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
 
         @ThriftMethod(value = "return_void_method")
         ListenableFuture<Void> returnVoidMethod(
-            @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id);
+            @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id,
+            @com.facebook.swift.codec.ThriftField(value=2, name="i", requiredness=Requiredness.NONE) final test.fixtures.service_schema.I i);
 
         default ListenableFuture<Void> returnVoidMethod(
             @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id,
+            @com.facebook.swift.codec.ThriftField(value=2, name="i", requiredness=Requiredness.NONE) final test.fixtures.service_schema.I i,
             RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 
         default ListenableFuture<ResponseWrapper<Void>> returnVoidMethodWrapper(
             @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id,
+            @com.facebook.swift.codec.ThriftField(value=2, name="i", requiredness=Requiredness.NONE) final test.fixtures.service_schema.I i,
             RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
@@ -153,16 +156,19 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
 
     @ThriftMethod(value = "return_void_method")
     void returnVoidMethod(
-        @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id) throws org.apache.thrift.TException;
+        @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id,
+        @com.facebook.swift.codec.ThriftField(value=2, name="i", requiredness=Requiredness.NONE) final test.fixtures.service_schema.I i) throws org.apache.thrift.TException;
 
     default void returnVoidMethod(
         @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id,
+        @com.facebook.swift.codec.ThriftField(value=2, name="i", requiredness=Requiredness.NONE) final test.fixtures.service_schema.I i,
         RpcOptions rpcOptions) throws org.apache.thrift.TException {
         throw new UnsupportedOperationException();
     }
 
     default ResponseWrapper<Void> returnVoidMethodWrapper(
         @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE) final long id,
+        @com.facebook.swift.codec.ThriftField(value=2, name="i", requiredness=Requiredness.NONE) final test.fixtures.service_schema.I i,
         RpcOptions rpcOptions) throws org.apache.thrift.TException {
         throw new UnsupportedOperationException();
     }
@@ -213,13 +219,13 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         }
 
         @ThriftMethod(value = "return_void_method")
-        reactor.core.publisher.Mono<Void> returnVoidMethod(final long id);
+        reactor.core.publisher.Mono<Void> returnVoidMethod(final long id, final test.fixtures.service_schema.I i);
 
-        default reactor.core.publisher.Mono<Void> returnVoidMethod(final long id, RpcOptions rpcOptions) {
+        default reactor.core.publisher.Mono<Void> returnVoidMethod(final long id, final test.fixtures.service_schema.I i, RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 
-        default reactor.core.publisher.Mono<ResponseWrapper<Void>> returnVoidMethodWrapper(final long id, RpcOptions rpcOptions) {
+        default reactor.core.publisher.Mono<ResponseWrapper<Void>> returnVoidMethodWrapper(final long id, final test.fixtures.service_schema.I i, RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 

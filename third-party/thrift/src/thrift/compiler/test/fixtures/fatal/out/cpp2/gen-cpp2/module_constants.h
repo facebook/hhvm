@@ -44,6 +44,7 @@ namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_7a4a502fee7f90ef();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7a4a502fee7f90ef_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7a4a502fee7f90ef_uris();
 
 } // namespace module_constants
 } // namespace test_cpp2::cpp_reflection

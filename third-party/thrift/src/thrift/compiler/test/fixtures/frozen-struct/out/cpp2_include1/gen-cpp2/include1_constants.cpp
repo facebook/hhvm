@@ -20,6 +20,9 @@ namespace include1_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_933b10759aaa870_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_933b10759aaa870_uris() {
+  return {};
+}
 
 } // namespace include1_constants
 } // namespace some::ns

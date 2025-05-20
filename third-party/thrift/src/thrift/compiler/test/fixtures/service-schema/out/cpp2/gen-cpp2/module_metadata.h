@@ -12,9 +12,9 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_metadata.h"
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 class PrimitivesService;
-} // namespace cpp2
+} // namespace facebook::thrift::test
 
 namespace apache {
 namespace thrift {
@@ -22,22 +22,22 @@ namespace detail {
 namespace md {
 
 template <>
-class EnumMetadata<::cpp2::Result> {
+class EnumMetadata<::facebook::thrift::test::Result> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::cpp2::CustomException> {
+class StructMetadata<::facebook::thrift::test::CustomException> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class ExceptionMetadata<::cpp2::CustomException> {
+class ExceptionMetadata<::facebook::thrift::test::CustomException> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>> {
+class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
  private:

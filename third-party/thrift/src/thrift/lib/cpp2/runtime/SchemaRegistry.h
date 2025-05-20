@@ -102,9 +102,11 @@ class SchemaRegistry {
       const std::string_view uri) const;
 
   BaseSchemaRegistry& base_;
+
   Ptr mergedSchema_;
   folly::relaxed_atomic<bool> mergedSchemaAccessed_{false};
   std::unordered_set<type::ProgramId> includedPrograms_;
+
   std::unique_ptr<schema::SyntaxGraph> syntaxGraph_;
   schema::detail::IncrementalResolver* resolver_;
 

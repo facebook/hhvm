@@ -33,7 +33,9 @@ class BaseSchemaRegistry {
   void registerSchema(
       std::string_view name,
       folly::span<const std::string_view> data,
-      std::string_view path);
+      std::string_view path,
+      int64_t programId,
+      folly::span<const std::string_view> uris);
 
   using Callback = folly::Function<void(std::string_view) const>;
 
@@ -41,8 +43,10 @@ class BaseSchemaRegistry {
   struct RawSchema {
     folly::span<const std::string_view> data;
     std::string_view path;
+    int64_t programId{};
   };
-  folly::F14FastMap<std::string_view, RawSchema> rawSchemas_;
+  folly::F14NodeMap<std::string_view, RawSchema> rawSchemas_;
+  folly::F14FastMap<std::string_view, RawSchema*> rawSchemasByUri_;
   bool accessed_;
   Callback insertCallback_;
   folly::SharedMutex mutex_;

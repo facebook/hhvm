@@ -20,6 +20,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_c06a47e52851962b_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_c06a47e52851962b_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace facebook::thrift::test

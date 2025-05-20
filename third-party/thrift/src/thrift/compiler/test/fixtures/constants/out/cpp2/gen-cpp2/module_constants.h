@@ -458,6 +458,7 @@ namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_3e52b9a9fabc0c36();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_uris();
 
 } // namespace module_constants
 } // namespace cpp2

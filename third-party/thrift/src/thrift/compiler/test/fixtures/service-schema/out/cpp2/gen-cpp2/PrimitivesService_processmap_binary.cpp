@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesService.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesService.tcc"
 
-namespace cpp2 {
-} // namespace cpp2
+namespace facebook::thrift::test {
+} // namespace facebook::thrift::test

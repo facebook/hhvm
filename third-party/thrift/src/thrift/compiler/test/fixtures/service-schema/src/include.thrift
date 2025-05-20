@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
+namespace java.swift test.fixtures.service_schema
+
 struct I {}

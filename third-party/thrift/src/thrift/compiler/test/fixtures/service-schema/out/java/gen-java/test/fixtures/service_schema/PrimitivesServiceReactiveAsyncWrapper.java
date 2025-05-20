@@ -66,22 +66,24 @@ public class PrimitivesServiceReactiveAsyncWrapper
   }
 
   @java.lang.Override
-  public com.google.common.util.concurrent.ListenableFuture<Void> returnVoidMethod(final long id) {
-      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.returnVoidMethod(id));
+  public com.google.common.util.concurrent.ListenableFuture<Void> returnVoidMethod(final long id, final test.fixtures.service_schema.I i) {
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.returnVoidMethod(id, i));
   }
 
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<Void> returnVoidMethod(
     final long id,
+    final test.fixtures.service_schema.I i,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.returnVoidMethod(id, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.returnVoidMethod(id,i, rpcOptions));
   }
 
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> returnVoidMethodWrapper(
     final long id,
+    final test.fixtures.service_schema.I i,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.returnVoidMethodWrapper(id, rpcOptions));
+    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.returnVoidMethodWrapper(id,i, rpcOptions));
   }
 
 }

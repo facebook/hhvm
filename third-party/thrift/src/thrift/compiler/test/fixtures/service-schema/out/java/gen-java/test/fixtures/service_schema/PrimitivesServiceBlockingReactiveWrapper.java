@@ -67,14 +67,14 @@ public class PrimitivesServiceBlockingReactiveWrapper
     }
 
     @java.lang.Override
-    public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id) {
+    public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id, final test.fixtures.service_schema.I i) {
         reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>create(_sink -> {
             try {
                 reactor.util.context.ContextView _contextView = _sink.contextView();
                 com.facebook.nifty.core.RequestContext
                     .tryContextView(_contextView)
                     .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
-                _delegate.returnVoidMethod(id);
+                _delegate.returnVoidMethod(id, i);
                 _sink.success();
             } catch (Throwable _e) {
                 throw reactor.core.Exceptions.propagate(_e);

@@ -23,7 +23,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 class PrimitivesService;
 class PrimitivesServiceAsyncProcessor;
 
@@ -32,17 +32,21 @@ class PrimitivesServiceServiceInfoHolder : public apache::thrift::ServiceInfoHol
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // namespace cpp2
+} // namespace facebook::thrift::test
 
 namespace apache::thrift {
 template <>
-class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerInterface {
-  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::PrimitivesService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+class ServiceHandler<::facebook::thrift::test::PrimitivesService> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::PrimitivesService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "PrimitivesService"; }
 
-  typedef ::cpp2::PrimitivesServiceAsyncProcessor ProcessorType;
+  static const char* __fbthrift_thrift_uri() {
+    return "facebook.com/thrift/test/PrimitivesService";
+  }
+
+  typedef ::facebook::thrift::test::PrimitivesServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
   #if defined(THRIFT_SCHEMA_AVAILABLE)
@@ -63,50 +67,50 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   virtual folly::coro::Task<::std::int64_t> co_init(apache::thrift::RequestParams params, ::std::int64_t p_param0, ::std::int64_t p_param1);
 #endif
   virtual void async_tm_init(apache::thrift::HandlerCallbackPtr<::std::int64_t> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
-  virtual ::cpp2::Result sync_method_that_throws();
-  [[deprecated("Use sync_method_that_throws instead")]] virtual ::cpp2::Result method_that_throws();
-  virtual folly::Future<::cpp2::Result> future_method_that_throws();
-  virtual folly::SemiFuture<::cpp2::Result> semifuture_method_that_throws();
+  virtual ::facebook::thrift::test::Result sync_method_that_throws();
+  [[deprecated("Use sync_method_that_throws instead")]] virtual ::facebook::thrift::test::Result method_that_throws();
+  virtual folly::Future<::facebook::thrift::test::Result> future_method_that_throws();
+  virtual folly::SemiFuture<::facebook::thrift::test::Result> semifuture_method_that_throws();
 #if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task<::cpp2::Result> co_method_that_throws();
-  virtual folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RequestParams params);
+  virtual folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws();
+  virtual folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_method_that_throws(apache::thrift::HandlerCallbackPtr<::cpp2::Result> callback);
-  virtual void sync_return_void_method(::std::int64_t /*id*/);
-  [[deprecated("Use sync_return_void_method instead")]] virtual void return_void_method(::std::int64_t /*id*/);
-  virtual folly::Future<folly::Unit> future_return_void_method(::std::int64_t p_id);
-  virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(::std::int64_t p_id);
+  virtual void async_tm_method_that_throws(apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::Result> callback);
+  virtual void sync_return_void_method(::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/);
+  [[deprecated("Use sync_return_void_method instead")]] virtual void return_void_method(::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/);
+  virtual folly::Future<folly::Unit> future_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i);
+  virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i);
 #if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task<void> co_return_void_method(::std::int64_t p_id);
-  virtual folly::coro::Task<void> co_return_void_method(apache::thrift::RequestParams params, ::std::int64_t p_id);
+  virtual folly::coro::Task<void> co_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i);
+  virtual folly::coro::Task<void> co_return_void_method(apache::thrift::RequestParams params, ::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i);
 #endif
-  virtual void async_tm_return_void_method(apache::thrift::HandlerCallbackPtr<void> callback, ::std::int64_t p_id);
+  virtual void async_tm_return_void_method(apache::thrift::HandlerCallbackPtr<void> callback, ::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i);
  private:
-  static ::cpp2::PrimitivesServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+  static ::facebook::thrift::test::PrimitivesServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_method_that_throws{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_return_void_method{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::cpp2::PrimitivesService, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -5240074935052059995;
-  static constexpr ::std::string_view definitionKey = {"\x0d\x05\x1d\xbc\xb2\xd5\x1d\x8f\x95\x45\xbb\x51\xfa\xcf\x0f\xfe", 16};
+  static constexpr int64_t programId = -5801222360042945894;
+  static constexpr ::std::string_view definitionKey = {"\xd4\xc6\x7f\xc7\xc9\xc1\x55\x0b\x67\xf5\x98\x2d\x63\xad\x35\x5f", 16};
 };
 }
 } // namespace apache::thrift
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 using PrimitivesServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<PrimitivesService> instead")]] = ::apache::thrift::ServiceHandler<PrimitivesService>;
-} // namespace cpp2
+} // namespace facebook::thrift::test
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 class PrimitivesServiceSvNull : public ::apache::thrift::ServiceHandler<PrimitivesService> {
  public:
   ::std::int64_t init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) override;
-  ::cpp2::Result method_that_throws() override;
-  void return_void_method(::std::int64_t /*id*/) override;
+  ::facebook::thrift::test::Result method_that_throws() override;
+  void return_void_method(::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/) override;
 };
 
 class PrimitivesServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
@@ -115,7 +119,7 @@ class PrimitivesServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncP
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:
-  ::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>* iface_;
+  ::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>* iface_;
  public:
   void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
   void executeRequest(apache::thrift::ServerRequest&& serverRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) override;
@@ -139,7 +143,7 @@ class PrimitivesServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncP
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_method_that_throws(apache::thrift::ServerRequest&& serverRequest);
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_method_that_throws(apache::thrift::ContextStack* ctx, ::cpp2::Result const& _return);
+  static apache::thrift::SerializedResponse return_method_that_throws(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::Result const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_method_that_throws(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -151,9 +155,9 @@ class PrimitivesServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncP
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_return_void_method(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:
-  PrimitivesServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>* iface) :
+  PrimitivesServiceAsyncProcessor(::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>* iface) :
       iface_(iface) {}
   ~PrimitivesServiceAsyncProcessor() override {}
 };
 
-} // namespace cpp2
+} // namespace facebook::thrift::test

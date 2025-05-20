@@ -20,6 +20,9 @@ namespace deprecated_terse_writes_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_5fb8d5476e240a7d_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_5fb8d5476e240a7d_uris() {
+  return {};
+}
 
 } // namespace deprecated_terse_writes_constants
 } // namespace apache::thrift::test

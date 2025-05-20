@@ -16,6 +16,7 @@ namespace service_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_819f854565f620aa();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_819f854565f620aa_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_819f854565f620aa_uris();
 
 } // namespace service_constants
 } // namespace cpp2

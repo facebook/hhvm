@@ -24,7 +24,9 @@ namespace apache::thrift {
 void BaseSchemaRegistry::registerSchema(
     std::string_view name,
     folly::span<const std::string_view> data,
-    std::string_view path) {
+    std::string_view path,
+    int64_t programId,
+    folly::span<const std::string_view> uris) {
   std::lock_guard lock(mutex_);
   if (auto it = rawSchemas_.find(name); it != rawSchemas_.end()) {
     if (it->second.path != path) { // Needed to support dynamic linking
@@ -35,7 +37,18 @@ void BaseSchemaRegistry::registerSchema(
     }
     return;
   }
-  rawSchemas_[name] = {data, path};
+  auto& schema = rawSchemas_[name];
+  schema = {data, path, programId};
+  for (auto uri : uris) {
+    if (auto it = rawSchemasByUri_.find(uri); it != rawSchemasByUri_.end()) {
+      throw std::runtime_error(fmt::format(
+          "URI collision on '{}' between '{}' and '{}'.",
+          uri,
+          path,
+          it->second->path));
+    }
+    rawSchemasByUri_[uri] = &schema;
+  }
   if (insertCallback_ && !data.empty()) {
     insertCallback_(data[0]);
   }

@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_8515cec8 implements TypeList {
+public class __fbthrift_TypeList_2cddd4d0 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -19,7 +19,14 @@ public class __fbthrift_TypeList_8515cec8 implements TypeList {
     list.add(new TypeList.TypeMapping(uri, className));
   }
 
+  private static void addToList0() {
+    add("facebook.com/thrift/test/CustomException", "test.fixtures.service_schema.CustomException");
+    add("facebook.com/thrift/test/Result", "test.fixtures.service_schema.Result");
+  }
 
+  static {
+    addToList0();
+  }
 
   @java.lang.Override
   public List<TypeList.TypeMapping> getTypes() {

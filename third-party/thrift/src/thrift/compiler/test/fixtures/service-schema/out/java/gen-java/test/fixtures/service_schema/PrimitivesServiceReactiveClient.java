@@ -36,6 +36,7 @@ public class PrimitivesServiceReactiveClient
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _methodThatThrows_EXCEPTION_READERS = new HashMap<>();
   private static final com.facebook.thrift.payload.Reader _methodThatThrows_EXCEPTION_READER0 = Readers.wrap(test.fixtures.service_schema.CustomException.asReader());
   private static final TField _returnVoidMethod_ID_FIELD_DESC = new TField("id", TType.I64, (short)1);
+  private static final TField _returnVoidMethod_I_FIELD_DESC = new TField("i", TType.STRUCT, (short)2);
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _returnVoidMethod_EXCEPTION_READERS = java.util.Collections.emptyMap();
 
   static {
@@ -189,7 +190,7 @@ public class PrimitivesServiceReactiveClient
     return methodThatThrows( com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 
-  private com.facebook.thrift.payload.Writer _createreturnVoidMethodWriter(final long id) {
+  private com.facebook.thrift.payload.Writer _createreturnVoidMethodWriter(final long id, final test.fixtures.service_schema.I i) {
     return oprot -> {
       try {
         {
@@ -198,6 +199,15 @@ public class PrimitivesServiceReactiveClient
           long _iter0 = id;
 
           oprot.writeI64(id);
+          oprot.writeFieldEnd();
+        }
+
+        {
+          oprot.writeFieldBegin(_returnVoidMethod_I_FIELD_DESC);
+
+          test.fixtures.service_schema.I _iter0 = i;
+
+          _iter0.write0(oprot);
           oprot.writeFieldEnd();
         }
 
@@ -212,7 +222,7 @@ public class PrimitivesServiceReactiveClient
   private static final com.facebook.thrift.payload.Reader _returnVoidMethod_READER = Readers.voidReader();
 
   @java.lang.Override
-  public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<Void>> returnVoidMethodWrapper(final long id,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
+  public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<Void>> returnVoidMethodWrapper(final long id, final test.fixtures.service_schema.I i,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
       .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -225,7 +235,7 @@ public class PrimitivesServiceReactiveClient
             com.facebook.thrift.payload.ClientRequestPayload<Void> _crp =
                 com.facebook.thrift.payload.ClientRequestPayload.create(
                     "PrimitivesService",
-                    _createreturnVoidMethodWriter(id),
+                    _createreturnVoidMethodWriter(id, i),
                     _returnVoidMethod_READER,
                     _returnVoidMethod_EXCEPTION_READERS,
                     _metadata,
@@ -237,13 +247,13 @@ public class PrimitivesServiceReactiveClient
   }
 
   @java.lang.Override
-  public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return returnVoidMethodWrapper(id,  rpcOptions).then();
+  public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id, final test.fixtures.service_schema.I i,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
+    return returnVoidMethodWrapper(id, i,  rpcOptions).then();
   }
 
   @java.lang.Override
-  public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id) {
-    return returnVoidMethod(id,  com.facebook.thrift.client.RpcOptions.EMPTY);
+  public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id, final test.fixtures.service_schema.I i) {
+    return returnVoidMethod(id, i,  com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 
 

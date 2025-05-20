@@ -28,7 +28,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(result);
 } // namespace apache::thrift
 
 // BEGIN declare_enums
-namespace cpp2 {
+namespace facebook::thrift::test {
 
 /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "Result", "kind": "enum" } */
 enum class Result {
@@ -37,15 +37,15 @@ enum class Result {
   GOOD = 2,
 };
 
-} // namespace cpp2
+} // namespace facebook::thrift::test
 
-template<> struct std::hash<::cpp2::Result> :
-  ::apache::thrift::detail::enum_hash<::cpp2::Result> {};
+template<> struct std::hash<::facebook::thrift::test::Result> :
+  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::Result> {};
 
 namespace apache::thrift {
 
-template <> struct TEnumTraits<::cpp2::Result> {
-  using type = ::cpp2::Result;
+template <> struct TEnumTraits<::facebook::thrift::test::Result> {
+  using type = ::facebook::thrift::test::Result;
 
   static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
@@ -75,9 +75,9 @@ template <> struct TEnumTraits<::cpp2::Result> {
 } // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
-namespace cpp2 {
+namespace facebook::thrift::test {
 class CustomException;
-} // namespace cpp2
+} // namespace facebook::thrift::test
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -87,7 +87,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace cpp2 {
+namespace facebook::thrift::test {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -103,6 +103,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -120,7 +121,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t,
-    ::apache::thrift::type::enum_t<::cpp2::Result>
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::Result>
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -146,7 +147,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::cpp2::Result result__arg);
+  CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::facebook::thrift::test::Result result__arg);
 
   CustomException(CustomException&&) noexcept;
 
@@ -161,7 +162,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
  private:
   ::std::string __fbthrift_field_name;
  private:
-  ::cpp2::Result __fbthrift_field_result;
+  ::facebook::thrift::test::Result __fbthrift_field_result;
  private:
   apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -207,37 +208,37 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> result_ref() const& {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> result_ref() & {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> result_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> result() const& {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> result() & {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::cpp2::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> result() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
@@ -264,11 +265,11 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result().value()` instead of `FOO.get_result()`")]]
-  ::cpp2::Result get_result() const;
+  ::facebook::thrift::test::Result get_result() const;
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result() = BAR` instead of `FOO.set_result(BAR)`")]]
-  ::cpp2::Result& set_result(::cpp2::Result result_);
+  ::facebook::thrift::test::Result& set_result(::facebook::thrift::test::Result result_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -280,7 +281,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   uint32_t write(Protocol_* prot_) const;
 
   const char* what() const noexcept override {
-    return "::cpp2::CustomException";
+    return "::facebook::thrift::test::CustomException";
   }
 
  private:
@@ -299,17 +300,17 @@ unsigned long CustomException::read(Protocol_* iprot) {
 }
 
 
-} // namespace cpp2
+} // namespace facebook::thrift::test
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::cpp2::CustomException, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::CustomException, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -5240074935052059995;
-  static constexpr ::std::string_view definitionKey = {"\x79\xe3\xbb\xb3\x2b\x3c\x0d\x8b\x7b\xd6\x62\xb3\xb0\xf3\xf5\xe4", 16};
+  static constexpr int64_t programId = -5801222360042945894;
+  static constexpr ::std::string_view definitionKey = {"\x16\xe5\x9e\x66\x30\x81\x1e\xe2\xb7\x62\xa1\x73\x54\x41\x10\xf4", 16};
 };
-template <> struct TSchemaAssociation<::cpp2::Result, true> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::Result, true> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -5240074935052059995;
-  static constexpr ::std::string_view definitionKey = {"\x9c\x7a\x36\x2b\x69\x6a\x84\xe3\x92\xdb\xb4\x40\x04\xf4\xb0\x85", 16};
+  static constexpr int64_t programId = -5801222360042945894;
+  static constexpr ::std::string_view definitionKey = {"\xba\x6b\xf3\xf4\xfa\x21\x77\x6d\x90\xac\x6b\xaa\xbc\x6d\x26\x49", 16};
 };
 } // namespace apache::thrift::detail

@@ -22,6 +22,9 @@ namespace simple_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_fd38c81e7958ce95_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_fd38c81e7958ce95_uris() {
+  return {};
+}
 
 } // namespace simple_constants
 } // namespace apache::thrift::test

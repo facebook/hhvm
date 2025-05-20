@@ -16,6 +16,7 @@ namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_24097339ae5f92df();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_24097339ae5f92df_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_24097339ae5f92df_uris();
 
 } // namespace module_constants
 } // namespace cpp2

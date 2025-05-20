@@ -54,6 +54,7 @@ namespace {{program:name}}_constants {
   FOLLY_EXPORT ::std::string_view {{program:schema_name}}();
 {{/program:has_schema?}}
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> {{program:schema_name}}_uris();
 
 } // namespace {{program:name}}_constants
 } // namespace {{program:qualified_namespace}}

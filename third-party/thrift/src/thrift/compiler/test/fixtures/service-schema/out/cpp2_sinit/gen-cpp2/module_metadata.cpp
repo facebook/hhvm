@@ -25,21 +25,21 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
-void EnumMetadata<::cpp2::Result>::gen(ThriftMetadata& metadata) {
+void EnumMetadata<::facebook::thrift::test::Result>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("module.Result", ::apache::thrift::metadata::ThriftEnum{});
   if (!res.second) {
     return;
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name() = "module.Result";
-  using EnumTraits = TEnumTraits<::cpp2::Result>;
+  using EnumTraits = TEnumTraits<::facebook::thrift::test::Result>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.CustomException", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -49,7 +49,7 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
   module_CustomException.is_union() = false;
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 2>{ {
-    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::cpp2::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_CustomException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -62,7 +62,7 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 
-void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
+void ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.exceptions()->emplace("module.CustomException", ::apache::thrift::metadata::ThriftException{});
   if (!res.second) {
     return;
@@ -71,7 +71,7 @@ void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
   module_CustomException.name() = "module.CustomException";
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 2>{ {
-    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::cpp2::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_CustomException_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -81,7 +81,7 @@ void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
     module_CustomException.fields()->push_back(std::move(field));
   }
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "init";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
@@ -103,23 +103,23 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_method_that_throws([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "method_that_throws";
-  auto func_ret_type = std::make_unique<Enum<::cpp2::Result>>("module.Result");
+  auto func_ret_type = std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_PrimitivesService_method_that_throws_e_1;
   module_PrimitivesService_method_that_throws_e_1.id() = 1;
   module_PrimitivesService_method_that_throws_e_1.name() = "e";
   module_PrimitivesService_method_that_throws_e_1.is_optional() = false;
-  auto module_PrimitivesService_method_that_throws_e_1_type = std::make_unique<Struct<::cpp2::CustomException>>("module.CustomException");
+  auto module_PrimitivesService_method_that_throws_e_1_type = std::make_unique<Struct<::facebook::thrift::test::CustomException>>("module.CustomException");
   module_PrimitivesService_method_that_throws_e_1_type->writeAndGenType(*module_PrimitivesService_method_that_throws_e_1.type(), metadata);
   func.exceptions()->push_back(std::move(module_PrimitivesService_method_that_throws_e_1));
-  ExceptionMetadata<::cpp2::CustomException>::gen(metadata);
+  ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(metadata);
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_return_void_method([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_return_void_method([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "return_void_method";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -131,11 +131,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   auto module_PrimitivesService_return_void_method_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_PrimitivesService_return_void_method_id_1_type->writeAndGenType(*module_PrimitivesService_return_void_method_id_1.type(), metadata);
   func.arguments()->push_back(std::move(module_PrimitivesService_return_void_method_id_1));
+  ::apache::thrift::metadata::ThriftField module_PrimitivesService_return_void_method_i_2;
+  module_PrimitivesService_return_void_method_i_2.id() = 2;
+  module_PrimitivesService_return_void_method_i_2.name() = "i";
+  module_PrimitivesService_return_void_method_i_2.is_optional() = false;
+  auto module_PrimitivesService_return_void_method_i_2_type = std::make_unique<Struct<::cpp2::I>>("include.I");
+  module_PrimitivesService_return_void_method_i_2_type->writeAndGenType(*module_PrimitivesService_return_void_method_i_2.type(), metadata);
+  func.arguments()->push_back(std::move(module_PrimitivesService_return_void_method_i_2));
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -145,13 +152,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_PrimitivesService;
   module_PrimitivesService.name() = "module.PrimitivesService";
+  module_PrimitivesService.uri() = "facebook.com/thrift/test/PrimitivesService";
   static const ThriftFunctionGenerator functions[] = {
-    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init,
-    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws,
-    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_return_void_method,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_init,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_method_that_throws,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_return_void_method,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_PrimitivesService);

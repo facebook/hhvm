@@ -16,6 +16,7 @@ namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_3d342284656f136b();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3d342284656f136b_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3d342284656f136b_uris();
 
 } // namespace module_constants
 } // namespace apache::thrift::fixtures::types

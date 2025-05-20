@@ -17,19 +17,23 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 class PrimitivesService;
-} // namespace cpp2
+} // namespace facebook::thrift::test
 namespace apache::thrift {
 
 template <>
-class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncClient {
-  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::PrimitivesService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::PrimitivesService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
   char const* getServiceName() const noexcept override {
     return "PrimitivesService";
+  }
+
+  static const char* __fbthrift_thrift_uri() {
+    return "facebook.com/thrift/test/PrimitivesService";
   }
 
 
@@ -162,44 +166,44 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual ::cpp2::Result sync_method_that_throws();
+  virtual ::facebook::thrift::test::Result sync_method_that_throws();
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual ::cpp2::Result sync_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  virtual ::facebook::thrift::test::Result sync_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::Future<::cpp2::Result> future_method_that_throws();
+  virtual folly::Future<::facebook::thrift::test::Result> future_method_that_throws();
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::SemiFuture<::cpp2::Result> semifuture_method_that_throws();
+  virtual folly::SemiFuture<::facebook::thrift::test::Result> semifuture_method_that_throws();
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::Future<::cpp2::Result> future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::Future<::facebook::thrift::test::Result> future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::SemiFuture<::cpp2::Result> semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::SemiFuture<::facebook::thrift::test::Result> semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   template <int = 0>
-  folly::coro::Task<::cpp2::Result> co_method_that_throws() {
+  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws() {
     return co_method_that_throws<false>(nullptr);
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   template <int = 0>
-  folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
+  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
     return co_method_that_throws<true>(&rpcOptions);
   }
 #else
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  folly::coro::Task<::cpp2::Result> co_method_that_throws() {
+  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws() {
     co_return co_await folly::coro::detachOnCancel(semifuture_method_that_throws());
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
+  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
     co_return co_await folly::coro::detachOnCancel(semifuture_method_that_throws(rpcOptions));
   }
 #endif
  private:
   template <bool hasRpcOptions>
-  folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RpcOptions* rpcOptions) {
+  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions* rpcOptions) {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     const bool cancellable = cancelToken.canBeCancelled();
@@ -243,7 +247,7 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::cpp2::Result _return;
+    ::facebook::thrift::test::Result _return;
     if (auto ew = recv_wrapped_method_that_throws(_return, returnState)) {
       co_yield folly::coro::co_error(std::move(ew));
     }
@@ -257,69 +261,69 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  static folly::exception_wrapper recv_wrapped_method_that_throws(::cpp2::Result& _return, ::apache::thrift::ClientReceiveState& state);
+  static folly::exception_wrapper recv_wrapped_method_that_throws(::facebook::thrift::test::Result& _return, ::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  static ::cpp2::Result recv_method_that_throws(::apache::thrift::ClientReceiveState& state);
+  static ::facebook::thrift::test::Result recv_method_that_throws(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual ::cpp2::Result recv_instance_method_that_throws(::apache::thrift::ClientReceiveState& state);
+  virtual ::facebook::thrift::test::Result recv_instance_method_that_throws(::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::exception_wrapper recv_instance_wrapped_method_that_throws(::cpp2::Result& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_method_that_throws(::facebook::thrift::test::Result& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_method_that_throws(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_method_that_throws(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method_that_throwsCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
-  folly::SemiFuture<::cpp2::Result> fbthrift_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  folly::SemiFuture<::facebook::thrift::test::Result> fbthrift_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual void return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
+  virtual void return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::cpp2::I& p_i);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual void return_void_method(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
+  virtual void return_void_method(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::cpp2::I& p_i);
  protected:
-  void fbthrift_serialize_and_send_return_void_method(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_return_void_method(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::cpp2::I& p_i, bool stealRpcOptions = false);
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual void sync_return_void_method(::std::int64_t p_id);
+  virtual void sync_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual void sync_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  virtual void sync_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i);
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual folly::Future<folly::Unit> future_return_void_method(::std::int64_t p_id);
+  virtual folly::Future<folly::Unit> future_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(::std::int64_t p_id);
+  virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual folly::Future<folly::Unit> future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  virtual folly::Future<folly::Unit> future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   template <int = 0>
-  folly::coro::Task<void> co_return_void_method(::std::int64_t p_id) {
-    return co_return_void_method<false>(nullptr, p_id);
+  folly::coro::Task<void> co_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
+    return co_return_void_method<false>(nullptr, p_id, p_i);
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   template <int = 0>
-  folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
-    return co_return_void_method<true>(&rpcOptions, p_id);
+  folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+    return co_return_void_method<true>(&rpcOptions, p_id, p_i);
   }
 #else
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  folly::coro::Task<void> co_return_void_method(::std::int64_t p_id) {
-    co_await folly::coro::detachOnCancel(semifuture_return_void_method(p_id));
+  folly::coro::Task<void> co_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
+    co_await folly::coro::detachOnCancel(semifuture_return_void_method(p_id, p_i));
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
-    co_await folly::coro::detachOnCancel(semifuture_return_void_method(rpcOptions, p_id));
+  folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+    co_await folly::coro::detachOnCancel(semifuture_return_void_method(rpcOptions, p_id, p_i));
   }
 #endif
  private:
   template <bool hasRpcOptions>
-  folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_id) {
+  folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     const bool cancellable = cancelToken.canBeCancelled();
@@ -332,13 +336,13 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      auto argsAsRefs = std::tie(p_id);
+      auto argsAsRefs = std::tie(p_id, p_i);
       ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_return_void_method(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_id);
+      fbthrift_serialize_and_send_return_void_method(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_id, p_i);
     } else {
-      fbthrift_serialize_and_send_return_void_method(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), p_id);
+      fbthrift_serialize_and_send_return_void_method(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), p_id, p_i);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -371,7 +375,7 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
 #endif // FOLLY_HAS_COROUTINES
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  virtual void return_void_method(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_id);
+  virtual void return_void_method(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_id, const ::cpp2::I& p_i);
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
@@ -384,17 +388,17 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::exception_wrapper recv_instance_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_return_void_method(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id);
+  apache::thrift::SerializedRequest fbthrift_serialize_return_void_method(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id, const ::cpp2::I& p_i);
   template <typename RpcOptions>
   void fbthrift_send_return_void_method(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> return_void_methodCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
-  folly::SemiFuture<folly::Unit> fbthrift_semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i);
  public:
 };
 
 } // namespace apache::thrift
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 using PrimitivesServiceAsyncClient [[deprecated("Use apache::thrift::Client<PrimitivesService> instead")]] = ::apache::thrift::Client<PrimitivesService>;
-} // namespace cpp2
+} // namespace facebook::thrift::test

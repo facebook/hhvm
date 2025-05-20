@@ -26,6 +26,7 @@ namespace includes_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_708c30a658df2a09();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_708c30a658df2a09_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_708c30a658df2a09_uris();
 
 } // namespace includes_constants
 } // namespace cpp2

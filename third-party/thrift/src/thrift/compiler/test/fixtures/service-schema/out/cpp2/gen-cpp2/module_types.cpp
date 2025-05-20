@@ -15,15 +15,15 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::cpp2::Result>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::cpp2::Result const*> const TEnumTraits<::cpp2::Result>::values = folly::range(TEnumDataStorage<::cpp2::Result>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::cpp2::Result>::names = folly::range(TEnumDataStorage<::cpp2::Result>::names);
+const std::string_view TEnumTraits<::facebook::thrift::test::Result>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::facebook::thrift::test::Result const*> const TEnumTraits<::facebook::thrift::test::Result>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Result>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Result>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Result>::names);
 
-bool TEnumTraits<::cpp2::Result>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::Result>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::Result>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::Result>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
@@ -34,11 +34,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::cpp2::CustomException>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::CustomException>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::CustomException>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::CustomException>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -51,7 +51,11 @@ void TccStructTraits<::cpp2::CustomException>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace cpp2 {
+namespace facebook::thrift::test {
+
+const char* CustomException::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/CustomException";
+}
 
 std::string_view CustomException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -64,7 +68,7 @@ std::string_view CustomException::__fbthrift_get_class_name() {
 CustomException::CustomException(const CustomException&) = default;
 CustomException& CustomException::operator=(const CustomException&) = default;
 CustomException::CustomException() :
-    __fbthrift_field_result( ::cpp2::Result::SO_SO) {
+    __fbthrift_field_result( ::facebook::thrift::test::Result::SO_SO) {
 }
 
 
@@ -84,7 +88,7 @@ CustomException& CustomException::operator=([[maybe_unused]] CustomException&& o
 }
 
 
-CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::cpp2::Result result__arg) :
+CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::facebook::thrift::test::Result result__arg) :
     __fbthrift_field_name(std::move(name__arg)),
     __fbthrift_field_result(std::move(result__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
@@ -95,7 +99,7 @@ CustomException::CustomException(apache::thrift::FragileConstructor, ::std::stri
 void CustomException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_result = ::cpp2::Result();
+  this->__fbthrift_field_result = ::facebook::thrift::test::Result();
   __isset = {};
 }
 
@@ -115,11 +119,11 @@ bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) con
 }
 
 
-::cpp2::Result CustomException::get_result() const {
+::facebook::thrift::test::Result CustomException::get_result() const {
   return __fbthrift_field_result;
 }
 
-::cpp2::Result& CustomException::set_result(::cpp2::Result result_) {
+::facebook::thrift::test::Result& CustomException::set_result(::facebook::thrift::test::Result result_) {
   result_ref() = result_;
   return __fbthrift_field_result;
 }
@@ -143,11 +147,11 @@ template uint32_t CustomException::serializedSizeZC<>(apache::thrift::CompactPro
 #endif
 
 
-} // namespace cpp2
+} // namespace facebook::thrift::test
 
-namespace cpp2 { namespace {
+namespace facebook::thrift::test { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // namespace cpp2
+}} // namespace facebook::thrift::test
 namespace apache::thrift::detail::annotation {
 }

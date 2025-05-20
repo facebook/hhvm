@@ -16,6 +16,7 @@ namespace terse_write_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_4380d0b9f890cad3();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_4380d0b9f890cad3_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_4380d0b9f890cad3_uris();
 
 } // namespace terse_write_constants
 } // namespace facebook::thrift::test::terse_write

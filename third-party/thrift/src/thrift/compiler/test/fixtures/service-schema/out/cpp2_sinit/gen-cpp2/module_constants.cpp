@@ -11,24 +11,31 @@
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_constants.h"
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 namespace module_constants {
 
-::std::string_view _fbthrift_schema_b747839c13cb3aa5() {
-  constexpr static ::std::string_view _fbthrift_schema_b747839c13cb3aa5_{
+::std::string_view _fbthrift_schema_af7deaffee96429a() {
+  constexpr static ::std::string_view _fbthrift_schema_af7deaffee96429a_{
     /*<truncated>*/,
-    479};
-  return _fbthrift_schema_b747839c13cb3aa5_;
+    528};
+  return _fbthrift_schema_af7deaffee96429a_;
 }
 
 
-::folly::Range<const ::std::string_view*> _fbthrift_schema_b747839c13cb3aa5_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_includes() {
   static const ::std::array<::std::string_view, 2> includes = {
-    _fbthrift_schema_b747839c13cb3aa5(),
-    ::apache::thrift::detail::mc::readSchema(::cpp2::include_constants::_fbthrift_schema_8569dfae849b43aa),
+    _fbthrift_schema_af7deaffee96429a(),
+    ::apache::thrift::detail::mc::readSchema(::cpp2::include_constants::_fbthrift_schema_b3aa26370c7e318d),
   };
   return ::folly::range(includes);
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_uris() {
+  static const ::std::array<::std::string_view, 2> uris = {
+    "facebook.com/thrift/test/CustomException",
+    "facebook.com/thrift/test/Result",
+  };
+  return ::folly::range(uris);
+}
 
 } // namespace module_constants
-} // namespace cpp2
+} // namespace facebook::thrift::test

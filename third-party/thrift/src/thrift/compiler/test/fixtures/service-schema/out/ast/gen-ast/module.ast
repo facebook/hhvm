@@ -3,15 +3,16 @@ Schema {
     [0] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "module",
+        2: uri (string) = "facebook.com/thrift/test",
       },
-      2: id (i64) = -5240074935052059995,
+      2: id (i64) = -5801222360042945894,
       3: includes (list) = list<i64>[1] {
-        [0] = -8833283253468445782,
+        [0] = -5500541977004985971,
       },
       8: definitionKeys (list) = list<string>[3] {
-        [0] = "\234z6+ij\204\343\222\333\264@\004\364\260\205",
-        [1] = "y\343\273\263+<\r\213{\326b\263\260\363\365\344",
-        [2] = "\r\005\035\274\262\325\035\217\225E\273Q\372\317\017\376",
+        [0] = "\272k\363\364\372!wm\220\254k\252\274m&I",
+        [1] = "\026\345\236f0\201\036\342\267b\241sTA\020\364",
+        [2] = "\324\306\177\307\311\301U\013g\365\230-c\2555_",
       },
       5: path (string) = "thrift/compiler/test/fixtures/service-schema/src/module.thrift",
       7: namespaces (map) = map<string,string>[1] {
@@ -22,11 +23,14 @@ Schema {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "include",
       },
-      2: id (i64) = -8833283253468445782,
+      2: id (i64) = -5500541977004985971,
       8: definitionKeys (list) = list<string>[1] {
-        [0] = "\243F\372\262\275\034\312j\360\024\n\375\316\265l\311",
+        [0] = "&Z;^k\371\222\325\341\315\"\2569\3258\353",
       },
       5: path (string) = "include.thrift",
+      7: namespaces (map) = map<string,string>[1] {
+        "java.swift" -> "test.fixtures.service_schema",
+      },
     },
   },
   3: valuesMap (map) = map<i64,struct>[1] {
@@ -35,15 +39,131 @@ Schema {
     },
   },
   8: definitionsMap (map) = map<string,struct>[3] {
-    "\r\005\035\274\262\325\035\217\225E\273Q\372\317\017\376" -> Definition {
+    "\026\345\236f0\201\036\342\267b\241sTA\020\364" -> Definition {
+      3: exceptionDef (struct) = Exception {
+        1: attrs (struct) = DefinitionAttrs {
+          1: name (string) = "CustomException",
+          2: uri (string) = "facebook.com/thrift/test/CustomException",
+          7: sourceRange (struct) = SourceRange {
+            1: programId (i64) = -5801222360042945894,
+            2: beginLine (i32) = 29,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 32,
+            5: endColumn (i32) = 2,
+          },
+        },
+        2: fields (list) = list<struct>[2] {
+          [0] = Field {
+            1: id (i16) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                8: stringType (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "name",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 30,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 30,
+                5: endColumn (i32) = 18,
+              },
+            },
+          },
+          [1] = Field {
+            1: id (i16) = 2,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                10: enumType (struct) = TypeUri {
+                  4: definitionKey (string) = "\272k\363\364\372!wm\220\254k\252\274m&I",
+                },
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "result",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 31,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 31,
+                5: endColumn (i32) = 35,
+              },
+            },
+            5: customDefault (i64) = -5721078285587364846,
+          },
+        },
+      },
+    },
+    "\272k\363\364\372!wm\220\254k\252\274m&I" -> Definition {
+      4: enumDef (struct) = Enum {
+        1: attrs (struct) = DefinitionAttrs {
+          1: name (string) = "Result",
+          2: uri (string) = "facebook.com/thrift/test/Result",
+          7: sourceRange (struct) = SourceRange {
+            1: programId (i64) = -5801222360042945894,
+            2: beginLine (i32) = 23,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 27,
+            5: endColumn (i32) = 2,
+          },
+        },
+        2: values (list) = list<struct>[3] {
+          [0] = EnumValue {
+            1: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "OK",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 24,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 24,
+                5: endColumn (i32) = 10,
+              },
+            },
+          },
+          [1] = EnumValue {
+            1: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "SO_SO",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 25,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 25,
+                5: endColumn (i32) = 13,
+              },
+            },
+            2: value (i32) = 1,
+          },
+          [2] = EnumValue {
+            1: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "GOOD",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 26,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 26,
+                5: endColumn (i32) = 12,
+              },
+            },
+            2: value (i32) = 2,
+          },
+        },
+      },
+    },
+    "\324\306\177\307\311\301U\013g\365\230-c\2555_" -> Definition {
       7: serviceDef (struct) = Service {
         1: attrs (struct) = DefinitionAttrs {
           1: name (string) = "PrimitivesService",
+          2: uri (string) = "facebook.com/thrift/test/PrimitivesService",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -5240074935052059995,
-            2: beginLine (i32) = 32,
+            1: programId (i64) = -5801222360042945894,
+            2: beginLine (i32) = 34,
             3: beginColumn (i32) = 1,
-            4: endLine (i32) = 36,
+            4: endLine (i32) = 38,
             5: endColumn (i32) = 2,
           },
         },
@@ -52,10 +172,10 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "init",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 33,
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 35,
                 3: beginColumn (i32) = 3,
-                4: endLine (i32) = 33,
+                4: endLine (i32) = 35,
                 5: endColumn (i32) = 42,
               },
             },
@@ -101,10 +221,10 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "method_that_throws",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 34,
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 36,
                 3: beginColumn (i32) = 3,
-                4: endLine (i32) = 34,
+                4: endLine (i32) = 36,
                 5: endColumn (i32) = 61,
               },
             },
@@ -114,7 +234,7 @@ Schema {
                 3: type (struct) = TypeStruct {
                   1: name (struct) = TypeName {
                     13: exceptionType (struct) = TypeUri {
-                      4: definitionKey (string) = "y\343\273\263+<\r\213{\326b\263\260\363\365\344",
+                      4: definitionKey (string) = "\026\345\236f0\201\036\342\267b\241sTA\020\364",
                     },
                   },
                   2: params (list) = list<struct>[0] {
@@ -128,7 +248,7 @@ Schema {
             6: returnType (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 10: enumType (struct) = TypeUri {
-                  4: definitionKey (string) = "\234z6+ij\204\343\222\333\264@\004\364\260\205",
+                  4: definitionKey (string) = "\272k\363\364\372!wm\220\254k\252\274m&I",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -139,15 +259,15 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "return_void_method",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 35,
+                1: programId (i64) = -5801222360042945894,
+                2: beginLine (i32) = 37,
                 3: beginColumn (i32) = 3,
-                4: endLine (i32) = 35,
-                5: endColumn (i32) = 38,
+                4: endLine (i32) = 37,
+                5: endColumn (i32) = 54,
               },
             },
             4: paramlist (struct) = Paramlist {
-              1: fields (list) = list<struct>[1] {
+              1: fields (list) = list<struct>[2] {
                 [0] = Field {
                   1: id (i16) = 1,
                   3: type (struct) = TypeStruct {
@@ -161,6 +281,21 @@ Schema {
                     1: name (string) = "id",
                   },
                 },
+                [1] = Field {
+                  1: id (i16) = 2,
+                  3: type (struct) = TypeStruct {
+                    1: name (struct) = TypeName {
+                      11: structType (struct) = TypeUri {
+                        4: definitionKey (string) = "&Z;^k\371\222\325\341\315\"\2569\3258\353",
+                      },
+                    },
+                    2: params (list) = list<struct>[0] {
+                    },
+                  },
+                  4: attrs (struct) = DefinitionAttrs {
+                    1: name (string) = "i",
+                  },
+                },
               },
             },
             6: returnType (struct) = TypeStruct {
@@ -169,119 +304,6 @@ Schema {
               2: params (list) = list<struct>[0] {
               },
             },
-          },
-        },
-      },
-    },
-    "y\343\273\263+<\r\213{\326b\263\260\363\365\344" -> Definition {
-      3: exceptionDef (struct) = Exception {
-        1: attrs (struct) = DefinitionAttrs {
-          1: name (string) = "CustomException",
-          7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -5240074935052059995,
-            2: beginLine (i32) = 27,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 30,
-            5: endColumn (i32) = 2,
-          },
-        },
-        2: fields (list) = list<struct>[2] {
-          [0] = Field {
-            1: id (i16) = 1,
-            3: type (struct) = TypeStruct {
-              1: name (struct) = TypeName {
-                8: stringType (i32) = 0,
-              },
-              2: params (list) = list<struct>[0] {
-              },
-            },
-            4: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "name",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 28,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 28,
-                5: endColumn (i32) = 18,
-              },
-            },
-          },
-          [1] = Field {
-            1: id (i16) = 2,
-            3: type (struct) = TypeStruct {
-              1: name (struct) = TypeName {
-                10: enumType (struct) = TypeUri {
-                  4: definitionKey (string) = "\234z6+ij\204\343\222\333\264@\004\364\260\205",
-                },
-              },
-              2: params (list) = list<struct>[0] {
-              },
-            },
-            4: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "result",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 29,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 29,
-                5: endColumn (i32) = 35,
-              },
-            },
-            5: customDefault (i64) = -5721078285587364846,
-          },
-        },
-      },
-    },
-    "\234z6+ij\204\343\222\333\264@\004\364\260\205" -> Definition {
-      4: enumDef (struct) = Enum {
-        1: attrs (struct) = DefinitionAttrs {
-          1: name (string) = "Result",
-          7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -5240074935052059995,
-            2: beginLine (i32) = 21,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 25,
-            5: endColumn (i32) = 2,
-          },
-        },
-        2: values (list) = list<struct>[3] {
-          [0] = EnumValue {
-            1: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "OK",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 22,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 22,
-                5: endColumn (i32) = 10,
-              },
-            },
-          },
-          [1] = EnumValue {
-            1: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "SO_SO",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 23,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 23,
-                5: endColumn (i32) = 13,
-              },
-            },
-            2: value (i32) = 1,
-          },
-          [2] = EnumValue {
-            1: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "GOOD",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -5240074935052059995,
-                2: beginLine (i32) = 24,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 24,
-                5: endColumn (i32) = 12,
-              },
-            },
-            2: value (i32) = 2,
           },
         },
       },

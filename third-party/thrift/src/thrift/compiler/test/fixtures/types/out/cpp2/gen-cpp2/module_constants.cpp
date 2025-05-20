@@ -21,6 +21,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_3d342284656f136b_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_3d342284656f136b_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace apache::thrift::fixtures::types

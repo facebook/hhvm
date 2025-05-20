@@ -8,27 +8,36 @@
 
 #include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 // Call all static init functions.
 //
 // If this file is always linked (e.g. link_whole), it will force
 // static linking to include the intialization logic.
 
+void __fbthrift_static_init_CustomException();
 
 namespace module_constants {
-extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_b747839c13cb3aa5_includes();
+extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_includes();
+extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_af7deaffee96429a_uris();
 }
 
 namespace {
 
 struct StaticInit {
   StaticInit() {
+    __fbthrift_static_init_CustomException();
 
-    ::apache::thrift::BaseSchemaRegistry::get().registerSchema("_fbthrift_schema_b747839c13cb3aa5", module_constants::_fbthrift_schema_b747839c13cb3aa5_includes(), "thrift/compiler/test/fixtures/service-schema/src/module.thrift");
+    ::apache::thrift::BaseSchemaRegistry::get().registerSchema(
+      "_fbthrift_schema_af7deaffee96429a",
+      module_constants::_fbthrift_schema_af7deaffee96429a_includes(),
+      "thrift/compiler/test/fixtures/service-schema/src/module.thrift",
+      -5801222360042945894,
+      module_constants::_fbthrift_schema_af7deaffee96429a_uris()
+    );
   }
 };
 
 StaticInit staticInit;
 
 }
-} // namespace cpp2
+} // namespace facebook::thrift::test

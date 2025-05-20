@@ -28,6 +28,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_49a8a875b834f528_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_49a8a875b834f528_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace test::fixtures::basic-structured-annotations

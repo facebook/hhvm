@@ -20,6 +20,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_c465e4c95e880acf_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_c465e4c95e880acf_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace cpp2

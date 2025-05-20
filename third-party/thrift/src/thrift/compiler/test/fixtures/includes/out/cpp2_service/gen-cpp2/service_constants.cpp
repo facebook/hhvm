@@ -22,6 +22,9 @@ namespace service_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_819f854565f620aa_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_819f854565f620aa_uris() {
+  return {};
+}
 
 } // namespace service_constants
 } // namespace cpp2

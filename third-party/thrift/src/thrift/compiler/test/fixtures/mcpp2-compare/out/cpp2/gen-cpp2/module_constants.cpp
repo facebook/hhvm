@@ -91,6 +91,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_9a58f62a41e2535e_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_9a58f62a41e2535e_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace some::valid::ns

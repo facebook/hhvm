@@ -10,12 +10,12 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace cpp2 {
+namespace facebook::thrift::test {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_presult;
 typedef apache::thrift::ThriftPresult<false> PrimitivesService_method_that_throws_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::cpp2::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::CustomException>> PrimitivesService_method_that_throws_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_return_void_method_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::facebook::thrift::test::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::facebook::thrift::test::CustomException>> PrimitivesService_method_that_throws_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::structure, ::cpp2::I*>> PrimitivesService_return_void_method_pargs;
 typedef apache::thrift::ThriftPresult<true> PrimitivesService_return_void_method_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
 void PrimitivesServiceAsyncProcessor::setUpAndProcess_init(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
@@ -114,7 +114,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_init(apache::thrift::ContextStack* ctx, ::std::int64_t const& _return) {
   ProtocolOut_ prot;
-  ::cpp2::PrimitivesService_init_presult result;
+  ::facebook::thrift::test::PrimitivesService_init_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("init", &prot, ctx, result);
@@ -180,7 +180,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = apache::thrift::HandlerCallbackPtr<::cpp2::Result>::make(
+  auto callback = apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::Result>::make(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
@@ -221,10 +221,10 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_method_that_throws(apache::thrift::ContextStack* ctx, ::cpp2::Result const& _return) {
+apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_method_that_throws(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::Result const& _return) {
   ProtocolOut_ prot;
-  ::cpp2::PrimitivesService_method_that_throws_presult result;
-  result.get<0>().value = const_cast<::cpp2::Result*>(&_return);
+  ::facebook::thrift::test::PrimitivesService_method_that_throws_presult result;
+  result.get<0>().value = const_cast<::facebook::thrift::test::Result*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("method_that_throws", &prot, ctx, result);
 }
@@ -234,13 +234,13 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_method_that_throws(apache::t
   if (!ew) {
     return;
   }
-  ::cpp2::PrimitivesService_method_that_throws_presult result;
-  if (ew.with_exception([&]( ::cpp2::CustomException& e) {
+  ::facebook::thrift::test::PrimitivesService_method_that_throws_presult result;
+  if (ew.with_exception([&]( ::facebook::thrift::test::CustomException& e) {
     if (ctx) {
       ctx->userExceptionWrapped(true, ew);
     }
     ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-    ::apache::thrift::util::appendErrorClassificationToHeader< ::cpp2::CustomException>(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader< ::facebook::thrift::test::CustomException>(ew, *reqCtx);
     result.get<1>().ref() = e;
     result.setIsSet(1, true);
   }
@@ -275,15 +275,18 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_id{0};
+    std::unique_ptr<::cpp2::I> uarg_i = std::make_unique<::cpp2::I>();
     PrimitivesService_return_void_method_pargs pargs() {
       PrimitivesService_return_void_method_pargs args;
       args.get<0>().value = &uarg_id;
+      args.get<1>().value = uarg_i.get();
       return args;
     }
 
     auto asTupleOfRefs() & {
       return std::tie(
-        std::as_const(uarg_id)
+        std::as_const(uarg_id),
+        std::as_const(*uarg_i)
       );
     }
   } args;
@@ -327,7 +330,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
-      ifacePtr->async_tm_return_void_method(std::move(cb), args.uarg_id);
+      ifacePtr->async_tm_return_void_method(std::move(cb), args.uarg_id, std::move(args.uarg_i));
     };
   };
 #if FOLLY_HAS_COROUTINES
@@ -352,7 +355,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_return_void_method(apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
-  ::cpp2::PrimitivesService_return_void_method_presult result;
+  ::facebook::thrift::test::PrimitivesService_return_void_method_presult result;
   return serializeResponse("return_void_method", &prot, ctx, result);
 }
 
@@ -369,4 +372,4 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_return_void_method(apache::t
 }
 
 
-} // namespace cpp2
+} // namespace facebook::thrift::test

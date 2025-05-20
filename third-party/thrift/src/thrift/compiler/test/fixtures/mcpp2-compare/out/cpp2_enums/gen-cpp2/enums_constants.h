@@ -28,6 +28,7 @@ namespace enums_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_13f072109540bb8d();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_uris();
 
 } // namespace enums_constants
 } // namespace facebook::ns::qwerty

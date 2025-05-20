@@ -16,6 +16,7 @@ namespace simple_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_53f2f7f9a3bb3ebf();
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_53f2f7f9a3bb3ebf_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_53f2f7f9a3bb3ebf_uris();
 
 } // namespace simple_constants
 } // namespace apache::thrift::test

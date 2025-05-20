@@ -277,6 +277,8 @@ oprot.writeI32(_iter0 == null ? 0 : _iter0.getValue());
 
     
     _readerList.add(Readers.i64Reader());
+    
+    _readerList.add(Readers.wrap(test.fixtures.service_schema.I.asReader()));
 
     return _readerList;
   }
@@ -314,12 +316,13 @@ oprot.writeI32(_iter0 == null ? 0 : _iter0.getValue());
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
           long id = (long) _iterator.next();
+          test.fixtures.service_schema.I i = (test.fixtures.service_schema.I) _iterator.next();
 
           _chain.postRead(_data);
 
           reactor.core.publisher.Mono<Void> _delegateResponse =
             _delegate
-              .returnVoidMethod(id)
+              .returnVoidMethod(id, i)
               .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

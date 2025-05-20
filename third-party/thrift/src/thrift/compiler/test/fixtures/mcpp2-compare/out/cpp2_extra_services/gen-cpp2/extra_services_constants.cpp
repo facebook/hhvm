@@ -21,6 +21,9 @@ namespace extra_services_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_6e8480798c558f9d_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_6e8480798c558f9d_uris() {
+  return {};
+}
 
 } // namespace extra_services_constants
 } // namespace extra::svc

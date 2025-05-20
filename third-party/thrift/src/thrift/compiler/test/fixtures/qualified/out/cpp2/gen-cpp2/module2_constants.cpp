@@ -37,6 +37,9 @@ namespace module2_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_9188ad030fa5981a_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_9188ad030fa5981a_uris() {
+  return {};
+}
 
 } // namespace module2_constants
 } // namespace module2

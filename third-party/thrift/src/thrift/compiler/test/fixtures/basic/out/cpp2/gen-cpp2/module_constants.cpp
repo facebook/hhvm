@@ -52,6 +52,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_402a672704b1a4e6_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_402a672704b1a4e6_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace test::fixtures::basic

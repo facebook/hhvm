@@ -20,6 +20,9 @@ namespace shared_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_c56c72d4e711dd06_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_c56c72d4e711dd06_uris() {
+  return {};
+}
 
 } // namespace shared_constants
 } // namespace thrift::shared_interactions

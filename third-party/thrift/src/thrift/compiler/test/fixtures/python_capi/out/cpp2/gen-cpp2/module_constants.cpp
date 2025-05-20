@@ -24,6 +24,9 @@ namespace module_constants {
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_e17942f2d315ef8b_includes() {
   return {};
 }
+::folly::Range<const ::std::string_view*> _fbthrift_schema_e17942f2d315ef8b_uris() {
+  return {};
+}
 
 } // namespace module_constants
 } // namespace test::fixtures::python_capi

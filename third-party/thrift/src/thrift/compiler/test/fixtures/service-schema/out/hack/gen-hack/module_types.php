@@ -6,10 +6,13 @@
  *  @generated
  */
 
+namespace facebook\thrift\test;
+
 /**
  * Original thrift enum:-
  * Result
  */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Result'))>>
 enum Result: int {
   OK = 0;
   SO_SO = 1;
@@ -18,7 +21,7 @@ enum Result: int {
 
 class Result_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
-    return tmeta_ThriftEnum::fromShape(
+    return \tmeta_ThriftEnum::fromShape(
       shape(
         "name" => "module.Result",
         "elements" => dict[
@@ -43,6 +46,7 @@ class Result_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift exception:-
  * CustomException
  */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CustomException'))>>
 class CustomException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
@@ -54,7 +58,7 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
     2 => shape(
       'var' => 'result',
       'type' => \TType::I32,
-      'enum' => Result::class,
+      'enum' => \facebook\thrift\test\Result::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -64,7 +68,7 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
 
   const type TConstructorShape = shape(
     ?'name' => ?string,
-    ?'result' => ?Result,
+    ?'result' => ?\facebook\thrift\test\Result,
   );
 
   const int STRUCTURAL_ID = 457716634004981248;
@@ -77,12 +81,12 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
    * Original thrift field:-
    * 2: module.Result result
    */
-  public ?Result $result;
+  public ?\facebook\thrift\test\Result $result;
 
-  public function __construct(?string $name = null, ?Result $result = null)[] {
+  public function __construct(?string $name = null, ?\facebook\thrift\test\Result $result = null)[] {
     parent::__construct();
     $this->name = $name ?? '';
-    $this->result = $result ?? Result::SO_SO;
+    $this->result = $result ?? \facebook\thrift\test\Result::SO_SO;
   }
 
   public static function withDefaultValues()[]: this {
@@ -101,27 +105,27 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
-    return tmeta_ThriftException::fromShape(
+    return \tmeta_ThriftException::fromShape(
       shape(
         "name" => "module.CustomException",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "name",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_enum" => tmeta_ThriftEnumType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "module.Result",
                     )

@@ -24,6 +24,7 @@ include "thrift/lib/thrift/type_id.thrift"
 include "thrift/lib/thrift/record.thrift"
 
 cpp_include "thrift/lib/thrift/detail/TypeSystemAdapter.h"
+cpp_include "folly/container/F14Map.h"
 
 namespace cpp2 apache.thrift.dynamic
 

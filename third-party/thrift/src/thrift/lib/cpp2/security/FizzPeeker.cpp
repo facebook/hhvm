@@ -15,11 +15,9 @@
  */
 
 #include <folly/io/async/AsyncSocket.h>
-#include <folly/net/NetworkSocket.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/security/FizzPeeker.h>
 #include <thrift/lib/cpp2/security/SSLUtil.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
 

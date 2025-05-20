@@ -33,7 +33,11 @@ final class ThriftContextPropHandlers {
     try {
       // Check if AM Traffic AND (AM Tenant OR Async job) AND JK passes with consistent rate using Request ID as the hash.
       if (
-        $context_prop_state->getOriginId() == MCPProductID::L4_ADS_MANAGER &&
+        (
+          $context_prop_state->getRootProductId() ==
+            MCPProductID::L4_ADS_MANAGER ||
+          $context_prop_state->getOriginId() == MCPProductID::L4_ADS_MANAGER
+        ) &&
         (
           Environment::getServiceId() == 'web_ads_manager/hhvm' ||
           Environment::isAsyncEnvironment()
@@ -58,7 +62,11 @@ final class ThriftContextPropHandlers {
     }
     try {
       if (
-        $context_prop_state->getOriginId() == MCPProductID::L4_MARKETING_API &&
+        (
+          $context_prop_state->getRootProductId() ==
+            MCPProductID::L4_MARKETING_API ||
+          $context_prop_state->getOriginId() == MCPProductID::L4_MARKETING_API
+        ) &&
         Environment::isAsyncEnvironment() &&
         JustKnobs::evalString(
           "ads/marketing_api/context_prop:set_thrift_request_priority",

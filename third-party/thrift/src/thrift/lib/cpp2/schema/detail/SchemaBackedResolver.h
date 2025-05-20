@@ -47,8 +47,10 @@ class IncrementalResolver : public Resolver {
    * Gets node for given definition, or returns nullptr if not present in
    * schema.
    */
-  const schema::DefinitionNode* getDefinitionNodeByUri(
-      const std::string_view uri) const;
+  const DefinitionNode* getDefinitionNodeByUri(
+      std::string_view uri,
+      type::ProgramId programId,
+      folly::span<const std::string_view> bundle) const;
 
   const ProgramNode& programOf(const type::ProgramId& id) const override;
   const protocol::Value& valueOf(const type::ValueId& id) const override;
@@ -62,6 +64,9 @@ class IncrementalResolver : public Resolver {
       type::ProgramId programId,
       std::string_view name,
       ::folly::Range<const ::std::string_view*> (*bundle)()) const;
+  void readSchema(
+      folly::Synchronized<type::Schema>::LockedPtr& schema,
+      folly::span<const std::string_view> bundle) const;
 
   mutable folly::Synchronized<type::Schema> schema_;
   folly::not_null_unique_ptr<SchemaIndex> index_;

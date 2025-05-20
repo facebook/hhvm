@@ -17,8 +17,10 @@
 namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 cpp_include "thrift/test/AdapterTest.h"
 
+@thrift.Uri{value = "facebook.com/thrift/test/UseOpEncode/Foo"}
 struct Foo {
   1: i32 field;
 }

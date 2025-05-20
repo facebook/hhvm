@@ -98,6 +98,8 @@ class SchemaRegistry {
   Ptr getMergedSchema();
 
   // Look up a definition by URI. Returns nullptr if not found.
+  // The definition must be defined in a file with the `any` cpp2 compiler
+  // option enabled.
   const schema::DefinitionNode* getSyntaxGraphDefinitionNodeByUri(
       const std::string_view uri) const;
 

@@ -23,6 +23,7 @@
 // These deps pull in the corresponding schemas when enabled.
 #include <thrift/annotation/gen-cpp2/thrift_types.h>
 #include <thrift/test/gen-cpp2/TopologicallySortObjectsTest_types.h>
+#include <thrift/test/gen-cpp2/UseOpEncode_types.h>
 #include <thrift/test/gen-cpp2/schema_types.h>
 
 #include <thrift/test/gen-cpp2/schema_constants.h>
@@ -199,16 +200,20 @@ TEST_F(SchemaTest, getSyntaxGraphDefinitionNodeByUri) {
   auto uri = "facebook.com/thrift/test/schema/Empty";
 
   const DefinitionNode* dynamicNode = getSyntaxGraphDefinitionNodeByUri(uri);
-  // Data isn't available until after static access (yet!).
-  EXPECT_FALSE(dynamicNode);
+  EXPECT_TRUE(dynamicNode);
 
   const DefinitionNode& staticNode =
       registry.getDefinitionNode<facebook::thrift::test::schema::Empty>();
   EXPECT_EQ(uri, staticNode.asStruct().uri());
 
-  dynamicNode = getSyntaxGraphDefinitionNodeByUri(uri);
-  EXPECT_TRUE(dynamicNode);
   EXPECT_EQ(dynamicNode, &staticNode);
+
+  // With `any` disabled, getSyntaxGraphDefinitionNodeByUri fails even after
+  // static access.
+  const DefinitionNode& staticNodeWithoutAny =
+      registry.getDefinitionNode<apache::thrift::test::Foo>();
+  auto uriWithoutAny = staticNodeWithoutAny.asStruct().uri();
+  EXPECT_FALSE(getSyntaxGraphDefinitionNodeByUri(uriWithoutAny));
 }
 
 } // namespace apache::thrift::test

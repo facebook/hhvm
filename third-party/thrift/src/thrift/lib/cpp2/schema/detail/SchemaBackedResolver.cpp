@@ -862,6 +862,31 @@ ProgramNode::IncludesList IncrementalResolver::programs() const {
   return index_->programs();
 }
 
+void IncrementalResolver::readSchema(
+    folly::Synchronized<type::Schema>::LockedPtr& schema,
+    folly::span<const std::string_view> bundle) const {
+  auto src = mergeSchemas(bundle);
+  auto& dst = *schema;
+
+  // Merge new schema data in
+  // TODO: avoid deserializing shared deps
+  std::copy_if(
+      std::make_move_iterator(src.programs()->begin()),
+      std::make_move_iterator(src.programs()->end()),
+      std::back_inserter(*dst.programs()),
+      [this](const auto& program) {
+        return index_->programsById_.count(*program.id()) == 0;
+      });
+  dst.valuesMap()->insert(
+      std::make_move_iterator(src.valuesMap()->begin()),
+      std::make_move_iterator(src.valuesMap()->end()));
+  dst.definitionsMap()->insert(
+      std::make_move_iterator(src.definitionsMap()->begin()),
+      std::make_move_iterator(src.definitionsMap()->end()));
+
+  index_->updateIndices(dst);
+}
+
 const DefinitionNode& IncrementalResolver::getDefinitionNode(
     const type::DefinitionKey& key,
     type::ProgramId programId,
@@ -884,26 +909,7 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode(
     return *def;
   }
 
-  auto src = mergeSchemas((*bundle)());
-  auto& dst = *schemaWriteGuard;
-
-  // Merge new schema data in
-  // TODO: avoid deserializing shared deps
-  std::copy_if(
-      std::make_move_iterator(src.programs()->begin()),
-      std::make_move_iterator(src.programs()->end()),
-      std::back_inserter(*dst.programs()),
-      [this](const auto& program) {
-        return index_->programsById_.count(*program.id()) == 0;
-      });
-  dst.valuesMap()->insert(
-      std::make_move_iterator(src.valuesMap()->begin()),
-      std::make_move_iterator(src.valuesMap()->end()));
-  dst.definitionsMap()->insert(
-      std::make_move_iterator(src.definitionsMap()->begin()),
-      std::make_move_iterator(src.definitionsMap()->end()));
-
-  index_->updateIndices(dst);
+  readSchema(schemaWriteGuard, bundle());
 
   if (auto* def = index_->definitionOf(key)) {
     return *def;
@@ -918,8 +924,36 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode(
 }
 
 const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
-    std::string_view uri) const {
-  return index_->definitionForUri(uri);
+    const std::string_view uri,
+    type::ProgramId programId,
+    folly::span<const std::string_view> bundle) const {
+  {
+    auto schemaReadGuard = schema_.rlock();
+    if (auto* def = index_->definitionForUri(uri)) {
+      return def;
+    }
+  }
+
+  if (bundle.empty()) {
+    return nullptr;
+  }
+
+  auto schemaWriteGuard = schema_.wlock();
+  if (auto* def = index_->definitionForUri(uri)) {
+    return def;
+  }
+
+  readSchema(schemaWriteGuard, bundle);
+
+  if (auto* def = index_->definitionForUri(uri)) {
+    return def;
+  }
+
+  if (index_->programsById_.count(programId)) {
+    folly::throw_exception<InvalidSyntaxGraphError>(
+        fmt::format("Definition `{}` not found in its program's schema.", uri));
+  }
+  return nullptr;
 }
 
 } // namespace apache::thrift::schema::detail

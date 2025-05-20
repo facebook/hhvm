@@ -87,7 +87,17 @@ SchemaRegistry::Ptr SchemaRegistry::getMergedSchema() {
 
 const schema::DefinitionNode* SchemaRegistry::getSyntaxGraphDefinitionNodeByUri(
     const std::string_view uri) const {
-  return resolver_->getDefinitionNodeByUri(uri);
+  // Note: we check rawSchemasByUri_ first to ensure the definition is available
+  // via dynamic bundling, even if it is already available because of an earlier
+  // call to getNode using static bundling.
+  // This prevents nondeterministic behavior where URIs are only sometimes found
+  // depending on which other code happened to run earlier.
+  auto* data = folly::get_default(base_.rawSchemasByUri_, uri);
+  if (!data) {
+    return nullptr;
+  }
+  return resolver_->getDefinitionNodeByUri(
+      uri, type::ProgramId{data->programId}, data->data);
 }
 
 } // namespace apache::thrift

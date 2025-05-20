@@ -28,7 +28,7 @@ namespace HPHP {
 namespace Facts {
 
 template <typename Key>
-const StringPtr& getVersionKey(const Key& key);
+StringPtr getVersionKey(const Key& key);
 
 struct LazyTwoWayMapVersionProvider {
   virtual ~LazyTwoWayMapVersionProvider() {}

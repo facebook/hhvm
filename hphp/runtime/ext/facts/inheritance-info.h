@@ -91,8 +91,7 @@ namespace HPHP {
 namespace Facts {
 
 template <>
-inline const StringPtr& getVersionKey<EdgeToSupertype>(
-    const EdgeToSupertype& edge) {
+inline StringPtr getVersionKey<EdgeToSupertype>(const EdgeToSupertype& edge) {
   return edge.m_path.m_path;
 }
 

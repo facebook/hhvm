@@ -76,6 +76,10 @@ struct TestStringTable {
         stringTable_.insert(strKey, std::move(staticStr)).first->first};
   }
 
+  void clear() {
+    stringTable_.clear();
+  }
+
  private:
   folly::ConcurrentHashMap<StringPtr, std::unique_ptr<StringData>> stringTable_;
 };

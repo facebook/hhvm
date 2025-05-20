@@ -51,17 +51,17 @@ struct StringData;
 namespace Facts {
 
 template <>
-inline const StringPtr& getVersionKey<Path>(const Path& path) {
+inline StringPtr getVersionKey<Path>(const Path& path) {
   return path.m_path;
 }
 
 template <>
-inline const StringPtr& getVersionKey<TypeDecl>(const TypeDecl& type) {
+inline StringPtr getVersionKey<TypeDecl>(const TypeDecl& type) {
   return type.m_path.m_path;
 }
 
 template <>
-inline const StringPtr& getVersionKey<MethodDecl>(const MethodDecl& method) {
+inline StringPtr getVersionKey<MethodDecl>(const MethodDecl& method) {
   return method.m_type.m_path.m_path;
 }
 

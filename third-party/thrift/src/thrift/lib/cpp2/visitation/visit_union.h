@@ -49,7 +49,10 @@ struct VisitUnion {
  */
 template <typename T, typename F>
 [[deprecated(
-    "Deprecated in favor of apache::thrift::op::visit_union_with_tag.")]]
+    "Deprecated in favor of apache::thrift::op::visit_union_with_tag. "
+    "See "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 decltype(auto) visit_union_with_metadata(T&& t, F&& f) {
   return apache::thrift::detail::VisitUnion<folly::remove_cvref_t<T>>()(
       detail::MetadataForwarder<T, F>{std::forward<F>(f)}, static_cast<T&&>(t));
@@ -57,7 +60,11 @@ decltype(auto) visit_union_with_metadata(T&& t, F&& f) {
 
 template <typename T, typename F>
 [[deprecated(
-    "Deprecated in favor of apache::thrift::op::visit_union_with_tag. If metadata is needed then visit_union_with_metadata is a drop-in replacement.")]]
+    "Deprecated in favor of apache::thrift::op::visit_union_with_tag. "
+    "If metadata is needed then visit_union_with_metadata is a drop-in replacement. "
+    "See "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 decltype(auto) visit_union(T&& t, F&& f) {
   return visit_union_with_metadata(std::forward<T>(t), std::forward<F>(f));
 }

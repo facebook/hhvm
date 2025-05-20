@@ -51,7 +51,11 @@ struct InvalidThriftId : std::out_of_range {
  * @param f a callable that accepts all member types of thrift struct
  */
 template <typename T, typename F>
-[[deprecated("Deprecated in favor of apache::thrift::op::invoke_by_field_id.")]]
+[[deprecated(
+    "Deprecated in favor of apache::thrift::op::invoke_by_field_id. "
+    "See "
+    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 void visit_by_thrift_field_metadata(
     T&& t, const apache::thrift::metadata::ThriftField& meta, F f) {
   auto adapter = [&f](auto&&, auto&& ref) {

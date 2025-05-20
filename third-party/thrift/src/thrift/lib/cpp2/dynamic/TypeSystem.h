@@ -569,9 +569,18 @@ struct FastFieldHandle {
   }
 };
 
-class StructuredNode {
+class DefinitionNode {
  public:
   const Uri& uri() const noexcept { return uri_; }
+
+ protected:
+  Uri uri_;
+
+  explicit DefinitionNode(Uri uri) noexcept : uri_(std::move(uri)) {}
+};
+
+class StructuredNode : public DefinitionNode {
+ public:
   folly::span<const FieldNode> fields() const noexcept { return fields_; }
   bool isSealed() const noexcept { return isSealed_; }
 
@@ -644,7 +653,6 @@ class StructuredNode {
   }
 
  protected:
-  Uri uri_;
   std::vector<FieldNode> fields_;
   folly::F14FastMap<FieldId, FastFieldHandle> fieldHandleById_;
   folly::F14FastMap<std::string_view, FastFieldHandle> fieldHandleByName_;
@@ -670,7 +678,7 @@ class UnionNode final : folly::MoveOnly, public StructuredNode {
       Uri, std::vector<FieldNode>, bool isSealed, AnnotationsMap annotations);
 };
 
-class EnumNode final : folly::MoveOnly {
+class EnumNode final : folly::MoveOnly, public DefinitionNode {
  public:
   struct Value {
     std::string name;
@@ -688,7 +696,6 @@ class EnumNode final : folly::MoveOnly {
     }
   };
 
-  const Uri& uri() const noexcept { return uri_; }
   folly::span<const Value> values() const noexcept { return values_; }
 
   const SerializableRecord* getAnnotationOrNull(UriView uri) const {
@@ -697,19 +704,17 @@ class EnumNode final : folly::MoveOnly {
 
   explicit EnumNode(
       Uri uri, std::vector<Value> values, AnnotationsMap annotations)
-      : uri_(std::move(uri)),
+      : DefinitionNode(std::move(uri)),
         values_(std::move(values)),
         annotations_(std::move(annotations)) {}
 
  private:
-  Uri uri_;
   std::vector<Value> values_;
   AnnotationsMap annotations_;
 };
 
-class OpaqueAliasNode final : folly::MoveOnly {
+class OpaqueAliasNode final : folly::MoveOnly, public DefinitionNode {
  public:
-  const Uri& uri() const noexcept { return uri_; }
   const TypeRef& targetType() const noexcept { return targetType_; }
 
   const SerializableRecord* getAnnotationOrNull(UriView uri) const {
@@ -718,12 +723,11 @@ class OpaqueAliasNode final : folly::MoveOnly {
 
   explicit OpaqueAliasNode(
       Uri uri, TypeRef targetType, AnnotationsMap annotations)
-      : uri_(std::move(uri)),
+      : DefinitionNode(std::move(uri)),
         targetType_(std::move(targetType)),
         annotations_(std::move(annotations)) {}
 
  private:
-  Uri uri_;
   TypeRef targetType_;
   AnnotationsMap annotations_;
 };

@@ -20,6 +20,7 @@
 
 #include <fmt/core.h>
 
+#include <functional>
 #include <memory>
 
 namespace apache::thrift::dynamic {
@@ -29,7 +30,7 @@ StructuredNode::StructuredNode(
     std::vector<FieldNode> fields,
     bool isSealed,
     AnnotationsMap annotations)
-    : uri_(std::move(uri)),
+    : DefinitionNode(std::move(uri)),
       fields_(std::move(fields)),
       isSealed_(isSealed),
       annotations_(std::move(annotations)) {
@@ -323,7 +324,7 @@ bool TypeRef::isEqualIdentityTo(const TypeRef& rhs) const noexcept {
 }
 
 const Uri& DefinitionRef::uri() const noexcept {
-  return visit([](const auto& def) -> const Uri& { return def.uri(); });
+  return visit(std::mem_fn(&DefinitionNode::uri));
 }
 
 /* static */ std::string_view DefinitionRef::kindToString(Kind k) noexcept {

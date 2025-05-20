@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/op/Patch.h>
+#include <folly/ExceptionString.h>
+#include <folly/logging/xlog.h>
+#include <thrift/lib/cpp2/op/PatchTraits.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
-#include <thrift/lib/cpp2/type/Any.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 #include <thrift/shared/tree_printer.h>
@@ -289,5 +289,16 @@ struct DebugTree<T, std::enable_if_t<op::is_patch_v<T>>> {
 } // namespace apache::thrift::detail
 
 namespace apache::thrift::util {
-using apache::thrift::detail::debugTree;
+
+template <class... Args>
+tree_printer::scope debugTree(Args&&... args) try {
+  return apache::thrift::detail::debugTree(std::forward<Args>(args)...);
+} catch (std::exception& e) {
+  // We practice defensive programming to swallow any exceptions so that we
+  // don't crash user's code during logging.
+  auto msg = folly::exceptionStr(e);
+  XLOG(DFATAL) << msg;
+  return tree_printer::scope::make_root(
+      "[Failed to print, error: {}]", tree_printer::escape(msg));
 }
+} // namespace apache::thrift::util

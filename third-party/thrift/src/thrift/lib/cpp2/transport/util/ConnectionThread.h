@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <gflags/gflags.h>
 #include <folly/Synchronized.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <thrift/lib/cpp2/transport/core/ClientConnectionIf.h>

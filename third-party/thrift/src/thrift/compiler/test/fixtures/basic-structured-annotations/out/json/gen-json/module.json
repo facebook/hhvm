@@ -3,7 +3,7 @@
   "thrift_module" : "module",
   "constants" : {
     "MyConst" : {
-      "lineno" : 128,
+      "lineno" : 129,
       "value" : { "ENUMERATOR" : "enum", "CONST" : "const" },
       "type_enum" : "MAP",
       "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
@@ -12,11 +12,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 128,
+          "line" : 129,
           "column" : 1
         },
         "end" : {
-          "line" : 129,
+          "line" : 130,
           "column" : 78
         }
       }
@@ -31,11 +31,14 @@
     },
     "cpp" : {
       "path" : "thrift/annotation/cpp.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
     }
   },
   "enumerations" : {
     "MyEnum" : {
-      "lineno" : 119,
+      "lineno" : 120,
       "structured_annotations" : {
         "structured_annotation_inline" : { "count" : 4 }
       },
@@ -45,11 +48,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 119,
+          "line" : 120,
           "column" : 1
         },
         "end" : {
-          "line" : 126,
+          "line" : 127,
           "column" : 2
         }
       }
@@ -57,7 +60,7 @@
   },
   "typedefs" : {
     "annotated_with_default_string" : {
-      "lineno" : 52,
+      "lineno" : 53,
       "type_enum" : "STRING",
       "spec_args" : null,
       "structured_annotations" : {
@@ -65,17 +68,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 52,
+          "line" : 53,
           "column" : 1
         },
         "end" : {
-          "line" : 53,
+          "line" : 54,
           "column" : 45
         }
       }
     },
     "annotated_inline_string" : {
-      "lineno" : 55,
+      "lineno" : 56,
       "type_enum" : "STRING",
       "spec_args" : null,
       "structured_annotations" : {
@@ -84,17 +87,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 55,
+          "line" : 56,
           "column" : 1
         },
         "end" : {
-          "line" : 57,
+          "line" : 58,
           "column" : 39
         }
       }
     },
     "annotated_inline_i64" : {
-      "lineno" : 59,
+      "lineno" : 60,
       "type_enum" : "I64",
       "spec_args" : null,
       "structured_annotations" : {
@@ -102,11 +105,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 59,
+          "line" : 60,
           "column" : 1
         },
         "end" : {
-          "line" : 60,
+          "line" : 61,
           "column" : 33
         }
       }
@@ -114,28 +117,28 @@
   },
   "structs" : {
     "runtime_annotation" : {
-      "lineno" : 24,
+      "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "cpp.RuntimeAnnotation" : {  }
+        "thrift.RuntimeAnnotation" : {  }
       },
       "fields" : {
 
       },
       "source_range" : {
         "begin" : {
-          "line" : 24,
+          "line" : 25,
           "column" : 1
         },
         "end" : {
-          "line" : 25,
+          "line" : 26,
           "column" : 29
         }
       }
     },
     "structured_annotation_inline" : {
-      "lineno" : 27,
+      "lineno" : 28,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -145,11 +148,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 28,
+              "line" : 29,
               "column" : 3
             },
             "end" : {
-              "line" : 28,
+              "line" : 29,
               "column" : 16
             }
           }
@@ -161,11 +164,11 @@
           "default_value" : "abacaba",
           "source_range" : {
             "begin" : {
-              "line" : 29,
+              "line" : 30,
               "column" : 3
             },
             "end" : {
-              "line" : 29,
+              "line" : 30,
               "column" : 30
             }
           }
@@ -173,17 +176,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 27,
+          "line" : 28,
           "column" : 1
         },
         "end" : {
-          "line" : 30,
+          "line" : 31,
           "column" : 2
         }
       }
     },
     "structured_annotation_with_default" : {
-      "lineno" : 32,
+      "lineno" : 33,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -194,11 +197,11 @@
           "default_value" : "abacabadabacaba",
           "source_range" : {
             "begin" : {
-              "line" : 33,
+              "line" : 34,
               "column" : 3
             },
             "end" : {
-              "line" : 33,
+              "line" : 34,
               "column" : 38
             }
           }
@@ -206,17 +209,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 32,
+          "line" : 33,
           "column" : 1
         },
         "end" : {
-          "line" : 34,
+          "line" : 35,
           "column" : 2
         }
       }
     },
     "structured_annotation_recursive" : {
-      "lineno" : 36,
+      "lineno" : 37,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -226,11 +229,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 37,
+              "line" : 38,
               "column" : 3
             },
             "end" : {
-              "line" : 37,
+              "line" : 38,
               "column" : 18
             }
           }
@@ -244,11 +247,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 38,
+              "line" : 39,
               "column" : 3
             },
             "end" : {
-              "line" : 39,
+              "line" : 40,
               "column" : 55
             }
           }
@@ -259,11 +262,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 40,
+              "line" : 41,
               "column" : 3
             },
             "end" : {
-              "line" : 40,
+              "line" : 41,
               "column" : 44
             }
           }
@@ -271,17 +274,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 36,
+          "line" : 37,
           "column" : 1
         },
         "end" : {
-          "line" : 41,
+          "line" : 42,
           "column" : 2
         }
       }
     },
     "structured_annotation_forward" : {
-      "lineno" : 43,
+      "lineno" : 44,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -291,11 +294,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 44,
+              "line" : 45,
               "column" : 3
             },
             "end" : {
-              "line" : 44,
+              "line" : 45,
               "column" : 16
             }
           }
@@ -303,17 +306,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 43,
+          "line" : 44,
           "column" : 1
         },
         "end" : {
-          "line" : 45,
+          "line" : 46,
           "column" : 2
         }
       }
     },
     "structured_annotation_nested" : {
-      "lineno" : 47,
+      "lineno" : 48,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -323,11 +326,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 48,
+              "line" : 49,
               "column" : 3
             },
             "end" : {
-              "line" : 48,
+              "line" : 49,
               "column" : 18
             }
           }
@@ -338,11 +341,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 49,
+              "line" : 50,
               "column" : 3
             },
             "end" : {
-              "line" : 49,
+              "line" : 50,
               "column" : 46
             }
           }
@@ -350,17 +353,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 47,
+          "line" : 48,
           "column" : 1
         },
         "end" : {
-          "line" : 50,
+          "line" : 51,
           "column" : 2
         }
       }
     },
     "MyStruct" : {
-      "lineno" : 62,
+      "lineno" : 63,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -382,11 +385,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 72,
+              "line" : 73,
               "column" : 3
             },
             "end" : {
-              "line" : 74,
+              "line" : 75,
               "column" : 26
             }
           }
@@ -397,11 +400,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 76,
+              "line" : 77,
               "column" : 3
             },
             "end" : {
-              "line" : 76,
+              "line" : 77,
               "column" : 45
             }
           }
@@ -415,11 +418,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 78,
+              "line" : 79,
               "column" : 3
             },
             "end" : {
-              "line" : 83,
+              "line" : 84,
               "column" : 33
             }
           }
@@ -433,11 +436,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 85,
+              "line" : 86,
               "column" : 3
             },
             "end" : {
-              "line" : 86,
+              "line" : 87,
               "column" : 27
             }
           }
@@ -445,17 +448,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 62,
+          "line" : 63,
           "column" : 1
         },
         "end" : {
-          "line" : 87,
+          "line" : 88,
           "column" : 2
         }
       }
     },
     "MyException" : {
-      "lineno" : 89,
+      "lineno" : 90,
       "is_exception" : true,
       "is_union" : false,
       "structured_annotations" : {
@@ -471,11 +474,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 91,
+              "line" : 92,
               "column" : 3
             },
             "end" : {
-              "line" : 92,
+              "line" : 93,
               "column" : 21
             }
           }
@@ -483,17 +486,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 89,
+          "line" : 90,
           "column" : 1
         },
         "end" : {
-          "line" : 93,
+          "line" : 94,
           "column" : 2
         }
       }
     },
     "MyUnion" : {
-      "lineno" : 95,
+      "lineno" : 96,
       "is_exception" : false,
       "is_union" : true,
       "structured_annotations" : {
@@ -509,11 +512,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 100,
+              "line" : 101,
               "column" : 3
             },
             "end" : {
-              "line" : 101,
+              "line" : 102,
               "column" : 36
             }
           }
@@ -527,11 +530,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 103,
+              "line" : 104,
               "column" : 3
             },
             "end" : {
-              "line" : 104,
+              "line" : 105,
               "column" : 34
             }
           }
@@ -539,11 +542,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 95,
+          "line" : 96,
           "column" : 1
         },
         "end" : {
-          "line" : 105,
+          "line" : 106,
           "column" : 2
         }
       }
@@ -551,7 +554,7 @@
   },
   "services" : {
     "MyService" : {
-      "lineno" : 107,
+      "lineno" : 108,
       "structured_annotations" : {
         "structured_annotation_inline" : { "count" : 3 }
       },
@@ -568,11 +571,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 109,
+              "line" : 110,
               "column" : 3
             },
             "end" : {
-              "line" : 110,
+              "line" : 111,
               "column" : 35
             }
           }
@@ -598,11 +601,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 112,
+              "line" : 113,
               "column" : 3
             },
             "end" : {
-              "line" : 116,
+              "line" : 117,
               "column" : 5
             }
           }
@@ -610,11 +613,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 107,
+          "line" : 108,
           "column" : 1
         },
         "end" : {
-          "line" : 117,
+          "line" : 118,
           "column" : 2
         }
       }

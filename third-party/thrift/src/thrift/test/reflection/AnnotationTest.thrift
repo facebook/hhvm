@@ -15,24 +15,24 @@
  */
 
 include "thrift/annotation/scope.thrift"
-include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "apache.org/thrift/test"
 
-@cpp.RuntimeAnnotation
+@thrift.RuntimeAnnotation
 @scope.Field
 struct Oncall {
   1: string name;
 }
 
-@cpp.RuntimeAnnotation
+@thrift.RuntimeAnnotation
 @scope.Struct
 @scope.Field
 struct Doc {
   1: string text;
 }
 
-@cpp.RuntimeAnnotation
+@thrift.RuntimeAnnotation
 @scope.Field
 struct Sensitive {}
 

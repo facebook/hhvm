@@ -106,7 +106,7 @@ class runtime_annotation implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\cpp\RuntimeAnnotation' => \facebook\thrift\annotation\cpp\RuntimeAnnotation::fromShape(
+        '\facebook\thrift\annotation\RuntimeAnnotation' => \facebook\thrift\annotation\RuntimeAnnotation::fromShape(
           shape(
           )
         ),

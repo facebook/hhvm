@@ -220,20 +220,20 @@ namespace apache::thrift {
 ///
 /// For example, for the following thrift file
 ///
-///     @cpp.RuntimeAnnotation
+///     @thrift.RuntimeAnnotation
 ///     @scope.Field
 ///     struct Oncall {
 ///       1: string name;
 ///     }
 ///
-///     @cpp.RuntimeAnnotation
+///     @thrift.RuntimeAnnotation
 ///     @scope.Struct
 ///     @scope.Field
 ///     struct Doc {
 ///       1: string text;
 ///     }
 ///
-///     @cpp.RuntimeAnnotation
+///     @thrift.RuntimeAnnotation
 ///     @scope.Field
 ///     struct Sensitive {}
 ///
@@ -258,7 +258,7 @@ namespace apache::thrift {
 ///            Oncall{"thrift"});
 ///
 ///     // Build failure since `Other` is not marked with
-///     @cpp.RuntimeAnnotation.
+///     @thrift.RuntimeAnnotation.
 ///     get_field_annotation<Other, MyStruct, ident::field>;
 ///
 template <class Annotation, class Struct, class Id>
@@ -267,7 +267,7 @@ const Annotation* get_field_annotation() {
   using detail::annotation::is_runtime_annotation;
   static_assert(
       is_runtime_annotation<Annotation>,
-      "Annotation is not annotated with @cpp.RuntimeAnnotation.");
+      "Annotation is not annotated with @thrift.RuntimeAnnotation.");
   static_assert(
       op::get_ordinal<Struct, Id>::value != static_cast<FieldOrdinal>(0),
       "Id not found in Struct.");

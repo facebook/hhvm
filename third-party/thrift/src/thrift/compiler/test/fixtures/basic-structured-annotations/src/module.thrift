@@ -17,11 +17,12 @@
 include "included.thrift"
 include "namespaced.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 @included.structured_annotation_included{name = 'aba'}
 package "test.dev/fixtures/basic-structured-annotations"
 
-@cpp.RuntimeAnnotation
+@thrift.RuntimeAnnotation
 struct runtime_annotation {}
 
 struct structured_annotation_inline {

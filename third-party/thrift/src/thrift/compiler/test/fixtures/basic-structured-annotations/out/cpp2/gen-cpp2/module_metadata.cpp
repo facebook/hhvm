@@ -48,7 +48,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::runtime_annotatio
   ::apache::thrift::metadata::ThriftStruct& module_runtime_annotation = res.first->second;
   module_runtime_annotation.name() = "module.runtime_annotation";
   module_runtime_annotation.is_union() = false;
-  module_runtime_annotation.structured_annotations()->push_back(*cvStruct("cpp.RuntimeAnnotation", {  }).cv_struct_ref());
+  module_runtime_annotation.structured_annotations()->push_back(*cvStruct("thrift.RuntimeAnnotation", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

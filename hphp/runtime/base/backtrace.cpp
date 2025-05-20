@@ -462,8 +462,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         : prevFunc->unit()->filepath();
 
       assertx(prevFile != nullptr);
-      frame.set(s_file_idx, s_file,
-                Variant(VarNR(const_cast<StringData*>(prevFile))));
+      frame.set(s_file_idx, s_file, make_tv<KindOfPersistentString>(prevFile));
       frame.set(s_line_idx, s_line, prevFunc->getLineNumber(prev.bcOff()));
     }
 
@@ -540,7 +539,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     // Add metadata if we found it earlier
     if (metadataVal) {
-      frame.set(s_metadata_idx, s_metadata, Variant{variant_ref{metadataVal}});
+      frame.set(s_metadata_idx, s_metadata, *metadataVal);
     }
 
     bt.append(frame.toVariant());

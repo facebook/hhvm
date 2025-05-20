@@ -13,6 +13,8 @@
 
 #include <fizz/protocol/test/Mocks.h>
 
+#include <utility>
+
 using namespace fizz::test;
 
 namespace fizz {
@@ -28,9 +30,9 @@ class CertManagerTest : public Test {
       std::vector<std::string> alts,
       std::vector<SignatureScheme> schemes) {
     auto cert = std::make_shared<MockSelfCert>();
-    ON_CALL(*cert, getIdentity()).WillByDefault(Return(identity));
-    ON_CALL(*cert, getAltIdentities()).WillByDefault(Return(alts));
-    ON_CALL(*cert, getSigSchemes()).WillByDefault(Return(schemes));
+    ON_CALL(*cert, getIdentity()).WillByDefault(Return(std::move(identity)));
+    ON_CALL(*cert, getAltIdentities()).WillByDefault(Return(std::move(alts)));
+    ON_CALL(*cert, getSigSchemes()).WillByDefault(Return(std::move(schemes)));
     return cert;
   }
 

@@ -35,7 +35,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
       folly::EventBase& evb,
       CallbackFactory* factory,
       int port = 0,
-      std::string ip = "")
+      const std::string& ip = "")
       : factory_(factory), evb_(evb) {
     auto certData =
         fizz::test::createCert("fizz-test-selfsign", false, nullptr);
@@ -107,7 +107,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
   }
 
   void enableClientAuthWithChain(
-      std::string path,
+      const std::string& path,
       ClientAuthMode mode = ClientAuthMode::Optional) {
     ctx_->setClientAuthMode(mode);
     std::string certData;

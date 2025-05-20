@@ -827,7 +827,7 @@ static ServerHello getServerHello(
 
 static Optional<std::string> negotiateAlpn(
     const ClientHello& chlo,
-    folly::Optional<std::string> zeroRttAlpn,
+    const folly::Optional<std::string>& zeroRttAlpn,
     const FizzServerContext& context) {
   auto ext = getExtension<ProtocolNameList>(chlo.extensions);
   std::vector<std::string> clientProtocols;
@@ -893,7 +893,7 @@ static EarlyDataType negotiateEarlyDataType(
     CipherSuite cipher,
     Optional<KeyExchangeType> keyExchangeType,
     const Optional<CookieState>& cookieState,
-    Optional<std::string> alpn,
+    const Optional<std::string>& alpn,
     ReplayCacheResult replayCacheResult,
     Optional<std::chrono::milliseconds> clockSkew,
     ClockSkewTolerance clockSkewTolerance,

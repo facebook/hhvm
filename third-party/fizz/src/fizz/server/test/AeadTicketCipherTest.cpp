@@ -99,7 +99,7 @@ class AeadTicketCipherTest : public Test {
   std::shared_ptr<Factory> factory_;
   std::shared_ptr<CertManager> certManager_;
 
-  void rebuildCipher(std::string pskContext = "") {
+  void rebuildCipher(const std::string& pskContext = "") {
     if (!pskContext.empty()) {
       cipher_ = TestAeadTicketCipher(
           std::make_shared<MockFactory>(),

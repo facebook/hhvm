@@ -19,6 +19,8 @@
 #include <fizz/server/ReplayCache.h>
 #include <fizz/server/TicketCipher.h>
 
+#include <utility>
+
 namespace fizz {
 namespace server {
 
@@ -316,7 +318,7 @@ class FizzServerContext {
    */
   void setSupportedCompressionAlgorithms(
       std::vector<CertificateCompressionAlgorithm> algos) {
-    supportedCompressionAlgos_ = algos;
+    supportedCompressionAlgos_ = std::move(algos);
   }
   const auto& getSupportedCompressionAlgorithms() const {
     return supportedCompressionAlgos_;

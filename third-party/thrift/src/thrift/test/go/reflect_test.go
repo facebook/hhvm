@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"thrift/lib/go/thrift"
 	"thrift/test/go/if/thrifttest"
 )
@@ -36,9 +37,7 @@ func TestReflectCodec(t *testing.T) {
 
 	writeTarget := thrifttest.NewVariousFieldsStruct()
 	err := thrift.DeepCopy(thrifttest.VariousFieldsStructConst1, writeTarget)
-	if err != nil {
-		t.Fatalf("failed to deep copy: %v", err)
-	}
+	require.NoError(t, err)
 	writeTarget.Field51 = map[thrifttest.ComparableStruct]string{
 		{Field1: 123}: "value1",
 	}
@@ -47,22 +46,16 @@ func TestReflectCodec(t *testing.T) {
 	}
 
 	originalBuf, err := thrift.EncodeCompact(writeTarget)
-	if err != nil {
-		t.Fatalf("failed to serialize struct: %v", err)
-	}
+	require.NoError(t, err)
 
 	readTarget := &thrifttest.VariousFieldsStruct{}
 	err = thrift.DecodeCompact(originalBuf, readTarget)
-	if err != nil {
-		t.Fatalf("failed to deserialize struct: %v", err)
-	}
+	require.NoError(t, err)
 
 	// TODO: field53 is not printed properly using String() method, so use json for now.
 	writeData, _ := json.Marshal(writeTarget)
 	readData, _ := json.Marshal(readTarget)
 	writeStr := string(writeData)
 	readStr := string(readData)
-	if writeStr != readStr {
-		t.Fatalf("data is not equal after ser/des:\n%s\n%s", writeStr, readStr)
-	}
+	require.Equal(t, writeStr, readStr)
 }

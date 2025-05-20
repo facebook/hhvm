@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"thrift/lib/go/thrift"
 	"thrift/test/go/if/thrifttest"
 )
@@ -46,9 +47,7 @@ func BenchmarkStructRead(b *testing.B) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 10*1024*1024))
 	proto := thrift.NewBinaryFormat(buffer)
 	err := originalStruct.Write(proto)
-	if err != nil {
-		b.Fatalf("failed to write struct: %v", err)
-	}
+	require.NoError(b, err)
 
 	dataBytes := buffer.Bytes()
 
@@ -58,9 +57,7 @@ func BenchmarkStructRead(b *testing.B) {
 		buffer.Write(dataBytes)
 		readTargetStruct := thrifttest.NewVariousFieldsStruct()
 		err = readTargetStruct.Read(proto)
-		if err != nil {
-			b.Fatalf("failed to read struct: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -87,9 +84,7 @@ func BenchmarkStructWrite(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		buffer.Reset()
 		err := originalStruct.Write(proto)
-		if err != nil {
-			b.Fatalf("failed to write struct: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 

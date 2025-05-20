@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"thrift/lib/go/thrift"
 	"thrift/test/go/if/thrifttest"
 )
@@ -82,35 +83,22 @@ func connectTestHeaderServer(
 func doClientTest(ctx context.Context, t *testing.T) {
 	handler := &testHandler{}
 	cancel, addr, err := createTestHeaderServer(handler)
-	if err != nil {
-		t.Fatalf("failed to create test server: %s", err.Error())
-	}
+	require.NoError(t, err)
 	defer cancel()
 
 	client, err := connectTestHeaderServer(addr)
-	if err != nil {
-		t.Fatalf("failed to connect to test server: %s", err.Error())
-	}
+	require.NoError(t, err)
 	defer client.Close()
 
 	res, err := client.DoTestString(ctx, testCallString)
-	if err != nil {
-		t.Fatalf("failed to query test server: %s", err.Error())
-	}
-
-	if res != testCallString {
-		t.Fatalf("server query compare failed")
-	}
+	require.NoError(t, err)
+	require.Equal(t, testCallString, res)
 
 	// Try sending a lot of requests
 	for i := 0; i < 1000; i++ {
 		res, err = client.DoTestString(ctx, testCallString)
-		if err != nil {
-			t.Fatalf("failed to query test server: %s", err.Error())
-		}
-		if res != testCallString {
-			t.Fatalf("server query compare failed")
-		}
+		require.NoError(t, err)
+		require.Equal(t, testCallString, res)
 	}
 
 	// Try getting an application Exception
@@ -144,9 +132,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 	// Try sending a lot of large things
 	for i := 0; i < 10; i++ {
 		resp, terr := client.DoTestInsanity(ctx, insanity)
-		if terr != nil {
-			t.Fatalf("failed to query test server: %s", err.Error())
-		}
+		require.NoError(t, terr)
 
 		num, ok := resp[thrifttest.UserId(3)]
 		if !ok {

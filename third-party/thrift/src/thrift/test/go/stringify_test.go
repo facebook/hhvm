@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 	"thrift/test/go/if/thrifttest"
 )
 
@@ -28,43 +29,31 @@ func TestStructStringMethod(t *testing.T) {
 	// Nil ptr case
 	val1 := (*thrifttest.Bonk)(nil)
 	expectedVal1 := "<nil>"
-	if val1.String() != expectedVal1 {
-		t.Fatalf("value mismatch: %v != %v", val1.String(), expectedVal1)
-	}
+	require.Equal(t, expectedVal1, val1.String())
 
 	// Simple case
 	val2 := &thrifttest.Bonk{Message: "hello", Type: 1234}
 	expectedVal2 := "Bonk({Message:hello Type:1234})"
-	if val2.String() != expectedVal2 {
-		t.Fatalf("value mismatch: %v != %v", val2.String(), expectedVal2)
-	}
+	require.Equal(t, expectedVal2, val2.String())
 
 	// Recursive structs
 	val3 := &thrifttest.Xtruct2{ByteThing: 123, I32Thing: 456, StructThing: &thrifttest.Xtruct{StringThing: "hello"}}
 	expectedVal3 := "Xtruct2({ByteThing:123 StructThing:Xtruct({StringThing:hello ByteThing:0 I32Thing:0 I64Thing:0}) I32Thing:456})"
-	if val3.String() != expectedVal3 {
-		t.Fatalf("value mismatch: %v != %v", val3.String(), expectedVal3)
-	}
+	require.Equal(t, expectedVal3, val3.String())
 
 	// Recursive structs with nil
 	val4 := &thrifttest.Xtruct2{ByteThing: 123, I32Thing: 456, StructThing: nil}
 	expectedVal4 := "Xtruct2({ByteThing:123 StructThing:<nil> I32Thing:456})"
-	if val4.String() != expectedVal4 {
-		t.Fatalf("value mismatch: %v != %v", val4.String(), expectedVal4)
-	}
+	require.Equal(t, expectedVal4, val4.String())
 
 	// Optional field
 	val5 := &thrifttest.Xtruct4{Opt64: nil}
 	expectedVal5 := "Xtruct4({StringThing: IntThing:0 ListInt32Thing:[] Xtruct2:<nil> Opt64:<nil>})"
-	if val5.String() != expectedVal5 {
-		t.Fatalf("value mismatch: %v != %v", val5.String(), expectedVal5)
-	}
+	require.Equal(t, expectedVal5, val5.String())
 
 	// Invalid argument
 	val6 := int64(1234)
 	expectedVal6 := "<invalid>"
 	actualVal6 := types.StructToString(reflect.ValueOf(val6))
-	if actualVal6 != expectedVal6 {
-		t.Fatalf("value mismatch: %v != %v", actualVal6, expectedVal6)
-	}
+	require.Equal(t, expectedVal6, actualVal6)
 }

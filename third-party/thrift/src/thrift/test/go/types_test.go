@@ -17,11 +17,11 @@
 package gotest
 
 import (
-	"reflect"
 	"sort"
 	"testing"
 	"unsafe"
 
+	"github.com/stretchr/testify/require"
 	"thrift/lib/go/thrift"
 	"thrift/test/go/if/thrifttest"
 )
@@ -36,17 +36,9 @@ func TestStructMapKey(t *testing.T) {
 	maps.Struct2str[k1b] = "y"
 	maps.Struct2str[k2] = "z"
 
-	if maps.Struct2str[k1a] != "y" {
-		t.Fatalf("unexpected map value (should have been overwritten to 'y')")
-	}
-
-	if maps.Struct2str[k2] != "z" {
-		t.Fatalf("unexpected map value (should have been 'z')")
-	}
-
-	if len(maps.Struct2str) != 2 {
-		t.Fatalf("unexpected map length (should have been 2)")
-	}
+	require.Equal(t, "y", maps.Struct2str[k1a])
+	require.Equal(t, "z", maps.Struct2str[k2])
+	require.Len(t, maps.Struct2str, 2)
 }
 
 func getValues[K comparable, V any](m map[K]V) []V {
@@ -67,9 +59,7 @@ func TestEnumValues(t *testing.T) {
 	}
 	sort.Slice(values, func(i, j int) bool { return values[i] < values[j] })
 
-	if !reflect.DeepEqual(generatedValues, values) {
-		t.Fatalf("values slices are not equal (should be equal)")
-	}
+	require.Equal(t, generatedValues, values)
 }
 
 func TestEnumNames(t *testing.T) {
@@ -82,9 +72,7 @@ func TestEnumNames(t *testing.T) {
 	}
 	sort.Strings(names)
 
-	if !reflect.DeepEqual(generatedNames, names) {
-		t.Fatalf("names slices are not equal (should be equal)")
-	}
+	require.Equal(t, generatedNames, names)
 }
 
 func TestSetters(t *testing.T) {
@@ -96,9 +84,7 @@ func TestSetters(t *testing.T) {
 		SetMessage("exampleMessage").
 		SetType(3)
 
-	if !reflect.DeepEqual(bonk1, bonk2) {
-		t.Fatalf("structs are not equal (should be equal)")
-	}
+	require.Equal(t, bonk1, bonk2)
 
 	wn1 := thrifttest.NewWeirdNames()
 	wn1.Me = true
@@ -114,14 +100,10 @@ func TestSetters(t *testing.T) {
 		SetP(true).
 		SetB(true)
 
-	if !reflect.DeepEqual(wn1, wn2) {
-		t.Fatalf("structs are not equal (should be equal)")
-	}
+	require.Equal(t, wn1, wn2)
 
 	wn2.SetXSetMe(true)
-	if reflect.DeepEqual(wn1, wn2) {
-		t.Fatalf("structs are equal (should be not equal)")
-	}
+	require.NotEqual(t, wn1, wn2)
 
 	xt1 := thrifttest.NewXtruct4()
 	xt1.IntThing = 0
@@ -129,9 +111,7 @@ func TestSetters(t *testing.T) {
 	xt2 := thrifttest.NewXtruct4().
 		SetIntThing(0)
 
-	if !reflect.DeepEqual(xt1, xt2) {
-		t.Fatalf("structs are not equal (should be equal)")
-	}
+	require.Equal(t, xt1, xt2)
 
 	xt3 := thrifttest.NewXtruct4()
 	xt3.Xtruct2 = thrifttest.NewXtruct2()
@@ -144,9 +124,7 @@ func TestSetters(t *testing.T) {
 			),
 		)
 
-	if !reflect.DeepEqual(xt3, xt4) {
-		t.Fatalf("structs are not equal (should be equal)")
-	}
+	require.Equal(t, xt3, xt4)
 }
 
 func TestFieldSerializationOrderDeterminism(t *testing.T) {
@@ -175,48 +153,31 @@ func TestFieldSerializationOrderDeterminism(t *testing.T) {
 	}
 
 	buf, err := thrift.EncodeCompactJSON(value)
-	if err != nil {
-		t.Fatalf("failed to serialize struct: %v", err)
-	}
+	require.NoError(t, err)
 
 	expectedJSON := `{"142":{"i64":13},"191":{"i64":5},"219":{"i64":2},"270":{"i64":9},"316":{"i64":7},"327":{"i64":16},"351":{"i64":11},"467":{"i64":3},"489":{"i64":8},"569":{"i64":17},"628":{"i64":10},"654":{"i64":15},"753":{"i64":6},"789":{"i64":14},"812":{"i64":18},"843":{"i64":1},"917":{"i64":12},"932":{"i64":4},"945":{"i64":19}}`
 	actualJSON := string(buf)
-	if actualJSON != expectedJSON {
-		t.Fatalf("actual json is not as expected: %s", actualJSON)
-	}
+	require.JSONEq(t, expectedJSON, actualJSON)
 }
 
 func TestSimpleJSONSerialization(t *testing.T) {
 	writeTarget := thrifttest.NewVariousFieldsStruct()
 	err := thrift.DeepCopy(thrifttest.VariousFieldsStructConst1, writeTarget)
-	if err != nil {
-		t.Fatalf("failed to deep copy: %v", err)
-	}
+	require.NoError(t, err)
 
 	data, err := thrift.EncodeSimpleJSON(writeTarget)
-	if err != nil {
-		t.Fatalf("failed to serialize struct: %v", err)
-	}
+	require.NoError(t, err)
 
 	readTarget := &thrifttest.VariousFieldsStruct{}
 	err = thrift.DecodeSimpleJSON(data, readTarget)
-	if err != nil {
-		t.Fatalf("failed to deserialize struct: %v", err)
-	}
-
-	if writeTarget.String() != readTarget.String() {
-		t.Fatalf("values are not equal")
-	}
+	require.NoError(t, err)
+	require.Equal(t, writeTarget.String(), readTarget.String())
 }
 
 func TestMinimizePadding(t *testing.T) {
 	valOptimized := thrifttest.LayoutOptimizedStruct{}
-	if unsafe.Sizeof(valOptimized) != 16 {
-		t.Fatalf("layout is not optimized")
-	}
+	require.EqualValues(t, 16, unsafe.Sizeof(valOptimized))
 
 	valUnoptimized := thrifttest.LayoutUnoptimizedStruct{}
-	if unsafe.Sizeof(valUnoptimized) != 32 {
-		t.Fatalf("unexpected unoptimized size")
-	}
+	require.EqualValues(t, 32, unsafe.Sizeof(valUnoptimized))
 }

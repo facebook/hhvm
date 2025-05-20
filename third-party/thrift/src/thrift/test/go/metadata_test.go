@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
+	"github.com/stretchr/testify/require"
 	"thrift/test/go/if/thrifttest"
 )
 
@@ -56,9 +57,7 @@ func TestMetadata(t *testing.T) {
 }
 
 func verifyThriftType(t *testing.T, thriftType *metadata.ThriftType, allMetadata *metadata.ThriftMetadata) {
-	if thriftType == nil {
-		t.Fatalf("thriftType is nil")
-	}
+	require.NotNil(t, thriftType)
 
 	switch {
 	case thriftType.TPrimitive != nil:
@@ -81,9 +80,7 @@ func verifyThriftType(t *testing.T, thriftType *metadata.ThriftType, allMetadata
 		verifyThriftType(t, thriftType.TSink.GetFinalResponseType(), allMetadata)
 	case thriftType.TEnum != nil:
 		enumName := thriftType.TEnum.GetName()
-		if _, ok := allMetadata.GetEnums()[enumName]; !ok {
-			t.Fatalf("enum definition not found for %s", enumName)
-		}
+		require.Contains(t, allMetadata.GetEnums(), enumName)
 	case thriftType.TStruct != nil:
 		structName := thriftType.TStruct.GetName()
 		// TStruct can be either a struct or an exception
@@ -94,8 +91,6 @@ func verifyThriftType(t *testing.T, thriftType *metadata.ThriftType, allMetadata
 		}
 	case thriftType.TUnion != nil:
 		unionName := thriftType.TUnion.GetName()
-		if _, ok := allMetadata.GetStructs()[unionName]; !ok {
-			t.Fatalf("union definition not found for %s", unionName)
-		}
+		require.Contains(t, allMetadata.GetStructs(), unionName)
 	}
 }

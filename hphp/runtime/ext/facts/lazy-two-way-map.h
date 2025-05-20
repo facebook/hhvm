@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 #include "hphp/util/hash-map.h"
@@ -93,7 +94,9 @@ struct LazyTwoWayMap {
   // previously populated, they will be initialized with the provided values
   // from the source.  The source is always considered to be more stale than
   // values that are already in the map.
-  Values getValuesForKey(Key key, const Values& valuesFromSource) noexcept {
+  Values getValuesForKey(
+      const Key& key,
+      const Values& valuesFromSource) noexcept {
     if (getVersion(key) == 0) {
       setValuesForKey(key, valuesFromSource);
     } else {
@@ -105,7 +108,7 @@ struct LazyTwoWayMap {
     return valuesFromSource;
   }
 
-  Optional<Keys> getKeysForValue(Value value) const noexcept {
+  Optional<Keys> getKeysForValue(const Value& value) const noexcept {
     auto const versionedKeysIt = m_valueToKeys.find(value);
     if (versionedKeysIt == m_valueToKeys.end()) {
       return {};
@@ -127,7 +130,9 @@ struct LazyTwoWayMap {
     return keys;
   }
 
-  Keys getKeysForValue(Value value, const Keys& keysFromSource) noexcept {
+  Keys getKeysForValue(
+      const Value& value,
+      const Keys& keysFromSource) noexcept {
     VersionedKeys* versionedKeys;
     auto const it = m_valueToKeys.find(value);
     if (it != m_valueToKeys.end()) {

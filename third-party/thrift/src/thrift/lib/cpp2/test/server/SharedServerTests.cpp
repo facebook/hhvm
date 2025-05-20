@@ -213,7 +213,7 @@ TEST_P(SharedServerTests, GetLoadTest) {
   client->sendResponse(rpcOptions, std::move(callback), 64);
   base->loop();
 
-  server->setGetLoad([&](std::string counter) {
+  server->setGetLoad([&](const std::string& counter) {
     EXPECT_EQ(counter, "thrift.active_requests");
     return 1;
   });

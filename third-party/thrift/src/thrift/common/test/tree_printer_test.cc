@@ -17,7 +17,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <thrift/shared/tree_printer.h>
+#include <thrift/common/tree_printer.h>
 
 namespace apache::thrift {
 

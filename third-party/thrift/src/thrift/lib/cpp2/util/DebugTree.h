@@ -18,13 +18,13 @@
 
 #include <folly/ExceptionString.h>
 #include <folly/logging/xlog.h>
+#include <thrift/common/tree_printer.h>
 #include <thrift/lib/cpp2/op/PatchTraits.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
-#include <thrift/shared/tree_printer.h>
 
 namespace apache::thrift::detail {
 

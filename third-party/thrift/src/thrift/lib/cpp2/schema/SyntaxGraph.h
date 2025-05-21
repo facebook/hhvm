@@ -44,8 +44,8 @@
 #include <variant>
 #include <vector>
 
+#include <thrift/common/tree_printer.h>
 #include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
-#include <thrift/shared/tree_printer.h>
 
 namespace apache::thrift::schema {
 

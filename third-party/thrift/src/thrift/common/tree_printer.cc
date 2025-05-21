@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <thrift/shared/detail/string.h>
-#include <thrift/shared/tree_printer.h>
+#include <thrift/common/detail/string.h>
+#include <thrift/common/tree_printer.h>
 
 #include <boost/algorithm/string/replace.hpp>
 

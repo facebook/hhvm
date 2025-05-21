@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/shared/detail/string.h>
+#include <thrift/common/detail/string.h>
 
 namespace apache::thrift::detail {
 

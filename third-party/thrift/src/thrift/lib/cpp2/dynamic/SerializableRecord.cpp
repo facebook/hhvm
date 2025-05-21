@@ -16,8 +16,8 @@
 
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 
+#include <thrift/common/tree_printer.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
-#include <thrift/shared/tree_printer.h>
 
 #include <folly/Memory.h>
 #include <folly/base64.h>

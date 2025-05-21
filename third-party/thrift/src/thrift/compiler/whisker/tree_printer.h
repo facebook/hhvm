@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/shared/tree_printer.h>
+#include <thrift/common/tree_printer.h>
 
 namespace whisker {
 namespace tree_printer = apache::thrift::tree_printer;

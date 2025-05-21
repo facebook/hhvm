@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(shared)
+add_subdirectory(common)
 
 if (THRIFT_COMPILER_ONLY OR build_all)
   add_subdirectory(compiler)

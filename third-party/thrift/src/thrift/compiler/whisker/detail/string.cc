@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <thrift/common/detail/string.h>
 #include <thrift/compiler/whisker/detail/string.h>
-#include <thrift/shared/detail/string.h>
 
 namespace whisker::detail {
 

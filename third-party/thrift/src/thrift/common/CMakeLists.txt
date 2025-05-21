@@ -15,14 +15,14 @@
 set(COMPILER_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(
-  shared
+  common
 
   detail/string.cc
   tree_printer.cc
 )
 
 target_link_libraries(
-  shared
+  common
   Boost::boost
   fmt::fmt
 )

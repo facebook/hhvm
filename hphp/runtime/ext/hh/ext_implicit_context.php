@@ -90,16 +90,6 @@ function get_whole_implicit_context()[zoned]: ImplicitContextData;
 function has_key<T>(class<T> $key)[leak_safe]: bool;
 
 /**
- * Creates implicit context $context keyed by $key.
- */
-<<__Native>>
-function create_implicit_context<T>(
-  class<T> $key,
-  mixed $context,
-  bool $memo_sensitive,
-)[leak_safe]: ImplicitContextData;
-
-/**
  * Creates memo agnostic implicit context $context keyed by $key.
  */
 <<__Native>>
@@ -227,59 +217,6 @@ abstract class ImplicitContextBase {
     } finally {
       ImplicitContext\_Private\set_implicit_context_by_value($prev);
     }
-  }
-}
-
-abstract class ImplicitContext {
-  abstract const type T as nonnull;
-  abstract const bool IS_MEMO_SENSITIVE;
-  abstract const ctx CRun as [leak_safe];
-
-  protected static async function runWithAsync<Tout>(
-    this::T $context,
-    (function ()[_]: Awaitable<Tout>) $f,
-  )[this::CRun, ctx $f]: Awaitable<Tout> {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
-      ImplicitContext\_Private\create_implicit_context(
-        static::class,
-        $context,
-        static::IS_MEMO_SENSITIVE,
-      ),
-    );
-    try {
-      $result = $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-    // Needs to be awaited here so that context dependency is established
-    // between parent/child functions
-    return await $result;
-  }
-
-  protected static function runWith<Tout>(
-    this::T $context,
-    (function ()[_]: Tout) $f,
-  )[this::CRun, ctx $f]: Tout {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
-      ImplicitContext\_Private\create_implicit_context(
-        static::class,
-        $context,
-        static::IS_MEMO_SENSITIVE,
-      ),
-    );
-    try {
-      return $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-  }
-
-  protected static function exists()[this::CRun]: bool {
-    return ImplicitContext\_Private\has_key(static::class);
-  }
-
-  protected static function get()[this::CRun]: ?this::T {
-    return ImplicitContext\_Private\get_implicit_context(static::class);
   }
 }
 

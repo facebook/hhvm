@@ -70,25 +70,6 @@ namespace HH {
     protected static function get()[this::CRun]: ?this::TData;
   }
 
-  abstract class ImplicitContext {
-    abstract const type T as nonnull;
-    abstract const bool IS_MEMO_SENSITIVE;
-    abstract const ctx CRun as [leak_safe];
-
-    protected static async function runWithAsync<Tout>(
-      this::T $context,
-      (function()[_]: Awaitable<Tout>) $f,
-    )[this::CRun, ctx $f]: Awaitable<Tout>;
-
-    protected static function runWith<Tout>(
-      this::T $context,
-      (function()[_]: Tout) $f,
-    )[this::CRun, ctx $f]: Tout;
-
-    protected static function get()[this::CRun]: ?this::T;
-    protected static function exists()[this::CRun]: bool;
-  }
-
   /**
    * Options for memoization to be used with dynamically enforced implicit
    * context

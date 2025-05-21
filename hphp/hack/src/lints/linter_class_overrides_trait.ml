@@ -14,6 +14,10 @@ open Hh_prelude
 open Aast
 module Cls = Folded_class
 
+let has_semantic_attribute m =
+  List.exists m.m_user_attributes ~f:(fun ua ->
+      not (String.is_prefix (snd ua.ua_name) ~prefix:"__"))
+
 let trait_name_from_hint th =
   match th with
   | Happly ((_, tid), _) -> Some tid
@@ -164,7 +168,17 @@ let handler =
             SSet.iter
               (fun n ->
                 let origin = SMap.find n origins in
-                if not (String.equal origin bid) then
+                let method_ =
+                  List.find c.c_methods ~f:(fun m ->
+                      String.equal n (snd m.m_name))
+                in
+                let has_semantic_meaning =
+                  match method_ with
+                  | None -> false
+                  | Some m -> m.m_abstract && has_semantic_attribute m
+                in
+                if (not (String.equal origin bid)) && not has_semantic_meaning
+                then
                   Lints_errors.trait_requires_class_that_overrides_method
                     (SMap.find n base_pos_map)
                     cid

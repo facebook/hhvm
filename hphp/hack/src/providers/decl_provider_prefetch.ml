@@ -158,15 +158,8 @@ let next_missing_types
             Typing_defs.td_type_assignment =
               Typing_defs.SimpleTypeDef (_, td_type);
             _;
-          }
-      | Typedef
-          {
-            Typing_defs.td_type_assignment =
-              Typing_defs.CaseType ((td_type, _), []);
-            _;
           } ->
         do_ty d `Ty (acc, visited) td_type
-      (* TODO T201569125 - do I need to do something with the where constraints here? *)
       | Typedef { Typing_defs.td_type_assignment = Typing_defs.CaseType _; _ }
         ->
         (acc, visited)
@@ -187,15 +180,8 @@ let next_missing_types
             Typing_defs.td_type_assignment =
               Typing_defs.SimpleTypeDef (_, td_type);
             _;
-          }
-      | Typedef
-          {
-            Typing_defs.td_type_assignment =
-              Typing_defs.CaseType ((td_type, _), []);
-            _;
           } ->
         do_ty d `Fold (acc, visited) td_type
-      (* TODO T201569125 - do I need to do something with the where constraints here? *)
       | Typedef { Typing_defs.td_type_assignment = Typing_defs.CaseType _; _ }
         ->
         (acc, visited)

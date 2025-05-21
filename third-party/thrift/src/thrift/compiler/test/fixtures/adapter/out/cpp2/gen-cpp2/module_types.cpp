@@ -802,7 +802,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::DirectlyAdapted>,
+        ::facebook::thrift::test::detail::DirectlyAdapted>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::test
@@ -1341,7 +1341,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         B,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::AdaptedA>,
+        ::facebook::thrift::test::A>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::test
@@ -2729,19 +2729,19 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructFieldAdaptedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::AdaptedTypedef>,
+        ::facebook::thrift::test::ThriftAdaptedStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructFieldAdaptedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::DirectlyAdaptedStruct>,
+        ::facebook::thrift::test::detail::DirectlyAdaptedStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructFieldAdaptedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::TypedefOfDirect>,
+        ::facebook::thrift::test::detail::DirectlyAdaptedStruct>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::test
@@ -2949,7 +2949,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         CircularStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::AdaptedCircularAdaptee>,
+        ::facebook::thrift::test::CircularAdaptee>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::test
@@ -3057,7 +3057,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ReorderedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::DeclaredAfterStruct>,
+        ::facebook::thrift::test::detail::DeclaredAfterStruct>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::test
@@ -3454,7 +3454,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MoveOnly,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::HeapAllocated>,
+        ::facebook::thrift::test::detail::HeapAllocated>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::test

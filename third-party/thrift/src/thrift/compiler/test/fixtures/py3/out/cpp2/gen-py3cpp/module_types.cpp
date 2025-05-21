@@ -677,7 +677,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         HiddenTypeFieldsStruct,
         ::apache::thrift::type_class::structure,
-        ::py3::simple::AdaptedTypeDef>,
+        ::py3::simple::SimpleStruct>,
     "inconsistent use of json option");
 
 } // namespace py3::simple
@@ -1872,7 +1872,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AdaptedTypedefFields,
         ::apache::thrift::type_class::structure,
-        ::py3::simple::AdaptedStruct>,
+        ::py3::simple::SimpleStruct>,
     "inconsistent use of json option");
 
 } // namespace py3::simple

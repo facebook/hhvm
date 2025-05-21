@@ -2935,7 +2935,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AdaptedList,
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-        ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>>,
+        ::std::vector<::apache::thrift::fixtures::types::detail::AdaptedListDep>>,
     "inconsistent use of json option");
 
 } // namespace apache::thrift::fixtures::types
@@ -3145,7 +3145,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         DependentAdaptedList,
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-        ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>>,
+        ::std::vector<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>,
     "inconsistent use of json option");
 
 } // namespace apache::thrift::fixtures::types

@@ -599,7 +599,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         OpEncodeStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::AdaptedFoo>,
+        ::facebook::thrift::test::Foo>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

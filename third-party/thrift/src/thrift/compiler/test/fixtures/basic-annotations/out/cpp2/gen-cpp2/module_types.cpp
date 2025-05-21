@@ -496,7 +496,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         YourStruct,
         ::apache::thrift::type_class::variant,
-        ::cpp2::YourUnion>,
+        ::cpp2::detail::YourUnion>,
     "inconsistent use of json option");
 
 } // namespace detail

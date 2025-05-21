@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include "hphp/runtime/ext/facts/string-ptr.h"
-#include "hphp/runtime/ext/facts/test/string-data-test.h"
+#include "hphp/runtime/ext/facts/test/string-data-fake.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/bstring.h"
 

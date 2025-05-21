@@ -21,11 +21,10 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include "gmock/gmock.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
 #include "hphp/runtime/ext/facts/test/matchers.h"
-#include "hphp/runtime/ext/facts/test/printers.h"
-#include "hphp/runtime/ext/facts/test/string-data-test.h"
+#include "hphp/runtime/ext/facts/test/printers.h" // @donotremove
+#include "hphp/runtime/ext/facts/test/string-data-fake.h"
 
 using ::testing::_;
 using ::testing::ElementsAre;

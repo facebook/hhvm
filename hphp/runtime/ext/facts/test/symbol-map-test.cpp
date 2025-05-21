@@ -35,7 +35,7 @@
 #include "hphp/runtime/ext/facts/sqlite-key.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
-#include "hphp/runtime/ext/facts/test/string-data-test.h"
+#include "hphp/runtime/ext/facts/test/string-data-fake.h"
 #include "hphp/util/bstring.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"

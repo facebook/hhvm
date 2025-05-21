@@ -77,8 +77,8 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            if _fbthrift_resp.ex is not None:
-                raise _fbthrift_resp.ex
+            if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
+                raise _fbthrift_ex
     
     
     # pyre-ignore[4]: Missing annotation.
@@ -111,6 +111,6 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            if _fbthrift_resp.ex is not None:
-                raise _fbthrift_resp.ex
+            if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
+                raise _fbthrift_ex
 

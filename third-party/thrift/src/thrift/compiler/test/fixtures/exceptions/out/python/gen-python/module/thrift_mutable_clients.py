@@ -91,12 +91,12 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            if _fbthrift_resp.b is not None:
-                raise _fbthrift_resp.b
-            if _fbthrift_resp.f is not None:
-                raise _fbthrift_resp.f
-            if _fbthrift_resp.s is not None:
-                raise _fbthrift_resp.s
+            if (_fbthrift_ex := _fbthrift_resp._ex0__b) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex1__f) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
+                raise _fbthrift_ex
     
         async def get200(
             self,
@@ -139,12 +139,12 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
-            if _fbthrift_resp.f is not None:
-                raise _fbthrift_resp.f
-            if _fbthrift_resp.b is not None:
-                raise _fbthrift_resp.b
-            if _fbthrift_resp.s is not None:
-                raise _fbthrift_resp.s
+            if (_fbthrift_ex := _fbthrift_resp._ex0__f) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex1__b) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -202,12 +202,12 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            if _fbthrift_resp.b is not None:
-                raise _fbthrift_resp.b
-            if _fbthrift_resp.f is not None:
-                raise _fbthrift_resp.f
-            if _fbthrift_resp.s is not None:
-                raise _fbthrift_resp.s
+            if (_fbthrift_ex := _fbthrift_resp._ex0__b) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex1__f) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
+                raise _fbthrift_ex
     
         def get200(
             self,
@@ -248,12 +248,12 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
-            if _fbthrift_resp.f is not None:
-                raise _fbthrift_resp.f
-            if _fbthrift_resp.b is not None:
-                raise _fbthrift_resp.b
-            if _fbthrift_resp.s is not None:
-                raise _fbthrift_resp.s
+            if (_fbthrift_ex := _fbthrift_resp._ex0__f) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex1__b) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex2__s) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",

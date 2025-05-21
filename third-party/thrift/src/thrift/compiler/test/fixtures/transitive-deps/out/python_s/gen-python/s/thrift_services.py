@@ -61,7 +61,7 @@ class TestServiceInterface(
             value = await self.test()
             return_struct = _fbthrift__s__thrift_types._fbthrift_TestService_test_result()
         except _fbthrift__c__thrift_types.E as e:
-            return_struct = _fbthrift__s__thrift_types._fbthrift_TestService_test_result(ex=e)
+            return_struct = _fbthrift__s__thrift_types._fbthrift_TestService_test_result(_ex0__ex=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('E', str(e), buf)
             raise exp

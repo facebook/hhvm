@@ -255,8 +255,8 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(CustomException),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -470,8 +470,8 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(CustomException),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -609,8 +609,8 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(CustomException),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -758,8 +758,8 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(CustomException),  # typeinfo
             None,  # default value
             None,  # adapter info

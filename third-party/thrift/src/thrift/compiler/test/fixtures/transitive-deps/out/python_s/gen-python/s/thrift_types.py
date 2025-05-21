@@ -44,8 +44,8 @@ class _fbthrift_TestService_test_result(metaclass=_fbthrift_python_types.StructM
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__c__thrift_types.E),  # typeinfo
             None,  # default value
             None,  # adapter info

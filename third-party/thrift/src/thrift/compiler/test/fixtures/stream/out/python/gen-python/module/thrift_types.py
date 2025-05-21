@@ -306,8 +306,8 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(metaclass=_fbthrift_
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -353,8 +353,8 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e1",  # name
-            "e1",  # python name (from @python.Name annotation)
+            "_ex0__e1",  # name
+            "_ex0__e1",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -364,8 +364,8 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift
         _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e2",  # name
-            "e2",  # python name (from @python.Name annotation)
+            "_ex1__e2",  # name
+            "_ex1__e2",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx2),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -411,8 +411,8 @@ class _fbthrift_PubSubStreamingService_boththrows_result(metaclass=_fbthrift_pyt
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -536,8 +536,8 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(met
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -593,8 +593,8 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metacl
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
             None,  # adapter info

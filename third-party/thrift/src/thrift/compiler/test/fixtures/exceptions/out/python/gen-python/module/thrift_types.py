@@ -579,8 +579,8 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "b",  # name
-            "b",  # python name (from @python.Name annotation)
+            "_ex0__b",  # name
+            "_ex0__b",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Banal),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -590,8 +590,8 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
         _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "f",  # name
-            "f",  # python name (from @python.Name annotation)
+            "_ex1__f",  # name
+            "_ex1__f",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Fiery),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -601,8 +601,8 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
         _fbthrift_python_types.FieldInfo(
             3,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "s",  # name
-            "s",  # python name (from @python.Name annotation)
+            "_ex2__s",  # name
+            "_ex2__s",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Serious),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -652,8 +652,8 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "f",  # name
-            "f",  # python name (from @python.Name annotation)
+            "_ex0__f",  # name
+            "_ex0__f",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Fiery),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -663,8 +663,8 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
         _fbthrift_python_types.FieldInfo(
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "b",  # name
-            "b",  # python name (from @python.Name annotation)
+            "_ex1__b",  # name
+            "_ex1__b",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Banal),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -674,8 +674,8 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
         _fbthrift_python_types.FieldInfo(
             3,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "s",  # name
-            "s",  # python name (from @python.Name annotation)
+            "_ex2__s",  # name
+            "_ex2__s",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(Serious),  # typeinfo
             None,  # default value
             None,  # adapter info

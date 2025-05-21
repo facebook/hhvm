@@ -48,7 +48,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result({{> types/struct_base 
     def __init__(
         self, *, success: _typing.Optional[{{#function:regular_response_type}}{{> types/pep484_type }}{{/function:regular_response_type}}] = ...{{!
         }}{{#function:exceptions}}{{!
-        }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
+        }}, {{> fields/exception_field_name }}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
         }}{{/function:exceptions}}
     ) -> None: ...
 

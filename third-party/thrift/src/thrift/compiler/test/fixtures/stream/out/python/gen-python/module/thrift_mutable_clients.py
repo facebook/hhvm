@@ -120,8 +120,8 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 is_mutable_types=True,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            if _fbthrift_resp.e is not None:
-                raise _fbthrift_resp.e
+            if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
+                raise _fbthrift_ex
             return _fbthrift_stream
     
         async def servicethrows2(
@@ -142,10 +142,10 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 is_mutable_types=True,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            if _fbthrift_resp.e1 is not None:
-                raise _fbthrift_resp.e1
-            if _fbthrift_resp.e2 is not None:
-                raise _fbthrift_resp.e2
+            if (_fbthrift_ex := _fbthrift_resp._ex0__e1) is not None:
+                raise _fbthrift_ex
+            if (_fbthrift_ex := _fbthrift_resp._ex1__e2) is not None:
+                raise _fbthrift_ex
             return _fbthrift_stream
     
         async def boththrows(
@@ -166,8 +166,8 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 is_mutable_types=True,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            if _fbthrift_resp.e is not None:
-                raise _fbthrift_resp.e
+            if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
+                raise _fbthrift_ex
             return _fbthrift_stream
     
         async def responseandstreamstreamthrows(
@@ -217,8 +217,8 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_stream
-            if _fbthrift_resp.e is not None:
-                raise _fbthrift_resp.e
+            if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -245,8 +245,8 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_stream
-            if _fbthrift_resp.e is not None:
-                raise _fbthrift_resp.e
+            if (_fbthrift_ex := _fbthrift_resp._ex0__e) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",

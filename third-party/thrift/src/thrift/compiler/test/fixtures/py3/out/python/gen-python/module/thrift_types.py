@@ -1707,8 +1707,8 @@ class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_pyth
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "se",  # name
-            "se",  # python name (from @python.Name annotation)
+            "_ex0__se",  # name
+            "_ex0__se",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(SimpleException),  # typeinfo
             None,  # default value
             None,  # adapter info

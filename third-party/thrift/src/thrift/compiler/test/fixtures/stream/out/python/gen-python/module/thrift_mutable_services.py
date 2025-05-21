@@ -126,7 +126,7 @@ class PubSubStreamingServiceInterface(
             return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result()
             return_stream = self._fbthrift__stream_wrapper_servicethrows(stream, protocol)
         except _fbthrift__module__thrift_mutable_types.FooEx as e:
-            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result(e=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result(_ex0__e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
@@ -153,12 +153,12 @@ class PubSubStreamingServiceInterface(
             return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result()
             return_stream = self._fbthrift__stream_wrapper_servicethrows2(stream, protocol)
         except _fbthrift__module__thrift_mutable_types.FooEx as e:
-            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(e1=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(_ex0__e1=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
         except _fbthrift__module__thrift_mutable_types.FooEx2 as e:
-            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(e2=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(_ex1__e2=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx2', str(e), buf)
             raise exp
@@ -191,7 +191,7 @@ class PubSubStreamingServiceInterface(
             return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result()
             return_stream = self._fbthrift__stream_wrapper_boththrows(stream, protocol)
         except _fbthrift__module__thrift_mutable_types.FooEx as e:
-            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result(e=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result(_ex0__e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
@@ -245,7 +245,7 @@ class PubSubStreamingServiceInterface(
             return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(success=value)
             return_stream = self._fbthrift__stream_wrapper_responseandstreamservicethrows(stream, protocol)
         except _fbthrift__module__thrift_mutable_types.FooEx as e:
-            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(e=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(_ex0__e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
@@ -278,7 +278,7 @@ class PubSubStreamingServiceInterface(
             return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result(success=value)
             return_stream = self._fbthrift__stream_wrapper_responseandstreamboththrows(stream, protocol)
         except _fbthrift__module__thrift_mutable_types.FooEx as e:
-            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result(e=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result(_ex0__e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp

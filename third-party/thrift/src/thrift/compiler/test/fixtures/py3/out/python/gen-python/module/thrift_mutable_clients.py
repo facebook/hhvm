@@ -318,8 +318,8 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            if _fbthrift_resp.se is not None:
-                raise _fbthrift_resp.se
+            if (_fbthrift_ex := _fbthrift_resp._ex0__se) is not None:
+                raise _fbthrift_ex
     
         async def unexpected_exception(
             self,
@@ -1440,8 +1440,8 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            if _fbthrift_resp.se is not None:
-                raise _fbthrift_resp.se
+            if (_fbthrift_ex := _fbthrift_resp._ex0__se) is not None:
+                raise _fbthrift_ex
     
         def unexpected_exception(
             self,

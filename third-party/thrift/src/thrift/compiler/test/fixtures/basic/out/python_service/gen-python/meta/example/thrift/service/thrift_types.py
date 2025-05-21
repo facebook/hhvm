@@ -256,8 +256,8 @@ class _fbthrift_EchoService_echo_result(metaclass=_fbthrift_python_types.StructM
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(WhisperException),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -300,8 +300,8 @@ class _fbthrift_ExtendedEchoService_echo_2_result(metaclass=_fbthrift_python_typ
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(WhisperException),  # typeinfo
             None,  # default value
             None,  # adapter info

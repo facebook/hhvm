@@ -122,8 +122,8 @@ class Async({{#service:extends}}{{!
           }}_fbthrift_resp.success{{#function:stream?}}, _fbthrift_stream{{/function:stream?}}
         {{/function:early_client_return?}}
         {{#function:exceptions}}
-        if _fbthrift_resp.{{field:py_name}} is not None:
-            raise _fbthrift_resp.{{field:py_name}}
+        if (_fbthrift_ex := _fbthrift_resp.{{> fields/exception_field_name }}) is not None:
+            raise _fbthrift_ex
         {{/function:exceptions}}
         {{^function:early_client_return?}}
         {{^function:void?}}
@@ -209,8 +209,8 @@ class Sync({{#service:extends}}{{!
             return _fbthrift_resp.success
         {{/type:void?}}{{/function:return_type}}
         {{#function:exceptions}}
-        if _fbthrift_resp.{{field:py_name}} is not None:
-            raise _fbthrift_resp.{{field:py_name}}
+        if (_fbthrift_ex := _fbthrift_resp.{{> fields/exception_field_name }}) is not None:
+            raise _fbthrift_ex
         {{/function:exceptions}}
         {{#function:return_type}}{{^type:void?}}
         raise _fbthrift_python_exceptions.ApplicationError(

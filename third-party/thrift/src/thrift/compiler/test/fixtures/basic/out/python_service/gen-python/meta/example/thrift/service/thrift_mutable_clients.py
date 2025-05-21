@@ -82,8 +82,8 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
-            if _fbthrift_resp.ex is not None:
-                raise _fbthrift_resp.ex
+            if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -125,8 +125,8 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
-            if _fbthrift_resp.ex is not None:
-                raise _fbthrift_resp.ex
+            if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -186,8 +186,8 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
-            if _fbthrift_resp.ex is not None:
-                raise _fbthrift_resp.ex
+            if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -229,8 +229,8 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success
-            if _fbthrift_resp.ex is not None:
-                raise _fbthrift_resp.ex
+            if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
+                raise _fbthrift_ex
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",

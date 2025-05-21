@@ -41,6 +41,13 @@ struct is_orderable_walk_context {
 
 bool is_orderable_walk(
     std::unordered_map<const t_type*, bool>& memo,
+    const t_field& field,
+    const t_type* prev,
+    is_orderable_walk_context& context,
+    bool forceCustomTypeOrderable);
+
+bool is_orderable_walk(
+    std::unordered_map<const t_type*, bool>& memo,
     const t_type& type,
     const t_type* prev,
     is_orderable_walk_context& context,
@@ -73,12 +80,11 @@ bool is_orderable_walk(
     }
   });
   if (type.is_typedef()) {
-    const auto& real = [&]() -> auto&& { return *type.get_true_type(); };
+    const auto& real = *type.get_true_type();
     const auto& next = *(dynamic_cast<const t_typedef&>(type).get_type());
     return result = is_orderable_walk(
                         memo, next, &type, context, forceCustomTypeOrderable) &&
-        (!(real().is_set() || real().is_map()) ||
-         !has_disqualifying_annotation);
+        (!(real.is_set() || real.is_map()) || !has_disqualifying_annotation);
   } else if (const auto* as_struct = dynamic_cast<const t_structured*>(&type)) {
     return result = std::all_of(
                as_struct->fields().begin(),
@@ -86,7 +92,7 @@ bool is_orderable_walk(
                [&](const auto& f) {
                  return is_orderable_walk(
                      memo,
-                     f.type().deref(),
+                     f,
                      &type,
                      context,
                      enable_custom_type_ordering(*as_struct) ||
@@ -124,6 +130,26 @@ bool is_orderable_walk(
                forceCustomTypeOrderable);
   }
   return false;
+}
+
+bool is_orderable_walk(
+    std::unordered_map<const t_type*, bool>& memo,
+    const t_field& field,
+    const t_type* prev,
+    is_orderable_walk_context& context,
+    bool forceCustomTypeOrderable) {
+  const auto& real = *field.type().deref().get_true_type();
+  // We don't consider @cpp.Adapter on the field since all adapted fields can be
+  // orderable by customizing Adapter::less.
+  const bool has_disqualifying_annotation =
+      field.has_structured_annotation(kCppTypeUri) && !forceCustomTypeOrderable;
+  return (!(real.is_set() || real.is_map()) || !has_disqualifying_annotation) &&
+      is_orderable_walk(
+             memo,
+             field.type().deref(),
+             prev,
+             context,
+             forceCustomTypeOrderable);
 }
 
 void is_orderable_back_propagate(

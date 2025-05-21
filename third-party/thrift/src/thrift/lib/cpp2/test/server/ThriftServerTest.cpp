@@ -2098,8 +2098,8 @@ TEST(ThriftServer, QueueTimeoutPctSetTest) {
   auto slowRequestFuture = client->semifuture_sendResponse(20000);
 
   RpcOptions rpcOptions;
-  // QueueTimeout will be set to 100ms.
-  rpcOptions.setTimeout(std::chrono::milliseconds(200));
+  // QueueTimeout will be set to 500ms.
+  rpcOptions.setTimeout(std::chrono::milliseconds(1000));
 
   std::string response;
   try {

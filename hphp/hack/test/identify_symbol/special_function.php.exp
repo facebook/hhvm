@@ -9,8 +9,8 @@ definition:
    params:
      $cls_name
        kind: param
-       position: line 53, characters 22-30
-       span: line 53, character 5 - line 53, character 30
+       position: line 53, characters 18-26
+       span: line 53, character 5 - line 53, character 26
        modifiers: 
 
      $meth_name

@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+<<file:__EnableUnstableFeatures('class_type')>>
 namespace HH {
 
   // The functions in this file are defined in HHVM and known to the
@@ -50,7 +50,7 @@ namespace HH {
   * @return $func_ref A fully typed function reference to the instance method.
   */
   function meth_caller(
-    classname<mixed> $cls_name,
+    class<mixed> $cls_name,
     string $meth_name,
   ): \HH\FIXME\MISSING_RETURN_TYPE; // becomes:
   // function meth_caller(C::class, 'method')

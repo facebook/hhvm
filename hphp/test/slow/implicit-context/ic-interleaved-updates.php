@@ -1,7 +1,8 @@
 <?hh
 
 function printMSIC(): void {
-  var_dump(MemoSensitiveIntCtx::getContext());
+  $c = MemoSensitiveIntCtx::getContext();
+  var_dump($c ? $c->getPayload() : null);
 }
 
 function printMAIC(): void {
@@ -15,7 +16,7 @@ function s1(): void {
 
 function a1(): void{
   printMAIC();
-  MemoSensitiveIntCtx::start(6, s1<>);
+  MemoSensitiveIntCtx::start(new Base(6), s1<>);
   printMAIC();
   printMSIC(); // should throw since Memo sensitive IC is no longer set
 }
@@ -23,6 +24,6 @@ function a1(): void{
 <<__EntryPoint>>
 function main(): mixed{
   include 'both-contexts.inc';
-  MemoAgnosticIntCtx::runWith(5, a1<>);
+  MemoAgnosticIntCtx::start(5, a1<>);
   printMAIC(); // should return null
 }

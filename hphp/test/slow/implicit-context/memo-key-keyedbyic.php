@@ -13,21 +13,21 @@ function f4()[zoned] :mixed{
 function f3()[zoned] :mixed{
   echo "in f3\n";
   memo(1, 2);
-  ClassContext2::start(new A, f4<>);
+  ClassContext2::start(new A(0), f4<>);
 }
 function f2()[zoned] :mixed{
   echo "in f2\n";
   memo(1, 2);
-  ClassContext::start(new A, f3<>);
+  ClassContext::start(new A(0), f3<>);
 }
 function f1()[zoned] :mixed{
   echo "in f1\n";
   memo(1, 2);
-  ClassContext2::start(new A, f2<>);
+  ClassContext2::start(new A(0), f2<>);
 }
 
 <<__EntryPoint>>
 function main() :mixed{
   include 'implicit.inc';
-  ClassContext::start(new A, f1<>);
+  ClassContext::start(new A(0), f1<>);
 }

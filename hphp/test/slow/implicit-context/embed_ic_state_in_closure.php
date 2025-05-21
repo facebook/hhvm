@@ -1,13 +1,22 @@
 <?hh
 
-abstract final class IntContext extends HH\ImplicitContext {
-  const type T = int;
-  const bool IS_MEMO_SENSITIVE = true;
+
+class MemoSensitiveData implements HH\IPureMemoizeParam {
+  public function getPayload()[]: int {
+    return 42;
+  }
+  public function getInstanceKey()[]: string {
+    return 'strkey';
+  }
+}
+
+abstract final class IntContext extends HH\MemoSensitiveImplicitContext {
+  const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
-  public static function set<T>(int $context, (function (): T) $f)[zoned, ctx $f]: T {
+  public static function set<T>(MemoSensitiveData $context, (function (): T) $f)[zoned, ctx $f]: T {
     return parent::runWith($context, $f);
   }
-  public static function getContext()[zoned]: ?int {
+  public static function getContext()[zoned]: this::TData {
     return parent::get();
   }
 }
@@ -42,10 +51,10 @@ function get_closure_from_soft_set(): (function (): void) {
 
 function get_closure_from_value_state(): (function (): void) {
   return IntContext::set(
-    42,
+    new MemoSensitiveData(),
     () ==> HH\ImplicitContext\embed_implicit_context_state_in_closure(
       () ==> {
-        echo "Calling closure with IC value: ".(string)IntContext::getContext()."\n";
+        echo "Calling closure with IC value: ".(string)IntContext::getContext()->getPayload()."\n";
       },
     ),
   );
@@ -77,10 +86,10 @@ function get_async_closure_from_soft_set(): (function (): Awaitable<void>) {
 
 function get_async_closure_from_value_state(): (function (): Awaitable<void>) {
   return IntContext::set(
-    42,
+    new MemoSensitiveData(),
     () ==> HH\ImplicitContext\embed_implicit_context_state_in_async_closure(
       async () ==> {
-        echo "Calling closure with IC value: ".(string)IntContext::getContext()."\n";
+        echo "Calling closure with IC value: ".(string)IntContext::getContext()->getPayload()."\n";
       },
     ),
   );

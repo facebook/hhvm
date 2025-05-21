@@ -68,7 +68,7 @@ function main() :mixed{
   p("from null");
   f();
   p("from value");
-  ClassContext::start(new C, f<>);
+  ClassContext::start(new C(0), f<>);
   p("from inaccessible");
   ic_inaccessible();
   p("from soft run with");

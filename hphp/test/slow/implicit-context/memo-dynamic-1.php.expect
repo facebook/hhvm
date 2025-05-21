@@ -6,7 +6,7 @@ memo_normal passed
   After: C
 ------------------------
   Before: C
-string(21) "ClassContext, %sKEYC"
+string(18) "ClassContext, KEYC"
 
 memo_keyed passed
   After: C

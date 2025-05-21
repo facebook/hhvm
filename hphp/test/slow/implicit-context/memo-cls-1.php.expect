@@ -1,0 +1,4 @@
+args: 1, 2 hash: ClassContext, KEYA
+args: 1, 3 hash: ClassContext, KEYA
+args: 1, 2 hash: ClassContext2, KEYB, ClassContext, KEYA
+args: 1, 3 hash: ClassContext2, KEYB, ClassContext, KEYA

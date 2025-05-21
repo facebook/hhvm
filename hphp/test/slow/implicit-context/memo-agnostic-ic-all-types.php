@@ -9,7 +9,7 @@ function f1()[leak_safe]: void {
 
 function f2(): void {
   echo "inside f2, calling f1 with a new baggage 7\n";
-  TestContext::runWith(7, f1<>);
+  TestContext::start(7, f1<>);
   echo "returned, now the baggage should be 6\n";
   var_dump(TestContext::getContext());
 }
@@ -68,36 +68,36 @@ function main(): void {
 
   $d = dict['a' => 0, 'b' => 1, 'c' => 2];
   echo "\n1. Set null\n";
-  TestContext::runWith(null, f1<>);
+  TestContext::start(null, f1<>);
 
   echo "\n2. Set 5\n";
-  TestContext::runWith(5, f1<>);
+  TestContext::start(5, f1<>);
 
   echo "\n3. Set String\n";
-  TestContext::runWith("I don't have friends, I got family", f1<>);
+  TestContext::start("I don't have friends, I got family", f1<>);
 
   echo "\n4. Set Dict\n";
-  TestContext::runWith($d, f1<>);
+  TestContext::start($d, f1<>);
 
   echo "\n5. Set nested baggage\n";
-  TestContext::runWith(6, f2<>);
+  TestContext::start(6, f2<>);
 
 
   echo "\n6. Set lambda 10\n";
-  TestContext::runWith(()[] ==> { return 10; }, f8<>);
+  TestContext::start(()[] ==> { return 10; }, f8<>);
 
   echo "\n7. Set async func result 15\n";
-  TestContext::runWith(f3<>, f9<>);
+  TestContext::start(f3<>, f9<>);
 
   echo "\n8. Set func result 20\n";
-  TestContext::runWith(f4<>, f8<>);
+  TestContext::start(f4<>, f8<>);
 
   echo "\n9. Set async func result Dict\n";
-  TestContext::runWith(f5<>, f9<>);
+  TestContext::start(f5<>, f9<>);
 
   echo "\n10. Set 17. call via an indirection\n";
-  TestContext::runWith(17, f6<>);
+  TestContext::start(17, f6<>);
 
   echo "\n11. Set 18. call a memoized indirection via indirection\n";
-  TestContext::runWith(10, f7<>);
+  TestContext::start(10, f7<>);
 }

@@ -1,20 +1,19 @@
 <?hh
 
-class Base implements HH\IMemoizeParam {
+class Base implements HH\IPureMemoizeParam {
   public function getInstanceKey()[]: string {
     return 'KEY' . $this->name();
   }
   public function name()[]: string { return static::class; }
 }
 
-abstract final class ClassContext extends HH\ImplicitContext {
-  const type T = Base;
-  const bool IS_MEMO_SENSITIVE = true;
+abstract final class ClassContext extends HH\MemoSensitiveImplicitContext {
+  const type TData = Base;
   const ctx CRun = [defaults];
-  public static function start(Base $context, (function (): int) $f)[this::CRun, ctx $f] {
+  public static function start(this::TData $context, (function (): int) $f)[this::CRun, ctx $f] {
     return parent::runWith($context, $f);
   }
-  public static function getContext()[this::CRun]: ?Base {
+  public static function getContext()[this::CRun]: this::TData {
     return parent::get();
   }
   public static function exists()[this::CRun]: bool {
@@ -65,7 +64,7 @@ function memo_default($a, $b)[defaults]: mixed{
 }
 
 function f()[defaults]: mixed{
-  $klass_b = new B;
+  $klass_b = new B(0);
   $tryout = function($memo_function, $a, $b) use ($klass_b) {
     try {
       $memo_function($a, $b);
@@ -88,5 +87,5 @@ function f()[defaults]: mixed{
 
 <<__EntryPoint>>
 function main(): mixed{
-  ClassContext::start(new A, f<>);
+  ClassContext::start(new A(0), f<>);
 }

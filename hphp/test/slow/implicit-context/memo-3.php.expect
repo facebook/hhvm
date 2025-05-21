@@ -1,0 +1,2 @@
+hash: ClassContext, KEYA
+hash: ClassContext2, KEYB, ClassContext, KEYA

@@ -9,5 +9,5 @@ async function f()[zoned] :Awaitable<mixed>{
 async function main() :Awaitable<mixed>{
   include 'async-implicit.inc';
 
-  await ClassContext::genStart(new C(), f<>);
+  await ClassContext::genStart(new C, f<>);
 }

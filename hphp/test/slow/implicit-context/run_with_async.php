@@ -1,17 +1,25 @@
 <?hh
 
-final class IntContext extends HH\ImplicitContext {
-  const type T = int;
-  const bool IS_MEMO_SENSITIVE = true;
+class MemoSensitiveData implements HH\IPureMemoizeParam {
+  public function getPayload()[]: int {
+    return 5;
+  }
+  public function getInstanceKey()[]: string {
+    return 'strkey';
+  }
+}
+
+final class IntContext extends HH\MemoSensitiveImplicitContext {
+  const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
   public static async function setAsync(
-    int $context,
+    MemoSensitiveData $context,
     (function ()[_]: int) $f,
   )[zoned, ctx $f]: Awaitable<int> {
-    echo 'Setting context to ' . $context . "\n";
+    echo 'Setting context to ' . $context->getPayload() . "\n";
     return await parent::runWithAsync($context, $f);
   }
-  public static function getContext()[zoned]: int {
+  public static function getContext()[zoned]: MemoSensitiveData {
     return parent::get() as nonnull;
   }
 }
@@ -21,13 +29,13 @@ async function addFive(): Awaitable<int> {
     RescheduleWaitHandle::QUEUE_DEFAULT,
     0,
   );
-  return IntContext::getContext() + 5;
+  return IntContext::getContext()->getPayload() + 5;
 }
 
 <<__EntryPoint>>
 async function main(): Awaitable<void> {
   $result = await IntContext::setAsync(
-    5,
+    new MemoSensitiveData(),
     addFive<>,
   );
   var_dump($result);

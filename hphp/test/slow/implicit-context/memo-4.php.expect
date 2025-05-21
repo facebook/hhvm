@@ -1,0 +1,4 @@
+hash: ClassContext, KEYA, kind: 1
+hash: ClassContext, KEYA, kind: 4
+hash: ClassContext2, KEYB, ClassContext, KEYA, kind: 1
+hash: ClassContext2, KEYB, ClassContext, KEYA, kind: 4

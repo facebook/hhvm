@@ -1,17 +1,17 @@
 <?hh
 
 function printImplicit() :mixed{
-  var_dump(IntContext::getContext());
+  var_dump(ClassContext::getContext()->getPayload());
   return 0;
 }
 
 function addFive() :mixed{
-  return IntContext::getContext() + IntContext::start(4, printImplicit<>);
+  return ClassContext::getContext()->getPayload() + ClassContext::start(new Base(4), printImplicit<>);
 }
 
 <<__EntryPoint>>
 function main() :mixed{
   include 'implicit.inc';
 
-  var_dump(IntContext::start(5, addFive<>));
+  var_dump(ClassContext::start(new Base(5), addFive<>));
 }

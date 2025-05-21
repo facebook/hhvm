@@ -1,2 +1,0 @@
-hash: ClassContext, %sKEYA
-hash: ClassContext2, %sKEYB, ClassContext, %sKEYA

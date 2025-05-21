@@ -1,13 +1,22 @@
 <?hh
 
-abstract final class IntContext extends HH\ImplicitContext {
-  const type T = int;
-  const bool IS_MEMO_SENSITIVE = true;
+
+class MemoSensitiveData implements HH\IPureMemoizeParam {
+  public function getPayload()[]: int {
+    return 42;
+  }
+  public function getInstanceKey()[]: string {
+    return 'strkey';
+  }
+}
+
+abstract final class IntContext extends HH\MemoSensitiveImplicitContext {
+  const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
-  public static function set<T>(int $context, (function (): T) $f)[zoned, ctx $f]: T {
+  public static function set<T>(this::TData $context, (function (): T) $f)[zoned, ctx $f]: T {
     return parent::runWith($context, $f);
   }
-  public static function getContext()[zoned]: ?int {
+  public static function getContext()[zoned]: MemoSensitiveData {
     return parent::get();
   }
 }
@@ -32,7 +41,7 @@ function mici(): void {
 function main(): void {
   expect(HH\ImplicitContext\State::INACCESSIBLE);
   IntContext::set(
-    0,
+    new MemoSensitiveData(0),
     () ==> expect(HH\ImplicitContext\State::VALUE),
   );
   expect(HH\ImplicitContext\State::INACCESSIBLE);

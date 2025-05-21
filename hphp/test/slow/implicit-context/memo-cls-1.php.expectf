@@ -1,4 +1,0 @@
-args: 1, 2 hash: ClassContext, %sKEYA
-args: 1, 3 hash: ClassContext, %sKEYA
-args: 1, 2 hash: ClassContext2, %sKEYB, ClassContext, %sKEYA
-args: 1, 3 hash: ClassContext2, %sKEYB, ClassContext, %sKEYA

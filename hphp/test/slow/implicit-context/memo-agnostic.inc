@@ -1,10 +1,9 @@
 <?hh
 
-abstract final class TestContext extends HH\ImplicitContext {
-  const type T = mixed;
-  const bool IS_MEMO_SENSITIVE = false;
+abstract final class TestContext extends HH\MemoAgnosticImplicitContext {
+  const type TData = mixed;
   const ctx CRun = [leak_safe];
-  public static function runWith(mixed $context, (function (): T) $f)[ctx $f, this::CRun] {
+  public static function start(mixed $context, (function (): T) $f)[ctx $f, this::CRun] {
     return parent::runWith($context, $f);
   }
 

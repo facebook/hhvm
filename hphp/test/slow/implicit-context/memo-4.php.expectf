@@ -1,4 +1,0 @@
-hash: ClassContext, %sKEYA, kind: 1
-hash: ClassContext, %sKEYA, kind: 4
-hash: ClassContext2, %sKEYB, ClassContext, %sKEYA, kind: 1
-hash: ClassContext2, %sKEYB, ClassContext, %sKEYA, kind: 4

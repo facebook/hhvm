@@ -20,10 +20,10 @@ function genB(): AsyncGenerator<mixed,mixed,void>{
 function main(): mixed{
   include 'memo-agnostic.inc';
 
-  TestContext::runWith(1, () ==> {
+  TestContext::start(1, () ==> {
     $a = genA();
     $a->next(); // 1
-    TestContext::runWith(2, () ==> {
+    TestContext::start(2, () ==> {
       $b = genB();
       $b->next(); // 2
       $a->next(); // 2

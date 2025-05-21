@@ -1,16 +1,17 @@
 <?hh
 
 function aux()[zoned] :mixed{
-  $x = IntContext::getContext();
+  $c = ClassContext::getContext();
+  $x = $c ? $c->getPayload() : 0;
   if ($x > 10) return;
   var_dump($x);
-  IntContext::start($x+1, aux<>);
-  var_dump(IntContext::getContext());
+  ClassContext::start(new Base($x+1), aux<>);
+  var_dump(ClassContext::getContext()->getPayload());
 }
 
 <<__EntryPoint>>
 function main() :mixed{
   include 'implicit.inc';
 
-  IntContext::start(0, aux<>);
+  ClassContext::start(new Base(0), aux<>);
 }

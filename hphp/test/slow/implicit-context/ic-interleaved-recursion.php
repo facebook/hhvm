@@ -4,8 +4,9 @@
 
 function printAndReturnMSIC(): ?int {
   echo "MSIC: ";
-  var_dump(MemoSensitiveIntCtx::getContext());
-  return MemoSensitiveIntCtx::getContext();
+  $c = MemoSensitiveIntCtx::getContext();
+  var_dump ($c ? $c->getPayload() : 'NULL')."\n";
+  return $c ? $c->getPayload() : null;
 }
 
 function printAndReturnMAIC(): ?int {
@@ -26,7 +27,7 @@ function s1(): void {
   printAndReturnMAIC();
   $x = printAndReturnMSIC();
   if ($x > 20) return;
-  MemoAgnosticIntCtx::runWith($x+1, a1<>);
+  MemoAgnosticIntCtx::start($x+1, a1<>);
   var_dump($x);
 }
 
@@ -51,12 +52,12 @@ function a1(): void{
     test_memo();
   }
   if ($x > 20) return;
-  MemoSensitiveIntCtx::start($x+1, s1<>);
+  MemoSensitiveIntCtx::start(new Base($x+1), s1<>);
   var_dump($x);
 }
 
 <<__EntryPoint>>
 function main(): mixed{
   include 'both-contexts.inc';
-  MemoAgnosticIntCtx::runWith(0, a1<>);
+  MemoAgnosticIntCtx::start(0, a1<>);
 }

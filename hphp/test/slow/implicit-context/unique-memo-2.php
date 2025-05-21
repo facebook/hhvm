@@ -12,9 +12,16 @@ function f()[zoned] :mixed{
   memo();
 }
 
-final class ArraykeyContext extends HH\ImplicitContext {
-  const type T = arraykey;
-  const bool IS_MEMO_SENSITIVE = true;
+class MemoSensitiveData implements HH\IPureMemoizeParam {
+  public arraykey $p;
+  public function __construct(arraykey $p) { $this->p = $p; }
+  public function getInstanceKey()[]: string {
+    return $this->p;
+  }
+}
+
+final class ArraykeyContext extends HH\MemoSensitiveImplicitContext {
+  const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
   public static function set($value, $fun) :mixed{ parent::runWith($value, $fun); }
 }
@@ -22,6 +29,5 @@ final class ArraykeyContext extends HH\ImplicitContext {
 
 <<__EntryPoint>>
 function main() :mixed{
-  ArraykeyContext::set(123, f<>);
-  ArraykeyContext::set("123", f<>);
+  ArraykeyContext::set(new MemoSensitiveData("123"), f<>);
 }

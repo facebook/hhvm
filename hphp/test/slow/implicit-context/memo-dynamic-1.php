@@ -58,6 +58,6 @@ function f(bool $has_ctx) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   include 'implicit.inc';
-  ClassContext::start(new C, () ==> f(true));
+  ClassContext::start(new C(0), () ==> f(true));
   HH\ImplicitContext\soft_run_with(() ==> f(false), "SOFT_KEY");
 }

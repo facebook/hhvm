@@ -8,15 +8,15 @@ function throwExn()[zoned] :mixed{
 function main() :mixed{
   include 'implicit.inc';
 
-  IntContext::start(1, ()[zoned] ==> {
+  ClassContext::start(new Base(1), ()[zoned] ==> {
     try {
-      IntContext::start(2, () ==> {
-        var_dump(IntContext::getContext());
+      ClassContext::start(new Base(2), () ==> {
+        var_dump(ClassContext::getContext()->getPayload());
         throwExn();
       });
     } catch (Exception $e) {
       var_dump('caught!');
-      var_dump(IntContext::getContext());
+      var_dump(ClassContext::getContext()->getPayload());
     }
   });
 }

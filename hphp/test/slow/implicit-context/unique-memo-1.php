@@ -12,18 +12,28 @@ function f()[zoned] :mixed{
   memo();
 }
 
+class MemoSensitiveData implements HH\IPureMemoizeParam {
+  public int $p;
+  public function __construct(int $p) { $this->p = $p; }
+  public function getPayload()[]: int {
+    return $this->p;
+  }
+  public function getInstanceKey()[]: string {
+    return 'strkey'.$this->getPayload();
+  }
+}
+
 trait T {
-  const type T = int;
-  const bool IS_MEMO_SENSITIVE = true;
+  const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
   public static function set($value, $fun) :mixed{ parent::runWith($value, $fun); }
 }
 
-final class IntContext extends HH\ImplicitContext { use T; }
-final class IntContext1 extends HH\ImplicitContext { use T; }
+final class IntContext extends HH\MemoSensitiveImplicitContext { use T; }
+final class IntContext1 extends HH\MemoSensitiveImplicitContext { use T; }
 
 <<__EntryPoint>>
 function main() :mixed{
-  IntContext::set(11, f<>);
-  IntContext1::set(1, f<>);
+  IntContext::set(new MemoSensitiveData(11), f<>);
+  IntContext1::set(new MemoSensitiveData(1), f<>);
 }

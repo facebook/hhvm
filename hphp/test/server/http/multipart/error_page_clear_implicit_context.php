@@ -10,14 +10,22 @@ function main_error() :mixed{
 
 // FILE: main.php
 
-abstract final class IntContext extends HH\ImplicitContext {
-  const type T = int;
-  const bool IS_MEMO_SENSITIVE = true;
+class MemoSensitiveData implements HH\IPureMemoizeParam {
+  public function getPayload()[]: int {
+    return 5;
+  }
+  public function getInstanceKey()[]: string {
+    return 'strkey';
+  }
+}
+
+abstract final class IntContext extends HH\MemoSensitiveImplicitContext {
+  const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
   public static function start<T>(int $context, mixed $f)[zoned, ctx $f]: T {
     return parent::runWith($context, $f);
   }
-  public static function get()[zoned]: ?int {
+  public static function get()[zoned]: this::TData {
     return parent::get();
   }
 }
@@ -31,5 +39,5 @@ function foo() :mixed{
 function main(): void {
   echo "Begin!\n";
   hphp_set_error_page("error_page.php");
-  register_shutdown_function(function () { IntContext::start(5, foo<>); });
+  register_shutdown_function(function () { IntContext::start(new MemoSensitiveData(), foo<>); });
 }

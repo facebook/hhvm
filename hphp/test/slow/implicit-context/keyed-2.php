@@ -37,7 +37,7 @@ function main() :mixed{
   include 'implicit.inc';
   for ($i = 0; $i < 4; $i++) {
     f();
-    ClassContext::start(new C, f<>);
+    ClassContext::start(new C(0), f<>);
     ic_inaccessible();
     HH\ImplicitContext\soft_run_with(f<>, "SOFT_KEY");
   }

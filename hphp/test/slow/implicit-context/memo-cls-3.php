@@ -22,7 +22,7 @@ function f()[zoned] :mixed{
   Foo::memo<int>(1, 3);
   Foo::memo<string>(1, 2);
   Foo::memo<string>(1, 3);
-  ClassContext2::start(new B, g<>);
+  ClassContext2::start(new B(0), g<>);
   Foo::memo<int>(1, 2);
   Foo::memo<int>(1, 3);
   Foo::memo<string>(1, 2);
@@ -32,5 +32,5 @@ function f()[zoned] :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   include 'implicit.inc';
-  ClassContext::start(new A, f<>);
+  ClassContext::start(new A(0), f<>);
 }

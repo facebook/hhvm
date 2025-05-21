@@ -1,21 +1,21 @@
 A
 vec(2) {
   string(12) "ClassContext"
-  string(7) "%sKEYA"
+  string(4) "KEYA"
 }
 
 B
 vec(4) {
   string(13) "ClassContext2"
-  string(7) "%sKEYB"
+  string(4) "KEYB"
   string(12) "ClassContext"
-  string(7) "%sKEYA"
+  string(4) "KEYA"
 }
 
 C
 vec(4) {
   string(13) "ClassContext2"
-  string(7) "%sKEYC"
+  string(4) "KEYC"
   string(12) "ClassContext"
-  string(7) "%sKEYA"
+  string(4) "KEYA"
 }

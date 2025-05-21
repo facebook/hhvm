@@ -1,13 +1,13 @@
 2
-int(1)
+1
 string(7) "caught!"
 
-int(1)
+1
 string(13) "caught outer!"
 
 NULL
 1
-int(2)
+2
 string(7) "caught!"
 1
 NULL

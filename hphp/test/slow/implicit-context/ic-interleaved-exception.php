@@ -5,11 +5,12 @@ function throwExn(): mixed {
 }
 
 function printMSIC(): void {
-  var_dump(MemoSensitiveIntCtx::getContext());
+  $c = MemoSensitiveIntCtx::getContext();
+  echo($c ? $c->getPayload(): 'NULL')."\n";
 }
 
 function printMAIC()[leak_safe]: void {
-  echo (MemoAgnosticIntCtx::getContext())."\n";
+  echo MemoAgnosticIntCtx::getContext()."\n";
 }
 
 
@@ -17,9 +18,9 @@ function printMAIC()[leak_safe]: void {
 function main(): mixed{
   include 'both-contexts.inc';
   try {
-    MemoSensitiveIntCtx::start(1, () ==> {
+    MemoSensitiveIntCtx::start(new Base(1), () ==> {
       try {
-        MemoAgnosticIntCtx::runWith(2, () ==> {
+        MemoAgnosticIntCtx::start(2, () ==> {
           printMAIC(); // should return 2
           printMSIC(); // should return 1
           throwExn();
@@ -38,9 +39,9 @@ function main(): mixed{
   }
 
   try {
-    MemoAgnosticIntCtx::runWith(1, () ==> {
+    MemoAgnosticIntCtx::start(1, () ==> {
     try {
-      MemoSensitiveIntCtx::start(2, () ==> {
+      MemoSensitiveIntCtx::start(new Base(2), () ==> {
         printMAIC(); // should return 1, set on the outer
         printMSIC(); // should return 2
         throwExn();

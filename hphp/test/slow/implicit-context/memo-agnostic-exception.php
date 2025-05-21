@@ -8,9 +8,9 @@ function throwExn(): void{
 function main(): mixed{
   include 'memo-agnostic.inc';
 
-  TestContext::runWith(1, () ==> {
+  TestContext::start(1, () ==> {
     try {
-      TestContext::runWith(2, () ==> {
+      TestContext::start(2, () ==> {
         var_dump(TestContext::getContext());
         throwExn();
       });

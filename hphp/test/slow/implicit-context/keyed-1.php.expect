@@ -21,7 +21,7 @@ C
 Hash:
 vec(2) {
   string(12) "ClassContext"
-  string(7) "%sKEYC"
+  string(4) "KEYC"
 }
 memoNoArg passed
   After: C
@@ -31,7 +31,7 @@ C
 Hash:
 vec(2) {
   string(12) "ClassContext"
-  string(7) "%sKEYC"
+  string(4) "KEYC"
 }
 memoWithArg passed
   After: C

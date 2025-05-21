@@ -1,6 +1,6 @@
 In memo agnostic...
 MAIC: int(0)
-MSIC: NULL
+MSIC: string(4) "NULL"
 In memo sensitive...
 MAIC: int(0)
 MSIC: int(1)
@@ -9,7 +9,7 @@ MAIC: int(2)
 MSIC: int(1)
 In test_memo...
 MAIC: int(2)
-MSIC: NULL
+MSIC: string(4) "NULL"
 In memo sensitive...
 MAIC: int(2)
 MSIC: int(3)

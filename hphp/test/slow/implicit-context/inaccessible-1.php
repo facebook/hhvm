@@ -57,5 +57,5 @@ function f() :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   include 'implicit.inc';
-  ClassContext::start(new C, f<>);
+  ClassContext::start(new C(0), f<>);
 }

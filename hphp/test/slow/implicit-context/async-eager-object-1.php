@@ -12,7 +12,7 @@ async function g()[zoned] :Awaitable<mixed>{
 async function h() :Awaitable<mixed>{
   echo "in h should be C got ";
   echo ClassContext::getContext()->name() . "\n";
-  await ClassContext::genStart(new D, async () ==> {
+  await ClassContext::genStart(new D(0), async () ==> {
     echo "in lambda should be D got ";
     echo ClassContext::getContext()->name() . "\n";
     echo "done with lambda should be D got ";
@@ -37,5 +37,5 @@ async function f()[zoned] :Awaitable<mixed>{
 async function main() :Awaitable<mixed>{
   include 'async-implicit.inc';
 
-  await ClassContext::genStart(new C, f<>);
+  await ClassContext::genStart(new C(0), f<>);
 }

@@ -38,6 +38,6 @@ function f()[zoned]: mixed{
 <<__EntryPoint>>
 function main(): mixed{
   include 'implicit.inc';
-  ClassContext::start(new A, f<>);
+  ClassContext::start(new A(0), f<>);
   memo2(1, 4);
 }

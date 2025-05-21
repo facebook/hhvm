@@ -318,17 +318,39 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
   return init_null();
 }
 
+Variant binary_deserialize_hack(int8_t thrift_typeID,
+                           PHPInputTransport& transport,
+                           const FieldSpec& fieldspec,
+                           int options,
+                           bool& hasTypeWrapper) {
+  auto thriftValue = binary_deserialize_internal(
+        thrift_typeID, transport, fieldspec, options, hasTypeWrapper);
+  hasTypeWrapper = hasTypeWrapper || fieldspec.isTypeWrapped;
+  return transformToHackType(std::move(thriftValue), *fieldspec.adapter);
+}
+
+Variant binary_deserialize_thrift(int8_t thrift_typeID,
+                           PHPInputTransport& transport,
+                           const FieldSpec& fieldspec,
+                           int options,
+                           bool& hasTypeWrapper) {
+  auto thriftValue = binary_deserialize_internal(
+        thrift_typeID, transport, fieldspec, options, hasTypeWrapper);
+  hasTypeWrapper = hasTypeWrapper || fieldspec.isTypeWrapped;
+  return thriftValue;
+}
+
 Variant binary_deserialize(int8_t thrift_typeID,
                            PHPInputTransport& transport,
                            const FieldSpec& fieldspec,
                            int options,
                            bool& hasTypeWrapper) {
-  const auto thriftValue = binary_deserialize_internal(
+  if (fieldspec.adapter) {
+    return binary_deserialize_hack(
         thrift_typeID, transport, fieldspec, options, hasTypeWrapper);
-  hasTypeWrapper = hasTypeWrapper || fieldspec.isTypeWrapped;
-  return fieldspec.adapter
-           ? transformToHackType(thriftValue, *fieldspec.adapter)
-           : thriftValue;
+  }
+  return binary_deserialize_thrift(
+      thrift_typeID, transport, fieldspec, options, hasTypeWrapper);
 }
 
 void skip_element(long thrift_typeID, PHPInputTransport& transport) {
@@ -630,15 +652,18 @@ void binary_serialize(int8_t thrift_typeID,
                       PHPOutputTransport& transport,
                       const Variant& value,
                       const FieldSpec& fieldspec) {
-  auto thrift_value = value;
-  if (fieldspec.isTypeWrapped && value.isObject()) {
-    thrift_value = getThriftField(value.toObject());
-  }
-  if (fieldspec.adapter)  {
-    const auto& thriftValue = transformToThriftType(thrift_value, *fieldspec.adapter);
-    binary_serialize_internal(thrift_typeID, transport, thriftValue, fieldspec);
+  bool isTypeWrappedObj = fieldspec.isTypeWrapped && value.isObject();
+  if (!fieldspec.adapter && !isTypeWrappedObj) {
+    binary_serialize_internal(thrift_typeID, transport, value, fieldspec);
   } else {
-    binary_serialize_internal(thrift_typeID, transport, thrift_value, fieldspec);
+    auto valueCopy = isTypeWrappedObj ? getThriftField(value.toObject()) : value;
+    if (fieldspec.adapter)  {
+      const auto thriftValue =
+        transformToThriftType(std::move(valueCopy), *fieldspec.adapter);
+      binary_serialize_internal(thrift_typeID, transport, thriftValue, fieldspec);
+    } else {
+      binary_serialize_internal(thrift_typeID, transport, valueCopy, fieldspec);
+    }
   }
 }
 

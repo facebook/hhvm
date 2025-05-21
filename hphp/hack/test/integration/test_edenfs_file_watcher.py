@@ -1,25 +1,44 @@
 # pyre-strict
 
+"""
+
+This file tests the Edenfs_watcher module.
+
+Note that like all the other tests in this directory, it is run *without* the
+run_as_bundle configuration flag on its python_unittest definition in TARGETS.
+This means that the distinction beween setUp vs setUpClass (and tearDown vs
+tearDownClass) is insignificant. Therefore, we just follow CommonTestDriver to
+decide what setup and teardown code goes where.
+"""
+
 import os
 
 import shutil
 import subprocess
-from typing import List
+from pathlib import Path
+from typing import ClassVar, List, Optional, Tuple
 
 import hphp.hack.test.integration.common_tests as common_tests
+from eden.integration.lib.edenclient import EdenFS
 from hphp.hack.test.integration.common_tests import CommonTestDriver
+
+from watchman.integration.lib import WatchmanInstance
 
 
 # Contents of hh.conf used in these tests Currently, enabling the EdenFS file
 # watcher actually runs the old Watchman code under the hood. Thus, we configure
 # Watchman the same way it is in /etc/hh.conf these days.
-WATCHMAN_AND_EDENFS_HH_CONF = """
+def makeWatchmanEdenHhConf(watchman_socket_path: str) -> str:
+    config = """
 use_watchman = true
 watchman_debug_logging = false
 watchman_subscribe_v2 = true
 watchman_sync_directory = .hg
 edenfs_file_watcher_enabled=true
 """
+
+    config = config + f"watchman_sockname={watchman_socket_path}\n"
+    return config
 
 
 def runAndCheckSetupCommand(args: List[str]) -> None:
@@ -36,12 +55,37 @@ def createHgRepo(path: str) -> None:
     runAndCheckSetupCommand(["hg", "commit", "-m", "initial", "-R", path])
 
 
-def mountEden(hg_repo: str, eden_mount_point: str) -> None:
-    runAndCheckSetupCommand(["edenfsctl", "clone", hg_repo, eden_mount_point])
+def createEdenInstance(eden_base_dir: str) -> EdenFS:
+    """Creates an EdenFS instance, and starts it.
+
+    The instance is independent from the one powering for example
+    ~/fbsource, and stores all of its state and metadata in eden_base_dir.
+    """
+
+    instance = EdenFS(Path(eden_base_dir))
+    instance.start()
+    return instance
 
 
-def unmountEden(eden_mount_point: str) -> None:
-    runAndCheckSetupCommand(["edenfsctl", "remove", "--no-prompt", eden_mount_point])
+def createWatchmanInstance() -> WatchmanInstance.Instance:
+    """Creates a Watchman instance, and starts it.
+
+    The instance is independent from the one powering for example
+    ~/fbsource, and stores all of its state and metadata in a temp dir
+    that it manages.
+    """
+
+    instance = WatchmanInstance.Instance()
+    instance.start()
+    return instance
+
+
+def mountEden(eden_instance: EdenFS, hg_repo: str, eden_mount_point: str) -> None:
+    eden_instance.clone(hg_repo, eden_mount_point)
+
+
+def unmountEden(eden_instance: EdenFS, eden_mount_point: str) -> None:
+    eden_instance.remove(eden_mount_point)
 
 
 def assertServerLogContains(driver: CommonTestDriver, needle: str) -> None:
@@ -75,13 +119,24 @@ class CommonTestsOnEden(common_tests.CommonTests):
         commit using Eden.
         """
 
+        eden_instance: ClassVar[EdenFS]
+        watchman_instance: ClassVar[WatchmanInstance.Instance]
+
         @classmethod
         def setUpClass(cls, template_repo: str) -> None:
-            print("running CommonTestsOnEden.Driver.setUpClass")
+            print("running CommonTestsOnEden._Driver.setUpClass")
 
             # We need to call CommonTestDriver.setUpClass, but make the class
             # variable changes visible to our cls object.
             super(CommonTestsOnEden._Driver, cls).setUpClass(template_repo)
+
+            # This is where the Eden testing intsance will put all of its state and files
+            eden_base_dir = os.path.join(cls.base_tmp_dir, "eden_base")
+            os.mkdir(eden_base_dir)
+            cls.eden_instance = createEdenInstance(eden_base_dir)
+
+            cls.watchman_instance = createWatchmanInstance()
+            watchman_socket_path = cls.watchman_instance.getUnixSockPath()
 
             # The call above set cls.repo_dir, but does not create that directory. Good!
             # Let's create an hg repo once for all tests, and then mount it for
@@ -90,15 +145,23 @@ class CommonTestsOnEden(common_tests.CommonTests):
             shutil.copytree(template_repo, cls.hg_repo_dir)
 
             with open(os.path.join(cls.hg_repo_dir, "hh.conf"), "w") as f:
-                f.write(WATCHMAN_AND_EDENFS_HH_CONF)
+                f.write(makeWatchmanEdenHhConf(watchman_socket_path))
 
             createHgRepo(cls.hg_repo_dir)
+
+        @classmethod
+        def tearDownClass(cls) -> None:
+            print("running CommonTestsOnEden._Driver.tearDownClass")
+
+            cls.eden_instance.cleanup()
+            cls.watchman_instance.stop()
+            super(CommonTestsOnEden._Driver, cls).tearDownClass()
 
         def setUp(self) -> None:
             print("running CommonTestsOnEden._Driver.setUp")
 
             # For hygiene, we (re-)mount our Eden repo for each individual test
-            mountEden(self.hg_repo_dir, self.repo_dir)
+            mountEden(self.eden_instance, self.hg_repo_dir, self.repo_dir)
 
         def tearDown(self) -> None:
             print("running CommonTestsOnEden._Driver.tearDown")
@@ -107,8 +170,26 @@ class CommonTestsOnEden(common_tests.CommonTests):
             # but core testing logic, but we need to get this into every test
             assertEdenFsWatcherInitialized(self)
 
-            # For hygiene, we (re-)mount our Eden repo for each individual test
-            unmountEden(self.repo_dir)
+            # For hygiene, we (re-)mount our Eden repo for each individual test.
+            # Note that we must stop the server before unmounting the Eden repo that it works on.
+            # 3 retries is the value used in CommonTestDriver.tearDown
+            self.stop_hh_server(retries=3)
+            unmountEden(self.eden_instance, self.repo_dir)
+
+        def run_check(
+            self, stdin: Optional[str] = None, options: Optional[List[str]] = None
+        ) -> Tuple[str, str, int]:
+            """Just a wrapper overriding of CommonTestDriver.run_check such that we get the server log if hh_client check failed."""
+
+            (stdout, stderr, retcode) = super().run_check(stdin, options)
+            if retcode != 0:
+                print(
+                    f"hh_client check failed with exit code {retcode} for options {options}"
+                )
+                print(
+                    f"Server log:\n{self.get_all_logs(self.repo_dir).current_server_log}"
+                )
+            return (stdout, stderr, retcode)
 
     @classmethod
     def get_test_driver(cls) -> common_tests.CommonTestDriver:

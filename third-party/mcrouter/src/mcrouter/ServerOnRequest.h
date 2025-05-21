@@ -13,6 +13,7 @@
 
 #ifndef MCROUTER_OSS_BUILD
 #include "core_infra_security/thrift_authentication_module/ClientIdentifierHelper.h"
+#include "crypto/cat/cpp/protocol/CryptoAuthTokenRetriever.h"
 #endif
 
 #include "mcrouter/CarbonRouterClient.h"
@@ -183,6 +184,12 @@ class ServerOnRequest {
           std::holds_alternative<std::string>(mayBeHashedIdentities->value())) {
         reqRef.setClientIdentifier(
             std::get<std::string>(mayBeHashedIdentities->value()));
+      }
+      auto serializedCat = facebook::cryptocat::protocol::
+          CryptoAuthTokenRetriever::getUnverifiedSerializedTokensFromHeader(
+              *ctxRef.getThriftRequestContext());
+      if (serializedCat.has_value()) {
+        reqRef.setCryptoAuthToken(std::string{serializedCat.value()});
       }
     }
 #endif

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_type.h>
 
 namespace apache::thrift::compiler::cpp2 {
@@ -26,17 +27,19 @@ class OrderableTypeUtils final {
   OrderableTypeUtils() = delete;
 
   /*
-   * This determines if a type can be ordered.
+   * This determines if the given structured type (struct, union or exception)
+   * can be ordered.
+   *
    * If the type is using any annotation for cpp2.type or cpp2.template
    * its not considered orderable, and we don't need to generate operator<
    * methods
    */
   static bool is_orderable(
-      const t_type& type, bool enableCustomTypeOrderingIfStructureHasUri);
+      const t_structured& type, bool enableCustomTypeOrderingIfStructureHasUri);
 
   static bool is_orderable(
       std::unordered_map<const t_type*, bool>& memo,
-      const t_type& type,
+      const t_structured& type,
       bool enableCustomTypeOrderingIfStructureHasUri);
 };
 

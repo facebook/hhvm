@@ -148,23 +148,25 @@ void is_orderable_back_propagate(
 } // namespace
 
 bool OrderableTypeUtils::is_orderable(
-    const t_type& type, bool enableCustomTypeOrderingIfStructureHasUri) {
+    const t_structured& structured_type,
+    bool enableCustomTypeOrderingIfStructureHasUri) {
   // Thrift struct could self-reference, so have to perform a two-stage walk:
   std::unordered_map<const t_type*, bool> memo;
-  return is_orderable(memo, type, enableCustomTypeOrderingIfStructureHasUri);
+  return is_orderable(
+      memo, structured_type, enableCustomTypeOrderingIfStructureHasUri);
 }
 
 bool OrderableTypeUtils::is_orderable(
     std::unordered_map<const t_type*, bool>& memo,
-    const t_type& type,
+    const t_structured& structured_type,
     bool enableCustomTypeOrderingIfStructureHasUri) {
   // Thrift struct could self-reference, so have to perform a two-stage walk:
   // first all self-references are speculated, then negative classification is
   // back-propagated through the traversed dependencies.
   is_orderable_walk_context context{enableCustomTypeOrderingIfStructureHasUri};
-  is_orderable_walk(memo, type, nullptr, context, false);
+  is_orderable_walk(memo, structured_type, nullptr, context, false);
   is_orderable_back_propagate(memo, context);
-  auto it = memo.find(&type);
+  auto it = memo.find(&structured_type);
   return it == memo.end() || it->second;
 }
 

@@ -29,9 +29,9 @@ namespace apache::thrift::compiler::cpp2 {
 namespace {
 const t_structured& get_structured_named(
     const t_program& p, std::string_view name) {
-  for (auto i : p.structured_definitions()) {
-    if (i->name() == name) {
-      return *i;
+  for (const t_structured* structured_definition : p.structured_definitions()) {
+    if (structured_definition->name() == name) {
+      return *structured_definition;
     }
   }
   throw std::logic_error("Foo not found");
@@ -124,60 +124,60 @@ struct Baz4 {
 } // namespace
 
 TEST(OrderableTypeUtilsTest, is_orderable_set_template) {
-  t_set t(&t_primitive_type::t_double());
-  t.set_unstructured_annotation("cpp2.template", "blah");
-  t_program p("path/to/program.thrift", "path/to/program.thrift");
-  t_struct s(&p, "struct_name");
-  s.append(std::make_unique<t_field>(&t, "set_field", 1));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(t, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(s, true));
+  t_set set_t(&t_primitive_type::t_double());
+  set_t.set_unstructured_annotation("cpp2.template", "blah");
+  t_program program_p("path/to/program.thrift", "path/to/program.thrift");
+  t_struct struct_s(&program_p, "struct_name");
+  struct_s.append(std::make_unique<t_field>(&set_t, "set_field", 1));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, true));
 
-  s.set_uri("facebook.com/path/to/struct_name");
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(s, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(s, false));
+  struct_s.set_uri("facebook.com/path/to/struct_name");
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, false));
 
-  s.set_uri(""); // remove uri
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(s, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(s, false));
+  struct_s.set_uri(""); // remove uri
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, false));
 
-  auto builder = gen::cpp_annotation_builder::EnableCustomTypeOrdering(p);
-  s.add_structured_annotation(builder.make());
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(s, true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(s, false));
+  auto builder =
+      gen::cpp_annotation_builder::EnableCustomTypeOrdering(program_p);
+  struct_s.add_structured_annotation(builder.make());
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, false));
 }
 
 TEST(OrderableTypeUtilsTest, is_orderable_struct) {
-  t_program p("path/to/program.thrift", "path/to/program.thrift");
-  t_struct s(&p, "struct_name");
-  s.append(std::make_unique<t_field>(
+  t_program program_p("path/to/program.thrift", "path/to/program.thrift");
+  t_struct struct_s(&program_p, "struct_name");
+  struct_s.append(std::make_unique<t_field>(
       &t_primitive_type::t_string(), "field_name", 1));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(s, true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, true));
 }
 
 TEST(OrderableTypeUtilsTest, is_orderable_struct_self_reference) {
-  t_program p("path/to/program.thrift", "path/to/program.thrift");
+  t_program program_p("path/to/program.thrift", "path/to/program.thrift");
 
-  t_set t(&t_primitive_type::t_double());
-  t.set_unstructured_annotation("cpp2.template", "blah");
+  t_set set_t(&t_primitive_type::t_double());
+  set_t.set_unstructured_annotation("cpp2.template", "blah");
 
-  t_struct c(&p, "C");
-  c.append(std::make_unique<t_field>(&t, "set_field", 1));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(c, true));
+  t_struct struct_c(&program_p, "C");
+  struct_c.append(std::make_unique<t_field>(&set_t, "set_field", 1));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_c, true));
 
-  t_struct b(&p, "B");
-  t_struct a(&p, "A");
+  t_struct struct_b(&program_p, "B");
+  t_struct struct_a(&program_p, "A");
 
-  b.append(std::make_unique<t_field>(&a, "a", 1));
-  a.append(std::make_unique<t_field>(&b, "b", 1));
-  a.append(std::make_unique<t_field>(&c, "c", 2));
+  struct_b.append(std::make_unique<t_field>(&struct_a, "struct_a", 1));
+  struct_a.append(std::make_unique<t_field>(&struct_b, "struct_b", 1));
+  struct_a.append(std::make_unique<t_field>(&struct_c, "struct_c", 2));
 
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(a, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(b, true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_a, true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_b, true));
 
   std::unordered_map<t_type const*, bool> memo;
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, a, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, b, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, c, true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, struct_a, true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, struct_b, true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, struct_c, true));
 }
 
 TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithoutUri) {

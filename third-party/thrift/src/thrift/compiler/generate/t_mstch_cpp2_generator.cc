@@ -227,10 +227,12 @@ class cpp2_generator_context {
   cpp2_generator_context& operator=(cpp2_generator_context&&) = default;
 
   bool is_orderable(
-      const t_type& type, bool enableCustomTypeOrderingIfStructureHasUri) {
-    auto& memo = is_orderable_memo_;
+      const t_structured& structured_type,
+      bool enableCustomTypeOrderingIfStructureHasUri) {
     return cpp2::OrderableTypeUtils::is_orderable(
-        memo, type, enableCustomTypeOrderingIfStructureHasUri);
+        is_orderable_memo_,
+        structured_type,
+        enableCustomTypeOrderingIfStructureHasUri);
   }
 
   cpp_name_resolver& resolver() { return resolver_; }

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use bstr::BString;
 use itertools::Itertools;
@@ -106,7 +106,7 @@ pub fn desugar(
         // free variables and get an error from that
         LiveVars::new_from_expression(&e).used
     } else {
-        HashMap::default()
+        BTreeMap::default()
     };
 
     let mut state = RewriteState {
@@ -2130,9 +2130,9 @@ fn mk_visit_string(pos: &Pos, str: Expr_) -> Expr {
 pub struct LiveVars {
     // The variables that might be used in a block, not following an assignment
     // to that variable in the block
-    pub used: HashMap<LocalId, Pos>,
+    pub used: BTreeMap<LocalId, Pos>,
     // The variables that are definitely assigned in a block
-    pub assigned: HashMap<LocalId, Pos>,
+    pub assigned: BTreeMap<LocalId, Pos>,
 }
 
 impl LiveVars {
@@ -2140,8 +2140,8 @@ impl LiveVars {
     // assuming nothing is live after
     pub fn new_from_statement(stmts: &[Stmt]) -> Self {
         let mut lvs = LiveVars {
-            used: HashMap::default(),
-            assigned: HashMap::default(),
+            used: BTreeMap::default(),
+            assigned: BTreeMap::default(),
         };
         lvs.update_for_stmts(stmts);
         lvs
@@ -2151,8 +2151,8 @@ impl LiveVars {
     // assuming that nothing is live after
     pub fn new_from_expression(expr: &Expr) -> Self {
         let mut lvs = LiveVars {
-            used: HashMap::default(),
-            assigned: HashMap::default(),
+            used: BTreeMap::default(),
+            assigned: BTreeMap::default(),
         };
         lvs.visit_expr(&mut (), expr).unwrap();
         lvs
@@ -2184,21 +2184,21 @@ impl LiveVars {
 
                     let mut body_lvs = Self::new_from_statement(body);
                     // The assigned vars don't matter because we might not enter the body
-                    body_lvs.assigned = HashMap::default();
+                    body_lvs.assigned = BTreeMap::default();
                     self.update_for_more_live_vars(body_lvs);
                     // We relay on there being no assignments in the expr
                     self.visit_expr(&mut (), test).unwrap();
                 }
                 Stmt_::For(box (init, test, inc, body)) => {
                     let mut body_lvs = LiveVars {
-                        used: HashMap::default(),
-                        assigned: HashMap::default(),
+                        used: BTreeMap::default(),
+                        assigned: BTreeMap::default(),
                     };
                     for e in inc.iter().rev() {
                         body_lvs.visit_expr(&mut (), e).unwrap();
                     }
                     body_lvs.update_for_stmts(body);
-                    body_lvs.assigned = HashMap::default();
+                    body_lvs.assigned = BTreeMap::default();
                     self.update_for_more_live_vars(body_lvs);
                     for e in test.iter().rev() {
                         self.visit_expr(&mut (), e).unwrap();

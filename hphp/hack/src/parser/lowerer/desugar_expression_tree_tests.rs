@@ -9,14 +9,14 @@
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     use hack_macros::hack_expr;
     use hack_macros::hack_stmts;
     use lowerer::desugar_expression_tree::LiveVars;
 
-    fn strings_to_map(v: Vec<&str>) -> HashMap<aast::LocalId, Pos> {
-        HashMap::from_iter(v.iter().map(|s| ((0, s.to_string()), Pos::NONE)))
+    fn strings_to_map(v: Vec<&str>) -> BTreeMap<aast::LocalId, Pos> {
+        BTreeMap::from_iter(v.iter().map(|s| ((0, s.to_string()), Pos::NONE)))
     }
 
     fn strings_to_lids(v: Vec<&str>) -> Vec<aast::Lid> {

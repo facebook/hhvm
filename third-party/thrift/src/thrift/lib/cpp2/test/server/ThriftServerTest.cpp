@@ -22,8 +22,6 @@
 #include <utility>
 
 #include <boost/cast.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/thread.hpp>
 #include <fmt/core.h>
 
 #include <gmock/gmock.h>
@@ -98,7 +96,6 @@ using namespace apache::thrift::transport;
 using namespace apache::thrift::concurrency;
 using namespace std::literals;
 using folly::test::find_resource;
-using std::string;
 
 THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
@@ -294,7 +291,7 @@ TEST(ThriftServer, HeaderTest) {
 }
 
 TEST(ThriftServer, ServerEventHandlerTest) {
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
    public:
     void voidResponse() override {}
   };
@@ -307,16 +304,16 @@ TEST(ThriftServer, ServerEventHandlerTest) {
       ++connectionDestroyedCalls;
     }
 
-    ssize_t preServeCalls{0};
-    ssize_t newConnectionCalls{0};
-    ssize_t connectionDestroyedCalls{0};
+    ssize_t preServeCalls = 0;
+    ssize_t newConnectionCalls = 0;
+    ssize_t connectionDestroyedCalls = 0;
   };
   auto eh1 = std::make_shared<TestEventHandler>();
   auto eh2 = std::make_shared<TestEventHandler>();
   auto eh3 = std::make_shared<TestEventHandler>();
   auto eh4 = std::make_shared<TestEventHandler>();
 
-  auto testIf = std::make_shared<TestInterface>();
+  auto testIf = std::make_shared<TestHandler>();
 
   auto runner = std::make_unique<ScopedServerInterfaceThread>(
       testIf, "::1", 0, [&](auto& ts) {
@@ -1208,7 +1205,7 @@ TEST_P(HeaderOrRocket, RequestParamsNullCheck) {
 }
 
 TEST_P(HeaderOrRocket, OnewayQueueTimeTest) {
-  struct TestInterface : apache::thrift::ServiceHandler<TestService> {
+  struct TestHandler : apache::thrift::ServiceHandler<TestService> {
     folly::Baton<> running, finished;
     folly::Baton<> running2;
     int once = 0;
@@ -1221,7 +1218,7 @@ TEST_P(HeaderOrRocket, OnewayQueueTimeTest) {
     void noResponse(int64_t) override { running2.post(); }
   };
 
-  auto handler = std::make_shared<TestInterface>();
+  auto handler = std::make_shared<TestHandler>();
   ScopedServerInterfaceThread runner(handler);
   runner.getThriftServer().setQueueTimeout(100ms);
 
@@ -1240,12 +1237,12 @@ TEST_P(HeaderOrRocket, OnewayQueueTimeTest) {
 }
 
 TEST_P(HeaderOrRocket, Priority) {
-  int callCount{0};
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  int callCount = 0;
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
     int& callCount_;
 
    public:
-    explicit TestInterface(int& callCount) : callCount_(callCount) {}
+    explicit TestHandler(int& callCount) : callCount_(callCount) {}
     void priorityHigh() override {
       callCount_++;
       EXPECT_EQ(
@@ -1260,8 +1257,7 @@ TEST_P(HeaderOrRocket, Priority) {
     }
   };
 
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(callCount));
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>(callCount));
   folly::EventBase base;
   auto client = makeClient(runner, &base);
   client->sync_priorityHigh();
@@ -1285,14 +1281,14 @@ bool blockWhile(F&& f, Duration duration = 1s) {
 
 TEST_P(HeaderOrRocket, ThreadManagerAdapterOverSimpleTMUpstreamPriorities) {
   THRIFT_FLAG_SET_MOCK(allow_set_thread_manager_resource_pools, true);
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
    public:
-    TestInterface() {}
+    TestHandler() {}
     void voidResponse() override { callback_(getHandlerExecutor()); }
     folly::Function<void(folly::Executor*)> callback_;
   };
 
-  auto handler = std::make_shared<TestInterface>();
+  auto handler = std::make_shared<TestHandler>();
   ScopedServerInterfaceThread runner(handler, "::1", 0, [&](auto& ts) {
     // empty executor will default to SimpleThreadManager
     auto executor = ThreadManager::newSimpleThreadManager("tm", 1);
@@ -1303,7 +1299,7 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterOverSimpleTMUpstreamPriorities) {
     tm->start();
     ts.setThreadManager(tm);
   });
-  std::make_shared<TestInterface>();
+  std::make_shared<TestHandler>();
   auto client = makeClient(runner, nullptr);
 
   folly::Baton baton1;
@@ -1336,9 +1332,9 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterOverSimpleTMUpstreamPriorities) {
 
 TEST_P(
     HeaderOrRocket, ThreadManagerAdapterOverMeteredExecutorUpstreamPriorities) {
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
    public:
-    explicit TestInterface(int& testCounter) : testCounter_(testCounter) {}
+    explicit TestHandler(int& testCounter) : testCounter_(testCounter) {}
     void voidResponse() override { callback_(getHandlerExecutor()); }
     int echoInt(int value) override {
       EXPECT_EQ(value, testCounter_++);
@@ -1349,7 +1345,7 @@ TEST_P(
   };
 
   int testCounter = 0;
-  auto handler = std::make_shared<TestInterface>(testCounter);
+  auto handler = std::make_shared<TestHandler>(testCounter);
   ScopedServerInterfaceThread runner(handler, "::1", 0, [&](auto& ts) {
     auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
         1, std::make_shared<folly::NamedThreadFactory>("cpu"));
@@ -1405,14 +1401,14 @@ TEST_P(
 }
 
 TEST_P(HeaderOrRocket, ThreadManagerAdapterManyPools) {
-  int callCount{0};
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  int callCount = 0;
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
     int& callCount_;
     std::array<std::array<std::string, 3>, 2> prefixes = {
         {{"tm-1-", "tm-4-", "cpu0"}, {"tm.H", "tm.BE", "tm.N"}}};
 
    public:
-    explicit TestInterface(int& callCount) : callCount_(callCount) {}
+    explicit TestHandler(int& callCount) : callCount_(callCount) {}
     void priorityHigh() override {
       callCount_++;
       EXPECT_THAT(
@@ -1434,7 +1430,7 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterManyPools) {
   };
 
   ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(callCount), "::1", 0, [](auto& ts) {
+      std::make_shared<TestHandler>(callCount), "::1", 0, [](auto& ts) {
         if (!useResourcePoolsFlagsSet()) {
           auto tm = std::shared_ptr<ThreadManagerExecutorAdapter>(
               new ThreadManagerExecutorAdapter(
@@ -1465,13 +1461,13 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterManyPools) {
 }
 
 TEST_P(HeaderOrRocket, ThreadManagerAdapterSinglePool) {
-  int callCount{0};
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  int callCount = 0;
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
     int& callCount_;
     std::array<std::string, 2> threadNames{{"cpu0", "cpu.N0"}};
 
    public:
-    explicit TestInterface(int& callCount) : callCount_(callCount) {}
+    explicit TestHandler(int& callCount) : callCount_(callCount) {}
     void priorityHigh() override {
       callCount_++;
       EXPECT_EQ(
@@ -1493,7 +1489,7 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterSinglePool) {
   };
 
   ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(callCount), "::1", 0, [](auto& ts) {
+      std::make_shared<TestHandler>(callCount), "::1", 0, [](auto& ts) {
         if (!useResourcePoolsFlagsSet()) {
           auto tm = std::shared_ptr<ThreadManagerExecutorAdapter>(
               new ThreadManagerExecutorAdapter(
@@ -1521,12 +1517,12 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterSinglePool) {
 
 TEST_P(HeaderOrRocket, StickyToThreadPool) {
   THRIFT_FLAG_SET_MOCK(allow_set_thread_manager_resource_pools, true);
-  int callCount{0};
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  int callCount = 0;
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
     int& callCount_;
 
    public:
-    explicit TestInterface(int& callCount) : callCount_(callCount) {}
+    explicit TestHandler(int& callCount) : callCount_(callCount) {}
     folly::SemiFuture<folly::Unit> semifuture_priorityHigh() override {
       EXPECT_THAT(
           *folly::getCurrentThreadName(), testing::StartsWith("foo-pri1"));
@@ -1549,7 +1545,7 @@ TEST_P(HeaderOrRocket, StickyToThreadPool) {
   };
 
   ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(callCount), "::1", 0, [](auto& ts) {
+      std::make_shared<TestHandler>(callCount), "::1", 0, [](auto& ts) {
         auto tm = PriorityThreadManager::newPriorityThreadManager(1);
         tm->setNamePrefix("foo");
         tm->start();
@@ -1818,22 +1814,21 @@ TEST_P(HeaderOrRocket, ConnectionAgeTimeout) {
 }
 
 TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
    public:
-    TestInterface() = delete;
-    TestInterface(
+    TestHandler(
         folly::Baton<>& requestReceivedBaton,
         folly::Baton<>& callbackInstalledBaton)
         : requestReceivedBaton_{requestReceivedBaton},
           callbackInstalledBaton_{callbackInstalledBaton} {}
 
-    // only used to configure the server-side connection socket
-    int sync_echoInt(int) override {
+    // Only used to configure the server-side connection socket.
+    int32_t sync_echoInt(int32_t) override {
       shrinkSocketSendBuffer();
       return 0;
     }
 
-    void sync_sendResponse(std::string& _return, int64_t block) override {
+    void sync_sendResponse(std::string& ret, int64_t block) override {
       if (block > 0) {
         requestReceivedBaton_.post();
         callbackInstalledBaton_.wait();
@@ -1843,16 +1838,22 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
       // a) much larger than the send buffer, and
       // b) random to mitigate undesired effects of (possible) compression at
       //    lower points in the networking stack
-      _return = getRandomString(bufsize_ * 100);
+      std::generate_n(std::back_inserter(ret), bufsize_ * 100, []() -> char {
+        return 32 + (folly::Random::rand32() % 95);
+      });
     }
 
    private:
     void shrinkSocketSendBuffer() {
-      auto const_transport =
-          getRequestContext()->getConnectionContext()->getTransport();
-      auto transport = const_cast<folly::AsyncTransport*>(const_transport);
+      auto transport = const_cast<folly::AsyncTransport*>(
+          getRequestContext()->getConnectionContext()->getTransport());
       auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
-      sock->setSendBufSize(0); // smallest possible size
+
+      // Passing 0 to setSendBufSize sets the buffer size to the smallest
+      // possible value on Linux but not other platforms.
+      int result = sock->setSendBufSize(folly::kIsLinux ? 0 : 1);
+      ASSERT_EQ(result, 0);
+
       socklen_t bufsizelen = sizeof(bufsize_);
       if (sock->getSockOpt<int>(SOL_SOCKET, SO_SNDBUF, &bufsize_, &bufsizelen) <
           0) {
@@ -1860,23 +1861,14 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
       }
     }
 
-    std::string getRandomString(size_t len) {
-      auto randomChar = []() -> char { return 32 + (rand() % 95); };
-      std::string str(len, 0);
-      std::generate_n(str.begin(), len, randomChar);
-      return str;
-    }
-
-    int bufsize_{0};
+    int bufsize_ = 0;
     folly::Baton<>& requestReceivedBaton_;
     folly::Baton<>& callbackInstalledBaton_;
   };
 
   class SlowReadCallback : public folly::AsyncReader::ReadCallback {
    public:
-    SlowReadCallback() = delete;
-
-    explicit SlowReadCallback(
+    SlowReadCallback(
         folly::AsyncSocket* socket,
         size_t maxBytesPerLoop,
         std::chrono::milliseconds sleepMsPerLoop)
@@ -1946,7 +1938,7 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
 
    private:
     folly::AsyncSocket* socket_;
-    folly::AsyncReader::ReadCallback* wrapped_{nullptr};
+    folly::AsyncReader::ReadCallback* wrapped_ = nullptr;
     size_t maxBytesPerLoop_;
     std::chrono::milliseconds sleepMsPerLoop_;
     bool hasEOF_ = false;
@@ -1954,14 +1946,14 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
 
   folly::Baton<> requestReceivedBaton;
   folly::Baton<> callbackInstalledBaton;
-  ScopedServerInterfaceThread ssit(std::make_shared<TestInterface>(
+  ScopedServerInterfaceThread ssit(std::make_shared<TestHandler>(
       requestReceivedBaton, callbackInstalledBaton));
 
-  // set maxResponseWriteTime to 1 second
+  // Set maxResponseWriteTime to 1 second.
   auto& config =
       apache::thrift::detail::getThriftServerConfig(ssit.getThriftServer());
-  config.setMaxResponseWriteTime_Deprecated(folly::observer::makeStaticObserver(
-      std::make_optional(std::chrono::milliseconds{1000})));
+  config.setMaxResponseWriteTime_Deprecated(
+      folly::observer::makeStaticObserver(std::make_optional(1000ms)));
 
   std::unique_ptr<SlowReadCallback> readCallback;
 
@@ -1972,14 +1964,14 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
         return makeChannel(std::move(socket));
       });
 
-  // Call to shrink server socket buffer
+  // Call to shrink the server socket buffer.
   client->semifuture_echoInt(0).get();
 
-  // Test normal client reads (timeout should not fire)
+  // Test normal client reads (timeout should not fire).
   auto t1 = client->semifuture_sendResponse(0).getTry();
   EXPECT_FALSE(t1.hasException());
 
-  // Test slow client reads (timeout should fire)
+  // Test slow client reads (timeout should fire).
   auto fut = client->semifuture_sendResponse(1);
 
   /* Header sets the read callback (to a new TAsyncTransportHandler) on the
@@ -2021,7 +2013,7 @@ TEST_P(OverloadTest, DISABLED_Test) {
   auto client = makeClient(runner, &base);
 
   runner.getThriftServer().setIsOverloaded(
-      [&](const auto&, const string& method) {
+      [&](const auto&, const std::string& method) {
         if (errorType == ErrorType::AppOverload) {
           EXPECT_EQ("voidResponse", method);
           return true;
@@ -3274,7 +3266,7 @@ TEST_P(HeaderOrRocket, PreprocessHeaders) {
 
 TEST_P(HeaderOrRocket, TaskTimeoutBeforeProcessing) {
   folly::Baton haltBaton;
-  std::atomic<int> processedCount{0};
+  std::atomic<int> processedCount = 0;
 
   class VoidResponseInterface
       : public apache::thrift::ServiceHandler<TestService> {

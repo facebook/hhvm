@@ -19,7 +19,7 @@ class C extends B {
 async function test(): Awaitable<void> {
   $foo = 'foo';
   $bar = 'bar';
-  $c = 'C';
+  $c = HH\classname_to_class(nameof C);
   $foo_dynamic = HH\dynamic_fun($foo);
   hh_show($foo_dynamic);
   $gen_baz_dynamic = HH\dynamic_class_meth($c, 'genBaz');

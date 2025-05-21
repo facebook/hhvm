@@ -7,7 +7,7 @@
   "namespaces": {
     "android": "com.facebook.thrift.annotation_deprecated",
     "go": "thrift.annotation.thrift",
-    "hs2": "facebook.thrift.annotation.thrift",
+    "hs": "Facebook.Thrift.Annotation.Thrift",
     "java": "com.facebook.thrift.annotation_deprecated",
     "js": "thrift.annotation.thrift",
     "py": "thrift.annotation.thrift",

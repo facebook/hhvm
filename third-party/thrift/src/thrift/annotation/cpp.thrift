@@ -25,7 +25,7 @@ namespace js thrift.annotation.cpp
 namespace py.asyncio facebook_thrift_asyncio.annotation.cpp
 namespace go thrift.annotation.cpp
 namespace py thrift.annotation.cpp
-namespace hs2 facebook.thrift.annotation.cpp
+namespace hs Facebook.Thrift.Annotation.Cpp
 
 // start
 

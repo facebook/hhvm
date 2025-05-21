@@ -424,6 +424,28 @@ std::string cpp_name_resolver::gen_standard_type(const t_type& node) {
   return gen_standard_type(node, &cpp_name_resolver::get_standard_type);
 }
 
+std::string cpp_name_resolver::gen_standard_type(const t_field& node) {
+  const t_type& type = *node.type();
+  if (auto* annotation = node.find_structured_annotation_or_null(kCppTypeUri)) {
+    if (auto name =
+            annotation->get_value_from_structured_annotation_or_null("name")) {
+      return detail::get_or_gen(field_standard_type_cache_, &node, [&]() {
+        return name->get_string();
+      });
+    } else {
+      auto& tmplate =
+          annotation->get_value_from_structured_annotation("template");
+      return detail::get_or_gen(field_standard_type_cache_, &node, [&]() {
+        return gen_container_type(
+            type.get_true_type()->as<t_container>(),
+            &cpp_name_resolver::get_native_type,
+            &tmplate.get_string());
+      });
+    }
+  }
+  return gen_standard_type(type);
+}
+
 std::string cpp_name_resolver::gen_storage_type(
     const std::string& native_type, cpp_reference_type ref_type) {
   switch (ref_type) {

@@ -75,6 +75,10 @@ class CppNameResolverTest : public ::testing::Test {
     return resolver_.get_standard_type(node);
   }
 
+  const std::string& get_standard_type(const t_field& node) {
+    return resolver_.get_standard_type(node);
+  }
+
   const std::string& get_storage_type(const t_field& node) {
     return resolver_.get_storage_type(node, struct_);
   }
@@ -548,6 +552,7 @@ TEST_F(CppNameResolverTest, adapted_field_type) {
   auto field = t_field(i64, "n", 42);
   field.add_structured_annotation(
       gen::adapter_builder(program_, "cpp").make("MyAdapter"));
+  EXPECT_EQ(get_standard_type(field), "::std::int64_t");
   EXPECT_EQ(
       get_native_type(field),
       "::apache::thrift::adapt_detail::adapted_field_t<"

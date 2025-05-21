@@ -1962,6 +1962,7 @@ class cpp_mstch_field : public mstch_field {
             {"field:cpp_type", &cpp_mstch_field::cpp_type},
             {"field:cpp_storage_name", &cpp_mstch_field::cpp_storage_name},
             {"field:cpp_storage_type", &cpp_mstch_field::cpp_storage_type},
+            {"field:cpp_standard_type", &cpp_mstch_field::cpp_standard_type},
             {"field:has_deprecated_accessors?",
              &cpp_mstch_field::has_deprecated_accessors},
             {"field:serialization_next_field_key",
@@ -2051,6 +2052,10 @@ class cpp_mstch_field : public mstch_field {
     assert(field_context_->strct);
     return cpp_context_->resolver().get_storage_type(
         *field_, *field_context_->strct);
+  }
+  mstch::node cpp_standard_type() {
+    assert(field_context_->strct);
+    return cpp_context_->resolver().get_standard_type(*field_);
   }
   mstch::node eligible_for_storage_name_mangling() {
     return is_eligible_for_storage_name_mangling();

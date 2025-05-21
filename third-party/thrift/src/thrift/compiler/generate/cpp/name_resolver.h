@@ -80,6 +80,11 @@ class cpp_name_resolver {
     return detail::get_or_gen(
         standard_type_cache_, &node, [&]() { return gen_standard_type(node); });
   }
+  const std::string& get_standard_type(const t_field& node) {
+    return detail::get_or_gen(field_standard_type_cache_, &node, [&]() {
+      return gen_standard_type(node);
+    });
+  }
 
   // Returns C++ type tag of given thrift type
   const std::string& get_type_tag(const t_type& node) {
@@ -192,6 +197,7 @@ class cpp_name_resolver {
   std::unordered_map<const t_const*, std::string> const_cache_;
   std::unordered_map<const t_field*, std::string> field_type_cache_;
   std::unordered_map<const t_type*, std::string> standard_type_cache_;
+  std::unordered_map<const t_field*, std::string> field_standard_type_cache_;
   std::unordered_map<const t_type*, std::string> underlying_type_cache_;
   std::unordered_map<const t_type*, std::string>
       underlying_namespaced_name_cache_;
@@ -221,6 +227,7 @@ class cpp_name_resolver {
   }
   std::string gen_standard_type(const t_type& node);
   std::string gen_standard_type(const t_type& node, type_resolve_fn resolve_fn);
+  std::string gen_standard_type(const t_field& node);
   std::string gen_storage_type(
       const std::string& native_type, cpp_reference_type ref_type);
   std::string gen_container_type(

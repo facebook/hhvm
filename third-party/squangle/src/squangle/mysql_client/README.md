@@ -33,9 +33,8 @@ for example usage.
       "type", "pusheen",
       "awesomeness", MAX, INF);
 
-    DbLocator dblocator(XDB_MACROS, db::InstanceRequirement::Any);
-
-    auto conn_op = FbAsyncMysqlClient::defaultClient()->beginConnection(dblocator);
+    std::shared_ptr<ConnectOperation> connect_op =
+        client->beginConnection(hostname, port, dbname, user, password);
     conn_op->run()->wait();
     if (!conn_op->ok()) {
       panicalittlebit();

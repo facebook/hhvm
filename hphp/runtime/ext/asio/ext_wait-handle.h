@@ -43,6 +43,8 @@ String HHVM_METHOD(Awaitable, getName);
  *   ConcurrentWaitHandle          - wait handle that finishes when all wait
  *                                     handles in the concurrent block finish
  *   ConditionWaitHandle           - wait handle implementing condition variable
+ *   PriorityBridgeWaitHandle      - wait handle holding an (optionally) low
+                                       priority child
  *   RescheduleWaitHandle          - wait handle that reschedules execution
  *   SleepWaitHandle               - wait handle that finishes after a timeout
  *   ExternalThreadEventWaitHandle - thread-powered asynchronous execution
@@ -61,6 +63,7 @@ struct c_ConditionWaitHandle;
 struct c_RescheduleWaitHandle;
 struct c_SleepWaitHandle;
 struct c_ExternalThreadEventWaitHandle;
+struct c_PriorityBridgeWaitHandle;
 
 #define WAITHANDLE_DTOR(cn) \
   static void instanceDtor(ObjectData* obj, const Class*) { \
@@ -89,6 +92,7 @@ struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
     Reschedule,
     Sleep,
     ExternalThreadEvent,
+    PriorityBridge,
   };
 
   explicit c_Awaitable(Class* cls, HeaderKind kind,
@@ -158,6 +162,7 @@ struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
   c_ResumableWaitHandle* asResumable();
   c_SleepWaitHandle* asSleep();
   c_ExternalThreadEventWaitHandle* asExternalThreadEvent();
+  c_PriorityBridgeWaitHandle* asPriorityBridge();
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().
@@ -212,6 +217,8 @@ struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
       scanner.scan(m_parentChain);
     }
   }
+
+  friend struct c_PriorityBridgeWaitHandle;
 };
 
 template<class T>

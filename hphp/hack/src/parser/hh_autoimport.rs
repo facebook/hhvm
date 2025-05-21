@@ -51,6 +51,7 @@ pub static TYPES: &[&str] = &[
     "ObjprofPathsStats",
     "ObjprofStringStats",
     "Pair",
+    "PriorityBridgeWaitHandle",
     "RescheduleWaitHandle",
     "ResumableWaitHandle",
     "Set",

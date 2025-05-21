@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -32,184 +33,222 @@ namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  struct EnterContextState final {
-    using Kind = c_Awaitable::Kind;
 
-    EnterContextState(c_WaitableWaitHandle* root, ContextStateIndex ctxStateIdx)
-      : m_importSet({root}), m_pending({root}), m_ctxStateIdx(ctxStateIdx) {
+// Struct to hold metadate for tracking throughout discover phase.
+struct WHInfo {
+  c_WaitableWaitHandle* waitHandle;
+  ContextStateIndex newStateIdx;
+};
+
+struct EnterContextState final {
+  using Kind = c_Awaitable::Kind;
+
+  EnterContextState(c_WaitableWaitHandle* root, ContextStateIndex newStateIdx)
+  : m_importMap({{root, newStateIdx}}), m_pending({{root, newStateIdx}}) {}
+
+  void enqueue(c_WaitableWaitHandle* node, ContextStateIndex newStateIdx) {
+    // Do not need to import this WH if it's already finished or in a higher
+    // priority context state.
+    if (node->isFinished() || node->getContextStateIndex() >= newStateIdx) {
+      return;
     }
 
-    void enqueue(c_WaitableWaitHandle* node) {
-      if (!node->isFinished() && node->getContextStateIndex() < m_ctxStateIdx) {
-        if (m_importSet.insert(node).second) {
-          m_pending.push_back(node);
-        }
+    auto it = m_importMap.find(node);
+    if (it == m_importMap.end()) {
+      m_importMap.insert({node, newStateIdx});
+      m_pending.push_back({node, newStateIdx});
+    } else {
+      // Already imported this WH, but reprocess if the parent is in a higher
+      // priority context state.
+      auto const currentIdx = it->second;
+      if (newStateIdx > currentIdx) {
+        m_importMap[node] = newStateIdx;
+        m_pending.push_back({node, newStateIdx});
       }
     }
+  }
 
-    bool discoverResumable(c_ResumableWaitHandle* node) {
-      if (node->getState() == c_ResumableWaitHandle::STATE_RUNNING) {
-        SystemLib::throwInvalidOperationExceptionObject(
-          "Detected cross-context dependency cycle. You are trying to depend "
-          "on something that is running you serially.");
-      }
-
-      return node->getState() == c_ResumableWaitHandle::STATE_BLOCKED;
+  bool discoverResumable(c_ResumableWaitHandle* node) {
+    if (node->getState() == c_ResumableWaitHandle::STATE_RUNNING) {
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Detected cross-context dependency cycle. You are trying to depend "
+        "on something that is running you serially.");
     }
 
-    void discover(c_AsyncFunctionWaitHandle* node) {
-      if (discoverResumable(node)) {
-        if (auto const child = node->getChild()) enqueue(child);
-      }
+    return node->getState() == c_ResumableWaitHandle::STATE_BLOCKED;
+  }
+
+  void discover(c_AsyncFunctionWaitHandle *node,
+                ContextStateIndex newStateIdx) {
+    if (discoverResumable(node)) {
+      if (auto const child = node->getChild()) enqueue(child, newStateIdx);
     }
+  }
 
-    void discover(c_AsyncGeneratorWaitHandle* node) {
-      if (discoverResumable(node)) enqueue(node->getChild());
-    }
+  void discover(c_AsyncGeneratorWaitHandle* node,
+                ContextStateIndex newStateIdx) {
+    if (discoverResumable(node)) enqueue(node->getChild(), newStateIdx);
+  }
 
-    void discover(c_AwaitAllWaitHandle* node) {
-      assertx(node->getState() == c_AwaitAllWaitHandle::STATE_BLOCKED);
-      node->forEachChild([this] (c_WaitableWaitHandle* child) {
-        enqueue(child);
-      });
-    }
+  void discover(c_AwaitAllWaitHandle* node, ContextStateIndex newStateIdx) {
+    assertx(node->getState() == c_AwaitAllWaitHandle::STATE_BLOCKED);
+    node->forEachChild([this, newStateIdx] (c_WaitableWaitHandle* child) {
+      enqueue(child, newStateIdx);
+    });
+  }
 
-    void discover(c_ConcurrentWaitHandle* node) {
-      assertx(node->getState() == c_ConcurrentWaitHandle::STATE_BLOCKED);
-      node->forEachChild([this] (c_WaitableWaitHandle* child) {
-        enqueue(child);
-      });
-    }
+  void discover(c_ConcurrentWaitHandle* node, ContextStateIndex newStateIdx) {
+    assertx(node->getState() == c_ConcurrentWaitHandle::STATE_BLOCKED);
+    node->forEachChild([this, newStateIdx] (c_WaitableWaitHandle* child) {
+      enqueue(child, newStateIdx);
+    });
+  }
 
-    void discover(c_ConditionWaitHandle* node) {
-      assertx(node->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
-      enqueue(node->getChild());
-    }
+  void discover(c_ConditionWaitHandle* node, ContextStateIndex newStateIdx) {
+    assertx(node->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
+    enqueue(node->getChild(), newStateIdx);
+  }
 
-    void discover() {
-      while (!m_pending.empty()) {
-        auto node = m_pending.back();
-        m_pending.pop_back();
+  // PriorityBridge WHs allow children to run in a lower priority context, and
+  // maintain this when entering the context.
+  void discover(c_PriorityBridgeWaitHandle* node,
+                ContextStateIndex newStateIdx) {
+    assertx(node->getState() == c_PriorityBridgeWaitHandle::STATE_BLOCKED);
+    auto child = node->getChild();
+    newStateIdx = child->getContextStateIndex().isLow()
+      ? newStateIdx.toLow()
+      : newStateIdx;
+    enqueue(child, newStateIdx);
+  }
 
-        switch (node->getKind()) {
-          case Kind::AsyncFunction:
-            discover(node->asAsyncFunction());
-            break;
-          case Kind::AsyncGenerator:
-            discover(node->asAsyncGenerator());
-            break;
-          case Kind::AwaitAll:
-            discover(node->asAwaitAll());
-            break;
-          case Kind::Concurrent:
-            discover(node->asConcurrent());
-            break;
-          case Kind::Condition:
-            discover(node->asCondition());
-            break;
-          case Kind::Static:
-          case Kind::Reschedule:
-          case Kind::Sleep:
-          case Kind::ExternalThreadEvent:
-            break;
-        }
-      }
-    }
+  void discover() {
+    while (!m_pending.empty()) {
+      auto whInfo = m_pending.back();
+      m_pending.pop_back();
 
-    void enter(c_ResumableWaitHandle* node) {
-      if (node->getState() == c_ResumableWaitHandle::STATE_READY) {
-        node->getContext()->schedule(node);
-        node->incRefCount();
-      }
-    }
-
-    void enter(c_RescheduleWaitHandle* node) {
-      assertx(node->getState() == c_RescheduleWaitHandle::STATE_SCHEDULED);
-      node->scheduleInContext();
-    }
-
-    void preEnter(c_SleepWaitHandle* node) {
-      assertx(node->getState() == c_SleepWaitHandle::STATE_WAITING);
-      if (node->isInContext()) {
-        node->unregisterFromContext();
+      switch (whInfo.waitHandle->getKind()) {
+        case Kind::AsyncFunction:
+          discover(whInfo.waitHandle->asAsyncFunction(), whInfo.newStateIdx);
+          break;
+        case Kind::AsyncGenerator:
+          discover(whInfo.waitHandle->asAsyncGenerator(), whInfo.newStateIdx);
+          break;
+        case Kind::AwaitAll:
+          discover(whInfo.waitHandle->asAwaitAll(), whInfo.newStateIdx);
+          break;
+        case Kind::Concurrent:
+          discover(whInfo.waitHandle->asConcurrent(), whInfo.newStateIdx);
+          break;
+        case Kind::Condition:
+          discover(whInfo.waitHandle->asCondition(), whInfo.newStateIdx);
+          break;
+        case Kind::PriorityBridge:
+          discover(whInfo.waitHandle->asPriorityBridge(), whInfo.newStateIdx);
+          break;
+        case Kind::Static:
+        case Kind::Reschedule:
+        case Kind::Sleep:
+        case Kind::ExternalThreadEvent:
+          break;
       }
     }
+  }
 
-    void enter(c_SleepWaitHandle* node) {
-      assertx(node->getState() == c_SleepWaitHandle::STATE_WAITING);
-      node->registerToContext();
+  void enter(c_ResumableWaitHandle* node) {
+    if (node->getState() == c_ResumableWaitHandle::STATE_READY) {
+      node->getContext()->schedule(node);
+      node->incRefCount();
     }
+  }
 
-    void preEnter(c_ExternalThreadEventWaitHandle* node) {
-      assertx(node->getState() ==
-             c_ExternalThreadEventWaitHandle::STATE_WAITING);
-      if (node->isInContext()) {
-        node->unregisterFromContext();
+  void enter(c_RescheduleWaitHandle* node) {
+    assertx(node->getState() == c_RescheduleWaitHandle::STATE_SCHEDULED);
+    node->scheduleInContext();
+  }
+
+  void preEnter(c_SleepWaitHandle* node) {
+    assertx(node->getState() == c_SleepWaitHandle::STATE_WAITING);
+    if (node->isInContext()) {
+      node->unregisterFromContext();
+    }
+  }
+
+  void enter(c_SleepWaitHandle* node) {
+    assertx(node->getState() == c_SleepWaitHandle::STATE_WAITING);
+    node->registerToContext();
+  }
+
+  void preEnter(c_ExternalThreadEventWaitHandle* node) {
+    assertx(node->getState() ==
+            c_ExternalThreadEventWaitHandle::STATE_WAITING);
+    if (node->isInContext()) {
+      node->unregisterFromContext();
+    }
+  }
+
+  void enter(c_ExternalThreadEventWaitHandle* node) {
+    assertx(node->getState() ==
+            c_ExternalThreadEventWaitHandle::STATE_WAITING);
+    node->registerToContext();
+  }
+
+  void enter() {
+    for (auto const& [handle, newStateIdx] : m_importMap) {
+      switch (handle->getKind()) {
+        case Kind::Sleep:
+          preEnter(handle->asSleep());
+          break;
+        case Kind::ExternalThreadEvent:
+          preEnter(handle->asExternalThreadEvent());
+          break;
+        case Kind::Static:
+        case Kind::AsyncFunction:
+        case Kind::AsyncGenerator:
+        case Kind::AwaitAll:
+        case Kind::Concurrent:
+        case Kind::Condition:
+        case Kind::Reschedule:
+        case Kind::PriorityBridge:
+          break;
+      }
+
+      handle->setContextStateIndex(newStateIdx);
+
+      switch (handle->getKind()) {
+        case Kind::AsyncFunction:
+        case Kind::AsyncGenerator:
+          enter(handle->asResumable());
+          break;
+        case Kind::Reschedule:
+          enter(handle->asReschedule());
+          break;
+        case Kind::Sleep:
+          enter(handle->asSleep());
+          break;
+        case Kind::ExternalThreadEvent:
+          enter(handle->asExternalThreadEvent());
+          break;
+        case Kind::Static:
+        case Kind::AwaitAll:
+        case Kind::Concurrent:
+        case Kind::Condition:
+        case Kind::PriorityBridge:
+          break;
       }
     }
+  }
 
-    void enter(c_ExternalThreadEventWaitHandle* node) {
-      assertx(node->getState() ==
-             c_ExternalThreadEventWaitHandle::STATE_WAITING);
-      node->registerToContext();
-    }
-
-    void enter() {
-      for (auto node : m_importSet) {
-        switch (node->getKind()) {
-          case Kind::Sleep:
-            preEnter(node->asSleep());
-            break;
-          case Kind::ExternalThreadEvent:
-            preEnter(node->asExternalThreadEvent());
-            break;
-          case Kind::Static:
-          case Kind::AsyncFunction:
-          case Kind::AsyncGenerator:
-          case Kind::AwaitAll:
-          case Kind::Concurrent:
-          case Kind::Condition:
-          case Kind::Reschedule:
-            break;
-        }
-
-        node->setContextStateIndex(m_ctxStateIdx);
-
-        switch (node->getKind()) {
-          case Kind::AsyncFunction:
-          case Kind::AsyncGenerator:
-            enter(node->asResumable());
-            break;
-          case Kind::Reschedule:
-            enter(node->asReschedule());
-            break;
-          case Kind::Sleep:
-            enter(node->asSleep());
-            break;
-          case Kind::ExternalThreadEvent:
-            enter(node->asExternalThreadEvent());
-            break;
-          case Kind::Static:
-          case Kind::AwaitAll:
-          case Kind::Concurrent:
-          case Kind::Condition:
-            break;
-        }
-      }
-    }
-
-    hphp_fast_set<c_WaitableWaitHandle*> m_importSet;
-    std::vector<c_WaitableWaitHandle*> m_pending;
-    ContextStateIndex const m_ctxStateIdx;
-  };
+  hphp_fast_map<c_WaitableWaitHandle*, ContextStateIndex> m_importMap;
+  std::vector<WHInfo> m_pending;
+};
 }
 
 void enter_context_impl(c_WaitableWaitHandle *root,
-                        ContextStateIndex ctxStateIdx) {
+                        ContextStateIndex newStateIdx) {
   assertx(!root->isFinished());
-  assertx(root->getContextStateIndex() < ctxStateIdx);
+  assertx(root->getContextStateIndex() < newStateIdx);
 
-  EnterContextState ctx(root, ctxStateIdx);
+  EnterContextState ctx(root, newStateIdx);
   ctx.discover();
   ctx.enter();
 }

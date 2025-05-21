@@ -75,6 +75,7 @@ final class StaticWaitHandle<T> extends Awaitable<T> {}
   ConcurrentWaitHandle::class,
   ConditionWaitHandle::class,
   ExternalThreadEventWaitHandle::class,
+  PriorityBridgeWaitHandle::class,
   RescheduleWaitHandle::class,
   ResumableWaitHandle::class,
   SleepWaitHandle::class
@@ -195,6 +196,19 @@ final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
    */
   <<__Native>>
   public function fail(\Exception $exception)[]: void;
+}
+
+/** A wait handle that supports lower priority children
+ */
+final class PriorityBridgeWaitHandle<T> extends WaitableWaitHandle<T> {
+
+  /** Create a wait handle with an arbitrary priority child, used to bridge
+   * between low-pri lower priority children and the current context.
+   * @param Awaitable<T> $child - an awaitable which may be in a lower priority
+   * context
+   */
+  <<__Native("NoRecording")>>
+  public static function create(Awaitable<T> $child)[]: \HH\PriorityBridgeWaitHandle<T>;
 }
 
 /** A wait handle that succeeds with null once desired scheduling priority is

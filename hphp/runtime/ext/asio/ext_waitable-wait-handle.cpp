@@ -26,9 +26,10 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -76,6 +77,7 @@ String c_WaitableWaitHandle::getName() {
     case Kind::Reschedule:          return asReschedule()->getName();
     case Kind::Sleep:               return asSleep()->getName();
     case Kind::ExternalThreadEvent: return asExternalThreadEvent()->getName();
+    case Kind::PriorityBridge:      return asPriorityBridge()->getName();
   }
   not_reached();
 }
@@ -90,6 +92,7 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
     case Kind::AwaitAll:            return asAwaitAll()->getChild();
     case Kind::Concurrent:          return asConcurrent()->getChild();
     case Kind::Condition:           return asCondition()->getChild();
+    case Kind::PriorityBridge:      return asPriorityBridge()->getChild();
     case Kind::Reschedule:          return nullptr;
     case Kind::Sleep:               return nullptr;
     case Kind::ExternalThreadEvent: return nullptr;

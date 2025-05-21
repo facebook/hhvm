@@ -163,6 +163,7 @@ void AsioExtension::moduleRegisterNative() {
   registerNativeStaticWaitHandle();
   registerNativeAsyncFunctionWaitHandle();
   registerNativeAsyncGeneratorWaitHandle();
+  registerNativePriorityBridgeWaitHandle();
 }
 
 std::vector<std::string> AsioExtension::hackFiles() const {

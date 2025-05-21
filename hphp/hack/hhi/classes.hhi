@@ -120,6 +120,7 @@ namespace HH {
       ConcurrentWaitHandle::class,
       ConditionWaitHandle::class,
       ExternalThreadEventWaitHandle::class,
+      PriorityBridgeWaitHandle::class,
       RescheduleWaitHandle::class,
       ResumableWaitHandle::class,
       SleepWaitHandle::class,
@@ -236,6 +237,13 @@ namespace HH {
     ): \HH\FIXME\MISSING_RETURN_TYPE {}
     public function succeed(T $result): void {}
     public function fail(\Exception $exception): void {}
+  }
+
+  <<__SupportDynamicType>>
+  final class PriorityBridgeWaitHandle<T> extends WaitableWaitHandle<T> {
+    public static function create(
+      Awaitable<T> $child,
+    )[]: PriorityBridgeWaitHandle<T> {}
   }
 
   <<__SupportDynamicType>>

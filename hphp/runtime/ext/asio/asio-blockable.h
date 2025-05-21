@@ -39,6 +39,7 @@ struct AsioBlockable final {
     AwaitAllWaitHandleNode,
     ConcurrentWaitHandleNode,
     ConditionWaitHandle,
+    PriorityBridgeWaitHandle,
   };
 
   static constexpr ptrdiff_t bitsOff() {

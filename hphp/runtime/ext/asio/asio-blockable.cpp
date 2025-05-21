@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -70,6 +71,13 @@ inline c_ConditionWaitHandle* getConditionWaitHandle(
 ) {
   assertx(blockable->getKind() == Kind::ConditionWaitHandle);
   return getContainingObject<c_ConditionWaitHandle>(blockable);
+}
+
+inline c_PriorityBridgeWaitHandle* getPriorityBridgeWaitHandle(
+  const AsioBlockable* blockable
+) {
+  assertx(blockable->getKind() == Kind::PriorityBridgeWaitHandle);
+  return getContainingObject<c_PriorityBridgeWaitHandle>(blockable);
 }
 
 inline void exitContextImpl(
@@ -151,6 +159,8 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
       return getConcurrentWaitHandleNode(this)->getWaitHandle();
     case Kind::ConditionWaitHandle:
       return getConditionWaitHandle(this);
+    case Kind::PriorityBridgeWaitHandle:
+      return getPriorityBridgeWaitHandle(this);
   }
   not_reached();
 }
@@ -175,6 +185,9 @@ void AsioBlockableChain::unblock() {
         break;
       case Kind::ConditionWaitHandle:
         getConditionWaitHandle(cur)->onUnblocked();
+        break;
+      case Kind::PriorityBridgeWaitHandle:
+        getPriorityBridgeWaitHandle(cur)->onUnblocked();
         break;
     }
   }
@@ -203,6 +216,9 @@ void AsioBlockableChain::exitContext(ContextIndex contextIdx) {
           break;
         case Kind::ConditionWaitHandle:
           exitContextImpl(worklist, getConditionWaitHandle(cur), contextIdx);
+          break;
+        case Kind::PriorityBridgeWaitHandle:
+          exitContextImpl(worklist, getPriorityBridgeWaitHandle(cur), contextIdx);
           break;
       }
     }

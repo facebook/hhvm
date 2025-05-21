@@ -92,6 +92,13 @@ struct ContextStateIndex {
   }
 
   /**
+   * Check if this is a low pri context index.
+   */
+  constexpr bool isLow() const {
+    return !isRegular();
+  }
+
+  /**
    * Get the wrapper index. This is the index of the containing context,
    * dropping the priority bit (i.e. shr 1).
    */

@@ -34,6 +34,7 @@ struct c_AwaitAllWaitHandle;
 struct c_ConcurrentWaitHandle;
 struct c_ConditionWaitHandle;
 struct c_ResumableWaitHandle;
+struct c_PriorityBridgeWaitHandle;
 
 struct AsioSession final {
   static void Init();
@@ -171,6 +172,12 @@ struct AsioSession final {
   void onSleepCreate(c_SleepWaitHandle* waitHandle);
   void onSleepSuccess(c_SleepWaitHandle* waitHandle, int64_t finish_time);
 
+  // PriorityBridgeWaitHandle callbacks:
+  void setOnPriorityBridgeCreate(const Variant& callback);
+  bool hasOnPriorityBridgeCreate() { return !!m_onPriorityBridgeCreate; }
+  void onPriorityBridgeCreate(c_PriorityBridgeWaitHandle* wh,
+                              c_WaitableWaitHandle* child);
+
 private:
   AsioSession();
   friend AsioSession* req::make_raw<AsioSession>();
@@ -198,6 +205,7 @@ private:
   Object m_onExtThreadEventFail;
   Object m_onSleepCreate;
   Object m_onSleepSuccess;
+  Object m_onPriorityBridgeCreate;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

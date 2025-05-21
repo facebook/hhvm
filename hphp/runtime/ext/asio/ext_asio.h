@@ -44,6 +44,7 @@ private:
   void registerNativeStaticWaitHandle();
   void registerNativeAsyncFunctionWaitHandle();
   void registerNativeAsyncGeneratorWaitHandle();
+  void registerNativePriorityBridgeWaitHandle();
 
   void initNativeWaitHandle();
 

@@ -32,6 +32,7 @@
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
@@ -250,6 +251,7 @@ inline size_t allocSize(const HeapObject* h) {
     sizeClass<c_RescheduleWaitHandle>(),
     sizeClass<c_SleepWaitHandle>(),
     sizeClass<c_ExternalThreadEventWaitHandle>(),
+    sizeClass<c_PriorityBridgeWaitHandle>(),
   };
 
   // Ordering depends on header-kind.h.

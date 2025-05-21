@@ -47,6 +47,7 @@ let types =
     "ObjprofPathsStats";
     "ObjprofStringStats";
     "Pair";
+    "PriorityBridgeWaitHandle";
     "RescheduleWaitHandle";
     "ResumableWaitHandle";
     "Set";

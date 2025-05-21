@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
@@ -93,6 +94,7 @@ size_t asio_object_size(const ObjectData* od) {
     X(Sleep)
     X(ExternalThreadEvent)
     X(AsyncGenerator)
+    X(PriorityBridge)
 #undef X
     case c_Awaitable::Kind::AwaitAll:
       return obj->asAwaitAll()->heapSize();

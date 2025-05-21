@@ -12,6 +12,7 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
     ext_await-all-wait-handle.cpp
     ext_concurrent-wait-handle.cpp
     ext_condition-wait-handle.cpp
+    ext_priority-bridge-wait-handle.cpp
     ext_asio.cpp
     ext_external-thread-event-wait-handle.cpp
     ext_reschedule-wait-handle.cpp
@@ -40,6 +41,7 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
     ext_concurrent-wait-handle.h
     ext_concurrent-wait-handle-inl.h
     ext_condition-wait-handle.h
+    ext_priority-bridge-wait-handle.h
     ext_asio.h
     ext_external-thread-event-wait-handle.h
     ext_reschedule-wait-handle.h

@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -317,6 +318,24 @@ void AsioSession::onExternalThreadEventFail(
     m_onExtThreadEventFail,
     make_vec_array(waitHandle, exception, finish_time),
     "ExternalThreadEventWaitHandle::onFail"
+  );
+}
+
+void AsioSession::setOnPriorityBridgeCreate(const Variant& callback) {
+  m_onPriorityBridgeCreate = checkCallback(
+    callback,
+    "PriorityBridgeWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onPriorityBridgeCreate(
+  c_PriorityBridgeWaitHandle* waitHandle,
+  c_WaitableWaitHandle* child
+) {
+  runCallback(
+    m_onPriorityBridgeCreate,
+    make_vec_array(waitHandle, child),
+    "PriorityBridgeWaitHandle::onCreate"
   );
 }
 

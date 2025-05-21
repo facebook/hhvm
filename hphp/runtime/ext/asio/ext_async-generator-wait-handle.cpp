@@ -81,7 +81,10 @@ c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
   , m_generator(gen->toObject())
 {
   setState(STATE_BLOCKED);
-  setContextStateIndex(child->getContextStateIndex());
+  setContextStateIndex(std::min(
+    AsioSession::Get()->getCurrentContextStateIndex(),
+    child->getContextStateIndex())
+  );
   m_child = child; // no incref, to avoid leaking parent<-->child cycle
 }
 

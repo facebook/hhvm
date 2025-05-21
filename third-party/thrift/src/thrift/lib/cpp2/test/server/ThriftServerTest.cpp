@@ -100,9 +100,21 @@ using folly::test::find_resource;
 THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 
-namespace {
-constexpr auto kForcedQueueTimeout = 10ms /*ms*/;
-} // namespace
+static folly::AsyncSocket* shrinkSocketSendBuffer(Cpp2RequestContext* ctx) {
+  auto transport = const_cast<folly::AsyncTransport*>(
+      ctx->getConnectionContext()->getTransport());
+  folly::AsyncSocket* sock =
+      transport->getUnderlyingTransport<folly::AsyncSocket>();
+
+  // Passing 0 to setSendBufSize sets the buffer size to the smallest
+  // possible value on Linux but not other platforms.
+  int result = sock->setSendBufSize(folly::kIsLinux ? 0 : 1);
+  if (result != 0) {
+    throw std::runtime_error("setSendBufSize failed");
+  }
+
+  return sock;
+}
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
     ThriftServer& server) {
@@ -648,51 +660,49 @@ TEST(ThriftServer, EnforceEgressMemoryLimit) {
   class TestServiceHandler
       : public apache::thrift::ServiceHandler<TestService> {
    public:
-    // only used to configure the server-side connection socket
-    int echoInt(int) override {
-      shrinkSocketWriteBuffer();
+    // Only used to configure the server-side connection socket.
+    int32_t echoInt(int32_t) override {
+      shrinkSocketSendBuffer(getRequestContext());
       return 0;
     }
 
     void echoRequest(
-        std::string& _return, std::unique_ptr<std::string> req) override {
-      _return = *std::move(req);
+        std::string& ret, std::unique_ptr<std::string> req) override {
+      ret = *std::move(req);
       barrier.wait();
     }
 
     folly::test::Barrier barrier{2};
-
-   private:
-    void shrinkSocketWriteBuffer() {
-      auto const_transport =
-          getRequestContext()->getConnectionContext()->getTransport();
-      auto transport = const_cast<folly::AsyncTransport*>(const_transport);
-      auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
-      sock->setSendBufSize(0); // (smallest possible size)
-    }
   };
 
-  // Allocate server
+  // Allocate a server.
   auto handler = std::make_shared<TestServiceHandler>();
   auto runner = std::make_shared<ScopedServerInterfaceThread>(handler);
   auto& thriftServer = runner->getThriftServer();
-  const auto kChunkSize = 1ul << 20; // (1 MiB)
-  thriftServer.setEgressMemoryLimit(kChunkSize * 4); // (4 MiB)
+  const auto chunkSize = 1ul << 20; // (1 MiB)
+  thriftServer.setEgressMemoryLimit(chunkSize * 4); // (4 MiB)
   thriftServer.setWriteBatchingInterval(std::chrono::milliseconds::zero());
 
-  // Allocate client
+  // Allocate a client.
   folly::EventBase evb;
   auto clientSocket = folly::AsyncSocket::newSocket(&evb, runner->getAddress());
   auto clientSocketPtr = clientSocket.get();
-  clientSocketPtr->setRecvBufSize(0); // set recv buffer as small as possible
+
+  // Passing 0 to setRecvBufSize sets the buffer size to the smallest
+  // possible value on Linux but not other platforms.
+  int result = clientSocketPtr->setRecvBufSize(folly::kIsLinux ? 0 : 1);
+  EXPECT_EQ(result, 0);
+
+  clientSocketPtr->setSendBufSize(chunkSize * 2);
+
   auto clientChannel = RocketClientChannel::newChannel(std::move(clientSocket));
   auto clientChannelPtr = clientChannel.get();
   TestServiceAsyncClient client(std::move(clientChannel));
 
-  // Dummy request which triggers some server-side socket configuration
+  // Dummy request which triggers some server-side socket configuration.
   client.sync_echoInt(42);
 
-  // This is used to flush the client write queue
+  // This is used to flush the client write queue.
   apache::thrift::rocket::RocketClient::FlushList flushList;
   clientChannelPtr->setFlushList(&flushList);
   auto flushClientWrites = [&]() {
@@ -722,29 +732,28 @@ TEST(ThriftServer, EnforceEgressMemoryLimit) {
   // Reach the egress buffer limit. Notice that the server will report a bit
   // less memory than expected because a small portion of the response data will
   // be buffered in the kernel.
-  for (size_t b = 0; b + kChunkSize < thriftServer.getEgressMemoryLimit();
-       b += kChunkSize) {
-    std::string data(kChunkSize, 'a');
+  for (size_t b = 0; b + chunkSize < thriftServer.getEgressMemoryLimit();
+       b += chunkSize) {
+    std::string data(chunkSize, 'a');
     fv.emplace_back(client.semifuture_echoRequest(std::move(data)));
     flushClientWrites();
     handler->barrier.wait();
   }
 
-  // The client socket should still be open
+  // The client socket should still be open.
   ASSERT_TRUE(isClientChannelGood(std::chrono::seconds(5)));
 
   ASSERT_GT(thriftServer.getUsedIOMemory().get().egress, 0);
 
-  // The next response should put us over the egress limit
-  std::string data(kChunkSize, 'a');
-  fv.emplace_back(client.semifuture_echoRequest(std::move(data)));
+  // The next response should put us over the egress limit.
+  fv.emplace_back(client.semifuture_echoRequest(std::string(chunkSize, 'a')));
   flushClientWrites();
   handler->barrier.wait();
 
-  // Wait for the connection to drop
+  // Wait for the connection to drop.
   ASSERT_FALSE(isClientChannelGood(std::chrono::seconds(20)));
 
-  // Start reading again
+  // Start reading again.
   clientChannelPtr->setFlushList(nullptr);
   clientSocketPtr->setRecvBufSize(65535);
   auto t = std::thread([&] { evb.loopForever(); });
@@ -1336,7 +1345,7 @@ TEST_P(
    public:
     explicit TestHandler(int& testCounter) : testCounter_(testCounter) {}
     void voidResponse() override { callback_(getHandlerExecutor()); }
-    int echoInt(int value) override {
+    int32_t echoInt(int32_t value) override {
       EXPECT_EQ(value, testCounter_++);
       return value;
     }
@@ -1824,7 +1833,13 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
 
     // Only used to configure the server-side connection socket.
     int32_t sync_echoInt(int32_t) override {
-      shrinkSocketSendBuffer();
+      folly::AsyncSocket* sock = shrinkSocketSendBuffer(getRequestContext());
+      socklen_t bufsizelen = sizeof(bufsize_);
+      if (sock->getSockOpt<int>(SOL_SOCKET, SO_SNDBUF, &bufsize_, &bufsizelen) <
+          0) {
+        throw std::runtime_error(
+            "Unable to get server send socket buffer size");
+      }
       return 0;
     }
 
@@ -1844,23 +1859,6 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
     }
 
    private:
-    void shrinkSocketSendBuffer() {
-      auto transport = const_cast<folly::AsyncTransport*>(
-          getRequestContext()->getConnectionContext()->getTransport());
-      auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
-
-      // Passing 0 to setSendBufSize sets the buffer size to the smallest
-      // possible value on Linux but not other platforms.
-      int result = sock->setSendBufSize(folly::kIsLinux ? 0 : 1);
-      ASSERT_EQ(result, 0);
-
-      socklen_t bufsizelen = sizeof(bufsize_);
-      if (sock->getSockOpt<int>(SOL_SOCKET, SO_SNDBUF, &bufsize_, &bufsizelen) <
-          0) {
-        FAIL() << "Unable to get server send socket buffer size";
-      }
-    }
-
     int bufsize_ = 0;
     folly::Baton<>& requestReceivedBaton_;
     folly::Baton<>& callbackInstalledBaton_;
@@ -2038,7 +2036,7 @@ TEST_P(OverloadTest, DISABLED_Test) {
   if (errorType == ErrorType::Overload) {
     // Thrift is overloaded on max requests
     runner.getThriftServer().setMaxRequests(1);
-    runner.getThriftServer().setQueueTimeout(kForcedQueueTimeout);
+    runner.getThriftServer().setQueueTimeout(10ms);
     auto handler = dynamic_cast<BlockInterface*>(
         runner.getThriftServer().getProcessorFactory().get());
     client->semifuture_voidResponse();

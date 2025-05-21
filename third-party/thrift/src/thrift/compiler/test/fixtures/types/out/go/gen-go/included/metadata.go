@@ -19,41 +19,47 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_map_i32_string = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i32,
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_included_SomeMap = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "included.SomeMap",
-    UnderlyingType: premadeThriftType_map_i32_string,
-},
-
-    }
-    premadeThriftType_list_included_SomeMap = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_included_SomeMap,
-},
-
-    }
-    premadeThriftType_included_SomeListOfTypeMap = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "included.SomeListOfTypeMap",
-    UnderlyingType: premadeThriftType_list_included_SomeMap,
-},
-
-    }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_map_i32_string =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i32,
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_included_SomeMap =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "included.SomeMap",
+                    UnderlyingType: premadeThriftType_map_i32_string,
+                },
+        }
+    premadeThriftType_list_included_SomeMap =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_included_SomeMap,
+                },
+        }
+    premadeThriftType_included_SomeListOfTypeMap =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "included.SomeListOfTypeMap",
+                    UnderlyingType: premadeThriftType_list_included_SomeMap,
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

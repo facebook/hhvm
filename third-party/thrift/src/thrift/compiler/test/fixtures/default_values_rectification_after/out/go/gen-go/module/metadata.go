@@ -19,32 +19,37 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_EmptyStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.EmptyStruct",
-},
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_bool = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-
-    }
-    premadeThriftType_list_i32 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_module_TestStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.TestStruct",
-},
-
-    }
+    premadeThriftType_module_EmptyStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.EmptyStruct",
+                },
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_list_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_module_TestStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.TestStruct",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

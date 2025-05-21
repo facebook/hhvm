@@ -19,133 +19,156 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_MyEnum = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyEnum",
-},
-
-    }
-    premadeThriftType_module_HackEnum = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.HackEnum",
-},
-
-    }
-    premadeThriftType_i64 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_module_MyDataItem = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyDataItem",
-},
-
-    }
-    premadeThriftType_module_MyDataItemAlias = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.MyDataItemAlias",
-    UnderlyingType: premadeThriftType_module_MyDataItem,
-},
-
-    }
-    premadeThriftType_bool = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-
-    }
-    premadeThriftType_float = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
-
-    }
-    premadeThriftType_set_float = &metadata.ThriftType{
-        TSet: &metadata.ThriftSetType{
-    ValueType: premadeThriftType_float,
-},
-
-    }
-    premadeThriftType_module_MyStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyStruct",
-},
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_list_i32 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_set_string = &metadata.ThriftType{
-        TSet: &metadata.ThriftSetType{
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_map_string_i64 = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_string,
-    ValueType: premadeThriftType_i64,
-},
-
-    }
-    premadeThriftType_module_Containers = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.Containers",
-},
-
-    }
-    premadeThriftType_module_MyEnumAlias = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.MyEnumAlias",
-    UnderlyingType: premadeThriftType_module_MyEnum,
-},
-
-    }
-    premadeThriftType_module_MyUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.MyUnion",
-},
-
-    }
-    premadeThriftType_module_ReservedKeyword = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.ReservedKeyword",
-},
-
-    }
-    premadeThriftType_module_UnionToBeRenamed = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.UnionToBeRenamed",
-},
-
-    }
-    premadeThriftType_module_MyException = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyException",
-},
-
-    }
-    premadeThriftType_module_MyExceptionWithMessage = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyExceptionWithMessage",
-},
-
-    }
-    premadeThriftType_void = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-
-    }
-    premadeThriftType_binary = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
-
-    }
+    premadeThriftType_module_MyEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum",
+                },
+        }
+    premadeThriftType_module_HackEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.HackEnum",
+                },
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module_MyDataItem =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyDataItem",
+                },
+        }
+    premadeThriftType_module_MyDataItemAlias =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.MyDataItemAlias",
+                    UnderlyingType: premadeThriftType_module_MyDataItem,
+                },
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_float =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
+        }
+    premadeThriftType_set_float =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_float,
+                },
+        }
+    premadeThriftType_module_MyStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyStruct",
+                },
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_list_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_set_string =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_map_string_i64 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_string,
+                    ValueType: premadeThriftType_i64,
+                },
+        }
+    premadeThriftType_module_Containers =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.Containers",
+                },
+        }
+    premadeThriftType_module_MyEnumAlias =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.MyEnumAlias",
+                    UnderlyingType: premadeThriftType_module_MyEnum,
+                },
+        }
+    premadeThriftType_module_MyUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.MyUnion",
+                },
+        }
+    premadeThriftType_module_ReservedKeyword =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.ReservedKeyword",
+                },
+        }
+    premadeThriftType_module_UnionToBeRenamed =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.UnionToBeRenamed",
+                },
+        }
+    premadeThriftType_module_MyException =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyException",
+                },
+        }
+    premadeThriftType_module_MyExceptionWithMessage =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyExceptionWithMessage",
+                },
+        }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_binary =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

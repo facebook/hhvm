@@ -17,659 +17,696 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_cpp_RefType = &thrift.TypeSpec{
         FullName: "cpp.RefType",
-        CodecEnumSpec: &thrift.CodecEnumSpec{
-    ScopedName: "cpp.RefType",
-},
-
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "cpp.RefType",
+            },
     }
     premadeCodecTypeSpec_cpp_EnumUnderlyingType = &thrift.TypeSpec{
         FullName: "cpp.EnumUnderlyingType",
-        CodecEnumSpec: &thrift.CodecEnumSpec{
-    ScopedName: "cpp.EnumUnderlyingType",
-},
-
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "cpp.EnumUnderlyingType",
+            },
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
     }
     premadeCodecTypeSpec_cpp_Name = &thrift.TypeSpec{
         FullName: "cpp.Name",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.Name",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewName() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.Name",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewName() },
+            },
     }
     premadeCodecTypeSpec_cpp_Type = &thrift.TypeSpec{
         FullName: "cpp.Type",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.Type",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewType() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.Type",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewType() },
+            },
     }
     premadeCodecTypeSpec_cpp_Ref = &thrift.TypeSpec{
         FullName: "cpp.Ref",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.Ref",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewRef() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.Ref",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewRef() },
+            },
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
         FullName: "bool",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
+            },
     }
     premadeCodecTypeSpec_cpp_Lazy = &thrift.TypeSpec{
         FullName: "cpp.Lazy",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.Lazy",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewLazy() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.Lazy",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewLazy() },
+            },
     }
     premadeCodecTypeSpec_cpp_DisableLazyChecksum = &thrift.TypeSpec{
         FullName: "cpp.DisableLazyChecksum",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.DisableLazyChecksum",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewDisableLazyChecksum() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.DisableLazyChecksum",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewDisableLazyChecksum() },
+            },
     }
     premadeCodecTypeSpec_cpp_Adapter = &thrift.TypeSpec{
         FullName: "cpp.Adapter",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.Adapter",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewAdapter() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.Adapter",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewAdapter() },
+            },
     }
     premadeCodecTypeSpec_cpp_PackIsset = &thrift.TypeSpec{
         FullName: "cpp.PackIsset",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.PackIsset",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewPackIsset() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.PackIsset",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewPackIsset() },
+            },
     }
     premadeCodecTypeSpec_cpp_MinimizePadding = &thrift.TypeSpec{
         FullName: "cpp.MinimizePadding",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.MinimizePadding",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewMinimizePadding() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.MinimizePadding",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewMinimizePadding() },
+            },
     }
     premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType = &thrift.TypeSpec{
         FullName: "cpp.ScopedEnumAsUnionType",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.ScopedEnumAsUnionType",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewScopedEnumAsUnionType() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.ScopedEnumAsUnionType",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewScopedEnumAsUnionType() },
+            },
     }
     premadeCodecTypeSpec_cpp_FieldInterceptor = &thrift.TypeSpec{
         FullName: "cpp.FieldInterceptor",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.FieldInterceptor",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewFieldInterceptor() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.FieldInterceptor",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFieldInterceptor() },
+            },
     }
     premadeCodecTypeSpec_cpp_UseOpEncode = &thrift.TypeSpec{
         FullName: "cpp.UseOpEncode",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.UseOpEncode",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewUseOpEncode() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.UseOpEncode",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewUseOpEncode() },
+            },
     }
     premadeCodecTypeSpec_cpp_EnumType = &thrift.TypeSpec{
         FullName: "cpp.EnumType",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.EnumType",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewEnumType() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.EnumType",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewEnumType() },
+            },
     }
     premadeCodecTypeSpec_cpp_Frozen2Exclude = &thrift.TypeSpec{
         FullName: "cpp.Frozen2Exclude",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.Frozen2Exclude",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewFrozen2Exclude() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.Frozen2Exclude",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFrozen2Exclude() },
+            },
     }
     premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams = &thrift.TypeSpec{
         FullName: "cpp.Frozen2RequiresCompleteContainerParams",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.Frozen2RequiresCompleteContainerParams",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewFrozen2RequiresCompleteContainerParams() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.Frozen2RequiresCompleteContainerParams",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFrozen2RequiresCompleteContainerParams() },
+            },
     }
     premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe = &thrift.TypeSpec{
         FullName: "cpp.ProcessInEbThreadUnsafe",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.ProcessInEbThreadUnsafe",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewProcessInEbThreadUnsafe() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.ProcessInEbThreadUnsafe",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewProcessInEbThreadUnsafe() },
+            },
     }
     premadeCodecTypeSpec_cpp_RuntimeAnnotation = &thrift.TypeSpec{
         FullName: "cpp.RuntimeAnnotation",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.RuntimeAnnotation",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewRuntimeAnnotation() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.RuntimeAnnotation",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewRuntimeAnnotation() },
+            },
     }
     premadeCodecTypeSpec_cpp_UseCursorSerialization = &thrift.TypeSpec{
         FullName: "cpp.UseCursorSerialization",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.UseCursorSerialization",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewUseCursorSerialization() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.UseCursorSerialization",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewUseCursorSerialization() },
+            },
     }
     premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods = &thrift.TypeSpec{
         FullName: "cpp.GenerateDeprecatedHeaderClientMethods",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.GenerateDeprecatedHeaderClientMethods",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewGenerateDeprecatedHeaderClientMethods() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.GenerateDeprecatedHeaderClientMethods",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewGenerateDeprecatedHeaderClientMethods() },
+            },
     }
     premadeCodecTypeSpec_cpp_AllowLegacyNonOptionalRef = &thrift.TypeSpec{
         FullName: "cpp.AllowLegacyNonOptionalRef",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.AllowLegacyNonOptionalRef",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewAllowLegacyNonOptionalRef() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.AllowLegacyNonOptionalRef",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewAllowLegacyNonOptionalRef() },
+            },
     }
     premadeCodecTypeSpec_cpp_DeprecatedTerseWrite = &thrift.TypeSpec{
         FullName: "cpp.DeprecatedTerseWrite",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.DeprecatedTerseWrite",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewDeprecatedTerseWrite() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.DeprecatedTerseWrite",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewDeprecatedTerseWrite() },
+            },
     }
     premadeCodecTypeSpec_cpp_AllowLegacyDeprecatedTerseWritesRef = &thrift.TypeSpec{
         FullName: "cpp.AllowLegacyDeprecatedTerseWritesRef",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.AllowLegacyDeprecatedTerseWritesRef",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewAllowLegacyDeprecatedTerseWritesRef() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.AllowLegacyDeprecatedTerseWritesRef",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewAllowLegacyDeprecatedTerseWritesRef() },
+            },
     }
     premadeCodecTypeSpec_cpp_EnableCustomTypeOrdering = &thrift.TypeSpec{
         FullName: "cpp.EnableCustomTypeOrdering",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.EnableCustomTypeOrdering",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewEnableCustomTypeOrdering() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.EnableCustomTypeOrdering",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewEnableCustomTypeOrdering() },
+            },
     }
     premadeCodecTypeSpec_cpp_GenerateServiceMethodDecorator = &thrift.TypeSpec{
         FullName: "cpp.GenerateServiceMethodDecorator",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "cpp.GenerateServiceMethodDecorator",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewGenerateServiceMethodDecorator() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "cpp.GenerateServiceMethodDecorator",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewGenerateServiceMethodDecorator() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Name = &thrift.StructSpec{
-    Name:                 "Name",
-    ScopedName:           "cpp.Name",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "value",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "value": 0,
-    },
-}
-    premadeStructSpec_Type = &thrift.StructSpec{
-    Name:                 "Type",
-    ScopedName:           "cpp.Type",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "name",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRING,
-            Name:                 "template",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "name": 0,
-        "template": 1,
-    },
-}
-    premadeStructSpec_Ref = &thrift.StructSpec{
-    Name:                 "Ref",
-    ScopedName:           "cpp.Ref",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.I32,
-            Name:                 "type",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_cpp_RefType,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "type": 0,
-    },
-}
-    premadeStructSpec_Lazy = &thrift.StructSpec{
-    Name:                 "Lazy",
-    ScopedName:           "cpp.Lazy",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.BOOL,
-            Name:                 "ref",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_bool,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "ref": 0,
-    },
-}
-    premadeStructSpec_DisableLazyChecksum = &thrift.StructSpec{
-    Name:                 "DisableLazyChecksum",
-    ScopedName:           "cpp.DisableLazyChecksum",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_Adapter = &thrift.StructSpec{
-    Name:                 "Adapter",
-    ScopedName:           "cpp.Adapter",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "name",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRING,
-            Name:                 "adaptedType",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   3,
-            WireType:             thrift.STRING,
-            Name:                 "underlyingName",
-            ReflectIndex:         2,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   4,
-            WireType:             thrift.STRING,
-            Name:                 "extraNamespace",
-            ReflectIndex:         3,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   5,
-            WireType:             thrift.BOOL,
-            Name:                 "moveOnly",
-            ReflectIndex:         4,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_bool,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-        3: 2,
-        4: 3,
-        5: 4,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "name": 0,
-        "adaptedType": 1,
-        "underlyingName": 2,
-        "extraNamespace": 3,
-        "moveOnly": 4,
-    },
-}
-    premadeStructSpec_PackIsset = &thrift.StructSpec{
-    Name:                 "PackIsset",
-    ScopedName:           "cpp.PackIsset",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.BOOL,
-            Name:                 "atomic",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_bool,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "atomic": 0,
-    },
-}
-    premadeStructSpec_MinimizePadding = &thrift.StructSpec{
-    Name:                 "MinimizePadding",
-    ScopedName:           "cpp.MinimizePadding",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_ScopedEnumAsUnionType = &thrift.StructSpec{
-    Name:                 "ScopedEnumAsUnionType",
-    ScopedName:           "cpp.ScopedEnumAsUnionType",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_FieldInterceptor = &thrift.StructSpec{
-    Name:                 "FieldInterceptor",
-    ScopedName:           "cpp.FieldInterceptor",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "name",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.BOOL,
-            Name:                 "noinline",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_bool,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "name": 0,
-        "noinline": 1,
-    },
-}
-    premadeStructSpec_UseOpEncode = &thrift.StructSpec{
-    Name:                 "UseOpEncode",
-    ScopedName:           "cpp.UseOpEncode",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_EnumType = &thrift.StructSpec{
-    Name:                 "EnumType",
-    ScopedName:           "cpp.EnumType",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.I32,
-            Name:                 "type",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_cpp_EnumUnderlyingType,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "type": 0,
-    },
-}
-    premadeStructSpec_Frozen2Exclude = &thrift.StructSpec{
-    Name:                 "Frozen2Exclude",
-    ScopedName:           "cpp.Frozen2Exclude",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_Frozen2RequiresCompleteContainerParams = &thrift.StructSpec{
-    Name:                 "Frozen2RequiresCompleteContainerParams",
-    ScopedName:           "cpp.Frozen2RequiresCompleteContainerParams",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_ProcessInEbThreadUnsafe = &thrift.StructSpec{
-    Name:                 "ProcessInEbThreadUnsafe",
-    ScopedName:           "cpp.ProcessInEbThreadUnsafe",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_RuntimeAnnotation = &thrift.StructSpec{
-    Name:                 "RuntimeAnnotation",
-    ScopedName:           "cpp.RuntimeAnnotation",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_UseCursorSerialization = &thrift.StructSpec{
-    Name:                 "UseCursorSerialization",
-    ScopedName:           "cpp.UseCursorSerialization",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_GenerateDeprecatedHeaderClientMethods = &thrift.StructSpec{
-    Name:                 "GenerateDeprecatedHeaderClientMethods",
-    ScopedName:           "cpp.GenerateDeprecatedHeaderClientMethods",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_AllowLegacyNonOptionalRef = &thrift.StructSpec{
-    Name:                 "AllowLegacyNonOptionalRef",
-    ScopedName:           "cpp.AllowLegacyNonOptionalRef",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_DeprecatedTerseWrite = &thrift.StructSpec{
-    Name:                 "DeprecatedTerseWrite",
-    ScopedName:           "cpp.DeprecatedTerseWrite",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_AllowLegacyDeprecatedTerseWritesRef = &thrift.StructSpec{
-    Name:                 "AllowLegacyDeprecatedTerseWritesRef",
-    ScopedName:           "cpp.AllowLegacyDeprecatedTerseWritesRef",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_EnableCustomTypeOrdering = &thrift.StructSpec{
-    Name:                 "EnableCustomTypeOrdering",
-    ScopedName:           "cpp.EnableCustomTypeOrdering",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_GenerateServiceMethodDecorator = &thrift.StructSpec{
-    Name:                 "GenerateServiceMethodDecorator",
-    ScopedName:           "cpp.GenerateServiceMethodDecorator",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
+    premadeStructSpec_Name =
+        &thrift.StructSpec{
+            Name:                 "Name",
+            ScopedName:           "cpp.Name",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "value",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "value": 0,
+            },
+        }
+    premadeStructSpec_Type =
+        &thrift.StructSpec{
+            Name:                 "Type",
+            ScopedName:           "cpp.Type",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "name",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRING,
+                    Name:                 "template",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "name": 0,
+                "template": 1,
+            },
+        }
+    premadeStructSpec_Ref =
+        &thrift.StructSpec{
+            Name:                 "Ref",
+            ScopedName:           "cpp.Ref",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "type",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_cpp_RefType,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "type": 0,
+            },
+        }
+    premadeStructSpec_Lazy =
+        &thrift.StructSpec{
+            Name:                 "Lazy",
+            ScopedName:           "cpp.Lazy",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.BOOL,
+                    Name:                 "ref",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "ref": 0,
+            },
+        }
+    premadeStructSpec_DisableLazyChecksum =
+        &thrift.StructSpec{
+            Name:                 "DisableLazyChecksum",
+            ScopedName:           "cpp.DisableLazyChecksum",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_Adapter =
+        &thrift.StructSpec{
+            Name:                 "Adapter",
+            ScopedName:           "cpp.Adapter",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "name",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRING,
+                    Name:                 "adaptedType",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   3,
+                    WireType:             thrift.STRING,
+                    Name:                 "underlyingName",
+                    ReflectIndex:         2,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   4,
+                    WireType:             thrift.STRING,
+                    Name:                 "extraNamespace",
+                    ReflectIndex:         3,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   5,
+                    WireType:             thrift.BOOL,
+                    Name:                 "moveOnly",
+                    ReflectIndex:         4,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+                3: 2,
+                4: 3,
+                5: 4,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "name": 0,
+                "adaptedType": 1,
+                "underlyingName": 2,
+                "extraNamespace": 3,
+                "moveOnly": 4,
+            },
+        }
+    premadeStructSpec_PackIsset =
+        &thrift.StructSpec{
+            Name:                 "PackIsset",
+            ScopedName:           "cpp.PackIsset",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.BOOL,
+                    Name:                 "atomic",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "atomic": 0,
+            },
+        }
+    premadeStructSpec_MinimizePadding =
+        &thrift.StructSpec{
+            Name:                 "MinimizePadding",
+            ScopedName:           "cpp.MinimizePadding",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_ScopedEnumAsUnionType =
+        &thrift.StructSpec{
+            Name:                 "ScopedEnumAsUnionType",
+            ScopedName:           "cpp.ScopedEnumAsUnionType",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_FieldInterceptor =
+        &thrift.StructSpec{
+            Name:                 "FieldInterceptor",
+            ScopedName:           "cpp.FieldInterceptor",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "name",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.BOOL,
+                    Name:                 "noinline",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "name": 0,
+                "noinline": 1,
+            },
+        }
+    premadeStructSpec_UseOpEncode =
+        &thrift.StructSpec{
+            Name:                 "UseOpEncode",
+            ScopedName:           "cpp.UseOpEncode",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_EnumType =
+        &thrift.StructSpec{
+            Name:                 "EnumType",
+            ScopedName:           "cpp.EnumType",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "type",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_cpp_EnumUnderlyingType,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "type": 0,
+            },
+        }
+    premadeStructSpec_Frozen2Exclude =
+        &thrift.StructSpec{
+            Name:                 "Frozen2Exclude",
+            ScopedName:           "cpp.Frozen2Exclude",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_Frozen2RequiresCompleteContainerParams =
+        &thrift.StructSpec{
+            Name:                 "Frozen2RequiresCompleteContainerParams",
+            ScopedName:           "cpp.Frozen2RequiresCompleteContainerParams",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_ProcessInEbThreadUnsafe =
+        &thrift.StructSpec{
+            Name:                 "ProcessInEbThreadUnsafe",
+            ScopedName:           "cpp.ProcessInEbThreadUnsafe",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_RuntimeAnnotation =
+        &thrift.StructSpec{
+            Name:                 "RuntimeAnnotation",
+            ScopedName:           "cpp.RuntimeAnnotation",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_UseCursorSerialization =
+        &thrift.StructSpec{
+            Name:                 "UseCursorSerialization",
+            ScopedName:           "cpp.UseCursorSerialization",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_GenerateDeprecatedHeaderClientMethods =
+        &thrift.StructSpec{
+            Name:                 "GenerateDeprecatedHeaderClientMethods",
+            ScopedName:           "cpp.GenerateDeprecatedHeaderClientMethods",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_AllowLegacyNonOptionalRef =
+        &thrift.StructSpec{
+            Name:                 "AllowLegacyNonOptionalRef",
+            ScopedName:           "cpp.AllowLegacyNonOptionalRef",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_DeprecatedTerseWrite =
+        &thrift.StructSpec{
+            Name:                 "DeprecatedTerseWrite",
+            ScopedName:           "cpp.DeprecatedTerseWrite",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_AllowLegacyDeprecatedTerseWritesRef =
+        &thrift.StructSpec{
+            Name:                 "AllowLegacyDeprecatedTerseWritesRef",
+            ScopedName:           "cpp.AllowLegacyDeprecatedTerseWritesRef",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_EnableCustomTypeOrdering =
+        &thrift.StructSpec{
+            Name:                 "EnableCustomTypeOrdering",
+            ScopedName:           "cpp.EnableCustomTypeOrdering",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_GenerateServiceMethodDecorator =
+        &thrift.StructSpec{
+            Name:                 "GenerateServiceMethodDecorator",
+            ScopedName:           "cpp.GenerateServiceMethodDecorator",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

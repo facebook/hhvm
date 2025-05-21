@@ -19,114 +19,132 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_scope_Transitive = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Transitive",
-},
-
-    }
-    premadeThriftType_scope_Program = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Program",
-},
-
-    }
-    premadeThriftType_scope_Struct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Struct",
-},
-
-    }
-    premadeThriftType_scope_Union = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Union",
-},
-
-    }
-    premadeThriftType_scope_Exception = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Exception",
-},
-
-    }
-    premadeThriftType_scope_Field = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Field",
-},
-
-    }
-    premadeThriftType_scope_Typedef = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Typedef",
-},
-
-    }
-    premadeThriftType_scope_Service = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Service",
-},
-
-    }
-    premadeThriftType_scope_Interaction = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Interaction",
-},
-
-    }
-    premadeThriftType_scope_Function = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Function",
-},
-
-    }
-    premadeThriftType_scope_EnumValue = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.EnumValue",
-},
-
-    }
-    premadeThriftType_scope_Const = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Const",
-},
-
-    }
-    premadeThriftType_scope_Enum = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Enum",
-},
-
-    }
-    premadeThriftType_scope_Structured = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Structured",
-},
-
-    }
-    premadeThriftType_scope_Interface = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Interface",
-},
-
-    }
-    premadeThriftType_scope_RootDefinition = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.RootDefinition",
-},
-
-    }
-    premadeThriftType_scope_Definition = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.Definition",
-},
-
-    }
-    premadeThriftType_scope_DisableSchemaConst = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "scope.DisableSchemaConst",
-},
-
-    }
+    premadeThriftType_scope_Transitive =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Transitive",
+                },
+        }
+    premadeThriftType_scope_Program =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Program",
+                },
+        }
+    premadeThriftType_scope_Struct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Struct",
+                },
+        }
+    premadeThriftType_scope_Union =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Union",
+                },
+        }
+    premadeThriftType_scope_Exception =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Exception",
+                },
+        }
+    premadeThriftType_scope_Field =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Field",
+                },
+        }
+    premadeThriftType_scope_Typedef =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Typedef",
+                },
+        }
+    premadeThriftType_scope_Service =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Service",
+                },
+        }
+    premadeThriftType_scope_Interaction =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Interaction",
+                },
+        }
+    premadeThriftType_scope_Function =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Function",
+                },
+        }
+    premadeThriftType_scope_EnumValue =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.EnumValue",
+                },
+        }
+    premadeThriftType_scope_Const =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Const",
+                },
+        }
+    premadeThriftType_scope_Enum =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Enum",
+                },
+        }
+    premadeThriftType_scope_Structured =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Structured",
+                },
+        }
+    premadeThriftType_scope_Interface =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Interface",
+                },
+        }
+    premadeThriftType_scope_RootDefinition =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.RootDefinition",
+                },
+        }
+    premadeThriftType_scope_Definition =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.Definition",
+                },
+        }
+    premadeThriftType_scope_DisableSchemaConst =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "scope.DisableSchemaConst",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

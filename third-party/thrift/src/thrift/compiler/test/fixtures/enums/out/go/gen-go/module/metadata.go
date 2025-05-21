@@ -19,70 +19,81 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_Metasyntactic = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.Metasyntactic",
-},
-
-    }
-    premadeThriftType_module_MyEnum1 = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyEnum1",
-},
-
-    }
-    premadeThriftType_module_MyEnum2 = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyEnum2",
-},
-
-    }
-    premadeThriftType_module_MyEnum3 = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyEnum3",
-},
-
-    }
-    premadeThriftType_module_MyEnum4 = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyEnum4",
-},
-
-    }
-    premadeThriftType_module_MyBitmaskEnum1 = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyBitmaskEnum1",
-},
-
-    }
-    premadeThriftType_module_MyBitmaskEnum2 = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyBitmaskEnum2",
-},
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_set_i32 = &metadata.ThriftType{
-        TSet: &metadata.ThriftSetType{
-    ValueType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_module_SomeStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.SomeStruct",
-},
-
-    }
-    premadeThriftType_module_MyStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyStruct",
-},
-
-    }
+    premadeThriftType_module_Metasyntactic =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.Metasyntactic",
+                },
+        }
+    premadeThriftType_module_MyEnum1 =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum1",
+                },
+        }
+    premadeThriftType_module_MyEnum2 =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum2",
+                },
+        }
+    premadeThriftType_module_MyEnum3 =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum3",
+                },
+        }
+    premadeThriftType_module_MyEnum4 =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum4",
+                },
+        }
+    premadeThriftType_module_MyBitmaskEnum1 =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyBitmaskEnum1",
+                },
+        }
+    premadeThriftType_module_MyBitmaskEnum2 =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyBitmaskEnum2",
+                },
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_set_i32 =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_module_SomeStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.SomeStruct",
+                },
+        }
+    premadeThriftType_module_MyStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyStruct",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

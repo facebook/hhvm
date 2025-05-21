@@ -19,82 +19,97 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_module_GetEntityRequest = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.GetEntityRequest",
-},
-
-    }
-    premadeThriftType_module_GetEntityResponse = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.GetEntityResponse",
-},
-
-    }
-    premadeThriftType_list_string = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_module_NonComparableStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.NonComparableStruct",
-},
-
-    }
-    premadeThriftType_i64 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-
-    }
-    premadeThriftType_map_module_NonComparableStruct_i64 = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_module_NonComparableStruct,
-    ValueType: premadeThriftType_i64,
-},
-
-    }
-    premadeThriftType_bool = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-
-    }
-    premadeThriftType_byte = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
-
-    }
-    premadeThriftType_i16 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_double = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
-
-    }
-    premadeThriftType_binary = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
-
-    }
-    premadeThriftType_map_string_string = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_string,
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_set_string = &metadata.ThriftType{
-        TSet: &metadata.ThriftSetType{
-    ValueType: premadeThriftType_string,
-},
-
-    }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module_GetEntityRequest =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.GetEntityRequest",
+                },
+        }
+    premadeThriftType_module_GetEntityResponse =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.GetEntityResponse",
+                },
+        }
+    premadeThriftType_list_string =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module_NonComparableStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.NonComparableStruct",
+                },
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_map_module_NonComparableStruct_i64 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_module_NonComparableStruct,
+                    ValueType: premadeThriftType_i64,
+                },
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_byte =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+        }
+    premadeThriftType_i16 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_double =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+        }
+    premadeThriftType_binary =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+        }
+    premadeThriftType_map_string_string =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_string,
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_set_string =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

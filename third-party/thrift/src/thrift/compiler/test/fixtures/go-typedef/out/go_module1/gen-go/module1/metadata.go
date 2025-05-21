@@ -23,142 +23,164 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_module1_Plate = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.Plate",
-    UnderlyingType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_module1_Year = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.Year",
-    UnderlyingType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_list_string = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_module1_Drivers = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.Drivers",
-    UnderlyingType: premadeThriftType_list_string,
-},
-
-    }
-    premadeThriftType_module1_Accessory = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.Accessory",
-    UnderlyingType: module0.GetMetadataThriftType("module0.Accessory"),
-},
-
-    }
-    premadeThriftType_list_module1_Accessory = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_module1_Accessory,
-},
-
-    }
-    premadeThriftType_module1_PartName = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.PartName",
-    UnderlyingType: module0.GetMetadataThriftType("module0.PartName"),
-},
-
-    }
-    premadeThriftType_map_i32_module1_PartName = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i32,
-    ValueType: premadeThriftType_module1_PartName,
-},
-
-    }
-    premadeThriftType_module1_Automobile = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module1.Automobile",
-},
-
-    }
-    premadeThriftType_i64 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-
-    }
-    premadeThriftType_module1_MapKey = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module1.MapKey",
-},
-
-    }
-    premadeThriftType_map_module1_MapKey_string = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_module1_MapKey,
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_module1_MapContainer = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module1.MapContainer",
-},
-
-    }
-    premadeThriftType_module1_Car = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.Car",
-    UnderlyingType: premadeThriftType_module1_Automobile,
-},
-
-    }
-    premadeThriftType_module1_Pair = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module1.Pair",
-},
-
-    }
-    premadeThriftType_list_module1_Automobile = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_module1_Automobile,
-},
-
-    }
-    premadeThriftType_list_module1_Car = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_module1_Car,
-},
-
-    }
-    premadeThriftType_module1_Collection = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module1.Collection",
-},
-
-    }
-    premadeThriftType_module1_State = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.State",
-    UnderlyingType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_module1_Enum = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module1.Enum",
-    UnderlyingType: module2.GetMetadataThriftType("module2.Enum"),
-},
-
-    }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module1_Plate =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.Plate",
+                    UnderlyingType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_module1_Year =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.Year",
+                    UnderlyingType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_list_string =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module1_Drivers =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.Drivers",
+                    UnderlyingType: premadeThriftType_list_string,
+                },
+        }
+    premadeThriftType_module1_Accessory =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.Accessory",
+                    UnderlyingType: module0.GetMetadataThriftType("module0.Accessory"),
+                },
+        }
+    premadeThriftType_list_module1_Accessory =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_module1_Accessory,
+                },
+        }
+    premadeThriftType_module1_PartName =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.PartName",
+                    UnderlyingType: module0.GetMetadataThriftType("module0.PartName"),
+                },
+        }
+    premadeThriftType_map_i32_module1_PartName =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i32,
+                    ValueType: premadeThriftType_module1_PartName,
+                },
+        }
+    premadeThriftType_module1_Automobile =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module1.Automobile",
+                },
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_module1_MapKey =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module1.MapKey",
+                },
+        }
+    premadeThriftType_map_module1_MapKey_string =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_module1_MapKey,
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module1_MapContainer =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module1.MapContainer",
+                },
+        }
+    premadeThriftType_module1_Car =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.Car",
+                    UnderlyingType: premadeThriftType_module1_Automobile,
+                },
+        }
+    premadeThriftType_module1_Pair =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module1.Pair",
+                },
+        }
+    premadeThriftType_list_module1_Automobile =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_module1_Automobile,
+                },
+        }
+    premadeThriftType_list_module1_Car =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_module1_Car,
+                },
+        }
+    premadeThriftType_module1_Collection =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module1.Collection",
+                },
+        }
+    premadeThriftType_module1_State =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.State",
+                    UnderlyingType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module1_Enum =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.Enum",
+                    UnderlyingType: module2.GetMetadataThriftType("module2.Enum"),
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

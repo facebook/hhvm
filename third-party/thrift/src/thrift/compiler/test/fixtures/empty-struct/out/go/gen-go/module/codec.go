@@ -17,50 +17,52 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_module_Empty = &thrift.TypeSpec{
         FullName: "module.Empty",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module.Empty",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewEmpty() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.Empty",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewEmpty() },
+            },
     }
     premadeCodecTypeSpec_module_Nada = &thrift.TypeSpec{
         FullName: "module.Nada",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module.Nada",
-    IsUnion:    true,
-    NewFunc:    func() thrift.Struct { return NewNada() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.Nada",
+                IsUnion:    true,
+                NewFunc:    func() thrift.Struct { return NewNada() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Empty = &thrift.StructSpec{
-    Name:                 "Empty",
-    ScopedName:           "module.Empty",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_Nada = &thrift.StructSpec{
-    Name:                 "Nada",
-    ScopedName:           "module.Nada",
-    IsUnion:              true,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
+    premadeStructSpec_Empty =
+        &thrift.StructSpec{
+            Name:                 "Empty",
+            ScopedName:           "module.Empty",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_Nada =
+        &thrift.StructSpec{
+            Name:                 "Nada",
+            ScopedName:           "module.Nada",
+            IsUnion:              true,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

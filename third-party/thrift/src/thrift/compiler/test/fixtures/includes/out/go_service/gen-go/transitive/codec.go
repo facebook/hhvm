@@ -17,46 +17,48 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
         FullName: "i64",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
+            },
     }
     premadeCodecTypeSpec_transitive_Foo = &thrift.TypeSpec{
         FullName: "transitive.Foo",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "transitive.Foo",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewFoo() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "transitive.Foo",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFoo() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Foo = &thrift.StructSpec{
-    Name:                 "Foo",
-    ScopedName:           "transitive.Foo",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.I64,
-            Name:                 "a",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i64,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "a": 0,
-    },
-}
+    premadeStructSpec_Foo =
+        &thrift.StructSpec{
+            Name:                 "Foo",
+            ScopedName:           "transitive.Foo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I64,
+                    Name:                 "a",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i64,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "a": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

@@ -19,100 +19,117 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_i64 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_list_i64 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_i64,
-},
-
-    }
-    premadeThriftType_list_string = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_i16 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
-
-    }
-    premadeThriftType_map_i16_string = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i16,
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_module_containerTypedef = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.containerTypedef",
-    UnderlyingType: premadeThriftType_map_i16_string,
-},
-
-    }
-    premadeThriftType_module_ComplexUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.ComplexUnion",
-},
-
-    }
-    premadeThriftType_module_ListUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.ListUnion",
-},
-
-    }
-    premadeThriftType_binary = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
-
-    }
-    premadeThriftType_module_DataUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.DataUnion",
-},
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_module_Val = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.Val",
-},
-
-    }
-    premadeThriftType_module_ValUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.ValUnion",
-},
-
-    }
-    premadeThriftType_module_VirtualComplexUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.VirtualComplexUnion",
-},
-
-    }
-    premadeThriftType_module_NonCopyableStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.NonCopyableStruct",
-},
-
-    }
-    premadeThriftType_module_NonCopyableUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.NonCopyableUnion",
-},
-
-    }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_list_i64 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_i64,
+                },
+        }
+    premadeThriftType_list_string =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_i16 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+        }
+    premadeThriftType_map_i16_string =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i16,
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module_containerTypedef =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.containerTypedef",
+                    UnderlyingType: premadeThriftType_map_i16_string,
+                },
+        }
+    premadeThriftType_module_ComplexUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.ComplexUnion",
+                },
+        }
+    premadeThriftType_module_ListUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.ListUnion",
+                },
+        }
+    premadeThriftType_binary =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+        }
+    premadeThriftType_module_DataUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.DataUnion",
+                },
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_module_Val =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.Val",
+                },
+        }
+    premadeThriftType_module_ValUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.ValUnion",
+                },
+        }
+    premadeThriftType_module_VirtualComplexUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.VirtualComplexUnion",
+                },
+        }
+    premadeThriftType_module_NonCopyableStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.NonCopyableStruct",
+                },
+        }
+    premadeThriftType_module_NonCopyableUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.NonCopyableUnion",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

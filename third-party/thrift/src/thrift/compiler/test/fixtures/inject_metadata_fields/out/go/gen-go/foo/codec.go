@@ -17,66 +17,70 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
     }
     premadeCodecTypeSpec_foo_Fields = &thrift.TypeSpec{
         FullName: "foo.Fields",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "foo.Fields",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewFields() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "foo.Fields",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFields() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Fields = &thrift.StructSpec{
-    Name:                 "Fields",
-    ScopedName:           "foo.Fields",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   100,
-            WireType:             thrift.STRING,
-            Name:                 "injected_field",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   101,
-            WireType:             thrift.STRING,
-            Name:                 "injected_structured_annotation_field",
-            ReflectIndex:         1,
-            IsOptional:           true,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: true,
-        },        {
-            ID:                   102,
-            WireType:             thrift.STRING,
-            Name:                 "injected_unstructured_annotation_field",
-            ReflectIndex:         2,
-            IsOptional:           true,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        100: 0,
-        101: 1,
-        102: 2,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "injected_field": 0,
-        "injected_structured_annotation_field": 1,
-        "injected_unstructured_annotation_field": 2,
-    },
-}
+    premadeStructSpec_Fields =
+        &thrift.StructSpec{
+            Name:                 "Fields",
+            ScopedName:           "foo.Fields",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   100,
+                    WireType:             thrift.STRING,
+                    Name:                 "injected_field",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   101,
+                    WireType:             thrift.STRING,
+                    Name:                 "injected_structured_annotation_field",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   102,
+                    WireType:             thrift.STRING,
+                    Name:                 "injected_unstructured_annotation_field",
+                    ReflectIndex:         2,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                100: 0,
+                101: 1,
+                102: 2,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "injected_field": 0,
+                "injected_structured_annotation_field": 1,
+                "injected_unstructured_annotation_field": 2,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

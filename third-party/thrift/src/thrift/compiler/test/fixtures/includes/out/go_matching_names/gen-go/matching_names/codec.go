@@ -19,39 +19,41 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_matching_names_IncludesAlso = &thrift.TypeSpec{
         FullName: "matching_names.IncludesAlso",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "matching_names.IncludesAlso",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewIncludesAlso() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "matching_names.IncludesAlso",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewIncludesAlso() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_IncludesAlso = &thrift.StructSpec{
-    Name:                 "IncludesAlso",
-    ScopedName:           "matching_names.IncludesAlso",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRUCT,
-            Name:                 "also",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        includesAlso.GetCodecTypeSpec("IncludesAlso.Also"),
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "also": 0,
-    },
-}
+    premadeStructSpec_IncludesAlso =
+        &thrift.StructSpec{
+            Name:                 "IncludesAlso",
+            ScopedName:           "matching_names.IncludesAlso",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "also",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        includesAlso.GetCodecTypeSpec("IncludesAlso.Also"),
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "also": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

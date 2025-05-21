@@ -21,26 +21,30 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_module_ShouldBeBoxed = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.ShouldBeBoxed",
-},
-
-    }
-    premadeThriftType_module_CustomException = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.CustomException",
-},
-
-    }
-    premadeThriftType_void = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-
-    }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module_ShouldBeBoxed =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.ShouldBeBoxed",
+                },
+        }
+    premadeThriftType_module_CustomException =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.CustomException",
+                },
+        }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

@@ -19,12 +19,13 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_IncludesAlso_Also = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "IncludesAlso.Also",
-},
-
-    }
+    premadeThriftType_IncludesAlso_Also =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "IncludesAlso.Also",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

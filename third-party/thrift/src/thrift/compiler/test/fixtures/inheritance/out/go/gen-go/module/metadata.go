@@ -19,10 +19,11 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_void = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-
-    }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

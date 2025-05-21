@@ -21,119 +21,127 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_service_IncludesIncluded = &thrift.TypeSpec{
         FullName: "service.IncludesIncluded",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "service.IncludesIncluded",
-	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "service.IncludesIncluded",
+            	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
+            },
     }
     premadeCodecTypeSpec_service_IncludesTransitiveFoo = &thrift.TypeSpec{
         FullName: "service.IncludesTransitiveFoo",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "service.IncludesTransitiveFoo",
-	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "service.IncludesTransitiveFoo",
+            	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
+            },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
         FullName: "void",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqMyServiceQuery = &thrift.StructSpec{
-    Name:                 "reqMyServiceQuery",
-    ScopedName:           "service.reqMyServiceQuery",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRUCT,
-            Name:                 "s",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        module.GetCodecTypeSpec("module.MyStruct"),
-            MustBeSetToSerialize: true,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRUCT,
-            Name:                 "i",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        includes.GetCodecTypeSpec("includes.Included"),
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "s": 0,
-        "i": 1,
-    },
-}
-    premadeStructSpec_respMyServiceQuery = &thrift.StructSpec{
-    Name:                 "respMyServiceQuery",
-    ScopedName:           "service.respMyServiceQuery",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_reqMyServiceHasArgDocs = &thrift.StructSpec{
-    Name:                 "reqMyServiceHasArgDocs",
-    ScopedName:           "service.reqMyServiceHasArgDocs",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRUCT,
-            Name:                 "s",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        module.GetCodecTypeSpec("module.MyStruct"),
-            MustBeSetToSerialize: true,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRUCT,
-            Name:                 "i",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        includes.GetCodecTypeSpec("includes.Included"),
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "s": 0,
-        "i": 1,
-    },
-}
-    premadeStructSpec_respMyServiceHasArgDocs = &thrift.StructSpec{
-    Name:                 "respMyServiceHasArgDocs",
-    ScopedName:           "service.respMyServiceHasArgDocs",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
+    premadeStructSpec_reqMyServiceQuery =
+        &thrift.StructSpec{
+            Name:                 "reqMyServiceQuery",
+            ScopedName:           "service.reqMyServiceQuery",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "s",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        module.GetCodecTypeSpec("module.MyStruct"),
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "i",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        includes.GetCodecTypeSpec("includes.Included"),
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "s": 0,
+                "i": 1,
+            },
+        }
+    premadeStructSpec_respMyServiceQuery =
+        &thrift.StructSpec{
+            Name:                 "respMyServiceQuery",
+            ScopedName:           "service.respMyServiceQuery",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqMyServiceHasArgDocs =
+        &thrift.StructSpec{
+            Name:                 "reqMyServiceHasArgDocs",
+            ScopedName:           "service.reqMyServiceHasArgDocs",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "s",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        module.GetCodecTypeSpec("module.MyStruct"),
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "i",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        includes.GetCodecTypeSpec("includes.Included"),
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "s": 0,
+                "i": 1,
+            },
+        }
+    premadeStructSpec_respMyServiceHasArgDocs =
+        &thrift.StructSpec{
+            Name:                 "respMyServiceHasArgDocs",
+            ScopedName:           "service.respMyServiceHasArgDocs",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

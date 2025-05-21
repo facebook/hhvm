@@ -19,89 +19,104 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_MyEnum = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.MyEnum",
-},
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_module_MyStructNestedAnnotation = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyStructNestedAnnotation",
-},
-
-    }
-    premadeThriftType_module_MyUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.MyUnion",
-},
-
-    }
-    premadeThriftType_i64 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-
-    }
-    premadeThriftType_list_string = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_module_list_string_6884 = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.list_string_6884",
-    UnderlyingType: premadeThriftType_list_string,
-},
-
-    }
-    premadeThriftType_module_MyStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyStruct",
-},
-
-    }
-    premadeThriftType_module_SecretStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.SecretStruct",
-},
-
-    }
-    premadeThriftType_module_MyException = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.MyException",
-},
-
-    }
-    premadeThriftType_module_AwesomeStruct = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.AwesomeStruct",
-    UnderlyingType: premadeThriftType_module_MyStruct,
-},
-
-    }
-    premadeThriftType_module_FantasticStruct = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.FantasticStruct",
-    UnderlyingType: premadeThriftType_module_MyStruct,
-},
-
-    }
-    premadeThriftType_void = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-
-    }
-    premadeThriftType_bool = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
+    premadeThriftType_module_MyEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum",
+                },
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module_MyStructNestedAnnotation =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyStructNestedAnnotation",
+                },
+        }
+    premadeThriftType_module_MyUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.MyUnion",
+                },
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_list_string =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module_list_string_6884 =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.list_string_6884",
+                    UnderlyingType: premadeThriftType_list_string,
+                },
+        }
+    premadeThriftType_module_MyStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyStruct",
+                },
+        }
+    premadeThriftType_module_SecretStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.SecretStruct",
+                },
+        }
+    premadeThriftType_module_MyException =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyException",
+                },
+        }
+    premadeThriftType_module_AwesomeStruct =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.AwesomeStruct",
+                    UnderlyingType: premadeThriftType_module_MyStruct,
+                },
+        }
+    premadeThriftType_module_FantasticStruct =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.FantasticStruct",
+                    UnderlyingType: premadeThriftType_module_MyStruct,
+                },
+        }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

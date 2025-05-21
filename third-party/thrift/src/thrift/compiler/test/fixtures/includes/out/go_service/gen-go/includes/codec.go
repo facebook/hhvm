@@ -19,72 +19,75 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
         FullName: "i64",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
+            },
     }
     premadeCodecTypeSpec_includes_Included = &thrift.TypeSpec{
         FullName: "includes.Included",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "includes.Included",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewIncluded() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "includes.Included",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewIncluded() },
+            },
     }
     premadeCodecTypeSpec_includes_IncludedInt64 = &thrift.TypeSpec{
         FullName: "includes.IncludedInt64",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "includes.IncludedInt64",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "includes.IncludedInt64",
+            	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+            },
     }
     premadeCodecTypeSpec_includes_TransitiveFoo = &thrift.TypeSpec{
         FullName: "includes.TransitiveFoo",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "includes.TransitiveFoo",
-	UnderlyingTypeSpec: transitive.GetCodecTypeSpec("transitive.Foo"),
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "includes.TransitiveFoo",
+            	UnderlyingTypeSpec: transitive.GetCodecTypeSpec("transitive.Foo"),
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Included = &thrift.StructSpec{
-    Name:                 "Included",
-    ScopedName:           "includes.Included",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.I64,
-            Name:                 "MyIntField",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i64,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRUCT,
-            Name:                 "MyTransitiveField",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        transitive.GetCodecTypeSpec("transitive.Foo"),
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "MyIntField": 0,
-        "MyTransitiveField": 1,
-    },
-}
+    premadeStructSpec_Included =
+        &thrift.StructSpec{
+            Name:                 "Included",
+            ScopedName:           "includes.Included",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I64,
+                    Name:                 "MyIntField",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i64,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "MyTransitiveField",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        transitive.GetCodecTypeSpec("transitive.Foo"),
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "MyIntField": 0,
+                "MyTransitiveField": 1,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

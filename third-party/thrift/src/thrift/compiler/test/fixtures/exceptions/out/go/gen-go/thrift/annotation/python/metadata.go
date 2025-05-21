@@ -19,62 +19,72 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_python_Py3Hidden = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.Py3Hidden",
-},
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_python_PyDeprecatedHidden = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.PyDeprecatedHidden",
-},
-
-    }
-    premadeThriftType_python_Flags = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.Flags",
-},
-
-    }
-    premadeThriftType_python_Name = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.Name",
-},
-
-    }
-    premadeThriftType_python_Adapter = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.Adapter",
-},
-
-    }
-    premadeThriftType_bool = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-
-    }
-    premadeThriftType_python_UseCAPI = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.UseCAPI",
-},
-
-    }
-    premadeThriftType_python_Py3EnableCppAdapter = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.Py3EnableCppAdapter",
-},
-
-    }
-    premadeThriftType_python_MigrationBlockingAllowInheritance = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "python.MigrationBlockingAllowInheritance",
-},
-
-    }
+    premadeThriftType_python_Py3Hidden =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.Py3Hidden",
+                },
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_python_PyDeprecatedHidden =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.PyDeprecatedHidden",
+                },
+        }
+    premadeThriftType_python_Flags =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.Flags",
+                },
+        }
+    premadeThriftType_python_Name =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.Name",
+                },
+        }
+    premadeThriftType_python_Adapter =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.Adapter",
+                },
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_python_UseCAPI =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.UseCAPI",
+                },
+        }
+    premadeThriftType_python_Py3EnableCppAdapter =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.Py3EnableCppAdapter",
+                },
+        }
+    premadeThriftType_python_MigrationBlockingAllowInheritance =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "python.MigrationBlockingAllowInheritance",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

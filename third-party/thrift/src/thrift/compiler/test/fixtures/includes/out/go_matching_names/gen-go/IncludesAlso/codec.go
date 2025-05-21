@@ -17,29 +17,30 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_IncludesAlso_Also = &thrift.TypeSpec{
         FullName: "IncludesAlso.Also",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "IncludesAlso.Also",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewAlso() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "IncludesAlso.Also",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewAlso() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Also = &thrift.StructSpec{
-    Name:                 "Also",
-    ScopedName:           "IncludesAlso.Also",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
+    premadeStructSpec_Also =
+        &thrift.StructSpec{
+            Name:                 "Also",
+            ScopedName:           "IncludesAlso.Also",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

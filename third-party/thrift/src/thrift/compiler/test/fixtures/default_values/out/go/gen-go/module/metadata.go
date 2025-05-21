@@ -19,28 +19,32 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_module_TrivialStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.TrivialStruct",
-},
-
-    }
-    premadeThriftType_module_StructWithNoCustomDefaultValues = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.StructWithNoCustomDefaultValues",
-},
-
-    }
-    premadeThriftType_module_StructWithCustomDefaultValues = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.StructWithCustomDefaultValues",
-},
-
-    }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_module_TrivialStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.TrivialStruct",
+                },
+        }
+    premadeThriftType_module_StructWithNoCustomDefaultValues =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.StructWithNoCustomDefaultValues",
+                },
+        }
+    premadeThriftType_module_StructWithCustomDefaultValues =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.StructWithCustomDefaultValues",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

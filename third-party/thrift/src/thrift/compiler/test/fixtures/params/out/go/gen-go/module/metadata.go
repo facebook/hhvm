@@ -19,78 +19,90 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_void = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_list_i32 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_map_i32_list_i32 = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i32,
-    ValueType: premadeThriftType_list_i32,
-},
-
-    }
-    premadeThriftType_set_i32 = &metadata.ThriftType{
-        TSet: &metadata.ThriftSetType{
-    ValueType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_map_i32_set_i32 = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i32,
-    ValueType: premadeThriftType_set_i32,
-},
-
-    }
-    premadeThriftType_map_i32_i32 = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i32,
-    ValueType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_list_map_i32_i32 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_map_i32_i32,
-},
-
-    }
-    premadeThriftType_list_set_i32 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_set_i32,
-},
-
-    }
-    premadeThriftType_map_i32_map_i32_set_i32 = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i32,
-    ValueType: premadeThriftType_map_i32_set_i32,
-},
-
-    }
-    premadeThriftType_list_map_i32_map_i32_set_i32 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_map_i32_map_i32_set_i32,
-},
-
-    }
-    premadeThriftType_list_list_map_i32_map_i32_set_i32 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_list_map_i32_map_i32_set_i32,
-},
-
-    }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_list_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_map_i32_list_i32 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i32,
+                    ValueType: premadeThriftType_list_i32,
+                },
+        }
+    premadeThriftType_set_i32 =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_map_i32_set_i32 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i32,
+                    ValueType: premadeThriftType_set_i32,
+                },
+        }
+    premadeThriftType_map_i32_i32 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i32,
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_list_map_i32_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_map_i32_i32,
+                },
+        }
+    premadeThriftType_list_set_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_set_i32,
+                },
+        }
+    premadeThriftType_map_i32_map_i32_set_i32 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i32,
+                    ValueType: premadeThriftType_map_i32_set_i32,
+                },
+        }
+    premadeThriftType_list_map_i32_map_i32_set_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_map_i32_map_i32_set_i32,
+                },
+        }
+    premadeThriftType_list_list_map_i32_map_i32_set_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_list_map_i32_map_i32_set_i32,
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

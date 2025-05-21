@@ -21,30 +21,34 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_i64 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-
-    }
-    premadeThriftType_includes_Included = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "includes.Included",
-},
-
-    }
-    premadeThriftType_includes_IncludedInt64 = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "includes.IncludedInt64",
-    UnderlyingType: premadeThriftType_i64,
-},
-
-    }
-    premadeThriftType_includes_TransitiveFoo = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "includes.TransitiveFoo",
-    UnderlyingType: transitive.GetMetadataThriftType("transitive.Foo"),
-},
-
-    }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_includes_Included =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "includes.Included",
+                },
+        }
+    premadeThriftType_includes_IncludedInt64 =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "includes.IncludedInt64",
+                    UnderlyingType: premadeThriftType_i64,
+                },
+        }
+    premadeThriftType_includes_TransitiveFoo =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "includes.TransitiveFoo",
+                    UnderlyingType: transitive.GetMetadataThriftType("transitive.Foo"),
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

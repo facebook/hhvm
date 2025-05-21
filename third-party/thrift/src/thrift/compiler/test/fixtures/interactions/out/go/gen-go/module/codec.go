@@ -19,190 +19,203 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
     }
     premadeCodecTypeSpec_module_ShouldBeBoxed = &thrift.TypeSpec{
         FullName: "module.ShouldBeBoxed",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module.ShouldBeBoxed",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewShouldBeBoxed() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.ShouldBeBoxed",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewShouldBeBoxed() },
+            },
     }
     premadeCodecTypeSpec_module_CustomException = &thrift.TypeSpec{
         FullName: "module.CustomException",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module.CustomException",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewCustomException() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.CustomException",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewCustomException() },
+            },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
         FullName: "void",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_CustomException = &thrift.StructSpec{
-    Name:                 "CustomException",
-    ScopedName:           "module.CustomException",
-    IsUnion:              false,
-    IsException:          true,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "message",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "message": 0,
-    },
-}
-    premadeStructSpec_ShouldBeBoxed = &thrift.StructSpec{
-    Name:                 "ShouldBeBoxed",
-    ScopedName:           "module.ShouldBeBoxed",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "sessionId",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "sessionId": 0,
-    },
-}
-    premadeStructSpec_reqMyServiceFoo = &thrift.StructSpec{
-    Name:                 "reqMyServiceFoo",
-    ScopedName:           "module.reqMyServiceFoo",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_respMyServiceFoo = &thrift.StructSpec{
-    Name:                 "respMyServiceFoo",
-    ScopedName:           "module.respMyServiceFoo",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_reqFactoriesFoo = &thrift.StructSpec{
-    Name:                 "reqFactoriesFoo",
-    ScopedName:           "module.reqFactoriesFoo",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_respFactoriesFoo = &thrift.StructSpec{
-    Name:                 "respFactoriesFoo",
-    ScopedName:           "module.respFactoriesFoo",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_reqPerformFoo = &thrift.StructSpec{
-    Name:                 "reqPerformFoo",
-    ScopedName:           "module.reqPerformFoo",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_respPerformFoo = &thrift.StructSpec{
-    Name:                 "respPerformFoo",
-    ScopedName:           "module.respPerformFoo",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_reqInteractWithSharedDoSomeSimilarThings = &thrift.StructSpec{
-    Name:                 "reqInteractWithSharedDoSomeSimilarThings",
-    ScopedName:           "module.reqInteractWithSharedDoSomeSimilarThings",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_respInteractWithSharedDoSomeSimilarThings = &thrift.StructSpec{
-    Name:                 "respInteractWithSharedDoSomeSimilarThings",
-    ScopedName:           "module.respInteractWithSharedDoSomeSimilarThings",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   0,
-            WireType:             thrift.STRUCT,
-            Name:                 "success",
-            ReflectIndex:         0,
-            IsOptional:           true,
-            ValueTypeSpec:        shared.GetCodecTypeSpec("shared.DoSomethingResult"),
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        0: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "success": 0,
-    },
-}
+    premadeStructSpec_CustomException =
+        &thrift.StructSpec{
+            Name:                 "CustomException",
+            ScopedName:           "module.CustomException",
+            IsUnion:              false,
+            IsException:          true,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "message",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "message": 0,
+            },
+        }
+    premadeStructSpec_ShouldBeBoxed =
+        &thrift.StructSpec{
+            Name:                 "ShouldBeBoxed",
+            ScopedName:           "module.ShouldBeBoxed",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "sessionId",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "sessionId": 0,
+            },
+        }
+    premadeStructSpec_reqMyServiceFoo =
+        &thrift.StructSpec{
+            Name:                 "reqMyServiceFoo",
+            ScopedName:           "module.reqMyServiceFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyServiceFoo =
+        &thrift.StructSpec{
+            Name:                 "respMyServiceFoo",
+            ScopedName:           "module.respMyServiceFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqFactoriesFoo =
+        &thrift.StructSpec{
+            Name:                 "reqFactoriesFoo",
+            ScopedName:           "module.reqFactoriesFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respFactoriesFoo =
+        &thrift.StructSpec{
+            Name:                 "respFactoriesFoo",
+            ScopedName:           "module.respFactoriesFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqPerformFoo =
+        &thrift.StructSpec{
+            Name:                 "reqPerformFoo",
+            ScopedName:           "module.reqPerformFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respPerformFoo =
+        &thrift.StructSpec{
+            Name:                 "respPerformFoo",
+            ScopedName:           "module.respPerformFoo",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqInteractWithSharedDoSomeSimilarThings =
+        &thrift.StructSpec{
+            Name:                 "reqInteractWithSharedDoSomeSimilarThings",
+            ScopedName:           "module.reqInteractWithSharedDoSomeSimilarThings",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respInteractWithSharedDoSomeSimilarThings =
+        &thrift.StructSpec{
+            Name:                 "respInteractWithSharedDoSomeSimilarThings",
+            ScopedName:           "module.respInteractWithSharedDoSomeSimilarThings",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        shared.GetCodecTypeSpec("shared.DoSomethingResult"),
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

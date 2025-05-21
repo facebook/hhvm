@@ -17,87 +17,93 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
         FullName: "void",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqMyRootDoRoot = &thrift.StructSpec{
-    Name:                 "reqMyRootDoRoot",
-    ScopedName:           "module.reqMyRootDoRoot",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_respMyRootDoRoot = &thrift.StructSpec{
-    Name:                 "respMyRootDoRoot",
-    ScopedName:           "module.respMyRootDoRoot",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_reqMyNodeDoMid = &thrift.StructSpec{
-    Name:                 "reqMyNodeDoMid",
-    ScopedName:           "module.reqMyNodeDoMid",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_respMyNodeDoMid = &thrift.StructSpec{
-    Name:                 "respMyNodeDoMid",
-    ScopedName:           "module.respMyNodeDoMid",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_reqMyLeafDoLeaf = &thrift.StructSpec{
-    Name:                 "reqMyLeafDoLeaf",
-    ScopedName:           "module.reqMyLeafDoLeaf",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_respMyLeafDoLeaf = &thrift.StructSpec{
-    Name:                 "respMyLeafDoLeaf",
-    ScopedName:           "module.respMyLeafDoLeaf",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
+    premadeStructSpec_reqMyRootDoRoot =
+        &thrift.StructSpec{
+            Name:                 "reqMyRootDoRoot",
+            ScopedName:           "module.reqMyRootDoRoot",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyRootDoRoot =
+        &thrift.StructSpec{
+            Name:                 "respMyRootDoRoot",
+            ScopedName:           "module.respMyRootDoRoot",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqMyNodeDoMid =
+        &thrift.StructSpec{
+            Name:                 "reqMyNodeDoMid",
+            ScopedName:           "module.reqMyNodeDoMid",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyNodeDoMid =
+        &thrift.StructSpec{
+            Name:                 "respMyNodeDoMid",
+            ScopedName:           "module.respMyNodeDoMid",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_reqMyLeafDoLeaf =
+        &thrift.StructSpec{
+            Name:                 "reqMyLeafDoLeaf",
+            ScopedName:           "module.reqMyLeafDoLeaf",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respMyLeafDoLeaf =
+        &thrift.StructSpec{
+            Name:                 "respMyLeafDoLeaf",
+            ScopedName:           "module.respMyLeafDoLeaf",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

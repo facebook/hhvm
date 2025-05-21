@@ -19,82 +19,95 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_hack_FieldWrapper = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.FieldWrapper",
-},
-
-    }
-    premadeThriftType_hack_Wrapper = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.Wrapper",
-},
-
-    }
-    premadeThriftType_hack_Adapter = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.Adapter",
-},
-
-    }
-    premadeThriftType_hack_SkipCodegen = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.SkipCodegen",
-},
-
-    }
-    premadeThriftType_hack_Name = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.Name",
-},
-
-    }
-    premadeThriftType_list_string = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_hack_UnionEnumAttributes = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.UnionEnumAttributes",
-},
-
-    }
-    premadeThriftType_hack_StructTrait = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.StructTrait",
-},
-
-    }
-    premadeThriftType_hack_Attributes = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.Attributes",
-},
-
-    }
-    premadeThriftType_hack_StructAsTrait = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.StructAsTrait",
-},
-
-    }
-    premadeThriftType_hack_ModuleInternal = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.ModuleInternal",
-},
-
-    }
-    premadeThriftType_hack_GenerateClientMethodsWithHeaders = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "hack.GenerateClientMethodsWithHeaders",
-},
-
-    }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_hack_FieldWrapper =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.FieldWrapper",
+                },
+        }
+    premadeThriftType_hack_Wrapper =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.Wrapper",
+                },
+        }
+    premadeThriftType_hack_Adapter =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.Adapter",
+                },
+        }
+    premadeThriftType_hack_SkipCodegen =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.SkipCodegen",
+                },
+        }
+    premadeThriftType_hack_Name =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.Name",
+                },
+        }
+    premadeThriftType_list_string =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_hack_UnionEnumAttributes =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.UnionEnumAttributes",
+                },
+        }
+    premadeThriftType_hack_StructTrait =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.StructTrait",
+                },
+        }
+    premadeThriftType_hack_Attributes =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.Attributes",
+                },
+        }
+    premadeThriftType_hack_StructAsTrait =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.StructAsTrait",
+                },
+        }
+    premadeThriftType_hack_ModuleInternal =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.ModuleInternal",
+                },
+        }
+    premadeThriftType_hack_GenerateClientMethodsWithHeaders =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "hack.GenerateClientMethodsWithHeaders",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

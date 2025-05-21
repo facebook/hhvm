@@ -19,62 +19,72 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_B = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "module.B",
-},
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_module_A = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.A",
-},
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_module_U = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "module.U",
-},
-
-    }
-    premadeThriftType_module_Bang = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "module.Bang",
-},
-
-    }
-    premadeThriftType_module_lanyard = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.lanyard",
-    UnderlyingType: premadeThriftType_string,
-},
-
-    }
-    premadeThriftType_module_number = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "module.number",
-    UnderlyingType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_void = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-
-    }
-    premadeThriftType_set_i32 = &metadata.ThriftType{
-        TSet: &metadata.ThriftSetType{
-    ValueType: premadeThriftType_i32,
-},
-
-    }
+    premadeThriftType_module_B =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.B",
+                },
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_module_A =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.A",
+                },
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module_U =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.U",
+                },
+        }
+    premadeThriftType_module_Bang =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.Bang",
+                },
+        }
+    premadeThriftType_module_lanyard =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.lanyard",
+                    UnderlyingType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module_number =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.number",
+                    UnderlyingType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_set_i32 =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

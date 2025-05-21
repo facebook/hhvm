@@ -17,240 +17,253 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_python_Py3Hidden = &thrift.TypeSpec{
         FullName: "python.Py3Hidden",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.Py3Hidden",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewPy3Hidden() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.Py3Hidden",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewPy3Hidden() },
+            },
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
     }
     premadeCodecTypeSpec_python_PyDeprecatedHidden = &thrift.TypeSpec{
         FullName: "python.PyDeprecatedHidden",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.PyDeprecatedHidden",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewPyDeprecatedHidden() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.PyDeprecatedHidden",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewPyDeprecatedHidden() },
+            },
     }
     premadeCodecTypeSpec_python_Flags = &thrift.TypeSpec{
         FullName: "python.Flags",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.Flags",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewFlags() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.Flags",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFlags() },
+            },
     }
     premadeCodecTypeSpec_python_Name = &thrift.TypeSpec{
         FullName: "python.Name",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.Name",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewName() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.Name",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewName() },
+            },
     }
     premadeCodecTypeSpec_python_Adapter = &thrift.TypeSpec{
         FullName: "python.Adapter",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.Adapter",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewAdapter() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.Adapter",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewAdapter() },
+            },
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
         FullName: "bool",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
+            },
     }
     premadeCodecTypeSpec_python_UseCAPI = &thrift.TypeSpec{
         FullName: "python.UseCAPI",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.UseCAPI",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewUseCAPI() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.UseCAPI",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewUseCAPI() },
+            },
     }
     premadeCodecTypeSpec_python_Py3EnableCppAdapter = &thrift.TypeSpec{
         FullName: "python.Py3EnableCppAdapter",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.Py3EnableCppAdapter",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewPy3EnableCppAdapter() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.Py3EnableCppAdapter",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewPy3EnableCppAdapter() },
+            },
     }
     premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance = &thrift.TypeSpec{
         FullName: "python.MigrationBlockingAllowInheritance",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "python.MigrationBlockingAllowInheritance",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewMigrationBlockingAllowInheritance() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "python.MigrationBlockingAllowInheritance",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewMigrationBlockingAllowInheritance() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Py3Hidden = &thrift.StructSpec{
-    Name:                 "Py3Hidden",
-    ScopedName:           "python.Py3Hidden",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_PyDeprecatedHidden = &thrift.StructSpec{
-    Name:                 "PyDeprecatedHidden",
-    ScopedName:           "python.PyDeprecatedHidden",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "reason",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "reason": 0,
-    },
-}
-    premadeStructSpec_Flags = &thrift.StructSpec{
-    Name:                 "Flags",
-    ScopedName:           "python.Flags",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_Name = &thrift.StructSpec{
-    Name:                 "Name",
-    ScopedName:           "python.Name",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "name",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "name": 0,
-    },
-}
-    premadeStructSpec_Adapter = &thrift.StructSpec{
-    Name:                 "Adapter",
-    ScopedName:           "python.Adapter",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "name",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRING,
-            Name:                 "typeHint",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "name": 0,
-        "typeHint": 1,
-    },
-}
-    premadeStructSpec_UseCAPI = &thrift.StructSpec{
-    Name:                 "UseCAPI",
-    ScopedName:           "python.UseCAPI",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.BOOL,
-            Name:                 "serialize",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_bool,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "serialize": 0,
-    },
-}
-    premadeStructSpec_Py3EnableCppAdapter = &thrift.StructSpec{
-    Name:                 "Py3EnableCppAdapter",
-    ScopedName:           "python.Py3EnableCppAdapter",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
-    premadeStructSpec_MigrationBlockingAllowInheritance = &thrift.StructSpec{
-    Name:                 "MigrationBlockingAllowInheritance",
-    ScopedName:           "python.MigrationBlockingAllowInheritance",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-    },
-    FieldSpecIDToIndex:   map[int16]int{
-    },
-    FieldSpecNameToIndex: map[string]int{
-    },
-}
+    premadeStructSpec_Py3Hidden =
+        &thrift.StructSpec{
+            Name:                 "Py3Hidden",
+            ScopedName:           "python.Py3Hidden",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_PyDeprecatedHidden =
+        &thrift.StructSpec{
+            Name:                 "PyDeprecatedHidden",
+            ScopedName:           "python.PyDeprecatedHidden",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "reason",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "reason": 0,
+            },
+        }
+    premadeStructSpec_Flags =
+        &thrift.StructSpec{
+            Name:                 "Flags",
+            ScopedName:           "python.Flags",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_Name =
+        &thrift.StructSpec{
+            Name:                 "Name",
+            ScopedName:           "python.Name",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "name",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "name": 0,
+            },
+        }
+    premadeStructSpec_Adapter =
+        &thrift.StructSpec{
+            Name:                 "Adapter",
+            ScopedName:           "python.Adapter",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "name",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRING,
+                    Name:                 "typeHint",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "name": 0,
+                "typeHint": 1,
+            },
+        }
+    premadeStructSpec_UseCAPI =
+        &thrift.StructSpec{
+            Name:                 "UseCAPI",
+            ScopedName:           "python.UseCAPI",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.BOOL,
+                    Name:                 "serialize",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "serialize": 0,
+            },
+        }
+    premadeStructSpec_Py3EnableCppAdapter =
+        &thrift.StructSpec{
+            Name:                 "Py3EnableCppAdapter",
+            ScopedName:           "python.Py3EnableCppAdapter",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_MigrationBlockingAllowInheritance =
+        &thrift.StructSpec{
+            Name:                 "MigrationBlockingAllowInheritance",
+            ScopedName:           "python.MigrationBlockingAllowInheritance",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

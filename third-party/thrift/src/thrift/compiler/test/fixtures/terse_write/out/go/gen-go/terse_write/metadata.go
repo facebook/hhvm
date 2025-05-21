@@ -19,116 +19,137 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_terse_write_MyEnum = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "terse_write.MyEnum",
-},
-
-    }
-    premadeThriftType_terse_write_MyStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "terse_write.MyStruct",
-},
-
-    }
-    premadeThriftType_bool = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-
-    }
-    premadeThriftType_byte = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
-
-    }
-    premadeThriftType_i16 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
-
-    }
-    premadeThriftType_i32 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-
-    }
-    premadeThriftType_i64 = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-
-    }
-    premadeThriftType_float = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
-
-    }
-    premadeThriftType_double = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_binary = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
-
-    }
-    premadeThriftType_list_i16 = &metadata.ThriftType{
-        TList: &metadata.ThriftListType{
-    ValueType: premadeThriftType_i16,
-},
-
-    }
-    premadeThriftType_set_i16 = &metadata.ThriftType{
-        TSet: &metadata.ThriftSetType{
-    ValueType: premadeThriftType_i16,
-},
-
-    }
-    premadeThriftType_map_i16_i16 = &metadata.ThriftType{
-        TMap: &metadata.ThriftMapType{
-    KeyType:   premadeThriftType_i16,
-    ValueType: premadeThriftType_i16,
-},
-
-    }
-    premadeThriftType_terse_write_MyUnion = &metadata.ThriftType{
-        TUnion: &metadata.ThriftUnionType{
-    Name: "terse_write.MyUnion",
-},
-
-    }
-    premadeThriftType_terse_write_MyStructWithCustomDefault = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "terse_write.MyStructWithCustomDefault",
-},
-
-    }
-    premadeThriftType_terse_write_StructLevelTerseStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "terse_write.StructLevelTerseStruct",
-},
-
-    }
-    premadeThriftType_terse_write_FieldLevelTerseStruct = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "terse_write.FieldLevelTerseStruct",
-},
-
-    }
-    premadeThriftType_terse_write_MyInteger = &metadata.ThriftType{
-        TTypedef: &metadata.ThriftTypedefType{
-    Name:           "terse_write.MyInteger",
-    UnderlyingType: premadeThriftType_i32,
-},
-
-    }
-    premadeThriftType_terse_write_AdaptedFields = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "terse_write.AdaptedFields",
-},
-
-    }
-    premadeThriftType_terse_write_TerseException = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "terse_write.TerseException",
-},
-
-    }
+    premadeThriftType_terse_write_MyEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "terse_write.MyEnum",
+                },
+        }
+    premadeThriftType_terse_write_MyStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "terse_write.MyStruct",
+                },
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_byte =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+        }
+    premadeThriftType_i16 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_float =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
+        }
+    premadeThriftType_double =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_binary =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+        }
+    premadeThriftType_list_i16 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_i16,
+                },
+        }
+    premadeThriftType_set_i16 =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_i16,
+                },
+        }
+    premadeThriftType_map_i16_i16 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i16,
+                    ValueType: premadeThriftType_i16,
+                },
+        }
+    premadeThriftType_terse_write_MyUnion =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "terse_write.MyUnion",
+                },
+        }
+    premadeThriftType_terse_write_MyStructWithCustomDefault =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "terse_write.MyStructWithCustomDefault",
+                },
+        }
+    premadeThriftType_terse_write_StructLevelTerseStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "terse_write.StructLevelTerseStruct",
+                },
+        }
+    premadeThriftType_terse_write_FieldLevelTerseStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "terse_write.FieldLevelTerseStruct",
+                },
+        }
+    premadeThriftType_terse_write_MyInteger =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "terse_write.MyInteger",
+                    UnderlyingType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_terse_write_AdaptedFields =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "terse_write.AdaptedFields",
+                },
+        }
+    premadeThriftType_terse_write_TerseException =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "terse_write.TerseException",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

@@ -19,164 +19,191 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_cpp_RefType = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "cpp.RefType",
-},
-
-    }
-    premadeThriftType_cpp_EnumUnderlyingType = &metadata.ThriftType{
-        TEnum: &metadata.ThriftEnumType{
-    Name: "cpp.EnumUnderlyingType",
-},
-
-    }
-    premadeThriftType_string = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-
-    }
-    premadeThriftType_cpp_Name = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.Name",
-},
-
-    }
-    premadeThriftType_cpp_Type = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.Type",
-},
-
-    }
-    premadeThriftType_cpp_Ref = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.Ref",
-},
-
-    }
-    premadeThriftType_bool = &metadata.ThriftType{
-        TPrimitive: thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-
-    }
-    premadeThriftType_cpp_Lazy = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.Lazy",
-},
-
-    }
-    premadeThriftType_cpp_DisableLazyChecksum = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.DisableLazyChecksum",
-},
-
-    }
-    premadeThriftType_cpp_Adapter = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.Adapter",
-},
-
-    }
-    premadeThriftType_cpp_PackIsset = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.PackIsset",
-},
-
-    }
-    premadeThriftType_cpp_MinimizePadding = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.MinimizePadding",
-},
-
-    }
-    premadeThriftType_cpp_ScopedEnumAsUnionType = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.ScopedEnumAsUnionType",
-},
-
-    }
-    premadeThriftType_cpp_FieldInterceptor = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.FieldInterceptor",
-},
-
-    }
-    premadeThriftType_cpp_UseOpEncode = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.UseOpEncode",
-},
-
-    }
-    premadeThriftType_cpp_EnumType = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.EnumType",
-},
-
-    }
-    premadeThriftType_cpp_Frozen2Exclude = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.Frozen2Exclude",
-},
-
-    }
-    premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.Frozen2RequiresCompleteContainerParams",
-},
-
-    }
-    premadeThriftType_cpp_ProcessInEbThreadUnsafe = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.ProcessInEbThreadUnsafe",
-},
-
-    }
-    premadeThriftType_cpp_RuntimeAnnotation = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.RuntimeAnnotation",
-},
-
-    }
-    premadeThriftType_cpp_UseCursorSerialization = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.UseCursorSerialization",
-},
-
-    }
-    premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.GenerateDeprecatedHeaderClientMethods",
-},
-
-    }
-    premadeThriftType_cpp_AllowLegacyNonOptionalRef = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.AllowLegacyNonOptionalRef",
-},
-
-    }
-    premadeThriftType_cpp_DeprecatedTerseWrite = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.DeprecatedTerseWrite",
-},
-
-    }
-    premadeThriftType_cpp_AllowLegacyDeprecatedTerseWritesRef = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.AllowLegacyDeprecatedTerseWritesRef",
-},
-
-    }
-    premadeThriftType_cpp_EnableCustomTypeOrdering = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.EnableCustomTypeOrdering",
-},
-
-    }
-    premadeThriftType_cpp_GenerateServiceMethodDecorator = &metadata.ThriftType{
-        TStruct: &metadata.ThriftStructType{
-    Name: "cpp.GenerateServiceMethodDecorator",
-},
-
-    }
+    premadeThriftType_cpp_RefType =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "cpp.RefType",
+                },
+        }
+    premadeThriftType_cpp_EnumUnderlyingType =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "cpp.EnumUnderlyingType",
+                },
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_cpp_Name =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.Name",
+                },
+        }
+    premadeThriftType_cpp_Type =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.Type",
+                },
+        }
+    premadeThriftType_cpp_Ref =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.Ref",
+                },
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_cpp_Lazy =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.Lazy",
+                },
+        }
+    premadeThriftType_cpp_DisableLazyChecksum =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.DisableLazyChecksum",
+                },
+        }
+    premadeThriftType_cpp_Adapter =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.Adapter",
+                },
+        }
+    premadeThriftType_cpp_PackIsset =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.PackIsset",
+                },
+        }
+    premadeThriftType_cpp_MinimizePadding =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.MinimizePadding",
+                },
+        }
+    premadeThriftType_cpp_ScopedEnumAsUnionType =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.ScopedEnumAsUnionType",
+                },
+        }
+    premadeThriftType_cpp_FieldInterceptor =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.FieldInterceptor",
+                },
+        }
+    premadeThriftType_cpp_UseOpEncode =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.UseOpEncode",
+                },
+        }
+    premadeThriftType_cpp_EnumType =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.EnumType",
+                },
+        }
+    premadeThriftType_cpp_Frozen2Exclude =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.Frozen2Exclude",
+                },
+        }
+    premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.Frozen2RequiresCompleteContainerParams",
+                },
+        }
+    premadeThriftType_cpp_ProcessInEbThreadUnsafe =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.ProcessInEbThreadUnsafe",
+                },
+        }
+    premadeThriftType_cpp_RuntimeAnnotation =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.RuntimeAnnotation",
+                },
+        }
+    premadeThriftType_cpp_UseCursorSerialization =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.UseCursorSerialization",
+                },
+        }
+    premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.GenerateDeprecatedHeaderClientMethods",
+                },
+        }
+    premadeThriftType_cpp_AllowLegacyNonOptionalRef =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.AllowLegacyNonOptionalRef",
+                },
+        }
+    premadeThriftType_cpp_DeprecatedTerseWrite =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.DeprecatedTerseWrite",
+                },
+        }
+    premadeThriftType_cpp_AllowLegacyDeprecatedTerseWritesRef =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.AllowLegacyDeprecatedTerseWritesRef",
+                },
+        }
+    premadeThriftType_cpp_EnableCustomTypeOrdering =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.EnableCustomTypeOrdering",
+                },
+        }
+    premadeThriftType_cpp_GenerateServiceMethodDecorator =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "cpp.GenerateServiceMethodDecorator",
+                },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {

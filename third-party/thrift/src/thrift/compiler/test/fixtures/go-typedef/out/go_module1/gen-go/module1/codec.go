@@ -21,522 +21,553 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
     }
     premadeCodecTypeSpec_module1_Plate = &thrift.TypeSpec{
         FullName: "module1.Plate",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.Plate",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.Plate",
+            	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+            },
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
         FullName: "i32",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
+            },
     }
     premadeCodecTypeSpec_module1_Year = &thrift.TypeSpec{
         FullName: "module1.Year",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.Year",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.Year",
+            	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+            },
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
         FullName: "list<string>",
-        CodecListSpec: &thrift.CodecListSpec{
-    ElementWireType: thrift.STRING,
-	ElementTypeSpec: premadeCodecTypeSpec_string,
-},
-
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.STRING,
+            	ElementTypeSpec: premadeCodecTypeSpec_string,
+            },
     }
     premadeCodecTypeSpec_module1_Drivers = &thrift.TypeSpec{
         FullName: "module1.Drivers",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.Drivers",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.Drivers",
+            	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
+            },
     }
     premadeCodecTypeSpec_module1_Accessory = &thrift.TypeSpec{
         FullName: "module1.Accessory",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.Accessory",
-	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.Accessory",
+            	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
+            },
     }
     premadeCodecTypeSpec_list_module1_Accessory = &thrift.TypeSpec{
         FullName: "list<module1.Accessory>",
-        CodecListSpec: &thrift.CodecListSpec{
-    ElementWireType: thrift.STRUCT,
-	ElementTypeSpec: premadeCodecTypeSpec_module1_Accessory,
-},
-
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.STRUCT,
+            	ElementTypeSpec: premadeCodecTypeSpec_module1_Accessory,
+            },
     }
     premadeCodecTypeSpec_module1_PartName = &thrift.TypeSpec{
         FullName: "module1.PartName",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.PartName",
-	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.PartName",
+            	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
+            },
     }
     premadeCodecTypeSpec_map_i32_module1_PartName = &thrift.TypeSpec{
         FullName: "map<i32, module1.PartName>",
-        CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_i32,
-	ValueTypeSpec: premadeCodecTypeSpec_module1_PartName,
-    KeyWireType:   thrift.I32,
-	ValueWireType: thrift.STRUCT,
-},
-
+        CodecMapSpec:
+            &thrift.CodecMapSpec{
+            	KeyTypeSpec:   premadeCodecTypeSpec_i32,
+            	ValueTypeSpec: premadeCodecTypeSpec_module1_PartName,
+                KeyWireType:   thrift.I32,
+            	ValueWireType: thrift.STRUCT,
+            },
     }
     premadeCodecTypeSpec_module1_Automobile = &thrift.TypeSpec{
         FullName: "module1.Automobile",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module1.Automobile",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewAutomobile() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module1.Automobile",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewAutomobile() },
+            },
     }
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
         FullName: "i64",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
+            },
     }
     premadeCodecTypeSpec_module1_MapKey = &thrift.TypeSpec{
         FullName: "module1.MapKey",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module1.MapKey",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewMapKey() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module1.MapKey",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewMapKey() },
+            },
     }
     premadeCodecTypeSpec_map_module1_MapKey_string = &thrift.TypeSpec{
         FullName: "map<module1.MapKey, string>",
-        CodecMapSpec: &thrift.CodecMapSpec{
-	KeyTypeSpec:   premadeCodecTypeSpec_module1_MapKey,
-	ValueTypeSpec: premadeCodecTypeSpec_string,
-    KeyWireType:   thrift.STRUCT,
-	ValueWireType: thrift.STRING,
-},
-
+        CodecMapSpec:
+            &thrift.CodecMapSpec{
+            	KeyTypeSpec:   premadeCodecTypeSpec_module1_MapKey,
+            	ValueTypeSpec: premadeCodecTypeSpec_string,
+                KeyWireType:   thrift.STRUCT,
+            	ValueWireType: thrift.STRING,
+            },
     }
     premadeCodecTypeSpec_module1_MapContainer = &thrift.TypeSpec{
         FullName: "module1.MapContainer",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module1.MapContainer",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewMapContainer() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module1.MapContainer",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewMapContainer() },
+            },
     }
     premadeCodecTypeSpec_module1_Car = &thrift.TypeSpec{
         FullName: "module1.Car",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.Car",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.Car",
+            	UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+            },
     }
     premadeCodecTypeSpec_module1_Pair = &thrift.TypeSpec{
         FullName: "module1.Pair",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module1.Pair",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewPair() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module1.Pair",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewPair() },
+            },
     }
     premadeCodecTypeSpec_list_module1_Automobile = &thrift.TypeSpec{
         FullName: "list<module1.Automobile>",
-        CodecListSpec: &thrift.CodecListSpec{
-    ElementWireType: thrift.STRUCT,
-	ElementTypeSpec: premadeCodecTypeSpec_module1_Automobile,
-},
-
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.STRUCT,
+            	ElementTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+            },
     }
     premadeCodecTypeSpec_list_module1_Car = &thrift.TypeSpec{
         FullName: "list<module1.Car>",
-        CodecListSpec: &thrift.CodecListSpec{
-    ElementWireType: thrift.STRUCT,
-	ElementTypeSpec: premadeCodecTypeSpec_module1_Car,
-},
-
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.STRUCT,
+            	ElementTypeSpec: premadeCodecTypeSpec_module1_Car,
+            },
     }
     premadeCodecTypeSpec_module1_Collection = &thrift.TypeSpec{
         FullName: "module1.Collection",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "module1.Collection",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewCollection() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module1.Collection",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewCollection() },
+            },
     }
     premadeCodecTypeSpec_module1_State = &thrift.TypeSpec{
         FullName: "module1.State",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.State",
-	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.State",
+            	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+            },
     }
     premadeCodecTypeSpec_module1_Enum = &thrift.TypeSpec{
         FullName: "module1.Enum",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
-    ScopedName:         "module1.Enum",
-	UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
-},
-
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.Enum",
+            	UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_Automobile = &thrift.StructSpec{
-    Name:                 "Automobile",
-    ScopedName:           "module1.Automobile",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "plate",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRING,
-            Name:                 "previous_plate",
-            ReflectIndex:         1,
-            IsOptional:           true,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
-            MustBeSetToSerialize: true,
-        },        {
-            ID:                   3,
-            WireType:             thrift.STRING,
-            Name:                 "first_plate",
-            ReflectIndex:         2,
-            IsOptional:           true,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
-            MustBeSetToSerialize: true,
-        },        {
-            ID:                   4,
-            WireType:             thrift.I32,
-            Name:                 "year",
-            ReflectIndex:         3,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Year,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   5,
-            WireType:             thrift.LIST,
-            Name:                 "drivers",
-            ReflectIndex:         4,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Drivers,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   6,
-            WireType:             thrift.LIST,
-            Name:                 "Accessories",
-            ReflectIndex:         5,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_list_module1_Accessory,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   7,
-            WireType:             thrift.MAP,
-            Name:                 "PartNames",
-            ReflectIndex:         6,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_map_i32_module1_PartName,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-        3: 2,
-        4: 3,
-        5: 4,
-        6: 5,
-        7: 6,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "plate": 0,
-        "previous_plate": 1,
-        "first_plate": 2,
-        "year": 3,
-        "drivers": 4,
-        "Accessories": 5,
-        "PartNames": 6,
-    },
-}
-    premadeStructSpec_MapKey = &thrift.StructSpec{
-    Name:                 "MapKey",
-    ScopedName:           "module1.MapKey",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.I64,
-            Name:                 "num",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i64,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRING,
-            Name:                 "strval",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "num": 0,
-        "strval": 1,
-    },
-}
-    premadeStructSpec_MapContainer = &thrift.StructSpec{
-    Name:                 "MapContainer",
-    ScopedName:           "module1.MapContainer",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.MAP,
-            Name:                 "mapval",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_map_module1_MapKey_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "mapval": 0,
-    },
-}
-    premadeStructSpec_Pair = &thrift.StructSpec{
-    Name:                 "Pair",
-    ScopedName:           "module1.Pair",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRUCT,
-            Name:                 "automobile",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Automobile,
-            MustBeSetToSerialize: true,
-        },        {
-            ID:                   2,
-            WireType:             thrift.STRUCT,
-            Name:                 "car",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Car,
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "automobile": 0,
-        "car": 1,
-    },
-}
-    premadeStructSpec_Collection = &thrift.StructSpec{
-    Name:                 "Collection",
-    ScopedName:           "module1.Collection",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.LIST,
-            Name:                 "automobiles",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_list_module1_Automobile,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.LIST,
-            Name:                 "cars",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_list_module1_Car,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "automobiles": 0,
-        "cars": 1,
-    },
-}
-    premadeStructSpec_reqFinderByPlate = &thrift.StructSpec{
-    Name:                 "reqFinderByPlate",
-    ScopedName:           "module1.reqFinderByPlate",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "plate",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "plate": 0,
-    },
-}
-    premadeStructSpec_respFinderByPlate = &thrift.StructSpec{
-    Name:                 "respFinderByPlate",
-    ScopedName:           "module1.respFinderByPlate",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   0,
-            WireType:             thrift.STRUCT,
-            Name:                 "success",
-            ReflectIndex:         0,
-            IsOptional:           true,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Automobile,
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        0: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "success": 0,
-    },
-}
-    premadeStructSpec_reqFinderAliasByPlate = &thrift.StructSpec{
-    Name:                 "reqFinderAliasByPlate",
-    ScopedName:           "module1.reqFinderAliasByPlate",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "plate",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "plate": 0,
-    },
-}
-    premadeStructSpec_respFinderAliasByPlate = &thrift.StructSpec{
-    Name:                 "respFinderAliasByPlate",
-    ScopedName:           "module1.respFinderAliasByPlate",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   0,
-            WireType:             thrift.STRUCT,
-            Name:                 "success",
-            ReflectIndex:         0,
-            IsOptional:           true,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Car,
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        0: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "success": 0,
-    },
-}
-    premadeStructSpec_reqFinderPreviousPlate = &thrift.StructSpec{
-    Name:                 "reqFinderPreviousPlate",
-    ScopedName:           "module1.reqFinderPreviousPlate",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "plate",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "plate": 0,
-    },
-}
-    premadeStructSpec_respFinderPreviousPlate = &thrift.StructSpec{
-    Name:                 "respFinderPreviousPlate",
-    ScopedName:           "module1.respFinderPreviousPlate",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   0,
-            WireType:             thrift.STRING,
-            Name:                 "success",
-            ReflectIndex:         0,
-            IsOptional:           true,
-            ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        0: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "success": 0,
-    },
-}
+    premadeStructSpec_Automobile =
+        &thrift.StructSpec{
+            Name:                 "Automobile",
+            ScopedName:           "module1.Automobile",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "plate",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRING,
+                    Name:                 "previous_plate",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   3,
+                    WireType:             thrift.STRING,
+                    Name:                 "first_plate",
+                    ReflectIndex:         2,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   4,
+                    WireType:             thrift.I32,
+                    Name:                 "year",
+                    ReflectIndex:         3,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Year,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   5,
+                    WireType:             thrift.LIST,
+                    Name:                 "drivers",
+                    ReflectIndex:         4,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Drivers,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   6,
+                    WireType:             thrift.LIST,
+                    Name:                 "Accessories",
+                    ReflectIndex:         5,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_list_module1_Accessory,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   7,
+                    WireType:             thrift.MAP,
+                    Name:                 "PartNames",
+                    ReflectIndex:         6,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_map_i32_module1_PartName,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+                3: 2,
+                4: 3,
+                5: 4,
+                6: 5,
+                7: 6,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "plate": 0,
+                "previous_plate": 1,
+                "first_plate": 2,
+                "year": 3,
+                "drivers": 4,
+                "Accessories": 5,
+                "PartNames": 6,
+            },
+        }
+    premadeStructSpec_MapKey =
+        &thrift.StructSpec{
+            Name:                 "MapKey",
+            ScopedName:           "module1.MapKey",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I64,
+                    Name:                 "num",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i64,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRING,
+                    Name:                 "strval",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "num": 0,
+                "strval": 1,
+            },
+        }
+    premadeStructSpec_MapContainer =
+        &thrift.StructSpec{
+            Name:                 "MapContainer",
+            ScopedName:           "module1.MapContainer",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.MAP,
+                    Name:                 "mapval",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_map_module1_MapKey_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "mapval": 0,
+            },
+        }
+    premadeStructSpec_Pair =
+        &thrift.StructSpec{
+            Name:                 "Pair",
+            ScopedName:           "module1.Pair",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "automobile",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Automobile,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "car",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Car,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "automobile": 0,
+                "car": 1,
+            },
+        }
+    premadeStructSpec_Collection =
+        &thrift.StructSpec{
+            Name:                 "Collection",
+            ScopedName:           "module1.Collection",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.LIST,
+                    Name:                 "automobiles",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_list_module1_Automobile,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.LIST,
+                    Name:                 "cars",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_list_module1_Car,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "automobiles": 0,
+                "cars": 1,
+            },
+        }
+    premadeStructSpec_reqFinderByPlate =
+        &thrift.StructSpec{
+            Name:                 "reqFinderByPlate",
+            ScopedName:           "module1.reqFinderByPlate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "plate",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "plate": 0,
+            },
+        }
+    premadeStructSpec_respFinderByPlate =
+        &thrift.StructSpec{
+            Name:                 "respFinderByPlate",
+            ScopedName:           "module1.respFinderByPlate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Automobile,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqFinderAliasByPlate =
+        &thrift.StructSpec{
+            Name:                 "reqFinderAliasByPlate",
+            ScopedName:           "module1.reqFinderAliasByPlate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "plate",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "plate": 0,
+            },
+        }
+    premadeStructSpec_respFinderAliasByPlate =
+        &thrift.StructSpec{
+            Name:                 "respFinderAliasByPlate",
+            ScopedName:           "module1.respFinderAliasByPlate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Car,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqFinderPreviousPlate =
+        &thrift.StructSpec{
+            Name:                 "reqFinderPreviousPlate",
+            ScopedName:           "module1.reqFinderPreviousPlate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "plate",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "plate": 0,
+            },
+        }
+    premadeStructSpec_respFinderPreviousPlate =
+        &thrift.StructSpec{
+            Name:                 "respFinderPreviousPlate",
+            ScopedName:           "module1.respFinderPreviousPlate",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRING,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module1_Plate,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

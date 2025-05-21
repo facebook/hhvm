@@ -40,7 +40,8 @@ var (
     {{#program:thrift_metadata_types}}
     {{type:codec_type_spec_name}} = &thrift.TypeSpec{
         FullName: "{{type:full_name}}",
-        {{> spec/codec_type_spec_setter}}: {{> spec/codec_type_spec_instance}}
+        {{> spec/codec_type_spec_setter}}:
+            {{> spec/codec_type_spec_instance}}
     }
     {{/program:thrift_metadata_types}}
 )
@@ -48,11 +49,13 @@ var (
 // Premade struct specs
 var (
     {{#program:structs}}
-    {{struct:struct_spec_name}} = {{> spec/codec_struct_spec}}
+    {{struct:struct_spec_name}} =
+        {{> spec/codec_struct_spec}}
     {{/program:structs}}
     {{#program:services}}
     {{#service:req_resp_structs}}
-    {{struct:struct_spec_name}} = {{> spec/codec_struct_spec}}
+    {{struct:struct_spec_name}} =
+        {{> spec/codec_struct_spec}}
     {{/service:req_resp_structs}}
     {{/program:services}}
 )

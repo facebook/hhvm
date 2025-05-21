@@ -17,46 +17,48 @@ var _ = thrift.VOID
 var (
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
-    PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-},
-
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
     }
     premadeCodecTypeSpec_internal_InjectMetadataFields = &thrift.TypeSpec{
         FullName: "internal.InjectMetadataFields",
-        CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "internal.InjectMetadataFields",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewInjectMetadataFields() },
-},
-
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "internal.InjectMetadataFields",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewInjectMetadataFields() },
+            },
     }
 )
 
 // Premade struct specs
 var (
-    premadeStructSpec_InjectMetadataFields = &thrift.StructSpec{
-    Name:                 "InjectMetadataFields",
-    ScopedName:           "internal.InjectMetadataFields",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.STRING,
-            Name:                 "type",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "type": 0,
-    },
-}
+    premadeStructSpec_InjectMetadataFields =
+        &thrift.StructSpec{
+            Name:                 "InjectMetadataFields",
+            ScopedName:           "internal.InjectMetadataFields",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "type",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "type": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {

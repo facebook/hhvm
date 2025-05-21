@@ -11,7 +11,7 @@ class C extends Base {}
 class D extends Base {}
 
 
-abstract final class TestAsyncContext extends HH\MemoAgnosticImplicitContext {
+abstract final class TestAsyncContext extends HH\HHVMTestMemoAgnosticImplicitContext {
   const type TData = mixed;
   const ctx CRun = [leak_safe];
   public static async function genRunWith(mixed $context, (function (): mixed) $f) {

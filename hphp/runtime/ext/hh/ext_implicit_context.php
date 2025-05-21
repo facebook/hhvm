@@ -220,6 +220,12 @@ abstract class ImplicitContextBase {
   }
 }
 
+// These will come handy if we decide to seal the PHP classes
+// All HHVM tests now inherit only from these 2 classes
+abstract class HHVMTestMemoSensitiveImplicitContext extends MemoSensitiveImplicitContext {}
+abstract class HHVMTestMemoAgnosticImplicitContext extends MemoAgnosticImplicitContext {}
+
+
 /**
  * Options for memoization to be used with dynamically enforced implicit context
  */

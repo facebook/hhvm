@@ -10,7 +10,7 @@ class Base implements HH\IPureMemoizeParam {
   public function name()[]: string { return static::class; }
 }
 
-abstract final class ClassContext extends HH\MemoSensitiveImplicitContext {
+abstract final class ClassContext extends HH\HHVMTestMemoSensitiveImplicitContext {
   const type TData = Base;
   const ctx CRun = [defaults];
   public static function start(Base $context, (function (): int) $f)[this::CRun, ctx $f] {

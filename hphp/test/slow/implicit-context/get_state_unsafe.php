@@ -10,7 +10,8 @@ class MemoSensitiveData implements HH\IPureMemoizeParam {
   }
 }
 
-abstract final class IntContext extends HH\MemoSensitiveImplicitContext {
+
+abstract final class IntContext extends HH\HHVMTestMemoSensitiveImplicitContext {
   const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
   public static function set<T>(this::TData $context, (function (): T) $f)[zoned, ctx $f]: T {

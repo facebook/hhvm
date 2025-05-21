@@ -29,10 +29,10 @@ trait ClassContextDefs {
   }
 }
 
-abstract final class ClassContext extends HH\MemoSensitiveImplicitContext {
+abstract final class ClassContext extends HH\HHVMTestMemoSensitiveImplicitContext {
   use ClassContextDefs;
 }
 
-abstract final class ClassContext2 extends HH\MemoSensitiveImplicitContext {
+abstract final class ClassContext2 extends HH\HHVMTestMemoSensitiveImplicitContext {
   use ClassContextDefs;
 }

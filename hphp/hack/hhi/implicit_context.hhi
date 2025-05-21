@@ -35,6 +35,7 @@ namespace HH {
 
   } // namespace ImplicitContext
 
+  <<__Sealed(FBMemoAgnosticImplicitContext::class)>>
   abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
     final protected static async function runWithAsync<Tout>(
       this::TData $context,
@@ -47,6 +48,7 @@ namespace HH {
     )[this::CRun, ctx $f]: Tout;
   }
 
+  <<__Sealed(FBMemoSensitiveImplicitContext::class)>>
   abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
     abstract const type TData as IPureMemoizeParam;
 

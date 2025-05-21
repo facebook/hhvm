@@ -12,7 +12,7 @@ class Base implements HH\IPureMemoizeParam {
 }
 
 
-abstract final class MemoAgnosticIntCtx extends HH\MemoAgnosticImplicitContext {
+abstract final class MemoAgnosticIntCtx extends HH\HHVMTestMemoAgnosticImplicitContext {
   const type TData = int;
   const ctx CRun = [leak_safe];
   public static function start(this::TData $context, (function (): T) $f) [ctx $f, this::CRun] {
@@ -24,7 +24,7 @@ abstract final class MemoAgnosticIntCtx extends HH\MemoAgnosticImplicitContext {
   }
 }
 
-abstract final class MemoSensitiveIntCtx extends HH\MemoSensitiveImplicitContext {
+abstract final class MemoSensitiveIntCtx extends HH\HHVMTestMemoSensitiveImplicitContext {
   const type TData = Base;
   const ctx CRun = [zoned];
   public static function start(this::TData $context, (function (): int) $f) {

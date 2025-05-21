@@ -1,6 +1,6 @@
 <?hh
 
-abstract final class TestContext extends HH\MemoAgnosticImplicitContext {
+abstract final class TestContext extends HH\HHVMTestMemoAgnosticImplicitContext {
   const type TData = mixed;
   const ctx CRun = [leak_safe];
   public static function start(mixed $context, (function (): T) $f)[ctx $f, this::CRun] {

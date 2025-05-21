@@ -29,8 +29,8 @@ trait T {
   public static function set($value, $fun) :mixed{ parent::runWith($value, $fun); }
 }
 
-final class IntContext extends HH\MemoSensitiveImplicitContext { use T; }
-final class IntContext1 extends HH\MemoSensitiveImplicitContext { use T; }
+final class IntContext extends HH\HHVMTestMemoSensitiveImplicitContext { use T; }
+final class IntContext1 extends HH\HHVMTestMemoSensitiveImplicitContext { use T; }
 
 <<__EntryPoint>>
 function main() :mixed{

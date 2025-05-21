@@ -15,7 +15,7 @@ class B extends Base {}
 class C extends Base {}
 class D extends Base {}
 
-abstract final class IntContext extends HH\MemoSensitiveImplicitContext {
+abstract final class IntContext extends HH\HHVMTestMemoSensitiveImplicitContext {
   const type TData = Base;
   const ctx CRun = [zoned];
   public static async function genStart(this::TData $context, (function (): int) $f)[zoned] {
@@ -26,7 +26,7 @@ abstract final class IntContext extends HH\MemoSensitiveImplicitContext {
   }
 }
 
-abstract final class ClassContext extends HH\MemoSensitiveImplicitContext {
+abstract final class ClassContext extends HH\HHVMTestMemoSensitiveImplicitContext {
   const type TData = Base;
   const ctx CRun = [zoned];
   public static async function genStart(this::TData $context, (function (): int) $f)[zoned] {

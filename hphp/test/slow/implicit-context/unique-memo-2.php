@@ -20,7 +20,7 @@ class MemoSensitiveData implements HH\IPureMemoizeParam {
   }
 }
 
-final class ArraykeyContext extends HH\MemoSensitiveImplicitContext {
+final class ArraykeyContext extends HH\HHVMTestMemoSensitiveImplicitContext {
   const type TData = MemoSensitiveData;
   const ctx CRun = [zoned];
   public static function set($value, $fun) :mixed{ parent::runWith($value, $fun); }

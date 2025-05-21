@@ -1592,7 +1592,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t HHIR.InliningCostFactorCold = 32, UNKNOWN
 - uint32_t HHIR.InliningCostFactorFrozen = 10, UNKNOWN
 - uint32_t HHIR.InliningVasmCostLimit = 300000, UNKNOWN
-- uint32_t HHIR.InliningMinVasmCostLimit = 5000, UNKNOWN
 - uint32_t HHIR.InliningMaxVasmCostLimit = 25000, UNKNOWN
 - uint32_t HHIR.AlwaysInlineVasmCostLimit = 5000, UNKNOWN
 - uint32_t HHIR.InliningMaxDepth = 8, UNKNOWN

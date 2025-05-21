@@ -367,8 +367,8 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
                            std::pow(1.0 / numCallsites, Cfg::HHIR::InliningVasmCallsiteExp));
   adjustedCost *= std::pow(1.0 / (1 + depth),
                            Cfg::HHIR::InliningDepthExp);
-  if (adjustedCost < Cfg::HHIR::InliningMinVasmCostLimit) {
-    adjustedCost = Cfg::HHIR::InliningMinVasmCostLimit;
+  if (adjustedCost < Cfg::HHIR::AlwaysInlineVasmCostLimit) {
+    adjustedCost = Cfg::HHIR::AlwaysInlineVasmCostLimit;
   }
   if (adjustedCost > Cfg::HHIR::InliningMaxVasmCostLimit) {
     adjustedCost = Cfg::HHIR::InliningMaxVasmCostLimit;

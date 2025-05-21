@@ -172,6 +172,8 @@ STUI(distribution_replay_xregion_directed, 0, 1)
 STUI(distribution_replay_xregion_directed_no_prefix_error, 0, 1)
 STUI(distribution_replay_xregion_broadcast, 0, 1)
 STUI(distribution_replay_other, 0, 1)
+STUI(distribution_error_on_delete_failure, 0, 1)
+STUI(srroute_error_on_delete_failure, 0, 1)
 #undef GROUP
 #define GROUP ods_stats | detailed_stats
 STUI(proxy_request_num_outstanding, 0, 1)

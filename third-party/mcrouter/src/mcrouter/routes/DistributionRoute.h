@@ -26,6 +26,7 @@ struct DistributionRouteSettings {
   bool replay{false};
   std::string srcRegion;
   bool secureWrites{false};
+  bool returnErrorOnDeleteFailure{false};
 };
 
 constexpr std::string_view kAsynclogDistributionEndpoint = "0.0.0.0";
@@ -51,15 +52,17 @@ class DistributionRoute {
         distributedDeleteRpcEnabled_(settings.distributedDeleteRpcEnabled),
         replay_{settings.replay},
         srcRegion_{settings.srcRegion},
-        secureWrites_(settings.secureWrites) {}
+        secureWrites_(settings.secureWrites),
+        returnErrorOnDeleteFailure_(settings.returnErrorOnDeleteFailure) {}
 
   std::string routeName() const {
     return fmt::format(
-        "distribution|distributed_delete_rpc_enabled={}|replay={}|distribution_source_region={}|secure_writes={}",
+        "distribution|distributed_delete_rpc_enabled={}|replay={}|distribution_source_region={}|secure_writes={}|return_error_on_mc_delete_failure={}",
         distributedDeleteRpcEnabled_ ? "true" : "false",
         replay_ ? "true" : "false",
         srcRegion_,
-        secureWrites_ ? "true" : "false");
+        secureWrites_ ? "true" : "false",
+        returnErrorOnDeleteFailure_ ? "true" : "false");
   }
 
   template <class Request>
@@ -212,37 +215,43 @@ class DistributionRoute {
           .first;
     }
 
-    folly::fibers::addTask([this,
-                            bucketId,
-                            ctx = fiber_local<RouterInfo>::getSharedCtx(),
-                            axonCtx,
-                            finalReq = std::move(finalReq),
-                            distributionRegion =
-                                std::move(distributionRegion)]() {
-      auto [_, spoolSucceeded] = distributeWithLogging(
-          finalReq,
-          distributeDeleteRequest,
-          axonCtx,
-          bucketId.value(),
-          invalidation::DistributionType::Distribution,
-          distributionRegion,
-          srcRegion_,
-          std::nullopt);
+    folly::fibers::addTask(
+        [this,
+         bucketId,
+         ctx = fiber_local<RouterInfo>::getSharedCtx(),
+         axonCtx,
+         finalReq = std::move(finalReq),
+         distributionRegion = std::move(distributionRegion)]() {
+          auto [_, spoolSucceeded] = distributeWithLogging(
+              finalReq,
+              distributeDeleteRequest,
+              axonCtx,
+              bucketId.value(),
+              invalidation::DistributionType::Distribution,
+              distributionRegion,
+              srcRegion_,
+              std::nullopt);
 
-      if (FOLLY_UNLIKELY(!spoolSucceeded)) {
-        const auto host =
-            std::make_shared<AccessPoint>(kAsynclogDistributionEndpoint);
-        spoolSucceeded |= spoolAsynclog(
-            &ctx->proxy(),
-            finalReq,
-            host,
-            true,
-            fiber_local<RouterInfo>::getAsynclogName());
-        if (!spoolSucceeded) {
-          ctx->proxy().stats().increment(distribution_async_spool_failed_stat);
-        }
-      }
-    });
+          if (FOLLY_UNLIKELY(!spoolSucceeded)) {
+            if (returnErrorOnDeleteFailure_) {
+              ctx->proxy().stats().increment(
+                  distribution_error_on_delete_failure_stat);
+            } else {
+              const auto host =
+                  std::make_shared<AccessPoint>(kAsynclogDistributionEndpoint);
+              spoolSucceeded |= spoolAsynclog(
+                  &ctx->proxy(),
+                  finalReq,
+                  host,
+                  true,
+                  fiber_local<RouterInfo>::getAsynclogName());
+              if (!spoolSucceeded) {
+                ctx->proxy().stats().increment(
+                    distribution_async_spool_failed_stat);
+              }
+            }
+          }
+        });
     // route to the local region:
     return rh_->route(req);
   }
@@ -253,6 +262,7 @@ class DistributionRoute {
   const bool replay_;
   const std::string srcRegion_;
   const bool secureWrites_;
+  const bool returnErrorOnDeleteFailure_{false};
 
   std::optional<std::string> inferDistributionRegionForReplay(
       const McDeleteRequest& req,

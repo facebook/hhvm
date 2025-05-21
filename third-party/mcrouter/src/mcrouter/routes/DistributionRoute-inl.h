@@ -37,6 +37,14 @@ inline DistributionRouteSettings parseDistributionRouteSettings(
     settings.secureWrites = parseBool(
         *jDistributionSecureWrites, "distribution_secure_writes_enabled");
   }
+  if (auto jReturnErrorOnDeleteFailure =
+          json.get_ptr("return_error_on_mc_delete_failure")) {
+    checkLogic(
+        jReturnErrorOnDeleteFailure->isBool(),
+        "DistributionRoute: 'return_error_on_mc_delete_failure' must be a bool");
+    settings.returnErrorOnDeleteFailure =
+        jReturnErrorOnDeleteFailure->getBool();
+  }
   return settings;
 }
 

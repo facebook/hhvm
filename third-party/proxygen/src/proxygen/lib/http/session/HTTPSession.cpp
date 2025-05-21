@@ -1901,7 +1901,7 @@ bool HTTPSession::maybeResumePausedPipelinedTransaction(size_t oldStreamCount,
       auto curStreamId = txnSeqn + 1;
       auto txnIt = transactions_.find(curStreamId + 1);
       CHECK(txnIt != transactions_.end());
-      DCHECK(transactionIds_.count(curStreamId + 1));
+      DCHECK(transactionIds_.contains(curStreamId + 1));
       auto& nextTxn = txnIt->second;
       DCHECK_EQ(nextTxn.getSequenceNumber(), txnSeqn + 1);
       DCHECK(!nextTxn.isIngressComplete());
@@ -1920,7 +1920,7 @@ void HTTPSession::detach(HTTPTransaction* txn) noexcept {
   auto txnSeqn = txn->getSequenceNumber();
   auto it = transactions_.find(txn->getID());
   DCHECK(it != transactions_.end());
-  DCHECK(transactionIds_.count(txn->getID()));
+  DCHECK(transactionIds_.contains(txn->getID()));
 
   if (txn->isIngressPaused()) {
     // Someone detached a transaction that was paused.  Make the resumeIngress
@@ -1955,7 +1955,7 @@ void HTTPSession::detach(HTTPTransaction* txn) noexcept {
   if (lastTxn_ == txn) {
     lastTxn_ = nullptr;
   }
-  DCHECK(transactionIds_.count(it->first));
+  DCHECK(transactionIds_.contains(it->first));
   transactionIds_.erase(it->first);
   transactions_.erase(it);
 
@@ -2669,10 +2669,10 @@ HTTPTransaction* HTTPSession::findTransaction(HTTPCodec::StreamID streamID) {
   }
   auto it = transactions_.find(streamID);
   if (it == transactions_.end()) {
-    DCHECK(transactionIds_.count(streamID) == 0);
+    DCHECK(!transactionIds_.contains(streamID));
     return nullptr;
   } else {
-    DCHECK(transactionIds_.count(streamID));
+    DCHECK(transactionIds_.contains(streamID));
     lastTxn_ = &it->second;
     return lastTxn_;
   }
@@ -2690,7 +2690,7 @@ HTTPTransaction* HTTPSession::createTransaction(
     return nullptr;
   }
 
-  if (transactions_.count(streamID)) {
+  if (transactions_.contains(streamID)) {
     // Refuse to add a transaction if a transaction of that ID already exists.
     SET_PROXYGEN_ERROR_IF(error, ProxygenError::kErrorDuplicatedStreamId);
     return nullptr;

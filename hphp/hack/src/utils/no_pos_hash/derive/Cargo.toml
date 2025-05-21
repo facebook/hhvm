@@ -12,6 +12,7 @@ path = "../no_pos_hash_derive.rs"
 test = false
 doctest = false
 proc-macro = true
+edition = "2018"
 
 [dependencies]
 proc-macro2 = { version = "1.0.70", features = ["span-locations"] }

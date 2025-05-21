@@ -254,7 +254,7 @@ namespace {{program:qualified_namespace}} { namespace {
 {{#program:split_structs}}{{#struct:fields}}
 {{#field:cpp_first_adapter}}{{#field:type}}
   ::apache::thrift::adapt_detail::validateFieldAdapter<{{!
-      }}{{field:cpp_first_adapter}}, {{field:key}}, {{type:cpp_standard_type}}, {{struct:cpp_fullname}}>();
+      }}{{field:cpp_first_adapter}}, {{field:key}}, {{field:cpp_standard_type}}, {{struct:cpp_fullname}}>();
 {{/field:type}}{{/field:cpp_first_adapter}}
 {{/struct:fields}}{{/program:split_structs}}
 {{#program:typedefs}}{{#typedef:type}}

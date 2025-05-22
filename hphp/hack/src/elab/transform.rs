@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1461ddacd4604948138376e3172e5b2c>>
+// @generated SignedSource<<d2ff6968fc4744a0281da36b775793a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -183,7 +183,7 @@ impl Transform for Program {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_program_bottom_up(env, self);
+        let _ = in_pass.on_ty_program_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -198,7 +198,7 @@ impl Transform for Stmt {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_stmt_bottom_up(env, self);
+        let _ = in_pass.on_ty_stmt_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -218,7 +218,7 @@ impl Transform for Stmt_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_stmt__bottom_up(env, self);
+        let _ = in_pass.on_ty_stmt__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -256,7 +256,7 @@ impl Transform for UsingStmt {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_using_stmt_bottom_up(env, self);
+        let _ = in_pass.on_ty_using_stmt_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -287,7 +287,7 @@ impl Transform for AsExpr {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_as_expr_bottom_up(env, self);
+        let _ = in_pass.on_ty_as_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -323,7 +323,7 @@ impl Transform for Block {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_block_bottom_up(env, self);
+        let _ = in_pass.on_ty_block_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -338,7 +338,7 @@ impl Transform for FinallyBlock {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_finally_block_bottom_up(env, self);
+        let _ = in_pass.on_ty_finally_block_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -353,7 +353,7 @@ impl Transform for StmtMatch {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_stmt_match_bottom_up(env, self);
+        let _ = in_pass.on_ty_stmt_match_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -376,7 +376,7 @@ impl Transform for StmtMatchArm {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_stmt_match_arm_bottom_up(env, self);
+        let _ = in_pass.on_ty_stmt_match_arm_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -399,7 +399,7 @@ impl Transform for Pattern {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_pattern_bottom_up(env, self);
+        let _ = in_pass.on_ty_pattern_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -417,7 +417,7 @@ impl Transform for PatVar {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_pat_var_bottom_up(env, self);
+        let _ = in_pass.on_ty_pat_var_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -435,7 +435,7 @@ impl Transform for PatRefinement {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_pat_refinement_bottom_up(env, self);
+        let _ = in_pass.on_ty_pat_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -459,7 +459,7 @@ impl Transform for ClassId {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_id_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -482,7 +482,7 @@ impl Transform for ClassId_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_id__bottom_up(env, self);
+        let _ = in_pass.on_ty_class_id__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -501,7 +501,7 @@ impl Transform for Expr {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_expr_bottom_up(env, self);
+        let _ = in_pass.on_ty_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -524,7 +524,7 @@ impl Transform for CollectionTarg {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_collection_targ_bottom_up(env, self);
+        let _ = in_pass.on_ty_collection_targ_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -547,7 +547,7 @@ impl Transform for FunctionPtrId {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_function_ptr_id_bottom_up(env, self);
+        let _ = in_pass.on_ty_function_ptr_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -570,7 +570,7 @@ impl Transform for ExpressionTree {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_expression_tree_bottom_up(env, self);
+        let _ = in_pass.on_ty_expression_tree_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -597,7 +597,7 @@ impl Transform for As_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_as__bottom_up(env, self);
+        let _ = in_pass.on_ty_as__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -628,7 +628,7 @@ impl Transform for EtSplice {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_et_splice_bottom_up(env, self);
+        let _ = in_pass.on_ty_et_splice_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -663,7 +663,7 @@ impl Transform for Expr_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_expr__bottom_up(env, self);
+        let _ = in_pass.on_ty_expr__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -747,7 +747,7 @@ impl Transform for HoleSource {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_hole_source_bottom_up(env, self);
+        let _ = in_pass.on_ty_hole_source_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -769,7 +769,7 @@ impl Transform for Binop {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_binop_bottom_up(env, self);
+        let _ = in_pass.on_ty_binop_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -786,7 +786,7 @@ impl Transform for Binop {
                             return;
                         }
                         __binding_1.transform(env, &mut pass.clone());
-                        in_pass.on_fld_binop_lhs_bottom_up(env, __binding_1);
+                        let _ = in_pass.on_fld_binop_lhs_bottom_up(env, __binding_1);
                     }
                 }
                 {
@@ -797,7 +797,7 @@ impl Transform for Binop {
                             return;
                         }
                         __binding_2.transform(env, &mut pass.clone());
-                        in_pass.on_fld_binop_rhs_bottom_up(env, __binding_2);
+                        let _ = in_pass.on_fld_binop_rhs_bottom_up(env, __binding_2);
                     }
                 }
             }
@@ -811,7 +811,7 @@ impl Transform for ClassGetExpr {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_get_expr_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_get_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -831,7 +831,7 @@ impl Transform for Case {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_case_bottom_up(env, self);
+        let _ = in_pass.on_ty_case_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -851,7 +851,7 @@ impl Transform for DefaultCase {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_default_case_bottom_up(env, self);
+        let _ = in_pass.on_ty_default_case_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -871,7 +871,7 @@ impl Transform for Catch {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_catch_bottom_up(env, self);
+        let _ = in_pass.on_ty_catch_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -894,7 +894,7 @@ impl Transform for Field {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_field_bottom_up(env, self);
+        let _ = in_pass.on_ty_field_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -914,7 +914,7 @@ impl Transform for Afield {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_afield_bottom_up(env, self);
+        let _ = in_pass.on_ty_afield_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -935,7 +935,7 @@ impl Transform for XhpSimple {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_xhp_simple_bottom_up(env, self);
+        let _ = in_pass.on_ty_xhp_simple_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -959,7 +959,7 @@ impl Transform for XhpAttribute {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_xhp_attribute_bottom_up(env, self);
+        let _ = in_pass.on_ty_xhp_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -979,7 +979,7 @@ impl Transform for FunParamInfo {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_fun_param_info_bottom_up(env, self);
+        let _ = in_pass.on_ty_fun_param_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -998,7 +998,7 @@ impl Transform for FunParam {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_fun_param_bottom_up(env, self);
+        let _ = in_pass.on_ty_fun_param_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1034,7 +1034,7 @@ impl Transform for Fun_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_fun__bottom_up(env, self);
+        let _ = in_pass.on_ty_fun__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1061,7 +1061,7 @@ impl Transform for Fun_ {
                             return;
                         }
                         __binding_4.transform(env, &mut pass.clone());
-                        in_pass.on_fld_fun__ret_bottom_up(env, __binding_4);
+                        let _ = in_pass.on_fld_fun__ret_bottom_up(env, __binding_4);
                     }
                 }
                 {
@@ -1094,7 +1094,7 @@ impl Transform for CaptureLid {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_capture_lid_bottom_up(env, self);
+        let _ = in_pass.on_ty_capture_lid_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1114,7 +1114,7 @@ impl Transform for Efun {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_efun_bottom_up(env, self);
+        let _ = in_pass.on_ty_efun_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1145,7 +1145,7 @@ impl Transform for FuncBody {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_func_body_bottom_up(env, self);
+        let _ = in_pass.on_ty_func_body_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1162,7 +1162,7 @@ impl Transform for TypeHint {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_type_hint_bottom_up(env, self);
+        let _ = in_pass.on_ty_type_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1182,7 +1182,7 @@ impl Transform for Targ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_targ_bottom_up(env, self);
+        let _ = in_pass.on_ty_targ_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1202,7 +1202,7 @@ impl Transform for CallExpr {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_call_expr_bottom_up(env, self);
+        let _ = in_pass.on_ty_call_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1233,7 +1233,7 @@ impl Transform for Argument {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_argument_bottom_up(env, self);
+        let _ = in_pass.on_ty_argument_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1254,7 +1254,7 @@ impl Transform for UserAttribute {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_user_attribute_bottom_up(env, self);
+        let _ = in_pass.on_ty_user_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1277,7 +1277,7 @@ impl Transform for FileAttribute {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_file_attribute_bottom_up(env, self);
+        let _ = in_pass.on_ty_file_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1300,7 +1300,7 @@ impl Transform for Tparam {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_tparam_bottom_up(env, self);
+        let _ = in_pass.on_ty_tparam_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1341,7 +1341,7 @@ impl Transform for Class_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class__bottom_up(env, self);
+        let _ = in_pass.on_ty_class__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1398,7 +1398,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_8.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__tparams_bottom_up(env, __binding_8);
+                        let _ = in_pass.on_fld_class__tparams_bottom_up(env, __binding_8);
                     }
                 }
                 {
@@ -1409,7 +1409,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_9.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__extends_bottom_up(env, __binding_9);
+                        let _ = in_pass.on_fld_class__extends_bottom_up(env, __binding_9);
                     }
                 }
                 {
@@ -1420,7 +1420,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_10.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__uses_bottom_up(env, __binding_10);
+                        let _ = in_pass.on_fld_class__uses_bottom_up(env, __binding_10);
                     }
                 }
                 {
@@ -1433,7 +1433,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_11.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__xhp_attr_uses_bottom_up(env, __binding_11);
+                        let _ = in_pass.on_fld_class__xhp_attr_uses_bottom_up(env, __binding_11);
                     }
                 }
                 {
@@ -1444,7 +1444,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_13.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__reqs_bottom_up(env, __binding_13);
+                        let _ = in_pass.on_fld_class__reqs_bottom_up(env, __binding_13);
                     }
                 }
                 {
@@ -1456,7 +1456,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_14.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__implements_bottom_up(env, __binding_14);
+                        let _ = in_pass.on_fld_class__implements_bottom_up(env, __binding_14);
                     }
                 }
                 {
@@ -1467,7 +1467,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_15.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__consts_bottom_up(env, __binding_15);
+                        let _ = in_pass.on_fld_class__consts_bottom_up(env, __binding_15);
                     }
                 }
                 {
@@ -1491,7 +1491,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_20.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__xhp_attrs_bottom_up(env, __binding_20);
+                        let _ = in_pass.on_fld_class__xhp_attrs_bottom_up(env, __binding_20);
                     }
                 }
                 {
@@ -1507,7 +1507,7 @@ impl Transform for Class_ {
                             return;
                         }
                         __binding_22.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class__user_attributes_bottom_up(env, __binding_22);
+                        let _ = in_pass.on_fld_class__user_attributes_bottom_up(env, __binding_22);
                     }
                 }
                 {
@@ -1543,7 +1543,7 @@ impl Transform for ClassReq {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_req_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_req_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1566,7 +1566,7 @@ impl Transform for XhpAttr {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_xhp_attr_bottom_up(env, self);
+        let _ = in_pass.on_ty_xhp_attr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1597,7 +1597,7 @@ impl Transform for ClassConstKind {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_const_kind_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_const_kind_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1617,7 +1617,7 @@ impl Transform for ClassConst {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_const_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_const_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1653,7 +1653,7 @@ impl Transform for ClassAbstractTypeconst {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_abstract_typeconst_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_abstract_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1678,7 +1678,8 @@ impl Transform for ClassAbstractTypeconst {
                             return;
                         }
                         __binding_2.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class_abstract_typeconst_default_bottom_up(env, __binding_2);
+                        let _ = in_pass
+                            .on_fld_class_abstract_typeconst_default_bottom_up(env, __binding_2);
                     }
                 }
             }
@@ -1692,7 +1693,7 @@ impl Transform for ClassConcreteTypeconst {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_concrete_typeconst_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_concrete_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1709,7 +1710,7 @@ impl Transform for ClassTypeconst {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_typeconst_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1729,7 +1730,7 @@ impl Transform for ClassTypeconstDef {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_typeconst_def_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_typeconst_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1765,7 +1766,7 @@ impl Transform for XhpAttrInfo {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_xhp_attr_info_bottom_up(env, self);
+        let _ = in_pass.on_ty_xhp_attr_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1783,7 +1784,7 @@ impl Transform for ClassVar {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_var_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_var_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1820,7 +1821,7 @@ impl Transform for ClassVar {
                             return;
                         }
                         __binding_5.transform(env, &mut pass.clone());
-                        in_pass.on_fld_class_var_type__bottom_up(env, __binding_5);
+                        let _ = in_pass.on_fld_class_var_type__bottom_up(env, __binding_5);
                     }
                 }
                 {
@@ -1847,7 +1848,7 @@ impl Transform for Method_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_method__bottom_up(env, self);
+        let _ = in_pass.on_ty_method__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1917,7 +1918,7 @@ impl Transform for Method_ {
                             return;
                         }
                         __binding_17.transform(env, &mut pass.clone());
-                        in_pass.on_fld_method__ret_bottom_up(env, __binding_17);
+                        let _ = in_pass.on_fld_method__ret_bottom_up(env, __binding_17);
                     }
                 }
                 {
@@ -1935,7 +1936,7 @@ impl Transform for TypedefVisibilityAndHint {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_typedef_visibility_and_hint_bottom_up(env, self);
+        let _ = in_pass.on_ty_typedef_visibility_and_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1951,7 +1952,7 @@ impl Transform for TypedefVisibilityAndHint {
                     return;
                 }
                 __binding_1.transform(env, &mut pass.clone());
-                in_pass.on_fld_typedef_visibility_and_hint_hint_bottom_up(env, __binding_1);
+                let _ = in_pass.on_fld_typedef_visibility_and_hint_hint_bottom_up(env, __binding_1);
             }
         }
     }
@@ -1963,7 +1964,7 @@ impl Transform for TypedefCaseTypeVariant {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_typedef_case_type_variant_bottom_up(env, self);
+        let _ = in_pass.on_ty_typedef_case_type_variant_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1986,7 +1987,7 @@ impl Transform for TypedefAssignment {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_typedef_assignment_bottom_up(env, self);
+        let _ = in_pass.on_ty_typedef_assignment_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2009,7 +2010,7 @@ impl Transform for Typedef {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_typedef_bottom_up(env, self);
+        let _ = in_pass.on_ty_typedef_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2093,7 +2094,7 @@ impl Transform for Gconst {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_gconst_bottom_up(env, self);
+        let _ = in_pass.on_ty_gconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2124,7 +2125,7 @@ impl Transform for Gconst {
                             return;
                         }
                         __binding_4.transform(env, &mut pass.clone());
-                        in_pass.on_fld_gconst_value_bottom_up(env, __binding_4);
+                        let _ = in_pass.on_fld_gconst_value_bottom_up(env, __binding_4);
                     }
                 }
                 {
@@ -2145,7 +2146,7 @@ impl Transform for FunDef {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_fun_def_bottom_up(env, self);
+        let _ = in_pass.on_ty_fun_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2197,7 +2198,7 @@ impl Transform for ModuleDef {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_module_def_bottom_up(env, self);
+        let _ = in_pass.on_ty_module_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2229,7 +2230,7 @@ impl Transform for Def {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_def_bottom_up(env, self);
+        let _ = in_pass.on_ty_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2264,7 +2265,7 @@ impl Transform for XhpChild {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_xhp_child_bottom_up(env, self);
+        let _ = in_pass.on_ty_xhp_child_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2299,7 +2300,7 @@ impl Transform for Hint {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_hint_bottom_up(env, self);
+        let _ = in_pass.on_ty_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2319,7 +2320,7 @@ impl Transform for UserAttributes {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_user_attributes_bottom_up(env, self);
+        let _ = in_pass.on_ty_user_attributes_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2334,7 +2335,7 @@ impl Transform for Contexts {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_contexts_bottom_up(env, self);
+        let _ = in_pass.on_ty_contexts_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2357,7 +2358,7 @@ impl Transform for HintFun {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_hint_fun_bottom_up(env, self);
+        let _ = in_pass.on_ty_hint_fun_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2394,7 +2395,7 @@ impl Transform for HintFun {
                             return;
                         }
                         __binding_6.transform(env, &mut pass.clone());
-                        in_pass.on_fld_hint_fun_return_ty_bottom_up(env, __binding_6);
+                        let _ = in_pass.on_fld_hint_fun_return_ty_bottom_up(env, __binding_6);
                     }
                 }
             }
@@ -2408,7 +2409,7 @@ impl Transform for HintTparam {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_hint_tparam_bottom_up(env, self);
+        let _ = in_pass.on_ty_hint_tparam_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2435,7 +2436,7 @@ impl Transform for ClassPtrKind {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_class_ptr_kind_bottom_up(env, self);
+        let _ = in_pass.on_ty_class_ptr_kind_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2451,7 +2452,7 @@ impl Transform for Hint_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_hint__bottom_up(env, self);
+        let _ = in_pass.on_ty_hint__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2522,7 +2523,7 @@ impl Transform for Refinement {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_refinement_bottom_up(env, self);
+        let _ = in_pass.on_ty_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2548,7 +2549,7 @@ impl Transform for TypeRefinement {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_type_refinement_bottom_up(env, self);
+        let _ = in_pass.on_ty_type_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2568,7 +2569,7 @@ impl Transform for TypeRefinementBounds {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_type_refinement_bounds_bottom_up(env, self);
+        let _ = in_pass.on_ty_type_refinement_bounds_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2591,7 +2592,7 @@ impl Transform for CtxRefinement {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_ctx_refinement_bottom_up(env, self);
+        let _ = in_pass.on_ty_ctx_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2611,7 +2612,7 @@ impl Transform for CtxRefinementBounds {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_ctx_refinement_bounds_bottom_up(env, self);
+        let _ = in_pass.on_ty_ctx_refinement_bounds_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2634,7 +2635,7 @@ impl Transform for ShapeFieldInfo {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_shape_field_info_bottom_up(env, self);
+        let _ = in_pass.on_ty_shape_field_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2658,7 +2659,7 @@ impl Transform for NastShapeInfo {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_nast_shape_info_bottom_up(env, self);
+        let _ = in_pass.on_ty_nast_shape_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2681,7 +2682,7 @@ impl Transform for TupleInfo {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_tuple_info_bottom_up(env, self);
+        let _ = in_pass.on_ty_tuple_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2704,7 +2705,7 @@ impl Transform for TupleExtraInfo {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_tuple_extra_info_bottom_up(env, self);
+        let _ = in_pass.on_ty_tuple_extra_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2727,7 +2728,7 @@ impl Transform for TupleExtra {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_tuple_extra_bottom_up(env, self);
+        let _ = in_pass.on_ty_tuple_extra_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2753,7 +2754,7 @@ impl Transform for Enum_ {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_enum__bottom_up(env, self);
+        let _ = in_pass.on_ty_enum__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2780,7 +2781,7 @@ impl Transform for WhereConstraintHint {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_where_constraint_hint_bottom_up(env, self);
+        let _ = in_pass.on_ty_where_constraint_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2803,7 +2804,7 @@ impl Transform for Id {
             return;
         }
         stack_limit::maybe_grow(|| self.traverse(env, pass));
-        in_pass.on_ty_id_bottom_up(env, self);
+        let _ = in_pass.on_ty_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {

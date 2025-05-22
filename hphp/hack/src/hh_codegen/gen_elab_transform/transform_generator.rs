@@ -193,7 +193,7 @@ fn gen_transform_body(
             return;
         }
         #recurse;
-        in_pass.#pass_method_bu(env, #elem);
+        let _ = in_pass.#pass_method_bu(env, #elem);
     }
 }
 
@@ -203,7 +203,7 @@ fn gen_transform_body_explicit(
     elem: TokenStream,
     recurse: TokenStream,
 ) -> TokenStream {
-    let body = gen_transform_body(&pass_method_td, &pass_method_bu, elem, recurse);
+    let body = gen_transform_body(pass_method_td, pass_method_bu, elem, recurse);
     quote! {
         {
             let pass = &mut pass.clone();

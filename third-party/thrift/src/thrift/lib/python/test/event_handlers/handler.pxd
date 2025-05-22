@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cdef extern from "thrift/lib/python/test/event_handlers/handler.h" namespace "::thrift::python::test":
-    cdef cppclass cThrowPreReadClientEventHandler "::thrift::python::test::ThrowPreReadClientEventHandler":
+cdef extern from "thrift/lib/python/test/event_handlers/handler.h":
+    cdef cppclass cThrowPreReadClientEventHandler "::apache::thrift::python::test::ThrowPreReadClientEventHandler":
         pass
-    cdef cppclass cThrowOnReadClientEventHandler "::thrift::python::test::ThrowOnReadClientEventHandler":
+    cdef cppclass cThrowOnReadClientEventHandler "::apache::thrift::python::test::ThrowOnReadClientEventHandler":
         pass
-    cdef cppclass cThrowPostReadClientEventHandler "::thrift::python::test::ThrowPostReadClientEventHandler":
+    cdef cppclass cThrowPostReadClientEventHandler "::apache::thrift::python::test::ThrowPostReadClientEventHandler":
         pass

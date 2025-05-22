@@ -20,7 +20,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 
-namespace thrift::python::test {
+namespace apache::thrift::python::test {
 inline std::unique_ptr<apache::thrift::HTTP2RoutingHandler>
 createHTTP2RoutingHandler(
     std::shared_ptr<apache::thrift::ThriftServer> server) {
@@ -32,4 +32,4 @@ createHTTP2RoutingHandler(
       std::move(h2_options), server->getThriftProcessor(), *server);
 }
 
-} // namespace thrift::python::test
+} // namespace apache::thrift::python::test

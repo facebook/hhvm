@@ -37,8 +37,8 @@
 #include <thrift/lib/python/client/test/gen-cpp2/test_types.h>
 
 using namespace apache::thrift;
-using namespace thrift::python::client;
-using namespace thrift::python::test;
+using namespace apache::thrift::python::client;
+using namespace apache::thrift::python::test;
 
 const std::string kTestHeaderKey = "headerKey";
 const std::string kTestHeaderValue = "headerValue";

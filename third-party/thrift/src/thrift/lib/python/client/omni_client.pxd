@@ -61,16 +61,16 @@ cdef extern from "folly/container/F14Map.h" namespace "folly":
     T& operator[](const K&)
     bool empty()
 
-cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::python::client":
-    cdef cppclass cIOBufClientBufferedStream "::thrift::python::client::IOBufClientBufferedStream":
+cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::apache::thrift::python::client":
+    cdef cppclass cIOBufClientBufferedStream "::apache::thrift::python::client::IOBufClientBufferedStream":
         pass
 
-    cdef cppclass cOmniClientResponseWithHeaders "::thrift::python::client::OmniClientResponseWithHeaders":
+    cdef cppclass cOmniClientResponseWithHeaders "::apache::thrift::python::client::OmniClientResponseWithHeaders":
         cExpected[unique_ptr[cIOBuf], cFollyExceptionWrapper] buf
         F14NodeMap[string, string] headers
         unique_ptr[cIOBufClientBufferedStream] stream
 
-    cdef cppclass cOmniClient "::thrift::python::client::OmniClient" nogil:
+    cdef cppclass cOmniClient "::apache::thrift::python::client::OmniClient" nogil:
         cOmniClient(cRequestChannel_ptr channel, const string& serviceName)
         cOmniClient(shared_ptr[cRequestChannel] channel, const string& serviceName)
         cOmniClientResponseWithHeaders sync_send(
@@ -106,7 +106,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
 
         void set_interaction_factory(cOmniClient *client)
 
-    cdef cppclass cOmniInteractionClient "::thrift::python::client::OmniInteractionClient"(cOmniClient) nogil:
+    cdef cppclass cOmniInteractionClient "::apache::thrift::python::client::OmniInteractionClient"(cOmniClient) nogil:
         cOmniInteractionClient(shared_ptr[cRequestChannel] channel, const string& methodName)
 
     cdef cFollyFuture[unique_ptr[cOmniInteractionClient]]& createOmniInteractionClient(shared_ptr[cRequestChannel] channel, const string& methodName)

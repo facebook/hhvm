@@ -16,5 +16,5 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from thrift.py3.server cimport cThriftServer, cTransportRoutingHandler
 
 
-cdef extern from "thrift/lib/python/client/test/http2_helper.h" namespace "::thrift::python::test":
+cdef extern from "thrift/lib/python/client/test/http2_helper.h" namespace "::apache::thrift::python::test":
     unique_ptr[cTransportRoutingHandler] createHTTP2RoutingHandler(shared_ptr[cThriftServer])

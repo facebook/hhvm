@@ -29,7 +29,7 @@
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace thrift::python::client {
+namespace apache::thrift::python::client {
 
 using RequestChannelUnique = std::unique_ptr<
     apache::thrift::RequestChannel,
@@ -184,4 +184,4 @@ createOmniInteractionClient(
     std::shared_ptr<apache::thrift::RequestChannel> channel,
     const std::string& methodName);
 
-} // namespace thrift::python::client
+} // namespace apache::thrift::python::client

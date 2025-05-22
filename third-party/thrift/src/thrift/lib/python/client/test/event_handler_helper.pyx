@@ -14,7 +14,7 @@
 
 from contextlib import contextmanager
 
-cdef extern from "<thrift/lib/python/client/test/event_handler_helper.h>" namespace "::thrift::python::test":
+cdef extern from "<thrift/lib/python/client/test/event_handler_helper.h>" namespace "::apache::thrift::python::test":
     cdef void addHandler()
     cdef void removeHandler()
 

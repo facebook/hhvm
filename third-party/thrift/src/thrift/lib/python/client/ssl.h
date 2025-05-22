@@ -22,7 +22,7 @@
 #include <folly/io/async/SSLContext.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace thrift::python::client {
+namespace apache::thrift::python::client {
 
 class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
                        public folly::DelayedDestruction {
@@ -69,4 +69,4 @@ apache::thrift::RequestChannel::Ptr createHeaderChannel(
     folly::Optional<std::string> host = folly::none,
     folly::Optional<std::string> endpoint = folly::none);
 
-} // namespace thrift::python::client
+} // namespace apache::thrift::python::client

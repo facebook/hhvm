@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp/EventHandlerBase.h>
 
-namespace thrift::python::test {
+namespace apache::thrift::python::test {
 
 using namespace apache::thrift;
 class TestEventHandler : public TProcessorEventHandler {
@@ -43,4 +43,4 @@ void removeHandler() {
   TClientBase::removeClientEventHandler(clientHandler());
 }
 
-} // namespace thrift::python::test
+} // namespace apache::thrift::python::test

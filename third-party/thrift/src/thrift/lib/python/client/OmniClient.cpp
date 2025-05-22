@@ -31,7 +31,7 @@
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
 
-namespace thrift::python::client {
+namespace apache::thrift::python::client {
 
 namespace {
 
@@ -536,4 +536,4 @@ createOmniInteractionClient(
       });
 }
 
-} // namespace thrift::python::client
+} // namespace apache::thrift::python::client

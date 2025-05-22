@@ -20,7 +20,7 @@
 #include <string>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 
-namespace thrift::python::test {
+namespace apache::thrift::python::test {
 
 class ThriftPythonUnitTestException : public std::exception {
  public:
@@ -63,4 +63,4 @@ class ThrowPostReadClientEventHandler
   }
 };
 
-} // namespace thrift::python::test
+} // namespace apache::thrift::python::test

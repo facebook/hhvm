@@ -26,7 +26,7 @@
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #endif
 
-namespace thrift::python::client {
+namespace apache::thrift::python::client {
 
 using namespace apache::thrift;
 
@@ -202,4 +202,4 @@ apache::thrift::RequestChannel::Ptr ChannelFactory::sync_createThriftChannelSSL(
   return std::move(future.wait().value());
 }
 
-} // namespace thrift::python::client
+} // namespace apache::thrift::python::client

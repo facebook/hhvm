@@ -19,7 +19,7 @@
 #include <string_view>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 
-namespace thrift::python::test {
+namespace apache::thrift::python::test {
 
 class TestClientEventHandler : public apache::thrift::TProcessorEventHandler {
  public:
@@ -32,4 +32,4 @@ class TestClientEventHandler : public apache::thrift::TProcessorEventHandler {
  private:
   bool preWriteCalled_ = false;
 };
-} // namespace thrift::python::test
+} // namespace apache::thrift::python::test

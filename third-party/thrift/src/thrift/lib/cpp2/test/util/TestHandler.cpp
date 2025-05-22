@@ -14,53 +14,53 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 
 #include <fmt/core.h>
 #include <folly/io/Cursor.h>
 
 const std::string kEchoSuffix(45, 'c');
 
-void TestInterface::sendResponse(std::string& _return, int64_t size) {
+void TestHandler::sendResponse(std::string& ret, int64_t size) {
   if (size >= 0) {
     usleep(size);
   }
 
-  _return = fmt::format("test{0}", size);
+  ret = fmt::format("test{0}", size);
 }
 
-void TestInterface::noResponse(int64_t size) {
+void TestHandler::noResponse(int64_t size) {
   usleep(size);
 }
 
-void TestInterface::voidResponse() {}
+void TestHandler::voidResponse() {}
 
-void TestInterface::echoRequest(
-    std::string& _return, std::unique_ptr<std::string> req) {
-  _return = *req + kEchoSuffix;
+void TestHandler::echoRequest(
+    std::string& ret, std::unique_ptr<std::string> req) {
+  ret = *req + kEchoSuffix;
 }
 
-void TestInterface::async_tm_serializationTest(StringCob::Ptr callback, bool) {
+void TestHandler::async_tm_serializationTest(StringCob::Ptr callback, bool) {
   std::unique_ptr<std::string> sp(new std::string("hello world"));
   callback->result(std::move(sp));
 }
 
-void TestInterface::async_eb_eventBaseAsync(StringCob::Ptr callback) {
+void TestHandler::async_eb_eventBaseAsync(StringCob::Ptr callback) {
   std::unique_ptr<std::string> hello(new std::string("hello world"));
   callback->result(std::move(hello));
 }
 
-void TestInterface::async_tm_notCalledBack(
+void TestHandler::async_tm_notCalledBack(
     apache::thrift::HandlerCallbackPtr<void>) {}
 
-void TestInterface::echoIOBuf(
+void TestHandler::echoIOBuf(
     std::unique_ptr<folly::IOBuf>& ret, std::unique_ptr<folly::IOBuf> buf) {
   ret = std::move(buf);
   folly::io::Appender cursor(ret.get(), kEchoSuffix.size());
   cursor.push(folly::StringPiece(kEchoSuffix.data(), kEchoSuffix.size()));
 }
 
-int32_t TestInterface::processHeader() {
+int32_t TestHandler::processHeader() {
   // Handler method can touch header at any time. Use this to test race
   // condition on per-request THeader.
   auto header = getConnectionContext()->getHeader();
@@ -71,6 +71,6 @@ int32_t TestInterface::processHeader() {
   return 1;
 }
 
-void TestInterface::throwsHandlerException() {
+void TestHandler::throwsHandlerException() {
   throw std::runtime_error("exception");
 }

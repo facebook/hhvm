@@ -18,7 +18,7 @@
 #include <folly/testing/TestUtil.h>
 
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/FdUtils.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
@@ -26,7 +26,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::rocket::test;
 using namespace std::literals;
 
-struct EchoInterface : public TestInterface {
+struct EchoInterface : public TestHandler {
   folly::coro::Task<std::unique_ptr<std::string>> co_echoRequest(
       apache::thrift::RequestParams params,
       std::unique_ptr<std::string> s) override {

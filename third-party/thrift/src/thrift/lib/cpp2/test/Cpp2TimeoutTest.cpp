@@ -24,7 +24,7 @@
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/util/ScopedServerThread.h>
 
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/test/util/TestThriftServerFactory.h>
 
 #include <memory>
@@ -44,7 +44,7 @@ class CloseChecker : public CloseCallback {
 };
 
 TEST(ThriftServer, IdleTimeoutTest) {
-  apache::thrift::TestThriftServerFactory<TestInterface> factory;
+  apache::thrift::TestThriftServerFactory<TestHandler> factory;
   factory.idleTimeoutMs(10);
   ScopedServerThread sst(factory.create());
 
@@ -61,7 +61,7 @@ TEST(ThriftServer, IdleTimeoutTest) {
 }
 
 TEST(ThriftServer, NoIdleTimeoutWhileWorkingTest) {
-  apache::thrift::TestThriftServerFactory<TestInterface> factory;
+  apache::thrift::TestThriftServerFactory<TestHandler> factory;
   factory.idleTimeoutMs(10);
   ScopedServerThread sst(factory.create());
 
@@ -84,7 +84,7 @@ TEST(ThriftServer, NoIdleTimeoutWhileWorkingTest) {
 }
 
 TEST(ThriftServer, IdleTimeoutAfterTest) {
-  apache::thrift::TestThriftServerFactory<TestInterface> factory;
+  apache::thrift::TestThriftServerFactory<TestHandler> factory;
   factory.idleTimeoutMs(20);
   ScopedServerThread sst(factory.create());
 

@@ -15,7 +15,6 @@
  */
 
 #include <chrono>
-#include <string_view>
 
 #include <gmock/gmock.h>
 #include <folly/coro/Baton.h>
@@ -26,7 +25,7 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/FdUtils.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
@@ -34,7 +33,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::rocket::test;
 using namespace std::literals;
 
-struct ServerResponseEnqueuedInterface : public TestInterface {
+struct ServerResponseEnqueuedInterface : public TestHandler {
   explicit ServerResponseEnqueuedInterface(
       MessageQueue* sendQueue, folly::Baton<>& responseEnqueuedBaton)
       : sendQueue_(sendQueue), responseEnqueuedBaton_(responseEnqueuedBaton) {}

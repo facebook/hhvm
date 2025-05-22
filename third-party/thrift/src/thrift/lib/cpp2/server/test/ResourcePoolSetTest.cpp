@@ -24,7 +24,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace ::testing;
@@ -55,7 +55,7 @@ TEST(ResourcePoolSetTest, testDefaultPoolsOverride_overrideAsync_expectCrash) {
 TEST(
     ResourcePoolSetTest,
     testThriftServer_whenResourcePoolsSuppliedButNotAsyncPool_expectDefaultSyncAndAsyncPoolsCreated) {
-  auto handler = std::make_shared<TestInterface>();
+  auto handler = std::make_shared<TestHandler>();
   auto server = std::make_shared<ScopedServerInterfaceThread>(
       handler, "::1", 9988, [](ThriftServer& server) {
         // Set up thrift server with 2 RPs none of them is "default"

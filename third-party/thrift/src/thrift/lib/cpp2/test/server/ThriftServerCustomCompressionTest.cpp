@@ -17,6 +17,7 @@
 #include <folly/test/TestUtils.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/test/server/ThriftServerTestUtils.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>
 
 using namespace apache::thrift;
@@ -272,7 +273,7 @@ class RocketCustomCompressionTest : public HeaderOrRocketTest {
   void TearDown() override { compressorAutoRegistry = nullptr; }
 
   std::unique_ptr<AsyncProcessorFactory> makeFactory() {
-    return std::make_unique<TestInterface>();
+    return std::make_unique<TestHandler>();
   }
 };
 

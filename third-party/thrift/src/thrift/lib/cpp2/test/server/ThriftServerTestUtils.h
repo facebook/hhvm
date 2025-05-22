@@ -21,7 +21,6 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/cpp2/util/ScopedServerThread.h>
 

@@ -81,7 +81,7 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
 #include <thrift/lib/cpp2/test/server/ThriftServerTestUtils.h>
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/test/util/TestThriftServerFactory.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
@@ -127,7 +127,7 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
 }
 
 TEST(ThriftServer, H2ClientAddressTest) {
-  class EchoClientAddrTestInterface
+  class EchoClientAddrTestHandler
       : public apache::thrift::ServiceHandler<TestService> {
     void sync_sendResponse(std::string& _return, int64_t /* size */) override {
       _return = getConnectionContext()->getPeerAddress()->describe();
@@ -135,7 +135,7 @@ TEST(ThriftServer, H2ClientAddressTest) {
   };
 
   ScopedServerInterfaceThread runner(
-      std::make_shared<EchoClientAddrTestInterface>());
+      std::make_shared<EchoClientAddrTestHandler>());
   auto& thriftServer = runner.getThriftServer();
   thriftServer.addRoutingHandler(createHTTP2RoutingHandler(thriftServer));
 
@@ -153,8 +153,7 @@ TEST(ThriftServer, H2ClientAddressTest) {
 }
 
 TEST(ThriftServer, OnewayDeferredHandlerTest) {
-  class OnewayTestInterface
-      : public apache::thrift::ServiceHandler<TestService> {
+  class OnewayTestHandler : public apache::thrift::ServiceHandler<TestService> {
    public:
     folly::Baton<> done;
 
@@ -169,7 +168,7 @@ TEST(ThriftServer, OnewayDeferredHandlerTest) {
     }
   };
 
-  auto handler = std::make_shared<OnewayTestInterface>();
+  auto handler = std::make_shared<OnewayTestHandler>();
   ScopedServerInterfaceThread runner(handler);
 
   handler->done.reset();
@@ -179,7 +178,7 @@ TEST(ThriftServer, OnewayDeferredHandlerTest) {
 }
 
 TEST(ThriftServer, ResponseTooBigTest) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
   runner.getThriftServer().setMaxResponseSize(4096);
   auto client = runner.newClient<apache::thrift::Client<TestService>>();
 
@@ -209,7 +208,7 @@ class TestConnCallback : public folly::AsyncSocket::ConnectCallback {
 };
 
 TEST(ThriftServer, SSLClientOnPlaintextServerTest) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   ScopedServerThread sst(factory.create());
   folly::EventBase base;
   auto sslCtx = std::make_shared<folly::SSLContext>();
@@ -252,7 +251,7 @@ TEST(ThriftServer, DefaultCompressionTest) {
     uint16_t expectedTransform_;
   };
 
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   ScopedServerThread sst(server);
   folly::EventBase base;
@@ -278,7 +277,7 @@ TEST(ThriftServer, DefaultCompressionTest) {
 }
 
 TEST(ThriftServer, HeaderTest) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto serv = factory.create();
   ScopedServerThread sst(serv);
   folly::EventBase base;
@@ -890,7 +889,7 @@ class ResourcePoolsFlagsTest : public testing::Test,
 };
 
 TEST_P(ResourcePoolsFlagsTest, ResourcePoolsFlags) {
-  auto handler = std::make_shared<TestInterface>();
+  auto handler = std::make_shared<TestHandler>();
   class TestObserver : public apache::thrift::server::TServerObserver {
    public:
     explicit TestObserver(std::string& explanation)
@@ -923,10 +922,9 @@ INSTANTIATE_TEST_SUITE_P(
 namespace long_shutdown {
 namespace {
 
-class BlockingTestInterface
-    : public apache::thrift::ServiceHandler<TestService> {
+class BlockingTestHandler : public apache::thrift::ServiceHandler<TestService> {
  public:
-  explicit BlockingTestInterface(folly::Baton<>& baton) : baton_(baton) {}
+  explicit BlockingTestHandler(folly::Baton<>& baton) : baton_(baton) {}
 
  private:
   void noResponse(int64_t) override {
@@ -971,7 +969,7 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshot) {
         THRIFT_FLAG_SET_MOCK(dump_snapshot_on_long_shutdown, true);
         folly::Baton<> ready;
         ScopedServerInterfaceThread runner(
-            std::make_shared<long_shutdown::BlockingTestInterface>(ready),
+            std::make_shared<long_shutdown::BlockingTestHandler>(ready),
             [](ThriftServer& server) {
               server.setWorkersJoinTimeout(1s);
               // We need at least 2 cpu threads for the test
@@ -999,7 +997,7 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshotTimeout) {
         THRIFT_FLAG_SET_MOCK(dump_snapshot_on_long_shutdown, true);
         folly::Baton<> ready;
         ScopedServerInterfaceThread runner(
-            std::make_shared<long_shutdown::BlockingTestInterface>(ready),
+            std::make_shared<long_shutdown::BlockingTestHandler>(ready),
             [](ThriftServer& server) {
               server.setWorkersJoinTimeout(1s);
               // We need at least 2 cpu threads for the test
@@ -1135,12 +1133,12 @@ class HeaderOrRocket : public HeaderOrRocketTest,
 };
 
 TEST_P(HeaderOrRocket, OnewayClientConnectionCloseTest) {
-  struct OnewayTestInterface : apache::thrift::ServiceHandler<TestService> {
+  struct OnewayTestHandler : apache::thrift::ServiceHandler<TestService> {
     folly::Baton<> baton;
     void noResponse(int64_t) override { baton.post(); }
   };
 
-  auto handler = std::make_shared<OnewayTestInterface>();
+  auto handler = std::make_shared<OnewayTestHandler>();
   ScopedServerInterfaceThread runner(handler);
   {
     auto client = makeClient(runner, nullptr);
@@ -1154,15 +1152,14 @@ TEST_P(HeaderOrRocket, ResourcePoolSetWorkers) {
   static folly::Baton enterBaton;
   static folly::Baton exitBaton;
 
-  class OnewayTestInterface
-      : public apache::thrift::ServiceHandler<TestService> {
+  class OnewayTestHandler : public apache::thrift::ServiceHandler<TestService> {
     void noResponse(int64_t) override {
       enterBaton.post();
       exitBaton.wait();
     }
   };
 
-  ScopedServerInterfaceThread runner(std::make_shared<OnewayTestInterface>());
+  ScopedServerInterfaceThread runner(std::make_shared<OnewayTestHandler>());
   // Only test in the presence of resource pools
   if (!runner.getThriftServer().resourcePoolSet().empty()) {
     auto client = makeClient(runner, nullptr);
@@ -1177,7 +1174,7 @@ TEST_P(HeaderOrRocket, ResourcePoolSetWorkers) {
 }
 
 TEST_P(HeaderOrRocket, RequestParamsNullCheck) {
-  class TestInterfaceSF : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandlerSF : public apache::thrift::ServiceHandler<TestService> {
     folly::SemiFuture<folly::Unit> semifuture_voidResponse() override {
       EXPECT_NE(getRequestContext(), nullptr);
       EXPECT_NE(getHandlerExecutor(), nullptr);
@@ -1190,7 +1187,7 @@ TEST_P(HeaderOrRocket, RequestParamsNullCheck) {
     }
   };
 
-  class TestInterfaceCoro : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandlerCoro : public apache::thrift::ServiceHandler<TestService> {
     folly::coro::Task<void> co_voidResponse() override {
       EXPECT_NE(getRequestContext(), nullptr);
       EXPECT_NE(getHandlerExecutor(), nullptr);
@@ -1202,12 +1199,12 @@ TEST_P(HeaderOrRocket, RequestParamsNullCheck) {
     }
   };
   {
-    ScopedServerInterfaceThread runner(std::make_shared<TestInterfaceSF>());
+    ScopedServerInterfaceThread runner(std::make_shared<TestHandlerSF>());
     auto client = makeClient(runner, nullptr);
     client->semifuture_voidResponse().get();
   }
   {
-    ScopedServerInterfaceThread runner(std::make_shared<TestInterfaceCoro>());
+    ScopedServerInterfaceThread runner(std::make_shared<TestHandlerCoro>());
     auto client = makeClient(runner, nullptr);
     client->semifuture_voidResponse().get();
   }
@@ -1780,7 +1777,7 @@ TEST_P(HeaderOrRocket, ConnectionIdleTimeoutTestSSL) {
   using namespace std::chrono_literals;
   folly::ScopedEventBaseThread clientEvbThread;
   ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(), "::1", 0, [](auto& server) {
+      std::make_shared<TestHandler>(), "::1", 0, [](auto& server) {
         server.setIdleTimeout(std::chrono::milliseconds(20));
         auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
         sslConfig->setCertificate(
@@ -1808,7 +1805,7 @@ TEST_P(HeaderOrRocket, ConnectionAgeTimeout) {
   using namespace std::chrono_literals;
   folly::ScopedEventBaseThread clientEvbThread;
   ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(), "::1", 0, [](auto& server) {
+      std::make_shared<TestHandler>(), "::1", 0, [](auto& server) {
         server.setConnectionAgeTimeout(100ms);
       });
 
@@ -2084,7 +2081,7 @@ INSTANTIATE_TEST_CASE_P(
         testing::Bool()));
 
 TEST(ThriftServer, QueueTimeoutPctSetTest) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
   auto client =
       runner.newStickyClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
         return HeaderClientChannel::newChannel(std::move(socket));
@@ -2120,7 +2117,7 @@ TEST(ThriftServer, QueueTimeoutPctSetTest) {
 }
 
 TEST(ThriftServer, QueueTimeoutDisabledTest) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
   auto client =
       runner.newStickyClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
         return HeaderClientChannel::newChannel(std::move(socket));
@@ -2148,7 +2145,7 @@ TEST(ThriftServer, QueueTimeoutDisabledTest) {
 
 // DO_BEFORE(aristidis,20250716): Test is flaky. Find owner or remove.
 TEST(ThriftServer, DISABLED_ClientTimeoutTest) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   ScopedServerThread sst(server);
   folly::EventBase base;
@@ -2249,7 +2246,7 @@ TEST(ThriftServer, DISABLED_ClientTimeoutTest) {
 }
 
 TEST(ThriftServer, ConnectionIdleTimeoutTest) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   server->setIdleTimeout(std::chrono::milliseconds(20));
   apache::thrift::util::ScopedServerThread st(server);
@@ -2281,7 +2278,7 @@ TEST(ThriftServer, BadSendTest) {
     }
   };
 
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   ScopedServerThread sst(factory.create());
   folly::EventBase base;
   auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
@@ -2383,7 +2380,7 @@ TEST_P(HeaderOrRocket, FailureInjection) {
     const std::atomic<ExpectedFailure>* expected_;
   };
 
-  ScopedServerInterfaceThread sst(std::make_shared<TestInterface>());
+  ScopedServerInterfaceThread sst(std::make_shared<TestHandler>());
   folly::EventBase base;
   auto client = makeClient(sst, &base);
 
@@ -2425,7 +2422,7 @@ TEST_P(HeaderOrRocket, FailureInjection) {
 }
 
 TEST(ThriftServer, useExistingSocketAndExit) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   folly::AsyncServerSocket::UniquePtr serverSocket(
       new folly::AsyncServerSocket);
@@ -2436,7 +2433,7 @@ TEST(ThriftServer, useExistingSocketAndExit) {
 
 TEST(ThriftServer, useExistingSocketAndConnectionIdleTimeout) {
   // This is ConnectionIdleTimeoutTest, but with an existing socket
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   folly::AsyncServerSocket::UniquePtr serverSocket(
       new folly::AsyncServerSocket);
@@ -2474,7 +2471,7 @@ class ReadCallbackTest : public folly::AsyncTransport::ReadCallback {
 } // namespace
 
 TEST(ThriftServer, ShutdownSocketSetTest) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   ScopedServerThread sst(server);
   folly::EventBase base;
@@ -2491,7 +2488,7 @@ TEST(ThriftServer, ShutdownSocketSetTest) {
 }
 
 TEST(ThriftServer, ShutdownDegenarateServer) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   server->setMaxRequests(1);
   server->setNumIOWorkerThreads(1);
@@ -2499,7 +2496,7 @@ TEST(ThriftServer, ShutdownDegenarateServer) {
 }
 
 TEST(ThriftServer, ModifyingIOThreadCountLive) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   auto iothreadpool = std::make_shared<folly::IOThreadPoolExecutor>(0);
   server->setIOThreadPool(iothreadpool);
@@ -2545,7 +2542,7 @@ TEST(ThriftServer, ModifyingIOThreadCountLive) {
 
 TEST(ThriftServer, setIOThreadPool) {
   auto exe = std::make_shared<folly::IOThreadPoolExecutor>(1);
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   factory.useSimpleThreadManager(false);
   auto server = factory.create();
 
@@ -2556,7 +2553,7 @@ TEST(ThriftServer, setIOThreadPool) {
 }
 
 TEST(ThriftServer, IdleServerTimeout) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
 
   auto server = factory.create();
   auto thriftServer = server.get();
@@ -2599,7 +2596,7 @@ TEST(ThriftServer, MultiPort) {
   };
 
   auto server = std::make_shared<MultiPortThriftServer>();
-  server->setInterface(std::make_shared<TestInterface>());
+  server->setInterface(std::make_shared<TestHandler>());
   server->setNumIOWorkerThreads(1);
   server->setNumCPUWorkerThreads(1);
 
@@ -2648,7 +2645,7 @@ TEST(ThriftServer, ClientIdentityHook) {
     return std::unique_ptr<void, void (*)(void*)>(nullptr, [](void*) {});
   };
 
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   server->setClientIdentityHook(hook);
   apache::thrift::util::ScopedServerThread st(server);
@@ -2688,7 +2685,7 @@ std::shared_ptr<folly::SSLContext> makeClientSslContext() {
 }
 
 void doBadRequestHeaderTest(bool secure) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   if (secure) {
     setupServerSSL(*server);
   }
@@ -2780,7 +2777,7 @@ TEST(ThriftServer, BadRequestHeaderSsl) {
 }
 
 TEST(ThriftServer, SSLRequiredRejectsPlaintext) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setSSLPolicy(SSLPolicy::REQUIRED);
   setupServerSSL(*server);
   ScopedServerThread sst(std::move(server));
@@ -2858,7 +2855,7 @@ class FizzStopTLSConnector
 } // namespace
 
 TEST(ThriftServer, StopTLSDowngrade) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setSSLPolicy(SSLPolicy::REQUIRED);
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
   sslConfig->setNextProtocols({"rs"});
@@ -2891,7 +2888,7 @@ TEST(ThriftServer, StopTLSDowngrade) {
 }
 
 TEST(ThriftServer, SSLRequiredAllowsLocalPlaintext) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setAllowPlaintextOnLoopback(true);
   server->setSSLPolicy(SSLPolicy::REQUIRED);
   setupServerSSL(*server);
@@ -2912,7 +2909,7 @@ TEST(ThriftServer, SSLRequiredAllowsLocalPlaintext) {
 }
 
 TEST(ThriftServer, SSLRequiredLoopbackUsesSSL) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setAllowPlaintextOnLoopback(true);
   server->setSSLPolicy(SSLPolicy::REQUIRED);
   setupServerSSL(*server);
@@ -2937,7 +2934,7 @@ TEST(ThriftServer, SSLRequiredLoopbackUsesSSL) {
 }
 
 TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setSSLPolicy(SSLPolicy::PERMITTED);
   setupServerSSL(*server);
   ScopedServerThread sst(std::move(server));
@@ -3125,7 +3122,7 @@ TEST(ThriftServer, QueueTimeoutStressTest) {
   EXPECT_EQ(received_reply, server_reply);
 }
 
-class ServerResponseEnqueuedInterface : public TestInterface {
+class ServerResponseEnqueuedInterface : public TestHandler {
  public:
   explicit ServerResponseEnqueuedInterface(
       folly::Baton<>& responseEnqueuedBaton)
@@ -3243,7 +3240,7 @@ TEST_F(WriteBatchingTest, IntervalTest) {
 }
 
 TEST_P(HeaderOrRocket, PreprocessHeaders) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
   folly::EventBase base;
   auto client = makeClient(runner, &base);
 
@@ -3318,7 +3315,7 @@ TEST_P(HeaderOrRocket, TaskTimeoutBeforeProcessing) {
 }
 
 TEST(ThriftServer, RocketOverSSLNoALPN) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setSSLPolicy(SSLPolicy::REQUIRED);
   setupServerSSL(*server);
   ScopedServerThread sst(std::move(server));
@@ -3344,7 +3341,7 @@ TEST(ThriftServer, RocketOverSSLNoALPN) {
 }
 
 TEST(ThriftServer, HeaderToRocketUpgradeOverTLS13) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
@@ -3380,7 +3377,7 @@ TEST(ThriftServer, HeaderToRocketUpgradeOverTLS13) {
 }
 
 TEST(ThriftServer, PooledRocketSyncChannel) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   setupServerSSL(*server);
   ScopedServerThread sst(std::move(server));
 
@@ -3456,7 +3453,7 @@ TEST(ThriftServer, RocketOverQuic) {
   server->setThreadFactory(
       std::make_shared<apache::thrift::concurrency::PosixThreadFactory>());
   server->setPort(0);
-  server->setInterface(std::make_unique<TestInterface>());
+  server->setInterface(std::make_unique<TestHandler>());
 
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
@@ -3518,7 +3515,7 @@ TEST(ThriftServer, CustomParserAllocatorTest) {
   auto alloc = std::make_shared<rocket::ParserAllocatorType>(&pool);
 
   ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(), [alloc](ThriftServer& server) {
+      std::make_shared<TestHandler>(), [alloc](ThriftServer& server) {
         server.setCustomAllocatorForParser(alloc);
       });
 
@@ -3534,7 +3531,7 @@ TEST(ThriftServer, CustomParserAllocatorTest) {
 #endif
 
 TEST(ThriftServer, AlpnNotAllowMismatch) {
-  auto server = TestThriftServerFactory<TestInterface>().create();
+  auto server = TestThriftServerFactory<TestHandler>().create();
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
@@ -3691,7 +3688,7 @@ TEST(ThriftServer, PerConnectionSocketOptions) {
 }
 
 TEST(ThriftServer, RocketOnly) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto serv = factory.create();
   ScopedServerThread sst(serv);
   serv->setLegacyTransport(
@@ -3729,7 +3726,7 @@ TEST(ThriftServer, RocketOnly) {
 }
 
 TEST(ThriftServer, DisableHeaderReject) {
-  TestThriftServerFactory<TestInterface> factory;
+  TestThriftServerFactory<TestHandler> factory;
   auto serv = factory.create();
   ScopedServerThread sst(serv);
   serv->setLegacyTransport(
@@ -3762,7 +3759,7 @@ TEST(ThriftServer, DisableHeaderReject) {
 // verifying that getThreadManager calls are valid
 // in both ResourcePool and non-resorucePool scenario
 TEST(ThriftServer, getThreadManager) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
   auto tm = runner.getThriftServer().getThreadManager();
 
   folly::Baton b;
@@ -3946,7 +3943,7 @@ TEST(ThriftServer, GetSetMaxRequests) {
     {
       // Test set before setupThreadManager
       ThriftServer server;
-      server.setInterface(std::make_shared<TestInterface>());
+      server.setInterface(std::make_shared<TestHandler>());
       server.setMaxRequests(target);
       EXPECT_EQ(server.getMaxRequests(), target);
       // Make the thrift server simple to create
@@ -3973,7 +3970,7 @@ TEST(ThriftServer, GetSetMaxRequests) {
     {
       // Test set after setupThreadManager
       ThriftServer server;
-      server.setInterface(std::make_shared<TestInterface>());
+      server.setInterface(std::make_shared<TestHandler>());
       // Make the thrift server simple to create
       server.setThreadManagerType(
           apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
@@ -4015,7 +4012,7 @@ TEST(ThriftServer, GetSetMaxQps) {
     {
       // Test set before setupThreadManager
       ThriftServer server;
-      server.setInterface(std::make_shared<TestInterface>());
+      server.setInterface(std::make_shared<TestHandler>());
       server.setMaxQps(target);
       EXPECT_EQ(server.getMaxQps(), target);
       // Make the thrift server simple to create
@@ -4042,7 +4039,7 @@ TEST(ThriftServer, GetSetMaxQps) {
     {
       // Test set after setupThreadManager
       ThriftServer server;
-      server.setInterface(std::make_shared<TestInterface>());
+      server.setInterface(std::make_shared<TestHandler>());
       // Make the thrift server simple to create
       server.setThreadManagerType(
           apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
@@ -4070,7 +4067,7 @@ TEST(ThriftServer, GetSetMaxQps) {
 
 TEST(ThriftServer, AddRemoveWorker) {
   ThriftServer server;
-  server.setInterface(std::make_shared<TestInterface>());
+  server.setInterface(std::make_shared<TestHandler>());
   server.setupThreadManager();
 
   // Under normal operation, ThriftServer will lock the ResourcePoolSet on
@@ -4093,7 +4090,7 @@ TEST(ThriftServer, AddRemoveWorker) {
 
 TEST_P(HeaderOrRocket, setMaxReuqestsToOne) {
   ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(), "::1", 0, [](auto&& server) {
+      std::make_shared<TestHandler>(), "::1", 0, [](auto&& server) {
         server.setMaxRequests(1);
       });
   auto client = makeClient(runner, nullptr);
@@ -4135,13 +4132,13 @@ void setConfig(size_t concurrency, double jitter = 0.0) {
 
 // DO_BEFORE(aristidis,20250716): Test is flaky. Find owner or remove.
 TEST_P(HeaderOrRocket, DISABLED_AdaptiveConcurrencyConfig) {
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
    public:
     void voidResponse() override {}
   };
 
   folly::EventBase base;
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
   runner.getThriftServer().setMaxRequests(5000);
   EXPECT_EQ(runner.getThriftServer().getMaxRequests(), 5000);
   auto& thriftServer = runner.getThriftServer();
@@ -4167,7 +4164,7 @@ TEST_P(HeaderOrRocket, DISABLED_AdaptiveConcurrencyConfig) {
 }
 
 TEST_P(HeaderOrRocket, OnStartStopServingTest) {
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+  class TestHandler : public apache::thrift::ServiceHandler<TestService> {
    public:
     folly::Baton<> startEnter;
     folly::Baton<> stopEnter;
@@ -4209,7 +4206,7 @@ TEST_P(HeaderOrRocket, OnStartStopServingTest) {
     }
   };
 
-  auto testIf = std::make_shared<TestInterface>();
+  auto testIf = std::make_shared<TestHandler>();
 
   class TestEventHandler : public server::TServerEventHandler {
    public:
@@ -4410,7 +4407,7 @@ TEST_P(HeaderOrRocket, StatusOnStartingAndStopping) {
 
 TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
   // Arrange integration test setup
-  auto handler = std::make_shared<TestInterface>();
+  auto handler = std::make_shared<TestHandler>();
   auto server = std::make_shared<ScopedServerInterfaceThread>(
       handler, [](ThriftServer& server) {
         {
@@ -4516,15 +4513,15 @@ class HeaderOrRocketCompression
     // processor can only check for compressed request payload on rocket
     if (compression == Compression::Enabled &&
         transport == TransportType::Rocket) {
-      return std::make_unique<CompressionCheckTestInterface>(
+      return std::make_unique<CompressionCheckTestHandler>(
           processorImplementation, CompressionAlgorithm::ZSTD);
     } else if (
         compression == Compression::Custom &&
         transport == TransportType::Rocket) {
-      return std::make_unique<CompressionCheckTestInterface>(
+      return std::make_unique<CompressionCheckTestHandler>(
           processorImplementation, CompressionAlgorithm::CUSTOM);
     } else {
-      return std::make_unique<CompressionCheckTestInterface>(
+      return std::make_unique<CompressionCheckTestHandler>(
           processorImplementation, CompressionAlgorithm::NONE);
     }
   }
@@ -4622,11 +4619,11 @@ class HeaderOrRocketCompression
 
   // Custom processor derived from generated processor
   struct InheritanceCompressionCheckProcessor
-      : public TestInterface::ProcessorType {
+      : public TestHandler::ProcessorType {
     InheritanceCompressionCheckProcessor(
         apache::thrift::ServiceHandler<TestService>* iface,
         CompressionAlgorithm compression)
-        : TestInterface::ProcessorType(iface), compression_(compression) {}
+        : TestHandler::ProcessorType(iface), compression_(compression) {}
 
     void executeRequest(
         ServerRequest&&,
@@ -4651,7 +4648,7 @@ class HeaderOrRocketCompression
       } else {
         EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
       }
-      TestInterface::ProcessorType::
+      TestHandler::ProcessorType::
           processSerializedCompressedRequestWithMetadata(
               std::move(req),
               std::move(serializedRequest),
@@ -4665,8 +4662,8 @@ class HeaderOrRocketCompression
     CompressionAlgorithm compression_;
   };
 
-  struct CompressionCheckTestInterface : public TestInterface {
-    CompressionCheckTestInterface(
+  struct CompressionCheckTestHandler : public TestHandler {
+    CompressionCheckTestHandler(
         ProcessorImplementation processorImplementation,
         CompressionAlgorithm compression)
         : processorImplementation_(processorImplementation),
@@ -4675,11 +4672,10 @@ class HeaderOrRocketCompression
       switch (processorImplementation_) {
         case ProcessorImplementation::Containment:
           return std::make_unique<ContainmentCompressionCheckProcessor>(
-              std::make_unique<TestInterface::ProcessorType>(this),
-              compression_);
+              std::make_unique<TestHandler::ProcessorType>(this), compression_);
         case ProcessorImplementation::ContainmentLegacy:
           return std::make_unique<LegacyContainmentProcessor>(
-              std::make_unique<TestInterface::ProcessorType>(this));
+              std::make_unique<TestHandler::ProcessorType>(this));
         case ProcessorImplementation::Inheritance:
           return std::make_unique<InheritanceCompressionCheckProcessor>(
               this, compression_);

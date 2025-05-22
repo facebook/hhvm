@@ -20,14 +20,13 @@
 
 extern const std::string kEchoSuffix;
 
-class TestInterface
+class TestHandler
     : public apache::thrift::ServiceHandler<apache::thrift::test::TestService> {
-  void sendResponse(std::string& _return, int64_t size) override;
+  void sendResponse(std::string& ret, int64_t size) override;
   void noResponse(int64_t size) override;
   void voidResponse() override;
 
-  void echoRequest(
-      std::string& _return, std::unique_ptr<std::string> req) override;
+  void echoRequest(std::string& ret, std::unique_ptr<std::string> req) override;
   using StringCob =
       apache::thrift::HandlerCallback<std::unique_ptr<std::string>>;
   void async_tm_serializationTest(

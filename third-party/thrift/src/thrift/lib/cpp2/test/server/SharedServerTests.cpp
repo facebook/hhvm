@@ -15,7 +15,6 @@
  */
 
 #include <boost/cast.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <gtest/gtest.h>
 #include <folly/CancellationToken.h>
@@ -32,7 +31,7 @@
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
-#include <thrift/lib/cpp2/test/util/TestInterface.h>
+#include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/test/util/TestThriftServerFactory.h>
 #include <thrift/lib/cpp2/util/ScopedServerThread.h>
 
@@ -93,7 +92,7 @@ class SharedServerTests
 
     switch (std::get<0>(GetParam())) {
       case THRIFT_SERVER: {
-        auto f = std::make_unique<TestThriftServerFactory<TestInterface>>();
+        auto f = std::make_unique<TestThriftServerFactory<TestHandler>>();
         serverFactory = std::move(f);
         break;
       }

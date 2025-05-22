@@ -32,6 +32,7 @@
 using namespace apache::thrift;
 using namespace apache::thrift::schema;
 using namespace apache::thrift::schema::detail;
+using namespace apache::thrift::syntax_graph;
 
 namespace apache::thrift::test {
 struct SchemaTest : public testing::Test {

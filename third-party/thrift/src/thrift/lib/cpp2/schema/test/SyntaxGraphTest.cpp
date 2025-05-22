@@ -34,7 +34,7 @@
 
 namespace type = apache::thrift::type;
 
-namespace apache::thrift::schema {
+namespace apache::thrift::syntax_graph {
 
 namespace {
 
@@ -82,7 +82,8 @@ TEST_F(ServiceSchemaTest, Programs) {
   auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
   EXPECT_EQ(mainProgram->definitionsByName().size(), 13);
   EXPECT_EQ(mainProgram->namespaces().size(), 1);
-  EXPECT_EQ(mainProgram->namespaces().at("cpp2"), "apache.thrift.schema.test");
+  EXPECT_EQ(
+      mainProgram->namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");
   {
     ProgramNode::IncludesList includes = mainProgram->includes();
     EXPECT_EQ(includes.size(), 2);
@@ -692,4 +693,4 @@ TEST(SyntaxGraphTest, getNode) {
       std::out_of_range);
 }
 
-} // namespace apache::thrift::schema
+} // namespace apache::thrift::syntax_graph

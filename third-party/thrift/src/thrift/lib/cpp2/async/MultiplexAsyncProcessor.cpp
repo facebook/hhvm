@@ -425,9 +425,9 @@ MultiplexAsyncProcessorFactory::getServiceSchema() {
   return result;
 }
 
-std::vector<folly::not_null<const schema::ServiceNode*>>
+std::vector<folly::not_null<const syntax_graph::ServiceNode*>>
 MultiplexAsyncProcessorFactory::getServiceSchemaNodes() {
-  std::vector<folly::not_null<const schema::ServiceNode*>> result;
+  std::vector<folly::not_null<const syntax_graph::ServiceNode*>> result;
   result.reserve(processorFactories_.size());
   for (auto& processorFactory : processorFactories_) {
     auto nodes = processorFactory->getServiceSchemaNodes();

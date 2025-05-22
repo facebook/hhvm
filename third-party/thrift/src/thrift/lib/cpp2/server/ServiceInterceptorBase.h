@@ -61,7 +61,7 @@ class ServiceInterceptorBase {
   struct InitParams {
 #ifdef THRIFT_SCHEMA_AVAILABLE
     using ServiceSchema =
-        std::vector<folly::not_null<const schema::ServiceNode*>>;
+        std::vector<folly::not_null<const syntax_graph::ServiceNode*>>;
     ServiceSchema serviceSchema;
 #endif
   };

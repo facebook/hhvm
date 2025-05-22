@@ -21,7 +21,7 @@
 
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
-namespace apache::thrift::schema::detail {
+namespace apache::thrift::syntax_graph::detail {
 namespace type = apache::thrift::type;
 namespace protocol = apache::thrift::protocol;
 using apache::thrift::util::enumNameSafe;
@@ -865,7 +865,7 @@ ProgramNode::IncludesList IncrementalResolver::programs() const {
 void IncrementalResolver::readSchema(
     folly::Synchronized<type::Schema>::LockedPtr& schema,
     folly::span<const std::string_view> bundle) const {
-  auto src = mergeSchemas(bundle);
+  auto src = schema::detail::mergeSchemas(bundle);
   auto& dst = *schema;
 
   // Merge new schema data in
@@ -956,5 +956,5 @@ const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
   return nullptr;
 }
 
-} // namespace apache::thrift::schema::detail
+} // namespace apache::thrift::syntax_graph::detail
 #endif

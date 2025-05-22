@@ -40,7 +40,7 @@ std::optional<apache::thrift::schema::DefinitionsSchema> {{> service_common/serv
 {{/program}}
 }
 
-std::vector<folly::not_null<const apache::thrift::schema::ServiceNode*>> {{> service_common/service_class_name}}::getServiceSchemaNodes() {
+std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> {{> service_common/service_class_name}}::getServiceSchemaNodes() {
   return {&apache::thrift::SchemaRegistry::get().getNode<{{service:qualified_name}}>()};
 }
 #endif

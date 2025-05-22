@@ -16,7 +16,7 @@
 
 include "thrift/lib/cpp2/schema/test/syntax_graph.thrift"
 
-namespace cpp2 apache.thrift.schema.test
+namespace cpp2 apache.thrift.syntax_graph.test
 
 service TestService2 extends syntax_graph.TestService {
 }

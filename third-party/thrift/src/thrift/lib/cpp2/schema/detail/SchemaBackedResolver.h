@@ -23,7 +23,7 @@
 
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
-namespace apache::thrift::schema::detail {
+namespace apache::thrift::syntax_graph::detail {
 namespace type = apache::thrift::type;
 class SchemaIndex;
 
@@ -82,5 +82,5 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode() const {
       TSchemaAssociation<T>::bundle);
 }
 
-} // namespace apache::thrift::schema::detail
+} // namespace apache::thrift::syntax_graph::detail
 #endif

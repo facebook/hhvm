@@ -36,7 +36,7 @@ namespace type = apache::thrift::type;
 namespace protocol = apache::thrift::protocol;
 using apache::thrift::util::enumNameSafe;
 
-namespace apache::thrift::schema {
+namespace apache::thrift::syntax_graph {
 
 namespace detail {
 
@@ -677,6 +677,6 @@ void SyntaxGraph::printTo(
   }
 }
 
-} // namespace apache::thrift::schema
+} // namespace apache::thrift::syntax_graph
 
 #endif // THRIFT_SCHEMA_AVAILABLE

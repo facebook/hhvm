@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-namespace cpp2 apache.thrift.schema
+namespace cpp2 apache.thrift.syntax_graph
 namespace rust syntax_graph
-namespace py3 apache.thrift.schema
+namespace py3 apache.thrift.syntax_graph
 
 include "thrift/annotation/cpp.thrift"
 

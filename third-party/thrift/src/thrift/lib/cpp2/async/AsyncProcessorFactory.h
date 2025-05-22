@@ -29,7 +29,7 @@ namespace apache::thrift {
 class AsyncProcessor;
 class ServiceHandlerBase;
 class ServerRequest;
-namespace schema {
+namespace syntax_graph {
 class ServiceNode;
 }
 
@@ -77,7 +77,7 @@ class AsyncProcessorFactory {
    * Generated handler types will return a single-element vector.
    * Multiple elements are only expected from MultiplexAsyncProcessor.
    */
-  virtual std::vector<folly::not_null<const schema::ServiceNode*>>
+  virtual std::vector<folly::not_null<const syntax_graph::ServiceNode*>>
   getServiceSchemaNodes() {
     return {};
   }

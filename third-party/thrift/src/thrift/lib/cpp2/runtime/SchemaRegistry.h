@@ -38,15 +38,15 @@ struct SyntaxGraphNodeTag {
 template <typename T>
 constexpr auto getSyntaxGraphNodeTypeFor() {
   if constexpr (is_thrift_service_tag_v<T>) {
-    return SyntaxGraphNodeTag<schema::ServiceNode>{};
+    return SyntaxGraphNodeTag<syntax_graph::ServiceNode>{};
   } else if constexpr (is_thrift_struct_v<T>) {
-    return SyntaxGraphNodeTag<schema::StructNode>{};
+    return SyntaxGraphNodeTag<syntax_graph::StructNode>{};
   } else if constexpr (is_thrift_union_v<T>) {
-    return SyntaxGraphNodeTag<schema::UnionNode>{};
+    return SyntaxGraphNodeTag<syntax_graph::UnionNode>{};
   } else if constexpr (is_thrift_exception_v<T>) {
-    return SyntaxGraphNodeTag<schema::ExceptionNode>{};
+    return SyntaxGraphNodeTag<syntax_graph::ExceptionNode>{};
   } else if constexpr (util::is_thrift_enum_v<T>) {
-    return SyntaxGraphNodeTag<schema::EnumNode>{};
+    return SyntaxGraphNodeTag<syntax_graph::EnumNode>{};
   } else {
     static_assert(folly::always_false<T>, "Unsupported Thrift type");
   }
@@ -72,7 +72,7 @@ class SchemaRegistry {
    * present in schema.
    */
   template <typename T>
-  const schema::DefinitionNode& getDefinitionNode() const {
+  const syntax_graph::DefinitionNode& getDefinitionNode() const {
     return resolver_->getDefinitionNode<T>();
   }
 
@@ -100,7 +100,7 @@ class SchemaRegistry {
   // Look up a definition by URI. Returns nullptr if not found.
   // The definition must be defined in a file with the `any` cpp2 compiler
   // option enabled.
-  const schema::DefinitionNode* getSyntaxGraphDefinitionNodeByUri(
+  const syntax_graph::DefinitionNode* getSyntaxGraphDefinitionNodeByUri(
       const std::string_view uri) const;
 
   BaseSchemaRegistry& base_;
@@ -109,8 +109,8 @@ class SchemaRegistry {
   folly::relaxed_atomic<bool> mergedSchemaAccessed_{false};
   std::unordered_set<type::ProgramId> includedPrograms_;
 
-  std::unique_ptr<schema::SyntaxGraph> syntaxGraph_;
-  schema::detail::IncrementalResolver* resolver_;
+  std::unique_ptr<syntax_graph::SyntaxGraph> syntaxGraph_;
+  syntax_graph::detail::IncrementalResolver* resolver_;
 
   friend struct test::SchemaTest;
 };

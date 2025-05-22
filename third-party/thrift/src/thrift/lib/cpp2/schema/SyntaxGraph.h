@@ -47,7 +47,7 @@
 #include <thrift/common/tree_printer.h>
 #include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
 
-namespace apache::thrift::schema {
+namespace apache::thrift::syntax_graph {
 
 /**
  * A `SyntaxGraph` object allows syntactic inspection of Thrift schema, i.e.
@@ -570,7 +570,7 @@ class FieldNode final : folly::MoveOnly,
    * serialization. However, such fields still "has a value" according to
    * Thrift's type system.
    */
-  using PresenceQualifier = schema::FieldPresenceQualifier;
+  using PresenceQualifier = syntax_graph::FieldPresenceQualifier;
 
   using detail::WithName::name;
   FieldId id() const { return id_; }
@@ -1601,6 +1601,6 @@ const T& Lazy<T>::operator*() const {
 }
 } // namespace detail
 
-} // namespace apache::thrift::schema
+} // namespace apache::thrift::syntax_graph
 
 #endif // THRIFT_SCHEMA_AVAILABLE

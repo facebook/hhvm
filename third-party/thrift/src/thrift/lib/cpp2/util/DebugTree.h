@@ -28,12 +28,12 @@
 
 namespace apache::thrift::detail {
 
-using TypeRef = apache::thrift::schema::TypeRef;
+using TypeRef = apache::thrift::syntax_graph::TypeRef;
 using scope = apache::thrift::tree_printer::scope;
 
 // TypeRef needs to be optional so that we can handle the case if we don't have
 // TypeRef information, e.g., if field id does not exist in the structure.
-using OptionalTypeRef = std::optional<apache::thrift::schema::TypeRef>;
+using OptionalTypeRef = std::optional<TypeRef>;
 
 // Strongly Typed URI
 struct Uri {
@@ -50,7 +50,7 @@ class TypeFinder {
   TypeFinder& add() {
     return add(SchemaRegistry::get().getDefinitionNode<T>().program());
   }
-  TypeFinder& add(const schema::ProgramNode& node);
+  TypeFinder& add(const syntax_graph::ProgramNode& node);
   OptionalTypeRef findType(const Uri& uri) const;
   OptionalTypeRef findTypeInAny(const type::Type& type) const;
 
@@ -101,7 +101,8 @@ scope debugTree(const T& t, const TypeFinder& finder) {
 }
 
 template <class T, class... Args>
-scope debugTree(const T& t, const schema::SyntaxGraph& graph, Args&&... args) {
+scope debugTree(
+    const T& t, const syntax_graph::SyntaxGraph& graph, Args&&... args) {
   TypeFinder finder;
   for (const auto& p : graph.programs()) {
     finder.add(*p);

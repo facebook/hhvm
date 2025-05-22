@@ -69,7 +69,7 @@ class MultiplexAsyncProcessorFactory final : public AsyncProcessorFactory {
    * Returns descriptors of the services that this AsyncProcessorFactory serves.
    * Nodes are in the same order as the underlying AsyncProcessorFactories.
    */
-  std::vector<folly::not_null<const schema::ServiceNode*>>
+  std::vector<folly::not_null<const syntax_graph::ServiceNode*>>
   getServiceSchemaNodes() override;
 #endif
   std::unique_ptr<AsyncProcessor> getProcessor() override;

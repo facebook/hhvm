@@ -23,7 +23,7 @@
 
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
-namespace apache::thrift::schema {
+namespace apache::thrift::syntax_graph {
 class ProgramNode;
 class DefinitionNode;
 
@@ -60,5 +60,5 @@ class Resolver {
 };
 
 } // namespace detail
-} // namespace apache::thrift::schema
+} // namespace apache::thrift::syntax_graph
 #endif

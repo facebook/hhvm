@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-namespace cpp2 apache.thrift.schema.test
+namespace cpp2 apache.thrift.syntax_graph.test
 
 struct OtherTestStruct {}

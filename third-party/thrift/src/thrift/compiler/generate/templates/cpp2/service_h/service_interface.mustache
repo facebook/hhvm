@@ -55,7 +55,7 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
   {{#service:has_service_schema}}
   #if defined(THRIFT_SCHEMA_AVAILABLE)
   std::optional<schema::DefinitionsSchema> getServiceSchema() override;
-  std::vector<folly::not_null<const schema::ServiceNode*>> getServiceSchemaNodes() override;
+  std::vector<folly::not_null<const syntax_graph::ServiceNode*>> getServiceSchemaNodes() override;
   #endif
   {{/service:has_service_schema}}
   {{^service:extends}}

@@ -17,7 +17,7 @@
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/thrift.thrift"
 
-namespace cpp2 apache.thrift.schema.test
+namespace cpp2 apache.thrift.syntax_graph.test
 
 @thrift.Uri{value = "meta.com/thrift_test/TestEnum"}
 enum TestEnum {

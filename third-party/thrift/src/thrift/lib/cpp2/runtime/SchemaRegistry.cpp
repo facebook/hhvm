@@ -25,9 +25,10 @@
 namespace apache::thrift {
 
 SchemaRegistry::SchemaRegistry(BaseSchemaRegistry& base) : base_(base) {
-  auto resolver = std::make_unique<schema::detail::IncrementalResolver>();
+  auto resolver = std::make_unique<syntax_graph::detail::IncrementalResolver>();
   resolver_ = resolver.get();
-  syntaxGraph_ = std::make_unique<schema::SyntaxGraph>(std::move(resolver));
+  syntaxGraph_ =
+      std::make_unique<syntax_graph::SyntaxGraph>(std::move(resolver));
 }
 SchemaRegistry::~SchemaRegistry() = default;
 
@@ -85,7 +86,8 @@ SchemaRegistry::Ptr SchemaRegistry::getMergedSchema() {
   return mergedSchema_;
 }
 
-const schema::DefinitionNode* SchemaRegistry::getSyntaxGraphDefinitionNodeByUri(
+const syntax_graph::DefinitionNode*
+SchemaRegistry::getSyntaxGraphDefinitionNodeByUri(
     const std::string_view uri) const {
   // Note: we check rawSchemasByUri_ first to ensure the definition is available
   // via dynamic bundling, even if it is already available because of an earlier

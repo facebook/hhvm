@@ -18,7 +18,7 @@
 
 #include <thrift/lib/cpp2/type/NativeType.h>
 
-using namespace apache::thrift::schema;
+using namespace apache::thrift::syntax_graph;
 
 namespace apache::thrift::detail {
 namespace {
@@ -114,7 +114,7 @@ std::optional<type::AnyStruct> ifAny(
         return {};
       }
     }
-  } catch (apache::thrift::schema::InvalidSyntaxGraphError&) {
+  } catch (apache::thrift::syntax_graph::InvalidSyntaxGraphError&) {
     // If we can't dereference the type, it might be Any.
   }
 
@@ -132,7 +132,7 @@ std::optional<type::AnyStruct> ifAny(
   return {};
 }
 
-const schema::StructuredNode* FOLLY_NULLABLE
+const syntax_graph::StructuredNode* FOLLY_NULLABLE
 ifStructured(const OptionalTypeRef& typeref) {
   if (typeref && typeref->isStructured()) {
     return &typeref->asStructured();
@@ -186,7 +186,7 @@ std::optional<scope> ifDynamicPatch(
 }
 } // namespace
 
-TypeFinder& TypeFinder::add(const schema::ProgramNode& p) {
+TypeFinder& TypeFinder::add(const syntax_graph::ProgramNode& p) {
   for (auto d : p.definitions()) {
     d->visit([&](auto& def) {
       if constexpr (__FBTHRIFT_IS_VALID(def, def.uri(), TypeRef::of(def))) {
@@ -616,7 +616,7 @@ scope DebugTree<protocol::DynamicMapPatch>::operator()(
         return;
       }
       if (auto mapKey = getMapKey(typeRef)) {
-        auto type = TypeRef::of(schema::Set::of(*mapKey));
+        auto type = TypeRef::of(syntax_graph::Set::of(*mapKey));
         addOp(__func__, debugTree(set, finder, type));
         return;
       }
@@ -686,7 +686,7 @@ scope DebugTree<protocol::DynamicUnknownPatch>::operator()(
       }
       OptionalTypeRef elem = typeRef;
       if (typeRef && typeRef->isMap()) {
-        elem = TypeRef::of(schema::Set::of(*getMapKey(typeRef)));
+        elem = TypeRef::of(syntax_graph::Set::of(*getMapKey(typeRef)));
       }
       protocol::Value v;
       v.emplace_set(set);

@@ -1099,21 +1099,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cst_and_decl_parser"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "direct_decl_parser",
- "direct_decl_smart_constructors_obr",
- "oxidized",
- "oxidized_by_ref",
- "pair_smart_constructors",
- "parser",
- "parser_core_types",
- "positioned_smart_constructors",
-]
-
-[[package]]
 name = "custom_error_config_ffi"
 version = "0.0.0"
 dependencies = [

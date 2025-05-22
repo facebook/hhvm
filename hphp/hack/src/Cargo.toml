@@ -53,7 +53,6 @@ members = [
     "package/cargo",
     "package/ffi_bridge",
     "package/ocaml_ffi/cargo",
-    "parser/api/cargo/cst_and_decl_parser",
     "parser/api/cargo/decl_mode_parser",
     "parser/api/cargo/direct_decl_parser",
     "parser/api/cargo/positioned_by_ref_parser",

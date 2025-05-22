@@ -236,6 +236,67 @@ void back_propagate_unorderable_types(
     context.inv_graph.erase(parentEdgesIt);
   }
 }
+
+// whether type is/has set/map with custom types (cpp.Type or cpp.Adapter)
+// Nested fields don't count.
+bool has_custom_set_or_map(
+    const t_type& type, std::unordered_set<const t_type*>& seen) {
+  if (!seen.emplace(&type).second) {
+    // We already saw the `type` previously. It can either be that
+    // 1. we checked this type and it has no custom set/map,
+    // 2. or the structure has recurisve types and we haven't finished
+    //    checking this type yet and meet it again.
+    //
+    // Either way we can assume `type` is not a custom set or map since it
+    // will be checked elsewhere.
+    return false;
+  }
+  if (is_custom_type(type) &&
+      (type.get_true_type()->is_set() || type.get_true_type()->is_map())) {
+    // Example:
+    // @cpp.Type{template = "std::unordered_map"}
+    // 1: map<i32, i32> foo;
+    return true;
+  }
+  if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
+    // Examples:
+    // @cpp.Type{template = "std::unordered_set"}
+    // typedef set<i32> CustomSet1;
+    //
+    // @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+    // typedef set<i32> CustomSet3;
+    return has_custom_set_or_map(*asTypedef->get_type(), seen);
+  }
+  if (const t_list* asList = type.try_as<t_list>()) {
+    // Examples:
+    // 1: list<CustomSet1> foo;
+    // In this case the structure is still not orderable.
+    return has_custom_set_or_map(*asList->get_elem_type(), seen);
+  }
+  if (const t_set* asSet = type.try_as<t_set>()) {
+    // Examples:
+    // 1: set<CustomSet1> foo;
+    return has_custom_set_or_map(*asSet->get_elem_type(), seen);
+  }
+  if (const t_map* asMap = type.try_as<t_map>()) {
+    // Examples:
+    // 1: map<i32, CustomSet1> foo;
+    return has_custom_set_or_map(*asMap->get_key_type(), seen) ||
+        has_custom_set_or_map(*asMap->get_val_type(), seen);
+  }
+  return false;
+}
+
+bool structure_has_custom_set_or_map_field(const t_structured& s) {
+  std::unordered_set<const t_type*> seen;
+  for (const t_field& field : s.fields()) {
+    if (has_custom_set_or_map(field.type().deref(), seen)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace
 
 bool OrderableTypeUtils::is_orderable(
@@ -271,6 +332,38 @@ bool OrderableTypeUtils::is_orderable(
   back_propagate_unorderable_types(memo, context);
   auto it = memo.find(&structured_type);
   return it == memo.end() || it->second;
+}
+
+OrderableTypeUtils::StructuredOrderableCondition
+OrderableTypeUtils::get_orderable_condition(
+    const t_structured& structured_type,
+    bool enableCustomTypeOrderingIfStructureHasUri) {
+  if (!structure_has_custom_set_or_map_field(structured_type)) {
+    return StructuredOrderableCondition::Always;
+  }
+
+  // `structured_type` has custom type fields, whose ordering must be enabled,
+  // either by:
+  // 1. @cpp.EnableCustomTypeOrdering, OR
+  // 2. having a URI *and* legacy URI-based custom type enabling
+
+  if (is_orderable(
+          structured_type,
+          false /* enableCustomTypeOrderingIfStructureHasUri */)) {
+    return StructuredOrderableCondition::OrderableByExplicitAnnotation;
+  }
+
+  // `structured_type` has custom type fields, whose ordering is NOT explicitly
+  // enabled via `@cpp.EnableCustomTypeOrdering`.
+
+  // It can still be orderable, IFF it has a URI and legacy logic is enabled.
+  const bool hasUri = !structured_type.uri().empty();
+  if (enableCustomTypeOrderingIfStructureHasUri && hasUri) {
+    return StructuredOrderableCondition::
+        OrderableByLegacyImplicitLogicEnabledByUri;
+  }
+
+  return StructuredOrderableCondition::NeedsCustomTypeOrderingEnabled;
 }
 
 } // namespace apache::thrift::compiler::cpp2

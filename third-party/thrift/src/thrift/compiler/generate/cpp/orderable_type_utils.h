@@ -76,6 +76,53 @@ class OrderableTypeUtils final {
       std::unordered_map<const t_type*, bool>& memo,
       const t_structured& structured_type,
       bool enableCustomTypeOrderingIfStructureHasUri);
+
+  enum class StructuredOrderableCondition {
+    /**
+     * The generated structured type is always orderable (i.e., it does not
+     * contain any unordered container field with custom type).
+     */
+    Always,
+
+    /**
+     * The generated structured type cannot be ordered as such, because it
+     * contains unordered container field(s) with custom types, and custom type
+     * ordering is not enabled. Enabling custom type ordering (via explicit
+     * annotation or implicit legacy URI-based logic) would make it orderable.
+     */
+    NeedsCustomTypeOrderingEnabled,
+
+    /**
+     * The generated structured type has unordered container field(s) with
+     * custom types, but is explicitly annotated with
+     * `@cpp.EnableCustomTypeOrdering`, thus making it orderable.
+     */
+    OrderableByExplicitAnnotation,
+
+    /**
+     * The generated structured type has unordered container field(s) with
+     * custom types and is NOT explicitly annotated with
+     * `@cpp.EnableCustomTypeOrdering`, however it is orderable because the
+     * (legacy) logic that implicitly treats custom types as orderable when the
+     * structured type has a URI is enabled.
+     */
+    OrderableByLegacyImplicitLogicEnabledByUri
+  };
+
+  /**
+   * Returns the conditions under which the C++ generated class for the given
+   * `structured_type` can be made orderable.
+   *
+   * The `is_orderable()` methods above are semantically equivalent to
+   * ```
+   * get_orderable_condition(...) !=
+   * StructuredOrderableCondition::NeedsCustomTypeOrderingEnabled
+   * ```
+   * but may be faster.
+   */
+  static StructuredOrderableCondition get_orderable_condition(
+      const t_structured& structured_type,
+      bool enableCustomTypeOrderingIfStructureHasUri);
 };
 
 } // namespace apache::thrift::compiler::cpp2

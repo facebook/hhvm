@@ -324,4 +324,179 @@ TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithUri) {
       get_structured_named(*program, "Baz4"), true));
 }
 
+TEST(OrderableTypeUtilsTest, get_orderable_condition) {
+  source_manager source_mgr;
+  std::shared_ptr<const t_program> program =
+      dedent_and_parse_to_program(source_mgr, R"(
+include "thrift/annotation/cpp.thrift"
+
+struct TestStruct {
+  1: i32 a;
+  2: set<i32> b;
+}
+
+union TestUnion {
+  1: i32 c;
+  2: string d;
+}
+
+struct TestStructCustomTypeNoOrdering {
+  @cpp.Type{template = "MyCustomType"}
+  1: set<i32> e;
+}
+
+@cpp.EnableCustomTypeOrdering
+struct TestStructCustomTypeOrderingExplicitlyEnabled {
+  @cpp.Type{template = "MyCustomType"}
+  1: set<i32> e;
+}
+
+@thrift.Uri{value = "apache.org/thrift/TestStructCustomTypeOrderingImplicitlyEnabled"}
+struct TestStructCustomTypeOrderingImplicitlyEnabled {
+  @cpp.Type{template = "MyCustomType"}
+  1: set<i32> e;
+}
+
+typedef set<i32> NonCustomSet
+
+@cpp.Type{template = "MyCustomType"}
+typedef NonCustomSet CustomSet
+
+typedef CustomSet AliasToCustomSet
+
+struct TestStructTypedefNonCustomSet {
+  1: NonCustomSet a;
+}
+
+struct TestStructTypedefCustomSet {
+  1: CustomSet a;
+}
+
+struct TestStructTypedefAliasToCustomSet {
+  1: AliasToCustomSet a;
+}
+
+struct TestStructTypedefNonCustomSetWithCppType {
+  @cpp.Type{template = "MyCustomType"}
+  1: NonCustomSet a;
+}
+
+@thrift.Uri{value = "apache.org/thrift/TestStructTypedefCustomSetWithUri"}
+struct TestStructTypedefCustomSetWithUri {
+  1: CustomSet a;
+}
+
+@cpp.EnableCustomTypeOrdering
+struct TestStructTypedefCustomSetWithAnnotation {
+  1: CustomSet a;
+}
+)");
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStruct"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::Always);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestUnion"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::Always);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStructCustomTypeNoOrdering"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructCustomTypeOrderingExplicitlyEnabled"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByExplicitAnnotation);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByLegacyImplicitLogicEnabledByUri);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
+          false /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStructTypedefNonCustomSet"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::Always);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStructTypedefCustomSet"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStructTypedefAliasToCustomSet"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructTypedefNonCustomSetWithCppType"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStructTypedefCustomSetWithUri"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByLegacyImplicitLogicEnabledByUri);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(*program, "TestStructTypedefCustomSetWithUri"),
+          false /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          NeedsCustomTypeOrderingEnabled);
+
+  EXPECT_EQ(
+      OrderableTypeUtils::get_orderable_condition(
+          get_structured_named(
+              *program, "TestStructTypedefCustomSetWithAnnotation"),
+          true /* enableCustomTypeOrderingIfStructureHasUri */
+          ),
+      OrderableTypeUtils::StructuredOrderableCondition::
+          OrderableByExplicitAnnotation);
+}
+
 } // namespace apache::thrift::compiler::cpp2

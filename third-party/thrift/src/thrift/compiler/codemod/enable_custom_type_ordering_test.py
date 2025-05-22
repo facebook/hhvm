@@ -16,6 +16,7 @@
 
 import os
 import shutil
+import subprocess
 import tempfile
 import unittest
 
@@ -209,16 +210,34 @@ class EnableCustomTypeOrderingTest(unittest.TestCase):
         self.addCleanup(os.chdir, os.getcwd())
         os.chdir(self.tmp)
         self.maxDiff = None
+        self._codemod_binary = pkg_resources.resource_filename(__name__, "codemod")
+
+    def _codemod_and_return_result(self, input_program: str) -> str:
+        write_file("foo.thrift", input_program)
+        run_binary(self._codemod_binary, "foo.thrift")
+        return read_file("foo.thrift")
 
     def test_basic_with_uri(self):
-        write_file("foo.thrift", HEADER_WITH_URI + ORDERABILITY_TEST_PROGRAM)
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-        self.assertEqual(read_file("foo.thrift"), ORDERABILITY_EXPECTED_RESULT)
+        self.assertEqual(
+            self._codemod_and_return_result(
+                HEADER_WITH_URI + ORDERABILITY_TEST_PROGRAM
+            ),
+            ORDERABILITY_EXPECTED_RESULT,
+        )
 
     def test_basic_without_uri(self):
         PROGRAM = HEADER_NO_URI + ORDERABILITY_TEST_PROGRAM
-        write_file("foo.thrift", PROGRAM)
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-        self.assertEqual(read_file("foo.thrift"), PROGRAM)
+        self.assertEqual(self._codemod_and_return_result(PROGRAM), PROGRAM)
+
+    def test_unnecessary_annotation(self):
+        with self.assertRaises(subprocess.CalledProcessError):
+            self._codemod_and_return_result(
+                HEADER_NO_URI
+                + """
+
+@cpp.EnableCustomTypeOrdering
+struct TestUnnecessaryAnnotation {
+  1: i32 a;
+}
+"""
+            )

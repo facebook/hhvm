@@ -27,7 +27,7 @@ std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::Service
   return ret;
 }
 
-std::vector<folly::not_null<const apache::thrift::schema::ServiceNode*>> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::getServiceSchemaNodes() {
+std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::getServiceSchemaNodes() {
   return {&apache::thrift::SchemaRegistry::get().getNode<::facebook::thrift::test::PrimitivesService>()};
 }
 #endif

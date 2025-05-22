@@ -2400,7 +2400,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
       auto const may_raise = t.subtypeOf(BStr) && [&] {
         switch (kind) {
           case ClassGetCMode::Normal:
-            return Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0;
+            return true;
           case ClassGetCMode::ExplicitConversion:
           case ClassGetCMode::UnsafeBackdoor:
             return rcls->mightCareAboutDynamicallyReferenced();
@@ -4662,7 +4662,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       module_check_always_passes(env, dcls_of(clsTy)) &&
-      (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate == 0 || !maybeDynamicCall) &&
+      !maybeDynamicCall &&
       (!rfunc.mightCareAboutDynCalls() ||
         !maybeDynamicCall ||
         skipLogAsDynamicCall

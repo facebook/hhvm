@@ -47,7 +47,6 @@ type t = {
   enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;
-  use_oxidized_by_ref_decls: bool;
 }
 [@@deriving show, eq]
 
@@ -91,7 +90,6 @@ let default =
     enable_class_pointer_hint = true;
     disallow_non_annotated_memoize = false;
     treat_non_annotated_memoize_as_kbic = false;
-    use_oxidized_by_ref_decls = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
@@ -118,7 +116,6 @@ type ffi_t =
   * Experimental_features.feature_status SMap.t
   * bool
   * bool
-  * bool
 
 let to_rust_ffi_t po =
   ( po.hhvm_compat_mode,
@@ -142,5 +139,4 @@ let to_rust_ffi_t po =
     po.use_legacy_experimental_feature_config,
     po.experimental_features,
     po.consider_unspecified_experimental_features_released,
-    po.enable_class_pointer_hint,
-    po.use_oxidized_by_ref_decls )
+    po.enable_class_pointer_hint )

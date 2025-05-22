@@ -1292,9 +1292,6 @@ let setup_server
   HackEventLogger.init_start
     ~experiments_config_meta:
       local_config.ServerLocalConfig.experiments_config_meta
-    ~decl_parser:
-      (ServerConfig.parser_options config)
-        .ParserOptions.use_oxidized_by_ref_decls
     (Memory_stats.get_host_hw_telemetry ());
 
   check_nfs ~root options local_config;

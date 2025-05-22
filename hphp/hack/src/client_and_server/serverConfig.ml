@@ -375,9 +375,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         treat_non_annotated_memoize_as_kbic =
           bool_opt "treat_non_annotated_memoize_as_kbic" config
           >?? po_opt.treat_non_annotated_memoize_as_kbic;
-        use_oxidized_by_ref_decls =
-          bool_opt "use_oxidized_by_ref_decls" config
-          >?? po_opt.use_oxidized_by_ref_decls;
       }
   in
   GlobalOptions.set
@@ -590,7 +587,6 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
               package_info;
-              use_oxidized_by_ref_decls = local_config.use_oxidized_by_ref_decls;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:

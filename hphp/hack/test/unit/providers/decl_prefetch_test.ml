@@ -35,8 +35,8 @@ let repo =
     (c_path, "<?hh\n class C implements A,B {}\n");
   ]
 
-let test_decl_provider ~use_obr () =
-  run_test ~use_obr repo ~f:(fun env ->
+let test_decl_provider () =
+  run_test repo ~f:(fun env ->
       let ctx = make_empty_ctx env in
 
       (* Can we fold the decl correctly? *)
@@ -109,8 +109,8 @@ let pfs_to_decls (pfs : Direct_decl_parser.parsed_file list) : string list =
   |> List.map ~f:(fun (name, _decl) -> name)
   |> List.sort ~compare:String.compare
 
-let test_concurrent_parser ~use_obr () =
-  run_test ~use_obr repo ~f:(fun env ->
+let test_concurrent_parser () =
+  run_test repo ~f:(fun env ->
       let ctx = Common_provider.make_empty_ctx env in
 
       (* single file that exists *)
@@ -162,8 +162,6 @@ let test_concurrent_parser ~use_obr () =
 
 let () =
   EventLogger.init_fake ();
-  test_decl_provider ~use_obr:true ();
-  test_decl_provider ~use_obr:false ();
-  test_concurrent_parser ~use_obr:true ();
-  test_concurrent_parser ~use_obr:false ();
+  test_decl_provider ();
+  test_concurrent_parser ();
   ()

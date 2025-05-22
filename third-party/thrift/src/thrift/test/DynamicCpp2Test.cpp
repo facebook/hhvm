@@ -25,10 +25,11 @@
 #include <thrift/lib/thrift/gen-cpp2/dynamic_types.h>
 #include <thrift/test/gen-cpp2/DynamicTestService.h>
 
+namespace apache::thrift::test {
+
+using dynamic = folly::dynamic;
+using std::numeric_limits;
 using namespace cpp2;
-using namespace std;
-using namespace folly;
-using namespace apache::thrift;
 
 static dynamic kDynamics[] = {
     // NULL
@@ -159,3 +160,5 @@ TEST_P(RoundtripTestFixture, SerializeOverHandler) {
 
 INSTANTIATE_TEST_CASE_P(
     All, RoundtripTestFixture, ::testing::ValuesIn(kDynamics));
+
+} // namespace apache::thrift::test

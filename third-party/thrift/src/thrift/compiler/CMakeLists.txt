@@ -104,7 +104,7 @@ target_link_libraries(
   compiler_base
   fmt::fmt
   Boost::boost
-  shared
+  common
   ${FBTHRIFT_COMPILER_LINK_CXXFS}
 )
 

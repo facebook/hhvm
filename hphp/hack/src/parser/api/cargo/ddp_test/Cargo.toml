@@ -14,7 +14,6 @@ test = false
 
 [dependencies]
 anyhow = "1.0.95"
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 clap = { version = "4.5.38", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 direct_decl_parser = { version = "0.0.0", path = "../direct_decl_parser" }
 hh_config = { version = "0.0.0", path = "../../../../utils/hh_config/cargo" }

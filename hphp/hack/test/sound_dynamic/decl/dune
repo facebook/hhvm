@@ -1,5 +1,5 @@
 (rule
- (alias sound_dynamic_typing_decl_obr)
+ (alias sound_dynamic_typing_decl)
  (deps
   %{exe:../../../src/hh_single_decl.exe}
   %{project_root}/hack/test/verify.py
@@ -14,7 +14,7 @@
    --program
    %{exe:../../../src/hh_single_decl.exe}
    --flags
-   --decl-parse-obr)))
+   --decl-parse)))
 
 (rule
  (alias sound_dynamic_typing_decl_typing)
@@ -45,5 +45,4 @@
 (alias
  (name runtest)
  (deps
-  (alias sound_dynamic_typing_decl_obr)
   (alias sound_dynamic_typing_decl_typing)))

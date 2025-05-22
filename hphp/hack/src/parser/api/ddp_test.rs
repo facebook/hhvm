@@ -5,7 +5,6 @@
 use std::path::PathBuf;
 
 use anyhow::Result;
-use bumpalo::Bump;
 use clap::Parser;
 use direct_decl_parser::DeclParserOptions;
 use hh_config::HhConfig;
@@ -18,8 +17,6 @@ struct Opts {
 
     #[clap(long)]
     root: Option<PathBuf>,
-    #[clap(long, short, action)]
-    by_ref: bool,
     #[clap(long, short, action)]
     for_typecheck: bool,
 }
@@ -35,26 +32,7 @@ fn main() -> Result<()> {
     };
     let text = std::fs::read(&opts.path)?;
     let rpath = RelativePath::make(Prefix::Tmp, opts.path);
-    if opts.by_ref && opts.for_typecheck {
-        let arena = Bump::new();
-        println!(
-            "{:#?}",
-            direct_decl_parser::parse_decls_for_typechecking_obr(
-                &dp_opts,
-                rpath.clone(),
-                &text,
-                &arena
-            )
-        );
-        drop(arena);
-    } else if opts.by_ref {
-        let arena = Bump::new();
-        println!(
-            "{:#?}",
-            direct_decl_parser::parse_decls_for_bytecode_obr(&dp_opts, rpath, &text, &arena)
-        );
-        drop(arena);
-    } else if opts.for_typecheck {
+    if opts.for_typecheck {
         println!(
             "{:#?}",
             direct_decl_parser::parse_decls_for_typechecking(&dp_opts, rpath.clone(), &text,)

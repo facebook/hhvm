@@ -7,15 +7,12 @@
 use std::cell::RefCell;
 use std::path::PathBuf;
 
-use bumpalo::Bump;
 use ocamlrep::bytes_from_ocamlrep;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::ocaml_ffi;
-use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use relative_path::RelativePath;
 
@@ -93,22 +90,6 @@ impl ocamlrep::ToOcamlRep for OcamlParsedFileWithHashes {
         }
         alloc.set_field(&mut block, 2, hd);
         block.build()
-    }
-}
-
-ocaml_ffi_arena_result! {
-    fn hh_parse_decls_ffi_obr<'a>(
-        arena: &'a Bump,
-        opts: DeclParserOptions,
-        filename: RelativePath,
-        text: UnsafeOcamlPtr,
-    ) -> ParsedFile<'a> {
-        // SAFETY: Borrow the contents of the source file from the value on the
-        // OCaml heap rather than copying it over. This is safe as long as we
-        // don't call into OCaml within this function scope.
-        let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
-        let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        direct_decl_parser::parse_decls_for_typechecking_obr(&opts, filename, text, arena)
     }
 }
 

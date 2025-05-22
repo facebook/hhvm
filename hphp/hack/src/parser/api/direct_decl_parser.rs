@@ -9,7 +9,6 @@ use bumpalo::Bump;
 use direct_decl_smart_constructors::DirectDeclSmartConstructors;
 use direct_decl_smart_constructors_obr::ArenaSourceTextAllocator;
 use direct_decl_smart_constructors_obr::DirectDeclSmartConstructors as DirectDeclSmartConstructorsObr;
-use direct_decl_smart_constructors_obr::NoSourceTextAllocator;
 use direct_decl_smart_constructors_obr::SourceTextAllocator;
 use mode_parser::parse_mode;
 pub use oxidized::decl_parser_options::DeclParserOptions;
@@ -33,23 +32,6 @@ use relative_path::RelativePath;
 /// decls from hhi files, (2) produces decls in reverse order, (3) includes subsequent decls
 /// in case of name-clash, rather than just the first. Unless you the caller have thought
 /// through your desired semantics in these cases, you're probably buggy.
-pub fn parse_decls_for_typechecking_obr<'a>(
-    opts: &DeclParserOptions,
-    filename: RelativePath,
-    text: &'a [u8],
-    arena: &'a Bump,
-) -> ParsedFile<'a> {
-    parse_script_with_text_allocator(
-        opts,
-        filename,
-        text,
-        arena,
-        NoSourceTextAllocator,
-        false, // elaborate_xhp_namespaces_for_facts
-    )
-}
-
-// As parse_decls_for_typechecking, but produce Oxidized
 pub fn parse_decls_for_typechecking(
     opts: &DeclParserOptions,
     filename: RelativePath,

@@ -77,11 +77,9 @@ pub fn run_bench_command(bench_opts: BenchOpts) -> Result<()> {
                     let (_, _, _) = positioned_parser::parse_script(&source_text, env);
                 }
                 ParserKind::DirectDecl => {
-                    let arena = bumpalo::Bump::new();
                     let opts = Default::default();
-                    let _ = direct_decl_parser::parse_decls_for_typechecking_obr(
-                        &opts, filepath, &content, &arena,
-                    );
+                    let _ =
+                        direct_decl_parser::parse_decls_for_typechecking(&opts, filepath, &content);
                 }
                 ParserKind::Aast => {
                     let indexed_source_text = IndexedSourceText::new(source_text);

@@ -41,13 +41,13 @@ class t_typedef : public t_type {
   template <typename UnaryPredicate>
   static const t_type* find_type_if(const t_type* type, UnaryPredicate&& pred) {
     while (true) {
-      if (!type) {
+      if (type == nullptr) {
         return nullptr;
       }
       if (pred(type)) {
         return type;
       }
-      if (const auto* as_typedef = dynamic_cast<const t_typedef*>(type)) {
+      if (const t_typedef* as_typedef = type->try_as<t_typedef>()) {
         type = as_typedef->get_type();
       } else {
         return nullptr;

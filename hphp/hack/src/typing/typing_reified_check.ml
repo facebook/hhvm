@@ -46,20 +46,23 @@ let validator =
     method! on_tfun acc r _ = this#invalid acc r "a function type"
 
     method! on_typeconst acc _ typeconst =
-      match typeconst.ttc_kind with
-      | TCConcrete { tc_type } -> this#on_type acc tc_type
-      | TCAbstract
-          { atc_as_constraint = _; atc_super_constraint = _; atc_default } ->
-      begin
-        match typeconst.ttc_reifiable with
-        | None ->
-          let r = Reason.witness_from_decl (fst typeconst.ttc_name) in
-          let kind =
-            "an abstract type constant without the __Reifiable attribute"
-          in
-          this#invalid acc r kind
-        | Some _ -> Option.fold ~f:this#on_type ~init:acc atc_default
-      end
+      let open Type_validator in
+      match acc.reification with
+      | TypeStructure -> acc
+      | Unresolved
+      | Resolved ->
+        (match typeconst.ttc_kind with
+        | TCConcrete { tc_type } -> this#on_type acc tc_type
+        | TCAbstract
+            { atc_as_constraint = _; atc_super_constraint = _; atc_default } ->
+          (match typeconst.ttc_reifiable with
+          | None ->
+            let r = Reason.witness_from_decl (fst typeconst.ttc_name) in
+            let kind =
+              "an abstract type constant without the __Reifiable attribute"
+            in
+            this#invalid acc r kind
+          | Some _ -> Option.fold ~f:this#on_type ~init:acc atc_default))
 
     method! on_taccess acc r (root, ids) =
       let acc =
@@ -69,7 +72,9 @@ let validator =
           | Tthis ->
             { acc with Type_validator.reification = Type_validator.Resolved }
           | _ -> this#on_type acc root)
-        | Type_validator.Resolved -> acc
+        | Type_validator.TypeStructure
+        | Type_validator.Resolved ->
+          acc
       in
       super#on_taccess acc r (root, ids)
 

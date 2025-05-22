@@ -8,7 +8,10 @@
 
 type validity
 
+(* In hint positions, reified types are not resolved *)
 type reification =
+  (* Cases like intrinsics where we're not storing back the generic *)
+  | TypeStructure
   | Resolved
   | Unresolved
 

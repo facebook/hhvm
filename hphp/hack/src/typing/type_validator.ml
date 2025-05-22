@@ -16,8 +16,8 @@ type validity =
   | Valid
   | Invalid : (Reason.decl_t * string) list -> validity
 
-(* In hint positions, reified types are not resolved *)
 type reification =
+  | TypeStructure
   | Resolved
   | Unresolved
 

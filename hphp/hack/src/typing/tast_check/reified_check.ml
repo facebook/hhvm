@@ -97,7 +97,7 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
  *
  * where Tf does not exist at runtime.
  *)
-let verify_targ_valid ?special_code env reification tparam targ =
+let verify_targ_valid env reification tparam targ =
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)
@@ -112,11 +112,6 @@ let verify_targ_valid ?special_code env reification tparam targ =
             primary
             @@ Primary.Invalid_reified_arg
                  { pos; param_name; decl_pos; arg_info })
-        in
-        let err =
-          match special_code with
-          | Some code -> Typing_error.with_code ~code err
-          | None -> err
         in
         Typing_error_utils.add_typing_error
           ~env:(Tast_env.tast_env_as_typing_env env)
@@ -146,7 +141,7 @@ let verify_targ_valid ?special_code env reification tparam targ =
   if Attributes.mem UA.uaNewable tparam.tp_user_attributes then
     valid_newable_hint env tparam.tp_name (snd targ)
 
-let verify_call_targs ?special_code env expr_pos decl_pos tparams targs =
+let verify_call_targs env expr_pos decl_pos tparams targs reification =
   (if tparams_has_reified tparams then
     let tparams_length = List.length tparams in
     let targs_length = List.length targs in
@@ -190,11 +185,7 @@ let verify_call_targs ?special_code env expr_pos decl_pos tparams targs =
         primary @@ Primary.Require_args_reify { decl_pos; pos = expr_pos })
   else
     (* Unequal_lengths case handled elsewhere *)
-    List.iter2
-      tparams
-      targs
-      ~f:(verify_targ_valid ?special_code env Type_validator.Resolved)
-    |> ignore
+    List.iter2 tparams targs ~f:(verify_targ_valid env reification) |> ignore
 
 let get_ft_tparams env fun_ty =
   let fun_ty = Tast_env.strip_dynamic env fun_ty in
@@ -242,31 +233,36 @@ let handler =
       | (fun_ty, pos, FunctionPointer (_, targs)) -> begin
         match get_ft_tparams env fun_ty with
         | Some (ft_tparams, _) ->
-          verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
+          verify_call_targs
+            env
+            pos
+            (get_pos fun_ty)
+            ft_tparams
+            targs
+            Type_validator.Resolved
         | None -> ()
       end
       | (_, pos, Call { func = (fun_ty, _, expr); targs; _ }) ->
-        let special_code =
+        let reification =
           (* If need be, we can extend this special casing to all
            * HH\ReifiedGenerics functions. *)
-          Typing_error.(
-            match expr with
-            | Id (_, id)
-              when String.(id = SN.StdlibFunctions.get_class_from_type) ->
-              Some Error_code.InvalidReifiedArgumentFIXMEable
-            | _ -> None)
+          match expr with
+          | Id (_, id) when String.(id = SN.StdlibFunctions.get_class_from_type)
+            ->
+            Type_validator.TypeStructure
+          | _ -> Type_validator.Resolved
         in
         let (env, efun_ty) = Env.expand_type env fun_ty in
         (match get_ft_tparams env efun_ty with
         | Some (ft_tparams, is_function_pointer) when not @@ is_function_pointer
           ->
           verify_call_targs
-            ?special_code
             env
             pos
             (get_pos efun_ty)
             ft_tparams
             targs
+            reification
         | _ -> ())
       | (_, pos, New ((ty, _, CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
@@ -291,7 +287,13 @@ let handler =
           | Decl_entry.Found cls ->
             let tparams = Cls.tparams cls in
             let class_pos = Cls.pos cls in
-            verify_call_targs env pos class_pos tparams targs
+            verify_call_targs
+              env
+              pos
+              class_pos
+              tparams
+              targs
+              Type_validator.Resolved
           | Decl_entry.DoesNotExist
           | Decl_entry.NotYetAvailable ->
             ()))
@@ -330,7 +332,13 @@ let handler =
             | Decl_entry.Found cls ->
               let tparams = Cls.tparams cls in
               let class_pos = Cls.pos cls in
-              verify_call_targs env pos class_pos tparams targs
+              verify_call_targs
+                env
+                pos
+                class_pos
+                tparams
+                targs
+                Type_validator.Resolved
             | Decl_entry.DoesNotExist
             | Decl_entry.NotYetAvailable ->
               ()

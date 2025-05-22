@@ -986,12 +986,12 @@ class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
    * underlying type.
    *
    * If this type does not represent a typedef, then this function returns a
-   * copy of `*this`.
+   * reference to `*this`.
    *
    * Post-conditions:
    *   - kind() != Kind::TYPEDEF
    */
-  TypeRef trueType() const {
+  const TypeRef& trueType() const {
     switch (kind()) {
       case Kind::TYPEDEF:
         return asTypedef().targetType().trueType();

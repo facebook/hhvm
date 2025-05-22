@@ -21,16 +21,7 @@
 namespace HPHP {
 namespace {
 
-  // This used to be pointing to Folly's DefaultGenerator, but that was changed
-  // to be backed by xoshiro, which has alignment requirements that RDS doesn't
-  // support.
-#if FOLLY_HAVE_EXTRANDOM_SFMT19937
-  using DefaultGenerator = __gnu_cxx::sfmt19937;
-#else
-  using DefaultGenerator = std::mt19937;
-#endif
-  RDS_LOCAL(DefaultGenerator, tl_rng);
-
+  RDS_LOCAL(folly::Random::DefaultGenerator, tl_rng);
   int64_t HHVM_FUNCTION(HH_pseudorandom_int, int64_t min, int64_t max) {
     return std::uniform_int_distribution<int64_t>(min, max)(*tl_rng);
   }

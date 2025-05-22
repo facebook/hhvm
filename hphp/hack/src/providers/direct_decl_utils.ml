@@ -206,18 +206,11 @@ let direct_decl_parse ?(ignore_file_content_caches = false) ctx file =
       popt.ParserOptions.deregister_php_stdlib
     in
     let parsed_file =
-      if (Provider_context.get_popt ctx).use_oxidized_by_ref_decls then
-        Direct_decl_parser.parse_and_hash_decls_obr
-          opts
-          deregister_php_stdlib_if_hhi
-          file
-          contents
-      else
-        Direct_decl_parser.parse_and_hash_decls
-          opts
-          deregister_php_stdlib_if_hhi
-          file
-          contents
+      Direct_decl_parser.parse_and_hash_decls
+        opts
+        deregister_php_stdlib_if_hhi
+        file
+        contents
     in
     Some parsed_file
 
@@ -227,16 +220,10 @@ let direct_decl_parse_and_cache ctx file =
     Counters.count Counters.Category.Direct_decl_parse @@ fun () ->
     get_file_contents ~ignore_file_content_caches:false ctx file
     |> Option.map ~f:(fun contents ->
-           if (Provider_context.get_popt ctx).use_oxidized_by_ref_decls then
-             Rust_provider_backend.Decl.direct_decl_parse_and_cache_obr
-               backend
-               file
-               contents
-           else
-             Rust_provider_backend.Decl.direct_decl_parse_and_cache
-               backend
-               file
-               contents)
+           Rust_provider_backend.Decl.direct_decl_parse_and_cache
+             backend
+             file
+             contents)
   | _ ->
     let result = direct_decl_parse ctx file in
     (match result with

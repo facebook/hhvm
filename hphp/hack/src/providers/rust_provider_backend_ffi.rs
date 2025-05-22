@@ -99,16 +99,6 @@ ocaml_ffi! {
 // Decl_provider ////////////////////////////////////////////////////////////
 
 ocaml_ffi_with_arena! {
-    fn hh_rust_provider_backend_direct_decl_parse_and_cache_obr<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        path: RelativePath,
-        text: UnsafeOcamlPtr,
-    ) -> rust_decl_ffi::OcamlParsedFileWithHashesObr<'a> {
-        let backend = unsafe { get_backend(backend) };
-        backend.direct_decl_parse_and_cache_obr(path, text, arena).into()
-    }
-
     fn hh_rust_provider_backend_add_shallow_decls<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,

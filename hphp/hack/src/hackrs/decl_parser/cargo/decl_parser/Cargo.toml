@@ -12,11 +12,9 @@ path = "../../decl_parser.rs"
 
 [dependencies]
 anyhow = "1.0.95"
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 direct_decl_parser = { version = "0.0.0", path = "../../../../parser/api/cargo/direct_decl_parser" }
 file_provider = { version = "0.0.0", path = "../../../file_provider/cargo/file_provider" }
 names = { version = "0.0.0", path = "../../../../naming/names_rust" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
-oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 ty = { version = "0.0.0", path = "../../../ty/cargo/ty" }

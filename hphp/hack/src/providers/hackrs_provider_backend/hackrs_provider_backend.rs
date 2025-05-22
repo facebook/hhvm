@@ -28,7 +28,6 @@ use oxidized::decl_fold_options::DeclFoldOptions;
 use oxidized::file_info::NameType;
 use oxidized::file_info::Names;
 use oxidized::naming_types;
-use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
@@ -165,23 +164,6 @@ impl HhServerProviderBackend {
     /// Decl-parse the given file, dedup duplicate definitions of the same
     /// symbol (within the file, as well as removing losers of naming conflicts
     /// with other files), and add the parsed decls to the shallow decl store.
-    fn parse_and_cache_decls_obr<'a>(
-        &self,
-        path: RelativePath,
-        text: &'a [u8],
-        arena: &'a bumpalo::Bump,
-    ) -> Result<ParsedFileWithHashes<'a>> {
-        let hashed_file = self.decl_parser.parse_impl_obr(path, text, arena);
-        self.lazy_shallow_decl_provider.dedup_and_add_decls(
-            path,
-            (hashed_file.iter()).map(|(name, decl, _, _)| NamedDecl::from(&(*name, *decl))),
-        )?;
-        Ok(hashed_file)
-    }
-
-    /// Decl-parse the given file, dedup duplicate definitions of the same
-    /// symbol (within the file, as well as removing losers of naming conflicts
-    /// with other files), and add the parsed decls to the shallow decl store.
     fn parse_and_cache_decls(
         &self,
         path: RelativePath,
@@ -266,20 +248,6 @@ impl rust_provider_backend_ffi::ProviderBackendFfi for HhServerProviderBackend {
 
     fn set_ctx_empty(&self, is_empty: bool) {
         self.ctx_is_empty.store(is_empty, Ordering::SeqCst);
-    }
-
-    fn direct_decl_parse_and_cache_obr<'a>(
-        &self,
-        path: RelativePath,
-        text: UnsafeOcamlPtr,
-        arena: &'a bumpalo::Bump,
-    ) -> oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes<'a> {
-        // SAFETY: Borrow the contents of the source file from the value on the
-        // OCaml heap rather than copying it over. This is safe as long as we
-        // don't call into OCaml within this function scope.
-        let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
-        let text = ocamlrep::bytes_from_ocamlrep(text_value).expect("expected string");
-        self.parse_and_cache_decls_obr(path, text, arena).unwrap()
     }
 
     fn direct_decl_parse_and_cache(

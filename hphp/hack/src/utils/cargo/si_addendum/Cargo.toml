@@ -15,4 +15,3 @@ doctest = false
 [dependencies]
 core_utils_rust = { version = "0.0.0", path = "../../core" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }

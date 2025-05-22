@@ -85,10 +85,7 @@ let concurrent_get_pfs ~ctx (paths : Relative_path.t list) :
     | None -> acc
     | Some earlier ->
       let next_earlier =
-        Concurrent.enqueue_next_and_get_earlier_results
-          ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls
-          handle
-          []
+        Concurrent.enqueue_next_and_get_earlier_results handle []
       in
       loop (earlier :: acc) next_earlier
   in
@@ -96,10 +93,7 @@ let concurrent_get_pfs ~ctx (paths : Relative_path.t list) :
     List.mapi paths ~f:(fun i path -> (path, Printf.sprintf "%02d" i, None))
   in
   let earlier_opt =
-    Concurrent.enqueue_next_and_get_earlier_results
-      ~use_obr:opts.DeclParserOptions.use_oxidized_by_ref_decls
-      handle
-      paths
+    Concurrent.enqueue_next_and_get_earlier_results handle paths
   in
   let acc = loop [] earlier_opt in
   acc

@@ -35,13 +35,6 @@ external parse_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
   = "hh_parse_decls_ffi"
 
-external parse_and_hash_decls_obr :
-  DeclParserOptions.t ->
-  bool ->
-  Relative_path.t ->
-  string ->
-  parsed_file_with_hashes = "hh_parse_and_hash_decls_ffi_obr"
-
 external parse_and_hash_decls :
   DeclParserOptions.t ->
   bool ->
@@ -146,30 +139,4 @@ module Concurrent (Metadata : Metadata) = struct
     (Relative_path.t * Metadata.t * content) list ->
     (Relative_path.t * Metadata.t * parsed_file) option
     = "hh_concurrent_parse_step_ffi"
-
-  external start_obr :
-    opts:DeclParserOptions.t ->
-    root:Path.t ->
-    hhi:Path.t ->
-    tmp:Path.t ->
-    dummy:Path.t ->
-    handle = "hh_concurrent_parse_start_obr_ffi"
-
-  external enqueue_next_and_get_earlier_results_obr :
-    handle ->
-    (Relative_path.t * Metadata.t * content) list ->
-    (Relative_path.t * Metadata.t * parsed_file) option
-    = "hh_concurrent_parse_step_obr_ffi"
-
-  let start ~opts =
-    if opts.DeclParserOptions.use_oxidized_by_ref_decls then
-      start_obr ~opts
-    else
-      start ~opts
-
-  let enqueue_next_and_get_earlier_results ~use_obr =
-    if use_obr then
-      enqueue_next_and_get_earlier_results_obr
-    else
-      enqueue_next_and_get_earlier_results
 end

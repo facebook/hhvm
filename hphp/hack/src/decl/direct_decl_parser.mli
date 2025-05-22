@@ -33,14 +33,6 @@ val parse_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
 
 (** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order *)
-val parse_and_hash_decls_obr :
-  DeclParserOptions.t ->
-  bool ->
-  Relative_path.t ->
-  string ->
-  parsed_file_with_hashes
-
-(** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order *)
 val parse_and_hash_decls :
   DeclParserOptions.t ->
   bool ->
@@ -93,7 +85,6 @@ module Concurrent (Metadata : Metadata) : sig
   it will be returned (either on this call or a subsequent call) with the exact
   same [(path, metadata)]. *)
   val enqueue_next_and_get_earlier_results :
-    use_obr:bool ->
     handle ->
     (Relative_path.t * Metadata.t * content) list ->
     (Relative_path.t * Metadata.t * parsed_file) option

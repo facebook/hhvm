@@ -1235,12 +1235,10 @@ name = "decl_parser"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bumpalo",
  "direct_decl_parser",
  "file_provider",
  "names",
  "oxidized",
- "oxidized_by_ref",
  "pos",
  "ty",
 ]
@@ -3308,7 +3306,6 @@ name = "naming_table_builder"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bumpalo",
  "clap 3.2.25",
  "direct_decl_parser",
  "files_to_ignore",
@@ -3318,7 +3315,6 @@ dependencies = [
  "hhi",
  "names",
  "oxidized",
- "oxidized_by_ref",
  "rayon",
  "relative_path",
  "si_addendum",
@@ -4383,13 +4379,11 @@ name = "rust_batch_index_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bumpalo",
  "direct_decl_parser",
  "file_info",
  "ocamlrep_caml_builtins",
  "ocamlrep_ocamlpool",
  "oxidized",
- "oxidized_by_ref",
  "rayon",
  "relative_path",
  "si_addendum",
@@ -4763,7 +4757,6 @@ version = "0.0.0"
 dependencies = [
  "core_utils_rust",
  "oxidized",
- "oxidized_by_ref",
 ]
 
 [[package]]

@@ -129,19 +129,6 @@ pub trait ProviderBackendFfi {
 
     /// Decl-parse the given file and cache the resulting decls in shallow decl
     /// stores. Return the decls and their hashes.
-    fn direct_decl_parse_and_cache_obr<'a>(
-        &self,
-        _path: RelativePath,
-        _text: UnsafeOcamlPtr,
-        _arena: &'a bumpalo::Bump,
-    ) -> oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes<'a> {
-        unimplemented!(
-            "ProviderBackendFfi::direct_decl_parse_and_cache_obr: {UNIMPLEMENTED_MESSAGE}"
-        )
-    }
-
-    /// Decl-parse the given file and cache the resulting decls in shallow decl
-    /// stores. Return the decls and their hashes.
     fn direct_decl_parse_and_cache(
         &self,
         _path: RelativePath,

@@ -69,6 +69,7 @@ bool is_custom_type(const t_type& type) {
                  "cpp.type",
                  "cpp2.type",
              }) ||
+      t_typedef::get_first_structured_annotation_or_null(&type, kCppTypeUri) ||
       t_typedef::get_first_structured_annotation_or_null(&type, kCppAdapterUri);
 }
 

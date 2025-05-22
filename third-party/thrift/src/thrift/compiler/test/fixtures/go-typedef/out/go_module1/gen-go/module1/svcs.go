@@ -75,6 +75,8 @@ func (c *FinderClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, e
     fbthriftErr := c.ch.SendRequestResponse(ctx, "byPlate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -87,6 +89,8 @@ func (c *FinderClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, err
     fbthriftErr := c.ch.SendRequestResponse(ctx, "aliasByPlate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -99,6 +103,8 @@ func (c *FinderClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, e
     fbthriftErr := c.ch.SendRequestResponse(ctx, "previousPlate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

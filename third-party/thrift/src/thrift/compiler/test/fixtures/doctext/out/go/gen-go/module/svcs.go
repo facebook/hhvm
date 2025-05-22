@@ -68,6 +68,8 @@ func (c *CClient) F(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "f", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -82,8 +84,8 @@ func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (stri
     fbthriftErr := c.ch.SendRequestResponse(ctx, "thing", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftResp.Bang != nil {
-        return "", fbthriftResp.Bang
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

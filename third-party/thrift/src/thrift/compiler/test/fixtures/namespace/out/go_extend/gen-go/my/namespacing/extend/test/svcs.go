@@ -78,6 +78,8 @@ func (c *ExtendTestServiceClient) Check(ctx context.Context, struct1 *test0.HsFo
     fbthriftErr := c.ch.SendRequestResponse(ctx, "check", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return false, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return false, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

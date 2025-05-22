@@ -66,6 +66,8 @@ func (c *FooServiceClient) SimpleRPC(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "simple_rpc", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -209,6 +211,8 @@ func (c *FB303ServiceClient) SimpleRPC(ctx context.Context, intParameter int32) 
     fbthriftErr := c.ch.SendRequestResponse(ctx, "simple_rpc", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -371,6 +375,8 @@ func (c *MyServiceClient) Ping(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "ping", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -382,6 +388,8 @@ func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "getRandomData", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -394,6 +402,8 @@ func (c *MyServiceClient) Sink(ctx context.Context, sink int64) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "sink", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -407,6 +417,8 @@ func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string
     fbthriftErr := c.ch.SendRequestResponse(ctx, "putDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -419,6 +431,8 @@ func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, erro
     fbthriftErr := c.ch.SendRequestResponse(ctx, "hasDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return false, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return false, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -431,6 +445,8 @@ func (c *MyServiceClient) GetDataById(ctx context.Context, id int64) (string, er
     fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -443,6 +459,8 @@ func (c *MyServiceClient) DeleteDataById(ctx context.Context, id int64) (error) 
     fbthriftErr := c.ch.SendRequestResponse(ctx, "deleteDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -462,6 +480,8 @@ func (c *MyServiceClient) InvalidReturnForHack(ctx context.Context) ([]float32, 
     fbthriftErr := c.ch.SendRequestResponse(ctx, "invalid_return_for_hack", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -473,6 +493,8 @@ func (c *MyServiceClient) RpcSkippedCodegen(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "rpc_skipped_codegen", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -1095,6 +1117,8 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey0(ctx context.Context, key str
     fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataByKey0", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -1107,6 +1131,8 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey1(ctx context.Context, key str
     fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataByKey1", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

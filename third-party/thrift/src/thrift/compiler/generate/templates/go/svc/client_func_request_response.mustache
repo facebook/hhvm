@@ -31,11 +31,8 @@ func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
     fbthriftErr := c.ch.SendRequestResponse({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftErr
-    }{{#function:exceptions?}}{{!
-    }}{{#function:exceptions}}{{!
-    }} else if fbthriftResp.{{field:go_name}} != nil {
-        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftResp.{{field:go_name}}
-    }{{/function:exceptions}}{{!
-    }}{{/function:exceptions?}}
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftEx
+    }
     return {{^function:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/function:void?}}nil
 }

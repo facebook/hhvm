@@ -78,8 +78,8 @@ func (c *MyServiceClient) Ping(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "ping", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftResp.MyExcept != nil {
-        return fbthriftResp.MyExcept
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -91,6 +91,8 @@ func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "getRandomData", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -103,6 +105,8 @@ func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, erro
     fbthriftErr := c.ch.SendRequestResponse(ctx, "hasDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return false, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return false, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -115,6 +119,8 @@ func (c *MyServiceClient) GoGetDataById(ctx context.Context, id int64) (string, 
     fbthriftErr := c.ch.SendRequestResponse(ctx, "getDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return "", fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -128,6 +134,8 @@ func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string
     fbthriftErr := c.ch.SendRequestResponse(ctx, "putDataById", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -147,6 +155,8 @@ func (c *MyServiceClient) GoDoNothing(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "doNothing", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -619,6 +629,8 @@ func (c *MyServicePrioParentClient) Ping(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "ping", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -630,6 +642,8 @@ func (c *MyServicePrioParentClient) Pong(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "pong", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -833,6 +847,8 @@ func (c *MyServicePrioChildClient) Pang(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "pang", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -948,6 +964,8 @@ func (c *BadServiceClient) Bar(ctx context.Context) (int32, error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "bar", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return 0, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return 0, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -1095,6 +1113,8 @@ func (c *FooBarBazServiceClient) FooStructured(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -1106,6 +1126,8 @@ func (c *FooBarBazServiceClient) BarNonStructured(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "bar", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -1117,6 +1139,8 @@ func (c *FooBarBazServiceClient) Baz(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "baz", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }

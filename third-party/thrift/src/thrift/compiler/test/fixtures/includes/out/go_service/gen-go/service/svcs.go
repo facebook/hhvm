@@ -74,6 +74,8 @@ func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *incl
     fbthriftErr := c.ch.SendRequestResponse(ctx, "query", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -87,6 +89,8 @@ func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i 
     fbthriftErr := c.ch.SendRequestResponse(ctx, "has_arg_docs", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }

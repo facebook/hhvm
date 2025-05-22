@@ -68,6 +68,8 @@ func (c *MyServiceClient) Foo(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -210,6 +212,8 @@ func (c *FactoriesClient) Foo(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -352,6 +356,8 @@ func (c *PerformClient) Foo(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -494,6 +500,8 @@ func (c *InteractWithSharedClient) DoSomeSimilarThings(ctx context.Context) (*sh
     fbthriftErr := c.ch.SendRequestResponse(ctx, "do_some_similar_things", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

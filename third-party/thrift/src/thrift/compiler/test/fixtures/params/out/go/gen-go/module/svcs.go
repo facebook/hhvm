@@ -75,6 +75,8 @@ func (c *NestedContainersClient) MapList(ctx context.Context, foo map[int32][]in
     fbthriftErr := c.ch.SendRequestResponse(ctx, "mapList", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -87,6 +89,8 @@ func (c *NestedContainersClient) MapSet(ctx context.Context, foo map[int32][]int
     fbthriftErr := c.ch.SendRequestResponse(ctx, "mapSet", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -99,6 +103,8 @@ func (c *NestedContainersClient) ListMap(ctx context.Context, foo []map[int32]in
     fbthriftErr := c.ch.SendRequestResponse(ctx, "listMap", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -111,6 +117,8 @@ func (c *NestedContainersClient) ListSet(ctx context.Context, foo [][]int32) (er
     fbthriftErr := c.ch.SendRequestResponse(ctx, "listSet", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -123,6 +131,8 @@ func (c *NestedContainersClient) Turtles(ctx context.Context, foo [][]map[int32]
     fbthriftErr := c.ch.SendRequestResponse(ctx, "turtles", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }

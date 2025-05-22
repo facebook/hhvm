@@ -66,6 +66,8 @@ func (c *MyRootClient) DoRoot(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "do_root", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -217,6 +219,8 @@ func (c *MyNodeClient) DoMid(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "do_mid", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }
@@ -341,6 +345,8 @@ func (c *MyLeafClient) DoLeaf(ctx context.Context) (error) {
     fbthriftErr := c.ch.SendRequestResponse(ctx, "do_leaf", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
     }
     return nil
 }

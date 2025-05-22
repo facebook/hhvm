@@ -67,6 +67,8 @@ func (c *TestServiceClient) Init(ctx context.Context, int1 int64) (int64, error)
     fbthriftErr := c.ch.SendRequestResponse(ctx, "init", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return 0, fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return 0, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

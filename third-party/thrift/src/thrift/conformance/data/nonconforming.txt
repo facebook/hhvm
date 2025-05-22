@@ -16796,7 +16796,6 @@ go/ThriftRPCClientTest/StreamInitialUndeclaredException/Success.StreamInitialUnd
 go/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
 go/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 go/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
-go/ThriftRPCClientTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
 #
 # Go RPC conformance server tests
 go/ThriftRPCServerTest/SinkBasic/Success.SinkBasicTest

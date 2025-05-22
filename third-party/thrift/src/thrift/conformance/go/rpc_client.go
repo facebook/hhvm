@@ -18,10 +18,10 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"net"
+	"time"
 
 	"thrift/conformance/rpc"
 	"thrift/lib/go/thrift"
@@ -72,7 +72,11 @@ func (t *rpcClientConformanceTester) execute() {
 		glog.Fatalf("failed to get client: %v", err)
 	}
 
-	testCase, err := t.client.GetTestCase(context.Background())
+	// 60 second timeout per test-case should be plenty
+	testCaseCtx, testCaseCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer testCaseCancel()
+
+	testCase, err := t.client.GetTestCase(testCaseCtx)
 	if err != nil {
 		glog.Fatalf("failed to get test case: %v", err)
 	}
@@ -80,15 +84,15 @@ func (t *rpcClientConformanceTester) execute() {
 
 	switch {
 	case t.instruction.RequestResponseBasic != nil:
-		err = t.RequestResponseBasic()
+		err = t.RequestResponseBasic(testCaseCtx)
 	case t.instruction.RequestResponseNoArgVoidResponse != nil:
-		err = t.RequestResponseNoArgVoidResponse()
+		err = t.RequestResponseNoArgVoidResponse(testCaseCtx)
 	case t.instruction.RequestResponseDeclaredException != nil:
-		err = t.RequestResponseDeclaredException()
+		err = t.RequestResponseDeclaredException(testCaseCtx)
 	case t.instruction.RequestResponseUndeclaredException != nil:
-		err = t.RequestResponseUndeclaredException()
+		err = t.RequestResponseUndeclaredException(testCaseCtx)
 	case t.instruction.RequestResponseTimeout != nil:
-		err = t.RequestResponseTimeout()
+		err = t.RequestResponseTimeout(testCaseCtx)
 	default:
 		glog.Fatal("unsupported test case")
 	}
@@ -98,10 +102,9 @@ func (t *rpcClientConformanceTester) execute() {
 	}
 }
 
-func (t *rpcClientConformanceTester) RequestResponseBasic() error {
+func (t *rpcClientConformanceTester) RequestResponseBasic(ctx context.Context) error {
 	response, err := t.client.RequestResponseBasic(
-		context.Background(),
-		t.instruction.RequestResponseBasic.Request,
+		ctx, t.instruction.RequestResponseBasic.Request,
 	)
 	if err != nil {
 		return err
@@ -111,11 +114,11 @@ func (t *rpcClientConformanceTester) RequestResponseBasic() error {
 		SetResponse(response)
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseBasic(responseValue)
-	return t.client.SendTestResult(context.Background(), clientTestResult)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
-func (t *rpcClientConformanceTester) RequestResponseNoArgVoidResponse() error {
-	err := t.client.RequestResponseNoArgVoidResponse(context.Background())
+func (t *rpcClientConformanceTester) RequestResponseNoArgVoidResponse(ctx context.Context) error {
+	err := t.client.RequestResponseNoArgVoidResponse(ctx)
 	if err != nil {
 		return err
 	}
@@ -123,37 +126,50 @@ func (t *rpcClientConformanceTester) RequestResponseNoArgVoidResponse() error {
 	responseValue := rpc.NewRequestResponseNoArgVoidResponseClientTestResult()
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseNoArgVoidResponse(responseValue)
-	return t.client.SendTestResult(context.Background(), clientTestResult)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
-func (t *rpcClientConformanceTester) RequestResponseTimeout() error {
-	// TODO: per call timeouts are not yet supported in Go.
-	// This test case is currently marked as nonconforming.
-	return errors.New("not supported")
+func (t *rpcClientConformanceTester) RequestResponseTimeout(ctx context.Context) error {
+	timeoutMs := t.instruction.RequestResponseTimeout.GetTimeoutMs()
+	timeoutCtx, timeoutCancel := context.WithTimeout(
+		ctx, time.Duration(timeoutMs)*time.Millisecond,
+	)
+	defer timeoutCancel()
+
+	_, err := t.client.RequestResponseTimeout(
+		timeoutCtx, t.instruction.RequestResponseTimeout.Request,
+	)
+
+	// We expect to hit a timeout for this test case.
+	isTimeout := (err != nil)
+
+	responseValue := rpc.NewRequestResponseTimeoutClientTestResult().
+		SetTimeoutException(isTimeout)
+	clientTestResult := rpc.NewClientTestResult().
+		SetRequestResponseTimeout(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
-func (t *rpcClientConformanceTester) RequestResponseDeclaredException() error {
+func (t *rpcClientConformanceTester) RequestResponseDeclaredException(ctx context.Context) error {
 	err := t.client.RequestResponseDeclaredException(
-		context.Background(),
-		t.instruction.RequestResponseDeclaredException.Request,
+		ctx, t.instruction.RequestResponseDeclaredException.Request,
 	)
 
 	responseValue := rpc.NewRequestResponseDeclaredExceptionClientTestResult().
 		SetUserException(err.(*rpc.UserException))
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseDeclaredException(responseValue)
-	return t.client.SendTestResult(context.Background(), clientTestResult)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
-func (t *rpcClientConformanceTester) RequestResponseUndeclaredException() error {
+func (t *rpcClientConformanceTester) RequestResponseUndeclaredException(ctx context.Context) error {
 	err := t.client.RequestResponseUndeclaredException(
-		context.Background(),
-		t.instruction.RequestResponseUndeclaredException.Request,
+		ctx, t.instruction.RequestResponseUndeclaredException.Request,
 	)
 
 	responseValue := rpc.NewRequestResponseUndeclaredExceptionClientTestResult().
 		SetExceptionMessage(err.Error())
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseUndeclaredException(responseValue)
-	return t.client.SendTestResult(context.Background(), clientTestResult)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }

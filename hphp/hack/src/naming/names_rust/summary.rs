@@ -10,7 +10,6 @@ use hh24_types::ToplevelSymbolHash;
 use oxidized::direct_decl_parser::ParsedFileWithHashes;
 use oxidized::file_info;
 use oxidized::file_info::NameType;
-use oxidized_by_ref::direct_decl_parser::Decl;
 use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
@@ -114,27 +113,6 @@ pub struct SymbolRow {
     pub path: RelativePath,
 }
 
-impl SymbolRow {
-    /// This method walks the Decl structure to construct a hash for it
-    pub fn new(
-        path: RelativePath,
-        file_info_id: crate::FileInfoId,
-        name: &str,
-        decl: &Decl<'_>,
-        decl_hash: DeclHash,
-    ) -> Self {
-        let kind = decl.kind();
-        Self {
-            hash: ToplevelSymbolHash::new(kind, name),
-            canon_hash: ToplevelCanonSymbolHash::new(kind, name.to_owned()),
-            kind,
-            decl_hash,
-            file_info_id,
-            path,
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct SymbolRowNew {
     pub hash: ToplevelSymbolHash,
@@ -145,27 +123,4 @@ pub struct SymbolRowNew {
     pub sort_text: String,
     pub path: RelativePath,
     pub file_info_id: crate::FileInfoId,
-}
-
-impl SymbolRowNew {
-    /// This method walks the Decl structure to construct a hash for it
-    pub fn new(
-        path: RelativePath,
-        file_info_id: crate::FileInfoId,
-        name: &str,
-        decl: &Decl<'_>,
-        decl_hash: DeclHash,
-    ) -> Self {
-        let kind = decl.kind();
-        Self {
-            hash: ToplevelSymbolHash::new(kind, name),
-            canon_hash: ToplevelCanonSymbolHash::new(kind, name.to_owned()),
-            kind,
-            decl_hash,
-            name: name.to_string(),
-            sort_text: name.to_string(),
-            file_info_id,
-            path,
-        }
-    }
 }

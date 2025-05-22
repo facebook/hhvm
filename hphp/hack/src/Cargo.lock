@@ -3238,7 +3238,6 @@ dependencies = [
  "crossbeam",
  "hh24_types",
  "oxidized",
- "oxidized_by_ref",
  "rand",
  "relative_path",
  "rusqlite",

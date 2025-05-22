@@ -24,7 +24,7 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 using UriView = std::string_view;
 
@@ -74,4 +74,4 @@ class TypeIds final {
 
 std::ostream& operator<<(std::ostream&, const TypeId&);
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

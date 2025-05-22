@@ -30,7 +30,7 @@
 
 // This file is intended to be used to adapt types in type_system.thrift.
 // Do not include this file directly! Use TypeSystem.h instead.
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 // From type_system.thrift
 class FieldIdentityStruct;
@@ -66,18 +66,18 @@ class FieldIdentityWrapper final
 
 using FieldIdentity = detail::FieldIdentity;
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system
 
 template <>
-struct std::hash<apache::thrift::dynamic::FieldIdentity> {
+struct std::hash<apache::thrift::type_system::FieldIdentity> {
   std::size_t operator()(
-      const apache::thrift::dynamic::FieldIdentity&) const noexcept;
+      const apache::thrift::type_system::FieldIdentity&) const noexcept;
 };
 
 template <>
-struct fmt::formatter<apache::thrift::dynamic::FieldIdentity>
+struct fmt::formatter<apache::thrift::type_system::FieldIdentity>
     : formatter<std::string_view> {
  public:
   format_context::iterator format(
-      const apache::thrift::dynamic::FieldIdentity&, format_context&) const;
+      const apache::thrift::type_system::FieldIdentity&, format_context&) const;
 };

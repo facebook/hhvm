@@ -40,7 +40,7 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 using FieldId = type::FieldId;
 class SerializableRecord;
@@ -592,16 +592,16 @@ class SerializableRecord final {
 std::string toDebugString(const SerializableRecord&);
 std::ostream& operator<<(std::ostream&, const SerializableRecord&);
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system
 
 template <>
-struct std::hash<apache::thrift::dynamic::SerializableRecord>
-    : apache::thrift::dynamic::detail::SerializableRecordHasher {};
+struct std::hash<apache::thrift::type_system::SerializableRecord>
+    : apache::thrift::type_system::detail::SerializableRecordHasher {};
 
 template <typename T>
-struct std::hash<apache::thrift::dynamic::detail::PrimitiveDatum<T>> {
+struct std::hash<apache::thrift::type_system::detail::PrimitiveDatum<T>> {
   std::size_t operator()(
-      const apache::thrift::dynamic::detail::PrimitiveDatum<T>& primitive)
+      const apache::thrift::type_system::detail::PrimitiveDatum<T>& primitive)
       const noexcept {
     return std::hash<T>{}(primitive.datum);
   }

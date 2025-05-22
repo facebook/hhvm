@@ -29,7 +29,7 @@
 #include <utility>
 #include <vector>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 // For conciseness
 namespace {
@@ -1018,4 +1018,4 @@ TEST(TypeSystemTest, TypeResolution) {
       TypeIds::set(TypeIds::uri(kEmptyStructUri)),
       TypeIds::map(TypeIds::I32, TypeIds::uri(kEmptyEnumUri)));
 }
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

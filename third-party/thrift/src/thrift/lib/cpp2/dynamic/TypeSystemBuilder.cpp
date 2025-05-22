@@ -30,7 +30,7 @@
 #include <utility>
 #include <variant>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 namespace {
 
@@ -523,4 +523,4 @@ void TypeSystemBuilder::tryEmplace(Uri uri, SerializableTypeDefinition&& def) {
   }
 }
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

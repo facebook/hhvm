@@ -25,7 +25,7 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 class TypeSystemBuilder {
  public:
@@ -44,4 +44,4 @@ class TypeSystemBuilder {
   void tryEmplace(Uri, SerializableTypeDefinition&&);
 };
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

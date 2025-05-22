@@ -20,7 +20,7 @@
 
 #include <fmt/core.h>
 
-namespace apache::thrift::dynamic::detail {
+namespace apache::thrift::type_system::detail {
 
 std::string toTypeidName(const TypeId& type) {
   return type.visit(
@@ -79,11 +79,11 @@ std::string toTypeidName(const MapTypeId& mapType) {
       actualKind));
 }
 
-} // namespace apache::thrift::dynamic::detail
+} // namespace apache::thrift::type_system::detail
 
 fmt::format_context::iterator
-fmt::formatter<apache::thrift::dynamic::detail::TypeId>::format(
-    const apache::thrift::dynamic::detail::TypeId& typeId,
+fmt::formatter<apache::thrift::type_system::detail::TypeId>::format(
+    const apache::thrift::type_system::detail::TypeId& typeId,
     fmt::format_context& ctx) const {
   return fmt::format_to(ctx.out(), "{}", typeId.name());
 }

@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <variant>
 
-namespace apache::thrift::dynamic::detail {
+namespace apache::thrift::type_system::detail {
 
 template <typename Variant, typename T>
 struct IndexOfImpl;
@@ -46,4 +46,4 @@ struct IndexOfImpl<std::variant<Types...>, T> {
 template <typename Variant, typename T>
 inline constexpr std::size_t IndexOf = IndexOfImpl<Variant, T>::value;
 
-} // namespace apache::thrift::dynamic::detail
+} // namespace apache::thrift::type_system::detail

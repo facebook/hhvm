@@ -22,9 +22,9 @@
 
 #include <fmt/core.h>
 
-using apache::thrift::dynamic::FieldId;
-using apache::thrift::dynamic::FieldIdentity;
-using apache::thrift::dynamic::FieldName;
+using apache::thrift::type_system::FieldId;
+using apache::thrift::type_system::FieldIdentity;
+using apache::thrift::type_system::FieldName;
 
 std::size_t std::hash<FieldIdentity>::operator()(
     const FieldIdentity& identity) const noexcept {

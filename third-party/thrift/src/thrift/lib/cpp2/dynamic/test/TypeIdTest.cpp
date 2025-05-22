@@ -21,9 +21,9 @@
 
 #include <type_traits>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
-using t = apache::thrift::dynamic::TypeIds;
+using t = apache::thrift::type_system::TypeIds;
 
 static_assert(std::is_copy_constructible_v<TypeId>);
 static_assert(std::is_copy_assignable_v<TypeId>);
@@ -147,4 +147,4 @@ TEST(TypeIdTest, Names) {
       "map<i32, example.com/thrift/AnotherExample>");
 }
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

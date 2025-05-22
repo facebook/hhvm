@@ -28,7 +28,7 @@
 
 #include <ostream>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 SerializableRecord::~SerializableRecord() noexcept = default;
 
@@ -483,4 +483,4 @@ std::ostream& operator<<(std::ostream& out, const SerializableRecord& record) {
   return out << scope;
 }
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

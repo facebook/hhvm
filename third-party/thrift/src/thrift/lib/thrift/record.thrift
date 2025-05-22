@@ -16,13 +16,13 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-package "facebook.com/thrift/dynamic"
+package "facebook.com/thrift/type_system"
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
-namespace cpp2 apache.thrift.dynamic
+namespace cpp2 apache.thrift.type_system
 
 /**
  * A Thrift record is a concrete, machine-readable, description of every datum

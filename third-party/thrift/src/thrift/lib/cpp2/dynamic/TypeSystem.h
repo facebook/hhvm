@@ -42,7 +42,7 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 /**
  * Base class for structured types (structs, unions).
@@ -870,4 +870,4 @@ template <typename K, typename V>
 
 } // namespace detail
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

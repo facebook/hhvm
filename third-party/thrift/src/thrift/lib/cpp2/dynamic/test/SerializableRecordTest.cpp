@@ -22,7 +22,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 static_assert(std::is_copy_constructible_v<SerializableRecord>);
 static_assert(std::is_copy_assignable_v<SerializableRecord>);
@@ -472,4 +472,4 @@ TEST(SerializableRecordTest, InvalidDatumSerde) {
       std::invalid_argument);
 }
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

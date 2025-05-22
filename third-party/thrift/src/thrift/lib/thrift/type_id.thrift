@@ -16,19 +16,19 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-package "facebook.com/thrift/dynamic"
+package "facebook.com/thrift/type_system"
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 
 cpp_include "thrift/lib/thrift/detail/TypeIdAdapter.h"
 
-namespace cpp2 apache.thrift.dynamic
+namespace cpp2 apache.thrift.type_system
 
 @cpp.Adapter{
   underlyingName = "ListTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::ListTypeId",
-  name = "::apache::thrift::dynamic::detail::ListTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::ListTypeId",
+  name = "::apache::thrift::type_system::detail::ListTypeIdAdapter",
 }
 struct ListTypeId {
   @thrift.Box
@@ -37,8 +37,8 @@ struct ListTypeId {
 
 @cpp.Adapter{
   underlyingName = "SetTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::SetTypeId",
-  name = "::apache::thrift::dynamic::detail::SetTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::SetTypeId",
+  name = "::apache::thrift::type_system::detail::SetTypeIdAdapter",
 }
 struct SetTypeId {
   @thrift.Box
@@ -47,8 +47,8 @@ struct SetTypeId {
 
 @cpp.Adapter{
   underlyingName = "MapTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::MapTypeId",
-  name = "::apache::thrift::dynamic::detail::MapTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::MapTypeId",
+  name = "::apache::thrift::type_system::detail::MapTypeIdAdapter",
 }
 struct MapTypeId {
   @thrift.Box
@@ -64,71 +64,71 @@ typedef string Uri
 // are in a cpp_include'd file, the Thrift-generated structs are not available.
 @cpp.Adapter{
   underlyingName = "BoolTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::BoolTypeId",
-  name = "::apache::thrift::dynamic::detail::BoolTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::BoolTypeId",
+  name = "::apache::thrift::type_system::detail::BoolTypeIdAdapter",
 }
 struct BoolTypeId {}
 
 @cpp.Adapter{
   underlyingName = "ByteTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::ByteTypeId",
-  name = "::apache::thrift::dynamic::detail::ByteTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::ByteTypeId",
+  name = "::apache::thrift::type_system::detail::ByteTypeIdAdapter",
 }
 struct ByteTypeId {}
 
 @cpp.Adapter{
   underlyingName = "I16TypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::I16TypeId",
-  name = "::apache::thrift::dynamic::detail::I16TypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::I16TypeId",
+  name = "::apache::thrift::type_system::detail::I16TypeIdAdapter",
 }
 struct I16TypeId {}
 
 @cpp.Adapter{
   underlyingName = "I32TypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::I32TypeId",
-  name = "::apache::thrift::dynamic::detail::I32TypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::I32TypeId",
+  name = "::apache::thrift::type_system::detail::I32TypeIdAdapter",
 }
 struct I32TypeId {}
 
 @cpp.Adapter{
   underlyingName = "I64TypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::I64TypeId",
-  name = "::apache::thrift::dynamic::detail::I64TypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::I64TypeId",
+  name = "::apache::thrift::type_system::detail::I64TypeIdAdapter",
 }
 struct I64TypeId {}
 
 @cpp.Adapter{
   underlyingName = "FloatTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::FloatTypeId",
-  name = "::apache::thrift::dynamic::detail::FloatTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::FloatTypeId",
+  name = "::apache::thrift::type_system::detail::FloatTypeIdAdapter",
 }
 struct FloatTypeId {}
 
 @cpp.Adapter{
   underlyingName = "DoubleTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::DoubleTypeId",
-  name = "::apache::thrift::dynamic::detail::DoubleTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::DoubleTypeId",
+  name = "::apache::thrift::type_system::detail::DoubleTypeIdAdapter",
 }
 struct DoubleTypeId {}
 
 @cpp.Adapter{
   underlyingName = "StringTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::StringTypeId",
-  name = "::apache::thrift::dynamic::detail::StringTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::StringTypeId",
+  name = "::apache::thrift::type_system::detail::StringTypeIdAdapter",
 }
 struct StringTypeId {}
 
 @cpp.Adapter{
   underlyingName = "BinaryTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::BinaryTypeId",
-  name = "::apache::thrift::dynamic::detail::BinaryTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::BinaryTypeId",
+  name = "::apache::thrift::type_system::detail::BinaryTypeIdAdapter",
 }
 struct BinaryTypeId {}
 
 @cpp.Adapter{
   underlyingName = "AnyTypeIdStruct",
-  adaptedType = "::apache::thrift::dynamic::detail::AnyTypeId",
-  name = "::apache::thrift::dynamic::detail::AnyTypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::AnyTypeId",
+  name = "::apache::thrift::type_system::detail::AnyTypeIdAdapter",
 }
 struct AnyTypeId {}
 
@@ -146,8 +146,8 @@ struct AnyTypeId {}
  */
 @cpp.Adapter{
   underlyingName = "TypeIdUnion",
-  adaptedType = "::apache::thrift::dynamic::detail::TypeId",
-  name = "::apache::thrift::dynamic::detail::TypeIdAdapter",
+  adaptedType = "::apache::thrift::type_system::detail::TypeId",
+  name = "::apache::thrift::type_system::detail::TypeIdAdapter",
 }
 union TypeId {
   // Primitive types

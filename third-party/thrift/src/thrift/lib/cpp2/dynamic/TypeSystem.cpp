@@ -23,7 +23,7 @@
 #include <functional>
 #include <memory>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 StructuredNode::StructuredNode(
     Uri uri,
@@ -421,4 +421,4 @@ TypeRef TypeSystem::resolveTypeId(const TypeId& typeId) {
   return TypeIdResolver{*this}(typeId);
 }
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

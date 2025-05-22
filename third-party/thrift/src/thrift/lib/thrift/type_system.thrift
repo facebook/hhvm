@@ -16,7 +16,7 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-package "facebook.com/thrift/dynamic"
+package "facebook.com/thrift/type_system"
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/id.thrift"
@@ -26,7 +26,7 @@ include "thrift/lib/thrift/record.thrift"
 cpp_include "thrift/lib/thrift/detail/TypeSystemAdapter.h"
 cpp_include "folly/container/F14Map.h"
 
-namespace cpp2 apache.thrift.dynamic
+namespace cpp2 apache.thrift.type_system
 
 typedef id.FieldId FieldId
 typedef string FieldName
@@ -38,7 +38,7 @@ typedef string FieldName
  */
 @cpp.Adapter{
   underlyingName = "FieldIdentityStruct",
-  name = "::apache::thrift::dynamic::detail::FieldIdentityAdapter",
+  name = "::apache::thrift::type_system::detail::FieldIdentityAdapter",
 }
 struct FieldIdentity {
   1: FieldId id;

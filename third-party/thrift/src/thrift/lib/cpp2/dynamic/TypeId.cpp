@@ -20,10 +20,10 @@
 
 #include <ostream>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 std::ostream& operator<<(std::ostream& out, const TypeId& typeId) {
   return out << fmt::format("{}", typeId);
 }
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

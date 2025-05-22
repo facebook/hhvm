@@ -18,7 +18,7 @@
 
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 // Callable that converts a TypeRef (or one of its variants) into the wire-type
 // for Binary and Compact protocols (TType)
@@ -79,4 +79,4 @@ struct ToTTypeFn {
   }
 };
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system

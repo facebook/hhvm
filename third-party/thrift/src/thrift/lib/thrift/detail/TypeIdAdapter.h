@@ -34,7 +34,7 @@
 
 // This file is intended to be used to adapt types in type_id.thrift.
 // Do not include this file directly! Use TypeId.h instead.
-namespace apache::thrift::dynamic {
+namespace apache::thrift::type_system {
 
 // From type_id.thrift
 class BoolTypeIdStruct;
@@ -651,13 +651,13 @@ class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
 
 } // namespace detail
 
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::type_system
 
 template <>
-struct fmt::formatter<apache::thrift::dynamic::detail::TypeId>
+struct fmt::formatter<apache::thrift::type_system::detail::TypeId>
     : formatter<std::string_view> {
  public:
   format_context::iterator format(
-      const apache::thrift::dynamic::detail::TypeId& typeId,
+      const apache::thrift::type_system::detail::TypeId& typeId,
       format_context& ctx) const;
 };

@@ -104,100 +104,116 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.Py3Hidden",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.PyDeprecatedHidden",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "reason",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.Py3Hidden",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.Flags",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.Name",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "name",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.PyDeprecatedHidden",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "reason",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.Adapter",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "name",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "typeHint",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.Flags",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.UseCAPI",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "serialize",
-                    IsOptional: false,
-                    Type:       premadeThriftType_bool,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.Name",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "name",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.Py3EnableCppAdapter",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.Adapter",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "name",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "typeHint",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "python.MigrationBlockingAllowInheritance",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.UseCAPI",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "serialize",
+                        IsOptional: false,
+                        Type:       premadeThriftType_bool,
+                    },
+                },
             },
-        },
-    )
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.Py3EnableCppAdapter",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "python.MigrationBlockingAllowInheritance",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
     return fbthriftResults
 }()
 

@@ -172,150 +172,186 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Transitive",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Transitive",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Program",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Program",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Struct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Struct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Union",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Union",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Exception",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Exception",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Field",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Field",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Typedef",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Typedef",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Service",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Service",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Interaction",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Interaction",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Function",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Function",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.EnumValue",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.EnumValue",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Const",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Const",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Enum",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Enum",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Structured",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Structured",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Interface",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Interface",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.RootDefinition",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.RootDefinition",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.Definition",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.Definition",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "scope.DisableSchemaConst",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "scope.DisableSchemaConst",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
             },
-        },
-    )
+        )
+    }()
     return fbthriftResults
 }()
 

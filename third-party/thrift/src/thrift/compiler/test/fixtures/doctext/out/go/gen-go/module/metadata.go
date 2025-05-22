@@ -103,40 +103,44 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.A",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "useless_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.A",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "useless_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.U",
-            IsUnion: true,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "i",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "s",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.U",
+                IsUnion: true,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "i",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "s",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
     return fbthriftResults
 }()
 

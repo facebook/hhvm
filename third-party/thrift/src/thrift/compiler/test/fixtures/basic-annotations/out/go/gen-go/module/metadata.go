@@ -140,110 +140,118 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.MyStructNestedAnnotation",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "name",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.MyStructNestedAnnotation",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "name",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.MyUnion",
-            IsUnion: true,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.MyStruct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "abstract",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "major",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "annotation_with_quote",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         4,
-                    Name:       "class_",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         5,
-                    Name:       "annotation_with_trailing_comma",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         6,
-                    Name:       "empty_annotations",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         7,
-                    Name:       "my_enum",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_MyEnum,
-                },
-                &metadata.ThriftField{
-                    Id:         8,
-                    Name:       "cpp_type_annotation",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_list_string_6884,
-                },
-                &metadata.ThriftField{
-                    Id:         9,
-                    Name:       "my_union",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_MyUnion,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.MyUnion",
+                IsUnion: true,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.SecretStruct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "id",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "password",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.MyStruct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "abstract",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "major",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "annotation_with_quote",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         4,
+                        Name:       "class_",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         5,
+                        Name:       "annotation_with_trailing_comma",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         6,
+                        Name:       "empty_annotations",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         7,
+                        Name:       "my_enum",
+                        IsOptional: false,
+                        Type:       premadeThriftType_module_MyEnum,
+                    },
+                    &metadata.ThriftField{
+                        Id:         8,
+                        Name:       "cpp_type_annotation",
+                        IsOptional: false,
+                        Type:       premadeThriftType_module_list_string_6884,
+                    },
+                    &metadata.ThriftField{
+                        Id:         9,
+                        Name:       "my_union",
+                        IsOptional: false,
+                        Type:       premadeThriftType_module_MyUnion,
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.SecretStruct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "id",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "password",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                },
+            },
+        )
+    }()
     return fbthriftResults
 }()
 

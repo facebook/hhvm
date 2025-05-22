@@ -159,160 +159,188 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Name",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "name",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Name",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "name",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Copy",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.RequestContext",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Arc",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Box",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Exhaustive",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Ord",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.NewType",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Type",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "name",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Copy",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Serde",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "enabled",
-                    IsOptional: false,
-                    Type:       premadeThriftType_bool,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.RequestContext",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Mod",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "name",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Arc",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Adapter",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "name",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Box",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.Derive",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "derives",
-                    IsOptional: false,
-                    Type:       premadeThriftType_list_string,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Exhaustive",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "rust.ServiceExn",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "anyhow_to_application_exn",
-                    IsOptional: false,
-                    Type:       premadeThriftType_bool,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Ord",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.NewType",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Type",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "name",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Serde",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "enabled",
+                        IsOptional: false,
+                        Type:       premadeThriftType_bool,
+                    },
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Mod",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "name",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Adapter",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "name",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.Derive",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "derives",
+                        IsOptional: false,
+                        Type:       premadeThriftType_list_string,
+                    },
+                },
+            },
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "rust.ServiceExn",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "anyhow_to_application_exn",
+                        IsOptional: false,
+                        Type:       premadeThriftType_bool,
+                    },
+                },
+            },
+        )
+    }()
     return fbthriftResults
 }()
 

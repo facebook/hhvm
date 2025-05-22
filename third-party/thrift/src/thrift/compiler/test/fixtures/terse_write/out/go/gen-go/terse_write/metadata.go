@@ -177,432 +177,444 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "terse_write.MyStruct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "terse_write.MyUnion",
-            IsUnion: true,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "bool_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_bool,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "byte_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_byte,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "short_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         4,
-                    Name:       "int_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         5,
-                    Name:       "long_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-                &metadata.ThriftField{
-                    Id:         6,
-                    Name:       "float_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_float,
-                },
-                &metadata.ThriftField{
-                    Id:         7,
-                    Name:       "double_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_double,
-                },
-                &metadata.ThriftField{
-                    Id:         8,
-                    Name:       "string_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         9,
-                    Name:       "binary_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_binary,
-                },
-                &metadata.ThriftField{
-                    Id:         10,
-                    Name:       "enum_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyEnum,
-                },
-                &metadata.ThriftField{
-                    Id:         11,
-                    Name:       "list_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_list_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         12,
-                    Name:       "set_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_set_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         13,
-                    Name:       "map_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_map_i16_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         14,
-                    Name:       "struct_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyStruct,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "terse_write.MyStruct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "terse_write.MyStructWithCustomDefault",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "field1",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "terse_write.MyUnion",
+                IsUnion: true,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "bool_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_bool,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "byte_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_byte,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "short_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         4,
+                        Name:       "int_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         5,
+                        Name:       "long_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
+                    &metadata.ThriftField{
+                        Id:         6,
+                        Name:       "float_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_float,
+                    },
+                    &metadata.ThriftField{
+                        Id:         7,
+                        Name:       "double_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_double,
+                    },
+                    &metadata.ThriftField{
+                        Id:         8,
+                        Name:       "string_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         9,
+                        Name:       "binary_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_binary,
+                    },
+                    &metadata.ThriftField{
+                        Id:         10,
+                        Name:       "enum_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyEnum,
+                    },
+                    &metadata.ThriftField{
+                        Id:         11,
+                        Name:       "list_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_list_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         12,
+                        Name:       "set_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_set_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         13,
+                        Name:       "map_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_map_i16_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         14,
+                        Name:       "struct_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyStruct,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "terse_write.StructLevelTerseStruct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "bool_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_bool,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "byte_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_byte,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "short_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         4,
-                    Name:       "int_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         5,
-                    Name:       "long_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-                &metadata.ThriftField{
-                    Id:         6,
-                    Name:       "float_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_float,
-                },
-                &metadata.ThriftField{
-                    Id:         7,
-                    Name:       "double_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_double,
-                },
-                &metadata.ThriftField{
-                    Id:         8,
-                    Name:       "string_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         9,
-                    Name:       "binary_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_binary,
-                },
-                &metadata.ThriftField{
-                    Id:         10,
-                    Name:       "enum_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyEnum,
-                },
-                &metadata.ThriftField{
-                    Id:         11,
-                    Name:       "list_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_list_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         12,
-                    Name:       "set_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_set_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         13,
-                    Name:       "map_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_map_i16_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         14,
-                    Name:       "struct_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyStruct,
-                },
-                &metadata.ThriftField{
-                    Id:         15,
-                    Name:       "union_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyUnion,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "terse_write.MyStructWithCustomDefault",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "field1",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "terse_write.FieldLevelTerseStruct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "terse_bool_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_bool,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "terse_byte_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_byte,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "terse_short_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         4,
-                    Name:       "terse_int_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         5,
-                    Name:       "terse_long_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-                &metadata.ThriftField{
-                    Id:         6,
-                    Name:       "terse_float_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_float,
-                },
-                &metadata.ThriftField{
-                    Id:         7,
-                    Name:       "terse_double_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_double,
-                },
-                &metadata.ThriftField{
-                    Id:         8,
-                    Name:       "terse_string_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         9,
-                    Name:       "terse_binary_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_binary,
-                },
-                &metadata.ThriftField{
-                    Id:         10,
-                    Name:       "terse_enum_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyEnum,
-                },
-                &metadata.ThriftField{
-                    Id:         11,
-                    Name:       "terse_list_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_list_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         12,
-                    Name:       "terse_set_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_set_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         13,
-                    Name:       "terse_map_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_map_i16_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         14,
-                    Name:       "terse_struct_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyStruct,
-                },
-                &metadata.ThriftField{
-                    Id:         15,
-                    Name:       "bool_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_bool,
-                },
-                &metadata.ThriftField{
-                    Id:         16,
-                    Name:       "byte_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_byte,
-                },
-                &metadata.ThriftField{
-                    Id:         17,
-                    Name:       "short_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         18,
-                    Name:       "int_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         19,
-                    Name:       "long_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-                &metadata.ThriftField{
-                    Id:         20,
-                    Name:       "float_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_float,
-                },
-                &metadata.ThriftField{
-                    Id:         21,
-                    Name:       "double_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_double,
-                },
-                &metadata.ThriftField{
-                    Id:         22,
-                    Name:       "string_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         23,
-                    Name:       "binary_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_binary,
-                },
-                &metadata.ThriftField{
-                    Id:         24,
-                    Name:       "enum_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyEnum,
-                },
-                &metadata.ThriftField{
-                    Id:         25,
-                    Name:       "list_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_list_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         26,
-                    Name:       "set_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_set_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         27,
-                    Name:       "map_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_map_i16_i16,
-                },
-                &metadata.ThriftField{
-                    Id:         28,
-                    Name:       "struct_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyStruct,
-                },
-                &metadata.ThriftField{
-                    Id:         29,
-                    Name:       "terse_union_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyUnion,
-                },
-                &metadata.ThriftField{
-                    Id:         30,
-                    Name:       "union_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyUnion,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "terse_write.StructLevelTerseStruct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "bool_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_bool,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "byte_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_byte,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "short_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         4,
+                        Name:       "int_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         5,
+                        Name:       "long_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
+                    &metadata.ThriftField{
+                        Id:         6,
+                        Name:       "float_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_float,
+                    },
+                    &metadata.ThriftField{
+                        Id:         7,
+                        Name:       "double_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_double,
+                    },
+                    &metadata.ThriftField{
+                        Id:         8,
+                        Name:       "string_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         9,
+                        Name:       "binary_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_binary,
+                    },
+                    &metadata.ThriftField{
+                        Id:         10,
+                        Name:       "enum_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyEnum,
+                    },
+                    &metadata.ThriftField{
+                        Id:         11,
+                        Name:       "list_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_list_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         12,
+                        Name:       "set_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_set_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         13,
+                        Name:       "map_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_map_i16_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         14,
+                        Name:       "struct_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyStruct,
+                    },
+                    &metadata.ThriftField{
+                        Id:         15,
+                        Name:       "union_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyUnion,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "terse_write.AdaptedFields",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "field1",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyInteger,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "field2",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "field3",
-                    IsOptional: false,
-                    Type:       premadeThriftType_terse_write_MyInteger,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "terse_write.FieldLevelTerseStruct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "terse_bool_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_bool,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "terse_byte_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_byte,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "terse_short_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         4,
+                        Name:       "terse_int_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         5,
+                        Name:       "terse_long_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
+                    &metadata.ThriftField{
+                        Id:         6,
+                        Name:       "terse_float_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_float,
+                    },
+                    &metadata.ThriftField{
+                        Id:         7,
+                        Name:       "terse_double_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_double,
+                    },
+                    &metadata.ThriftField{
+                        Id:         8,
+                        Name:       "terse_string_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         9,
+                        Name:       "terse_binary_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_binary,
+                    },
+                    &metadata.ThriftField{
+                        Id:         10,
+                        Name:       "terse_enum_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyEnum,
+                    },
+                    &metadata.ThriftField{
+                        Id:         11,
+                        Name:       "terse_list_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_list_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         12,
+                        Name:       "terse_set_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_set_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         13,
+                        Name:       "terse_map_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_map_i16_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         14,
+                        Name:       "terse_struct_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyStruct,
+                    },
+                    &metadata.ThriftField{
+                        Id:         15,
+                        Name:       "bool_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_bool,
+                    },
+                    &metadata.ThriftField{
+                        Id:         16,
+                        Name:       "byte_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_byte,
+                    },
+                    &metadata.ThriftField{
+                        Id:         17,
+                        Name:       "short_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         18,
+                        Name:       "int_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         19,
+                        Name:       "long_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
+                    &metadata.ThriftField{
+                        Id:         20,
+                        Name:       "float_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_float,
+                    },
+                    &metadata.ThriftField{
+                        Id:         21,
+                        Name:       "double_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_double,
+                    },
+                    &metadata.ThriftField{
+                        Id:         22,
+                        Name:       "string_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         23,
+                        Name:       "binary_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_binary,
+                    },
+                    &metadata.ThriftField{
+                        Id:         24,
+                        Name:       "enum_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyEnum,
+                    },
+                    &metadata.ThriftField{
+                        Id:         25,
+                        Name:       "list_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_list_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         26,
+                        Name:       "set_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_set_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         27,
+                        Name:       "map_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_map_i16_i16,
+                    },
+                    &metadata.ThriftField{
+                        Id:         28,
+                        Name:       "struct_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyStruct,
+                    },
+                    &metadata.ThriftField{
+                        Id:         29,
+                        Name:       "terse_union_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyUnion,
+                    },
+                    &metadata.ThriftField{
+                        Id:         30,
+                        Name:       "union_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyUnion,
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "terse_write.AdaptedFields",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "field1",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyInteger,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "field2",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "field3",
+                        IsOptional: false,
+                        Type:       premadeThriftType_terse_write_MyInteger,
+                    },
+                },
+            },
+        )
+    }()
     return fbthriftResults
 }()
 

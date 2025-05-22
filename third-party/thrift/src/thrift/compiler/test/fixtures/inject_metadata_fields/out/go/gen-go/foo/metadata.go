@@ -42,32 +42,34 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "foo.Fields",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         100,
-                    Name:       "injected_field",
-                    IsOptional: false,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         101,
-                    Name:       "injected_structured_annotation_field",
-                    IsOptional: true,
-                    Type:       premadeThriftType_string,
-                },
-                &metadata.ThriftField{
-                    Id:         102,
-                    Name:       "injected_unstructured_annotation_field",
-                    IsOptional: true,
-                    Type:       premadeThriftType_string,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "foo.Fields",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         100,
+                        Name:       "injected_field",
+                        IsOptional: false,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         101,
+                        Name:       "injected_structured_annotation_field",
+                        IsOptional: true,
+                        Type:       premadeThriftType_string,
+                    },
+                    &metadata.ThriftField{
+                        Id:         102,
+                        Name:       "injected_unstructured_annotation_field",
+                        IsOptional: true,
+                        Type:       premadeThriftType_string,
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
     return fbthriftResults
 }()
 

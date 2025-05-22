@@ -38,32 +38,34 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.MyStruct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "MyIncludedField",
-                    IsOptional: false,
-                    Type:       includes.GetMetadataThriftType("includes.Included"),
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "MyOtherIncludedField",
-                    IsOptional: false,
-                    Type:       includes.GetMetadataThriftType("includes.Included"),
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "MyIncludedInt",
-                    IsOptional: false,
-                    Type:       includes.GetMetadataThriftType("includes.IncludedInt64"),
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.MyStruct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "MyIncludedField",
+                        IsOptional: false,
+                        Type:       includes.GetMetadataThriftType("includes.Included"),
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "MyOtherIncludedField",
+                        IsOptional: false,
+                        Type:       includes.GetMetadataThriftType("includes.Included"),
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "MyIncludedInt",
+                        IsOptional: false,
+                        Type:       includes.GetMetadataThriftType("includes.IncludedInt64"),
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
     return fbthriftResults
 }()
 

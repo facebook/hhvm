@@ -62,26 +62,28 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "includes.Included",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "MyIntField",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i64,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "MyTransitiveField",
-                    IsOptional: false,
-                    Type:       transitive.GetMetadataThriftType("transitive.Foo"),
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "includes.Included",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "MyIntField",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i64,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "MyTransitiveField",
+                        IsOptional: false,
+                        Type:       transitive.GetMetadataThriftType("transitive.Foo"),
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
     return fbthriftResults
 }()
 

@@ -50,58 +50,62 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.Foo",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "field2",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "field3",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "field1",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.Foo2",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "field2",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "field3",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "field1",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.Foo",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "field2",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "field3",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "field1",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.Foo2",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "field2",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "field3",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "field1",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                },
+            },
+        )
+    }()
     return fbthriftResults
 }()
 

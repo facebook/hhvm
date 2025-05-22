@@ -58,108 +58,114 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.TrivialStruct",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "int_value",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.TrivialStruct",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "int_value",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
                 },
             },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.StructWithNoCustomDefaultValues",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "unqualified_integer",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "optional_integer",
-                    IsOptional: true,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "required_integer",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         4,
-                    Name:       "unqualified_struct",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_TrivialStruct,
-                },
-                &metadata.ThriftField{
-                    Id:         5,
-                    Name:       "optional_struct",
-                    IsOptional: true,
-                    Type:       premadeThriftType_module_TrivialStruct,
-                },
-                &metadata.ThriftField{
-                    Id:         6,
-                    Name:       "required_struct",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_TrivialStruct,
-                },
-            },
-        },
-    )
-    fbthriftResults = append(fbthriftResults,
-        &metadata.ThriftStruct{
-            Name:    "module.StructWithCustomDefaultValues",
-            IsUnion: false,
-            Fields:  []*metadata.ThriftField{
-                &metadata.ThriftField{
-                    Id:         1,
-                    Name:       "unqualified_integer",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         2,
-                    Name:       "optional_integer",
-                    IsOptional: true,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         3,
-                    Name:       "required_integer",
-                    IsOptional: false,
-                    Type:       premadeThriftType_i32,
-                },
-                &metadata.ThriftField{
-                    Id:         4,
-                    Name:       "unqualified_struct",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_TrivialStruct,
-                },
-                &metadata.ThriftField{
-                    Id:         5,
-                    Name:       "optional_struct",
-                    IsOptional: true,
-                    Type:       premadeThriftType_module_TrivialStruct,
-                },
-                &metadata.ThriftField{
-                    Id:         6,
-                    Name:       "required_struct",
-                    IsOptional: false,
-                    Type:       premadeThriftType_module_TrivialStruct,
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.StructWithNoCustomDefaultValues",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "unqualified_integer",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "optional_integer",
+                        IsOptional: true,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "required_integer",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         4,
+                        Name:       "unqualified_struct",
+                        IsOptional: false,
+                        Type:       premadeThriftType_module_TrivialStruct,
+                    },
+                    &metadata.ThriftField{
+                        Id:         5,
+                        Name:       "optional_struct",
+                        IsOptional: true,
+                        Type:       premadeThriftType_module_TrivialStruct,
+                    },
+                    &metadata.ThriftField{
+                        Id:         6,
+                        Name:       "required_struct",
+                        IsOptional: false,
+                        Type:       premadeThriftType_module_TrivialStruct,
+                    },
                 },
             },
-        },
-    )
+        )
+    }()
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            &metadata.ThriftStruct{
+                Name:    "module.StructWithCustomDefaultValues",
+                IsUnion: false,
+                Fields:  []*metadata.ThriftField{
+                    &metadata.ThriftField{
+                        Id:         1,
+                        Name:       "unqualified_integer",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         2,
+                        Name:       "optional_integer",
+                        IsOptional: true,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         3,
+                        Name:       "required_integer",
+                        IsOptional: false,
+                        Type:       premadeThriftType_i32,
+                    },
+                    &metadata.ThriftField{
+                        Id:         4,
+                        Name:       "unqualified_struct",
+                        IsOptional: false,
+                        Type:       premadeThriftType_module_TrivialStruct,
+                    },
+                    &metadata.ThriftField{
+                        Id:         5,
+                        Name:       "optional_struct",
+                        IsOptional: true,
+                        Type:       premadeThriftType_module_TrivialStruct,
+                    },
+                    &metadata.ThriftField{
+                        Id:         6,
+                        Name:       "required_struct",
+                        IsOptional: false,
+                        Type:       premadeThriftType_module_TrivialStruct,
+                    },
+                },
+            },
+        )
+    }()
     return fbthriftResults
 }()
 

@@ -70,9 +70,11 @@ var structMetadatas = func() []*{{program:metadata_qualifier}}ThriftStruct {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
     {{#program:structs}}
     {{^struct:exception?}}
-    fbthriftResults = append(fbthriftResults,
-        {{> metadata/thrift_metadata_struct}}
-    )
+    func() {
+        fbthriftResults = append(fbthriftResults,
+            {{> metadata/thrift_metadata_struct}}
+        )
+    }()
     {{/struct:exception?}}
     {{/program:structs}}
     return fbthriftResults

@@ -49,7 +49,6 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
-#include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/async-func.h"

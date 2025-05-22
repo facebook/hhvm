@@ -91,6 +91,7 @@ class codegen_data {
   std::map<std::string, int32_t> go_package_name_collisions_ = {
       {"thrift", 0},
       {"context", 0},
+      {"errors", 0},
       {"fmt", 0},
       {"sync", 0},
       {"metadata", 0},

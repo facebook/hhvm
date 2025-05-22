@@ -8,6 +8,7 @@ package service
 
 import (
     "context"
+    "errors"
     "fmt"
     "io"
     "reflect"
@@ -22,6 +23,7 @@ var _ = module.GoUnusedProtection__
 var _ = includes.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
+var _ = errors.New
 var _ = fmt.Printf
 var _ = io.EOF
 var _ = reflect.Ptr

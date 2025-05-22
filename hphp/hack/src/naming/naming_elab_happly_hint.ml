@@ -263,30 +263,48 @@ let on_hint on_error hint ~ctx =
       (ctx, Error hint))
   | _ -> (ctx, Ok hint)
 
+(* Disallow rebinding type parameters that occur in class or method position
+   but allow names to be reused across different first-class polymorphic function
+   hints *)
+let validate_hint_tparams tparams on_error ~ctx =
+  let bound = Env.tparams ctx in
+  let _bound =
+    List.fold_left
+      tparams
+      ~init:bound
+      ~f:(fun bound Aast_defs.{ htp_name = (pos, tparam_name); _ } ->
+        match SMap.find_opt tparam_name bound with
+        | Some prev_pos ->
+          let err =
+            Naming_phase_error.naming
+              (Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name })
+          in
+          let () = on_error err in
+          bound
+        | None -> SMap.add tparam_name pos bound)
+  in
+  ()
+
+let on_expr_ on_error expr_ ~ctx =
+  let ctx =
+    match expr_ with
+    | Aast_defs.Lfun (fun_, _) ->
+      let Aast.{ f_tparams; _ } = fun_ in
+      let (_ : unit) = validate_hint_tparams f_tparams on_error ~ctx in
+      Env.extend_hint_tparams ctx f_tparams
+    | _ -> ctx
+  in
+  (ctx, Ok expr_)
+
 let on_hint_fun on_error hint_fun ~ctx =
   let Aast.{ hf_tparams; _ } = hint_fun in
-  (* Disallow rebinding type parameters that occur in class or method position
-     but allow names to be reused across different first-class polymorphic function
-     hints *)
-  let (_ : unit) =
-    let bound = Env.tparams ctx in
-    List.iter
-      hf_tparams
-      ~f:(fun Aast_defs.{ htp_name = (pos, tparam_name); _ } ->
-        Option.iter
-          ~f:(fun prev_pos ->
-            let err =
-              Naming_phase_error.naming
-                (Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name })
-            in
-            on_error err)
-          (SMap.find_opt tparam_name bound))
-  in
+  let (_ : unit) = validate_hint_tparams hf_tparams on_error ~ctx in
   let ctx = Env.extend_hint_tparams ctx hf_tparams in
   (ctx, Ok hint_fun)
 
 let pass on_error =
   let id = Aast.Pass.identity () in
+  let on_ty_expr_ expr_ ~ctx = on_expr_ on_error expr_ ~ctx in
   Naming_phase_pass.top_down
     Aast.Pass.
       {
@@ -300,4 +318,5 @@ let pass on_error =
         on_ty_tparam = Some on_tparam;
         on_ty_hint = Some (on_hint on_error);
         on_ty_hint_fun = Some (on_hint_fun on_error);
+        on_ty_expr_ = Some on_ty_expr_;
       }

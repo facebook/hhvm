@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-21], "\\traversable");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((~Traversable<num>), (Some ([3:25-41], (Happly (([3:25-36], "\\HH\\Traversable"), [([3:37-40], (Hprim Tnum))]))))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~Traversable<num>), (Some ([3:25-41], (Happly (([3:25-36], "\\HH\\Traversable"), [([3:37-40], (Hprim Tnum))]))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body = { fb_ast = [([4:3-19], (Return (Some ((keyset<(int | (arraykey & dynamic))>), [4:10-18], (ValCollection (([4:10-16], Keyset), None, []))))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-21], "__SupportDynamicType"); ua_params = [] }]; 
@@ -35,7 +35,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-27], "\\keyed_traversable");
        fd_fun =
        { f_span = [9:1-11:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None;
+         f_readonly_ret = None; f_tparams = [];
          f_ret =
          ((~KeyedTraversable<C, mixed>),
           (Some ([9:31-57],

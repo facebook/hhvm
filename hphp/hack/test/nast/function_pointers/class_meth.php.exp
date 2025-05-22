@@ -29,7 +29,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-13], "\\Foo\\Bar\\baz");
        fd_fun =
        { f_span = [9:1-15:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =

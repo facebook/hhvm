@@ -42,6 +42,32 @@ let lambda_flags (f : Nast.fun_) =
 
 let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
     Typing_defs.fun_elt =
+  let ft_tparams =
+    List.map
+      f.f_tparams
+      ~f:(fun Aast_defs.{ htp_name; htp_constraints; htp_user_attributes } ->
+        let tp_name =
+          let (pos, name) = htp_name in
+          (Pos_or_decl.of_raw_pos pos, name)
+        and tp_constraints =
+          List.map htp_constraints ~f:(fun (kind, hint) ->
+              (kind, Decl_hint.hint env hint))
+        and tp_user_attributes =
+          List.map htp_user_attributes ~f:(fun (pos, id) ->
+              let ua_name = (Pos_or_decl.of_raw_pos pos, id) in
+              Typing_defs_core.{ ua_name; ua_params = []; ua_raw_val = None })
+        in
+        Typing_defs_core.
+          {
+            tp_name;
+            tp_constraints;
+            tp_user_attributes;
+            tp_tparams = [];
+            tp_variance = Ast_defs.Invariant;
+            tp_reified = Ast_defs.Erased;
+          })
+  in
+  let ft_instantiated = List.is_empty ft_tparams in
   let params = FunUtils.make_params env f.f_params in
   let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs f.f_span
@@ -69,7 +95,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
       ( Reason.witness_from_decl fe_pos,
         Tfun
           {
-            ft_tparams = [];
+            ft_tparams;
             ft_where_constraints = [];
             ft_params = params;
             ft_implicit_params = { capability };
@@ -78,7 +104,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
             (* TODO: handle const attribute *)
             (* Lambdas cannot be cross package *)
             ft_cross_package = None;
-            ft_instantiated = true;
+            ft_instantiated;
           } )
   in
   {

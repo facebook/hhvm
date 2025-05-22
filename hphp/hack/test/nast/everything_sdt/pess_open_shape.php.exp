@@ -6,7 +6,8 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-25], "\\pess_open_shape");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:42-52], (Happly (([3:42-52], "\\HH\\supportdyn"), [([3:42-52], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
+        f_readonly_ret = None; f_tparams = [];
+        f_ret = ((), (Some ([3:42-52], (Happly (([3:42-52], "\\HH\\supportdyn"), [([3:42-52], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
         f_params =
         [{ param_annotation = ();
            param_type_hint = ((), (Some ([3:26-36], (Happly (([3:26-36], "\\HH\\supportdyn"), [([3:26-36], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));

@@ -46,7 +46,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-31], "\\wildcard_hint_is_expr");
        fd_fun =
        { f_span = [8:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([8:43-47], (Hprim Tbool))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([8:43-47], (Hprim Tbool))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([8:32-37], (Happly (([8:32-37], "\\AAAAA"), []))))); 
             param_pos = [8:38-40]; param_name = "$x"; param_info = Param_required; 

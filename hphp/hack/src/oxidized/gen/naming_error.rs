@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08104cba35e85c6a67b4582c2c8a6c81>>
+// @generated SignedSource<<14ac32c289c7ca37242ad6e182e7c124>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -421,4 +421,9 @@ pub enum NamingError {
     ToplevelStatement(pos::Pos),
     #[rust_to_ocaml(name = "Attribute_outside_allowed_files")]
     AttributeOutsideAllowedFiles(pos::Pos),
+    #[rust_to_ocaml(name = "Polymorphic_lambda_missing_return_hint")]
+    PolymorphicLambdaMissingReturnHint(pos::Pos),
+    #[rust_to_ocaml(prefix = "param_")]
+    #[rust_to_ocaml(name = "Polymorphic_lambda_missing_param_hint")]
+    PolymorphicLambdaMissingParamHint { pos: pos::Pos, name: String },
 }

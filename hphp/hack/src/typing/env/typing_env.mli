@@ -455,6 +455,10 @@ val env_with_global_tpenv : env -> TPEnv.t -> env
 
 val add_generic_parameters : env -> decl_tparam list -> env
 
+val add_generic_parameters_with_bounds : env -> locl_tparam list -> env
+
+val unbind_generic_parameters : env -> _ tparam list -> env
+
 val get_generic_parameters : env -> string list
 
 val is_generic_parameter : env -> string -> bool

@@ -128,7 +128,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\bar");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((~string), (Some ([4:17-23], (Hprim Tstring)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~string), (Some ([4:17-23], (Hprim Tstring)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((string), [5:10-17], (String "class")))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
@@ -202,7 +202,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([20:10-21], "\\class_const");
        fd_fun =
        { f_span = [20:1-104:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([20:35-39], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([20:35-39], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([20:22-29], Hdynamic))); 
             param_pos = [20:30-32]; param_name = "$x"; param_info = Param_required; 
@@ -385,7 +385,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([107:10-19], "\\class_get");
        fd_fun =
        { f_span = [107:1-128:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([107:33-37], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([107:33-37], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([107:20-27], Hdynamic))); 
             param_pos = [107:28-30]; param_name = "$x"; param_info = Param_required; 

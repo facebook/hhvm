@@ -229,6 +229,9 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
     {
       Aast.f_annotation = Env.save local_tpenv env;
       Aast.f_readonly_this = f.f_readonly_this;
+      Aast.f_tparams = [];
+      (* For function definitions the declared type parameters appear on the
+         definition rather then function - see [fd_tparams] below *)
       Aast.f_span = f.f_span;
       Aast.f_readonly_ret = f.f_readonly_ret;
       Aast.f_ret = (return_ty, ret_hint);

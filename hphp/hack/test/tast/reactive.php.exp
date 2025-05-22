@@ -9,7 +9,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\foo");
       fd_fun =
       { f_span = [2:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None;
+        f_readonly_ret = None; f_tparams = [];
         f_ret =
         ((~Pure<(function(int): ~void)>),
          (Some ([4:18-47],

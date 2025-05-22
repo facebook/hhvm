@@ -596,7 +596,7 @@ let snapshot_env env =
   let ltp = Type_parameter_env.get_tparams (Env.get_tpenv env) in
   { tpmap = SMap.union gtp ltp; nextid = Env.make_expression_id env }
 
-let escaping_from_snapshot snap env :
+let escaping_from_snapshot snap env quants :
     string list * (rigid_tvar -> elim_info option) =
   let is_global tp =
     (* Oh, that's nice... *)
@@ -625,9 +625,12 @@ let escaping_from_snapshot snap env :
            SMap.union
              (Type_parameter_env.get_tparams c.Typing_per_cont_env.tpenv))
          (Typing_lenv.get_all_locals env)
-    |> SMap.fold (fun x _ -> SMap.remove x) snap.tpmap
+    |> SMap.fold (fun key _ acc -> SMap.remove key acc) snap.tpmap
     |> SMap.filter (fun tp _ ->
            (not (is_global tp)) && not (is_old_dep_expr tp))
+  in
+  let tpmap =
+    List.fold_left quants ~init:tpmap ~f:(fun acc nm -> SMap.remove nm acc)
   in
   ( SMap.keys tpmap,
     function

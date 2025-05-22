@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-38], "\\assign_array_get_index_tuple");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:71-75], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:71-75], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = ((string, int));
            param_type_hint =

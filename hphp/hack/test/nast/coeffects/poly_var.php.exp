@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\poly");
       fd_fun =
       { f_span = [3:1-5:18]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([5:11-15], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([5:11-15], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([4:5-7], (Habstr ("T/$f", []))))); 
            param_pos = [4:5-7]; param_name = "$f"; param_info = Param_required; 

@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-30], "\\tycon_arity_darray_1");
       fd_fun =
       { f_span = [3:1-55]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:48-52], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:48-52], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-30], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };

@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-37], "\\wilcard_hint_shape_toplevel");
       fd_fun =
       { f_span = [3:1-10:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:49-53], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:49-53], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:38-43], (Happly (([3:38-43], "\\HH\\supportdyn"), [([3:38-43], Hmixed)]))))); 
            param_pos = [3:44-46]; param_name = "$x"; param_info = Param_required; 
@@ -117,7 +117,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([12:10-36], "\\wildcard_hint_shape_nested");
        fd_fun =
        { f_span = [12:1-23:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([12:48-52], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([12:48-52], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([12:37-42], (Happly (([12:37-42], "\\HH\\supportdyn"), [([12:37-42], Hmixed)]))))); 
             param_pos = [12:43-45]; param_name = "$x"; param_info = Param_required; 

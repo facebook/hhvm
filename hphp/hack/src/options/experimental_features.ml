@@ -70,6 +70,7 @@ type feature_name =
   | SimpliHack
   | PolymorphicFunctionHints
   | ProtectedInternal
+  | PolymorphicLambda
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -116,6 +117,7 @@ let feature_name_map =
       ("simpli_hack", SimpliHack);
       ("polymorphic_function_hints", PolymorphicFunctionHints);
       ("protected_internal", ProtectedInternal);
+      ("polymorphic_lambda", PolymorphicLambda);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

@@ -55,6 +55,7 @@ impl FeatureName {
             SimpliHack => Preview,
             PolymorphicFunctionHints => Preview,
             ProtectedInternal => Unstable,
+            PolymorphicLambda => Preview,
         }
     }
 

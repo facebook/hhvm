@@ -981,14 +981,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             LambdaSignature(x) => {
-                get_index(7).and_then(|index| { match index {
-                        0 => Some(&x.left_paren),
-                    1 => Some(&x.parameters),
-                    2 => Some(&x.right_paren),
-                    3 => Some(&x.contexts),
-                    4 => Some(&x.colon),
-                    5 => Some(&x.readonly_return),
-                    6 => Some(&x.type_),
+                get_index(8).and_then(|index| { match index {
+                        0 => Some(&x.type_parameters),
+                    1 => Some(&x.left_paren),
+                    2 => Some(&x.parameters),
+                    3 => Some(&x.right_paren),
+                    4 => Some(&x.contexts),
+                    5 => Some(&x.colon),
+                    6 => Some(&x.readonly_return),
+                    7 => Some(&x.type_),
                         _ => None,
                     }
                 })

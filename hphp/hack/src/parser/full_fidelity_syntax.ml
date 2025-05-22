@@ -1749,6 +1749,7 @@ module WithToken (Token : TokenType) = struct
         acc
       | LambdaSignature
           {
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -1757,6 +1758,7 @@ module WithToken (Token : TokenType) = struct
             lambda_readonly_return;
             lambda_type;
           } ->
+        let acc = f acc lambda_type_parameters in
         let acc = f acc lambda_left_paren in
         let acc = f acc lambda_parameters in
         let acc = f acc lambda_right_paren in
@@ -3584,6 +3586,7 @@ module WithToken (Token : TokenType) = struct
         ]
       | LambdaSignature
           {
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -3593,6 +3596,7 @@ module WithToken (Token : TokenType) = struct
             lambda_type;
           } ->
         [
+          lambda_type_parameters;
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
@@ -5370,6 +5374,7 @@ module WithToken (Token : TokenType) = struct
         ]
       | LambdaSignature
           {
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -5379,6 +5384,7 @@ module WithToken (Token : TokenType) = struct
             lambda_type;
           } ->
         [
+          "lambda_type_parameters";
           "lambda_left_paren";
           "lambda_parameters";
           "lambda_right_paren";
@@ -7335,6 +7341,7 @@ module WithToken (Token : TokenType) = struct
           }
       | ( SyntaxKind.LambdaSignature,
           [
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -7345,6 +7352,7 @@ module WithToken (Token : TokenType) = struct
           ] ) ->
         LambdaSignature
           {
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -9642,6 +9650,7 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_lambda_signature
+          lambda_type_parameters
           lambda_left_paren
           lambda_parameters
           lambda_right_paren
@@ -9652,6 +9661,7 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           LambdaSignature
             {
+              lambda_type_parameters;
               lambda_left_paren;
               lambda_parameters;
               lambda_right_paren;
@@ -11000,6 +11010,7 @@ module WithToken (Token : TokenType) = struct
 
       let from_lambda_signature
           {
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -11010,6 +11021,7 @@ module WithToken (Token : TokenType) = struct
           } =
         LambdaSignature
           {
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -11173,6 +11185,7 @@ module WithToken (Token : TokenType) = struct
         match x with
         | LambdaSignature
             {
+              lambda_type_parameters;
               lambda_left_paren;
               lambda_parameters;
               lambda_right_paren;
@@ -11182,6 +11195,7 @@ module WithToken (Token : TokenType) = struct
               lambda_type;
             } ->
           {
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;

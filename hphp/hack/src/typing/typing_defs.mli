@@ -209,6 +209,7 @@ type expand_env = {
       (** Localize internal classes outside their module as if newtypes i.e. opaque *)
   visibility_behavior: visibility_behavior;
   substs: locl_ty SMap.t;
+  no_substs: SSet.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
   wildcard_action: wildcard_action;

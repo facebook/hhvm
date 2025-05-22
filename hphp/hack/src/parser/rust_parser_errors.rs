@@ -5649,6 +5649,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.lval_errors(node);
 
         match &node.children {
+            LambdaSignature(c) if !c.type_parameters.is_missing() => {
+                self.check_can_use_feature(node, &FeatureName::PolymorphicLambda)
+            }
             // todo: lambda
             LambdaExpression(_) | AwaitableCreationExpression(_) | AnonymousFunction(_) => {
                 self.lambda(node)

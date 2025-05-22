@@ -36,7 +36,7 @@
        fd_mode = Mstrict; fd_name = ([6:10-31], "\\like_hint_upcast_expr");
        fd_fun =
        { f_span = [6:1-8:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([6:43-47], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([6:43-47], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([6:32-37], (Happly (([6:32-37], "\\HH\\supportdyn"), [([6:32-37], Hmixed)]))))); 
             param_pos = [6:38-40]; param_name = "$x"; param_info = Param_required; 

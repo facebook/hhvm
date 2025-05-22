@@ -347,7 +347,7 @@
        fd_mode = Mstrict; fd_name = ([20:10-12], "\\ff");
        fd_fun =
        { f_span = [19:1-20:60]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint)))); 
             param_pos = [20:48-50]; param_name = "$i"; param_info = Param_required; 

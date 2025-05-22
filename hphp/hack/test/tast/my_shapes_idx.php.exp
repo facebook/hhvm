@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-16], "\\my_idx");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((~?Tv), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~?Tv), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
         f_params =
         [{ param_annotation = (shape(?'a' => Tv));
            param_type_hint =
@@ -35,7 +35,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-16], "\\testit");
        fd_fun =
        { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([8:41-45], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([8:41-45], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (shape(?'a' => ?int));
             param_type_hint =
@@ -76,7 +76,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-16], "\\my_idx");
        fd_fun =
        { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((dynamic), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
          f_params =
          [{ param_annotation = (dynamic);
             param_type_hint =
@@ -105,7 +105,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-16], "\\testit");
        fd_fun =
        { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((dynamic), (Some ([8:41-45], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([8:41-45], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic);
             param_type_hint =

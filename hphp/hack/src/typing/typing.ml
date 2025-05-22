@@ -9517,7 +9517,17 @@ end = struct
               used_ids
               (fun env ->
                 let (env, res) = f env in
-                let escaping = Typing_escape.escaping_from_snapshot snap env in
+                let quants =
+                  List.map
+                    ft.ft_tparams
+                    ~f:(fun Typing_defs_core.{ tp_name = (_, id); _ } -> id)
+                in
+                (* Any quantifiers in the function type won't appear in the
+                   snapshot so we have to ensure they aren't mistaken for
+                   escaping rigid tyvars *)
+                let escaping =
+                  Typing_escape.escaping_from_snapshot snap env quants
+                in
                 (env, (escaping, res))))
       in
       (* After the body of the function is checked, erase all the type parameters
@@ -9532,7 +9542,6 @@ end = struct
       (env, (te, { ft with ft_ret = ret_ty }, support_dynamic_type))
     in
     type_closure @@ fun env ->
-    let nb = f.f_body in
     (* Extract capabilities from AAST and add them to the environment *)
     let (env, capability) =
       match (f.f_ctxs, f.f_unsafe_ctxs) with
@@ -9647,10 +9656,36 @@ end = struct
                         fp.fp_type;
                   }
                 | _ -> fp);
+          ft_tparams =
+            List.map ft.ft_tparams ~f:(fun tparam ->
+                let Typing_defs_core.
+                      { tp_name = (pos, _); tp_user_attributes; _ } =
+                  tparam
+                in
+                if
+                  List.exists
+                    tp_user_attributes
+                    ~f:(fun { ua_name = (_, name); _ } ->
+                      String.equal
+                        name
+                        Naming_special_names.UserAttributes.uaNoAutoBound)
+                then
+                  tparam
+                else
+                  let reason = Typing_reason.witness_from_decl pos in
+                  {
+                    tparam with
+                    tp_constraints =
+                      ( Ast_defs.Constraint_as,
+                        Typing_make_type.supportdyn_mixed reason )
+                      :: tparam.tp_constraints;
+                  });
         }
       else
         ft
     in
+    (* Bind any quantifiers in the function type; these are unbound after typing the body *)
+    let env = Env.add_generic_parameters_with_bounds env ft.ft_tparams in
     let env = Env.clear_params env in
     let non_variadic_ft_params =
       if get_ft_variadic ft then
@@ -9765,7 +9800,7 @@ end = struct
       Env.unset_local env (Local_id.make_unscoped SN.SpecialIdents.dollardollar)
     in
     let sound_dynamic_check_saved_env = env in
-    let (env, tb) = Stmt.block env nb.fb_ast in
+    let (env, tb) = Stmt.block env f.f_body.fb_ast in
     let has_implicit_return = LEnv.has_next env in
     let env =
       if not has_implicit_return then
@@ -9822,6 +9857,7 @@ end = struct
       {
         Aast.f_annotation = Env.save local_tpenv env;
         Aast.f_readonly_this = f.f_readonly_this;
+        Aast.f_tparams = f.f_tparams;
         Aast.f_span = f.f_span;
         Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
         Aast.f_readonly_ret = f.f_readonly_ret;
@@ -9857,6 +9893,8 @@ end = struct
           Aast.Lfun (tfun_, used_ids_ty))
     in
     let env = Env.set_tyvar_variance env ty in
+    (* Finally unbind any quantifers *)
+    let env = Env.unbind_generic_parameters env ft.ft_tparams in
     (env, (te, ft, support_dynamic_type))
 
   let lambda
@@ -9891,8 +9929,21 @@ end = struct
       empty_expand_env_with_on_error
         (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
     in
+    (* If this is a polymorphic lambda we don't want to substitute any type parameter
+       bound in the lambda signature *)
+    let no_substs =
+      if not declared_decl_ft.ft_instantiated then
+        SSet.of_list
+          (List.map
+             declared_decl_ft.ft_tparams
+             ~f:(fun { tp_name = (_, nm); _ } -> nm))
+      else
+        SSet.empty
+    in
     (* For Twildcard types, generate fresh type variables *)
-    let ety_env = { ety_env with wildcard_action = Wildcard_fresh_tyvar } in
+    let ety_env =
+      { ety_env with wildcard_action = Wildcard_fresh_tyvar; no_substs }
+    in
     let ((env, ty_err_opt), declared_ft) =
       Phase.(
         localize_ft

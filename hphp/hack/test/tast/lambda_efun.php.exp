@@ -8,7 +8,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([12:10-13], "\\foo");
       fd_fun =
       { f_span = [12:1-25:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -20,7 +20,8 @@ Errors:
                     (((function(int $z): ~int)), [15:8-22],
                      (Lfun (
                         { f_span = [15:8-22]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((~int), None);
+                          f_annotation = (); f_readonly_ret = None; f_tparams = []; 
+                          f_ret = ((~int), None);
                           f_params =
                           [{ param_annotation = (int); param_type_hint = ((int), None); 
                              param_pos = [15:8-10]; param_name = "$z"; 
@@ -54,7 +55,7 @@ Errors:
                         { ef_fun =
                           { f_span = [18:8-20:4]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((~int), None);
+                            f_tparams = []; f_ret = ((~int), None);
                             f_params =
                             [{ param_annotation = (int); param_type_hint = ((int), None); 
                                param_pos = [18:17-19]; param_name = "$z"; 
@@ -87,7 +88,8 @@ Errors:
                     (((function(int $a, int $b): int)), [23:8-28],
                      (Lfun (
                         { f_span = [23:8-28]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None);
+                          f_annotation = (); f_readonly_ret = None; f_tparams = []; 
+                          f_ret = ((int), None);
                           f_params =
                           [{ param_annotation = (int); param_type_hint = ((int), None); 
                              param_pos = [23:9-11]; param_name = "$a"; 

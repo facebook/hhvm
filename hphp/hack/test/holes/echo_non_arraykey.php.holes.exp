@@ -13,7 +13,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-27], "\\echo_non_arraykey");
       fd_fun =
       { f_span = [3:1-8:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:49-53], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:49-53], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:28-33], (Happly (([3:28-33], "\\HH\\supportdyn"), [([3:28-33], Hmixed)]))))); 
            param_pos = [3:34-36]; param_name = "$x"; param_info = Param_required; 

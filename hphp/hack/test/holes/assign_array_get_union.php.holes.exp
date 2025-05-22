@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-32], "\\assign_array_get_union");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:76-80], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:76-80], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = ((int | string)); param_type_hint = (((int | string)), (Some ([3:33-45], (Hunion [([3:34-37], (Hprim Tint)); ([3:38-44], (Hprim Tstring))])))); 
            param_pos = [3:46-48]; param_name = "$x"; param_info = Param_required; 

@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:17-21], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:17-21], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -45,7 +45,7 @@
                                                    f_readonly_this = None; 
                                                    f_annotation = (); 
                                                    f_readonly_ret = None; 
-                                                   f_ret = ((), None); 
+                                                   f_tparams = []; f_ret = ((), None); 
                                                    f_params = []; f_ctxs = (Some ([4:19-58], [([4:19-58], (Happly (([4:19-58], "\\HH\\Contexts\\defaults"), [])))])); 
                                                    f_unsafe_ctxs = None;
                                                    f_body =
@@ -88,7 +88,7 @@
                                      (Lfun (
                                         { f_span = [4:19-58]; f_readonly_this = None; 
                                           f_annotation = (); f_readonly_ret = None; 
-                                          f_ret = ((), None);
+                                          f_tparams = []; f_ret = ((), None);
                                           f_params =
                                           [{ param_annotation = (); param_type_hint = ((), (Some ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), []))))); 
                                              param_pos = [4:8-18]; param_name = "$0v"; 

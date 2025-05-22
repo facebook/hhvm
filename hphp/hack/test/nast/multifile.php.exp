@@ -21,7 +21,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([2:10-13], "\\foo");
       fd_fun =
       { f_span = [2:1-24]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([2:17-21], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([2:17-21], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:10-13], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };

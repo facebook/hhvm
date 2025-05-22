@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e56692cb13a3e0f306d4d890505409f>>
+// @generated SignedSource<<f815b4e42c9d58d3a4e55c597efd9077>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1313,6 +1313,7 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::En> {
         self.readonly_this.accept(c, v)?;
         v.visit_en(c, &self.annotation)?;
         self.readonly_ret.accept(c, v)?;
+        self.tparams.accept(c, v)?;
         self.ret.accept(c, v)?;
         self.params.accept(c, v)?;
         self.ctxs.accept(c, v)?;

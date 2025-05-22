@@ -297,6 +297,7 @@ type expand_env = {
       (** Localize internal classes outside their module as if newtypes i.e. opaque *)
   visibility_behavior: visibility_behavior;
   substs: locl_ty SMap.t;
+  no_substs: SSet.t;
   this_ty: locl_ty;
       (** The type that is substituted for `this` in signatures. It should be
        * set to an expression dependent type if appropriate
@@ -315,6 +316,7 @@ let empty_expand_env =
     visibility_behavior = default_visibility_behaviour;
     make_internal_opaque = true;
     substs = SMap.empty;
+    no_substs = SSet.empty;
     this_ty = mk (Reason.none, Tgeneric Naming_special_names.Typehints.this);
     on_error = None;
     wildcard_action = Wildcard_fresh_tyvar;

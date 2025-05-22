@@ -377,6 +377,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     let ty = Tvec_or_dict (tk, tv) in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt, cycles1 @ cycles2), mk (r, ty))
+  | Tgeneric nm when SSet.mem nm ety_env.no_substs ->
+    (* For polymorphic lambda we want to retain generics bound in the lambda signature *)
+    ((env, None, []), mk (r, Tgeneric nm))
   | Tgeneric x ->
     let localize_tgeneric ?replace_with name r =
       match (replace_with, Env.get_pos_and_kind_of_generic env name) with

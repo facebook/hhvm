@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
       { f_span = [3:1-10:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:23-27], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:23-27], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:12-17], (Happly (([3:12-17], "\\HH\\supportdyn"), [([3:12-17], Hmixed)]))))); 
            param_pos = [3:18-20]; param_name = "$v"; param_info = Param_required; 

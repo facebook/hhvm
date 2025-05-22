@@ -467,6 +467,16 @@ let add_lower_bound ?union env name ty =
 let add_generic_parameters env tparaml =
   env_with_tpenv env (TPEnv.add_generic_parameters (get_tpenv env) tparaml)
 
+(* Add type parameters to environment with their bounds.
+ * Existing type parameters with the same name will be overridden. *)
+let add_generic_parameters_with_bounds env tparams =
+  env_with_tpenv
+    env
+    (TPEnv.add_generic_parameters_with_bounds (get_tpenv env) tparams)
+
+let unbind_generic_parameters env tparams =
+  env_with_tpenv env (TPEnv.unbind_generic_parameters (get_tpenv env) tparams)
+
 let is_generic_parameter env name =
   TPEnv.mem name (get_tpenv env) || SSet.mem name env.fresh_typarams
 
@@ -1997,6 +2007,7 @@ module Log = struct
         make_internal_opaque;
         visibility_behavior;
         substs = _;
+        no_substs = _;
         this_ty;
         on_error = _;
         wildcard_action = _;

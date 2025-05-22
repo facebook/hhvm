@@ -50,7 +50,7 @@
        fd_mode = Mstrict; fd_name = ([9:10-18], "\\dropped1");
        fd_fun =
        { f_span = [9:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([9:77-81], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([9:77-81], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (((nonnull & dynamic) | I));
             param_type_hint =
@@ -123,7 +123,7 @@
        fd_mode = Mstrict; fd_name = ([9:10-18], "\\dropped1");
        fd_fun =
        { f_span = [9:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((dynamic), (Some ([9:77-81], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([9:77-81], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic);
             param_type_hint =

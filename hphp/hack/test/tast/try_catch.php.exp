@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([11:10-21], "\\might_throw");
       fd_fun =
       { f_span = [11:1-32]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([11:25-29], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([11:25-29], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-21], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false;
@@ -24,7 +24,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([13:10-40], "\\terminal_catch_can_do_whatever");
        fd_fun =
        { f_span = [13:1-31:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((~int), (Some ([13:44-47], (Hprim Tint)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((~int), (Some ([13:44-47], (Hprim Tint)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =

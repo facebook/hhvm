@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ddc776cec14040805c51753e5314699a>>
+// @generated SignedSource<<c511659a3dd0c39e324ca4b5f83ad14c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1868,6 +1868,8 @@ pub struct Fun_<'a, Ex, En> {
     /// Whether the return value is readonly
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub tparams: &'a [&'a HintTparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub ret: &'a TypeHint<'a, Ex>,

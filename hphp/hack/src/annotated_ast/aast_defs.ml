@@ -850,6 +850,7 @@ and ('ex, 'en) fun_ = {
   f_annotation: 'en;
   f_readonly_ret: Ast_defs.readonly_kind option; [@transform.opaque]
       (** Whether the return value is readonly *)
+  f_tparams: hint_tparam list;
   f_ret: 'ex type_hint; [@transform.explicit]
   f_params: ('ex, 'en) fun_param list;
   f_ctxs: contexts option;

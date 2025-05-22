@@ -430,8 +430,8 @@ impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         <Self as FlattenSmartConstructors>::make_lambda_expression(self, attribute_spec, async_, signature, arrow, body)
     }
 
-    fn make_lambda_signature(&mut self, left_paren: Self::Output, parameters: Self::Output, right_paren: Self::Output, contexts: Self::Output, colon: Self::Output, readonly_return: Self::Output, type_: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_lambda_signature(self, left_paren, parameters, right_paren, contexts, colon, readonly_return, type_)
+    fn make_lambda_signature(&mut self, type_parameters: Self::Output, left_paren: Self::Output, parameters: Self::Output, right_paren: Self::Output, contexts: Self::Output, colon: Self::Output, readonly_return: Self::Output, type_: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_lambda_signature(self, type_parameters, left_paren, parameters, right_paren, contexts, colon, readonly_return, type_)
     }
 
     fn make_cast_expression(&mut self, left_paren: Self::Output, type_: Self::Output, right_paren: Self::Output, operand: Self::Output) -> Self::Output {

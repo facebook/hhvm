@@ -1379,6 +1379,7 @@
       "description" : "lambda_signature",
       "prefix" : "lambda",
       "fields" : [
+        { "field_name" : "type_parameters" },
         { "field_name" : "left_paren" },
         { "field_name" : "parameters" },
         { "field_name" : "right_paren" },

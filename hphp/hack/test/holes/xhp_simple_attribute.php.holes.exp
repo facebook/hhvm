@@ -95,7 +95,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([14:12-32], "\\XhpSimple\\xhp_simple_attribute");
        fd_fun =
        { f_span = [14:3-17:4]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([14:48-52], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([14:48-52], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([14:33-39], (Hprim Tstring)))); 
             param_pos = [14:40-45]; param_name = "$prop"; param_info = Param_required; 

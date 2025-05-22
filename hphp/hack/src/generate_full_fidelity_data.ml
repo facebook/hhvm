@@ -1133,8 +1133,6 @@ module GenerateFFRustPositionedSmartConstructors = struct
   let positioned_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-
-
 use parser_core_types::{
     syntax::*,
     lexable_token::LexableToken,
@@ -1704,7 +1702,6 @@ module GenerateRustPairSmartConstructors = struct
   let pair_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-
 use parser_core_types::token_factory::TokenFactory;
 use smart_constructors::{NodeType, SmartConstructors};
 
@@ -1866,8 +1863,7 @@ module GenerateFFRustSmartConstructorsWrappers = struct
  // This module contains smart constructors implementation that can be used to
  // build AST.
 "
-    ^ "
-use parser_core_types::{
+    ^ "use parser_core_types::{
   lexable_token::LexableToken,
   syntax_kind::SyntaxKind,
   token_factory::TokenFactory,

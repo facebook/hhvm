@@ -45,8 +45,8 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([6:10-11], "\\f");
        fd_fun =
        { f_span = [6:1-57]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), None); f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), None); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([6:10-11], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
@@ -65,8 +65,8 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\g");
        fd_fun =
        { f_span = [7:1-55]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), None); f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), None); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
@@ -87,8 +87,8 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-11], "\\h");
        fd_fun =
        { f_span = [8:1-24]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), None); f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), None); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-11], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
@@ -106,8 +106,8 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-11], "\\j");
        fd_fun =
        { f_span = [9:1-37]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), None); f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), None); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-11], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
@@ -125,8 +125,8 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([11:10-12], "\\ff");
        fd_fun =
        { f_span = [11:1-29]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), None); f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), None); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-12], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;

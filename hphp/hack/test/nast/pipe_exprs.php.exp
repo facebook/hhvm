@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-22], "\\takes_an_int");
       fd_fun =
       { f_span = [3:1-41]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:34-38], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:34-38], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:23-26], (Hprim Tint)))); 
            param_pos = [3:27-31]; param_name = "$int"; param_info = Param_required; 
@@ -26,7 +26,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-25], "\\pipe_param_call");
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([5:35-39], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([5:35-39], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([5:26-29], (Hprim Tint)))); 
             param_pos = [5:30-32]; param_name = "$x"; param_info = Param_required; 
@@ -57,7 +57,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-25], "\\pipe_local_call");
        fd_fun =
        { f_span = [9:1-12:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([9:29-33], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([9:29-33], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -104,7 +104,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([18:10-22], "\\pipe_taccess");
        fd_fun =
        { f_span = [18:1-21:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([18:26-30], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([18:26-30], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -129,7 +129,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([23:10-27], "\\pipe_taccess_call");
        fd_fun =
        { f_span = [23:1-25:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([23:31-35], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([23:31-35], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =

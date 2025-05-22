@@ -9,7 +9,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:16-31], "\\gen_empty_shape");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None;
+        f_readonly_ret = None; f_tparams = [];
         f_ret = ((Awaitable<~shape()>), (Some ([4:35-53], (Happly (([4:35-44], "\\HH\\Awaitable"), [([4:45-52], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [] }))])))));
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((shape()), [5:10-17], (Shape [])))))] }; 
         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([4:16-31], "__SupportDynamicType"); ua_params = [] }]; 
@@ -24,7 +24,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:16-20], "\\test");
        fd_fun =
        { f_span = [8:1-16:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<~void>), (Some ([8:24-39], (Happly (([8:24-33], "\\HH\\Awaitable"), [([8:34-38], (Hprim Tvoid))]))))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((Awaitable<~void>), (Some ([8:24-39], (Happly (([8:24-33], "\\HH\\Awaitable"), [([8:34-38], (Hprim Tvoid))]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =

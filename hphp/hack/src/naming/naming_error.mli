@@ -296,5 +296,10 @@ type t =
     }
   | Toplevel_statement of Pos.t
   | Attribute_outside_allowed_files of Pos.t
+  | Polymorphic_lambda_missing_return_hint of Pos.t
+  | Polymorphic_lambda_missing_param_hint of {
+      param_pos: Pos.t;
+      param_name: string;
+    }
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

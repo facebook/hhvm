@@ -350,6 +350,29 @@ where
         }
     }
 
+    // Used in conjunction with the following function. If you call next_token
+    // when the parser is at the <<<, it will scan the entire file looking for an
+    // ending to the heredoc, which could quickly get bad if there are many such
+    // declarations in a file.
+    fn peek_next_partial_token_is_triple_left_angle(&self) -> bool {
+        let mut lexer = self.lexer().clone();
+        lexer.scan_leading_php_trivia();
+        let tparam_open = lexer.peek_char(0);
+        let attr1 = lexer.peek_char(1);
+        let attr2 = lexer.peek_char(2);
+        tparam_open == '<' && attr1 == '<' && attr2 == '<'
+    }
+
+    // Type parameter/argument lists begin with < and can have attributes immediately
+    // afterwards, so this peeks a token kind at the beginning of such a list. *)
+    fn peek_token_kind_with_possible_attributized_type_list(&self) -> TokenKind {
+        if self.peek_next_partial_token_is_triple_left_angle() {
+            TokenKind::LessThan
+        } else {
+            self.peek_token_kind()
+        }
+    }
+
     fn parse_term(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
@@ -419,7 +442,17 @@ where
             TokenKind::Keyset => self.parse_keyset_intrinsic_expression(),
             TokenKind::Tuple => self.parse_tuple_expression(),
             TokenKind::Shape => self.parse_shape_expression(),
-            TokenKind::Function => self.parse_function(),
+            TokenKind::Function => {
+                let tokenkind = parser1.peek_token_kind_with_possible_attributized_type_list();
+                match tokenkind {
+                    TokenKind::LessThan => {
+                        let pos = self.pos();
+                        let attribute_spec = self.sc_mut().make_missing(pos);
+                        self.parse_lambda_expression(attribute_spec)
+                    }
+                    _ => self.parse_function(),
+                }
+            }
             TokenKind::DollarDollar => {
                 self.continue_from(parser1);
                 self.parse_dollar_dollar(token)
@@ -1918,6 +1951,16 @@ where
         (async_, signature)
     }
 
+    fn parse_lambda_signature_type_parameter_list_opt(&mut self) -> S::Output {
+        let quant_token = self.optional_token(TokenKind::Function);
+
+        if quant_token.is_missing() {
+            quant_token
+        } else {
+            self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_generic_type_parameter_list())
+        }
+    }
+
     fn parse_lambda_signature(&mut self) -> S::Output {
         // SPEC:
         // lambda-function-signature:
@@ -1928,10 +1971,12 @@ where
             let token = self.next_token();
             self.sc_mut().make_token(token)
         } else {
+            let typarams = self.parse_lambda_signature_type_parameter_list_opt();
             let (left, params, right) = self.parse_parameter_list_opt();
             let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
             let (colon, readonly_opt, return_type) = self.parse_optional_return();
             self.sc_mut().make_lambda_signature(
+                typarams,
                 left,
                 params,
                 right,
@@ -2571,7 +2616,17 @@ where
         let mut parser2 = self.clone();
         let _ = parser2.optional_token(TokenKind::Async);
         match parser2.peek_token_kind() {
-            TokenKind::Function => self.parse_anon(attribute_spec),
+            TokenKind::Function => {
+                let token = parser2.next_xhp_class_name_or_other_token();
+                match token.kind() {
+                    TokenKind::LessThan => {
+                        let pos = self.pos();
+                        let attribute_spec = self.sc_mut().make_missing(pos);
+                        self.parse_lambda_expression(attribute_spec)
+                    }
+                    _ => self.parse_anon(attribute_spec),
+                }
+            }
             TokenKind::LeftBrace => self.parse_async_block(attribute_spec),
             TokenKind::Variable | TokenKind::LeftParen => {
                 self.parse_lambda_expression(attribute_spec)

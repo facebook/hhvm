@@ -20,7 +20,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-19], "\\get_A_opt");
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((~?A), (Some ([5:23-25], (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((~?A), (Some ([5:23-25], (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([6:3-18], (Return (Some ((exact A), [6:10-17], (New (((exact A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, ((function(): void))))))))] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-19], "__SupportDynamicType"); ua_params = [] }]; 
@@ -35,7 +35,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-16], "\\fwhile");
        fd_fun =
        { f_span = [9:1-14:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([9:20-24], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([9:20-24], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -66,7 +66,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([16:10-14], "\\ffor");
        fd_fun =
        { f_span = [16:1-19:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =

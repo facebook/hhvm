@@ -112,6 +112,12 @@ val add_lower_bound :
     Existing type parameters with the same name will be overridden. *)
 val add_generic_parameters : t -> Typing_defs.decl_tparam list -> t
 
+(** Add type parameters to environment with their bounds.
+    Existing type parameters with the same name will be overridden. *)
+val add_generic_parameters_with_bounds : t -> Typing_defs.locl_tparam list -> t
+
+val unbind_generic_parameters : t -> _ Typing_defs.tparam list -> t
+
 val remove : t -> tparam_name -> t
 
 val get_parameter_names : tparam_info -> tparam_name list

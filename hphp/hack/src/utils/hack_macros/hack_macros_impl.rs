@@ -1554,6 +1554,7 @@ mod tests {
                                     readonly_this: None,
                                     annotation: (),
                                     readonly_ret: None,
+                                    tparams: vec![],
                                     ret: TypeHint((), None),
                                     params: vec![],
                                     ctxs: None,

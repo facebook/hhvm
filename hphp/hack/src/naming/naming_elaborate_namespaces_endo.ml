@@ -389,6 +389,17 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | ExpressionTree et ->
         let et_class = elaborate_type_name env et.et_class in
         super#on_expr_ env (ExpressionTree { et with et_class })
+      | Lfun (fun_, _capture_lids) ->
+        let env =
+          let type_params =
+            List.fold_left
+              fun_.f_tparams
+              ~f:(fun acc { htp_name = (_, nm); _ } -> SSet.add nm acc)
+              ~init:env.type_params
+          in
+          { env with type_params }
+        in
+        super#on_expr_ env expr
       | _ -> super#on_expr_ env expr
 
     method! on_hint_ env h =

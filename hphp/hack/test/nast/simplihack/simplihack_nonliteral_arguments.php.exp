@@ -14,7 +14,7 @@
       fd_mode = Mstrict; fd_name = ([4:10-12], "\\id");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([4:23-24], (Habstr ("T", [])))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([4:23-24], (Habstr ("T", [])))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([4:16-17], (Habstr ("T", []))))); 
            param_pos = [4:18-20]; param_name = "$x"; param_info = Param_required; 
@@ -47,7 +47,7 @@
        fd_mode = Mstrict; fd_name = ([11:10-11], "\\f");
        fd_fun =
        { f_span = [8:1-11:28]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([11:21-26], (Happly (([11:21-26], "\\HH\\supportdyn"), [([11:21-26], Hmixed)])))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([11:21-26], (Happly (([11:21-26], "\\HH\\supportdyn"), [([11:21-26], Hmixed)])))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([11:12-15], (Hprim Tint)))); 
             param_pos = [11:16-18]; param_name = "$i"; param_info = Param_required; 
@@ -64,8 +64,9 @@
                ((), [8:24-10:2],
                 (Lfun (
                    { f_span = [8:24-10:2]; f_readonly_this = None; f_annotation = (); 
-                     f_readonly_ret = None; f_ret = ((), None); f_params = []; 
-                     f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([9:3-16], (Return (Some ((), [9:10-15], (String "foo")))))] }; 
+                     f_readonly_ret = None; f_tparams = []; f_ret = ((), None); 
+                     f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+                     f_body = { fb_ast = [([9:3-16], (Return (Some ((), [9:10-15], (String "foo")))))] }; 
                      f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
                      f_doc_comment = None },
                    [])))

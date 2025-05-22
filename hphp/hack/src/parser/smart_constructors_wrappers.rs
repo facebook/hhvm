@@ -18,7 +18,6 @@
  */
  // This module contains smart constructors implementation that can be used to
  // build AST.
-
 use parser_core_types::{
   lexable_token::LexableToken,
   syntax_kind::SyntaxKind,
@@ -347,8 +346,8 @@ where S: SmartConstructors<State = St>,
     fn make_lambda_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::LambdaExpression, self.s.make_lambda_expression(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
-    fn make_lambda_signature(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::LambdaSignature, self.s.make_lambda_signature(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))
+    fn make_lambda_signature(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::LambdaSignature, self.s.make_lambda_signature(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1))
     }
     fn make_cast_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
         compose(SyntaxKind::CastExpression, self.s.make_cast_expression(arg0.1, arg1.1, arg2.1, arg3.1))

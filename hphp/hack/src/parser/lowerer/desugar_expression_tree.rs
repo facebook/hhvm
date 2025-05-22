@@ -330,6 +330,7 @@ fn wrap_fun_(
         readonly_this: None,
         annotation: (),
         readonly_ret: None,
+        tparams: vec![],
         ret: ast::TypeHint((), None),
         params,
         body,
@@ -1307,6 +1308,7 @@ impl RewriteState {
                     aast::Fun_ {
                         // Allow a plain function that isn't async.
                         fun_kind: ast::FunKind::FSync,
+                        tparams: _,
                         body: _,
                         span: _,
                         doc_comment: _,

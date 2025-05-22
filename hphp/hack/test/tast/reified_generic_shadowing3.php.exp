@@ -10,7 +10,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-11], "\\f");
       fd_fun =
       { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =

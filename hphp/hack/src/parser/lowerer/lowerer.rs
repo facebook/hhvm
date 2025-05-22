@@ -1871,8 +1871,9 @@ fn p_lambda_expression<'a>(
     pos: Pos,
 ) -> Result<Expr_> {
     let suspension_kind = mk_suspension_kind(&c.async_);
-    let (params, (ctxs, unsafe_ctxs), readonly_ret, ret) = match &c.signature.children {
+    let (tparams, params, (ctxs, unsafe_ctxs), readonly_ret, ret) = match &c.signature.children {
         LambdaSignature(c) => {
+            let tparams = p_hint_tparam_l(&c.type_parameters, env)?;
             let params = could_map(&c.parameters, env, p_fun_param)?;
             let readonly_ret = map_optional(&c.readonly_return, env, p_readonly)?;
             let ctxs = p_contexts(
@@ -1883,11 +1884,12 @@ fn p_lambda_expression<'a>(
             );
             let unsafe_ctxs = ctxs.clone();
             let ret = map_optional(&c.type_, env, p_hint)?;
-            (params, (ctxs, unsafe_ctxs), readonly_ret, ret)
+            (tparams, params, (ctxs, unsafe_ctxs), readonly_ret, ret)
         }
         Token(_) => {
             let ast::Id(p, n) = pos_name(&c.signature, env)?;
             (
+                vec![],
                 vec![ast::FunParam {
                     annotation: (),
                     type_hint: ast::TypeHint((), None),
@@ -1919,6 +1921,7 @@ fn p_lambda_expression<'a>(
     let fun = ast::Fun_ {
         span: pos,
         readonly_this: None, // filled in by mk_unop
+        tparams,
         annotation: (),
         readonly_ret,
         ret: ast::TypeHint((), ret),
@@ -2397,6 +2400,7 @@ fn p_prefixed_code_expr<'a>(
         let fun = ast::Fun_ {
             span: pos.clone(),
             readonly_this: None, // filled in by mk_unop
+            tparams: vec![],
             annotation: (),
             readonly_ret: None,
             ret: ast::TypeHint((), None),
@@ -2650,6 +2654,7 @@ fn p_anonymous_function<'a>(
     let fun = ast::Fun_ {
         span: p_pos(node, env),
         readonly_this: None, // set in process_readonly_expr
+        tparams: vec![],
         annotation: (),
         readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
         ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),
@@ -2686,6 +2691,7 @@ fn p_awaitable_creation_expr<'a>(
         annotation: (),
         readonly_this: None, // set in process_readonly_expr
         readonly_ret: None,  // TODO: awaitable creation expression
+        tparams: vec![],
         ret: ast::TypeHint((), None),
         body: ast::FuncBody {
             fb_ast: if blk.is_empty() {
@@ -5939,6 +5945,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let fun = ast::Fun_ {
                 span: p_fun_pos(node, env),
                 readonly_this: hdr.readonly_this,
+                tparams: vec![],
                 annotation: (),
                 ret,
                 readonly_ret: hdr.readonly_return,

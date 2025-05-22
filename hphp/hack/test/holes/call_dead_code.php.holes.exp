@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
       fd_fun =
       { f_span = [3:1-30]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:23-27], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:23-27], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
            param_pos = [3:18-20]; param_name = "$x"; param_info = Param_required; 
@@ -26,7 +26,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-24], "\\call_dead_code");
        fd_fun =
        { f_span = [5:1-15:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([5:28-32], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([5:28-32], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -66,7 +66,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([17:10-29], "\\call_dead_code_cast");
        fd_fun =
        { f_span = [17:1-27:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([17:33-37], (Hprim Tvoid)))); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([17:33-37], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =

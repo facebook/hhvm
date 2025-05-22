@@ -64,6 +64,7 @@ type feature_name =
   | SimpliHack
   | PolymorphicFunctionHints
   | ProtectedInternal
+  | PolymorphicLambda
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

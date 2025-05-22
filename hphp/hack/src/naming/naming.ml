@@ -148,6 +148,9 @@ let passes =
     Naming_validate_class_req.pass on_error;
     (* Validation dealing with common xhp naming errors *)
     Naming_validate_xhp_name.pass on_error;
+    (* Validate polymorphic lambda expressions, ensuring return hint and all
+       parameter hints are provided *)
+    Naming_validate_polymorphic_lambda_expr.pass on_error;
     (* -- Elaboration & validation under typechecker options -------------- *)
     (* Add `supportdyn` and `Like` wrappers everywhere - under `everything-sdt`
        typechecker option *)
@@ -335,6 +338,7 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
             {
               f_span = pos;
               f_readonly_this = None;
+              f_tparams = [];
               f_annotation = ();
               f_readonly_ret = None;
               f_ret =

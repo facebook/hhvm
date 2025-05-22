@@ -16,7 +16,6 @@
  **
  *
  */
-
 use parser_core_types::token_factory::TokenFactory;
 use smart_constructors::{NodeType, SmartConstructors};
 
@@ -445,8 +444,8 @@ where
         Node(self.0.make_lambda_expression(attribute_spec.0, async_.0, signature.0, arrow.0, body.0), self.1.make_lambda_expression(attribute_spec.1, async_.1, signature.1, arrow.1, body.1))
     }
 
-    fn make_lambda_signature(&mut self, left_paren: Self::Output, parameters: Self::Output, right_paren: Self::Output, contexts: Self::Output, colon: Self::Output, readonly_return: Self::Output, type_: Self::Output) -> Self::Output {
-        Node(self.0.make_lambda_signature(left_paren.0, parameters.0, right_paren.0, contexts.0, colon.0, readonly_return.0, type_.0), self.1.make_lambda_signature(left_paren.1, parameters.1, right_paren.1, contexts.1, colon.1, readonly_return.1, type_.1))
+    fn make_lambda_signature(&mut self, type_parameters: Self::Output, left_paren: Self::Output, parameters: Self::Output, right_paren: Self::Output, contexts: Self::Output, colon: Self::Output, readonly_return: Self::Output, type_: Self::Output) -> Self::Output {
+        Node(self.0.make_lambda_signature(type_parameters.0, left_paren.0, parameters.0, right_paren.0, contexts.0, colon.0, readonly_return.0, type_.0), self.1.make_lambda_signature(type_parameters.1, left_paren.1, parameters.1, right_paren.1, contexts.1, colon.1, readonly_return.1, type_.1))
     }
 
     fn make_cast_expression(&mut self, left_paren: Self::Output, type_: Self::Output, right_paren: Self::Output, operand: Self::Output) -> Self::Output {

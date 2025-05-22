@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d2ff6968fc4744a0281da36b775793a0>>
+// @generated SignedSource<<5e4be51ca72e277c99c5c0b39a091cf7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1040,32 +1040,33 @@ impl Transform for Fun_ {
         match self {
             Fun_ {
                 annotation: ref mut __binding_2,
-                ret: ref mut __binding_4,
-                params: ref mut __binding_5,
-                ctxs: ref mut __binding_6,
-                unsafe_ctxs: ref mut __binding_7,
-                body: ref mut __binding_8,
-                user_attributes: ref mut __binding_10,
-                external: ref mut __binding_11,
-                doc_comment: ref mut __binding_12,
+                tparams: ref mut __binding_4,
+                ret: ref mut __binding_5,
+                params: ref mut __binding_6,
+                ctxs: ref mut __binding_7,
+                unsafe_ctxs: ref mut __binding_8,
+                body: ref mut __binding_9,
+                user_attributes: ref mut __binding_11,
+                external: ref mut __binding_12,
+                doc_comment: ref mut __binding_13,
                 ..
             } => {
                 {
                     __binding_2.transform(env, &mut pass.clone())
                 }
                 {
+                    __binding_4.transform(env, &mut pass.clone())
+                }
+                {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_fun__ret_top_down(env, __binding_4) {
+                        if let Break(..) = pass.on_fld_fun__ret_top_down(env, __binding_5) {
                             return;
                         }
-                        __binding_4.transform(env, &mut pass.clone());
-                        let _ = in_pass.on_fld_fun__ret_bottom_up(env, __binding_4);
+                        __binding_5.transform(env, &mut pass.clone());
+                        let _ = in_pass.on_fld_fun__ret_bottom_up(env, __binding_5);
                     }
-                }
-                {
-                    __binding_5.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_6.transform(env, &mut pass.clone())
@@ -1077,12 +1078,15 @@ impl Transform for Fun_ {
                     __binding_8.transform(env, &mut pass.clone())
                 }
                 {
-                    __binding_10.transform(env, &mut pass.clone())
+                    __binding_9.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_11.transform(env, &mut pass.clone())
                 }
-                { __binding_12.transform(env, &mut pass.clone()) }
+                {
+                    __binding_12.transform(env, &mut pass.clone())
+                }
+                { __binding_13.transform(env, &mut pass.clone()) }
             }
         }
     }

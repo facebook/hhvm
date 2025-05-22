@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\test");
       fd_fun =
       { f_span = [3:1-9:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -23,8 +23,8 @@
                             (Lfun (
                                { f_span = [4:14-8:4]; f_readonly_this = None; 
                                  f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_params = []; f_ctxs = None; 
-                                 f_unsafe_ctxs = None;
+                                 f_tparams = []; f_ret = ((), None); 
+                                 f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                  f_body =
                                  { fb_ast =
                                    [([6:7-10], (Expr ((), [6:7-10], (Assign (((), [6:7-10], (Lvar ([6:7-10], $0fp0))), None, ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))))))));
@@ -58,6 +58,7 @@
                                                                     f_readonly_this = None; 
                                                                     f_annotation = (); 
                                                                     f_readonly_ret = None; 
+                                                                    f_tparams = []; 
                                                                     f_ret = ((), None); 
                                                                     f_params = []; 
                                                                     f_ctxs = (Some ([4:14-8:4], [([4:14-8:4], (Happly (([4:14-8:4], "\\HH\\Contexts\\defaults"), [])))])); 
@@ -80,6 +81,7 @@
                                                                     f_readonly_this = None; 
                                                                     f_annotation = (); 
                                                                     f_readonly_ret = None; 
+                                                                    f_tparams = []; 
                                                                     f_ret = ((), None); 
                                                                     f_params = []; 
                                                                     f_ctxs = None; 
@@ -186,6 +188,7 @@
                                                                 f_readonly_this = None; 
                                                                 f_annotation = (); 
                                                                 f_readonly_ret = None; 
+                                                                f_tparams = []; 
                                                                 f_ret = ((), None);
                                                                 f_params =
                                                                 [{ param_annotation = (); 

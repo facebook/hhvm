@@ -347,6 +347,34 @@ let add_generic_parameters tpenv tparaml =
   in
   List.fold_left tparaml ~f:add_top ~init:tpenv
 
+let add_bounds t name cstrs =
+  let rec aux t cstrs =
+    match cstrs with
+    | [] -> t
+    | (Ast_defs.Constraint_as, ty) :: rest ->
+      aux (add_upper_bound t name ty) rest
+    | (Ast_defs.Constraint_super, ty) :: rest ->
+      aux (add_lower_bound t name ty) rest
+    | (Ast_defs.Constraint_eq, ty) :: rest ->
+      let t = add_upper_bound t name ty in
+      aux (add_lower_bound t name ty) rest
+  in
+  aux t cstrs
+
+let add_generic_parameters_with_bounds t tparams =
+  let t = add_generic_parameters t tparams in
+  List.fold_left
+    tparams
+    ~init:t
+    ~f:(fun t Typing_defs_core.{ tp_name = (_, name); tp_constraints; _ } ->
+      add_bounds t name tp_constraints)
+
+let unbind_generic_parameters t tparams =
+  List.fold_left
+    tparams
+    ~init:t
+    ~f:(fun t Typing_defs_core.{ tp_name = (_, name); _ } -> remove t name)
+
 let get_parameter_names _tpi =
   (* TODO(T222659258) Always empty now that higher-kinded types are
      being removed *)

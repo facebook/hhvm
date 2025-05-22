@@ -14,7 +14,7 @@
       fd_mode = Mstrict; fd_name = ([5:10-14], "\\test");
       fd_fun =
       { f_span = [5:1-10:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([5:18-22], (Hprim Tvoid)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([5:18-22], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -49,8 +49,8 @@
                                            { ef_fun =
                                              { f_span = [6:14-9:4]; f_readonly_this = None; 
                                                f_annotation = (); f_readonly_ret = None; 
-                                               f_ret = ((), None); f_params = []; 
-                                               f_ctxs = (Some ([6:14-9:4], [([6:14-9:4], (Happly (([6:14-9:4], "\\HH\\Contexts\\defaults"), [])))])); 
+                                               f_tparams = []; f_ret = ((), None); 
+                                               f_params = []; f_ctxs = (Some ([6:14-9:4], [([6:14-9:4], (Happly (([6:14-9:4], "\\HH\\Contexts\\defaults"), [])))])); 
                                                f_unsafe_ctxs = None;
                                                f_body =
                                                { fb_ast =
@@ -68,6 +68,7 @@
                                                                     f_readonly_this = None; 
                                                                     f_annotation = (); 
                                                                     f_readonly_ret = None; 
+                                                                    f_tparams = []; 
                                                                     f_ret = ((), None); 
                                                                     f_params = []; 
                                                                     f_ctxs = None; 
@@ -121,7 +122,7 @@
                                  (Lfun (
                                     { f_span = [6:14-9:4]; f_readonly_this = None; 
                                       f_annotation = (); f_readonly_ret = None; 
-                                      f_ret = ((), None);
+                                      f_tparams = []; f_ret = ((), None);
                                       f_params =
                                       [{ param_annotation = (); param_type_hint = ((), (Some ([6:3-13], (Happly (([6:3-13], "\\ExampleDsl"), []))))); 
                                          param_pos = [6:3-13]; param_name = "$0v"; 

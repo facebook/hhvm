@@ -301,6 +301,11 @@ type t =
     }
   | Toplevel_statement of Pos.t
   | Attribute_outside_allowed_files of Pos.t
+  | Polymorphic_lambda_missing_return_hint of Pos.t
+  | Polymorphic_lambda_missing_param_hint of {
+      param_pos: Pos.t;
+      param_name: string;
+    }
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -1310,6 +1315,23 @@ let tparam_non_shadowing_reuse pos var_name =
     )
     []
 
+let polymorphic_lambda_missing_return_hint pos =
+  User_error.make_err
+    Error_codes.Naming.(to_enum AddATypehint)
+    ( pos,
+      "Return hints must be given explicitly for polymorphic lambda expressions. Please add a type hint."
+    )
+    []
+
+let polymorphic_lambda_missing_param_hint pos param_name =
+  User_error.make_err
+    Error_codes.Naming.(to_enum AddATypehint)
+    ( pos,
+      Format.sprintf
+        {|Parameter hints must be given explicitly for polymorphic lambda expressions. Please add a type hint for `%s`.|}
+        param_name )
+    []
+
 let to_user_error t =
   let f =
     match t with
@@ -1461,5 +1483,9 @@ let to_user_error t =
       illegal_typed_local ~join id_pos id_name (Pos_or_decl.of_raw_pos def_pos)
     | Toplevel_statement pos -> toplevel_statement pos
     | Attribute_outside_allowed_files pos -> attribute_outside_allowed_files pos
+    | Polymorphic_lambda_missing_return_hint pos ->
+      polymorphic_lambda_missing_return_hint pos
+    | Polymorphic_lambda_missing_param_hint { param_pos; param_name } ->
+      polymorphic_lambda_missing_param_hint param_pos param_name
   in
   f Explanation.empty

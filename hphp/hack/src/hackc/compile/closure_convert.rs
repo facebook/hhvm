@@ -20,6 +20,7 @@ use naming_special_names_rust::members;
 use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
+use oxidized::aast::UserAttribute;
 use oxidized::aast_visitor;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
@@ -60,8 +61,8 @@ use oxidized::ast::Stmt;
 use oxidized::ast::Stmt_;
 use oxidized::ast::Tparam;
 use oxidized::ast::TypeHint;
-use oxidized::ast::UserAttribute;
 use oxidized::ast::UserAttributes;
+use oxidized::ast::Variance;
 use oxidized::ast::Visibility;
 use oxidized::ast_defs::ParamKind;
 use oxidized::ast_defs::PropOrMethod;
@@ -771,6 +772,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         annotation: (),
         readonly_this: None, // TODO: readonly_this in closure_convert
         readonly_ret: None,  // TODO: readonly_ret in closure convert
+        tparams: vec![],
         ret: TypeHint((), None),
         params: vec![
             make_fn_param(pos(), &obj_var.1, false, false),
@@ -1289,7 +1291,27 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
             }
         };
 
-        let fun_tparams = scope.fun_tparams().to_vec(); // hiddden .clone()
+        let mut fun_tparams = scope.fun_tparams().to_vec(); // hiddden .clone()
+
+        // Remove the type parmas from the lambda, convert all the HintTparams
+        // to Tparams and add then to fun_tparams
+        std::mem::take(&mut fd.tparams).into_iter().for_each(|x| {
+            fun_tparams.push(Tparam {
+                variance: Variance::Invariant,
+                name: x.name,
+                parameters: vec![],
+                constraints: x.constraints,
+                reified: ReifyKind::Erased,
+                user_attributes: x
+                    .user_attributes
+                    .into_iter()
+                    .map(|name| UserAttribute {
+                        name,
+                        params: vec![],
+                    })
+                    .collect(),
+            })
+        });
         let class_tparams = scope.class_tparams().to_vec(); // hiddden .clone()
 
         let is_static = if is_long_lambda {

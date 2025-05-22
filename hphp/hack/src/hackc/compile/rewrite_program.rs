@@ -46,7 +46,7 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     if tast
         .first()
         .and_then(|x| x.as_stmt())
-        .map_or(true, |x| !x.1.is_markup())
+        .is_none_or(|x| !x.1.is_markup())
     {
         return Err(Error::unrecoverable(
             "Lowered AST did not start with a Markup statement",
@@ -269,6 +269,7 @@ fn extract_debugger_main(
         annotation: (),
         readonly_this: None, // TODO(readonly): readonly_this in closure_convert
         readonly_ret: None,  // TODO(readonly): readonly_ret in closure_convert
+        tparams: vec![],
         ret: TypeHint((), None),
         params,
         ctxs: None,        // TODO(T70095684)

@@ -8,7 +8,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-36], "\\taccess_self_outside_class");
       fd_fun =
       { f_span = [3:1-57]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:50-54], (Hprim Tvoid))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([3:50-54], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:37-44], (Haccess (([3:37-41], (Happly (([3:37-41], "self"), []))), [([3:43-44], "T")]))))); 
            param_pos = [3:45-47]; param_name = "$x"; param_info = Param_required; 

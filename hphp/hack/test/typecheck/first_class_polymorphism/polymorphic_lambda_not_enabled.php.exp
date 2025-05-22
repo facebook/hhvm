@@ -1,0 +1,2 @@
+ERROR: File "polymorphic_lambda_not_enabled.php", line 4, characters 17-27:
+Cannot use unstable feature: `polymorphic_lambda` (Parsing[1002])

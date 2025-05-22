@@ -232,7 +232,7 @@ install(
     compiler_lib
     compiler
     whisker
-    shared
+    common
   EXPORT fbthrift-exports
   RUNTIME DESTINATION ${BIN_INSTALL_DIR}
   LIBRARY DESTINATION ${LIB_INSTALL_DIR}

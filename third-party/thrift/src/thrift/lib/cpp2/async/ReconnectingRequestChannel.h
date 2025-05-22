@@ -129,6 +129,13 @@ class ReconnectingRequestChannel : public RequestChannel,
     return impl_->getProtocolId();
   }
 
+  void terminateInteraction(InteractionId id) override;
+
+  InteractionId createInteraction(ManagedStringView&& name) override;
+
+  InteractionId registerInteraction(
+      ManagedStringView&& name, int64_t id) override;
+
   // Avoid using this method, unless really necessary and you understand how in
   // your system the request and socket->connect are working.
   void setRequestQueueSize(size_t s) { requestQueueLimit = s; }

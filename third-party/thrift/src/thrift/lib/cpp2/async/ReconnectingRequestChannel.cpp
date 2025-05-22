@@ -388,4 +388,39 @@ void ReconnectingRequestChannel::sendQueuedRequests() {
   }
 }
 
+void ReconnectingRequestChannel::terminateInteraction(InteractionId id) {
+  if (!isChannelGood()) {
+    if (useRequestQueue_) {
+      reconnectRequestChannelWithCallback();
+    } else {
+      reconnectRequestChannel();
+    }
+  }
+  impl_->terminateInteraction(std::move(id));
+}
+
+InteractionId ReconnectingRequestChannel::createInteraction(
+    ManagedStringView&& name) {
+  if (!isChannelGood()) {
+    if (useRequestQueue_) {
+      reconnectRequestChannelWithCallback();
+    } else {
+      reconnectRequestChannel();
+    }
+  }
+  return impl_->createInteraction(std::move(name));
+}
+
+InteractionId ReconnectingRequestChannel::registerInteraction(
+    ManagedStringView&& name, int64_t id) {
+  if (!isChannelGood()) {
+    if (useRequestQueue_) {
+      reconnectRequestChannelWithCallback();
+    } else {
+      reconnectRequestChannel();
+    }
+  }
+  return impl_->registerInteraction(std::move(name), id);
+}
+
 } // namespace apache::thrift

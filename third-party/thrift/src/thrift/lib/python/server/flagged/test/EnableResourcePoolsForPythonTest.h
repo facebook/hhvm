@@ -18,10 +18,10 @@
 
 #include <thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h>
 
-namespace thrift::python::detail::test {
+namespace apache::thrift::python::detail::test {
 
 inline void mockEnableResourcePoolsForPython(bool flagValue) {
   THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_python, flagValue);
 }
 
-} // namespace thrift::python::detail::test
+} // namespace apache::thrift::python::detail::test

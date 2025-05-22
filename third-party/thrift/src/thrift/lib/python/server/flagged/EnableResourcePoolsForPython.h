@@ -23,8 +23,8 @@
 
 THRIFT_FLAG_DECLARE_bool(enable_resource_pools_for_python);
 
-namespace thrift::python::detail {
+namespace apache::thrift::python::detail {
 
 bool areResourcePoolsEnabledForPython();
 
-} // namespace thrift::python::detail
+} // namespace apache::thrift::python::detail

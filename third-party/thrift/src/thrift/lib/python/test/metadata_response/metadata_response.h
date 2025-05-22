@@ -23,18 +23,18 @@
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace thrift::python::test {
+namespace apache::thrift::python::test {
 
 folly::SemiFuture<std::unique_ptr<folly::IOBuf>> get_serialized_metadata(
-    std::shared_ptr<apache::thrift::AsyncProcessorFactory> factory) {
+    std::shared_ptr<AsyncProcessorFactory> factory) {
   return folly::makeSemiFuture().deferValue([factory](auto) {
-    std::unique_ptr<thrift::python::PythonAsyncProcessor> processor =
-        std::unique_ptr<thrift::python::PythonAsyncProcessor>(
-            dynamic_cast<thrift::python::PythonAsyncProcessor*>(
+    std::unique_ptr<PythonAsyncProcessor> processor =
+        std::unique_ptr<PythonAsyncProcessor>(
+            dynamic_cast<PythonAsyncProcessor*>(
                 factory->getProcessor().release()));
 
     return processor->getPythonMetadata();
   });
 }
 
-} // namespace thrift::python::test
+} // namespace apache::thrift::python::test

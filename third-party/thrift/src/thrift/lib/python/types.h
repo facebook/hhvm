@@ -133,7 +133,7 @@ PyObject* createStructList(int16_t numFields);
  * `Py_False`.
  */
 PyObject* createImmutableStructTupleWithDefaultValues(
-    const detail::StructInfo& structInfo);
+    const ::apache::thrift::detail::StructInfo& structInfo);
 
 /**
  * Returns a new "struct list" associated with an mutable Thrift struct,
@@ -148,7 +148,7 @@ PyObject* createImmutableStructTupleWithDefaultValues(
  *   * In the mutable version, the standard value for lists is an empty `list`.
  */
 PyObject* createMutableStructListWithDefaultValues(
-    const detail::StructInfo& structInfo);
+    const ::apache::thrift::detail::StructInfo& structInfo);
 
 /**
  * Sets the "isset" flag of the `index`-th field of the given struct tuple
@@ -183,7 +183,8 @@ void setMutableStructIsset(PyObject* structList, int16_t index, bool value);
  * However, the remaining elements (1 through `numFields + 1`) are set to `None`
  *
  */
-PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
+PyObject* createStructTupleWithNones(
+    const ::apache::thrift::detail::StructInfo& structInfo);
 
 /*
  * Returns a new "struct list" with all its elements set to `None`
@@ -191,7 +192,8 @@ PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
  *
  * Please see `createStructList()`.
  */
-PyObject* createStructListWithNones(const detail::StructInfo& structInfo);
+PyObject* createStructListWithNones(
+    const ::apache::thrift::detail::StructInfo& structInfo);
 
 /**
  * Populates unset fields of a immutable Thrift struct's "struct tuple" with
@@ -206,7 +208,7 @@ PyObject* createStructListWithNones(const detail::StructInfo& structInfo);
  *
  */
 void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
-    PyObject* object, const detail::StructInfo& structInfo);
+    PyObject* object, const ::apache::thrift::detail::StructInfo& structInfo);
 
 /**
  * Populates unset fields of a mutable Thrift struct's "struct list" with
@@ -221,7 +223,7 @@ void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
  * Throws on error
  */
 void populateMutableStructListUnsetFieldsWithDefaultValues(
-    PyObject* object, const detail::StructInfo& structInfo);
+    PyObject* object, const ::apache::thrift::detail::StructInfo& structInfo);
 
 /**
  * Resets the field at `index` of the "struct list" with the default value.
@@ -229,7 +231,9 @@ void populateMutableStructListUnsetFieldsWithDefaultValues(
  * Throws on error
  */
 void resetFieldToStandardDefault(
-    PyObject* structList, const detail::StructInfo& structInfo, int index);
+    PyObject* structList,
+    const ::apache::thrift::detail::StructInfo& structInfo,
+    int index);
 
 struct PyObjectDeleter {
   void operator()(PyObject* p) { Py_XDECREF(p); }
@@ -254,19 +258,20 @@ inline PyObject* setPyObject(void* objectPtr, UniquePyObjectPtr value) {
   return *pyObjPtr;
 }
 
-extern const detail::TypeInfo& boolTypeInfo;
-extern const detail::TypeInfo& byteTypeInfo;
-extern const detail::TypeInfo& i16TypeInfo;
-extern const detail::TypeInfo& i32TypeInfo;
-extern const detail::TypeInfo& i64TypeInfo;
-extern const detail::TypeInfo& doubleTypeInfo;
-extern const detail::TypeInfo& floatTypeInfo;
-extern const detail::TypeInfo stringTypeInfo;
-extern const detail::TypeInfo binaryTypeInfo;
-extern const detail::TypeInfo iobufTypeInfo;
+extern const ::apache::thrift::detail::TypeInfo& boolTypeInfo;
+extern const ::apache::thrift::detail::TypeInfo& byteTypeInfo;
+extern const ::apache::thrift::detail::TypeInfo& i16TypeInfo;
+extern const ::apache::thrift::detail::TypeInfo& i32TypeInfo;
+extern const ::apache::thrift::detail::TypeInfo& i64TypeInfo;
+extern const ::apache::thrift::detail::TypeInfo& doubleTypeInfo;
+extern const ::apache::thrift::detail::TypeInfo& floatTypeInfo;
+extern const ::apache::thrift::detail::TypeInfo stringTypeInfo;
+extern const ::apache::thrift::detail::TypeInfo binaryTypeInfo;
+extern const ::apache::thrift::detail::TypeInfo iobufTypeInfo;
 
-detail::OptionalThriftValue getStruct(
-    const void* objectPtr, const detail::TypeInfo& /* typeInfo */);
+::apache::thrift::detail::OptionalThriftValue getStruct(
+    const void* objectPtr,
+    const ::apache::thrift::detail::TypeInfo& /* typeInfo */);
 
 inline void* setContainer(void* objectPtr) {
   if (!setPyObject(objectPtr, UniquePyObjectPtr{PyTuple_New(0)})) {
@@ -338,7 +343,7 @@ class ListTypeInfo {
       void* object,
       void (*reader)(const void* /*context*/, void* /*val*/));
 
-  explicit ListTypeInfo(const detail::TypeInfo* valInfo)
+  explicit ListTypeInfo(const ::apache::thrift::detail::TypeInfo* valInfo)
       : ext_{
             /* .valInfo */ valInfo,
             /* .size */ size,
@@ -350,14 +355,17 @@ class ListTypeInfo {
         typeinfo_{
             protocol::TType::T_LIST,
             getStruct,
-            reinterpret_cast<detail::VoidPtrFuncPtr>(setContainer),
+            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
+                setContainer),
             &ext_,
         } {}
-  inline const detail::TypeInfo* get() const { return &typeinfo_; }
+  inline const ::apache::thrift::detail::TypeInfo* get() const {
+    return &typeinfo_;
+  }
 
  private:
-  const detail::ListFieldExt ext_;
-  const detail::TypeInfo typeinfo_;
+  const ::apache::thrift::detail::ListFieldExt ext_;
+  const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
 /**
@@ -390,7 +398,8 @@ class MutableListTypeInfo {
       void* object,
       void (*reader)(const void* /*context*/, void* /*val*/));
 
-  explicit MutableListTypeInfo(const detail::TypeInfo* valInfo)
+  explicit MutableListTypeInfo(
+      const ::apache::thrift::detail::TypeInfo* valInfo)
       : ext_{
             /* .valInfo */ valInfo,
             /* .size */ size,
@@ -402,15 +411,17 @@ class MutableListTypeInfo {
         typeinfo_{
             protocol::TType::T_LIST,
             getStruct,
-            reinterpret_cast<detail::VoidPtrFuncPtr>(setList),
+            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(setList),
             &ext_,
         } {}
 
-  inline const detail::TypeInfo* get() const { return &typeinfo_; }
+  inline const ::apache::thrift::detail::TypeInfo* get() const {
+    return &typeinfo_;
+  }
 
  private:
-  const detail::ListFieldExt ext_;
-  const detail::TypeInfo typeinfo_;
+  const ::apache::thrift::detail::ListFieldExt ext_;
+  const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
 template <typename T>
@@ -439,7 +450,8 @@ class SetTypeInfoTemplate {
       void* object,
       void (*reader)(const void* /*context*/, void* /*val*/));
 
-  explicit SetTypeInfoTemplate(const detail::TypeInfo* valInfo)
+  explicit SetTypeInfoTemplate(
+      const ::apache::thrift::detail::TypeInfo* valInfo)
       : ext_{
             /* .valInfo */ valInfo,
             /* .size */ size,
@@ -451,14 +463,15 @@ class SetTypeInfoTemplate {
         typeinfo_{
             protocol::TType::T_SET,
             getStruct,
-            reinterpret_cast<detail::VoidPtrFuncPtr>(T::clear),
+            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
+                T::clear),
             &ext_,
         } {}
-  const detail::TypeInfo* get() const { return &typeinfo_; }
+  const ::apache::thrift::detail::TypeInfo* get() const { return &typeinfo_; }
 
  private:
-  const detail::SetFieldExt ext_;
-  const detail::TypeInfo typeinfo_;
+  const ::apache::thrift::detail::SetFieldExt ext_;
+  const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
 template <typename T>
@@ -597,7 +610,8 @@ class MapTypeInfo {
       void (*valueReader)(const void* /*context*/, void* /*val*/));
 
   explicit MapTypeInfo(
-      const detail::TypeInfo* keyInfo, const detail::TypeInfo* valInfo)
+      const ::apache::thrift::detail::TypeInfo* keyInfo,
+      const ::apache::thrift::detail::TypeInfo* valInfo)
       : ext_{
             /* .keyInfo */ keyInfo,
             /* .valInfo */ valInfo,
@@ -610,14 +624,15 @@ class MapTypeInfo {
         typeinfo_{
             protocol::TType::T_MAP,
             getStruct,
-            reinterpret_cast<detail::VoidPtrFuncPtr>(setContainer),
+            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
+                setContainer),
             &ext_,
         } {}
-  const detail::TypeInfo* get() const { return &typeinfo_; }
+  const ::apache::thrift::detail::TypeInfo* get() const { return &typeinfo_; }
 
  private:
-  const detail::MapFieldExt ext_;
-  const detail::TypeInfo typeinfo_;
+  const ::apache::thrift::detail::MapFieldExt ext_;
+  const ::apache::thrift::detail::TypeInfo typeinfo_;
 };
 
 class MutableMapTypeInfo {
@@ -690,7 +705,8 @@ class MutableMapTypeInfo {
       void (*valueReader)(const void* /*context*/, void* /*val*/));
 
   explicit MutableMapTypeInfo(
-      const detail::TypeInfo* keyInfo, const detail::TypeInfo* valInfo)
+      const ::apache::thrift::detail::TypeInfo* keyInfo,
+      const ::apache::thrift::detail::TypeInfo* valInfo)
       : tableBasedSerializerMapFieldExt_{
             /* .keyInfo */ keyInfo,
             /* .valInfo */ valInfo,
@@ -703,14 +719,17 @@ class MutableMapTypeInfo {
         tableBasedSerializerTypeinfo_{
             protocol::TType::T_MAP,
             getStruct,
-            reinterpret_cast<detail::VoidPtrFuncPtr>(setMutableMap),
+            reinterpret_cast<::apache::thrift::detail::VoidPtrFuncPtr>(
+                setMutableMap),
             &tableBasedSerializerMapFieldExt_,
         } {}
-  const detail::TypeInfo* get() const { return &tableBasedSerializerTypeinfo_; }
+  const ::apache::thrift::detail::TypeInfo* get() const {
+    return &tableBasedSerializerTypeinfo_;
+  }
 
  private:
-  const detail::MapFieldExt tableBasedSerializerMapFieldExt_;
-  const detail::TypeInfo tableBasedSerializerTypeinfo_;
+  const ::apache::thrift::detail::MapFieldExt tableBasedSerializerMapFieldExt_;
+  const ::apache::thrift::detail::TypeInfo tableBasedSerializerTypeinfo_;
 };
 
 using FieldValueMap = std::unordered_map<int16_t, PyObject*>;
@@ -734,7 +753,7 @@ class DynamicStructInfo {
    * Returns the underlying (table-based) serializer `StructInfo`, populated
    * with all field infos and values added via the `addField*()` methods.
    */
-  const detail::StructInfo& getStructInfo() const {
+  const ::apache::thrift::detail::StructInfo& getStructInfo() const {
     return *tableBasedSerializerStructInfo_;
   }
 
@@ -748,16 +767,16 @@ class DynamicStructInfo {
    * behavior.
    */
   void addFieldInfo(
-      detail::FieldID id,
-      detail::FieldQualifier qualifier,
+      ::apache::thrift::detail::FieldID id,
+      ::apache::thrift::detail::FieldQualifier qualifier,
       const char* name,
-      const detail::TypeInfo* typeInfo);
+      const ::apache::thrift::detail::TypeInfo* typeInfo);
 
   void addMutableFieldInfo(
-      detail::FieldID id,
-      detail::FieldQualifier qualifier,
+      ::apache::thrift::detail::FieldID id,
+      ::apache::thrift::detail::FieldQualifier qualifier,
       const char* name,
-      const detail::TypeInfo* typeInfo);
+      const ::apache::thrift::detail::TypeInfo* typeInfo);
 
   // DO_BEFORE(aristidis,20240729): Rename to set(Default?)FieldValue.
   /**
@@ -804,7 +823,7 @@ class DynamicStructInfo {
    *
    * The `customExt` field of this StructInfo points to `fieldValues_`.
    */
-  detail::StructInfo* tableBasedSerializerStructInfo_;
+  ::apache::thrift::detail::StructInfo* tableBasedSerializerStructInfo_;
 
   /**
    * Names of the fields added via `addFieldInfo()`, in the order they were
@@ -816,10 +835,10 @@ class DynamicStructInfo {
   std::vector<std::string> fieldNames_;
 };
 
-detail::TypeInfo createImmutableStructTypeInfo(
+::apache::thrift::detail::TypeInfo createImmutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
 
-detail::TypeInfo createMutableStructTypeInfo(
+::apache::thrift::detail::TypeInfo createMutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
 
 /**
@@ -850,7 +869,7 @@ inline const PyObject* getListObjectItemBase(const void* pyList) {
  * @throws if there is no standard default value
  */
 PyObject* getStandardImmutableDefaultValuePtrForType(
-    const detail::TypeInfo& typeInfo);
+    const ::apache::thrift::detail::TypeInfo& typeInfo);
 
 /**
  * Returns the appropriate standard mutable default value for the given
@@ -870,7 +889,7 @@ PyObject* getStandardImmutableDefaultValuePtrForType(
  * @throws if there is no standard default value
  */
 PyObject* getStandardMutableDefaultValuePtrForType(
-    const detail::TypeInfo& typeInfo);
+    const ::apache::thrift::detail::TypeInfo& typeInfo);
 
 /*
  * Python introduced structural pattern matching. A type is treated as a
@@ -885,9 +904,8 @@ PyObject* getStandardMutableDefaultValuePtrForType(
  */
 void tag_object_as_sequence(PyTypeObject* type_object);
 void tag_object_as_mapping(PyTypeObject* type_object);
-} // namespace apache::thrift::python
 
-namespace apache::thrift::python::capi {
+namespace capi {
 /**
  * Retrieves internal _fbthrift_data from `StructOrUnion`. On import failure,
  * returns nullptr. Caller is responsible for clearing Err indicator on failure.
@@ -915,4 +933,5 @@ int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value);
  */
 PyObject* unionTupleFromValue(int64_t type_key, PyObject* value);
 
-} // namespace apache::thrift::python::capi
+} // namespace capi
+} // namespace apache::thrift::python

@@ -34,12 +34,12 @@ cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" namespace "apache::thr
         @staticmethod
         string describe(cCreateMethodMetadataResult result) noexcept
 
-cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::thrift::python":
-    cdef cppclass cPythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
+cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h":
+    cdef cppclass cPythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
         cCreateMethodMetadataResult createMethodMetadata() noexcept
 
     cdef shared_ptr[cPythonAsyncProcessorFactory] \
-        cCreatePythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory::create"(
+        cCreatePythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory::create"(
             PyObject* server,
             cmap[string, pair[RpcKind, PyObjPtr]] funcs,
             cvector[PyObjPtr] lifecycle,

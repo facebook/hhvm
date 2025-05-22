@@ -30,7 +30,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace thrift::python {
+namespace apache::thrift::python {
 
 enum class LifecycleFunc;
 
@@ -166,4 +166,4 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::protocol::PROTOCOL_TYPES protocol);
 };
 
-} // namespace thrift::python
+} // namespace apache::thrift::python

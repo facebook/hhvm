@@ -14,7 +14,6 @@
 
 from libcpp cimport bool as cbool
 
-cdef extern from "thrift/lib/python/server/flagged/test/EnableResourcePoolsForPythonTest.h" \
-        namespace "thrift::python::detail::test":
+cdef extern from "thrift/lib/python/server/flagged/test/EnableResourcePoolsForPythonTest.h":
 
-    cdef void cMockEnableResourcePoolsForPython "thrift::python::detail::test::mockEnableResourcePoolsForPython"(cbool flagValue) nogil
+    cdef void cMockEnableResourcePoolsForPython "apache::thrift::python::detail::test::mockEnableResourcePoolsForPython"(cbool flagValue) nogil

@@ -30,7 +30,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace thrift::python {
+namespace apache::thrift::python {
 
 constexpr size_t kMaxUexwSize = 1024;
 
@@ -211,4 +211,4 @@ static void throw_wrapped(
 
 } // namespace detail
 
-} // namespace thrift::python
+} // namespace apache::thrift::python

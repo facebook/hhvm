@@ -41,16 +41,16 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::a
         SINGLE_REQUEST_STREAMING_RESPONSE = 4
         SINK = 6
 
-cdef extern from "thrift/lib/python/server/util.h" namespace "::thrift::python":
-    cdef cppclass cPythonUserException "::thrift::python::PythonUserException"(cException):
+cdef extern from "thrift/lib/python/server/util.h" namespace "::apache::thrift::python":
+    cdef cppclass cPythonUserException "::apache::thrift::python::PythonUserException"(cException):
         cPythonUserException(string, string, unique_ptr[cIOBuf] buf) except +
 
-cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::thrift::python":
-    cdef cppclass cPythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
+cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::apache::thrift::python":
+    cdef cppclass cPythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
         pass
 
     cdef shared_ptr[cPythonAsyncProcessorFactory] \
-        cCreatePythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory::create"(
+        cCreatePythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory::create"(
             PyObject* server,
             cmap[string, pair[RpcKind, PyObjPtr]] funcs,
             cvector[PyObjPtr] lifecycle,
@@ -59,8 +59,8 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namesp
             cbool enableResourcePools,
         ) except +
 
-cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::thrift::python::detail":
-    cdef cbool cAreResourcePoolsEnabledForPython "::thrift::python::detail::areResourcePoolsEnabledForPython"()
+cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::apache::thrift::python::detail":
+    cdef cbool cAreResourcePoolsEnabledForPython "::apache::thrift::python::detail::areResourcePoolsEnabledForPython"()
 
 cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift":
     cdef cppclass SerializedRequest "::apache::thrift::SerializedRequest":

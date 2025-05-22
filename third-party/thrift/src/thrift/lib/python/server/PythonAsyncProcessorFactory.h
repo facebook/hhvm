@@ -30,7 +30,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace thrift::python {
+namespace apache::thrift::python {
 
 class PythonAsyncProcessorFactory
     : public apache::thrift::AsyncProcessorFactory,
@@ -101,4 +101,4 @@ class PythonAsyncProcessorFactory
         pythonMetadataForRpcKind_(std::move(pythonMetadataForRpcKind)) {}
 };
 
-} // namespace thrift::python
+} // namespace apache::thrift::python

@@ -17,5 +17,5 @@ from folly cimport cFollyTry, cFollySemiFuture
 from folly.iobuf cimport cIOBuf
 from thrift.py3.server cimport cAsyncProcessorFactory
 
-cdef extern from "thrift/lib/python/test/metadata_response/metadata_response.h" namespace "::thrift::python::test":
+cdef extern from "thrift/lib/python/test/metadata_response/metadata_response.h" namespace "::apache::thrift::python::test":
     cdef cFollySemiFuture[unique_ptr[cIOBuf]] get_serialized_metadata(shared_ptr [cAsyncProcessorFactory] factory)

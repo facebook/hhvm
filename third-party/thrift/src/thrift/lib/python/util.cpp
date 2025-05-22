@@ -23,7 +23,7 @@
 
 #if FOLLY_HAS_COROUTINES
 
-namespace thrift::python {
+namespace apache::thrift::python {
 
 namespace {
 
@@ -40,6 +40,6 @@ void cancelPythonIterator(PyObject* iter) {
   cancelAsyncGenerator(iter);
 }
 
-} // namespace thrift::python
+} // namespace apache::thrift::python
 
 #endif

@@ -21,7 +21,7 @@
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/python/server/python_async_processor_api.h> // @manual
 
-namespace thrift::python {
+namespace apache::thrift::python {
 
 namespace {
 
@@ -488,4 +488,4 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
   }
 }
 
-} // namespace thrift::python
+} // namespace apache::thrift::python

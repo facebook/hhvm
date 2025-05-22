@@ -20,7 +20,7 @@
 
 THRIFT_FLAG_DEFINE_bool(rc_aware_task_patch_enabled, false);
 
-namespace thrift::python::detail {
+namespace apache::thrift::python::detail {
 
 bool isRcAwareTaskPatchEnabled() {
   return THRIFT_FLAG(rc_aware_task_patch_enabled);
@@ -30,4 +30,4 @@ void mockRcAwareTaskPatchEnabled(bool enabled) {
   THRIFT_FLAG_SET_MOCK(rc_aware_task_patch_enabled, enabled);
 }
 
-} // namespace thrift::python::detail
+} // namespace apache::thrift::python::detail

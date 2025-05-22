@@ -23,7 +23,7 @@
 
 using namespace apache::thrift;
 
-namespace thrift::python::detail::test {
+namespace apache::thrift::python::detail::test {
 
 class EnableResourcePoolsForPythonFlagTest
     : public testing::TestWithParam<bool> {};
@@ -47,4 +47,4 @@ INSTANTIATE_TEST_CASE_P(
     EnableResourcePoolsForPythonFlagTest,
     testing::Values(true, false));
 
-} // namespace thrift::python::detail::test
+} // namespace apache::thrift::python::detail::test

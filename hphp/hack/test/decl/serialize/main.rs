@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use ::anyhow::Context;
 use ::anyhow::Result;
 use clap::Parser;
-use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized::direct_decl_parser::Decls;
 use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
@@ -33,7 +33,7 @@ fn main() -> ::anyhow::Result<()> {
             .expect("expect file path")
             .path()
             .extension()
-            .map_or(false, |e| e == "php")
+            .is_some_and(|e| e == "php")
     }) {
         let entry = f?;
         let path = entry.path();
@@ -41,18 +41,17 @@ fn main() -> ::anyhow::Result<()> {
         let relative_path = RelativePath::make(relative_path::Prefix::Dummy, path.to_path_buf());
 
         let arena = bumpalo::Bump::new();
-        let parsed_file = direct_decl_parser::parse_decls_for_bytecode_obr(
+        let parsed_file = direct_decl_parser::parse_decls_for_bytecode(
             &Default::default(),
             relative_path,
             &content,
-            &arena,
         );
         let decls = parsed_file.decls;
 
-        results.push(round_trip::<Decls<'_>, Json>(&arena, path, decls));
-        results.push(round_trip::<Decls<'_>, FlexBuffer>(&arena, path, decls));
-        results.push(round_trip::<Decls<'_>, Bincode>(&arena, path, decls));
-        results.push(round_trip::<Decls<'_>, Cbor>(&arena, path, decls));
+        // results.push(round_trip::<Decls, Json>(&arena, path, decls.clone()));
+        // results.push(round_trip::<Decls, FlexBuffer>(&arena, path, decls.clone()));
+        results.push(round_trip::<Decls, Bincode>(&arena, path, decls.clone()));
+        results.push(round_trip::<Decls, Cbor>(&arena, path, decls));
     }
 
     let (profiles, errs) = results
@@ -173,72 +172,72 @@ trait Provider {
     fn get_bytes(data: &Self::Data) -> &[u8];
 }
 
-struct Json;
+// struct Json;
 
-impl Provider for Json {
-    type Data = String;
+// impl Provider for Json {
+//     type Data = String;
 
-    fn name() -> &'static str {
-        "serde_json"
-    }
+//     fn name() -> &'static str {
+//         "serde_json"
+//     }
 
-    fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
-        serde_json::to_string(x)
-            .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))
-    }
+//     fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
+//         serde_json::to_string(x)
+//             .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))
+//     }
 
-    fn de<'a, X: serde::Deserialize<'a>>(
-        arena: &'a bumpalo::Bump,
-        data: Self::Data,
-    ) -> Result<X, String> {
-        let mut de = serde_json::Deserializer::from_str(&data);
-        let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
-        X::deserialize(de)
-            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
-    }
+//     fn de<'a, X: serde::Deserialize<'a>>(
+//         arena: &'a bumpalo::Bump,
+//         data: Self::Data,
+//     ) -> Result<X, String> {
+//         let mut de = serde_json::Deserializer::from_str(&data);
+//         let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
+//         X::deserialize(de)
+//             .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
+//     }
 
-    fn get_bytes(data: &Self::Data) -> &[u8] {
-        data.as_bytes()
-    }
-}
+//     fn get_bytes(data: &Self::Data) -> &[u8] {
+//         data.as_bytes()
+//     }
+// }
 
-struct FlexBuffer;
+// struct FlexBuffer;
 
-impl Provider for FlexBuffer {
-    type Data = flexbuffers::FlexbufferSerializer;
+// impl Provider for FlexBuffer {
+//     type Data = flexbuffers::FlexbufferSerializer;
 
-    fn name() -> &'static str {
-        "flexbuffers"
-    }
+//     fn name() -> &'static str {
+//         "flexbuffers"
+//     }
 
-    fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
-        let mut s = flexbuffers::FlexbufferSerializer::new();
-        x.serialize(&mut s)
-            .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))?;
-        Ok(s)
-    }
+//     fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
+//         let mut s = flexbuffers::FlexbufferSerializer::new();
+//         x.serialize(&mut s)
+//             .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))?;
+//         Ok(s)
+//     }
 
-    fn de<'a, X: serde::Deserialize<'a>>(
-        arena: &'a bumpalo::Bump,
-        data: Self::Data,
-    ) -> Result<X, String> {
-        let de = flexbuffers::Reader::get_root(data.view()).map_err(|e| {
-            format!(
-                "{} failed to create deserializer, message {}",
-                Self::name(),
-                e
-            )
-        })?;
+//     fn de<'a, X: serde::Deserialize<'a>>(
+//         arena: &'a bumpalo::Bump,
+//         data: Self::Data,
+//     ) -> Result<X, String> {
+//         let de = flexbuffers::Reader::get_root(data.view()).map_err(|e| {
+//             format!(
+//                 "{} failed to create deserializer, message {}",
+//                 Self::name(),
+//                 e
+//             )
+//         })?;
 
-        let de = arena_deserializer::ArenaDeserializer::new(arena, de);
-        X::deserialize(de)
-            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
-    }
+//         let de = arena_deserializer::ArenaDeserializer::new(arena, de);
+//         X::deserialize(de)
+//             .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
+//     }
 
-    fn get_bytes(data: &Self::Data) -> &[u8] {
-        data.view()
-    }
-}
+//     fn get_bytes(data: &Self::Data) -> &[u8] {
+//         data.view()
+//     }
+// }
 
 struct Bincode;
 
@@ -285,7 +284,7 @@ impl Provider for Cbor {
     fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
         let mut data = vec![];
         serde_cbor::to_writer(&mut data, x)
-            .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))?;
+            .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))?;
         Ok(data)
     }
 

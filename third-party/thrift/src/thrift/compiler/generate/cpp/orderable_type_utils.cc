@@ -16,7 +16,6 @@
 
 #include <unordered_set>
 
-#include <fmt/core.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/uri.h>
@@ -34,50 +33,27 @@ bool enable_custom_type_ordering(const t_structured& s) {
 
 struct is_orderable_walk_context {
   bool enableCustomTypeOrderingIfStructureHasUri;
-
-  /**
-   * Set of types that are determined to be non-orderable, but whose "parents"
-   * (i.e., types that were seen prior to each type, during the initial walk)
-   * still need to be marked as non-orderable.
-   */
-  std::unordered_set<const t_type*> pending_unorderable_back_propagation = {};
-
-  /**
-   * The set of types encountered in the current (depth-first) walk.
-   */
-  std::unordered_set<const t_type*> current_visiting_set = {};
-
-  /**
-   * Maps of reverse dependencies, i.e. for a given key `type`, maps the set of
-   * all "parent" types, i.e. types that were seen just before the key type.
-   */
+  std::unordered_set<const t_type*> pending_back_propagation = {};
+  std::unordered_set<const t_type*> seen = {};
   std::unordered_map<const t_type*, std::unordered_set<const t_type*>>
       inv_graph = {};
 };
 
-/**
- * Returns an object that will invoke the given functor upon deletion.
- * Typically used to run `f` upon leaving the current scope (eg. returning).
- */
-template <typename F>
-auto make_scope_guard(F&& f) {
-  auto deleter = [=](void*) { f(); };
-  return std::unique_ptr<void, decltype(deleter)>(&f, deleter);
-}
-
-bool field_is_orderable_walk(
+bool is_orderable_walk(
     std::unordered_map<const t_type*, bool>& memo,
     const t_field& field,
     const t_type* prev,
     is_orderable_walk_context& context,
     bool forceCustomTypeOrderable);
 
-bool type_is_orderable_walk(
+bool is_orderable_walk(
     std::unordered_map<const t_type*, bool>& memo,
     const t_type& type,
     const t_type* prev,
     is_orderable_walk_context& context,
     bool forceCustomTypeOrderable) {
+  const bool has_disqualifying_annotation =
+      is_custom_type(type) && !forceCustomTypeOrderable;
   auto memo_it = memo.find(&type);
   if (memo_it != memo.end()) {
     return memo_it->second;
@@ -85,153 +61,114 @@ bool type_is_orderable_walk(
   if (prev != nullptr) {
     context.inv_graph[&type].insert(prev);
   }
-  if (!context.current_visiting_set.insert(&type).second) {
+  if (!context.seen.insert(&type).second) {
     return true; // Recursive type, speculate success.
   }
-
-  // On return: pop the current type from the set of types being visited in
-  // the current walk.
-  auto g = make_scope_guard([&] { context.current_visiting_set.erase(&type); });
-
-  // Primitive types and enums are always orderable.
+  auto make_scope_guard = [](auto f) {
+    auto deleter = [=](void*) { f(); };
+    return std::unique_ptr<void, decltype(deleter)>(&f, deleter);
+  };
+  auto g = make_scope_guard([&] { context.seen.erase(&type); });
   if (type.is_primitive_type() || type.is_enum()) {
     return true;
   }
-
   bool result = false;
-  // On return: update the result cache (`memo`) with the returned value.
   auto g2 = make_scope_guard([&] {
     memo[&type] = result;
     if (!result) {
-      context.pending_unorderable_back_propagation.insert(&type);
+      context.pending_back_propagation.insert(&type);
     }
   });
-
-  // Structured types (struct, union, exception) and lists cannot have
-  // disqualifying annotations themselves, but their underlying fields may have
-  // some. fields) may have some.
-  if (const t_structured* asStructured = type.try_as<t_structured>()) {
+  if (type.is_typedef()) {
+    const auto& real = *type.get_true_type();
+    const auto& next = *(dynamic_cast<const t_typedef&>(type).get_type());
+    return result = is_orderable_walk(
+                        memo, next, &type, context, forceCustomTypeOrderable) &&
+        (!(real.is_set() || real.is_map()) || !has_disqualifying_annotation);
+  } else if (const auto* as_struct = dynamic_cast<const t_structured*>(&type)) {
     return result = std::all_of(
-               asStructured->fields().begin(),
-               asStructured->fields().end(),
-               [&](const t_field& field) {
-                 return field_is_orderable_walk(
+               as_struct->fields().begin(),
+               as_struct->fields().end(),
+               [&](const auto& f) {
+                 return is_orderable_walk(
                      memo,
-                     field,
+                     f,
                      &type,
                      context,
-                     enable_custom_type_ordering(*asStructured) ||
+                     enable_custom_type_ordering(*as_struct) ||
                          (context.enableCustomTypeOrderingIfStructureHasUri &&
-                          !asStructured->uri().empty()));
+                          !as_struct->uri().empty()));
                });
-  } else if (const t_list* asList = type.try_as<t_list>()) {
-    return result = type_is_orderable_walk(
+  } else if (type.is_list()) {
+    return result = is_orderable_walk(
                memo,
-               *asList->get_elem_type(),
+               *(dynamic_cast<const t_list&>(type).get_elem_type()),
                &type,
                context,
                forceCustomTypeOrderable);
-  }
-
-  // If this point is reached, `type` is one of: map, set or typedef.
-  // Maps and sets may be non-orderable, if they have custom C++ types AND
-  // custom type ordering is not enabled. Typedefs may be non-orderable if they
-  // point to maps or sets that are non-orderable.
-  const bool has_disqualifying_annotation =
-      is_custom_type(type) && !forceCustomTypeOrderable;
-  if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
-    const t_type& typedef_true_type = *type.get_true_type();
-
-    const t_type& next = *asTypedef->get_type();
-    if (!type_is_orderable_walk(
-            memo,
-            next /* type */,
-            &type /* prev */,
-            context,
-            forceCustomTypeOrderable)) {
-      return result = false;
-    }
-
-    if (typedef_true_type.is_set() || typedef_true_type.is_map()) {
-      return result = !has_disqualifying_annotation;
-    } else {
-      return result = true;
-    }
-  } else if (const t_set* asSet = type.try_as<t_set>()) {
+  } else if (type.is_set()) {
     return result = !has_disqualifying_annotation &&
-        type_is_orderable_walk(
+        is_orderable_walk(
                memo,
-               *asSet->get_elem_type(),
+               *(dynamic_cast<const t_set&>(type).get_elem_type()),
                &type,
                context,
                forceCustomTypeOrderable);
-  } else if (const t_map* asMap = type.try_as<t_map>()) {
+  } else if (type.is_map()) {
     return result = !has_disqualifying_annotation &&
-        type_is_orderable_walk(
+        is_orderable_walk(
                memo,
-               *asMap->get_key_type(),
+               *(dynamic_cast<const t_map&>(type).get_key_type()),
                &type,
                context,
                forceCustomTypeOrderable) &&
-        type_is_orderable_walk(
+        is_orderable_walk(
                memo,
-               *asMap->get_val_type(),
+               *(dynamic_cast<const t_map&>(type).get_val_type()),
                &type,
                context,
                forceCustomTypeOrderable);
   }
-
-  throw std::logic_error(fmt::format(
-      "type_is_orderable_walk unhandled t_type: {} (of type {})",
-      type.get_scoped_name(),
-      fmt::underlying(type.get_type_value())));
+  return false;
 }
 
-bool field_is_orderable_walk(
+bool is_orderable_walk(
     std::unordered_map<const t_type*, bool>& memo,
     const t_field& field,
     const t_type* prev,
     is_orderable_walk_context& context,
     bool forceCustomTypeOrderable) {
-  const t_type& field_type = field.type().deref();
-  const t_type& field_true_type = *field_type.get_true_type();
-  // Unlike `is_custom_type()` above, we don't consider @cpp.Adapter on the
-  // field to be disqualifying, since all adapted fields can be made orderable
-  // by customizing Adapter::less.
+  const auto& real = *field.type().deref().get_true_type();
+  // We don't consider @cpp.Adapter on the field since all adapted fields can be
+  // orderable by customizing Adapter::less.
   const bool has_disqualifying_annotation =
       field.has_structured_annotation(kCppTypeUri) && !forceCustomTypeOrderable;
-  if ((field_true_type.is_set() || field_true_type.is_map()) &&
-      has_disqualifying_annotation) {
-    return false;
-  } else {
-    return type_is_orderable_walk(
-        memo, field_type, prev, context, forceCustomTypeOrderable);
-  }
+  return (!(real.is_set() || real.is_map()) || !has_disqualifying_annotation) &&
+      is_orderable_walk(
+             memo,
+             field.type().deref(),
+             prev,
+             context,
+             forceCustomTypeOrderable);
 }
 
-void back_propagate_unorderable_types(
+void is_orderable_back_propagate(
     std::unordered_map<const t_type*, bool>& memo,
     is_orderable_walk_context& context) {
-  for (auto it = context.pending_unorderable_back_propagation.begin();
-       it != context.pending_unorderable_back_propagation.end();
-       it = context.pending_unorderable_back_propagation.erase(it)) {
-    const t_type* type = *it;
-
-    auto parentEdgesIt = context.inv_graph.find(type);
-    if (parentEdgesIt == context.inv_graph.end()) {
+  while (!context.pending_back_propagation.empty()) {
+    auto type = *context.pending_back_propagation.begin();
+    context.pending_back_propagation.erase(
+        context.pending_back_propagation.begin());
+    auto edges = context.inv_graph.find(type);
+    if (edges == context.inv_graph.end()) {
       continue;
     }
-
-    for (const t_type* parent : parentEdgesIt->second) {
-      const bool parentWasConsideredOrderable =
-          std::exchange(memo[parent], false);
-      if (parentWasConsideredOrderable) {
-        // Parent was previously considered orderable: need to back-propagate
-        // the negative signal from it too.
-        context.pending_unorderable_back_propagation.insert(parent);
+    for (const t_type* prev : edges->second) {
+      if (std::exchange(memo[prev], false)) {
+        context.pending_back_propagation.insert(prev);
       }
     }
-    context.inv_graph.erase(parentEdgesIt);
+    context.inv_graph.erase(edges);
   }
 }
 } // namespace
@@ -253,20 +190,8 @@ bool OrderableTypeUtils::is_orderable(
   // first all self-references are speculated, then negative classification is
   // back-propagated through the traversed dependencies.
   is_orderable_walk_context context{enableCustomTypeOrderingIfStructureHasUri};
-
-  // NOTE: The initial value of `forceCustomTypeOrderable` passed below is
-  // ignored: it is merely a placeholder for recursive calls. Since the first
-  // call is necessarily on a t_structured (i.e., `structured_type`), the
-  // actual value of forceCustomTypeOrderable for recursive calls will be
-  // determined based on annotations and properties of the structured type
-  // (eg. @thrift.EnableCustomTypeOrdering).
-  type_is_orderable_walk(
-      memo,
-      structured_type,
-      nullptr /* prev */,
-      context,
-      false /* forceCustomTypeOrderable, ignored (see above) */);
-  back_propagate_unorderable_types(memo, context);
+  is_orderable_walk(memo, structured_type, nullptr, context, false);
+  is_orderable_back_propagate(memo, context);
   auto it = memo.find(&structured_type);
   return it == memo.end() || it->second;
 }

@@ -26,55 +26,20 @@ class OrderableTypeUtils final {
  public:
   OrderableTypeUtils() = delete;
 
-  /**
-   * Determines if the given structured type (struct, union or exception) can be
-   * ordered.
+  /*
+   * This determines if the given structured type (struct, union or exception)
+   * can be ordered.
    *
-   * If `true`, the C++ generated Thrift code for the given type will define an
-   * implementation of `operator<` (note that a *declaration* of `operator<`
-   * may be generated even if this function is `false`, to support user-defined
-   * operators).
-   *
-   * In general, C++ generated Thrift structured types can be ordered, however
-   * there can be issues if the structure includes fields whose types do not
-   * have a natural order (i.e., maps, sets and typedefs that resolve to a map
-   * or set).
-   *
-   * Thrift always supports ordering for the [default target
-   * types](https://github.com/facebook/fbthrift/blob/main/thrift/doc/glossary/kinds-of-types.md#thrift-target-types)
-   * of such fields (i.e., `std::map` and `std::set`, respectively), however it
-   * may be unable to do so if a custom type is specified (via `@cpp.Type`,
-   * `cpp2.type`, `cpp2.template`, etc.).
-   *
-   * If `structured_type` does not have any field whose type resolves to a map
-   * or set with custom type, this function always returns `true`.
-   *
-   * Otherwise, this function returns `true` if and only if custom types are
-   * explicitly considered orderable, through (at least) one of the following
-   * mechanisms:
-   * 1. The given type (or its enclosing package) is annotated with
-   *    `@cpp.EnableCustomTypeOrdering`, or
-   * 2. The given type has a URI and
-   *    `enableCustomTypeOrderingIfStructureHasUri` is `true`. Note that in
-   *    practice, in the Thrift IDL, the URI can either be set explicitly (via
-   *    `@thrift.Uri`) or implicitly by specifying a [non-empty
-   *    `package`](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration).
-   *
-   * It follows that this function returns `false` iff `structured_type` has
-   * unordered container field(s) with custom types AND custom type ordering is
-   * disabled.
+   * If the type is using any annotation for cpp2.type or cpp2.template
+   * its not considered orderable, and we don't need to generate operator<
+   * methods
    */
   static bool is_orderable(
-      const t_structured& structured_type,
-      bool enableCustomTypeOrderingIfStructureHasUri);
+      const t_structured& type, bool enableCustomTypeOrderingIfStructureHasUri);
 
-  /**
-   * Same as `is_orderable()` above, but with an explicitly provided memoization
-   * cache.
-   */
   static bool is_orderable(
       std::unordered_map<const t_type*, bool>& memo,
-      const t_structured& structured_type,
+      const t_structured& type,
       bool enableCustomTypeOrderingIfStructureHasUri);
 };
 

@@ -300,14 +300,20 @@ void MysqlFetchOperationImpl::resumeImpl() {
     // When we pause between queries, the value of `paused_action_` is already
     // the value of the next states: StartQuery or CompleteOperation.
     setActiveFetchAction(paused_action_);
+    resume_scheduled_ = false;
     // Leave timeout to be reset or checked when we hit
     // `waitForActionable`
     actionable();
+  } else {
+    resume_scheduled_ = false;
   }
 }
 
 void MysqlFetchOperationImpl::resume() {
-  conn().runInThread(this, &MysqlFetchOperationImpl::resumeImpl);
+  // Make sure we only schedule one resume at a time.
+  if (!resume_scheduled_.exchange(true)) {
+    conn().runInThread(this, &MysqlFetchOperationImpl::resumeImpl);
+  }
 }
 
 void MysqlFetchOperationImpl::specializedTimeoutTriggered() {
@@ -332,13 +338,13 @@ void MysqlFetchOperationImpl::specializedTimeoutTriggered() {
    * read. Instead we use the code below to detach the result object from the
    * connection, so no network flushing is done.
    *
-   * This does not cause a memory leak because the socket will still be cleaned
-   * up when the connection is freed. AsyncMySQL also does not provide a way
-   * for clients to read half a result, then send more queries. If we allowed
-   * partial reads of results, then this strategy would not work. The most
-   * common case where we would normally need to flush results is for client
-   * query timeouts, where we might still be receiving rows when we interrupt
-   * and return an error to the client.
+   * This does not cause a memory leak because the socket will still be
+   * cleaned up when the connection is freed. AsyncMySQL also does not provide
+   * a way for clients to read half a result, then send more queries. If we
+   * allowed partial reads of results, then this strategy would not work. The
+   * most common case where we would normally need to flush results is for
+   * client query timeouts, where we might still be receiving rows when we
+   * interrupt and return an error to the client.
    */
   if (rowStream()) {
     rowStream()->close();

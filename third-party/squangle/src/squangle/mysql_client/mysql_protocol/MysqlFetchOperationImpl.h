@@ -57,6 +57,7 @@ class MysqlFetchOperationImpl : public MysqlOperationImpl,
   void killRunningQuery();
 
   bool cancel_ = false;
+  std::atomic<bool> resume_scheduled_{false};
 };
 
 } // namespace facebook::common::mysql_client::mysql_protocol

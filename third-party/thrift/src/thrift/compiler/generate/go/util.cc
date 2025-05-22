@@ -640,6 +640,24 @@ std::vector<t_struct*> get_service_req_resp_structs(const t_service* service) {
       }
     }
     req_resp_structs.push_back(resp_struct);
+
+    if (func->stream()) {
+      auto stream_struct_name =
+          go::munge_ident("stream" + svcGoName + funcGoName, false);
+      auto stream_struct = new t_struct(service->program(), stream_struct_name);
+      auto elem_field = std::make_unique<t_field>(
+          func->stream()->elem_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+      elem_field->set_qualifier(t_field_qualifier::optional);
+      stream_struct->append_field(std::move(elem_field));
+      if (func->stream()->exceptions() != nullptr) {
+        for (const auto& xs : func->stream()->exceptions()->get_members()) {
+          auto xc_ptr = std::unique_ptr<t_field>(xs);
+          xc_ptr->set_qualifier(t_field_qualifier::optional);
+          stream_struct->append_field(std::move(xc_ptr));
+        }
+      }
+      req_resp_structs.push_back(stream_struct);
+    }
   }
   return req_resp_structs;
 }

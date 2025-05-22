@@ -977,7 +977,7 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
         case 'g':
         case 'k':
         case 'G':
-        case 'H':
+        case 'H': {
           switch(modifier) {
             case LM_LONG_DOUBLE:
               fp_num = (double) va_arg(ap, long double);
@@ -990,35 +990,37 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
           }
 
           if (std::isnan(fp_num)) {
-             s = const_cast<char*>("NAN");
-             s_len = 3;
-             break;
-           } else if (std::isinf(fp_num)) {
-             if (fp_num > 0) {
-               s = const_cast<char*>("INF");
-               s_len = 3;
-             } else {
-               s = const_cast<char*>("-INF");
-               s_len = 4;
-             }
-             break;
-           }
+            s = const_cast<char*>("NAN");
+            s_len = 3;
+            break;
+          } else if (std::isinf(fp_num)) {
+            if (fp_num > 0) {
+              s = const_cast<char*>("INF");
+              s_len = 3;
+            } else {
+              s = const_cast<char*>("-INF");
+              s_len = 4;
+            }
+            break;
+          }
 
           if (adjust_precision == NO)
             precision = FLOAT_DIGITS;
           else if (precision == 0)
             precision = 1;
           /*
-           * * We use &num_buf[ 1 ], so that we have room for the sign
-           */
+          * * We use &num_buf[ 1 ], so that we have room for the sign
+          */
+          char expon = '.';
+          if (*fmt != 'H' && *fmt != 'k') {
 #ifdef HAVE_LOCALE_H
-          if (!lconv) {
-            lconv = localeconv();
-          }
+            if (!lconv) lconv = localeconv();
 #endif
+            expon = LCONV_DECIMAL_POINT;
+          }
           s = php_gcvt(fp_num, precision,
-                       (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT,
-                       (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
+                      expon,
+                      (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
           if (*s == '-')
             prefix_char = *s++;
           else if (print_sign)
@@ -1031,7 +1033,7 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
           if (alternate_form && (q = strchr(s, '.')) == nullptr)
             s[s_len++] = '.';
           break;
-
+        }
 
         case 'c':
           char_buf[0] = (char) (va_arg(ap, int));

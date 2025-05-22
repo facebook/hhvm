@@ -91,12 +91,12 @@ pub trait DeclProvider<'d>: std::fmt::Debug {
     /// Get a decl for the given type name and depth.
     /// * `symbol` - the name of the symbol being requested
     /// * `depth` - a hint to the provider about the number of layers of decl
-    ///             request traversed to arrive at this request
-    fn type_decl<'s>(&'s self, symbol: &str, depth: u64) -> Result<TypeDecl<'d>>;
+    /// *           request traversed to arrive at this request
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'d>>;
 
-    fn func_decl<'s>(&'s self, symbol: &str) -> Result<&'d FunDecl<'d>>;
-    fn const_decl<'s>(&'s self, symbol: &str) -> Result<&'d ConstDecl<'d>>;
-    fn module_decl<'s>(&'s self, symbol: &str) -> Result<&'d ModuleDecl<'d>>;
+    fn func_decl(&self, symbol: &str) -> Result<&'d FunDecl<'d>>;
+    fn const_decl(&self, symbol: &str) -> Result<&'d ConstDecl<'d>>;
+    fn module_decl(&self, symbol: &str) -> Result<&'d ModuleDecl<'d>>;
 }
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.

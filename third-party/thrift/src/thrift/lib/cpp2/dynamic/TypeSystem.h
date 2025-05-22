@@ -251,10 +251,6 @@ class MapTypeRef final {
   folly::not_null_unique_ptr<TypeRef> valueType_;
 };
 
-[[noreturn]] void throwTypeRefAccessInactiveKind(std::string_view actualKind);
-[[noreturn]] void throwDefinitionRefAccessInactiveKind(
-    std::string_view actualKind);
-
 } // namespace detail
 
 class TypeRef final {
@@ -340,7 +336,7 @@ class TypeRef final {
 
   const StructNode& asStruct() const {
     if (kind() != Kind::STRUCT) {
-      throwTypeRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return asStructUnchecked();
   }
@@ -350,7 +346,7 @@ class TypeRef final {
 
   const UnionNode& asUnion() const {
     if (kind() != Kind::UNION) {
-      throwTypeRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return asUnionUnchecked();
   }
@@ -360,7 +356,7 @@ class TypeRef final {
 
   const EnumNode& asEnum() const {
     if (kind() != Kind::ENUM) {
-      throwTypeRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return asEnumUnchecked();
   }
@@ -370,7 +366,7 @@ class TypeRef final {
 
   const OpaqueAliasNode& asOpaqueAlias() const {
     if (kind() != Kind::OPAQUE_ALIAS) {
-      throwTypeRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return asOpaqueAliasUnchecked();
   }
@@ -380,7 +376,7 @@ class TypeRef final {
 
   const List& asList() const {
     if (kind() != Kind::LIST) {
-      throwTypeRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return asListUnchecked();
   }
@@ -390,7 +386,7 @@ class TypeRef final {
 
   const Set& asSet() const {
     if (kind() != Kind::SET) {
-      throwTypeRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return asSetUnchecked();
   }
@@ -400,7 +396,7 @@ class TypeRef final {
 
   const Map& asMap() const {
     if (kind() != Kind::MAP) {
-      throwTypeRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return asMapUnchecked();
   }
@@ -451,7 +447,7 @@ class TypeRef final {
   const T& asType() const {
     return visit(
         [](const T& value) -> const T& { return value; },
-        [&](auto&&) -> const T& { throwTypeRefAccessInactiveKind(); });
+        [&](auto&&) -> const T& { throwAccessInactiveKind(); });
   }
 
   // TypeRef to primitives
@@ -489,10 +485,7 @@ class TypeRef final {
  private:
   Alternative type_;
 
-  static std::string_view kindToString(Kind) noexcept;
-  [[noreturn]] void throwTypeRefAccessInactiveKind() const {
-    detail::throwTypeRefAccessInactiveKind(kindToString(kind()));
-  }
+  [[noreturn]] void throwAccessInactiveKind() const;
 };
 static_assert(std::is_copy_constructible_v<TypeRef>);
 static_assert(std::is_copy_assignable_v<TypeRef>);
@@ -757,25 +750,25 @@ class DefinitionRef final {
 
   const StructNode& asStruct() const {
     if (kind() != Kind::STRUCT) {
-      throwDefinitionRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return *std::get<StructPtr>(definition_);
   }
   const UnionNode& asUnion() const {
     if (kind() != Kind::UNION) {
-      throwDefinitionRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return *std::get<UnionPtr>(definition_);
   }
   const EnumNode& asEnum() const {
     if (kind() != Kind::ENUM) {
-      throwDefinitionRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return *std::get<EnumPtr>(definition_);
   }
   const OpaqueAliasNode& asOpaqueAlias() const {
     if (kind() != Kind::OPAQUE_ALIAS) {
-      throwDefinitionRefAccessInactiveKind();
+      throwAccessInactiveKind();
     }
     return *std::get<OpaqueAliasPtr>(definition_);
   }
@@ -790,7 +783,7 @@ class DefinitionRef final {
       default:
         break;
     }
-    throwDefinitionRefAccessInactiveKind();
+    throwAccessInactiveKind();
   }
 
   /**
@@ -822,9 +815,7 @@ class DefinitionRef final {
   const T& asType() const {
     return visit(
         [](const T& value) -> const T& { return value; },
-        [&](const auto&) -> const T& {
-          throwDefinitionRefAccessInactiveKind();
-        });
+        [&](const auto&) -> const T& { throwAccessInactiveKind(); });
   }
 
   explicit DefinitionRef(Alternative definition)
@@ -833,10 +824,7 @@ class DefinitionRef final {
  private:
   Alternative definition_;
 
-  static std::string_view kindToString(Kind) noexcept;
-  [[noreturn]] void throwDefinitionRefAccessInactiveKind() const {
-    detail::throwDefinitionRefAccessInactiveKind(kindToString(kind()));
-  }
+  [[noreturn]] void throwAccessInactiveKind() const;
 };
 
 template <typename... F>

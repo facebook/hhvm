@@ -133,19 +133,6 @@ TypeId MapTypeRef::id() const {
   return TypeIds::map(keyType().id(), valueType().id());
 }
 
-[[noreturn]] void throwTypeRefAccessInactiveKind(std::string_view actualKind) {
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "tried to access TypeRef with inactive kind, actual kind was: {}",
-      actualKind));
-}
-
-[[noreturn]] void throwDefinitionRefAccessInactiveKind(
-    std::string_view actualKind) {
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "tried to access DefinitionRef with inactive kind, actual kind was: {}",
-      actualKind));
-}
-
 } // namespace detail
 
 const StructuredNode& TypeRef::asStructured() const {
@@ -157,7 +144,7 @@ const StructuredNode& TypeRef::asStructured() const {
     default:
       break;
   }
-  throwTypeRefAccessInactiveKind();
+  throwAccessInactiveKind();
 }
 
 TypeId TypeRef::id() const {
@@ -265,7 +252,9 @@ bool TypeRef::isEqualIdentityTo(const TypeRef& rhs) const noexcept {
       [&](const TypeRef::Any&) { return rhs.isAny(); });
 }
 
-/* static */ std::string_view TypeRef::kindToString(Kind k) noexcept {
+namespace {
+std::string_view kindToString(TypeRef::Kind k) noexcept {
+  using Kind = TypeRef::Kind;
   switch (k) {
     case Kind::BOOL:
       return "BOOL";
@@ -306,6 +295,13 @@ bool TypeRef::isEqualIdentityTo(const TypeRef& rhs) const noexcept {
   }
   return "<unknown>";
 }
+} // namespace
+
+[[noreturn]] void TypeRef::throwAccessInactiveKind() const {
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "tried to access TypeRef with inactive kind, actual kind was: {}",
+      kindToString(kind())));
+}
 
 /* static */ TypeRef TypeRef::fromDefinition(DefinitionRef def) {
   switch (def.kind()) {
@@ -327,7 +323,9 @@ const Uri& DefinitionRef::uri() const noexcept {
   return visit(std::mem_fn(&DefinitionNode::uri));
 }
 
-/* static */ std::string_view DefinitionRef::kindToString(Kind k) noexcept {
+namespace {
+std::string_view kindToString(DefinitionRef::Kind k) noexcept {
+  using Kind = DefinitionRef::Kind;
   switch (k) {
     case Kind::STRUCT:
       return "STRUCT";
@@ -341,6 +339,13 @@ const Uri& DefinitionRef::uri() const noexcept {
       break;
   }
   return "<unknown>";
+}
+} // namespace
+
+[[noreturn]] void DefinitionRef::throwAccessInactiveKind() const {
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "tried to access DefinitionRef with inactive kind, actual kind was: {}",
+      kindToString(kind())));
 }
 
 namespace {

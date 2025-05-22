@@ -106,30 +106,34 @@ class TJSONProtocol : public TVirtualProtocol<TJSONProtocol> {
   static const uint8_t kJSONTab;
   static const uint8_t kJSONCarriageReturn;
 
-  static const std::string kJSONEscapePrefix;
+#ifndef CLANG_LAZY_INIT_TEST
+#define CLANG_LAZY_INIT_TEST
+#endif
 
-  static const std::string kJSONTrue;
-  static const std::string kJSONFalse;
+  CLANG_LAZY_INIT_TEST static const std::string kJSONEscapePrefix;
+
+  CLANG_LAZY_INIT_TEST static const std::string kJSONTrue;
+  CLANG_LAZY_INIT_TEST static const std::string kJSONFalse;
 
   static const uint32_t kThriftVersion1;
 
-  static const std::string kThriftNan;
-  static const std::string kThriftNegativeNan;
-  static const std::string kThriftInfinity;
-  static const std::string kThriftNegativeInfinity;
+  CLANG_LAZY_INIT_TEST static const std::string kThriftNan;
+  CLANG_LAZY_INIT_TEST static const std::string kThriftNegativeNan;
+  CLANG_LAZY_INIT_TEST static const std::string kThriftInfinity;
+  CLANG_LAZY_INIT_TEST static const std::string kThriftNegativeInfinity;
 
-  static const std::string kTypeNameBool;
-  static const std::string kTypeNameByte;
-  static const std::string kTypeNameI16;
-  static const std::string kTypeNameI32;
-  static const std::string kTypeNameI64;
-  static const std::string kTypeNameDouble;
-  static const std::string kTypeNameFloat;
-  static const std::string kTypeNameStruct;
-  static const std::string kTypeNameString;
-  static const std::string kTypeNameMap;
-  static const std::string kTypeNameList;
-  static const std::string kTypeNameSet;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameBool;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameByte;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameI16;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameI32;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameI64;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameDouble;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameFloat;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameStruct;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameString;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameMap;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameList;
+  CLANG_LAZY_INIT_TEST static const std::string kTypeNameSet;
 
  private:
   const std::string& getTypeNameForTypeID(TType typeID);

@@ -18,7 +18,6 @@
 
 #include <thrift/perf/cpp/AsyncClientWorker2.h>
 
-#include <queue>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>

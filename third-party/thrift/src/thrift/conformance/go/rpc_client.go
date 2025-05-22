@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -93,6 +94,42 @@ func (t *rpcClientConformanceTester) execute() {
 		err = t.RequestResponseUndeclaredException(testCaseCtx)
 	case t.instruction.RequestResponseTimeout != nil:
 		err = t.RequestResponseTimeout(testCaseCtx)
+	case t.instruction.StreamBasic != nil:
+		err = t.StreamBasic(testCaseCtx)
+	case t.instruction.StreamInitialResponse != nil:
+		err = t.StreamInitialResponse(testCaseCtx)
+	case t.instruction.StreamDeclaredException != nil:
+		err = t.StreamDeclaredException(testCaseCtx)
+	case t.instruction.StreamUndeclaredException != nil:
+		err = t.StreamUndeclaredException(testCaseCtx)
+	case t.instruction.StreamInitialDeclaredException != nil:
+		err = t.StreamInitialDeclaredException(testCaseCtx)
+	case t.instruction.StreamInitialUndeclaredException != nil:
+		err = t.StreamInitialUndeclaredException(testCaseCtx)
+	case t.instruction.StreamChunkTimeout != nil:
+		err = t.StreamChunkTimeout(testCaseCtx)
+	case t.instruction.StreamCreditTimeout != nil:
+		err = t.StreamCreditTimeout(testCaseCtx)
+	case t.instruction.StreamInitialTimeout != nil:
+		err = t.StreamInitialTimeout(testCaseCtx)
+	case t.instruction.SinkBasic != nil:
+		err = t.SinkBasic(testCaseCtx)
+	case t.instruction.SinkChunkTimeout != nil:
+		err = t.SinkChunkTimeout(testCaseCtx)
+	case t.instruction.SinkInitialResponse != nil:
+		err = t.SinkInitialResponse(testCaseCtx)
+	case t.instruction.SinkDeclaredException != nil:
+		err = t.SinkDeclaredException(testCaseCtx)
+	case t.instruction.SinkUndeclaredException != nil:
+		err = t.SinkUndeclaredException(testCaseCtx)
+	case t.instruction.InteractionConstructor != nil:
+		err = t.InteractionConstructor(testCaseCtx)
+	case t.instruction.InteractionFactoryFunction != nil:
+		err = t.InteractionFactoryFunction(testCaseCtx)
+	case t.instruction.InteractionPersistsState != nil:
+		err = t.InteractionPersistsState(testCaseCtx)
+	case t.instruction.InteractionTermination != nil:
+		err = t.InteractionTermination(testCaseCtx)
 	default:
 		glog.Fatal("unsupported test case")
 	}
@@ -172,4 +209,76 @@ func (t *rpcClientConformanceTester) RequestResponseUndeclaredException(ctx cont
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseUndeclaredException(responseValue)
 	return t.client.SendTestResult(ctx, clientTestResult)
+}
+
+func (t *rpcClientConformanceTester) StreamBasic(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamInitialResponse(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamDeclaredException(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamUndeclaredException(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamInitialDeclaredException(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamInitialUndeclaredException(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamChunkTimeout(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamCreditTimeout(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) StreamInitialTimeout(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) SinkBasic(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) SinkChunkTimeout(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) SinkInitialResponse(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) SinkDeclaredException(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) SinkUndeclaredException(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) InteractionConstructor(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) InteractionFactoryFunction(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) InteractionPersistsState(ctx context.Context) error {
+	return errors.New("not supported")
+}
+
+func (t *rpcClientConformanceTester) InteractionTermination(ctx context.Context) error {
+	return errors.New("not supported")
 }

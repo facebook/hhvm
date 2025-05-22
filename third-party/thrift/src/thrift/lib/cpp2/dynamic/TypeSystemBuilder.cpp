@@ -349,10 +349,10 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
         std::vector<EnumNode::Value> values;
         values.reserve(enumDef.values()->size());
         for (SerializableEnumValueDefinition& mapping : *enumDef.values()) {
-          values.emplace_back(EnumNode::Value(
+          values.emplace_back(EnumNode::Value{
               std::move(*mapping.name()),
               *mapping.datum(),
-              makeAnnots(std::move(*mapping.annotations()))));
+              makeAnnots(std::move(*mapping.annotations()))});
         }
         uninitDef.asType<EnumNode>().emplace(
             uri,
@@ -410,7 +410,7 @@ void validateIdentitiesAreUnique(
 void validateFieldsAreOptional(
     UriView uri, const SerializableUnionDefinition& unionDef) {
   for (const SerializableFieldDefinition& field : *unionDef.fields()) {
-    if (field.presence() != PresenceQualifier::OPTIONAL) {
+    if (field.presence() != PresenceQualifier::OPTIONAL_) {
       throw InvalidTypeError(fmt::format(
           "field '{}' must be optional in union '{}'",
           field.identity()->name(),

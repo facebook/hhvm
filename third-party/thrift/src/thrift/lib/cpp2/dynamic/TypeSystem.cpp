@@ -38,7 +38,7 @@ StructuredNode::StructuredNode(
   for (const FieldNode& field : fields_) {
     bool emplaced =
         fieldHandleById_
-            .emplace(field.identity().id(), FastFieldHandle(ordinal))
+            .emplace(field.identity().id(), FastFieldHandle{ordinal})
             .second;
     if (!emplaced) {
       folly::throw_exception<InvalidTypeError>(fmt::format(
@@ -47,7 +47,7 @@ StructuredNode::StructuredNode(
           uri_));
     }
     emplaced = fieldHandleByName_
-                   .emplace(field.identity().name(), FastFieldHandle(ordinal))
+                   .emplace(field.identity().name(), FastFieldHandle{ordinal})
                    .second;
     if (!emplaced) {
       folly::throw_exception<InvalidTypeError>(fmt::format(
@@ -76,7 +76,7 @@ UnionNode::UnionNode(
     : StructuredNode(
           std::move(uri), std::move(fields), isSealed, std::move(annotations)) {
   for (const FieldNode& field : this->fields()) {
-    if (field.presence() != PresenceQualifier::OPTIONAL) {
+    if (field.presence() != PresenceQualifier::OPTIONAL_) {
       folly::throw_exception<InvalidTypeError>(fmt::format(
           "field {} must be optional in a Union", field.identity()));
     }

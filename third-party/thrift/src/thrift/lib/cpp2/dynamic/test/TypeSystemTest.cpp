@@ -34,7 +34,7 @@ namespace apache::thrift::dynamic {
 // For conciseness
 namespace {
 
-constexpr inline PresenceQualifier optional = PresenceQualifier::OPTIONAL;
+constexpr inline PresenceQualifier optional = PresenceQualifier::OPTIONAL_;
 constexpr inline PresenceQualifier unqualified = PresenceQualifier::UNQUALIFIED;
 using RawAnnotationsMap = folly::F14FastMap<Uri, SerializableRecordUnion>;
 

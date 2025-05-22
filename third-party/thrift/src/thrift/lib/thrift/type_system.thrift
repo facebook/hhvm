@@ -50,6 +50,7 @@ enum PresenceQualifier {
   DEFAULT_INITIALIZED = 0,
 
   UNQUALIFIED = 1,
+  @cpp.Name{value = "OPTIONAL_"}
   OPTIONAL = 2,
   TERSE = 3,
 }

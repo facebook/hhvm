@@ -558,8 +558,7 @@ class SerializableRecord final {
 
   template <
       typename V,
-      std::enable_if_t<
-          detail::isSerializableRecordKind<std::remove_cvref_t<V>>>* = nullptr>
+      std::enable_if_t<detail::isSerializableRecordKind<V>>* = nullptr>
   friend bool operator==(const V& lhs, const SerializableRecord& rhs) {
     return rhs == lhs;
   }
@@ -567,15 +566,13 @@ class SerializableRecord final {
   // In C++20, operator!= can be synthesized from operator==.
   template <
       typename V,
-      std::enable_if_t<
-          detail::isSerializableRecordKind<std::remove_cvref_t<V>>>* = nullptr>
+      std::enable_if_t<detail::isSerializableRecordKind<V>>* = nullptr>
   friend bool operator!=(const SerializableRecord& lhs, const V& rhs) {
     return !(lhs == rhs);
   }
   template <
       typename V,
-      std::enable_if_t<
-          detail::isSerializableRecordKind<std::remove_cvref_t<V>>>* = nullptr>
+      std::enable_if_t<detail::isSerializableRecordKind<V>>* = nullptr>
   friend bool operator!=(const V& lhs, const SerializableRecord& rhs) {
     return !(lhs == rhs);
   }
@@ -609,5 +606,3 @@ struct std::hash<apache::thrift::dynamic::detail::PrimitiveDatum<T>> {
     return std::hash<T>{}(primitive.datum);
   }
 };
-
-namespace apache::thrift::dynamic {} // namespace apache::thrift::dynamic

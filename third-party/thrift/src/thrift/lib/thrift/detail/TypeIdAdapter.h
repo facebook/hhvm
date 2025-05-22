@@ -627,23 +627,17 @@ class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
     return lhs.isMap() && lhs.asMap() == rhs;
   }
 
-  template <
-      typename V,
-      std::enable_if_t<isTypeIdKind<std::remove_reference_t<V>>>* = nullptr>
+  template <typename V, std::enable_if_t<isTypeIdKind<V>>* = nullptr>
   friend bool operator==(const V& lhs, const TypeIdWrapper& rhs) {
     return rhs == lhs;
   }
 
   // In C++20, operator!= can be synthesized from operator==.
-  template <
-      typename V,
-      std::enable_if_t<isTypeIdKind<std::remove_cvref_t<V>>>* = nullptr>
+  template <typename V, std::enable_if_t<isTypeIdKind<V>>* = nullptr>
   friend bool operator!=(const TypeIdWrapper& lhs, const V& rhs) {
     return !(lhs == rhs);
   }
-  template <
-      typename V,
-      std::enable_if_t<isTypeIdKind<std::remove_cvref_t<V>>>* = nullptr>
+  template <typename V, std::enable_if_t<isTypeIdKind<V>>* = nullptr>
   friend bool operator!=(const V& lhs, const TypeIdWrapper& rhs) {
     return !(lhs == rhs);
   }

@@ -3387,6 +3387,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _attribute_spec: Self::Output,
         _async_keyword: Self::Output,
         _function_keyword: Self::Output,
+        _type_parameters: Self::Output,
         _left_paren: Self::Output,
         _parameters: Self::Output,
         _right_paren: Self::Output,

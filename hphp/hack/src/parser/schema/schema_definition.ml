@@ -1251,6 +1251,7 @@ let schema : schema_node list =
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
           ("async_keyword", ZeroOrOne Token);
           ("function_keyword", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
           ("left_paren", Token);
           ("parameters", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);

@@ -1,0 +1,44 @@
+ERROR: File "polymorphic_lambda_sub_bad_legacy.php", line 25, characters 15-16:
+Invalid argument (Typing[4323])
+  File "polymorphic_lambda_sub_bad_legacy.php", line 24, characters 17-17:
+  `T` is a constrained type parameter
+  File "polymorphic_lambda_sub_bad_legacy.php", line 24, characters 22-26:
+  This type constraint is violated
+  File "polymorphic_lambda_sub_bad_legacy.php", line 24, characters 22-26:
+  Expected `Three`
+  File "polymorphic_lambda_sub_bad_legacy.php", line 14, characters 13-13:
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "polymorphic_lambda_sub_bad_legacy.php", line 25, characters 15-16:
+Invalid argument (Typing[4323])
+  File "polymorphic_lambda_sub_bad_legacy.php", line 24, characters 17-17:
+  `T` is a constrained type parameter
+  File "polymorphic_lambda_sub_bad_legacy.php", line 24, characters 22-26:
+  This type constraint is violated
+  File "polymorphic_lambda_sub_bad_legacy.php", line 24, characters 22-26:
+  Expected `Three`
+  File "polymorphic_lambda_sub_bad_legacy.php", line 14, characters 18-20:
+  But got `Two`
+ERROR: File "polymorphic_lambda_sub_bad_legacy.php", line 30, characters 15-16:
+Invalid argument (Typing[4323])
+  File "polymorphic_lambda_sub_bad_legacy.php", line 14, characters 13-13:
+  `T` is a constrained type parameter
+  File "polymorphic_lambda_sub_bad_legacy.php", line 14, characters 28-31:
+  This type constraint is violated
+  File "polymorphic_lambda_sub_bad_legacy.php", line 29, characters 17-17:
+  `T` is a constrained type parameter
+  File "polymorphic_lambda_sub_bad_legacy.php", line 29, characters 32-36:
+  This type constraint is violated
+  File "polymorphic_lambda_sub_bad_legacy.php", line 14, characters 28-31:
+  Expected `Four`
+  File "polymorphic_lambda_sub_bad_legacy.php", line 29, characters 32-36:
+  But got `Three`
+ERROR: File "polymorphic_lambda_sub_bad_legacy.php", line 30, characters 15-16:
+Invalid argument (Typing[4323])
+  File "polymorphic_lambda_sub_bad_legacy.php", line 29, characters 17-17:
+  `T` is a constrained type parameter
+  File "polymorphic_lambda_sub_bad_legacy.php", line 29, characters 32-36:
+  This type constraint is violated
+  File "polymorphic_lambda_sub_bad_legacy.php", line 14, characters 13-13:
+  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "polymorphic_lambda_sub_bad_legacy.php", line 29, characters 32-36:
+  But got `Three`

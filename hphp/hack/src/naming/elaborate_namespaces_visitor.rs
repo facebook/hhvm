@@ -495,6 +495,10 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 env.extend_hint_tparams(&fun_.tparams);
                 e.recurse(env, self.object())?
             }
+            Expr_::Efun(box efun) => {
+                env.extend_hint_tparams(&efun.fun.tparams);
+                e.recurse(env, self.object())?
+            }
             _ => e.recurse(env, self.object())?,
         }
         Ok(())

@@ -1,20 +1,2 @@
-ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 29-29:
-A lambda arrow `==>` is expected here. (Parsing[1002])
-ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 29-31:
-Unbound name: `use` (a global constant) (Naming[2049])
-ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 53-54:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "polymorphic_lambda_syntax_with_use_bad.php", line 4, characters 34-35:
-  Did you mean `$y` instead?
-ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 29-31:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 40-60:
-You cannot return a value (Typing[4084])
-  File "polymorphic_lambda_syntax_with_use_bad.php", line 4, characters 39-42:
-  This is a `void` function
-ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 47-59:
-Invalid return type (Typing[4110])
-  File "polymorphic_lambda_syntax_with_use_bad.php", line 4, characters 39-42:
-  Expected `void`
-  File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 47-59:
-  But got `(nothing, int)`
+ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 43-45:
+Encountered unexpected token `==>`. (Parsing[1002])

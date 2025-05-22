@@ -30,4 +30,11 @@ function main(): void {
   $g = function<T as One super Five>(T $x): T ==> $x;
   var_dump($g);
   $_ = fork($g,new Three(),new Four());
+
+  $h = function<T>(T $x): T use() { return $x; };
+  var_dump($f);
+  $_ = fork($f,new Three(),new Four());
+  $i = function<T as One super Five>(T $x): T use() { return $x; };
+  var_dump($g);
+  $_ = fork($g,new Three(),new Four());
 }

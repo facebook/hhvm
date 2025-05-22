@@ -1491,6 +1491,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           anonymous_attribute_spec = attr;
           anonymous_async_keyword = async_kw;
           anonymous_function_keyword = fun_kw;
+          anonymous_type_parameters = tp;
           anonymous_left_paren = lp;
           anonymous_parameters = params;
           anonymous_right_paren = rp;
@@ -1508,6 +1509,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env async_kw;
           when_present async_kw space;
           t env fun_kw;
+          t env tp;
           transform_argish_with_return_type
             env
             lp

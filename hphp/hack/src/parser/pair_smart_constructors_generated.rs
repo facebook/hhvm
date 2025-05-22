@@ -420,8 +420,8 @@ where
         Node(self.0.make_anonymous_class(class_keyword.0, left_paren.0, argument_list.0, right_paren.0, extends_keyword.0, extends_list.0, implements_keyword.0, implements_list.0, body.0), self.1.make_anonymous_class(class_keyword.1, left_paren.1, argument_list.1, right_paren.1, extends_keyword.1, extends_list.1, implements_keyword.1, implements_list.1, body.1))
     }
 
-    fn make_anonymous_function(&mut self, attribute_spec: Self::Output, async_keyword: Self::Output, function_keyword: Self::Output, left_paren: Self::Output, parameters: Self::Output, right_paren: Self::Output, ctx_list: Self::Output, colon: Self::Output, readonly_return: Self::Output, type_: Self::Output, use_: Self::Output, body: Self::Output) -> Self::Output {
-        Node(self.0.make_anonymous_function(attribute_spec.0, async_keyword.0, function_keyword.0, left_paren.0, parameters.0, right_paren.0, ctx_list.0, colon.0, readonly_return.0, type_.0, use_.0, body.0), self.1.make_anonymous_function(attribute_spec.1, async_keyword.1, function_keyword.1, left_paren.1, parameters.1, right_paren.1, ctx_list.1, colon.1, readonly_return.1, type_.1, use_.1, body.1))
+    fn make_anonymous_function(&mut self, attribute_spec: Self::Output, async_keyword: Self::Output, function_keyword: Self::Output, type_parameters: Self::Output, left_paren: Self::Output, parameters: Self::Output, right_paren: Self::Output, ctx_list: Self::Output, colon: Self::Output, readonly_return: Self::Output, type_: Self::Output, use_: Self::Output, body: Self::Output) -> Self::Output {
+        Node(self.0.make_anonymous_function(attribute_spec.0, async_keyword.0, function_keyword.0, type_parameters.0, left_paren.0, parameters.0, right_paren.0, ctx_list.0, colon.0, readonly_return.0, type_.0, use_.0, body.0), self.1.make_anonymous_function(attribute_spec.1, async_keyword.1, function_keyword.1, type_parameters.1, left_paren.1, parameters.1, right_paren.1, ctx_list.1, colon.1, readonly_return.1, type_.1, use_.1, body.1))
     }
 
     fn make_anonymous_function_use_clause(&mut self, keyword: Self::Output, left_paren: Self::Output, variables: Self::Output, right_paren: Self::Output) -> Self::Output {

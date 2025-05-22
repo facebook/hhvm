@@ -122,6 +122,7 @@ struct
     anonymous_attribute_spec: t;
     anonymous_async_keyword: t;
     anonymous_function_keyword: t;
+    anonymous_type_parameters: t;
     anonymous_left_paren: t;
     anonymous_parameters: t;
     anonymous_right_paren: t;
@@ -686,6 +687,7 @@ struct
         anonymous_attribute_spec: t;
         anonymous_async_keyword: t;
         anonymous_function_keyword: t;
+        anonymous_type_parameters: t;
         anonymous_left_paren: t;
         anonymous_parameters: t;
         anonymous_right_paren: t;

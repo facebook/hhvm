@@ -442,17 +442,7 @@ where
             TokenKind::Keyset => self.parse_keyset_intrinsic_expression(),
             TokenKind::Tuple => self.parse_tuple_expression(),
             TokenKind::Shape => self.parse_shape_expression(),
-            TokenKind::Function => {
-                let tokenkind = parser1.peek_token_kind_with_possible_attributized_type_list();
-                match tokenkind {
-                    TokenKind::LessThan => {
-                        let pos = self.pos();
-                        let attribute_spec = self.sc_mut().make_missing(pos);
-                        self.parse_lambda_expression(attribute_spec)
-                    }
-                    _ => self.parse_function(),
-                }
-            }
+            TokenKind::Function => self.parse_function(),
             TokenKind::DollarDollar => {
                 self.continue_from(parser1);
                 self.parse_dollar_dollar(token)
@@ -513,7 +503,7 @@ where
     fn parse_function(&mut self) -> S::Output {
         let pos = self.pos();
         let attribute_spec = self.sc_mut().make_missing(pos);
-        self.parse_anon(attribute_spec)
+        self.parse_anon_or_polymorphic_lambda(attribute_spec)
     }
 
     fn parse_dollar_dollar(&mut self, token: Token<S>) -> S::Output {
@@ -2616,17 +2606,7 @@ where
         let mut parser2 = self.clone();
         let _ = parser2.optional_token(TokenKind::Async);
         match parser2.peek_token_kind() {
-            TokenKind::Function => {
-                let token = parser2.next_xhp_class_name_or_other_token();
-                match token.kind() {
-                    TokenKind::LessThan => {
-                        let pos = self.pos();
-                        let attribute_spec = self.sc_mut().make_missing(pos);
-                        self.parse_lambda_expression(attribute_spec)
-                    }
-                    _ => self.parse_anon(attribute_spec),
-                }
-            }
+            TokenKind::Function => self.parse_anon_or_polymorphic_lambda(attribute_spec),
             TokenKind::LeftBrace => self.parse_async_block(attribute_spec),
             TokenKind::Variable | TokenKind::LeftParen => {
                 self.parse_lambda_expression(attribute_spec)
@@ -2696,7 +2676,7 @@ where
         (colon, readonly_opt, return_type)
     }
 
-    fn parse_anon(&mut self, attribute_spec: S::Output) -> S::Output {
+    fn parse_anon_or_polymorphic_lambda(&mut self, attribute_spec: S::Output) -> S::Output {
         // SPEC
         // anonymous-function-creation-expression:
         //   async-opt function
@@ -2712,37 +2692,63 @@ where
         // type annotations optional.
         let async_ = self.optional_token(TokenKind::Async);
         let fn_ = self.assert_token(TokenKind::Function);
+
+        // Lambda signature
+        let typarams = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
         let ctx_list = self.with_type_parser(|p| p.parse_contexts());
         let (colon, readonly_opt, return_type) = self.parse_optional_return();
-        let use_clause = self.parse_anon_use_opt();
-        // Detect if the user has the type in the wrong place
-        // function() use(): T // wrong
-        // function(): T use() // correct
-        if !use_clause.is_missing() {
-            let misplaced_colon = self.clone().optional_token(TokenKind::Colon);
-            if !misplaced_colon.is_missing() {
-                self.with_error(
-                    Cow::Borrowed("Bad signature: use(...) should occur after the type"),
-                    Vec::new(),
-                );
+
+        // Is there is fat-arrow? If yes, this is a polymorphic lambda otherwise it is an anonymous function
+
+        if self.peek_token_kind() == TokenKind::EqualEqualGreaterThan {
+            let signature = self.sc_mut().make_lambda_signature(
+                typarams,
+                left_paren,
+                params,
+                right_paren,
+                ctx_list,
+                colon,
+                readonly_opt,
+                return_type,
+            );
+            let arrow = self.require_lambda_arrow();
+            let body = self.parse_lambda_body();
+            self.sc_mut()
+                .make_lambda_expression(attribute_spec, async_, signature, arrow, body)
+        } else {
+            let use_clause = self.parse_anon_use_opt();
+            // Detect if the user has the type in the wrong place
+            // function() use(): T // wrong
+            // function(): T use() // correct
+            if !use_clause.is_missing() {
+                let misplaced_colon = self.clone().optional_token(TokenKind::Colon);
+                if !misplaced_colon.is_missing() {
+                    self.with_error(
+                        Cow::Borrowed("Bad signature: use(...) should occur after the type"),
+                        Vec::new(),
+                    );
+                }
             }
+            let body = self.parse_compound_statement();
+            self.sc_mut().make_anonymous_function(
+                attribute_spec,
+                async_,
+                fn_,
+                typarams,
+                left_paren,
+                params,
+                right_paren,
+                ctx_list,
+                colon,
+                readonly_opt,
+                return_type,
+                use_clause,
+                body,
+            )
         }
-        let body = self.parse_compound_statement();
-        self.sc_mut().make_anonymous_function(
-            attribute_spec,
-            async_,
-            fn_,
-            left_paren,
-            params,
-            right_paren,
-            ctx_list,
-            colon,
-            readonly_opt,
-            return_type,
-            use_clause,
-            body,
-        )
     }
 
     fn parse_et_splice_expression(&mut self, dollar: S::Output) -> S::Output {

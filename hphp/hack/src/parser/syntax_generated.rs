@@ -983,11 +983,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_readonly_return: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
+    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_type_parameters: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_readonly_return: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
             anonymous_attribute_spec,
             anonymous_async_keyword,
             anonymous_function_keyword,
+            anonymous_type_parameters,
             anonymous_left_paren,
             anonymous_parameters,
             anonymous_right_paren,
@@ -2757,10 +2758,11 @@ where
                 acc
             },
             SyntaxVariant::AnonymousFunction(x) => {
-                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_async_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_ctx_list, anonymous_colon, anonymous_readonly_return, anonymous_type, anonymous_use, anonymous_body } = *x;
+                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_async_keyword, anonymous_function_keyword, anonymous_type_parameters, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_ctx_list, anonymous_colon, anonymous_readonly_return, anonymous_type, anonymous_use, anonymous_body } = *x;
                 let acc = f(anonymous_attribute_spec, acc);
                 let acc = f(anonymous_async_keyword, acc);
                 let acc = f(anonymous_function_keyword, acc);
+                let acc = f(anonymous_type_parameters, acc);
                 let acc = f(anonymous_left_paren, acc);
                 let acc = f(anonymous_parameters, acc);
                 let acc = f(anonymous_right_paren, acc);
@@ -4326,7 +4328,7 @@ where
                  anonymous_class_class_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::AnonymousFunction, 12) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
+             (SyntaxKind::AnonymousFunction, 13) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
                  anonymous_body: ts.pop().unwrap(),
                  anonymous_use: ts.pop().unwrap(),
                  anonymous_type: ts.pop().unwrap(),
@@ -4336,6 +4338,7 @@ where
                  anonymous_right_paren: ts.pop().unwrap(),
                  anonymous_parameters: ts.pop().unwrap(),
                  anonymous_left_paren: ts.pop().unwrap(),
+                 anonymous_type_parameters: ts.pop().unwrap(),
                  anonymous_function_keyword: ts.pop().unwrap(),
                  anonymous_async_keyword: ts.pop().unwrap(),
                  anonymous_attribute_spec: ts.pop().unwrap(),
@@ -5077,7 +5080,7 @@ where
             SyntaxVariant::ConcurrentStatement(x) => unsafe { std::slice::from_raw_parts(&x.concurrent_keyword, 2) },
             SyntaxVariant::SimpleInitializer(x) => unsafe { std::slice::from_raw_parts(&x.simple_initializer_equal, 2) },
             SyntaxVariant::AnonymousClass(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_class_class_keyword, 9) },
-            SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_attribute_spec, 12) },
+            SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_attribute_spec, 13) },
             SyntaxVariant::AnonymousFunctionUseClause(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_use_keyword, 4) },
             SyntaxVariant::VariablePattern(x) => unsafe { std::slice::from_raw_parts(&x.variable_pattern_variable, 1) },
             SyntaxVariant::ConstructorPattern(x) => unsafe { std::slice::from_raw_parts(&x.constructor_pattern_constructor, 4) },
@@ -5268,7 +5271,7 @@ where
             SyntaxVariant::ConcurrentStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.concurrent_keyword, 2) },
             SyntaxVariant::SimpleInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.simple_initializer_equal, 2) },
             SyntaxVariant::AnonymousClass(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_class_class_keyword, 9) },
-            SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_attribute_spec, 12) },
+            SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_attribute_spec, 13) },
             SyntaxVariant::AnonymousFunctionUseClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_use_keyword, 4) },
             SyntaxVariant::VariablePattern(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.variable_pattern_variable, 1) },
             SyntaxVariant::ConstructorPattern(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.constructor_pattern_constructor, 4) },
@@ -6162,6 +6165,7 @@ pub struct AnonymousFunctionChildren<T, V> {
     pub anonymous_attribute_spec: Syntax<T, V>,
     pub anonymous_async_keyword: Syntax<T, V>,
     pub anonymous_function_keyword: Syntax<T, V>,
+    pub anonymous_type_parameters: Syntax<T, V>,
     pub anonymous_left_paren: Syntax<T, V>,
     pub anonymous_parameters: Syntax<T, V>,
     pub anonymous_right_paren: Syntax<T, V>,
@@ -8094,19 +8098,20 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AnonymousFunction(x) => {
-                get_index(12).and_then(|index| { match index {
+                get_index(13).and_then(|index| { match index {
                         0 => Some(&x.anonymous_attribute_spec),
                     1 => Some(&x.anonymous_async_keyword),
                     2 => Some(&x.anonymous_function_keyword),
-                    3 => Some(&x.anonymous_left_paren),
-                    4 => Some(&x.anonymous_parameters),
-                    5 => Some(&x.anonymous_right_paren),
-                    6 => Some(&x.anonymous_ctx_list),
-                    7 => Some(&x.anonymous_colon),
-                    8 => Some(&x.anonymous_readonly_return),
-                    9 => Some(&x.anonymous_type),
-                    10 => Some(&x.anonymous_use),
-                    11 => Some(&x.anonymous_body),
+                    3 => Some(&x.anonymous_type_parameters),
+                    4 => Some(&x.anonymous_left_paren),
+                    5 => Some(&x.anonymous_parameters),
+                    6 => Some(&x.anonymous_right_paren),
+                    7 => Some(&x.anonymous_ctx_list),
+                    8 => Some(&x.anonymous_colon),
+                    9 => Some(&x.anonymous_readonly_return),
+                    10 => Some(&x.anonymous_type),
+                    11 => Some(&x.anonymous_use),
+                    12 => Some(&x.anonymous_body),
                         _ => None,
                     }
                 })

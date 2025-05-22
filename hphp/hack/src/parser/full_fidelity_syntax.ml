@@ -1673,6 +1673,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -1686,6 +1687,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc anonymous_attribute_spec in
         let acc = f acc anonymous_async_keyword in
         let acc = f acc anonymous_function_keyword in
+        let acc = f acc anonymous_type_parameters in
         let acc = f acc anonymous_left_paren in
         let acc = f acc anonymous_parameters in
         let acc = f acc anonymous_right_paren in
@@ -3506,6 +3508,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -3520,6 +3523,7 @@ module WithToken (Token : TokenType) = struct
           anonymous_attribute_spec;
           anonymous_async_keyword;
           anonymous_function_keyword;
+          anonymous_type_parameters;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -5294,6 +5298,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -5308,6 +5313,7 @@ module WithToken (Token : TokenType) = struct
           "anonymous_attribute_spec";
           "anonymous_async_keyword";
           "anonymous_function_keyword";
+          "anonymous_type_parameters";
           "anonymous_left_paren";
           "anonymous_parameters";
           "anonymous_right_paren";
@@ -7256,6 +7262,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -7271,6 +7278,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -9547,6 +9555,7 @@ module WithToken (Token : TokenType) = struct
           anonymous_attribute_spec
           anonymous_async_keyword
           anonymous_function_keyword
+          anonymous_type_parameters
           anonymous_left_paren
           anonymous_parameters
           anonymous_right_paren
@@ -9562,6 +9571,7 @@ module WithToken (Token : TokenType) = struct
               anonymous_attribute_spec;
               anonymous_async_keyword;
               anonymous_function_keyword;
+              anonymous_type_parameters;
               anonymous_left_paren;
               anonymous_parameters;
               anonymous_right_paren;
@@ -10965,6 +10975,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -10980,6 +10991,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -11136,6 +11148,7 @@ module WithToken (Token : TokenType) = struct
               anonymous_attribute_spec;
               anonymous_async_keyword;
               anonymous_function_keyword;
+              anonymous_type_parameters;
               anonymous_left_paren;
               anonymous_parameters;
               anonymous_right_paren;
@@ -11150,6 +11163,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;

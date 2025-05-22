@@ -161,6 +161,7 @@ where
         r9: Self::Output,
         r10: Self::Output,
         r11: Self::Output,
+        r12: Self::Output,
         body: Self::Output,
     ) -> Self::Output {
         let saw_yield = self.state.pop_n(11);
@@ -179,6 +180,7 @@ where
             r9,
             r10,
             r11,
+            r12,
             body,
         )
     }

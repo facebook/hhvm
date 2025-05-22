@@ -1,0 +1,42 @@
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 6, characters 17-18:
+Variance annotation are not allowed on generics in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 11, characters 17-23:
+Reified generics are not allowed in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 21, characters 17-38:
+Attributes with parameters are not allowed for type parameters in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 26, characters 17-17:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "polymorphic_lambda_syntax_bad_legacy.php", line 25, characters 15-15:
+  `T` is already bound here
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 31, characters 19-20:
+You cannot re-bind the type parameter `Tm` (Naming[2041])
+  File "polymorphic_lambda_syntax_bad_legacy.php", line 30, characters 24-25:
+  `Tm` is already bound here
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 31, characters 22-23:
+You cannot re-bind the type parameter `Tc` (Naming[2041])
+  File "polymorphic_lambda_syntax_bad_legacy.php", line 29, characters 9-10:
+  `Tc` is already bound here
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 37, characters 19-19:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "polymorphic_lambda_syntax_bad_legacy.php", line 37, characters 17-17:
+  `T` is already bound here
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 44, characters 21-21:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "polymorphic_lambda_syntax_bad_legacy.php", line 43, characters 17-17:
+  `T` is already bound here
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 52, characters 8-45:
+Return hints must be given explicitly for polymorphic lambda expressions. Please add a type hint. (Naming[2001])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 55, characters 20-21:
+Parameter hints must be given explicitly for polymorphic lambda expressions. Please add a type hint for `$x`. (Naming[2001])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 62, characters 20-20:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 64, characters 27-27:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 66, characters 20-20:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 66, characters 27-27:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 68, characters 24-24:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_lambda_syntax_bad_legacy.php", line 68, characters 36-36:
+Wildcard typehints are not allowed in this position (Naming[2084])

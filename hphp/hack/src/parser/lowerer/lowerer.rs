@@ -2637,6 +2637,7 @@ fn p_anonymous_function<'a>(
             false,
         )),
     );
+
     let unsafe_ctxs = ctxs.clone();
     let p_use = |n: S<'a>, e: &mut Env<'a>| match &n.children {
         AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_use_var),
@@ -2651,10 +2652,11 @@ fn p_anonymous_function<'a>(
     let user_attributes = p_user_attributes(&c.attribute_spec, env);
     let external = c.body.is_external();
     let params = could_map(&c.parameters, env, p_fun_param)?;
+    let tparams = p_hint_tparam_l(&c.type_parameters, env)?;
     let fun = ast::Fun_ {
         span: p_pos(node, env),
         readonly_this: None, // set in process_readonly_expr
-        tparams: vec![],
+        tparams,
         annotation: (),
         readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
         ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),

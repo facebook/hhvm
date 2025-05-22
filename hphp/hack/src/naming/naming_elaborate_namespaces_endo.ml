@@ -389,7 +389,8 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | ExpressionTree et ->
         let et_class = elaborate_type_name env et.et_class in
         super#on_expr_ env (ExpressionTree { et with et_class })
-      | Lfun (fun_, _capture_lids) ->
+      | Lfun (fun_, _)
+      | Efun { ef_fun = fun_; _ } ->
         let env =
           let type_params =
             List.fold_left

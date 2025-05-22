@@ -288,7 +288,8 @@ let validate_hint_tparams tparams on_error ~ctx =
 let on_expr_ on_error expr_ ~ctx =
   let ctx =
     match expr_ with
-    | Aast_defs.Lfun (fun_, _) ->
+    | Aast_defs.Lfun (fun_, _)
+    | Aast_defs.(Efun { ef_fun = fun_; _ }) ->
       let Aast.{ f_tparams; _ } = fun_ in
       let (_ : unit) = validate_hint_tparams f_tparams on_error ~ctx in
       Env.extend_hint_tparams ctx f_tparams

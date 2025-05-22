@@ -1,0 +1,6 @@
+ERROR: File "polymorphic_lambda_syntax_legacy.php", line 24, characters 35-38:
+Some type arguments violate their constraints (Typing[4323])
+  File "polymorphic_lambda_syntax_legacy.php", line 8, characters 11-11:
+  Expected `dynamic`
+  File "polymorphic_lambda_syntax_legacy.php", line 24, characters 37-37:
+  Type `T` is not a subtype of `dynamic` under dynamic-aware subtyping

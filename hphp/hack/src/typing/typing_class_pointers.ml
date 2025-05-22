@@ -32,12 +32,12 @@ let error_at_cls_ptr_type env level pos ty =
       Typing_error.(primary @@ Primary.Class_pointer_to_string { pos; ty })
   | _ -> ()
 
-let error_at_classname_type env level pos cls_name =
+let error_at_classname_type env level pos cls_name ty_pos =
   if level > 1 then
     Typing_error_utils.add_typing_error
       ~env
       Typing_error.(
-        primary @@ Primary.String_to_class_pointer { pos; cls_name })
+        primary @@ Primary.String_to_class_pointer { pos; cls_name; ty_pos })
 
 let string_of_class_id_ = function
   | CIparent -> "parent"

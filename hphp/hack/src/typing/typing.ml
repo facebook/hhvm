@@ -10548,7 +10548,8 @@ end = struct
                (Env.get_tcopt env)
                "classname_class")
             p
-            cls_name;
+            cls_name
+            (get_pos base_ty);
           ((env, ty_err), (ty, err_res))
         | (_, Tclass_ptr the_cls) ->
           let wrap ty = mk (Reason.none, Tclass_ptr ty) in

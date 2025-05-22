@@ -4787,7 +4787,7 @@ end = struct
             ^ " to get the class name as a string." ))
       ()
 
-  let string_to_class_pointer pos cls_name =
+  let string_to_class_pointer pos cls_name ty_pos =
     let cls_name = Utils.strip_ns cls_name in
     let classname_ty = Printf.sprintf "classname<%s>" cls_name in
     let classname_ty_md = Markdown_lite.md_codify classname_ty in
@@ -4803,6 +4803,7 @@ end = struct
             ^ " in this position. Please use a "
             ^ class_ptr_ty_md
             ^ " instead." ))
+      ~reasons:(lazy [(ty_pos, "Definition is here")])
       ()
 
   let to_error t ~env =
@@ -5391,8 +5392,8 @@ end = struct
     | Class_const_to_string { pos; cls_name } ->
       class_const_to_string pos cls_name
     | Class_pointer_to_string { pos; ty } -> class_pointer_to_string pos ty
-    | String_to_class_pointer { pos; cls_name } ->
-      string_to_class_pointer pos cls_name
+    | String_to_class_pointer { pos; cls_name; ty_pos } ->
+      string_to_class_pointer pos cls_name ty_pos
     | Optional_parameter_not_supported pos ->
       optional_parameter_not_supported pos
     | Optional_parameter_not_abstract pos -> optional_parameter_not_abstract pos

@@ -11,6 +11,7 @@ async function lowpri(): Awaitable<bool> {
 async function normal(Awaitable<bool> $low): Awaitable<bool> {
   echo("start normal\n");
   $bridge = PriorityBridgeWaitHandle::create($low);
+  $bridge->prioritize();
   await SleepWaitHandle::create(1000000); // 1 second
   $res = await $bridge;
   echo("end normal\n");

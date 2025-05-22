@@ -244,6 +244,7 @@ namespace HH {
     public static function create(
       Awaitable<T> $child,
     )[]: PriorityBridgeWaitHandle<T> {}
+    public function prioritize(): void {}
   }
 
   <<__SupportDynamicType>>

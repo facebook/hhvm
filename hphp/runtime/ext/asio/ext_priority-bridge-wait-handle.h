@@ -52,6 +52,12 @@ public:
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
 
+  // Prioritize the child of this PBWH. Will lift the child into the object's
+  // context, and then maintain monotonicity between the child and the object's
+  // context states.
+  void prioritize();
+  bool isPrioritized() const { return m_prioritized; }
+
   static const int8_t STATE_BLOCKED = 2;
 
 private:
@@ -60,10 +66,12 @@ private:
 
   friend Object HHVM_STATIC_METHOD(PriorityBridgeWaitHandle, create,
                                    const Object& child);
+  friend void HHVM_METHOD(PriorityBridgeWaitHandle, prioritize);
 
 private:
   c_WaitableWaitHandle* m_child{};
   AsioBlockable m_blockable{};
+  bool m_prioritized{false};
 
   TYPE_SCAN_CUSTOM_FIELD(m_child) {
     if (!isFinished())

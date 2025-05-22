@@ -17,9 +17,10 @@
 
 #include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 
-#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
+#include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/system/systemlib.h"
 
@@ -101,11 +102,26 @@ c_WaitableWaitHandle* c_PriorityBridgeWaitHandle::getChild() {
   return m_child;
 }
 
+void c_PriorityBridgeWaitHandle::prioritize() {
+  auto const child = getChild();
+  assertx(!child->isFinished());
+
+  m_prioritized = true;
+  asio::enter_context_state(child, getContextStateIndex());
+}
+
+void HHVM_METHOD(PriorityBridgeWaitHandle, prioritize) {
+  auto obj = wait_handle<c_PriorityBridgeWaitHandle>(this_);
+  obj->prioritize();
+}
+
 void AsioExtension::registerNativePriorityBridgeWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\PriorityBridgeWaitHandle, create,
                      PriorityBridgeWaitHandle, create);
   HHVM_STATIC_MALIAS(HH\\PriorityBridgeWaitHandle, setOnCreateCallback,
                      PriorityBridgeWaitHandle, setOnCreateCallback);
+  HHVM_MALIAS(HH\\PriorityBridgeWaitHandle, prioritize,
+              PriorityBridgeWaitHandle, prioritize);
 
   Native::registerClassExtraDataHandler(
       c_PriorityBridgeWaitHandle::className(),

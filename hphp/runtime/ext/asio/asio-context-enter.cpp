@@ -109,13 +109,14 @@ struct EnterContextState final {
     enqueue(node->getChild(), newStateIdx);
   }
 
-  // PriorityBridge WHs allow children to run in a lower priority context, and
-  // maintain this when entering the context.
+  // Allow children to run in a lower priority context, unless they've been
+  // prioritized, in which case maintain the new state index.
   void discover(c_PriorityBridgeWaitHandle* node,
                 ContextStateIndex newStateIdx) {
     assertx(node->getState() == c_PriorityBridgeWaitHandle::STATE_BLOCKED);
     auto child = node->getChild();
-    newStateIdx = child->getContextStateIndex().isLow()
+
+    newStateIdx = !node->isPrioritized() && child->getContextStateIndex().isLow()
       ? newStateIdx.toLow()
       : newStateIdx;
     enqueue(child, newStateIdx);

@@ -15,7 +15,7 @@
 # pyre-strict
 
 from unittest import IsolatedAsyncioTestCase, TestCase
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import thrift.py3  # @manual
 from testing.clients import TestingService
@@ -29,7 +29,7 @@ class TestTesting(IsolatedAsyncioTestCase):
     @patch("thrift.py3.get_client")
     async def test_mock_client(self, mock_get_client: Mock) -> None:
         mock_get_client.return_value = mock_client(TestingService)
-        mock_get_client.return_value.getName = AsyncMock(return_value="mock_client")
+        mock_get_client.return_value.getName.return_value = "mock_client"
 
         async with thrift.py3.get_client(
             TestingService, host="localhost", port=8

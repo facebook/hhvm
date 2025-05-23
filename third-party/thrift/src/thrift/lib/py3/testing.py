@@ -36,6 +36,16 @@ def mock_client(client_klass: Type[Client]) -> mock.AsyncMock:
             # pyre-ignore
             if thing.__name__ in ("__aenter__", "__aexit__"):
                 return True
+            # We must check cython stuff first as they do not have a
+            # __objclass__ so the exception fires
+            if (
+                thing.__class__.__name__ == "cython_function_or_method"
+                and not thing.__name__.startswith("__")
+            ):
+                # The only cython function that makes it into here is one that
+                # is on the thrift client class that is being mocked.  As such
+                # we do not need to check the subclass
+                return True
             if not thing.__name__.startswith("__") and issubclass(
                 client_klass,
                 # pyre-ignore

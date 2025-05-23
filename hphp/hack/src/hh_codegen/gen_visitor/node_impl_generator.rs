@@ -26,7 +26,7 @@ pub trait NodeImpl {
     fn use_node() -> TokenStream;
     fn use_visitor() -> TokenStream;
 
-    fn gen(ctx: &Context<'_>) -> Result<TokenStream> {
+    fn r#gen(ctx: &Context<'_>) -> Result<TokenStream> {
         let impls = ctx
             .non_alias_types()
             .map(|ty| {

@@ -651,7 +651,7 @@ pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_)
 
     let initialized_constants: Vec<_> = constants
         .iter_mut()
-        .filter_map(|(Constant { ref name, .. }, instrs)| {
+        .filter_map(|&mut (Constant { ref name, .. }, ref mut instrs)| {
             instrs
                 .take()
                 .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))

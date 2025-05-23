@@ -29,7 +29,7 @@ pub fn get_ty_params(i: &Item) -> Result<Vec<String>> {
     }
 }
 
-pub fn get_ty_param_idents(i: &Item) -> Result<impl Iterator<Item = Ident>> {
+pub fn get_ty_param_idents(i: &Item) -> Result<impl Iterator<Item = Ident> + use<>> {
     Ok(get_ty_params(i)?
         .into_iter()
         .map(|t| format_ident!("{}", t)))

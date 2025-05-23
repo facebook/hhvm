@@ -21,8 +21,8 @@ pub fn run(args: &Args) -> anyhow::Result<Vec<(std::path::PathBuf, String)>> {
     let results = vec![
         ("node.rs", crate::common::by_ref_node::node()),
         ("node_impl.rs", crate::common::by_ref_node::node_impl()),
-        ("node_impl_gen.rs", node_impl_generator::gen(&ctx)),
-        ("visitor.rs", visitor_trait_generator::gen(&ctx)),
+        ("node_impl_gen.rs", node_impl_generator::r#gen(&ctx)),
+        ("visitor.rs", visitor_trait_generator::r#gen(&ctx)),
     ];
     Ok(results
         .iter()

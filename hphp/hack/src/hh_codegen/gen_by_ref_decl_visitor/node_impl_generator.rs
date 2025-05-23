@@ -10,7 +10,7 @@ use super::Context;
 use super::visitor_trait_generator;
 use crate::common::gen_helpers;
 
-pub fn gen(ctx: &Context) -> TokenStream {
+pub fn r#gen(ctx: &Context) -> TokenStream {
     let uses = gen_helpers::gen_module_uses(ctx.modules());
     let impls = ctx.type_structures().map(gen_node_impl).collect::<Vec<_>>();
 

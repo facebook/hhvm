@@ -204,14 +204,14 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
     }
 }
 
-fn uls_from_ast<P, F1, F2>(
+fn uls_from_ast<P, F1, F2, T: Node<AstParams<(), String>>>(
     params: &[P],
     get_param_name: F1,
     get_param_default_value: F2,
     explicit_use_set_opt: Option<&SSet>,
-    body: &impl Node<AstParams<(), String>>,
+    body: &T,
     capture_debugger_vars: bool,
-) -> Result<impl Iterator<Item = String>, String>
+) -> Result<impl Iterator<Item = String> + use<P, F1, F2, T>, String>
 where
     F1: Fn(&P) -> &str,
     F2: Fn(&P) -> Maybe<&Expr>,

@@ -142,14 +142,14 @@ macro_rules! impl_tuple {
     ( $(($name:ident, $lhs:ident, $rhs:ident))+) => (
         impl< $($name: EqModuloPos),+ > EqModuloPos for ($($name,)+) {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
-                let ($(ref $lhs,)+) = self;
-                let ($(ref $rhs,)+) = rhs;
+                let ($($lhs,)+) = self;
+                let ($($rhs,)+) = rhs;
                 true
                 $(&& $lhs.eq_modulo_pos($rhs))+
             }
             fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
-                let ($(ref $lhs,)+) = self;
-                let ($(ref $rhs,)+) = rhs;
+                let ($($lhs,)+) = self;
+                let ($($rhs,)+) = rhs;
                 true
                 $(&& $lhs.eq_modulo_pos_and_reason($rhs))+
             }

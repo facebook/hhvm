@@ -17,8 +17,8 @@ macro_rules! impl_generator {
                 <Self as $base>::filename()
             }
 
-            fn gen(&self, ctx: &Context<'_>) -> Result<TokenStream> {
-                <Self as $base>::gen(ctx)
+            fn r#gen(&self, ctx: &Context<'_>) -> Result<TokenStream> {
+                <Self as $base>::r#gen(ctx)
             }
         }
     };
@@ -26,5 +26,5 @@ macro_rules! impl_generator {
 
 pub trait Generator {
     fn filename(&self) -> String;
-    fn gen(&self, ctx: &Context<'_>) -> Result<TokenStream>;
+    fn r#gen(&self, ctx: &Context<'_>) -> Result<TokenStream>;
 }

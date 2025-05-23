@@ -377,16 +377,16 @@ macro_rules! list {
     () => {
         $crate::list::List::Nil
     };
-    (in $arena:expr; $x:expr $(,)?) => {{
+    (in $arena:expr_2021; $x:expr_2021 $(,)?) => {{
         use $crate::Arena;
         $crate::list::List::Cons($arena.alloc(($x, $crate::list::List::Nil)))
     }};
-    (in $arena:expr; $x:expr, $($xs:expr $(,)?)+) => {{
+    (in $arena:expr_2021; $x:expr_2021, $($xs:expr_2021 $(,)?)+) => {{
         use $crate::Arena;
         let arena = $arena;
         $crate::list::List::Cons(arena.alloc(($x, l![in arena; $($xs,)*])))
     }};
-    (in $arena:expr; $elem:expr; $n:expr) => {{
+    (in $arena:expr_2021; $elem:expr_2021; $n:expr_2021) => {{
         let elem = $elem;
         $crate::list::List::init($n, |_| elem.clone(), $arena)
     }};
@@ -397,10 +397,10 @@ macro_rules! stack_list {
     () => {
         $crate::list::List::Nil
     };
-    ($x:expr $(,)?) => {
+    ($x:expr_2021 $(,)?) => {
         $crate::list::List::Cons(&($x, $crate::list::List::Nil))
     };
-    ($x:expr, $($xs:expr $(,)?)+) => {
+    ($x:expr_2021, $($xs:expr_2021 $(,)?)+) => {
         $crate::list::List::Cons(&($x, stack_list![$($xs,)*]))
     };
 }

@@ -155,33 +155,36 @@ pub fn apply_tier_overrides_with_params(
                         }
                     }
 
-                    if let Some(ref overwrite) = tier.get("overwrite")? {
-                        log::info!(
-                            "Applying overrides for tier: {}",
-                            tier.name().unwrap_or_default()
-                        );
-                        config.copy(overwrite)?;
+                    match tier.get("overwrite")? {
+                        Some(ref overwrite) => {
+                            log::info!(
+                                "Applying overrides for tier: {}",
+                                tier.name().unwrap_or_default()
+                            );
+                            config.copy(overwrite)?;
 
-                        if let Some(ref debug_prop_name) = trace_property {
-                            if overwrite.get(debug_prop_name)?.is_some() {
-                                traced_rules.push(TracedRule {
-                                    rule_name: tier.name()?,
-                                    traced_property: debug_prop_name.clone(),
-                                    rule_body: overwrite.clone(),
-                                });
-                                log::debug!(
-                                    "Applied overrides from rule {:?}\n{:?}",
-                                    overwrite.name()?,
-                                    overwrite
-                                );
+                            if let Some(ref debug_prop_name) = trace_property {
+                                if overwrite.get(debug_prop_name)?.is_some() {
+                                    traced_rules.push(TracedRule {
+                                        rule_name: tier.name()?,
+                                        traced_property: debug_prop_name.clone(),
+                                        rule_body: overwrite.clone(),
+                                    });
+                                    log::debug!(
+                                        "Applied overrides from rule {:?}\n{:?}",
+                                        overwrite.name()?,
+                                        overwrite
+                                    );
+                                }
                             }
                         }
-                    } else {
-                        log::info!(
-                            "No overrides found for tier: {} {:?}",
-                            tier.name().unwrap_or_default(),
-                            tier,
-                        );
+                        _ => {
+                            log::info!(
+                                "No overrides found for tier: {} {:?}",
+                                tier.name().unwrap_or_default(),
+                                tier,
+                            );
+                        }
                     }
                     // no break here, so we can continue to match more overwrites
                 }

@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::custom_error_config::CustomErrorConfig;
-use crate::gen::global_options::GlobalOptions;
-use crate::gen::global_options::SavedState;
-use crate::gen::global_options::SavedStateLoading;
-use crate::gen::parser_options::ParserOptions;
-use crate::gen::saved_state_rollouts::SavedStateRollouts;
+use crate::r#gen::global_options::GlobalOptions;
+use crate::r#gen::global_options::SavedState;
+use crate::r#gen::global_options::SavedStateLoading;
+use crate::r#gen::parser_options::ParserOptions;
+use crate::r#gen::saved_state_rollouts::SavedStateRollouts;
 use crate::global_options::NoneOrAllExcept;
 use crate::i_set;
 use crate::s_map;

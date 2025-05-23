@@ -27,7 +27,7 @@ pub fn make_folded_decl_provider<R: Reason>(
     shallow_decl_store: ShallowDeclStore<R>,
     opts: Arc<DeclFoldOptions>,
     decl_parser: DeclParser<R>,
-) -> impl FoldedDeclProvider<R> {
+) -> impl FoldedDeclProvider<R> + use<R> {
     let shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>> =
         if let Some(naming_table_path) = naming_table {
             Arc::new(LazyShallowDeclProvider::new(

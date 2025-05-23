@@ -29,8 +29,8 @@ pub fn run(args: &Args) -> anyhow::Result<Vec<(std::path::PathBuf, String)>> {
     let ctx = Context::new(files.as_slice(), &args.root)?;
 
     let results = vec![
-        ("pass.rs", pass_generator::gen(&ctx)),
-        ("transform.rs", transform_generator::gen(&ctx)),
+        ("pass.rs", pass_generator::r#gen(&ctx)),
+        ("transform.rs", transform_generator::r#gen(&ctx)),
     ];
     Ok(results
         .iter()

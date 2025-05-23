@@ -517,52 +517,52 @@ impl HhServerProviderBackend {
     /// with no concurrent interaction with the OCaml runtime. The returned
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
-    pub unsafe fn get_ocaml_shallow_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_shallow_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if self.shallow_decl_changes_store.classes.has_local_changes() { None }
         else { self.shallow_decl_changes_store.classes_shm.get_ocaml_by_byte_string(name) }
-    }
-    pub unsafe fn get_ocaml_typedef(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    }}
+    pub unsafe fn get_ocaml_typedef(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if self.shallow_decl_changes_store.typedefs.has_local_changes() { None }
         else { self.shallow_decl_changes_store.typedefs_shm.get_ocaml_by_byte_string(name) }
-    }
-    pub unsafe fn get_ocaml_fun(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    }}
+    pub unsafe fn get_ocaml_fun(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if self.shallow_decl_changes_store.funs.has_local_changes() { None }
         else { self.shallow_decl_changes_store.funs_shm.get_ocaml_by_byte_string(name) }
-    }
-    pub unsafe fn get_ocaml_const(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    }}
+    pub unsafe fn get_ocaml_const(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if self.shallow_decl_changes_store.consts.has_local_changes() { None }
         else { self.shallow_decl_changes_store.consts_shm.get_ocaml_by_byte_string(name) }
-    }
-    pub unsafe fn get_ocaml_module(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    }}
+    pub unsafe fn get_ocaml_module(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if self.shallow_decl_changes_store.modules.has_local_changes() { None }
         else { self.shallow_decl_changes_store.modules_shm.get_ocaml_by_byte_string(name) }
-    }
+    }}
 
-    pub unsafe fn get_ocaml_folded_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_folded_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if self.folded_classes_store.has_local_changes() { None }
         else { self.folded_classes_shm.get_ocaml_by_byte_string(name) }
-    }
+    }}
 
     /// Returns `Option<UnsafeOcamlPtr>` where the `UnsafeOcamlPtr` is a value
     /// of OCaml type `FileInfo.pos option`.
-    pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         // If the context is non-empty, fall back to the slow path by returning None.
         // `self.naming_table.fallback` returns None when there are local changes.
         if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
         else { self.naming_table.fallback.get_ocaml_type_pos(name) }
-    }
-    pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    }}
+    pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
         else { self.naming_table.fallback.get_ocaml_fun_pos(name) }
-    }
-    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    }}
+    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
         else { self.naming_table.fallback.get_ocaml_const_pos(name) }
-    }
-    pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    }}
+    pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> { unsafe {
         if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
         else { self.naming_table.fallback.get_ocaml_module_pos(name) }
-    }
+    }}
 }
 
 #[rustfmt::skip]
@@ -761,10 +761,12 @@ impl ShallowStoreWithChanges {
 /// Calls into the OCaml runtime and may trigger a GC, which may invalidate any
 /// unrooted ocaml values (e.g., `UnsafeOcamlPtr`, `ocamlrep::Value`).
 unsafe fn call_ocaml<T: FromOcamlRep>(callback_name: &'static str, args: &impl ToOcamlRep) -> T {
-    let callback = ocaml_runtime::named_value(callback_name).unwrap();
-    let args = ocamlrep_ocamlpool::to_ocaml(args);
-    let ocaml_result = ocaml_runtime::callback_exn(callback, args).unwrap();
-    T::from_ocaml(ocaml_result).unwrap()
+    unsafe {
+        let callback = ocaml_runtime::named_value(callback_name).unwrap();
+        let args = ocamlrep_ocamlpool::to_ocaml(args);
+        let ocaml_result = ocaml_runtime::callback_exn(callback, args).unwrap();
+        T::from_ocaml(ocaml_result).unwrap()
+    }
 }
 
 /// An implementation of `FileProvider` which calls into

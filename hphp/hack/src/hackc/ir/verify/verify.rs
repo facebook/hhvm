@@ -43,7 +43,7 @@ pub struct Flags {
 /// check!(self, mycond, "mycond should be true but it's {mycond}");
 /// ```
 macro_rules! check {
-    ($self:expr, $cond:expr, $($why:expr),+ $(,)? ) => {{
+    ($self:expr_2021, $cond:expr_2021, $($why:expr_2021),+ $(,)? ) => {{
         let pred = $cond;
         if (!pred) {
             $self.check_failed(&format!($($why),+));
@@ -57,7 +57,7 @@ macro_rules! check {
 /// check_failed!("mycond failed to verify with value {mycond}");
 /// ```
 macro_rules! check_failed {
-    ($self:expr, $($why:expr),+ $(,)? ) => {{
+    ($self:expr_2021, $($why:expr_2021),+ $(,)? ) => {{
         $self.check_failed(&format!($($why),+))
     }}
 }

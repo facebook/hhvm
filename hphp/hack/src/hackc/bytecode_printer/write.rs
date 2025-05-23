@@ -82,7 +82,7 @@ where
 }
 
 macro_rules! wrap_by {
-    ($name:ident, $left:expr, $right:expr) => {
+    ($name:ident, $left:expr_2021, $right:expr_2021) => {
         pub(crate) fn $name<F>(w: &mut dyn Write, f: F) -> Result<()>
         where
             F: FnOnce(&mut dyn Write) -> Result<()>,

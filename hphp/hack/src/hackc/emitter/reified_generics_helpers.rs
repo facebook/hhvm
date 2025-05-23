@@ -58,7 +58,7 @@ pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> 
         let erased_tparams: HashSet<String> = get_erased_tparams(env).collect();
         h_iter.all(|h| match &*h.1 {
             Hint_::Hwildcard => true,
-            Hint_::Happly(Id(_, ref id), ref apply_hints) => {
+            Hint_::Happly(Id(_, id), apply_hints) => {
                 apply_hints.is_empty() && erased_tparams.contains(id)
             }
             _ => false,

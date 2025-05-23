@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-pub use crate::gen::aast_defs as aast;
+pub use crate::r#gen::aast_defs as aast;
 
 pub mod aast_defs_impl;
 pub mod aast_impl;

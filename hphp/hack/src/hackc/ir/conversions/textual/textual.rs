@@ -1399,7 +1399,7 @@ trait ExprWriter {
                 self.write_call_expr(&fun, &[])?;
             }
             Const::Int(i) => write!(self.internal_get_writer(), "{i}")?,
-            Const::LazyClass(ref s) => {
+            Const::LazyClass(s) => {
                 write!(
                     self.internal_get_writer(),
                     "__sil_get_lazy_class(<{}>)",
@@ -1407,7 +1407,7 @@ trait ExprWriter {
                 )?;
             }
             Const::Null => self.internal_get_writer().write_all(b"null")?,
-            Const::String(ref s) => {
+            Const::String(s) => {
                 // String should already be escaped...
                 write!(self.internal_get_writer(), "\"{s}\"")?;
             }

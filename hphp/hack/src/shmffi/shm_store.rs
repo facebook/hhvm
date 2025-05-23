@@ -348,7 +348,7 @@ impl Key for hh24_types::ToplevelCanonSymbolHash {
     }
 }
 
-extern "C" {
+unsafe extern "C" {
     fn hh_log_level() -> ocamlrep::Value<'static>;
 }
 
@@ -392,7 +392,7 @@ where
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
     pub unsafe fn get_ocaml(&self, key: K) -> Option<UnsafeOcamlPtr> {
-        self.get_ocaml_by_hash(self.hash_key(&key))
+        unsafe { self.get_ocaml_by_hash(self.hash_key(&key)) }
     }
 
     /// Fetch the value corresponding to the given key (when the key type `K`
@@ -409,23 +409,25 @@ where
     where
         K: Borrow<[u8]>,
     {
-        self.get_ocaml_by_hash(self.hash_key(key))
+        unsafe { self.get_ocaml_by_hash(self.hash_key(key)) }
     }
 
     unsafe fn get_ocaml_by_hash(&self, hash: u64) -> Option<UnsafeOcamlPtr> {
-        extern "C" {
-            fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
+        unsafe {
+            unsafe extern "C" {
+                fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
+            }
+            let bytes_opt = shmffi::with(|segment| {
+                segment.table.read(&hash).get().map(|heap_value| {
+                    self.decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())
+                        .unwrap()
+                        .into_owned()
+                })
+            });
+            let v = bytes_opt.map(|bytes| caml_input_value_from_block(bytes.as_ptr(), bytes.len()));
+            self.log_shmem_hit_rate(v.is_some());
+            v
         }
-        let bytes_opt = shmffi::with(|segment| {
-            segment.table.read(&hash).get().map(|heap_value| {
-                self.decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())
-                    .unwrap()
-                    .into_owned()
-            })
-        });
-        let v = bytes_opt.map(|bytes| caml_input_value_from_block(bytes.as_ptr(), bytes.len()));
-        self.log_shmem_hit_rate(v.is_some());
-        v
     }
 
     fn decompress<'a>(&self, bytes: &'a [u8], uncompressed_size: usize) -> Result<Cow<'a, [u8]>> {
@@ -519,7 +521,7 @@ where
             return Ok(cache_val_opt);
         }
         let bytes_opt = shmffi::with(|segment| {
-            segment
+            let x = segment
                 .table
                 .read(&self.hash_key(&key))
                 .get()
@@ -528,7 +530,8 @@ where
                         .decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())?
                         .into_owned())
                 })
-                .transpose()
+                .transpose();
+            x
         })?;
         let val_opt: Option<V> = bytes_opt
             .map(|bytes| -> Result<_> {

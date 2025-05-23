@@ -56,7 +56,7 @@ fn find_class<'a>(parsed_file: &ParsedFile<'a>, symbol: &str) -> Option<&'a Shal
     parsed_file
         .decls
         .classes()
-        .find(|(mut sym, _)| {
+        .find(|&(mut sym, _)| {
             if !input_symbol_formatted {
                 sym = &sym[1..];
             }

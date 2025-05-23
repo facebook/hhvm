@@ -215,10 +215,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let mut len = 0;
         for part in parts {
             match part {
-                Node::Name(&(name, _)) => len += name.len(),
+                &Node::Name(&(name, _)) => len += name.len(),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => len += 1,
-                Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => len += name.len() + 1,
-                Node::ListItem(&(Node::Token(t), _backslash))
+                &Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => len += name.len() + 1,
+                &Node::ListItem(&(Node::Token(t), _backslash))
                     if t.kind() == TokenKind::Namespace =>
                 {
                     len += t.width() + 1;
@@ -237,7 +237,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
         for part in parts {
             match part {
-                Node::Name(&(name, _pos)) => qualified_name.push_str(name),
+                &Node::Name(&(name, _pos)) => qualified_name.push_str(name),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => qualified_name.push('\\'),
                 &Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => {
                     qualified_name.push_str(name);
@@ -262,8 +262,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let mut len = 0;
         for part in parts {
             match part {
-                Node::Name(&(name, _)) => len += name.len(),
-                Node::ListItem(&(Node::Name(&(name, _)), _dot)) => len += name.len() + 1,
+                &Node::Name(&(name, _)) => len += name.len(),
+                &Node::ListItem(&(Node::Name(&(name, _)), _dot)) => len += name.len() + 1,
                 _ => {}
             }
         }
@@ -277,7 +277,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
         for part in parts {
             match part {
-                Node::Name(&(name, _pos)) => qualified_name.push_str(name),
+                &Node::Name(&(name, _pos)) => qualified_name.push_str(name),
                 &Node::ListItem(&(Node::Name(&(name, _)), _)) => {
                     qualified_name.push_str(name);
                     qualified_name.push_str(".");
@@ -363,11 +363,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             aast::Expr(
                 _,
                 _,
-                aast::Expr_::ClassConst((
-                    aast::ClassId(_, _, aast::ClassId_::CI(&Id(_, class_name))),
+                aast::Expr_::ClassConst(&(
+                    &aast::ClassId(_, _, aast::ClassId_::CI(&Id(_, class_name))),
                     _, // required to be "class" in constant initializer
                 ))
-                | aast::Expr_::Nameof(aast::ClassId(_, _, aast::ClassId_::CI(&Id(_, class_name)))),
+                | aast::Expr_::Nameof(&aast::ClassId(_, _, aast::ClassId_::CI(&Id(_, class_name)))),
             ) => {
                 // Imagine the case <<MyFancyEnum('foo'.X::class)>>
                 // We would expect a user attribute parameter to concatenate
@@ -1135,7 +1135,7 @@ impl<'a> Node<'a> {
         'a: 'b,
     {
         match self {
-            &Node::List(&items) | Node::BracketedList(&(_, items, _)) => {
+            &Node::List(&items) | &Node::BracketedList(&(_, items, _)) => {
                 NodeIterHelper::Vec(items.iter())
             }
             n if n.is_ignored() => NodeIterHelper::Empty,
@@ -1147,7 +1147,7 @@ impl<'a> Node<'a> {
     // Must return the upper bound returned by NodeIterHelper::size_hint.
     fn len(&self) -> usize {
         match self {
-            &Node::List(&items) | Node::BracketedList(&(_, items, _)) => items.len(),
+            &Node::List(&items) | &Node::BracketedList(&(_, items, _)) => items.len(),
             n if n.is_ignored() => 0,
             _ => 1,
         }
@@ -1166,7 +1166,7 @@ impl<'a> Node<'a> {
     // If this node is a simple unqualified identifier, return its position and text.
     fn as_id(&self) -> Option<Id<'a>> {
         match self {
-            Node::Name(&(name, pos)) | Node::XhpName(&(name, pos)) => Some(Id(pos, name)),
+            &Node::Name(&(name, pos)) | &Node::XhpName(&(name, pos)) => Some(Id(pos, name)),
             _ => None,
         }
     }
@@ -1176,7 +1176,7 @@ impl<'a> Node<'a> {
     // return other unqualified identifiers (i.e., the Name token kind).
     fn as_variable(&self) -> Option<Id<'a>> {
         match self {
-            Node::Variable(&(name, pos)) | Node::Name(&(name, pos)) => Some(Id(pos, name)),
+            &Node::Variable(&(name, pos)) | &Node::Name(&(name, pos)) => Some(Id(pos, name)),
             _ => None,
         }
     }
@@ -1194,9 +1194,9 @@ impl<'a> Node<'a> {
 
     fn contains_marker_attribute(&self, name: &str) -> bool {
         self.iter().any(|node| match node {
-            Node::Attribute(&UserAttributeNode {
+            &Node::Attribute(&UserAttributeNode {
                 name: Id(_pos, attr_name),
-                params: [],
+                params: &[],
                 string_literal_param: None,
                 raw_val: None,
             }) => attr_name == name,
@@ -1861,9 +1861,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             | Node::BooleanLiteral(_)
             | Node::IntLiteral(_)
             | Node::FloatingLiteral(_)
-            | Node::Expr(aast::Expr(_, _, aast::Expr_::Unop(&(Uop::Uminus, _))))
-            | Node::Expr(aast::Expr(_, _, aast::Expr_::Unop(&(Uop::Uplus, _))))
-            | Node::Expr(aast::Expr(_, _, aast::Expr_::String(..))) => self.node_to_ty(node),
+            | Node::Expr(&aast::Expr(_, _, aast::Expr_::Unop(&(Uop::Uminus, _))))
+            | Node::Expr(&aast::Expr(_, _, aast::Expr_::Unop(&(Uop::Uplus, _))))
+            | Node::Expr(&aast::Expr(_, _, aast::Expr_::String(..))) => self.node_to_ty(node),
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
                 let pos = self.token_pos(t);
                 Some(self.alloc(Ty(
@@ -2099,7 +2099,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 let mut ft_variadic = false;
                 for node in nodes.iter() {
                     match node {
-                        Node::FunParam(&FunParamDecl {
+                        &Node::FunParam(&FunParamDecl {
                             attributes,
                             visibility,
                             kind,
@@ -2269,16 +2269,16 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             // error--perhaps that's why.
             Node::IntLiteral(&(s, pos)) => ShapeFieldName::SFlitStr(self.alloc((pos, s.into()))),
             Node::Expr(aast::Expr(_, _, expr_)) => match expr_ {
-                aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, _, aast::ClassId_::CI(&class_name)),
+                &aast::Expr_::ClassConst(&(
+                    &aast::ClassId(_, _, aast::ClassId_::CI(&class_name)),
                     const_name,
                 )) => ShapeFieldName::SFclassConst(self.alloc((class_name, const_name))),
-                aast::Expr_::Nameof(&aast::ClassId(_, _, aast::ClassId_::CI(&class_name))) => {
+                &aast::Expr_::Nameof(&aast::ClassId(_, _, aast::ClassId_::CI(&class_name))) => {
                     ShapeFieldName::SFclassname(self.alloc(class_name))
                 }
                 // TODO(T199272576) I believe these two cases should be dead by parse error
-                aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, self_pos, aast::ClassId_::CIself),
+                &aast::Expr_::ClassConst(&(
+                    &aast::ClassId(_, ref self_pos, aast::ClassId_::CIself),
                     const_name,
                 )) => {
                     let (classish_name, _) = self.get_current_classish_name()?;
@@ -2286,7 +2286,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         self.alloc((Id(self_pos, classish_name), const_name)),
                     )
                 }
-                aast::Expr_::Nameof(&aast::ClassId(_, self_pos, aast::ClassId_::CIself)) => {
+                &aast::Expr_::Nameof(&aast::ClassId(_, self_pos, aast::ClassId_::CIself)) => {
                     let (classish_name, _) = self.get_current_classish_name()?;
                     ShapeFieldName::SFclassname(self.alloc(Id(self_pos, classish_name)))
                 }
@@ -2298,13 +2298,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
     fn make_t_shape_field_name(&self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
         TShapeField(match field {
-            ShapeFieldName::SFlitStr(&(pos, x)) => {
+            &ShapeFieldName::SFlitStr(&(pos, x)) => {
                 TshapeFieldName::TSFlitStr(self.alloc(PosByteString(pos, x)))
             }
-            ShapeFieldName::SFclassname(&id) => {
+            &ShapeFieldName::SFclassname(&id) => {
                 TshapeFieldName::TSFclassConst(self.alloc((id.into(), PosString(id.0, "class"))))
             }
-            ShapeFieldName::SFclassConst(&(id, &(pos, x))) => {
+            &ShapeFieldName::SFclassConst(&(id, &(pos, x))) => {
                 TshapeFieldName::TSFclassConst(self.alloc((id.into(), PosString(pos, x))))
             }
         })
@@ -2590,8 +2590,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
     fn has_polymorphic_context(contexts: &[&Ty<'_>]) -> bool {
         contexts.iter().any(|&ty| match ty.1 {
-            Ty_::Tapply((root, &[])) // Hfun_context in the AST
-            | Ty_::Taccess(TaccessType(Ty(_, Ty_::Tapply((root, &[]))), _)) => root.1.contains('$'),
+            Ty_::Tapply(&(ref root, &[])) // Hfun_context in the AST
+            | Ty_::Taccess(&TaccessType(&Ty(_, Ty_::Tapply(&(ref root, &[]))), _)) => root.1.contains('$'),
             | Ty_::Taccess(TaccessType(t, _)) => Self::taccess_root_is_generic(t),
             _ => false,
         })
@@ -2610,7 +2610,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     fn taccess_root_is_generic(ty: &Ty<'_>) -> bool {
         match ty {
             Ty(_, Ty_::Tgeneric(_)) => true,
-            Ty(_, Ty_::Taccess(&TaccessType(t, _))) => Self::taccess_root_is_generic(t),
+            &Ty(_, Ty_::Taccess(&TaccessType(t, _))) => Self::taccess_root_is_generic(t),
             _ => false,
         }
     }
@@ -2618,7 +2618,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     fn ctx_generic_for_generic_taccess_inner(ty: &Ty<'_>, cst: &str) -> std::string::String {
         let left = match ty {
             Ty(_, Ty_::Tgeneric(name)) => name.to_string(),
-            Ty(_, Ty_::Taccess(&TaccessType(ty, cst))) => {
+            &Ty(_, Ty_::Taccess(&TaccessType(ty, cst))) => {
                 Self::ctx_generic_for_generic_taccess_inner(ty, cst.1)
             }
             _ => panic!("Unexpected element in Taccess"),
@@ -2871,10 +2871,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
         let context_tys = self.slice(context_tys.iter().copied().map(|ty| {
             let ty_ = match ty.1 {
-                Ty_::Tapply(((_, name), &[])) if name.starts_with('$') => {
+                Ty_::Tapply(&((_, ref name), &[])) if name.starts_with('$') => {
                     Ty_::Tgeneric(self.alloc(self.ctx_generic_for_fun(name)))
                 }
-                Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply(((_, name), &[]))), cst))
+                Ty_::Taccess(&TaccessType(&Ty(_, Ty_::Tapply(&((_, ref name), &[]))), cst))
                     if name.starts_with('$') =>
                 {
                     let name = self.ctx_generic_for_dependent(name, cst.1);
@@ -2922,7 +2922,7 @@ impl<'a, 'b> Iterator for NodeIterHelper<'a, 'b> {
                 *self = NodeIterHelper::Empty;
                 Some(node)
             }
-            NodeIterHelper::Vec(ref mut iter) => iter.next(),
+            NodeIterHelper::Vec(iter) => iter.next(),
         }
     }
 
@@ -2941,7 +2941,7 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
         match self {
             NodeIterHelper::Empty => None,
             NodeIterHelper::Single(_) => self.next(),
-            NodeIterHelper::Vec(ref mut iter) => iter.next_back(),
+            NodeIterHelper::Vec(iter) => iter.next_back(),
         }
     }
 }
@@ -3672,7 +3672,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut as_constraint = None;
         let mut super_constraint = None;
         for c in constraint.iter() {
-            if let Node::TypeConstraint(&(kind, hint)) = c {
+            if let &Node::TypeConstraint(&(kind, hint)) = c {
                 let ty = self.node_to_ty(hint);
                 match kind {
                     ConstraintKind::ConstraintAs => as_constraint = ty,
@@ -3774,7 +3774,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut as_constraint = None;
         let mut super_constraint = None;
         for c in constraint.iter() {
-            if let Node::ContextConstraint(&(kind, hint)) = c {
+            if let &Node::ContextConstraint(&(kind, hint)) = c {
                 let ty = self.node_to_ty(hint);
                 match kind {
                     ConstraintKind::ConstraintAs => as_constraint = ty,
@@ -3846,7 +3846,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             _ => {
                 let pos = self.get_pos(bounds);
                 let tys = self.slice(bounds.iter().filter_map(|x| match x {
-                    Node::ListItem(&(ty, _commas)) => self.node_to_ty(ty),
+                    &Node::ListItem(&(ty, _commas)) => self.node_to_ty(ty),
                     &x => self.node_to_ty(x),
                 }));
                 Some(self.alloc(Ty(
@@ -3988,7 +3988,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         };
 
         let constraints = self.slice(constraints.iter().filter_map(|node| match node {
-            Node::TypeConstraint(&constraint) => Some(constraint),
+            &Node::TypeConstraint(&constraint) => Some(constraint),
             _ => None,
         }));
 
@@ -4203,7 +4203,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         right_bracket: Self::Output,
     ) -> Self::Output {
         let tys = self.slice(tys.iter().filter_map(|ty| match ty {
-            Node::ListItem(&(ty, _)) | &ty => {
+            &Node::ListItem(&(ty, _)) | &ty => {
                 // A wildcard is used for the context of a closure type on a
                 // parameter of a function with a function context (e.g.,
                 // `function f((function ()[_]: void) $f)[ctx $f]: void {}`).
@@ -4328,7 +4328,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 let ty = self.node_to_ty(hint);
                 Node::List(
                     self.alloc(self.slice(consts.iter().filter_map(|cst| match cst {
-                        Node::ConstInitializer(&(name, initializer, refs)) => {
+                        &Node::ConstInitializer(&(name, initializer, refs)) => {
                             let id = name.as_id()?;
                             let modifiers = read_member_modifiers(modifiers.iter());
                             let abstract_ = if modifiers.is_abstract {
@@ -4370,7 +4370,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 let pos = self.merge_positions(const_keyword, semicolon);
                 for cst in consts.iter() {
                     match cst {
-                        Node::ConstInitializer(&(name, initializer, _refs)) => {
+                        &Node::ConstInitializer(&(name, initializer, _refs)) => {
                             if let Some(Id(id_pos, id)) = self.elaborate_defined_id(name) {
                                 let ty = self
                                     .node_to_ty(hint)
@@ -4911,7 +4911,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let modifiers = read_member_modifiers(modifiers.iter());
         let declarators = self.slice(declarators.iter().filter_map(
             |declarator| match declarator {
-                Node::ListItem(&(name, initializer)) => {
+                &Node::ListItem(&(name, initializer)) => {
                     let attributes = self.to_attributes(attrs);
                     let Id(pos, name) = name.as_variable()?;
                     let name = if modifiers.is_static {
@@ -5051,7 +5051,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }));
 
         let xhp_attr_uses_decls = self.slice(attributes.iter().filter_map(|x| match x {
-            Node::XhpAttributeUse(&name) => Some(name),
+            &Node::XhpAttributeUse(&name) => Some(name),
             _ => None,
         }));
 
@@ -5094,11 +5094,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         for node in xhp_enum_values.iter() {
             // XHP enum values may only be string or int literals.
             match node {
-                Node::IntLiteral(&(s, _)) => {
+                &Node::IntLiteral(&(s, _)) => {
                     let i = s.parse::<isize>().unwrap_or(0);
                     values.push(XhpEnumValue::XEVInt(i));
                 }
-                Node::StringLiteral(&(s, _)) => {
+                &Node::StringLiteral(&(s, _)) => {
                     let owned_str = String::from_utf8_lossy(s);
                     values.push(XhpEnumValue::XEVString(self.arena.alloc_str(&owned_str)));
                 }
@@ -5727,7 +5727,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     ) -> Self::Output {
         let pos = self.merge_positions(left_paren, right_paren);
         let tys = self.slice(tys.iter().filter_map(|x| match x {
-            Node::ListItem(&(ty, _ampersand)) => self.node_to_ty(ty),
+            &Node::ListItem(&(ty, _ampersand)) => self.node_to_ty(ty),
             &x => self.node_to_ty(x),
         }));
         self.hint_ty(pos, Ty_::Tintersection(tys))
@@ -5741,7 +5741,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     ) -> Self::Output {
         let pos = self.merge_positions(left_paren, right_paren);
         let tys = self.slice(tys.iter().filter_map(|x| match x {
-            Node::ListItem(&(ty, _bar)) => self.node_to_ty(ty),
+            &Node::ListItem(&(ty, _bar)) => self.node_to_ty(ty),
             &x => self.node_to_ty(x),
         }));
         self.hint_ty(pos, Ty_::Tunion(tys))
@@ -6006,12 +6006,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         };
         let params =
             self.slice(args.iter().filter_map(|node| match node {
-                Node::Expr(aast::Expr(
+                &Node::Expr(&aast::Expr(
                     _,
                     _,
                     aast::Expr_::ClassConst(&(
-                        aast::ClassId(_, _, aast::ClassId_::CI(&Id(pos, class_name))),
-                        (_, "class"),
+                        &aast::ClassId(_, _, aast::ClassId_::CI(&Id(pos, class_name))),
+                        &(_, "class"),
                     ))
                     | aast::Expr_::Nameof(&aast::ClassId(
                         _,
@@ -6390,7 +6390,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut as_constraint = None;
         let mut super_constraint = None;
         for c in constraints.iter() {
-            if let Node::ContextConstraint(&(kind, hint)) = c {
+            if let &Node::ContextConstraint(&(kind, hint)) = c {
                 let ty = self.node_to_ty(hint);
                 match kind {
                     ConstraintKind::ConstraintSuper => super_constraint = ty,
@@ -6564,7 +6564,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let const_members = arena_collections::map::Map::from(
             self.arena,
             members.iter().filter_map(|node| match node {
-                Node::ListItem(&(node, _)) | &node => match node {
+                &Node::ListItem(&(node, _)) | &node => match node {
                     Node::RefinedConst(&(id, ctr)) => Some((id, ctr)),
                     _ => None,
                 },

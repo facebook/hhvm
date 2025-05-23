@@ -193,7 +193,7 @@ impl ConfigFile {
         })
     }
 
-    pub fn get_str_list(&self, key: &str) -> Option<impl Iterator<Item = &str>> {
+    pub fn get_str_list(&self, key: &str) -> Option<impl Iterator<Item = &str> + use<'_>> {
         lazy_static::lazy_static! {
             static ref RE: regex::Regex = regex::Regex::new(",[ \n\r\x0c\t]*").unwrap();
         }

@@ -242,7 +242,7 @@ impl TypedLocal {
         used_tmps: &mut Vec<Lid>,
     ) {
         match expr {
-            Expr(_, ref pos, Expr_::Lvar(box lid)) => {
+            &mut Expr(_, ref pos, Expr_::Lvar(box ref mut lid)) => {
                 if let Some(hint) = self.get_hint_or_add_assign(lid, pos) {
                     if self.should_elab {
                         let mut tmp = Lid(pos.clone(), self.gen_tmp_local());
@@ -576,7 +576,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 cond.recurse(env, self.object())?;
                 let mut envs = cases
                     .iter_mut()
-                    .map(|nast::Case(ref mut expr, ref mut block)| {
+                    .map(|nast::Case(expr, block)| {
                         let _ = expr.recurse(env, self.object());
                         let mut new_env = self.new_block_env();
                         let _ = block.recurse(env, new_env.object());
@@ -663,7 +663,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 try_block.recurse(env, self.object())?;
                 let mut envs = catches
                     .iter_mut()
-                    .map(|nast::Catch(_cn, Lid(pos, name), ref mut block)| {
+                    .map(|nast::Catch(_cn, Lid(pos, name), block)| {
                         if !self.locals.contains_key(&name.1) {
                             self.add_local(name.1.to_string(), None, pos);
                         }

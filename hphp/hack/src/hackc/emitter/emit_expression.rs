@@ -2749,7 +2749,7 @@ fn emit_special_function<'a, 'd>(
             // `inout` is dropped here, but it should be impossible to have an expression
             // like: `foo(inout "literal")`
             match args[0].to_expr_ref() {
-                Expr(_, _, Expr_::String(ref func_name)) => {
+                Expr(_, _, Expr_::String(func_name)) => {
                     match std::str::from_utf8(func_name) {
                         Ok(func_name) => Ok(Some(instr::resolve_meth_caller(
                             hhbc::FunctionName::intern(string_utils::strip_global_ns(func_name)),

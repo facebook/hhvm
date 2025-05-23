@@ -12,9 +12,9 @@ use relative_path::Prefix;
 use relative_path::RelativePath;
 use toml::Spanned;
 
-use crate::gen::package::Package;
-use crate::gen::package::PosId;
-use crate::gen::package_info::PackageInfo;
+use crate::r#gen::package::Package;
+use crate::r#gen::package::PosId;
+use crate::r#gen::package_info::PackageInfo;
 
 pub type Errors = Vec<(Pos, String, Vec<(Pos, String)>)>;
 

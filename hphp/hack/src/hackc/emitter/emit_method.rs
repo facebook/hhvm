@@ -99,7 +99,7 @@ pub fn from_ast<'a, 'd>(
         match &method.user_attributes[..] {
             [
                 ast::UserAttribute {
-                    name: ast_defs::Id(_, ref s),
+                    name: ast_defs::Id(_, s),
                     params: _,
                 },
             ] if s.eq_ignore_ascii_case("__DynamicMethCallerForce") => {

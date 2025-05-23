@@ -53,11 +53,11 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
         match &f.user_attributes[..] {
             [
                 ast::UserAttribute {
-                    name: ast_defs::Id(_, ref s),
+                    name: ast_defs::Id(_, s),
                     params,
                 },
             ] if s == "__MethCaller" => match &params[..] {
-                [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => {
+                [ast::Expr(_, _, ast::Expr_::String(ctx))] if !ctx.is_empty() => {
                     match std::str::from_utf8(ctx) {
                         Ok(ctx) => Some(ClassName::mangle(ctx.to_owned())),
                         Err(_) => {

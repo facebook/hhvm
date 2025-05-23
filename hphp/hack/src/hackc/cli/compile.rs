@@ -406,7 +406,7 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
 
 fn make_naming_table_powered_shallow_decl_provider<R: Reason>(
     hackc_opts: &crate::Opts,
-) -> Result<impl ShallowDeclProvider<R>> {
+) -> Result<impl ShallowDeclProvider<R> + use<R>> {
     let hhi_root = TempDir::with_prefix("rupro_decl_repo_hhi.")?;
     hhi::write_hhi_files(hhi_root.path()).unwrap();
 

@@ -351,7 +351,7 @@ impl<'a> Env<'a> {
 
     fn clone_and_unset_toplevel_if_toplevel<'b, 'c>(
         e: &'b mut Env<'c>,
-    ) -> impl AsMut<Env<'c>> + 'b {
+    ) -> impl AsMut<Env<'c>> + use<'c, 'b> {
         if e.top_level_statements {
             let mut cloned = e.clone();
             cloned.top_level_statements = false;
@@ -1286,11 +1286,11 @@ fn p_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Field, Error> {
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
 fn process_readonly_expr(mut e: ast::Expr) -> Expr_ {
     match &mut e {
-        ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.fun.readonly_this.is_none() => {
+        ast::Expr(_, _, Expr_::Efun(efun)) if efun.fun.readonly_this.is_none() => {
             efun.fun.readonly_this = Some(ast::ReadonlyKind::Readonly);
             e.2
         }
-        ast::Expr(_, _, Expr_::Lfun(ref mut l)) if l.0.readonly_this.is_none() => {
+        ast::Expr(_, _, Expr_::Lfun(l)) if l.0.readonly_this.is_none() => {
             l.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
             e.2
         }
@@ -3807,7 +3807,7 @@ fn is_polymorphic_context<'a>(env: &mut Env<'a>, hint: &ast::Hint, ignore_this: 
 }
 
 fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Contexts>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+    if let Some(ast::Contexts(_, context_hints)) = contexts {
         context_hints
             .iter()
             .any(|c| is_polymorphic_context(env, c, false))
@@ -3817,7 +3817,7 @@ fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Context
 }
 
 fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+    if let Some(ast::Contexts(_, context_hints)) = contexts {
         context_hints.iter().any(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned(id),
             _ => false,
@@ -3828,7 +3828,7 @@ fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
 }
 
 fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+    if let Some(ast::Contexts(_, context_hints)) = contexts {
         context_hints.iter().any(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned_or_defaults(id),
             _ => false,
@@ -3839,7 +3839,7 @@ fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> boo
 }
 
 fn contexts_cannot_access_ic(haystack: Option<&ast::Contexts>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
+    if let Some(ast::Contexts(_, context_hints)) = haystack {
         context_hints.iter().all(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => {
                 sn::coeffects::is_any_without_implicit_policy_or_unsafe(id)
@@ -3869,7 +3869,7 @@ fn rewrite_fun_ctx<'a>(
         |p| raise_parsing_error_pos(p, env, &syntax_error::ctx_fun_invalid_type_hint(name));
     match *hint.1 {
         Hint_::Hfun(ref mut hf) => {
-            if let Some(ast::Contexts(ref p, ref mut hl)) = &mut hf.ctxs {
+            if let &mut Some(ast::Contexts(ref p, ref mut hl)) = &mut hf.ctxs {
                 if let [ref mut h] = *hl.as_mut_slice() {
                     if let Hint_::Hwildcard = &*h.1 {
                         *h.1 = Hint_::HfunContext(name.to_string());
@@ -3925,7 +3925,7 @@ fn rewrite_effect_polymorphism<'a>(
     if !has_polymorphic_context(env, contexts) {
         return;
     }
-    let ast::Contexts(ref _p, ref context_hints) = contexts.as_ref().unwrap();
+    let ast::Contexts(_p, context_hints) = contexts.as_ref().unwrap();
     let tp = |name, v| ast::Tparam {
         variance: Variance::Invariant,
         name,
@@ -3996,7 +3996,7 @@ fn rewrite_effect_polymorphism<'a>(
             HfunContext(ref name) => match hint_by_param.get_mut::<str>(name) {
                 Some((hint_opt, param_pos, _is_variadic)) => match hint_opt {
                     Some(_) if env.is_codegen() => {}
-                    Some(ref mut param_hint) => rewrite_fun_ctx(env, tparams, param_hint, name),
+                    Some(param_hint) => rewrite_fun_ctx(env, tparams, param_hint, name),
                     None => raise_parsing_error_pos(
                         param_pos,
                         env,
@@ -4023,7 +4023,7 @@ fn rewrite_effect_polymorphism<'a>(
                             } else {
                                 match hint_opt {
                                     Some(_) if env.is_codegen() => {}
-                                    Some(ref mut param_hint) => {
+                                    Some(param_hint) => {
                                         let mut rewrite = |h| {
                                             rewrite_arg_ctx(
                                                 env,
@@ -5286,10 +5286,10 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             if let Some(ref hint) = context {
                 use ast::Hint_::Happly;
                 use ast::Hint_::Hintersection;
-                let ast::Hint(_, ref h) = hint;
+                let ast::Hint(_, h) = hint;
                 if let Hintersection(hl) = &**h {
                     for h in hl {
-                        let ast::Hint(_, ref h) = h;
+                        let ast::Hint(_, h) = h;
                         if let Happly(oxidized::ast::Id(_, id), _) = &**h {
                             if id.as_str().ends_with("_local") {
                                 raise_parsing_error(
@@ -5831,7 +5831,7 @@ fn check_effect_memoized<'a>(
 fn check_context_has_this<'a>(contexts: Option<&ast::Contexts>, env: &mut Env<'a>) {
     use ast::Hint_::Haccess;
     use ast::Hint_::Happly;
-    if let Some(ast::Contexts(pos, ref context_hints)) = contexts {
+    if let Some(ast::Contexts(pos, context_hints)) = contexts {
         context_hints.iter().for_each(|c| match *c.1 {
             Haccess(ref root, _) => match &*root.1 {
                 Happly(oxidized::ast::Id(_, id), _)
@@ -5857,7 +5857,7 @@ fn check_effect_polymorphic_reification<'a>(
 ) {
     use ast::Hint_::Haccess;
     use ast::Hint_::Happly;
-    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+    if let Some(ast::Contexts(_, context_hints)) = contexts {
         context_hints.iter().for_each(|c| match *c.1 {
             Haccess(ref root, _) => match &*root.1 {
                 Happly(oxidized::ast::Id(_, id), _) => {

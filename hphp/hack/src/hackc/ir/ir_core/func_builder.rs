@@ -263,7 +263,7 @@ impl FuncBuilder {
         let num_rets = match instr {
             Instr::Call(call) => call.num_rets,
             Instr::Hhbc(Hhbc::ClassGetTSWithGenerics(..)) => 2,
-            Instr::MemberOp(ref op) => op.num_values() as u32,
+            Instr::MemberOp(op) => op.num_values() as u32,
             _ => 1,
         };
         if num_rets > 1 { num_rets } else { 0 }

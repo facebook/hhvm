@@ -9,7 +9,7 @@ use crate::list::List;
 
 macro_rules! sl {
     () => { List::Nil::<i32> };
-    ($($xs:expr $(,)?)+) => { stack_list![$($xs,)*] };
+    ($($xs:expr_2021 $(,)?)+) => { stack_list![$($xs,)*] };
 }
 
 #[test]

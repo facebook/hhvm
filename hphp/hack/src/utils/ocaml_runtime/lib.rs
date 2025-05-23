@@ -8,7 +8,7 @@ use std::os::raw::c_char;
 
 use ocamlrep::CLOSURE_TAG;
 
-extern "C" {
+unsafe extern "C" {
     fn caml_named_value(name: *const c_char) -> *mut usize;
     fn caml_callback_exn(closure: usize, arg1: usize) -> usize;
 }
@@ -29,12 +29,14 @@ pub type Value = usize;
 ///
 /// Panics if the given `name` contains a nul byte.
 pub unsafe fn named_value<S: AsRef<str>>(name: S) -> Option<Value> {
-    let name = CString::new(name.as_ref()).expect("string contained nul byte");
-    let named = caml_named_value(name.as_ptr());
-    if named.is_null() {
-        return None;
+    unsafe {
+        let name = CString::new(name.as_ref()).expect("string contained nul byte");
+        let named = caml_named_value(name.as_ptr());
+        if named.is_null() {
+            return None;
+        }
+        Some(*named)
     }
-    Some(*named)
 }
 #[derive(Debug)]
 pub enum Error {
@@ -53,19 +55,21 @@ pub enum Error {
 ///
 /// [OCaml manual]: (https://caml.inria.fr/pub/docs/manual-ocaml/intfc.html#s:C-multithreading)
 pub unsafe fn callback_exn(f: Value, arg: Value) -> Result<Value, Error> {
-    let f_block = match ocamlrep::Value::from_bits(f).as_block() {
-        Some(block) => block,
-        None => return Err(Error::NotInvokable),
-    };
-    if f_block.tag() != CLOSURE_TAG {
-        return Err(Error::NotInvokable);
-    }
-    let res = caml_callback_exn(f, arg);
+    unsafe {
+        let f_block = match ocamlrep::Value::from_bits(f).as_block() {
+            Some(block) => block,
+            None => return Err(Error::NotInvokable),
+        };
+        if f_block.tag() != CLOSURE_TAG {
+            return Err(Error::NotInvokable);
+        }
+        let res = caml_callback_exn(f, arg);
 
-    if is_exception_result(res) {
-        Err(Error::Exception(extract_exception(res)))
-    } else {
-        Ok(res)
+        if is_exception_result(res) {
+            Err(Error::Exception(extract_exception(res)))
+        } else {
+            Ok(res)
+        }
     }
 }
 

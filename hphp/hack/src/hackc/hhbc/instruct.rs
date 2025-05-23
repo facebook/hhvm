@@ -339,7 +339,7 @@ impl LocalRange {
         }
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = Local> {
+    pub fn iter(&self) -> impl Iterator<Item = Local> + use<> {
         let start = self.start.index();
         let end = start + self.len as usize;
         (start..end).map(Local::new)

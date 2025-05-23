@@ -1284,7 +1284,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn attr_args(&self, node: S<'a>) -> Option<impl DoubleEndedIterator<Item = S<'a>>> {
+    fn attr_args(
+        &self,
+        node: S<'a>,
+    ) -> Option<impl DoubleEndedIterator<Item = S<'a>> + use<'a, State>> {
         if let ConstructorCall(x) = attr_constructor_call(node) {
             Some(syntax_to_list_no_separators(&x.argument_list))
         } else {

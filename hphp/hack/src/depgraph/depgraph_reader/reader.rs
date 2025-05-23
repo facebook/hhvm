@@ -322,7 +322,7 @@ impl<'bytes> HashList<'bytes> {
     /// Return raw hash indices in this list.
     pub fn hash_indices(
         &self,
-    ) -> impl DoubleEndedIterator<Item = u32> + std::iter::FusedIterator + 'bytes {
+    ) -> impl DoubleEndedIterator<Item = u32> + std::iter::FusedIterator + use<'bytes> {
         // If we even care, we could create an ExactSizeIterator type using `self.num_indices`.
         self.blocks.iter().flat_map(|b| Range {
             start: b.start,

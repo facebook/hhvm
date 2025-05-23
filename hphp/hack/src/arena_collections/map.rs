@@ -168,7 +168,7 @@ impl<'a, K: TrivialDrop, V: TrivialDrop> TrivialDrop for Node<'a, K, V> {}
 #[macro_export]
 macro_rules! map {
   ( ) => ({ Map::empty() });
-  ( $arena:expr; $($x:expr => $y:expr),* ) => ({
+  ( $arena:expr_2021; $($x:expr_2021 => $y:expr_2021),* ) => ({
       let mut temp_map = Map::empty();
       $(
           temp_map = temp_map.add($arena, $x, $y);
@@ -178,7 +178,7 @@ macro_rules! map {
 }
 
 impl<'a, K, V> Map<'a, K, V> {
-    pub fn keys(&self) -> impl Iterator<Item = &'a K> {
+    pub fn keys(&self) -> impl Iterator<Item = &'a K> + use<'a, K, V> {
         self.iter().map(|(k, _v)| k)
     }
 }
@@ -271,7 +271,7 @@ impl<'a, K: TrivialDrop + Clone + Ord, V: TrivialDrop + Clone> Map<'a, K, V> {
                 let node = Node(Self::empty(), x, data, Self::empty(), 1);
                 Map(Some(arena.alloc(node)))
             }
-            Map(Some(Node(ref l, v, d, r, h))) => match x.cmp(v) {
+            Map(Some(Node(l, v, d, r, h))) => match x.cmp(v) {
                 Ordering::Equal => {
                     let node = Node(*l, x, data, *r, *h);
                     Map(Some(arena.alloc(node)))

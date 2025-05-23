@@ -88,8 +88,10 @@ impl RawTypingDepsMode {
     /// You should not use this method if the OCaml runtime has had a chance
     /// to run between obtaining `self` and calling this method!
     unsafe fn to_rust(self) -> Result<TypingDepsMode, FromError> {
-        let value: Value<'_> = Value::from_bits(self.0);
-        TypingDepsMode::from_ocamlrep(value)
+        unsafe {
+            let value: Value<'_> = Value::from_bits(self.0);
+            TypingDepsMode::from_ocamlrep(value)
+        }
     }
 }
 

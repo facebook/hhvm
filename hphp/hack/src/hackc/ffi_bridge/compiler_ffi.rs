@@ -611,7 +611,7 @@ fn compile_from_text(env: &ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>
 fn type_exists(holder: &DeclsHolder, symbol: &str) -> bool {
     let input_symbol_formatted = symbol.starts_with('\\');
     // TODO T123158488: fix case insensitive lookups
-    holder.parsed_file.decls.types().any(|(mut sym, _)| {
+    holder.parsed_file.decls.types().any(|&(mut sym, _)| {
         if !input_symbol_formatted {
             sym = &sym[1..];
         }
@@ -907,7 +907,9 @@ fn get_shape_keys(holder: &DeclsHolder, name: &str) -> Vec<String> {
 
 // SAFETY: i must be a raw bitcast from a valid BytesId
 unsafe fn deref_bytes(i: u32) -> &'static [u8] {
-    use intern::InternId;
-    let biased = i.try_into().expect("raw id should be nonzero");
-    intern::string::BytesId::from_raw(biased).as_bytes()
+    unsafe {
+        use intern::InternId;
+        let biased = i.try_into().expect("raw id should be nonzero");
+        intern::string::BytesId::from_raw(biased).as_bytes()
+    }
 }

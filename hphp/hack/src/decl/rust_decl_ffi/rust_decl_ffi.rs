@@ -141,7 +141,7 @@ ocaml_ffi! {
     }
 }
 
-extern "C" {
+unsafe extern "C" {
     fn caml_register_global_root(value: *mut UnsafeOcamlPtr);
     fn caml_remove_global_root(value: *mut UnsafeOcamlPtr);
 }

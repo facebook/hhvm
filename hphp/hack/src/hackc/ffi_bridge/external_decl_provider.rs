@@ -30,7 +30,7 @@ pub enum ExternalDeclProviderResult {
 }
 
 // Bridge to C++ DeclProviders.
-extern "C" {
+unsafe extern "C" {
     // Safety: direct_decl_parser::Decls is a list of tuples, which cannot be repr(C)
     // even if the contents are. But we never dereference Decls in C++.
     #[allow(improper_ctypes)]

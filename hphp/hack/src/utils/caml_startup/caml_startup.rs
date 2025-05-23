@@ -6,7 +6,7 @@
 use std::ffi::CString;
 use std::os::raw::c_char;
 
-extern "C" {
+unsafe extern "C" {
     fn caml_startup(argv: *const *const c_char);
 }
 
@@ -21,9 +21,11 @@ extern "C" {
 ///
 /// Panics if any argument in argv contains a nul byte.
 pub unsafe fn startup() {
-    let mut argv: Vec<*const c_char> = (std::env::args().into_iter())
-        .map(|arg| CString::new(arg.as_str()).unwrap().into_raw() as _)
-        .collect();
-    argv.push(std::ptr::null());
-    caml_startup(argv.leak().as_ptr());
+    unsafe {
+        let mut argv: Vec<*const c_char> = (std::env::args().into_iter())
+            .map(|arg| CString::new(arg.as_str()).unwrap().into_raw() as _)
+            .collect();
+        argv.push(std::ptr::null());
+        caml_startup(argv.leak().as_ptr());
+    }
 }

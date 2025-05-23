@@ -114,7 +114,7 @@ use crate::tokenizer::TokenLoc;
 use crate::tokenizer::Tokenizer;
 
 macro_rules! parse_instr {
-    ($tok:ident, $cons:expr, $($rest:tt)+) => {{
+    ($tok:ident, $cons:expr_2021, $($rest:tt)+) => {{
         parse!($tok, $($rest)+);
         $cons
     }};

@@ -5,8 +5,8 @@
 
 use hh_autoimport_rust as hh_autoimport;
 
-use crate::gen::namespace_env::Env;
-use crate::gen::namespace_env::Mode;
+use crate::r#gen::namespace_env::Env;
+use crate::r#gen::namespace_env::Mode;
 
 impl Env {
     pub fn empty(

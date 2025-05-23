@@ -70,31 +70,33 @@ impl<'shm, T> ShmemTableSegment<'shm, T> {
         file_size: usize,
         max_evictable_bytes_per_shard: usize,
     ) -> ShmemTableSegmentRef<'shm, T> {
-        let (self_ptr, next_free_byte) =
-            Self::maybe_unint_ptr_and_next_free_byte(file_start, file_size);
+        unsafe {
+            let (self_ptr, next_free_byte) =
+                Self::maybe_unint_ptr_and_next_free_byte(file_start, file_size);
 
-        // Safety: Doing this cast assumes:
-        //  - The lifetime matches.
-        //  - We are the sole users of the underlying memory.
-        let segment: &'shm mut MaybeUninit<Self> = &mut *self_ptr;
-        segment.write(ShmemTableSegment {
-            file_alloc: MaybeUninit::uninit(),
-            table: MaybeUninit::uninit(),
-        });
-        let segment = segment.assume_init_mut();
+            // Safety: Doing this cast assumes:
+            //  - The lifetime matches.
+            //  - We are the sole users of the underlying memory.
+            let segment: &'shm mut MaybeUninit<Self> = &mut *self_ptr;
+            segment.write(ShmemTableSegment {
+                file_alloc: MaybeUninit::uninit(),
+                table: MaybeUninit::uninit(),
+            });
+            let segment = segment.assume_init_mut();
 
-        segment
-            .file_alloc
-            .write(FileAlloc::new(file_start, file_size, next_free_byte));
-        let file_alloc = segment.file_alloc.assume_init_mut();
-        let table = CMap::initialize_with_hasher(
-            &mut segment.table,
-            BuildHasherDefault::default(),
-            file_alloc,
-            max_evictable_bytes_per_shard,
-        );
+            segment
+                .file_alloc
+                .write(FileAlloc::new(file_start, file_size, next_free_byte));
+            let file_alloc = segment.file_alloc.assume_init_mut();
+            let table = CMap::initialize_with_hasher(
+                &mut segment.table,
+                BuildHasherDefault::default(),
+                file_alloc,
+                max_evictable_bytes_per_shard,
+            );
 
-        ShmemTableSegmentRef { table }
+            ShmemTableSegmentRef { table }
+        }
     }
 
     /// Attach to an already initialized shared memory segment.
@@ -106,26 +108,30 @@ impl<'shm, T> ShmemTableSegment<'shm, T> {
         file_start: *mut libc::c_void,
         file_size: usize,
     ) -> ShmemTableSegmentRef<'shm, T> {
-        let (self_ptr, _) = Self::maybe_unint_ptr_and_next_free_byte(file_start, file_size);
+        unsafe {
+            let (self_ptr, _) = Self::maybe_unint_ptr_and_next_free_byte(file_start, file_size);
 
-        let segment: &'shm MaybeUninit<Self> = &*self_ptr;
-        let segment = segment.assume_init_ref();
+            let segment: &'shm MaybeUninit<Self> = &*self_ptr;
+            let segment = segment.assume_init_ref();
 
-        let table = CMap::attach(&segment.table);
-        ShmemTableSegmentRef { table }
+            let table = CMap::attach(&segment.table);
+            ShmemTableSegmentRef { table }
+        }
     }
 
     unsafe fn maybe_unint_ptr_and_next_free_byte(
         file_start: *mut libc::c_void,
         file_size: usize,
     ) -> (*mut MaybeUninit<Self>, usize) {
-        let layout = std::alloc::Layout::new::<Self>();
-        let file_start = file_start as *mut u8;
-        let align_offset = file_start.align_offset(layout.align());
-        let total_size = align_offset + layout.size();
-        assert!(file_size >= total_size);
-        let ptr = file_start.add(align_offset);
-        let ptr = ptr as *mut MaybeUninit<Self>;
-        (ptr, total_size)
+        unsafe {
+            let layout = std::alloc::Layout::new::<Self>();
+            let file_start = file_start as *mut u8;
+            let align_offset = file_start.align_offset(layout.align());
+            let total_size = align_offset + layout.size();
+            assert!(file_size >= total_size);
+            let ptr = file_start.add(align_offset);
+            let ptr = ptr as *mut MaybeUninit<Self>;
+            (ptr, total_size)
+        }
     }
 }

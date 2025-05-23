@@ -13,7 +13,7 @@ use super::Direction;
 use super::contains_ocaml_attr;
 use crate::common::to_snake;
 
-pub fn gen(ctx: &Context) -> TokenStream {
+pub fn r#gen(ctx: &Context) -> TokenStream {
     let manual_impls = gen_manual_impls();
     let impls: Vec<_> = ctx
         .type_structures()

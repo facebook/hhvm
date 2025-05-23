@@ -49,7 +49,7 @@ mod test {
         let b = &bumpalo::Bump::new();
         let pos = |line| Pos::from_line_cols_offset(b, RelativePath::empty(), line, 10..50, 100);
         macro_rules! a {
-            ($e:expr) => {
+            ($e:expr_2021) => {
                 &*b.alloc($e)
             };
         }

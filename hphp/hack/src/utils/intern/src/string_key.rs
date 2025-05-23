@@ -54,7 +54,7 @@ impl StringKey {
     }
 
     pub unsafe fn from_index(index: u32) -> Self {
-        Self(StringId::from_index(index))
+        unsafe { Self(StringId::from_index(index)) }
     }
 }
 
@@ -104,7 +104,7 @@ macro_rules! intern {
         static INSTANCE: Lazy<$crate::string_key::StringKey> = Lazy::new(|| $value.intern());
         *INSTANCE
     }};
-    ($_:expr) => {
+    ($_:expr_2021) => {
         compile_error!("intern! macro can only be used with string literals.")
     };
 }

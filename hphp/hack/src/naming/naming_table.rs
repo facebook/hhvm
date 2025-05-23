@@ -203,47 +203,55 @@ impl NamingTable {
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
     pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
-        self.types
-            .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
-                // NameType::Class and NameType::Typedef are handled the same here
-                file_info::NameType::Class,
-                name,
-            ))
-            // The heap has values of type Option<Pos>, and they've already been
-            // converted to an OCaml value here. Map `Some(ocaml_none)` to
-            // `None` so that the caller doesn't need to inspect the value.
-            .filter(|ptr| ptr.is_block())
+        unsafe {
+            self.types
+                .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
+                    // NameType::Class and NameType::Typedef are handled the same here
+                    file_info::NameType::Class,
+                    name,
+                ))
+                // The heap has values of type Option<Pos>, and they've already been
+                // converted to an OCaml value here. Map `Some(ocaml_none)` to
+                // `None` so that the caller doesn't need to inspect the value.
+                .filter(|ptr| ptr.is_block())
+        }
     }
     pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
-        self.funs
-            .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
-                file_info::NameType::Fun,
-                name,
-            ))
-            .filter(|ptr| ptr.is_block())
-    }
-    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
-        if self.consts.has_local_changes() {
-            None
-        } else {
-            self.consts_shm
-                .get_ocaml(ToplevelSymbolHash::from_byte_string(
-                    file_info::NameType::Const,
+        unsafe {
+            self.funs
+                .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
+                    file_info::NameType::Fun,
                     name,
                 ))
                 .filter(|ptr| ptr.is_block())
         }
     }
+    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        unsafe {
+            if self.consts.has_local_changes() {
+                None
+            } else {
+                self.consts_shm
+                    .get_ocaml(ToplevelSymbolHash::from_byte_string(
+                        file_info::NameType::Const,
+                        name,
+                    ))
+                    .filter(|ptr| ptr.is_block())
+            }
+        }
+    }
     pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
-        if self.modules.has_local_changes() {
-            None
-        } else {
-            self.modules_shm
-                .get_ocaml(ToplevelSymbolHash::from_byte_string(
-                    file_info::NameType::Module,
-                    name,
-                ))
-                .filter(|ptr| ptr.is_block())
+        unsafe {
+            if self.modules.has_local_changes() {
+                None
+            } else {
+                self.modules_shm
+                    .get_ocaml(ToplevelSymbolHash::from_byte_string(
+                        file_info::NameType::Module,
+                        name,
+                    ))
+                    .filter(|ptr| ptr.is_block())
+            }
         }
     }
 }
@@ -540,10 +548,12 @@ mod reverse_naming_table {
             &self,
             hash: ToplevelSymbolHash,
         ) -> Option<ocamlrep::ptr::UnsafeOcamlPtr> {
-            if self.positions.has_local_changes() {
-                None
-            } else {
-                self.positions_shm.get_ocaml(hash)
+            unsafe {
+                if self.positions.has_local_changes() {
+                    None
+                } else {
+                    self.positions_shm.get_ocaml(hash)
+                }
             }
         }
 

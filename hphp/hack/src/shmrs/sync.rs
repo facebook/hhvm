@@ -15,7 +15,7 @@ use crate::error::Errno;
 // Note that these are not supported on all platforms, in particular
 // on macOS.
 #[cfg(target_os = "linux")]
-extern "C" {
+unsafe extern "C" {
     fn pthread_rwlock_timedwrlock(
         lock: *mut libc::pthread_rwlock_t,
         timespec: *const libc::timespec,
@@ -107,23 +107,25 @@ impl<T> RwLock<T> {
     ///  - You shouldn't be mutating the `RwLock` after `initialize`
     ///    or attached are called.
     pub unsafe fn initialize(&self) -> Result<RwLockRef<'_, T>, LockError> {
-        let mut attr: libc::pthread_rwlockattr_t = std::mem::zeroed();
+        unsafe {
+            let mut attr: libc::pthread_rwlockattr_t = std::mem::zeroed();
 
-        Errno::from(libc::pthread_rwlockattr_init(&mut attr as *mut _))?;
+            Errno::from(libc::pthread_rwlockattr_init(&mut attr as *mut _))?;
 
-        Self::set_prefer_writer(&mut attr as *mut _)?;
+            Self::set_prefer_writer(&mut attr as *mut _)?;
 
-        // Allow access from multiple processes
-        Errno::from(libc::pthread_rwlockattr_setpshared(
-            &mut attr as *mut _,
-            libc::PTHREAD_PROCESS_SHARED,
-        ))?;
-        Errno::from(libc::pthread_rwlock_init(
-            self.lock_ptr(),
-            &attr as *const _,
-        ))?;
+            // Allow access from multiple processes
+            Errno::from(libc::pthread_rwlockattr_setpshared(
+                &mut attr as *mut _,
+                libc::PTHREAD_PROCESS_SHARED,
+            ))?;
+            Errno::from(libc::pthread_rwlock_init(
+                self.lock_ptr(),
+                &attr as *const _,
+            ))?;
 
-        Ok(self.attach())
+            Ok(self.attach())
+        }
     }
 
     /// Attach to an already initialized lock.
@@ -142,13 +144,15 @@ impl<T> RwLock<T> {
 
     #[cfg(target_os = "linux")]
     unsafe fn set_prefer_writer(attr: *mut libc::pthread_rwlockattr_t) -> Result<(), LockError> {
-        // Not defined in the libc crate. Linux specific. See pthread.h.
-        const LIBC_PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP: libc::c_int = 2;
-        Errno::from(libc::pthread_rwlockattr_setkind_np(
-            attr,
-            LIBC_PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP,
-        ))
-        .map_err(Into::into)
+        unsafe {
+            // Not defined in the libc crate. Linux specific. See pthread.h.
+            const LIBC_PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP: libc::c_int = 2;
+            Errno::from(libc::pthread_rwlockattr_setkind_np(
+                attr,
+                LIBC_PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP,
+            ))
+            .map_err(Into::into)
+        }
     }
 
     #[cfg(not(target_os = "linux"))]
@@ -165,7 +169,7 @@ impl<T> RwLock<T> {
     ///   - No thread must hold the lock.
     ///   - Attempting to destroy an uninitialized lock is undefined behavior.
     pub unsafe fn destroy(&mut self) -> Result<(), LockError> {
-        Errno::from(libc::pthread_rwlock_destroy(self.lock_ptr())).map_err(Into::into)
+        unsafe { Errno::from(libc::pthread_rwlock_destroy(self.lock_ptr())).map_err(Into::into) }
     }
 }
 
@@ -236,7 +240,9 @@ impl<'a, T> RwLockRef<'a, T> {
     ///
     /// Safety: The thread must be locked, duh.
     unsafe fn unlock(self) {
-        Errno::from(libc::pthread_rwlock_unlock(self.0.lock_ptr())).unwrap();
+        unsafe {
+            Errno::from(libc::pthread_rwlock_unlock(self.0.lock_ptr())).unwrap();
+        }
     }
 
     #[inline]
@@ -284,7 +290,7 @@ impl<'a, T> RwLockRef<'a, T> {
         lock: *mut libc::pthread_rwlock_t,
         timespec: *const libc::timespec,
     ) -> libc::c_int {
-        pthread_rwlock_timedwrlock(lock, timespec)
+        unsafe { pthread_rwlock_timedwrlock(lock, timespec) }
     }
 
     #[cfg(target_os = "linux")]
@@ -292,7 +298,7 @@ impl<'a, T> RwLockRef<'a, T> {
         lock: *mut libc::pthread_rwlock_t,
         timespec: *const libc::timespec,
     ) -> libc::c_int {
-        pthread_rwlock_timedrdlock(lock, timespec)
+        unsafe { pthread_rwlock_timedrdlock(lock, timespec) }
     }
 
     #[cfg(not(target_os = "linux"))]

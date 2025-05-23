@@ -114,7 +114,7 @@ ocaml_ffi_with_arena! {
 // since arena-allocating a Custom would result in failing to decrement the
 // inner Rc and leaking memory).
 unsafe fn get_backend(ptr: UnsafeOcamlPtr) -> Backend {
-    Backend::from_ocamlrep(ptr.as_value()).unwrap()
+    unsafe { Backend::from_ocamlrep(ptr.as_value()).unwrap() }
 }
 
 // SAFETY: there must be no concurrent interaction with the OCaml runtime while
@@ -122,7 +122,7 @@ unsafe fn get_backend(ptr: UnsafeOcamlPtr) -> Backend {
 // implementation of `ocamlrep_ocamlpool::to_ocaml` (as of Oct 2023) guarantees
 // no triggering of the OCaml GC.
 unsafe fn to_ocaml<T: ToOcamlRep + ?Sized>(value: &T) -> UnsafeOcamlPtr {
-    UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(value))
+    unsafe { UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(value)) }
 }
 
 ocaml_ffi! {

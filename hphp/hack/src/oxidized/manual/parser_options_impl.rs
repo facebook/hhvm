@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::gen::parser_options::ParserOptions;
+use crate::r#gen::parser_options::ParserOptions;
 use crate::i_set;
 use crate::package_info::PackageInfo;
 

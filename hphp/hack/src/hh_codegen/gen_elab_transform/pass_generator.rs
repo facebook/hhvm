@@ -10,7 +10,7 @@ use super::Context;
 use super::Direction;
 use super::contains_ocaml_attr;
 
-pub fn gen(ctx: &Context) -> TokenStream {
+pub fn r#gen(ctx: &Context) -> TokenStream {
     let pass_methods: Vec<_> = ctx
         .type_structures()
         .flat_map(|s| gen_pass_methods(s, Body::Default))
@@ -79,8 +79,8 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
     let name_bu = super::gen_pass_method_name(ty.to_string(), Direction::BottomUp);
     let (_, ty_generics, _) = s.ast().generics.split_for_impl();
     let fld_methods = gen_fld_methods(&s, body_type);
-    let body_td = body_type.gen(&name_td);
-    let body_bu = body_type.gen(&name_bu);
+    let body_td = body_type.r#gen(&name_td);
+    let body_bu = body_type.r#gen(&name_bu);
     quote! {
         #[inline(always)]
         fn #name_td(
@@ -111,7 +111,7 @@ enum Body {
 }
 
 impl Body {
-    fn gen(self, name: &syn::Ident) -> TokenStream {
+    fn r#gen(self, name: &syn::Ident) -> TokenStream {
         match self {
             Body::Default => quote!(Continue(())),
             Body::Passes => quote! {
@@ -159,8 +159,8 @@ fn gen_fld_method(
         Direction::BottomUp,
     );
     let field_ty = &ast.ty;
-    let body_td = body_type.gen(&name_td);
-    let body_bu = body_type.gen(&name_bu);
+    let body_td = body_type.r#gen(&name_td);
+    let body_bu = body_type.r#gen(&name_bu);
     quote! {
         #[inline(always)]
         fn #name_td(
@@ -196,8 +196,8 @@ fn gen_ctor_method(
         super::gen_pass_ctor_method_name(ty_name, ast.ident.to_string(), Direction::TopDown);
     let name_bu =
         super::gen_pass_ctor_method_name(ty_name, ast.ident.to_string(), Direction::BottomUp);
-    let body_td = body_type.gen(&name_td);
-    let body_bu = body_type.gen(&name_bu);
+    let body_td = body_type.r#gen(&name_td);
+    let body_bu = body_type.r#gen(&name_bu);
     quote! {
         #[inline(always)]
         fn #name_td(

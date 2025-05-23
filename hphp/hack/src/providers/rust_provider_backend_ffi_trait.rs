@@ -256,7 +256,7 @@ const UNIMPLEMENTED_MESSAGE: &str = "The default ProviderBackendFfi impls \
 // implementation of `ocamlrep_ocamlpool::to_ocaml` (as of Oct 2023) guarantees
 // no triggering of the OCaml GC.
 unsafe fn to_ocaml<T: ToOcamlRep + ?Sized>(value: &T) -> UnsafeOcamlPtr {
-    UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(value))
+    unsafe { UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(value)) }
 }
 
 impl<T, R> ProviderBackendFfi for T

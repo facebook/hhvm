@@ -48,7 +48,7 @@ pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
     generators
         .into_iter()
         .map(|g| {
-            let code = g.gen(&ctx)?;
+            let code = g.r#gen(&ctx)?;
             let filepath = output_dir.join(g.filename());
             Ok((filepath, format!("{}", code)))
         })

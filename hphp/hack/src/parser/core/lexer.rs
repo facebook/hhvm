@@ -2220,7 +2220,7 @@ where
     pub fn next_token(&mut self) -> TF::Token {
         {
             let mut cache = self.cache.borrow_mut();
-            if let Some(ref mut cache) = cache.deref_mut() {
+            if let Some(cache) = cache.deref_mut() {
                 if cache.0 == *self {
                     self.start = (cache.2).start;
                     self.offset = (cache.2).offset;

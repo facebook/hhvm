@@ -117,33 +117,37 @@ where
         ptr: usize,
         text: &'a SourceText<'a>,
     ) -> Result<&'a Self, String> {
-        let raw_tree = ptr as *mut SyntaxTree<'_, Syntax, State>;
-        let tree = match raw_tree.as_mut() {
-            Some(t) => t,
-            None => return Err("null raw tree pointer".into()),
-        };
-        // The tree already contains source text, but this source text contains a pointer
-        // into OCaml heap, which might have been invalidated by GC in the meantime.
-        // Replacing the source text with a current one prevents it. This will still end
-        // horribly if the tree starts storing some other pointers into source text,
-        // but it's not the case at the moment.
-        tree.replace_text_unsafe(text);
-        Ok(tree)
+        unsafe {
+            let raw_tree = ptr as *mut SyntaxTree<'_, Syntax, State>;
+            let tree = match raw_tree.as_mut() {
+                Some(t) => t,
+                None => return Err("null raw tree pointer".into()),
+            };
+            // The tree already contains source text, but this source text contains a pointer
+            // into OCaml heap, which might have been invalidated by GC in the meantime.
+            // Replacing the source text with a current one prevents it. This will still end
+            // horribly if the tree starts storing some other pointers into source text,
+            // but it's not the case at the moment.
+            tree.replace_text_unsafe(text);
+            Ok(tree)
+        }
     }
 
     // Convert a foreign pointer to boxed `SyntaxTree`. This function can be used when foreign
     // caller moves a `SyntaxTree` to Rust, when `Box` goes out of scope the SyntaxTree will
     // be dropped.
     pub unsafe fn ffi_pointer_into_boxed(ptr: usize, text: &'a SourceText<'a>) -> Box<Self> {
-        let tree_pointer = ptr as *mut Self;
-        let mut tree = Box::from_raw(tree_pointer);
-        // The tree already contains source text, but this source text contains a pointer
-        // into OCaml heap, which might have been invalidated by GC in the meantime.
-        // Replacing the source text with a current one prevents it.
-        // This will still end horribly if the tree starts storing some
-        // other pointers into source text, but it's not the case at the moment.
-        tree.replace_text_unsafe(text);
-        tree
+        unsafe {
+            let tree_pointer = ptr as *mut Self;
+            let mut tree = Box::from_raw(tree_pointer);
+            // The tree already contains source text, but this source text contains a pointer
+            // into OCaml heap, which might have been invalidated by GC in the meantime.
+            // Replacing the source text with a current one prevents it.
+            // This will still end horribly if the tree starts storing some
+            // other pointers into source text, but it's not the case at the moment.
+            tree.replace_text_unsafe(text);
+            tree
+        }
     }
 
     pub fn create(

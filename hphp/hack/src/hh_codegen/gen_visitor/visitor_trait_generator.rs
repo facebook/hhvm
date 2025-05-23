@@ -24,7 +24,7 @@ pub trait VisitorTrait {
     fn use_node() -> TokenStream;
     fn node_trait_name() -> syn::Ident;
 
-    fn gen(ctx: &Context<'_>) -> Result<TokenStream> {
+    fn r#gen(ctx: &Context<'_>) -> Result<TokenStream> {
         let use_node = Self::use_node();
         let trait_name = Self::trait_name();
         let node_dispatcher_function = Self::gen_node_dispatcher_function(ctx)?;

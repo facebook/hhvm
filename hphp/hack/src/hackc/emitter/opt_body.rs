@@ -227,7 +227,7 @@ fn update_ant(inst: &Instruct, ant: &mut BitSet, catch_ant: Option<&BitSet>) {
 /// avl = (avl | must_write(I) | must_read(I)) & ~must_unset(I)
 fn update_avl(inst: &Instruct, avl: &mut BitSet, catch_avl: &mut Option<&mut BitSet>) {
     match catch_avl {
-        Some(ref mut s) if instr_may_throw(inst) => s.intersect_with(avl),
+        Some(s) if instr_may_throw(inst) => s.intersect_with(avl),
         _ => (),
     }
     let analysis = analyze_locals(inst);

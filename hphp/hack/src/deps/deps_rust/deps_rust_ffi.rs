@@ -46,28 +46,30 @@ fn tag_to_dep_type(tag: u8) -> DepType {
 /// concurrently modified.
 #[unsafe(no_mangle)]
 unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
-    fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
-        let dep_type_tag = dep_type_tag
-            .as_int()
-            .expect("dep_type_tag could not be converted to int");
-        let dep_type = tag_to_dep_type(dep_type_tag as u8);
-        let name1 = name1
-            .as_byte_string()
-            .expect("name1 could not be converted to byte string");
+    unsafe {
+        fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
+            let dep_type_tag = dep_type_tag
+                .as_int()
+                .expect("dep_type_tag could not be converted to int");
+            let dep_type = tag_to_dep_type(dep_type_tag as u8);
+            let name1 = name1
+                .as_byte_string()
+                .expect("name1 could not be converted to byte string");
 
-        let result: u64 = hash1(dep_type, name1);
+            let result: u64 = hash1(dep_type, name1);
 
-        // In Rust, a numeric cast between two integers of the same size
-        // is a no-op. We require a 64-bit word size.
-        let result = result as isize;
+            // In Rust, a numeric cast between two integers of the same size
+            // is a no-op. We require a 64-bit word size.
+            let result = result as isize;
 
-        Value::int(result)
+            Value::int(result)
+        }
+
+        let dep_type_tag = Value::from_bits(dep_type_tag);
+        let name1 = Value::from_bits(name1);
+        let result = do_hash(dep_type_tag, name1);
+        Value::to_bits(result)
     }
-
-    let dep_type_tag = Value::from_bits(dep_type_tag);
-    let name1 = Value::from_bits(name1);
-    let result = do_hash(dep_type_tag, name1);
-    Value::to_bits(result)
 }
 
 /// Hashes an `int` and two `string`s, arising from one of the two-argument cases of
@@ -91,41 +93,43 @@ unsafe extern "C" fn hash2_ocaml(
     type_hash: usize,
     member_name: usize,
 ) -> usize {
-    fn do_hash(
-        dep_type_tag: Value<'_>,
-        type_hash: Value<'_>,
-        member_name: Value<'_>,
-    ) -> Value<'static> {
-        let dep_type_tag = dep_type_tag
-            .as_int()
-            .expect("dep_type_tag could not be converted to int");
-        let dep_type = tag_to_dep_type(dep_type_tag as u8);
+    unsafe {
+        fn do_hash(
+            dep_type_tag: Value<'_>,
+            type_hash: Value<'_>,
+            member_name: Value<'_>,
+        ) -> Value<'static> {
+            let dep_type_tag = dep_type_tag
+                .as_int()
+                .expect("dep_type_tag could not be converted to int");
+            let dep_type = tag_to_dep_type(dep_type_tag as u8);
 
-        // Ocaml ints are i63, signed extended to i64. clear the MSB while
-        // converting to u64, to match FromOcamlRep for Dep.
-        let type_hash = type_hash
-            .as_int()
-            .expect("type_hash could not be converted to int");
-        let type_hash = type_hash as u64 & !(1 << 63);
+            // Ocaml ints are i63, signed extended to i64. clear the MSB while
+            // converting to u64, to match FromOcamlRep for Dep.
+            let type_hash = type_hash
+                .as_int()
+                .expect("type_hash could not be converted to int");
+            let type_hash = type_hash as u64 & !(1 << 63);
 
-        let member_name = member_name
-            .as_byte_string()
-            .expect("member_name could not be converted to byte string");
+            let member_name = member_name
+                .as_byte_string()
+                .expect("member_name could not be converted to byte string");
 
-        let result: u64 = hash2(dep_type, type_hash, member_name);
+            let result: u64 = hash2(dep_type, type_hash, member_name);
 
-        // In Rust, a numeric cast between two integers of the same size
-        // is a no-op. We require a 64-bit word size.
-        let result = result as isize;
+            // In Rust, a numeric cast between two integers of the same size
+            // is a no-op. We require a 64-bit word size.
+            let result = result as isize;
 
-        Value::int(result)
+            Value::int(result)
+        }
+
+        let dep_type_tag = Value::from_bits(dep_type_tag);
+        let type_hash = Value::from_bits(type_hash);
+        let member_name = Value::from_bits(member_name);
+        let result = do_hash(dep_type_tag, type_hash, member_name);
+        Value::to_bits(result)
     }
-
-    let dep_type_tag = Value::from_bits(dep_type_tag);
-    let type_hash = Value::from_bits(type_hash);
-    let member_name = Value::from_bits(member_name);
-    let result = do_hash(dep_type_tag, type_hash, member_name);
-    Value::to_bits(result)
 }
 
 // Functions to register custom Rust types with the OCaml runtime

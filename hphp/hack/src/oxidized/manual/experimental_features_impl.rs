@@ -7,10 +7,10 @@ use std::str::FromStr;
 
 use parser_core_types::syntax_error;
 
-use crate::gen::experimental_features::FeatureName;
-use crate::gen::experimental_features::FeatureName::*;
-use crate::gen::experimental_features::FeatureStatus;
-use crate::gen::experimental_features::FeatureStatus::*;
+use crate::r#gen::experimental_features::FeatureName;
+use crate::r#gen::experimental_features::FeatureName::*;
+use crate::r#gen::experimental_features::FeatureStatus;
+use crate::r#gen::experimental_features::FeatureStatus::*;
 use crate::parser_options::ParserOptions;
 
 impl FeatureName {

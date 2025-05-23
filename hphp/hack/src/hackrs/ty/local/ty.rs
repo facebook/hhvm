@@ -551,8 +551,8 @@ mod tests {
 
     #[test]
     fn test_var() {
-        let gen = IdentGen::new();
-        let tv0: Tyvar = gen.make().into();
+        let r#gen = IdentGen::new();
+        let tv0: Tyvar = r#gen.make().into();
         let ty_v0 = Ty::var(NReason::none(), tv0.clone());
         let (covs, contravs) = ty_v0.tyvars(|_| None);
         assert!(covs.contains(&tv0));
@@ -561,8 +561,8 @@ mod tests {
 
     #[test]
     fn test_union() {
-        let gen = IdentGen::new();
-        let tv0: Tyvar = gen.make().into();
+        let r#gen = IdentGen::new();
+        let tv0: Tyvar = r#gen.make().into();
         let ty_v0 = Ty::var(NReason::none(), tv0.clone());
         let ty_union = Ty::union(NReason::none(), vec![ty_v0]);
         let (covs, contravs) = ty_union.tyvars(|_| None);
@@ -572,8 +572,8 @@ mod tests {
 
     #[test]
     fn test_intersection() {
-        let gen = IdentGen::new();
-        let tv0: Tyvar = gen.make().into();
+        let r#gen = IdentGen::new();
+        let tv0: Tyvar = r#gen.make().into();
         let ty_v0 = Ty::var(NReason::none(), tv0.clone());
         let ty_intersection = Ty::intersection(NReason::none(), vec![ty_v0]);
         let (covs, contravs) = ty_intersection.tyvars(|_| None);
@@ -583,10 +583,10 @@ mod tests {
 
     #[test]
     fn test_fn_ty() {
-        let gen = IdentGen::new();
-        let tv0: Tyvar = gen.make().into();
-        let tv1: Tyvar = gen.make().into();
-        let tv2: Tyvar = gen.make().into();
+        let r#gen = IdentGen::new();
+        let tv0: Tyvar = r#gen.make().into();
+        let tv1: Tyvar = r#gen.make().into();
+        let tv2: Tyvar = r#gen.make().into();
 
         let params = vec![FunParam {
             pos: NPos::none(),
@@ -633,8 +633,8 @@ mod tests {
 
     #[test]
     fn test_occurs() {
-        let gen = IdentGen::new();
-        let tv: Tyvar = gen.make().into();
+        let r#gen = IdentGen::new();
+        let tv: Tyvar = r#gen.make().into();
         let ty_v = Ty::var(NReason::none(), tv.clone());
 
         let tint = Ty::int(NReason::none());

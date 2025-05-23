@@ -125,8 +125,8 @@ impl<'a> Reason<'a> {
             NoReason => None,
             Invalid => None,
             MissingField => None,
-            FromWitnessLocl(&witness) => Some(witness.pos()),
-            FromWitnessDecl(&witness) => Some(witness.pos()),
+            &FromWitnessLocl(&witness) => Some(witness.pos()),
+            &FromWitnessDecl(&witness) => Some(witness.pos()),
             Idx((p, _))
             | ArithRetFloat((p, _, _))
             | ArithRetNum((p, _, _))

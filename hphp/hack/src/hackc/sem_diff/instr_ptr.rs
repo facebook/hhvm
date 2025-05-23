@@ -32,7 +32,7 @@ impl InstrPtr {
     pub(crate) fn next(&self, end: usize) -> InstrPtr {
         match self {
             InstrPtr::None => InstrPtr::None,
-            InstrPtr::Index(mut i) => {
+            &InstrPtr::Index(mut i) => {
                 i += 1;
                 if i >= end as u32 {
                     InstrPtr::None

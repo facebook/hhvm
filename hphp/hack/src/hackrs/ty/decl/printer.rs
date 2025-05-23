@@ -176,7 +176,7 @@ fn trefinements<TY: Display>(
         let kind = if rc.is_ctx { "ctx" } else { "type" };
         write!(f, "{} {}", kind, name)?;
         match &rc.bound {
-            RefinedConstBound::Exact(ref ty) => write!(f, " = {}", ty)?,
+            RefinedConstBound::Exact(ty) => write!(f, " = {}", ty)?,
             RefinedConstBound::Loose(bounds) => {
                 for ty in bounds.lower.iter() {
                     write!(f, " super {}", ty)?;

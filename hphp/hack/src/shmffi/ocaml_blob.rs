@@ -8,7 +8,7 @@ use std::ptr::NonNull;
 use lz4::liblz4;
 use shmrs::chashmap::CMapValue;
 
-extern "C" {
+unsafe extern "C" {
     fn caml_input_value_from_block(data: *const u8, size: usize) -> usize;
     fn caml_alloc_initialized_string(size: usize, data: *const u8) -> usize;
     fn caml_output_value_to_malloc(value: usize, flags: usize, ptr: *mut *mut u8, len: *mut usize);
@@ -121,26 +121,28 @@ impl HeapValue {
     /// the old) values *inside* registered nodes). There's no guarantee that
     /// every object reachable from a root won't move!
     pub unsafe fn to_ocaml_value(&self) -> usize {
-        if !self.header.is_serialized() {
-            caml_alloc_initialized_string(self.header.buffer_size(), self.data.as_ptr())
-        } else if !self.header.is_compressed() {
-            caml_input_value_from_block(self.data.as_ptr(), self.header.buffer_size())
-        } else {
-            let mut data: Vec<u8> = Vec::with_capacity(self.header.uncompressed_size());
-            let uncompressed_size = liblz4::LZ4_decompress_safe(
-                self.data.as_ptr() as *const libc::c_char,
-                data.as_mut_ptr() as *mut libc::c_char,
-                self.header.buffer_size().try_into().unwrap(),
-                self.header.uncompressed_size().try_into().unwrap(),
-            );
-            let uncompressed_size: usize = uncompressed_size.try_into().unwrap();
-            assert!(self.header.uncompressed_size() == uncompressed_size);
-            // SAFETY: `LZ4_decompress_safe` should have initialized
-            // `uncompressed_size` bytes; we assert above that
-            // `uncompressed_size` is equal to the capacity we set
-            data.set_len(uncompressed_size);
+        unsafe {
+            if !self.header.is_serialized() {
+                caml_alloc_initialized_string(self.header.buffer_size(), self.data.as_ptr())
+            } else if !self.header.is_compressed() {
+                caml_input_value_from_block(self.data.as_ptr(), self.header.buffer_size())
+            } else {
+                let mut data: Vec<u8> = Vec::with_capacity(self.header.uncompressed_size());
+                let uncompressed_size = liblz4::LZ4_decompress_safe(
+                    self.data.as_ptr() as *const libc::c_char,
+                    data.as_mut_ptr() as *mut libc::c_char,
+                    self.header.buffer_size().try_into().unwrap(),
+                    self.header.uncompressed_size().try_into().unwrap(),
+                );
+                let uncompressed_size: usize = uncompressed_size.try_into().unwrap();
+                assert!(self.header.uncompressed_size() == uncompressed_size);
+                // SAFETY: `LZ4_decompress_safe` should have initialized
+                // `uncompressed_size` bytes; we assert above that
+                // `uncompressed_size` is equal to the capacity we set
+                data.set_len(uncompressed_size);
 
-            caml_input_value_from_block(data.as_ptr(), data.len())
+                caml_input_value_from_block(data.as_ptr(), data.len())
+            }
         }
     }
 
@@ -192,7 +194,7 @@ pub struct MallocBuf {
 
 impl Drop for MallocBuf {
     fn drop(&mut self) {
-        extern "C" {
+        unsafe extern "C" {
             fn free(data: *const u8);
         }
         unsafe { free(self.ptr) };
@@ -342,11 +344,11 @@ mod tests {
         let mut rng = StdRng::from_seed([0; 32]);
 
         for _ in 0..NUM_TESTS {
-            let buffer_size = (rng.gen::<u32>() & ((1 << 31) - 1)) as usize;
+            let buffer_size = (rng.r#gen::<u32>() & ((1 << 31) - 1)) as usize;
             let uncompressed_size = if rng.gen_bool(0.5) {
                 buffer_size
             } else {
-                (rng.gen::<u32>() & ((1 << 31) - 1)) as usize
+                (rng.r#gen::<u32>() & ((1 << 31) - 1)) as usize
             };
             let is_serialized = rng.gen_bool(0.5);
             let is_evictable = rng.gen_bool(0.5);
@@ -383,7 +385,7 @@ mod tests {
         }
 
         fn malloc_buf(buf: &[u8]) -> MallocBuf {
-            extern "C" {
+            unsafe extern "C" {
                 fn malloc(size: usize) -> *mut u8;
             }
             let ptr = unsafe { malloc(buf.len()) };

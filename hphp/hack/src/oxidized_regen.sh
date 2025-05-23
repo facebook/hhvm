@@ -103,9 +103,9 @@ summary "Write oxidized/gen/"
 
 # Add exports in oxidized/lib.rs from oxidized/gen/mod.rs.
 # BSD sed doesn't have -i
-sed "/^pub use gen::/d" hphp/hack/src/oxidized/lib.rs > hphp/hack/src/oxidized/lib.rs.tmp
+sed "/^pub use r#gen::/d" hphp/hack/src/oxidized/lib.rs > hphp/hack/src/oxidized/lib.rs.tmp
 mv hphp/hack/src/oxidized/lib.rs.tmp hphp/hack/src/oxidized/lib.rs
-grep "^pub mod " hphp/hack/src/oxidized/gen/mod.rs | sed 's/^pub mod /pub use gen::/' >> hphp/hack/src/oxidized/lib.rs
+grep "^pub mod " hphp/hack/src/oxidized/gen/mod.rs | sed 's/^pub mod /pub use r#gen::/' >> hphp/hack/src/oxidized/lib.rs
 
 summary "Write individually-converted oxidized files"
 "${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/deps/fileInfo.ml > hphp/hack/src/deps/rust/file_info.rs

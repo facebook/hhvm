@@ -38,9 +38,8 @@ namespace {
 static constexpr folly::StringPiece kDelegatedOid{"1.3.6.1.4.1.44363.44"};
 static const auto kMaxDelegatedCredentialLifetime = std::chrono::hours(24 * 7);
 
-folly::ssl::ASN1ObjUniquePtr generateCredentialOid() {
-  folly::ssl::ASN1ObjUniquePtr oid;
-  oid.reset(OBJ_txt2obj(kDelegatedOid.data(), 1));
+ASN1_OBJECT* generateCredentialOid() {
+  auto oid = OBJ_txt2obj(kDelegatedOid.data(), 1);
   if (!oid) {
     throw std::runtime_error("Couldn't create OID for delegated credential");
   }
@@ -50,10 +49,10 @@ folly::ssl::ASN1ObjUniquePtr generateCredentialOid() {
 
 bool DelegatedCredentialUtils::hasDelegatedExtension(
     const folly::ssl::X509UniquePtr& cert) {
-  static folly::ssl::ASN1ObjUniquePtr credentialOid = generateCredentialOid();
+  static const ASN1_OBJECT* credentialOid = generateCredentialOid();
   // To be valid for a credential, it has to have the delegated credential
   // extension and the digitalSignature KeyUsage.
-  auto credentialIdx = X509_get_ext_by_OBJ(cert.get(), credentialOid.get(), -1);
+  auto credentialIdx = X509_get_ext_by_OBJ(cert.get(), credentialOid, -1);
   if (credentialIdx == -1) {
     return false;
   }

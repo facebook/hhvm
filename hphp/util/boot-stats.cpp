@@ -118,7 +118,7 @@ BootStats::Block::~Block() {
   Logger::FInfo("BootStats: {} block done, took {}", m_name, total.toString());
   BootStats::add(m_name, total);
   if (m_publishWallTime) {
-    auto const counter = ServiceData::createCounter("bootstats." + m_name + ".time");
+    auto const counter = ServiceData::createCounter("jit." + m_name + ".time");
     counter->setValue(std::chrono::duration_cast<std::chrono::milliseconds>(total.wall()).count());     
   }
 }

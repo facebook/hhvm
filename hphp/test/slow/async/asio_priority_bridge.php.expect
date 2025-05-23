@@ -3,3 +3,4 @@ start lowpri
 end lowpri
 end normal
 bool(true)
+bool(true)

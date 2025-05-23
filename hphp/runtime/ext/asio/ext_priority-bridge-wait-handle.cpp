@@ -103,6 +103,10 @@ c_WaitableWaitHandle* c_PriorityBridgeWaitHandle::getChild() {
 }
 
 void c_PriorityBridgeWaitHandle::prioritize() {
+  if (isFinished()) {
+    return;
+  }
+
   auto const child = getChild();
   assertx(!child->isFinished());
 

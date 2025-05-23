@@ -55,6 +55,7 @@ const std::string kOrderabilityTestProgram = R"(
 typedef set<i32> CustomSet1;
 @cpp.Type{name = "std::unordered_set<int32_t>"}
 typedef set<i32> CustomSet2;
+// Adapter on typedef should be orderable.
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef set<i32> CustomSet3;
 typedef set<i32> CustomSet4 (cpp.template = "std::unordered_set");
@@ -95,8 +96,8 @@ struct Bar2 { 1: CustomList1 foo; }
 struct Bar3 { 1: Foo1 foo; }
 struct Bar4 { 1: map<i32, Foo4> foo; }
 
-// Weirdly field adapter doesn't count as custom type, probably a bug.
 struct Baz1 {
+  // Adapter on a field should be orderable.
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   1: set<i32> baz;
 }

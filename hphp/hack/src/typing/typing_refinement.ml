@@ -778,3 +778,7 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
               ("partition " ^ show_type_predicate_ @@ snd predicate, structures);
           ]));
   (env, { predicate; left; span; right; true_assumptions; false_assumptions })
+
+let passes_predicate env ty predicate =
+  let (_, { left = _; span; right; _ }) = partition_ty env ty predicate in
+  List.is_empty span && List.is_empty right

@@ -9781,16 +9781,8 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
        neg D and C to be disjoint.
     *)
     TUtils.is_sub_class_refl env c2 c1
-  | (Tneg pred1, _) ->
-    is_sub_type_for_union_help
-      env
-      ty2
-      (Typing_refinement.TyPredicate.to_ty pred1)
-  | (_, Tneg pred2) ->
-    is_sub_type_for_union_help
-      env
-      ty1
-      (Typing_refinement.TyPredicate.to_ty pred2)
+  | (Tneg pred1, _) -> Typing_refinement.passes_predicate env ty2 pred1
+  | (_, Tneg pred2) -> Typing_refinement.passes_predicate env ty1 pred2
   | (Tprim tp1, Tprim tp2) -> Subtype_negation.is_tprim_disjoint tp1 tp2
   | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
   | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))

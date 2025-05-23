@@ -60,6 +60,15 @@ val partition_ty :
   Typing_defs.type_predicate ->
   Typing_env_types.env * ty_partition
 
+(**
+  Returns true if the type falls entirely on the left of the predicate
+*)
+val passes_predicate :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_defs.type_predicate ->
+  bool
+
 module TyPredicate : sig
   val of_ty :
     Typing_env_types.env ->

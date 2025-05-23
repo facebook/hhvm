@@ -1742,6 +1742,10 @@ class HTTPTransaction
     return webTransportImpl_.get();
   }
 
+  void setWTTransportProvider(WebTransportImpl::TransportProvider* tp) {
+    wtTransportProvider_ = tp;
+  }
+
   static void setEgressBufferLimit(uint64_t limit) {
     egressBufferLimit_ = limit;
   }
@@ -1979,6 +1983,7 @@ class HTTPTransaction
   uint32_t maxDeferredIngress_{0};
   Handler* handler_{nullptr};
   Transport& transport_;
+  WebTransportImpl::TransportProvider* wtTransportProvider_;
 
   HTTPSessionStats* stats_{nullptr};
 

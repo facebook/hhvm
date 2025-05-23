@@ -86,6 +86,7 @@ HTTPTransaction::HTTPTransaction(
       id_(id),
       seqNo_(seqNo),
       transport_(transport),
+      wtTransportProvider_(&transport),
       stats_(stats),
       recvWindow_(receiveInitialWindowSize),
       sendWindow_(sendInitialWindowSize),
@@ -1720,7 +1721,7 @@ bool HTTPTransaction::sendDatagram(std::unique_ptr<folly::IOBuf> datagram) {
     return false;
   }
 
-  auto sent = transport_.sendDatagram(std::move(datagram));
+  auto sent = wtTransportProvider_->sendDatagram(std::move(datagram));
 
   if (sent && transportCallback_) {
     transportCallback_->datagramBytesGenerated(size);
@@ -2078,8 +2079,10 @@ void HTTPTransaction::onDatagram(
 WebTransportImpl::BidiStreamHandle HTTPTransaction::onWebTransportBidiStream(
     HTTPCodec::StreamID id) {
   if (!handler_) {
-    transport_.resetWebTransportEgress(id, WebTransport::kInternalError);
-    transport_.stopReadingWebTransportIngress(id, WebTransport::kInternalError);
+    wtTransportProvider_->resetWebTransportEgress(id,
+                                                  WebTransport::kInternalError);
+    wtTransportProvider_->stopReadingWebTransportIngress(
+        id, WebTransport::kInternalError);
     return {nullptr, nullptr};
   }
   refreshTimeout();
@@ -2094,7 +2097,8 @@ WebTransportImpl::StreamReadHandle* HTTPTransaction::onWebTransportUniStream(
     HTTPCodec::StreamID id) {
   if (!handler_) {
     LOG(ERROR) << "Handler not set";
-    transport_.stopReadingWebTransportIngress(id, WebTransport::kInternalError);
+    wtTransportProvider_->stopReadingWebTransportIngress(
+        id, WebTransport::kInternalError);
     return nullptr;
   }
   refreshTimeout();

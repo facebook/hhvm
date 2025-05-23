@@ -2424,6 +2424,48 @@ TEST(CompilerTest, base_service_defined_after_use) {
   )");
 }
 
+TEST(CompilerTest, cpp_orderable) {
+  check_compile(R"(
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+struct AlwaysOrderable {
+  1: set<i32> a;
+}
+
+@cpp.EnableCustomTypeOrdering
+# expected-error@-1: Type `UnnecessaryAnnotation` is always orderable in C++: remove redundant `@cpp.EnableCustomTypeOrdering` annotation.
+struct UnnecessaryAnnotation {
+  1: set<i32> a;
+}
+
+struct UnorderableCustomType {
+  @cpp.Type{name = "custom"}
+  1: set<i32> a;
+}
+
+@thrift.Uri{value = "facebook.com/thrift/ImplicitlyEnabledCustomType"}
+# expected-warning@-1: Type `ImplicitlyEnabledCustomType` is implicitly made orderable in C++ because it has a URI. This legacy behavior is being deprecated: enable ordering explicitly by annotating the type with `@cpp.EnableCustomTypeOrdering`.
+struct ImplicitlyEnabledCustomType {
+  @cpp.Type{name = "custom"}
+  1: set<i32> a;
+}
+
+@cpp.EnableCustomTypeOrdering
+struct ExplicitlyEnabledCustomType {
+  @cpp.Type{name = "custom"}
+  1: set<i32> a;
+}
+
+@thrift.Uri{value = "facebook.com/thrift/ExplicitlyEnabledCustomTypeWithUri"}
+@cpp.EnableCustomTypeOrdering
+struct ExplicitlyEnabledCustomTypeWithUri {
+  @cpp.Type{name = "custom"}
+  1: set<i32> a;
+}
+)");
+}
+
 TEST(CompilerTest, invalid_include_alias) {
   std::map<std::string, std::string> name_contents_map;
 

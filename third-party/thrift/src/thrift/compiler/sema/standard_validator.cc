@@ -40,6 +40,7 @@
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
+#include <thrift/compiler/generate/cpp/orderable_type_utils.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
@@ -48,6 +49,8 @@
 namespace apache::thrift::compiler {
 
 namespace {
+using cpp2::OrderableTypeUtils;
+
 const t_structured* get_mixin_type(const t_field& field) {
   if (cpp2::is_mixin(field)) {
     return dynamic_cast<const t_structured*>(field.type()->get_true_type());
@@ -467,6 +470,45 @@ void validate_exception_message_annotation_is_only_in_exceptions(
           "@thrift.ExceptionMessage annotation is only allowed in exception definitions. '{}' is not an exception.",
           node.name());
     }
+  }
+}
+
+void validate_orderable_structured_types(
+    sema_context& ctx, const t_structured& node) {
+  switch (OrderableTypeUtils::get_orderable_condition(
+      node, true /* enableCustomTypeOrderingIfStructureHasUri */)) {
+    case OrderableTypeUtils::StructuredOrderableCondition::Always: {
+      const t_const* annotation = ctx.program().inherit_annotation_or_null(
+          node, kCppEnableCustomTypeOrdering);
+      if (annotation == nullptr) {
+        return;
+      }
+
+      ctx.error(
+          *annotation,
+          "Type `{}` is always orderable in C++: remove redundant "
+          "`@cpp.EnableCustomTypeOrdering` annotation.",
+          node.name());
+      return;
+    }
+    case OrderableTypeUtils::StructuredOrderableCondition::
+        OrderableByLegacyImplicitLogicEnabledByUri: {
+      // warn("Ordering enabled, add @cpp.EnableCustomTypeOrdering");
+      ctx.warning(
+          node,
+          "Type `{}` is implicitly made orderable in C++ because it has a "
+          "URI. This legacy behavior is being deprecated: enable ordering "
+          "explicitly by annotating the type with "
+          "`@cpp.EnableCustomTypeOrdering`.",
+          node.name());
+      return;
+    }
+    case OrderableTypeUtils::StructuredOrderableCondition::
+        NeedsCustomTypeOrderingEnabled:
+    case OrderableTypeUtils::StructuredOrderableCondition::
+        OrderableByExplicitAnnotation:
+      // Nothing to do
+      return;
   }
 }
 
@@ -1633,6 +1675,8 @@ ast_validator standard_validator() {
       &validate_reserved_ids_structured);
   validator.add_structured_definition_visitor(
       &validate_exception_message_annotation_is_only_in_exceptions);
+  validator.add_structured_definition_visitor(
+      &validate_orderable_structured_types);
 
   validator.add_union_visitor(&validate_union_field_attributes);
   validator.add_exception_visitor(&validate_exception_message_annotation);

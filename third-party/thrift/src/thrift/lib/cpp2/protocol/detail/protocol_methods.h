@@ -34,6 +34,7 @@
 #include <folly/container/range_traits.h>
 #include <folly/functional/Invoke.h>
 #include <folly/io/IOBuf.h>
+#include <folly/lang/VectorTraits.h>
 #include <folly/memory/UninitializedMemoryHacks.h>
 
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
@@ -439,8 +440,12 @@ struct protocol_methods<type_class::integral, bool> {
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(integral, bool, Bool)
   THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(integral, bool, Bool)
 
-  template <typename Protocol>
-  static void read(Protocol& protocol, std::vector<bool>::reference out) {
+  template <
+      typename Protocol,
+      typename BitReference,
+      typename =
+          std::enable_if_t<folly::is_vector_bool_reference_v<BitReference>>>
+  static void read(Protocol& protocol, BitReference out) {
     bool tmp;
     read(protocol, tmp);
     out = tmp;

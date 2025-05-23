@@ -36,7 +36,9 @@ TEST(JsonTest, json_quote_ascii_stream) {
 
 TEST(JsonTest, to_json_t_const_value) {
   auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(source_mgr, R"(
+  auto program = dedent_and_parse_to_program(
+      source_mgr,
+      R"(
     enum MyEnum {
       FIRST = 1;
       SECOND = 2;
@@ -65,7 +67,9 @@ TEST(JsonTest, to_json_t_const_value) {
       },
     }
     struct MyStruct{}
-  )");
+  )",
+      {},
+      {});
 
   const std::vector<t_structured*>& structs = program->structs_and_unions();
   EXPECT_EQ(structs.size(), 3);

@@ -26,6 +26,8 @@
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_service.h>
+#include <thrift/compiler/parse/parse_ast.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 #include <thrift/compiler/test/parser_test_helpers-inl.h>
 
@@ -69,4 +71,7 @@ inline std::unique_ptr<t_enum> create_fake_enum(
  * Helper function to parse thrift content to t_program
  */
 std::shared_ptr<t_program> dedent_and_parse_to_program(
-    source_manager& sm, std::string source);
+    source_manager& sm,
+    std::string source,
+    parsing_params params,
+    sema_params sparams);

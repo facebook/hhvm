@@ -391,7 +391,9 @@ TEST(UtilTest, gen_adapter_dependency_graph) {
 
 TEST(UtilTest, simple_struct_dependency_graph) {
   auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(source_mgr, R"(
+  auto program = dedent_and_parse_to_program(
+      source_mgr,
+      R"(
     struct FirstStruct {
       1: string one;
       2: MissingType two;
@@ -400,7 +402,9 @@ TEST(UtilTest, simple_struct_dependency_graph) {
       1: string another;
       2: FirstStruct referent;
     }
-  )");
+  )",
+      {},
+      {});
 
   std::vector<const t_type*> objects(
       program->structured_definitions().begin(),
@@ -438,7 +442,9 @@ TEST(UtilTest, simple_struct_dependency_graph) {
 // be generated without crashing.
 TEST(UtilTest, struct_dependency_graph_with_bad_type) {
   auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(source_mgr, R"(
+  auto program = dedent_and_parse_to_program(
+      source_mgr,
+      R"(
     struct FirstStruct {
       1: string one;
       2: MissingType two;
@@ -447,7 +453,9 @@ TEST(UtilTest, struct_dependency_graph_with_bad_type) {
       1: string another;
       2: FirstStruct referent;
     }
-  )");
+  )",
+      {},
+      {});
 
   std::vector<const t_type*> objects(
       program->structured_definitions().begin(),
@@ -482,7 +490,9 @@ TEST(UtilTest, struct_dependency_graph_with_bad_type) {
 
 TEST(UtilTest, structs_and_typedefs_dependency_graph) {
   auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(source_mgr, R"(
+  auto program = dedent_and_parse_to_program(
+      source_mgr,
+      R"(
     struct ContainsList {
       1: list<S> (cpp.template = "dependent") l;
     }
@@ -503,7 +513,9 @@ TEST(UtilTest, structs_and_typedefs_dependency_graph) {
     typedef S AlsoS
 
     struct S {}
-  )");
+  )",
+      {},
+      {});
 
   std::vector<const t_type*> objects(
       program->structured_definitions().begin(),

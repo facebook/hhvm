@@ -180,148 +180,188 @@ TEST(OrderableTypeUtilsTest, is_orderable_struct_self_reference) {
   EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, struct_c, true));
 }
 
+void checkCustomSetOrderabilityWithoutUri(const t_program& program) {
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo1"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo2"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo3"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo4"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo5"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo6"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo7"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo8"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo9"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo10"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo11"), true));
+
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar1"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar2"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar3"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar4"), true));
+
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz1"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz2"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz3"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz4"), true));
+}
 TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithoutUri) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr, kHeaderNoUri + kOrderabilityTestProgram);
-
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo1"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo2"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo3"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo4"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo5"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo6"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo7"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo8"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo9"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo10"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo11"), true));
-
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar1"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar2"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar3"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar4"), true));
-
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz1"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz2"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz3"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz4"), true));
+      source_mgr, kHeaderNoUri + kOrderabilityTestProgram, {}, {});
+  checkCustomSetOrderabilityWithoutUri(*program);
+}
+TEST(
+    OrderableTypeUtilsTest,
+    CustomSetOrderabilityWithoutUriSkipLoweringAnnotations) {
+  source_manager source_mgr;
+  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
+      source_mgr,
+      kHeaderNoUri + kOrderabilityTestProgram,
+      {},
+      {.skip_lowering_annotations = true});
+  checkCustomSetOrderabilityWithoutUri(*program);
 }
 
 // The orderability should be the same as previous test case
+void checkCustomSetOrderabilityWithUriButPreservedOldBehavior(
+    const t_program& program) {
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo1"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo2"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo3"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo4"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo5"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo6"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo7"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo8"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo9"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo10"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo11"), false));
+
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar1"), false));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar2"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar3"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar4"), false));
+
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz1"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz2"), false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz3"), false));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz4"), false));
+}
 TEST(
     OrderableTypeUtilsTest,
     CustomSetOrderabilityWithUriButPreservedOldBehavior) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr, kHeaderWithUri + kOrderabilityTestProgram);
-
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo1"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo2"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo3"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo4"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo5"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo6"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo7"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo8"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo9"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo10"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo11"), false));
-
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar1"), false));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar2"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar3"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar4"), false));
-
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz1"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz2"), false));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz3"), false));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz4"), false));
+      source_mgr, kHeaderWithUri + kOrderabilityTestProgram, {}, {});
+  checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
+}
+TEST(
+    OrderableTypeUtilsTest,
+    CustomSetOrderabilityWithUriButPreservedOldBehaviorSkipLoweringAnnotations) {
+  source_manager source_mgr;
+  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
+      source_mgr,
+      kHeaderWithUri + kOrderabilityTestProgram,
+      {},
+      {.skip_lowering_annotations = true});
+  checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
 }
 
+void checkCustomSetOrderabilityWithUri(const t_program& program) {
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo1"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo2"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo3"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo4"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo5"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo6"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo7"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo8"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo9"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo10"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Foo11"), true));
+
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar1"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar2"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar3"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Bar4"), true));
+
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz1"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz2"), true));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz3"), true));
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
+      get_structured_named(program, "Baz4"), true));
+}
 TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithUri) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr, kHeaderWithUri + kOrderabilityTestProgram);
-
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo1"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo2"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo3"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo4"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo5"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo6"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo7"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo8"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo9"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo10"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Foo11"), true));
-
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar1"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar2"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar3"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Bar4"), true));
-
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz1"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz2"), true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz3"), true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(
-      get_structured_named(*program, "Baz4"), true));
+      source_mgr, kHeaderWithUri + kOrderabilityTestProgram, {}, {});
+  checkCustomSetOrderabilityWithUri(*program);
+}
+TEST(
+    OrderableTypeUtilsTest,
+    CustomSetOrderabilityWithUriSkipLoweringAnnotations) {
+  source_manager source_mgr;
+  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
+      source_mgr,
+      kHeaderWithUri + kOrderabilityTestProgram,
+      {},
+      {.skip_lowering_annotations = true});
+  checkCustomSetOrderabilityWithUri(*program);
 }
 
 TEST(OrderableTypeUtilsTest, get_orderable_condition) {

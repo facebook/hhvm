@@ -665,11 +665,11 @@ void normalize_return_type(
 }
 
 template <typename Node>
-void lower_type_annotations(
+void lower_cpp_type_annotations(
     sema_context& ctx, mutator_context& mctx, Node& node) {
   std::map<std::string, std::string> unstructured;
 
-  if (!ctx.sema_parameters().skip_lowering_annotations) {
+  if (!ctx.sema_parameters().skip_lowering_cpp_type_annotations) {
     if (const t_const* annot =
             node.find_structured_annotation_or_null(kCppTypeUri)) {
       if (auto type =
@@ -762,8 +762,8 @@ std::vector<ast_mutator> standard_mutators() {
   std::vector<ast_mutator> mutators;
 
   ast_mutator initial;
-  initial.add_field_visitor(&lower_type_annotations<t_field>);
-  initial.add_typedef_visitor(&lower_type_annotations<t_typedef>);
+  initial.add_field_visitor(&lower_cpp_type_annotations<t_field>);
+  initial.add_typedef_visitor(&lower_cpp_type_annotations<t_typedef>);
   initial.add_function_visitor(&normalize_return_type);
   initial.add_named_visitor(&lower_deprecated_annotations);
   mutators.push_back(std::move(initial));

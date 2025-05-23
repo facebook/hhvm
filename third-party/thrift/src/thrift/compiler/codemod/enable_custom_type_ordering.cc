@@ -106,6 +106,6 @@ int main(int argc, char** argv) {
   return run_codemod(
       argc,
       argv,
-      {.skip_lowering_annotations = false},
+      {.skip_lowering_cpp_type_annotations = false},
       apache::thrift::compiler::codemod_main);
 }

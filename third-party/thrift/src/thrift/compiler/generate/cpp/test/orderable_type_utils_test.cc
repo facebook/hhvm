@@ -231,13 +231,13 @@ TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithoutUri) {
 }
 TEST(
     OrderableTypeUtilsTest,
-    CustomSetOrderabilityWithoutUriSkipLoweringAnnotations) {
+    CustomSetOrderabilityWithoutUriSkipLoweringCppTypeAnnotations) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
       source_mgr,
       kHeaderNoUri + kOrderabilityTestProgram,
       {},
-      {.skip_lowering_annotations = true});
+      {.skip_lowering_cpp_type_annotations = true});
   checkCustomSetOrderabilityWithoutUri(*program);
 }
 
@@ -295,13 +295,13 @@ TEST(
 }
 TEST(
     OrderableTypeUtilsTest,
-    CustomSetOrderabilityWithUriButPreservedOldBehaviorSkipLoweringAnnotations) {
+    CustomSetOrderabilityWithUriButPreservedOldBehaviorSkipLoweringCppTypeAnnotations) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
       source_mgr,
       kHeaderWithUri + kOrderabilityTestProgram,
       {},
-      {.skip_lowering_annotations = true});
+      {.skip_lowering_cpp_type_annotations = true});
   checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
 }
 
@@ -355,13 +355,13 @@ TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithUri) {
 }
 TEST(
     OrderableTypeUtilsTest,
-    CustomSetOrderabilityWithUriSkipLoweringAnnotations) {
+    CustomSetOrderabilityWithUriSkipLoweringCppTypeAnnotations) {
   source_manager source_mgr;
   std::shared_ptr<t_program> program = dedent_and_parse_to_program(
       source_mgr,
       kHeaderWithUri + kOrderabilityTestProgram,
       {},
-      {.skip_lowering_annotations = true});
+      {.skip_lowering_cpp_type_annotations = true});
   checkCustomSetOrderabilityWithUri(*program);
 }
 

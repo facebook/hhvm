@@ -28,6 +28,7 @@ struct codemod_parsing_options {
   // `cpp.type`/`cpp.template` (lowering annotation from structured to
   // unstructured). In codemod program, by default we don't do such conversion
   // and this option changes it.
+  bool skip_lowering_cpp_type_annotations = true;
   bool skip_lowering_annotations = true;
 };
 

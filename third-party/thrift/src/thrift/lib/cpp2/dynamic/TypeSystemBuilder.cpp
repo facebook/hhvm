@@ -23,10 +23,7 @@
 #include <folly/lang/Assume.h>
 #include <folly/lang/SafeAssert.h>
 
-#include <cstddef>
 #include <functional>
-#include <new>
-#include <stdexcept>
 #include <utility>
 #include <variant>
 
@@ -34,181 +31,23 @@ namespace apache::thrift::type_system {
 
 namespace {
 
-/**
- * LazyInitPtr<T> is a smart pointer that allocates memory for an object of type
- * `T` without immediately constructing it. This allows lazy in-place
- * initialization of `T`at a later time, while providing a stable pointer to the
- * allocated memory even before construction.
- *
- * This is technically undefined behavior, but allows us to implementation the
- * semantics required for LazyInitDefinition mentioned below.
- *
- * On creation, LazyInitPtr<T> allocates sufficient memory for a `T` object but
- * does not call `T`'s constructor. The actual construction is deferred until
- * there is an explicit call to `emplace(...)`.
- *
- * The key feature of LazyInitPtr<T> is that it allows obtaining a raw pointer
- * to the allocated memory (via `get()`) even before `T` is constructed. This is
- * different from `std::unique_ptr<T>` which does not perform any allocation
- * (and thus returns nullptr) unless an object is constructed.
- *
- * The pointer returned by `get()` must not be dereferenced until the object is
- * constructed (see `emplace(...)` and `isInitialized(...)`). This kind of
- * deferred initialization is useful when setting up circular references.
- *
- * LazyInitPtr<T> models Movable but not Copyable.
- */
-template <typename T>
-class LazyInitPtr final {
-  static_assert(std::is_nothrow_move_constructible_v<T>);
-  static_assert(std::is_nothrow_destructible_v<T>);
-
- public:
-  LazyInitPtr() : storage_(allocateUninitializedStorage()) {}
-  ~LazyInitPtr() noexcept { destroyObjectAndFreeStorage(); }
-
-  LazyInitPtr(const LazyInitPtr&) = delete;
-  LazyInitPtr& operator=(const LazyInitPtr&) = delete;
-
-  LazyInitPtr(LazyInitPtr&& other) noexcept
-      : storage_(std::exchange(other.storage_, nullptr)),
-        initialized_(std::exchange(other.initialized_, false)) {}
-
-  LazyInitPtr& operator=(LazyInitPtr&& other) noexcept {
-    if (this == &other) {
-      return *this;
-    }
-    destroyObjectAndFreeStorage();
-    storage_ = std::exchange(other.storage_, nullptr);
-    initialized_ = std::exchange(other.initialized_, false);
-  }
-
-  bool isInitialized() const noexcept { return initialized_; }
-  /**
-   * Returns a pointer to the (possibly uninitialized) memory for the contained
-   * object.
-   *
-   * The returned pointer must not be deferenced unless isInitialized() returns
-   * true. The lifetime of the object is valid for the lifetime of the owning
-   * LazyInitPtr<T>, including if this object is moved (similar to other smart
-   * pointers).
-   */
-  T* get() const noexcept { return std::launder(storage_); }
-
-  /**
-   * Constructs an object in-place using the provided arguments.
-   *
-   * Pre-conditions:
-   *   - isInitialized() == false
-   *   - This object has not been moved-from
-   */
-  template <typename... Args>
-  T& emplace(Args&&... args) {
-    if (initialized_) {
-      throw std::logic_error("LazyInitPtr: object is already constructed");
-    }
-    new (storage_) T(std::forward<Args>(args)...);
-    initialized_ = true;
-    return *get();
-  }
-
- private:
-  static T* allocateUninitializedStorage() {
-    return static_cast<T*>(
-        ::operator new(sizeof(T), std::align_val_t{alignof(T)}));
-  }
-
-  void destroyObjectAndFreeStorage() noexcept {
-    if (initialized_) {
-      FOLLY_SAFE_DCHECK(storage_ != nullptr);
-      storage_->~T();
-      initialized_ = false;
-    }
-    if (storage_ != nullptr) {
-      ::operator delete(storage_, sizeof(T), std::align_val_t{alignof(T)});
-      storage_ = nullptr;
-    }
-  }
-
-  T* storage_ = nullptr;
-  bool initialized_ = false;
-};
-
-/**
- * LazyInitDefinition exists thanks to 2 conflicting requirements:
- *   1. TypeRef access should be performant — when a TypeRef points to a
- *      StructNode, it should store a pointer to the StructNode directly. There
- *      should be no "lazy resolution".
- *   2. Thrift type references can have cycles.
- *
- * Consider the simple case with a self referential struct:
- *
- *     struct Foo {
- *       1: optional Foo obj;
- *     }
- *
- * We expect that the FieldNode corresponding to `obj` will have a TypeRef to
- * `Foo` (and thus a StructNode pointer for `Foo`). However, we cannot construct
- * the StructNode for `Foo` without first creating the FieldNode for `obj`!
- *
- * To break this cycle, the approach we take is:
- *   1. Perform an initial pass where we create uninitialized nodes for each
- *      definition.
- *   2. Create the TypeSystem graph with pointers to uninitialized nodes.
- *   3. Perform a second pass and to initialize the node objects.
- */
-class LazyInitDefinition final {
- public:
-  using Alternative = std::variant<
-      LazyInitPtr<StructNode>,
-      LazyInitPtr<UnionNode>,
-      LazyInitPtr<EnumNode>,
-      LazyInitPtr<OpaqueAliasNode>>;
-
-  explicit LazyInitDefinition(Alternative definition) noexcept
-      : definition_(std::move(definition)) {}
-
-  template <typename T>
-  LazyInitPtr<T>& asType() {
-    return std::get<LazyInitPtr<T>>(definition_);
-  }
-
-  bool isInitialized() const {
-    return folly::variant_match(
-        definition_, [](const auto& lazyInitPtr) -> bool {
-          return lazyInitPtr.isInitialized();
-        });
-  }
-
-  DefinitionRef toDefinitionRef() const {
-    return folly::variant_match(
-        definition_, [](const auto& lazyInitPtr) -> DefinitionRef {
-          return DefinitionRef(lazyInitPtr.get());
-        });
-  }
-
-  TypeRef toTypeRef() const {
-    return TypeRef::fromDefinition(toDefinitionRef());
-  }
-
- private:
-  Alternative definition_;
-};
+using TSDefinition =
+    std::variant<StructNode, UnionNode, EnumNode, OpaqueAliasNode>;
 
 class TypeSystemImpl final : public TypeSystem {
  private:
  public:
-  using DefinitionsMap = folly::F14FastMap<
+  using DefinitionsMap = folly::F14NodeMap<
       Uri,
-      LazyInitDefinition,
+      TSDefinition,
       detail::UriHeterogeneousHash,
       std::equal_to<>>;
   DefinitionsMap definitions;
 
   DefinitionRef getUserDefinedType(UriView uri) final {
     if (auto def = definitions.find(uri); def != definitions.end()) {
-      FOLLY_SAFE_DCHECK(def->second.isInitialized());
-      return def->second.toDefinitionRef();
+      return folly::variant_match(
+          def->second, [](auto& d) { return DefinitionRef(&d); });
     }
     throw InvalidTypeError(
         fmt::format("Definition for uri '{}' was not found", uri));
@@ -230,7 +69,8 @@ class TypeSystemImpl final : public TypeSystem {
     return typeId.visit(
         [&](const Uri& uri) -> TypeRef {
           if (auto def = definitions.find(uri); def != definitions.end()) {
-            return def->second.toTypeRef();
+            return folly::variant_match(
+                def->second, [](auto& d) { return TypeRef(d); });
           }
           throw InvalidTypeError(
               fmt::format("Definition for uri '{}' was not found", uri));
@@ -258,22 +98,21 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
   for (auto& entry : definitions_) {
     const Uri& uri = entry.first;
     SerializableTypeDefinition& def = entry.second;
-    auto uninitDef = std::invoke([&]() -> LazyInitDefinition {
+    auto uninitDef = std::invoke([&]() -> TSDefinition {
       switch (def.getType()) {
         case SerializableTypeDefinition::Type::structDef:
-          return LazyInitDefinition(LazyInitPtr<StructNode>());
+          return StructNode{{}, {}, {}, {}};
         case SerializableTypeDefinition::Type::unionDef:
-          return LazyInitDefinition(LazyInitPtr<UnionNode>());
+          return UnionNode{{}, {}, {}, {}};
         case SerializableTypeDefinition::Type::enumDef:
-          return LazyInitDefinition(LazyInitPtr<EnumNode>());
+          return EnumNode{{}, {}, {}};
         case SerializableTypeDefinition::Type::opaqueAliasDef:
-          return LazyInitDefinition(LazyInitPtr<OpaqueAliasNode>());
+          return OpaqueAliasNode{{}, TypeRef{TypeRef::Bool{}}, {}};
         default:
           break;
       }
       folly::assume_unreachable();
     });
-    FOLLY_SAFE_DCHECK(!uninitDef.isInitialized());
     typeSystem->definitions.emplace(uri, std::move(uninitDef));
   }
 
@@ -324,13 +163,12 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
     const Uri& uri = entry.first;
     SerializableTypeDefinition& def = entry.second;
     // We created uninitialized stubs above so we can assume they exist
-    LazyInitDefinition& uninitDef = typeSystem->definitions.find(uri)->second;
-    FOLLY_SAFE_DCHECK(!uninitDef.isInitialized());
+    TSDefinition& uninitDef = typeSystem->definitions.find(uri)->second;
 
     switch (def.getType()) {
       case SerializableTypeDefinition::Type::structDef: {
         SerializableStructDefinition& structDef = *def.structDef_ref();
-        uninitDef.asType<StructNode>().emplace(
+        std::get<StructNode>(uninitDef) = StructNode(
             uri,
             makeFields(std::move(*structDef.fields())),
             *structDef.isSealed(),
@@ -338,7 +176,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
       } break;
       case SerializableTypeDefinition::Type::unionDef: {
         SerializableUnionDefinition& unionDef = *def.unionDef_ref();
-        uninitDef.asType<UnionNode>().emplace(
+        std::get<UnionNode>(uninitDef) = UnionNode(
             uri,
             makeFields(std::move(*unionDef.fields())),
             *unionDef.isSealed(),
@@ -354,7 +192,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
               *mapping.datum(),
               makeAnnots(std::move(*mapping.annotations()))});
         }
-        uninitDef.asType<EnumNode>().emplace(
+        std::get<EnumNode>(uninitDef) = EnumNode(
             uri,
             std::move(values),
             makeAnnots(std::move(*enumDef.annotations())));
@@ -362,7 +200,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
       case SerializableTypeDefinition::Type::opaqueAliasDef: {
         SerializableOpaqueAliasDefinition& opaqueAliasDef =
             *def.opaqueAliasDef_ref();
-        uninitDef.asType<OpaqueAliasNode>().emplace(
+        std::get<OpaqueAliasNode>(uninitDef) = OpaqueAliasNode(
             uri,
             typeSystem->typeOf(*opaqueAliasDef.targetType()),
             makeAnnots(std::move(*opaqueAliasDef.annotations())));

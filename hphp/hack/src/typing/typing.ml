@@ -7579,7 +7579,30 @@ end = struct
       let (env, ty_err) = Typing_solver.close_tyvars_and_solve env in
       let errs = Option.merge errs ty_err ~f:Typing_error.both in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
-      (env, refine_local ty_true, refine_local ty_false)
+      let refine_local tyvar ty_refine ~ty_refine_is_class env =
+        let (env, ty) =
+          Typing_helpers.refine_and_simplify_intersection
+            ~hint_first:false
+            env
+            ~is_class:ty_refine_is_class
+            reason
+            tyvar
+            ty_refine
+        in
+        refine_local ty env
+      in
+      ( env,
+        refine_local
+          ty_true
+          (Typing_refinement.TyPredicate.to_ty predicate)
+          ~ty_refine_is_class:
+            (match predicate with
+            | (_, IsTag (ClassTag _)) -> true
+            | _ -> false),
+        refine_local
+          ty_false
+          (MakeType.neg reason predicate)
+          ~ty_refine_is_class:false )
     in
     let rec get_partitions env ty :
         env * Typing_refinement.ty_partition list option =

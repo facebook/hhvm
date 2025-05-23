@@ -611,6 +611,9 @@ module Subtype_negation = struct
         Some (MakeType.prim_type r Aast.Tarraykey)
       | Tneg (r, IsTag NullTag) -> Some (MakeType.null r)
       | Tnonnull -> Some (MakeType.null r)
+      | Tneg (_, IsTag (ClassTag _)) -> None
+      | Tneg (r, predicate) ->
+        Some (Typing_refinement.TyPredicate.to_ty (r, predicate))
       | _ -> None
     in
     (env, neg_ty)
@@ -7241,77 +7244,17 @@ end = struct
             ~rhs:{ super_supportdyn = false; super_like; ty_super }
             env)
       in
-      (* When we split a type we have some component that is a subset and
-         some component that is a span. For the component that is a subset
-         we need to ensure it is a subtype of the given super type, but
-         for the span we need to refine the type down to a type we know
-         would pass the given predicate. *)
-      let simplify_split
-          ~init
-          ~refine
-          ~refine_span
-          (subset : Typing_refinement.dnf_ty)
-          (span : Typing_refinement.dnf_ty)
-          ty_sup =
-        let init =
-          List.fold_left subset ~init ~f:(fun res tyl ->
-              res &&& simplify_subtype ~f:refine tyl ty_sup)
-        in
-        List.fold_left span ~init ~f:(fun res tyl ->
-            res &&& simplify_subtype ~f:refine_span tyl ty_sup)
-      in
-
-      let refine_true_span env tyl =
-        intersect env (Typing_refinement.TyPredicate.to_ty predicate :: tyl)
-      in
-      let refine_false_span env tyl =
-        let neg = MakeType.neg reason_super predicate in
-        intersect env (neg :: tyl)
+      let simplify_split ~init (tys : Typing_refinement.dnf_ty) ty_sup =
+        List.fold_left tys ~init ~f:(fun res tyl ->
+            res &&& simplify_subtype ~f:intersect tyl ty_sup)
       in
       let left = partition.Typing_refinement.left in
       let span = partition.Typing_refinement.span in
       let right = partition.Typing_refinement.right in
-      (* Handle dynamic a bit differently to avoid intersecting with dynamic on
-         the false side. This is less precise, but plays better with dynamic
-         stripping logic elsewhere in the typechecker.
-         dynamic will always span (except cases like IsMixed, but this actually
-         isn't a problem if dynamic is in a different part since we only
-         intersect the span) so this picks out the dynamic and, for the false
-         side, moves it to the right.
-         This makes it such that (e.g. in the case when there is no other part
-         of the span) instead of `(dynamic & !P) | right` you get
-         `dynamic | right`
-      *)
-      let (span_for_false, dyn) =
-        List.fold_left
-          ~init:([], None)
-          ~f:(fun (tyll, dyn_opt) tyl ->
-            match tyl with
-            | [ty] when Typing_defs.is_dynamic ty -> (tyll, Some ty)
-            | _ -> (tyl :: tyll, dyn_opt))
-          span
-      in
-      let right =
-        match dyn with
-        | Some dyn -> [dyn] :: right
-        | _ -> right
-      in
       let (env, props) =
-        simplify_split
-          ~refine:refine_true_span
-          ~refine_span:refine_true_span
-          ~init:(env, TL.valid)
-          left
-          span
-          ty_true
+        simplify_split ~init:(env, TL.valid) (left @ span) ty_true
       in
-      simplify_split
-        ~refine:intersect
-        ~refine_span:refine_false_span
-        ~init:(env, props)
-        right
-        span_for_false
-        ty_false
+      simplify_split ~init:(env, props) (right @ span) ty_false
 end
 
 and Common : sig

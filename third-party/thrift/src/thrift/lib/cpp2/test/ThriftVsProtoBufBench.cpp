@@ -24,7 +24,6 @@
 
 #include <folly/Benchmark.h>
 #include <folly/Format.h>
-#include <folly/Optional.h>
 #include <folly/init/Init.h>
 #include <folly/memory/MallctlHelper.h>
 #include <folly/portability/GFlags.h>

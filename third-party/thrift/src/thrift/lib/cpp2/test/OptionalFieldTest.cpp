@@ -15,7 +15,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <folly/Portability.h>
 #include <thrift/lib/cpp2/FieldRefHash.h>
 
 #include <type_traits>

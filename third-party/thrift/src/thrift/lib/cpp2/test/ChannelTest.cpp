@@ -29,7 +29,6 @@
 #include <folly/io/async/test/TestSSLServer.h>
 #include <folly/lang/Bits.h>
 #include <folly/testing/TestUtil.h>
-#include <thrift/lib/cpp/EventHandlerBase.h>
 #include <thrift/lib/cpp2/async/Cpp2Channel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>

@@ -9,7 +9,7 @@ license = "MIT"
 
 [lib]
 path = "compiler_ffi.rs"
-crate-type = ["lib", "staticlib"]
+crate-type = ["rlib"]
 
 [dependencies]
 anyhow = "1.0.95"

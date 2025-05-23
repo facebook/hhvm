@@ -30,7 +30,6 @@ HHVM_DEFINE_EXTENSION(
     logging.h
     path-and-hash.h
     path-symbols-map.h
-    path-versions.h
     sqlite-autoload-db.h
     sqlite-key.h
     static-watcher.h

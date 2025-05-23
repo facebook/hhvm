@@ -204,7 +204,7 @@ inline const ArrayData* decode_litarr(PC& pc) {
   return liveUnit()->lookupArrayId(decode<Id>(pc));
 }
 
-ALWAYS_INLINE TypedValue* decode_local(PC& pc) {
+ALWAYS_INLINE tv_lval decode_local(PC& pc) {
   auto la = decode_iva(pc);
   assertx(la < vmfp()->func()->numLocals());
   return frame_local(vmfp(), la);
@@ -4407,7 +4407,7 @@ OPTBLD_INLINE void iopIterBase() {
   tvMove(Iter::extractBase(*base, arGetContextClass(vmfp())), base);
 }
 
-OPTBLD_INLINE void iopIterGetKey(const IterArgs& ita, TypedValue* base) {
+OPTBLD_INLINE void iopIterGetKey(const IterArgs& ita, tv_lval base) {
   if (isArrayLikeType(type(base))) {
     auto const arr = val(base).parr;
     auto const pos = frame_iter(vmfp(), ita.iterId)->getPos();
@@ -4421,7 +4421,7 @@ OPTBLD_INLINE void iopIterGetKey(const IterArgs& ita, TypedValue* base) {
   tvCopy(key, *vmStack().allocTV());
 }
 
-OPTBLD_INLINE void iopIterGetValue(const IterArgs& ita, TypedValue* base) {
+OPTBLD_INLINE void iopIterGetValue(const IterArgs& ita, tv_lval base) {
   if (isArrayLikeType(type(base))) {
     auto const arr = val(base).parr;
     auto const pos = frame_iter(vmfp(), ita.iterId)->getPos();
@@ -4435,7 +4435,7 @@ OPTBLD_INLINE void iopIterGetValue(const IterArgs& ita, TypedValue* base) {
   tvCopy(value, *vmStack().allocTV());
 }
 
-OPTBLD_INLINE void iopIterSetValue(const IterArgs& ita, TypedValue* base) {
+OPTBLD_INLINE void iopIterSetValue(const IterArgs& ita, tv_lval base) {
   assertx(isArrayLikeType(type(base)));
   assertx(!has_flag(ita.flags, IterArgs::Flags::BaseConst));
 
@@ -4446,7 +4446,7 @@ OPTBLD_INLINE void iopIterSetValue(const IterArgs& ita, TypedValue* base) {
 }
 
 OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
-                               TypedValue* base, PC targetpc) {
+                               tv_lval base, PC targetpc) {
   assertx(isArrayLikeType(type(base)) || isObjectType(type(base)));
   auto it = frame_iter(vmfp(), ita.iterId);
 
@@ -4458,7 +4458,7 @@ OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita,
-                               TypedValue* base, PC targetpc) {
+                               tv_lval base, PC targetpc) {
   assertx(isArrayLikeType(type(base)) || isObjectType(type(base)));
   auto it = frame_iter(vmfp(), ita.iterId);
 

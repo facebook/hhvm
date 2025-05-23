@@ -41,8 +41,8 @@ class DNSResolver : public folly::DelayedDestruction {
   class QueryBase;
 
  public:
-  typedef std::unique_ptr<DNSResolver, folly::DelayedDestruction::Destructor>
-      UniquePtr;
+  using UniquePtr =
+      std::unique_ptr<DNSResolver, folly::DelayedDestruction::Destructor>;
 
   enum class ResolverType : uint32_t {
     UNKNOWN = 0,

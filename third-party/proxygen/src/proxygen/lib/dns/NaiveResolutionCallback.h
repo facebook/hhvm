@@ -21,9 +21,8 @@ namespace proxygen {
 // Basic callback for name resolution
 class NaiveResolutionCallback : public DNSResolver::ResolutionCallback {
  public:
-  typedef std::function<void(std::vector<DNSResolver::Answer>&&,
-                             const folly::exception_wrapper&& ex)>
-      Handler;
+  using Handler = std::function<void(std::vector<DNSResolver::Answer> &&,
+                                     const folly::exception_wrapper &&)>;
 
   // Return a DNSResolver::Exception(DNSResolver::NODATA) wrapper
   static folly::exception_wrapper makeNoNameException() noexcept;
@@ -33,7 +32,7 @@ class NaiveResolutionCallback : public DNSResolver::ResolutionCallback {
 
   void resolutionSuccess(
       std::vector<DNSResolver::Answer> answers) noexcept override;
-  void resolutionError(const folly::exception_wrapper& exp) noexcept override;
+  void resolutionError(const folly::exception_wrapper &exp) noexcept override;
 
  private:
   Handler handler_;

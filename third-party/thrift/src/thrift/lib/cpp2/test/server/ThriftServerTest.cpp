@@ -28,7 +28,6 @@
 #include <gtest/gtest.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
-#include <folly/CPortability.h>
 #include <folly/Conv.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Memory.h>

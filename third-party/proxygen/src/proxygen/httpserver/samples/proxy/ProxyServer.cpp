@@ -84,7 +84,6 @@ int main(int argc, char* argv[]) {
   options.enableContentCompression = false;
   options.handlerFactories =
       RequestHandlerChain().addThen<ProxyHandlerFactory>().build();
-  options.h2cEnabled = true;
   options.supportsConnect = true;
 
   HTTPServer server(std::move(options));

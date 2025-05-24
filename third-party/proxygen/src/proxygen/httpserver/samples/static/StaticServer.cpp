@@ -70,7 +70,6 @@ int main(int argc, char* argv[]) {
   options.enableContentCompression = false;
   options.handlerFactories =
       RequestHandlerChain().addThen<StaticHandlerFactory>().build();
-  options.h2cEnabled = true;
 
   auto diskIOThreadPool = std::make_shared<folly::CPUThreadPoolExecutor>(
       FLAGS_threads,

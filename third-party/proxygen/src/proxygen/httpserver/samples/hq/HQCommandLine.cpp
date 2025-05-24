@@ -338,7 +338,6 @@ void initializeHttpServerSettings(HQToolServerParams& hqParams) {
   hqParams.httpServerIdleTimeout = std::chrono::milliseconds(60000);
   hqParams.httpServerShutdownOn = {SIGINT, SIGTERM};
   hqParams.httpServerEnableContentCompression = false;
-  hqParams.h2cEnabled = false;
   hqParams.httpVersion.parse(FLAGS_httpversion);
   hqParams.txnTimeout = std::chrono::milliseconds(FLAGS_txn_timeout);
 } // initializeHttpServerSettings

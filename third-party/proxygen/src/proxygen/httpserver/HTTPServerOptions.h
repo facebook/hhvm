@@ -79,7 +79,7 @@ class HTTPServerOptions {
   uint32_t listenBacklog{1024};
 
   /**
-   * Enable cleartext upgrades to HTTP/2
+   * --DEPRECATED-- Enable cleartext upgrades to HTTP/2
    */
   bool h2cEnabled{false};
 

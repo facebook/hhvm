@@ -42,7 +42,6 @@ struct HQToolServerParams : public HQServerParams {
   std::chrono::milliseconds httpServerIdleTimeout;
   std::vector<int> httpServerShutdownOn;
   bool httpServerEnableContentCompression;
-  bool h2cEnabled;
 };
 
 struct HQToolParams {

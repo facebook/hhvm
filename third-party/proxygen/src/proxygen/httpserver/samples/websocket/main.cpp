@@ -64,7 +64,6 @@ int main(int argc, char* argv[]) {
   options.shutdownOn = {SIGINT, SIGTERM};
   options.handlerFactories =
       RequestHandlerChain().addThen<WebSocketHandlerFactory>().build();
-  options.h2cEnabled = false;
   options.supportsConnect = true;
 
   auto ioThreadPool = std::make_shared<folly::CPUThreadPoolExecutor>(

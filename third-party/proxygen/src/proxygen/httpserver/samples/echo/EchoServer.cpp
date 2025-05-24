@@ -75,7 +75,6 @@ int main(int argc, char* argv[]) {
   options.initialReceiveWindow = uint32_t(1 << 20);
   options.receiveStreamWindowSize = uint32_t(1 << 20);
   options.receiveSessionWindowSize = 10 * (1 << 20);
-  options.h2cEnabled = true;
 
   HTTPServer server(std::move(options));
   server.bind(IPs);

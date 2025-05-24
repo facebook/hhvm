@@ -38,8 +38,6 @@ std::shared_ptr<const AcceptorConfiguration> HTTPServerAcceptor::makeConfig(
 
   if (ipConfig.protocol == HTTPServer::Protocol::HTTP2) {
     conf->plaintextProtocol = http2::kProtocolCleartextString;
-  } else if (opts.h2cEnabled) {
-    conf->allowedPlaintextUpgradeProtocols = {http2::kProtocolCleartextString};
   }
 
   conf->sslContextConfigs = ipConfig.sslConfigs;

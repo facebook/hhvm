@@ -70,6 +70,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     containers_TemplateSets.fields()->push_back(std::move(field));
   }
+  containers_TemplateSets.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -93,6 +94,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     containers_TemplateMaps.fields()->push_back(std::move(field));
   }
+  containers_TemplateMaps.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

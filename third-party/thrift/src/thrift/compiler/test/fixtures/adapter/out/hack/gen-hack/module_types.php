@@ -1099,7 +1099,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
         'intField' => shape(
           'field' => dict[
@@ -2086,7 +2091,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
         'intField' => shape(
           'field' => dict[
@@ -4159,7 +4169,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
         'set_string' => shape(
           'field' => dict[],

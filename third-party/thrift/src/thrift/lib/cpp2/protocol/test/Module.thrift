@@ -84,6 +84,7 @@ struct OneOfEach3 {
   12: SubUnion myUnion = kSubUnion;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct DebugHashedAssociative {
   @cpp.Type{name = "std::map<int64_t, std::set<int64_t>>"}
   1: map<i64, set<i64>> value;
@@ -92,6 +93,7 @@ struct DebugHashedAssociative {
 @cpp.Type{template = "folly::F14FastSet"}
 typedef set<i64> F14SetI64
 
+@cpp.EnableCustomTypeOrdering
 struct DebugSortedAssociative {
   @cpp.Type{template = "folly::F14FastMap"}
   1: map<i64, F14SetI64> value;
@@ -101,6 +103,7 @@ struct DebugList {
   1: list<i32> aList;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct StructWithF14VectorContainers {
   @cpp.Type{template = "folly::F14VectorMap"}
   1: map<i32, i32> m;
@@ -114,6 +117,7 @@ struct OrderedFields {
   2: set<string> f2 = ["a", "b", "c"];
 }
 
+@cpp.EnableCustomTypeOrdering
 struct UnorderedFields {
   @cpp.Type{template = "std::unordered_set"}
   2: set<string> f2 = ["a", "b", "c"];
@@ -156,6 +160,7 @@ typedef binary IOBuf
 
 // We need (cpp.noncomparable) since the codegen version of comparison operators
 // won't work
+@cpp.EnableCustomTypeOrdering
 struct ListIOBuf {
   1: list<IOBuf> field;
   @cpp.Type{template = "folly::F14FastMap"}

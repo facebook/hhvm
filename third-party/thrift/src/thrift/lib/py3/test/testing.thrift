@@ -344,6 +344,7 @@ typedef map<i32, i32> map_typedef
 @cpp.Type{name = "folly::fbstring"}
 typedef string string_typedef
 
+@cpp.EnableCustomTypeOrdering
 struct customized {
   @cpp.Type{template = "std::deque"}
   1: list<i32> list_template;

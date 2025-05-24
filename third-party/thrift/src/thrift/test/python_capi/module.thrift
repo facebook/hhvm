@@ -147,6 +147,7 @@ struct ListStruct {
 } (cpp.noncopyable)
 typedef ListStruct ListAlias
 
+@cpp.EnableCustomTypeOrdering
 struct SetStruct {
   1: set<MyEnum> enumz;
   2: optional set<i32> intz;
@@ -161,6 +162,7 @@ struct SetStruct {
   7: list<set<i64>> setz;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct MapStruct {
   1: map<MyEnum, string> enumz;
   2: optional map<i32, string> intz;

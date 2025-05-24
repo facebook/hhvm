@@ -668,7 +668,12 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
         'fieldB' => shape(
           'field' => dict[
@@ -2831,7 +2836,12 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );
@@ -3548,7 +3558,12 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
         'field' => shape(
           'field' => dict[

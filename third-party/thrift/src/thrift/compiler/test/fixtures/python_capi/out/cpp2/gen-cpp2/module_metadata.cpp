@@ -259,6 +259,7 @@ StructMetadata<::test::fixtures::python_capi::SetStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_SetStruct.fields()->push_back(std::move(field));
   }
+  module_SetStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -282,6 +283,7 @@ StructMetadata<::test::fixtures::python_capi::MapStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_MapStruct.fields()->push_back(std::move(field));
   }
+  module_MapStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

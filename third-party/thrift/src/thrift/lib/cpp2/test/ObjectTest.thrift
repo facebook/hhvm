@@ -33,6 +33,7 @@ struct Bar {
   20: Foo field_4;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct MyStruct {
   1: optional Foo foo;
   2: optional list<Foo> foo_vector;

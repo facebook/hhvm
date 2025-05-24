@@ -15,13 +15,13 @@ namespace apache::thrift::fixtures::types {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_3d342284656f136b() {
+::std::string_view _fbthrift_schema_f4077d890c8b0f82() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_3d342284656f136b_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_f4077d890c8b0f82_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_3d342284656f136b_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_f4077d890c8b0f82_uris() {
   return {};
 }
 

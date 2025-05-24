@@ -29,6 +29,7 @@ struct decorated_struct {
   1: string field;
 } (cpp.declare_hash, cpp.declare_equal_to)
 
+@cpp.EnableCustomTypeOrdering
 struct ContainerStruct {
   12: list<i32> fieldA;
   @cpp.Type{template = "std::list"}
@@ -138,6 +139,7 @@ struct Renaming {
   1: i64 foo;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct AnnotatedTypes {
   1: TBinary_8623 binary_field;
   2: SomeListOfTypeMap_2468 list_field;
@@ -169,6 +171,7 @@ struct IncompleteMap {
 }
 struct IncompleteMapDep {}
 
+@cpp.EnableCustomTypeOrdering
 struct CompleteMap {
   @cpp.Type{template = "std::unordered_map"}
   1: optional map<i32, CompleteMapDep> field;

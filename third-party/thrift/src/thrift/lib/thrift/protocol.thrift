@@ -42,6 +42,7 @@ typedef protocol_detail.Object Object
 typedef protocol_detail.Value Value
 
 // Represents serialized data of unmasked fields.
+@cpp.EnableCustomTypeOrdering
 @python.Py3Hidden
 union MaskedData {
   1: id.ValueId full;

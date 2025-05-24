@@ -90,6 +90,7 @@ struct MyStruct {
 @cpp.Type{template = "std::unordered_set"}
 typedef set<string> UnorderedStrings
 
+@cpp.EnableCustomTypeOrdering
 struct ComparisonTestStruct {
   @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
   1: MyStruct non_comparable_adapted_type;

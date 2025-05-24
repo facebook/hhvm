@@ -58,6 +58,7 @@ enum PresenceQualifier {
 /**
  * A field that is part of a structured type (struct or union).
  */
+@cpp.EnableCustomTypeOrdering
 struct SerializableFieldDefinition {
   1: FieldIdentity identity;
   2: PresenceQualifier presence;
@@ -76,6 +77,7 @@ struct SerializableFieldDefinition {
  *
  * Both the names and IDs of each field must be unique for a struct.
  */
+@cpp.EnableCustomTypeOrdering
 struct SerializableStructDefinition {
   2: list<SerializableFieldDefinition> fields;
   /**
@@ -97,6 +99,7 @@ struct SerializableStructDefinition {
  *
  * All fields must have optional presence qualifiers.
  */
+@cpp.EnableCustomTypeOrdering
 struct SerializableUnionDefinition {
   2: list<SerializableFieldDefinition> fields;
   /**
@@ -112,6 +115,7 @@ struct SerializableUnionDefinition {
   4: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct SerializableEnumValueDefinition {
   1: string name;
   2: i32 datum;
@@ -123,6 +127,7 @@ struct SerializableEnumValueDefinition {
   3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct SerializableEnumDefinition {
   2: list<SerializableEnumValueDefinition> values;
   /**
@@ -137,6 +142,7 @@ struct SerializableEnumDefinition {
  * A user-defined type which allows associating a URI with the datums of
  * another type.
  */
+@cpp.EnableCustomTypeOrdering
 struct SerializableOpaqueAliasDefinition {
   /**
    * The target type must not be another user-defined type. That is, the typeid

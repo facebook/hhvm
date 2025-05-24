@@ -34,6 +34,7 @@ typedef Struct StructCursor
 @cpp.Type{name = "::apache::thrift::ManagedStringViewWithConversions"}
 typedef string ManagedStringViewField
 
+@cpp.EnableCustomTypeOrdering
 struct Struct {
   1: optional string string_field;
   2: i32 i32_field;

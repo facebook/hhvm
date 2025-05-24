@@ -392,6 +392,7 @@ def _fbthrift_gen_metadata_struct_SetStruct(metadata_struct: _fbthrift_metadata.
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.EnableCustomTypeOrdering"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -444,6 +445,7 @@ def _fbthrift_gen_metadata_struct_MapStruct(metadata_struct: _fbthrift_metadata.
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.EnableCustomTypeOrdering"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 

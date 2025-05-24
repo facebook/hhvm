@@ -175,6 +175,7 @@ struct struct2 {
   7: struct1 fieldG;
 }
 
+@cpp.EnableCustomTypeOrdering
 struct struct3 {
   2: i32 fieldA;
   1: string fieldB;

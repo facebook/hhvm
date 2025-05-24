@@ -117,6 +117,7 @@ StructMetadata<::apache::thrift::fixtures::types::ContainerStruct>::gen(ThriftMe
     field.structured_annotations() = f.structured_annotations;
     module_ContainerStruct.fields()->push_back(std::move(field));
   }
+  module_ContainerStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -409,6 +410,7 @@ StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>::gen(ThriftMet
     field.structured_annotations() = f.structured_annotations;
     module_AnnotatedTypes.fields()->push_back(std::move(field));
   }
+  module_AnnotatedTypes.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -535,6 +537,7 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     module_CompleteMap.fields()->push_back(std::move(field));
   }
+  module_CompleteMap.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

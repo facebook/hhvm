@@ -260,6 +260,15 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
           ],
           'type' => dict[],
         ),
+        'arg3' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

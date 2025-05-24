@@ -71,6 +71,7 @@ typedef MyI64 DoubleTypedefI64
 @rust.Adapter{name = "::my::Adapter1"}
 typedef i32 MyI32
 
+@cpp.EnableCustomTypeOrdering
 struct Foo {
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
@@ -119,6 +120,7 @@ struct Foo {
   thrift.uri = "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo",
 )
 
+@cpp.EnableCustomTypeOrdering
 union Baz {
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
@@ -241,6 +243,7 @@ const i32 var1 = 10;
 @Config{path = "bar"}
 const string var2 = "20";
 
+@cpp.EnableCustomTypeOrdering
 struct MyStruct {
   1: i32 field;
   2: SetWithAdapter set_string;

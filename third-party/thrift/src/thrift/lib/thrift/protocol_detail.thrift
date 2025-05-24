@@ -37,6 +37,7 @@ namespace go thrift.lib.thrift.protocol_detail
 namespace py thrift.lib.thrift.protocol_detail
 
 // A dynamic struct/union/exception
+@cpp.EnableCustomTypeOrdering
 @rust.Ord
 @thrift.Uri{value = "facebook.com/thrift/protocol/Object"}
 @cpp.Adapter{
@@ -67,6 +68,7 @@ typedef float Float
 typedef double Double
 
 // A dynamic value.
+@cpp.EnableCustomTypeOrdering
 @rust.Ord
 @thrift.Uri{value = "facebook.com/thrift/protocol/Value"}
 @cpp.Adapter{

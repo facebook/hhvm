@@ -910,6 +910,9 @@ bool HTTP1xCodec::pushHeaderNameAndValue(HTTPHeaders& hdrs) {
       validationError_ = kErrorHeaderContentValidation;
       LOG(ERROR) << "Invalid header name=" << headerName;
       DVLOG(4) << " value=" << currentHeaderValue_;
+      // Hexlify the value for debuggability in case it contains non-printable
+      // characters like \n, \t, etc.
+      DVLOG(4) << " value in hex=" << folly::hexlify(currentHeaderValue_);
       return false;
     }
   }

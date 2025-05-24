@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <cassert>
 
-#include <folly/Random.h>
 #include <folly/json/dynamic.h>
 
 namespace facebook {

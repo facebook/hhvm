@@ -9,9 +9,7 @@
 
 #include <folly/json/dynamic.h>
 
-#include "mcrouter/config.h"
 #include "mcrouter/lib/config/RouteHandleFactory.h"
-#include "mcrouter/routes/McRouteHandleBuilder.h"
 #include "mcrouter/routes/McrouterRouteHandle.h"
 
 namespace facebook {

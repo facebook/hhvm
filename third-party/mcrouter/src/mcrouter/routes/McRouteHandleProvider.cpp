@@ -7,7 +7,6 @@
 
 #include "McRouteHandleProvider.h"
 
-#include "mcrouter/lib/network/MessageHelpers.h"
 #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/lib/routes/NullRoute.h"
 #include "mcrouter/routes/AllAsyncRouteFactory.h"
@@ -41,10 +40,8 @@
 #include "mcrouter/routes/ModifyKeyRoute.h"
 #include "mcrouter/routes/OperationSelectorRoute.h"
 #include "mcrouter/routes/OriginalClientHashRoute.h"
-#include "mcrouter/routes/OutstandingLimitRoute.h"
 #include "mcrouter/routes/RandomRouteFactory.h"
 #include "mcrouter/routes/RoutingGroupRoute.h"
-#include "mcrouter/routes/ShadowRoute.h"
 #include "mcrouter/routes/StagingRoute.h"
 
 namespace folly {

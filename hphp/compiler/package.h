@@ -73,6 +73,7 @@ struct Package {
   void addSourceFile(const std::string& fileName);
   void addInputList(const std::string& listFileName);
   void addStaticFile(const std::string& fileName);
+  void addStaticPattern(const std::string& pattern);
   void addDirectory(const std::string& path);
   void addStaticDirectory(const std::string& path);
 
@@ -367,6 +368,7 @@ private:
 
   folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;
   std::set<std::string> m_directories;
+  std::set<std::string> m_staticPatterns;
   std::set<std::string> m_staticDirectories;
   hphp_fast_set<std::string> m_extraStaticFiles;
   folly_concurrent_hash_map_simd<

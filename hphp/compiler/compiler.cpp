@@ -97,6 +97,7 @@ struct CompilerOptions {
   std::vector<std::string> excludeDirs;
   std::vector<std::string> excludeFiles;
   std::vector<std::string> excludePatterns;
+  std::vector<std::string> staticPatterns;
   std::vector<std::string> excludeStaticDirs;
   std::vector<std::string> excludeStaticFiles;
   std::vector<std::string> excludeStaticPatterns;
@@ -194,26 +195,36 @@ void addListToPackage(Package& package, const std::vector<std::string>& dirs,
   }
 }
 
-void addInputsToPackage(Package& package, const CompilerOptions& po) {
+bool addInputsToPackage(Package& package, const CompilerOptions& po) {
   if (po.dirs.empty() && po.inputs.empty() && po.inputList.empty()) {
     package.addDirectory("/");
-  } else {
-    for (auto const& dir : po.dirs) {
-      package.addDirectory(dir);
-    }
-    for (auto const& cdir : po.cdirs) {
-      package.addStaticDirectory(cdir);
-    }
-    for (auto const& cfile : po.cfiles) {
-      package.addStaticFile(cfile);
-    }
-    for (auto const& input : po.inputs) {
-      package.addSourceFile(input);
-    }
-    if (!po.inputList.empty()) {
-      package.addInputList(po.inputList);
-    }
+    return true;
   }
+
+  for (auto const& dir : po.dirs) {
+    package.addDirectory(dir);
+  }
+
+  if (!po.staticPatterns.empty() && (!po.cdirs.empty() || !po.cfiles.empty())) {
+    Logger::FError("Can not specify --static-pattern if you use --cdir or --cfile");
+    return false;
+  }
+  for (auto const& cdir : po.cdirs) {
+    package.addStaticDirectory(cdir);
+  }
+  for (auto const& cfile : po.cfiles) {
+    package.addStaticFile(cfile);
+  }
+  for (auto const& pattern : po.staticPatterns) {
+    package.addStaticPattern(pattern);
+  }
+  for (auto const& input : po.inputs) {
+    package.addSourceFile(input);
+  }
+  if (!po.inputList.empty()) {
+    package.addInputList(po.inputList);
+  }
+  return true;
 }
 
 void genText(const UnitEmitter& ue, const std::string& outputPath) {
@@ -506,6 +517,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "regex (in 'find' command's regex command line option format) of files "
      "or directories to exclude from the input, even if referenced by "
      "included files")
+    ("static-pattern",
+      value<std::vector<std::string>>(&po.staticPatterns)->composing(),
+     "Patterns in glob format to include in static content cache")
     ("exclude-static-pattern",
      value<std::vector<std::string>>(&po.excludeStaticPatterns)->composing(),
      "regex (in 'find' command's regex command line option format) of files "
@@ -882,7 +896,7 @@ std::unique_ptr<UnitIndex> computeIndex(
     if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return nullptr;
   } else {
     // index just the input files
-    addInputsToPackage(indexPackage, po);
+    if (!addInputsToPackage(indexPackage, po)) return nullptr;
   }
   // Here, we are doing the following in parallel:
   // * Indexing the build package
@@ -1461,7 +1475,7 @@ bool process(CompilerOptions &po) {
     Timer parseTimer(Timer::WallTime, "parsing");
 
     // Parse the input files specified on the command line
-    addInputsToPackage(*parsePackage, po);
+    if (!addInputsToPackage(*parsePackage, po)) return false;
     auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
     auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
     auto const queryStr = repoFlags.autoloadQuery();
@@ -1493,7 +1507,7 @@ bool process(CompilerOptions &po) {
     // Emit phase: emit systemlib units, all input files, and the transitive
     // closure of files referenced by symbolRefs.
     Timer emitTimer(Timer::WallTime, "emit");
-    addInputsToPackage(*package, po);
+    if (!addInputsToPackage(*package, po)) return false;
 
     if (!Cfg::Eval::UseHHBBC && Option::GenerateBinaryHHBC) {
       // Initialize autoload and repo for emitUnit() to populate

@@ -48,6 +48,7 @@
 #include "hphp/util/extern-worker.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/multiglob.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/virtual-file-system.h"
 #include "hphp/zend/zend-string.h"
@@ -112,6 +113,11 @@ void Package::addStaticDirectory(const std::string& path) {
   m_staticDirectories.insert(path);
 }
 
+void Package::addStaticPattern(const std::string& pattern) {
+  assert(!pattern.empty());
+  m_staticPatterns.insert(pattern);
+}
+
 void Package::addDirectory(const std::string& path) {
   m_directories.emplace(path);
 }
@@ -125,33 +131,47 @@ void Package::addSourceFile(const std::string& fileName) {
 
 void Package::writeVirtualFileSystem(const std::string& path) {
   auto writer = VirtualFileSystemWriter(path);
-  for (auto const& dir : m_directories) {
-    std::vector<std::string> files;
-    FileUtil::find(files, m_root, dir, /* php */ false, /* failHard */ true,
-                   &Option::PackageExcludeStaticDirs,
-                   &Option::PackageExcludeStaticFiles);
-    Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
+
+  if (!m_staticPatterns.empty()) {
+    auto root = std::filesystem::path(m_root);
+    auto files = MultiGlob::matches(m_staticPatterns, root);
     for (auto& file : files) {
-      auto const rpath = file.substr(m_root.size());
+      auto const rpath = std::filesystem::relative(file, root);
       if (writer.addFile(rpath.c_str(), file.c_str())) {
         Logger::Verbose("saving %s", file.c_str());
       }
     }
-  }
-  for (auto const& dir : m_staticDirectories) {
-    std::vector<std::string> files;
-    FileUtil::find(files, m_root, dir, /* php */ false, /* failHard */ true);
-    for (auto& file : files) {
-      auto const rpath = file.substr(m_root.size());
-      if (writer.addFile(rpath.c_str(), file.c_str())) {
-        Logger::Verbose("saving %s", file.c_str());
+  } else {
+    for (auto const& dir : m_directories) {
+      std::vector<std::string> files;
+      FileUtil::find(files, m_root, dir, /* php */ false, /* failHard */ true,
+                    &Option::PackageExcludeStaticDirs,
+                    &Option::PackageExcludeStaticFiles);
+      Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
+      for (auto& file : files) {
+        auto const rpath = file.substr(m_root.size());
+        if (writer.addFile(rpath.c_str(), file.c_str())) {
+          Logger::Verbose("saving %s", file.c_str());
+        }
       }
     }
-  }
-  for (auto const& file : m_extraStaticFiles) {
-    auto const fullpath = m_root + file;
-    if (writer.addFile(file.c_str(), fullpath.c_str())) {
-      Logger::Verbose("saving %s", fullpath.c_str());
+
+    for (auto const& dir : m_staticDirectories) {
+      std::vector<std::string> files;
+      FileUtil::find(files, m_root, dir, /* php */ false, /* failHard */ true);
+      for (auto& file : files) {
+        auto const rpath = file.substr(m_root.size());
+        if (writer.addFile(rpath.c_str(), file.c_str())) {
+          Logger::Verbose("saving %s", file.c_str());
+        }
+      }
+    }
+
+    for (auto const& file : m_extraStaticFiles) {
+      auto const fullpath = m_root + file;
+      if (writer.addFile(file.c_str(), fullpath.c_str())) {
+        Logger::Verbose("saving %s", fullpath.c_str());
+      }
     }
   }
 

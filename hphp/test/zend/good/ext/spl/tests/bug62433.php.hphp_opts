@@ -1,1 +1,1 @@
---cdir="__DIR__"
+--static-pattern="__DIR__/**"

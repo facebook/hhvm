@@ -179,7 +179,7 @@ namespace {
 
 // meta.com/a/B -> B
 std::string debugUri(std::string_view uri) {
-  auto pos = uri.find_last_of("/");
+  auto pos = uri.find_last_of('/');
   if (pos == std::string::npos) {
     return "?";
   } else {
@@ -189,7 +189,7 @@ std::string debugUri(std::string_view uri) {
 
 // a.b.c.D -> D
 std::string debugScopedName(std::string_view name) {
-  auto pos = name.find_last_of(".");
+  auto pos = name.find_last_of('.');
   if (pos == std::string::npos) {
     return "?";
   } else {

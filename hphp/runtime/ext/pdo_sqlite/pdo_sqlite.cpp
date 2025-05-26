@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include <sqlite3.h>
 
 namespace HPHP {
 

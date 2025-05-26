@@ -37,7 +37,6 @@
 #include <libxml/xmlsave.h>
 #include <libxml/xmlversion.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
-#include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
 #endif
 

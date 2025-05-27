@@ -239,7 +239,8 @@ void codegen_data::compute_thrift_metadata_types() {
 
   for (auto const& service : current_program_->services()) {
     for (const auto& func : service->functions()) {
-      if (!is_func_go_server_supported(&func)) {
+      if (!go::is_func_go_client_supported(&func) &&
+          !go::is_func_go_server_supported(&func)) {
         continue; // Skip unsupported functions
       }
 
@@ -254,6 +255,17 @@ void codegen_data::compute_thrift_metadata_types() {
         for (const auto& exception : func.exceptions()->get_members()) {
           auto type = exception->get_type();
           add_to_thrift_metadata_types(type, visited_type_names);
+        }
+      }
+      if (func.stream() != nullptr) {
+        auto type = func.stream()->elem_type().get_type();
+        add_to_thrift_metadata_types(type, visited_type_names);
+        if (func.stream()->exceptions() != nullptr) {
+          for (const auto& exception :
+               func.stream()->exceptions()->get_members()) {
+            auto type = exception->get_type();
+            add_to_thrift_metadata_types(type, visited_type_names);
+          }
         }
       }
     }

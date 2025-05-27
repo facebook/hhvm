@@ -143,6 +143,11 @@ let init
         "Failed to initialize EdenFS watcher, failed with message:\n%s"
         msg;
       None
+    | Result.Error Edenfs_watcher_types.NonEdenWWW ->
+      Hh_logger.log
+        "Failed to initialize EdenFS watcher, www repo %s is not on Eden"
+        (Path.to_string root);
+      None
     | Result.Ok instance -> begin
       (* TODO(frankemrich): Add use_edenfs_file_watcher to hh_server_events
          table and HackEventLogger *)

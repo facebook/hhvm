@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0d9a5d84539658c587cfa4da0df5033e>>
+// @generated SignedSource<<5d7fed2f3fd30e12bddc81abb5740575>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -66,4 +66,5 @@ pub enum Changes {
 #[repr(C, u8)]
 pub enum EdenfsWatcherError {
     EdenfsWatcherError(String),
+    NonEdenWWW,
 }

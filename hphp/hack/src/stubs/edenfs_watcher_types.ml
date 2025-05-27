@@ -17,4 +17,7 @@ type changes =
     }
 [@@deriving show]
 
-type edenfs_watcher_error = EdenfsWatcherError of string [@@deriving show]
+type edenfs_watcher_error =
+  | EdenfsWatcherError of string
+  | NonEdenWWW
+[@@deriving show]

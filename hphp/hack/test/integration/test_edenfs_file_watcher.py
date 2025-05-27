@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import ClassVar, List, Optional, Tuple
 
 import hphp.hack.test.integration.common_tests as common_tests
+import hphp.hack.test.integration.test_case as test_case
 from eden.integration.lib.edenclient import EdenFS
 from hphp.hack.test.integration.common_tests import CommonTestDriver
 
@@ -197,3 +198,107 @@ class CommonTestsOnEden(common_tests.CommonTests):
 
     # Nothing else to see here: We inherit all tests from CommonTests, but run
     # them using CommonTestsOnEden._Driver
+
+
+class NonMountPointRepoTest(test_case.TestCase[common_tests.CommonTestDriver]):
+    "Tests that we can run hh_server on a path that isn't the root of a hg repository/mount point of an Eden file system."
+
+    class _Driver(common_tests.CommonTestDriver):
+        "Similar to CommonTestsOnEden._Driver, but sets up a testing repo that is a subfolder of the hg repo"
+
+        eden_mount_point: ClassVar[str]
+        hg_repo_dir: ClassVar[str]
+
+        @classmethod
+        def setUpClass(cls, template_repo: str) -> None:
+            print("running NonMountPointRepoTest._Driver.setUpClass")
+
+            # We need to call CommonTestDriver.setUpClass, but make the class
+            # variable changes visible to our cls object
+            super(NonMountPointRepoTest._Driver, cls).setUpClass(template_repo)
+            print(f"base_tmp_dir is {cls.base_tmp_dir}")
+
+            # This is where the Eden testing intsance will put all of its state and files
+            eden_base_dir = os.path.join(cls.base_tmp_dir, "eden_base")
+            os.mkdir(eden_base_dir)
+            cls.eden_instance = createEdenInstance(eden_base_dir)
+
+            cls.watchman_instance = createWatchmanInstance()
+            watchman_socket_path = cls.watchman_instance.getUnixSockPath()
+
+            # The call to setUpClass in CommonTests above defined cls.repo_dir,
+            # but we want to redefine it to point to a nested folder.
+            # Root of the hg repo we will create
+            cls.hg_repo_dir = os.path.join(cls.base_tmp_dir, "hg_repo")
+
+            # Subfolder inside hg_repo where we actually put testing files:
+            hg_repo_sub_dir = os.path.join(cls.hg_repo_dir, "some", "sub", "folder")
+
+            shutil.copytree(template_repo, hg_repo_sub_dir)
+
+            # This file can go wherever, as long as HH_LOCALCONF_PATH points to
+            # it. CommonTestDriver.setUpClass sets that variable to cls.repo_dir
+            # / hh.conf, so let's put the file at the toplevel of the repo (not
+            # with the other files)
+            with open(os.path.join(cls.hg_repo_dir, "hh.conf"), "w") as f:
+                f.write(makeWatchmanEdenHhConf(watchman_socket_path))
+
+            createHgRepo(cls.hg_repo_dir)
+
+            # We will mount the hg repo here ...
+            cls.eden_mount_point = cls.repo_dir
+            # ... which means that hh will find the testing files here instead:
+            cls.repo_dir = os.path.join(cls.repo_dir, "some", "sub", "folder")
+
+        @classmethod
+        def tearDownClass(cls) -> None:
+            print("running NonMountPointRepoTest._Driver.tearDownClass")
+
+            cls.eden_instance.cleanup()
+            cls.watchman_instance.stop()
+            super(NonMountPointRepoTest._Driver, cls).tearDownClass()
+
+        def setUp(self) -> None:
+            print("running NonMountPointRepoTest._Driver.setUp")
+
+            # For hygiene, we (re-)mount our Eden repo for each individual test
+            mountEden(self.eden_instance, self.hg_repo_dir, self.eden_mount_point)
+
+        def tearDown(self) -> None:
+            print("running NonMountPointRepoTest._Driver.tearDown")
+
+            server_log = self.get_all_logs(self.repo_dir).current_server_log
+            print(f"server log:\n{server_log}")
+
+            # It's ugly to do this here, since this isn't really tear-down code,
+            # but core testing logic, but we need to get this into every test
+            assertEdenFsWatcherInitialized(self)
+
+            # For hygiene, we (re-)mount our Eden repo for each individual test.
+            # Note that we must stop the server before unmounting the Eden repo that it works on.
+            # 3 retries is the value used in CommonTestDriver.tearDown
+            self.stop_hh_server(retries=3)
+            unmountEden(self.eden_instance, self.eden_mount_point)
+
+    @classmethod
+    def get_test_driver(cls) -> common_tests.CommonTestDriver:
+        return NonMountPointRepoTest._Driver()
+
+    def test_non_mount_point_repo(self) -> None:
+        # This is mostly just a copy-paste of
+        # CommonTests.test_file_delete_after_load but with an additional check
+        # that the EdenFS watcher was initialized correctly.
+
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(["No errors!"])
+
+        os.remove(os.path.join(self.test_driver.repo_dir, "foo_2.php"))
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])",
+                "ERROR: {root}foo_1.php:4:20,20: Unbound name (typing): `g` (Typing[4107])",
+            ]
+        )
+
+        assertEdenFsWatcherInitialized(self.test_driver)

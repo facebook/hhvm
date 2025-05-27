@@ -21,8 +21,10 @@
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
 #include <unordered_set>
+#include <folly/SharedMutex.h>
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
@@ -31,22 +33,22 @@
 namespace apache::thrift {
 namespace detail {
 template <typename T>
-struct SyntaxGraphNodeTag {
+struct NodeTag {
   using type = T;
 };
 
 template <typename T>
 constexpr auto getSyntaxGraphNodeTypeFor() {
   if constexpr (is_thrift_service_tag_v<T>) {
-    return SyntaxGraphNodeTag<syntax_graph::ServiceNode>{};
+    return NodeTag<syntax_graph::ServiceNode>{};
   } else if constexpr (is_thrift_struct_v<T>) {
-    return SyntaxGraphNodeTag<syntax_graph::StructNode>{};
+    return NodeTag<syntax_graph::StructNode>{};
   } else if constexpr (is_thrift_union_v<T>) {
-    return SyntaxGraphNodeTag<syntax_graph::UnionNode>{};
+    return NodeTag<syntax_graph::UnionNode>{};
   } else if constexpr (is_thrift_exception_v<T>) {
-    return SyntaxGraphNodeTag<syntax_graph::ExceptionNode>{};
+    return NodeTag<syntax_graph::ExceptionNode>{};
   } else if constexpr (util::is_thrift_enum_v<T>) {
-    return SyntaxGraphNodeTag<syntax_graph::EnumNode>{};
+    return NodeTag<syntax_graph::EnumNode>{};
   } else {
     static_assert(folly::always_false<T>, "Unsupported Thrift type");
   }
@@ -55,8 +57,25 @@ constexpr auto getSyntaxGraphNodeTypeFor() {
 }
 
 template <typename T>
+constexpr auto getTypeSystemNodeTypeFor() {
+  if constexpr (is_thrift_struct_v<T>) {
+    return NodeTag<type_system::StructNode>{};
+  } else if constexpr (is_thrift_union_v<T>) {
+    return NodeTag<type_system::UnionNode>{};
+  } else if constexpr (util::is_thrift_enum_v<T>) {
+    return NodeTag<type_system::EnumNode>{};
+  } else {
+    static_assert(folly::always_false<T>, "Unsupported Thrift type");
+  }
+}
+
+template <typename T>
 using SyntaxGraphNodeTypeFor =
     typename decltype(getSyntaxGraphNodeTypeFor<T>())::type;
+
+template <typename T>
+using TypeSystemNodeTypeFor =
+    typename decltype(getTypeSystemNodeTypeFor<T>())::type;
 } // namespace detail
 namespace test {
 struct SchemaTest;
@@ -88,6 +107,36 @@ class SchemaRegistry {
         .template as<detail::SyntaxGraphNodeTypeFor<T>>();
   }
 
+  /**
+   * Gets TypeSystem node for given URI, or nullopt if not found.
+   * Only types defined in a file with the `any` cpp2 compiler option enabled
+   * can be found using this method.
+   */
+  std::optional<type_system::DefinitionRef> getTypeSystemDefinitionRefByUri(
+      const std::string_view uri) const;
+
+  /**
+   * Gets TypeSystem node for given definition, or throws `std::out_of_range` if
+   * not present in schema.
+   */
+  template <typename T>
+  type_system::DefinitionRef getTypeSystemDefinitionRef() const {
+    const syntax_graph::DefinitionNode& sgNode = getDefinitionNode<T>();
+    std::lock_guard<folly::SharedMutex> wlock(typeSystemMutex_);
+    return syntaxGraph_->asTypeSystemDefinitionRef(sgNode);
+  }
+
+  /**
+   * Gets TypeSystem node for given definition, or throws `std::out_of_range` if
+   * not present in schema. Returns most-derived type (e.g. StructNode) that
+   * matches the template parameter.
+   */
+  template <typename T>
+  const detail::TypeSystemNodeTypeFor<T>& getTypeSystemNode() const {
+    return getTypeSystemDefinitionRef<T>()
+        .template asType<detail::TypeSystemNodeTypeFor<T>>();
+  }
+
   explicit SchemaRegistry(BaseSchemaRegistry& base);
   ~SchemaRegistry();
 
@@ -111,6 +160,9 @@ class SchemaRegistry {
 
   std::unique_ptr<syntax_graph::SyntaxGraph> syntaxGraph_;
   syntax_graph::detail::IncrementalResolver* resolver_;
+  // Synchronizes access to syntaxGraph_->asTypeSystem* methods, which are not
+  // thread-safe.
+  mutable folly::SharedMutex typeSystemMutex_;
 
   friend struct test::SchemaTest;
 };

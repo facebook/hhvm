@@ -217,4 +217,29 @@ TEST_F(SchemaTest, getSyntaxGraphDefinitionNodeByUri) {
   EXPECT_FALSE(getSyntaxGraphDefinitionNodeByUri(uriWithoutAny));
 }
 
+TEST_F(SchemaTest, getTypeSystemDefinitionRef) {
+  auto& registry = SchemaRegistry::get();
+
+  auto uri = "facebook.com/thrift/test/schema/Empty";
+
+  auto dynamicDefinitionRef = registry.getTypeSystemDefinitionRefByUri(uri);
+  EXPECT_TRUE(dynamicDefinitionRef);
+
+  const type_system::StructNode& dynamicStructNode =
+      dynamicDefinitionRef->asStruct();
+  EXPECT_EQ(uri, dynamicStructNode.uri());
+
+  auto staticDefinitionRef =
+      registry
+          .getTypeSystemDefinitionRef<facebook::thrift::test::schema::Empty>();
+  const type_system::StructNode& staticStructNode =
+      staticDefinitionRef.asStruct();
+
+  const type_system::StructNode& directStructNode =
+      registry.getTypeSystemNode<facebook::thrift::test::schema::Empty>();
+
+  EXPECT_EQ(&dynamicStructNode, &staticStructNode);
+  EXPECT_EQ(&dynamicStructNode, &directStructNode);
+}
+
 } // namespace apache::thrift::test

@@ -102,6 +102,16 @@ SchemaRegistry::getSyntaxGraphDefinitionNodeByUri(
       uri, type::ProgramId{data->programId}, data->data);
 }
 
+std::optional<type_system::DefinitionRef>
+SchemaRegistry::getTypeSystemDefinitionRefByUri(
+    const std::string_view uri) const {
+  if (const auto* sgDef = getSyntaxGraphDefinitionNodeByUri(uri)) {
+    std::lock_guard<folly::SharedMutex> wlock(typeSystemMutex_);
+    return syntaxGraph_->asTypeSystemDefinitionRef(*sgDef);
+  }
+  return std::nullopt;
+}
+
 } // namespace apache::thrift
 
 #endif

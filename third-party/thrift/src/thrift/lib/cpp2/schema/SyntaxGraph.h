@@ -47,6 +47,10 @@
 #include <thrift/common/tree_printer.h>
 #include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
 
+namespace apache::thrift::type_system {
+class TypeSystem;
+}
+
 namespace apache::thrift::syntax_graph {
 
 /**
@@ -682,6 +686,7 @@ class EnumNode final : folly::MoveOnly,
   /**
    * A mapping of enum name to its i32 value.
    */
+  // TODO: these can also have annotations
   class Value : detail::WithName {
    public:
     Value(std::string_view name, std::int32_t i32)
@@ -1558,6 +1563,18 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
    */
   ProgramNode::IncludesList programs() const;
 
+  /**
+   * Provides a view of all definitions in the schema as a TypeSystem.
+   *
+   * This object must be kept alive for the lifetime of the returned object.
+   *
+   * NOTE: the returned object is NOT thread-safe.
+   *
+   * Throws `std::runtime_error` if this instance does not support URI-based
+   * lookup (which does not happen with any official Resolver implementations).
+   */
+  type_system::TypeSystem& asTypeSystem();
+
   explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 
   void printTo(
@@ -1565,6 +1582,7 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
 
  private:
   folly::not_null_unique_ptr<const detail::Resolver> resolver_;
+  std::unique_ptr<type_system::TypeSystem> typeSystemFacade_;
 
   friend const DefinitionNode& detail::lookUpDefinition(
       const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);

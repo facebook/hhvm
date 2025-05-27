@@ -31,6 +31,7 @@ struct TestStruct {
   2: optional TestEnum field2;
 }
 
+@thrift.Uri{value = "meta.com/thrift_test/TestRecursiveStruct"}
 struct TestRecursiveStruct {
   @thrift.Box
   1: optional TestRecursiveStruct myself;

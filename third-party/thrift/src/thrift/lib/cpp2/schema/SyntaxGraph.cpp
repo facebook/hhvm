@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
 #include <thrift/lib/cpp/util/EnumUtils.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
 
@@ -26,8 +27,7 @@
 
 #include <fmt/core.h>
 
-#include <functional>
-#include <ostream>
+#include <queue>
 #include <stdexcept>
 
 #ifdef THRIFT_SCHEMA_AVAILABLE
@@ -675,6 +675,262 @@ void SyntaxGraph::printTo(
   for (folly::not_null<const ProgramNode*> program : programs()) {
     program->printTo(programsScope.make_child(), visited);
   }
+}
+
+namespace {
+class TypeSystemFacade final : public type_system::TypeSystem {
+  using TSDefinition = std::variant<
+      type_system::StructNode,
+      type_system::UnionNode,
+      type_system::EnumNode>;
+
+ public:
+  explicit TypeSystemFacade(const detail::SchemaBackedResolver& graph)
+      : resolver_(graph) {}
+
+  type_system::DefinitionRef getUserDefinedType(
+      type_system::UriView uri) override {
+    const DefinitionNode* def = resolver_.getDefinitionNodeByUri(uri);
+    if (!def) {
+      folly::throw_exception<type_system::InvalidTypeError>(
+          fmt::format("Definition for uri '{}' was not found", uri));
+    }
+
+    if (auto it = cache_.find(def); it != cache_.end()) {
+      return folly::variant_match(it->second, [](auto& def) {
+        return type_system::DefinitionRef{&def};
+      });
+    }
+
+    return convertUserDefinedType(def);
+  }
+
+  folly::F14FastSet<type_system::Uri> getKnownUris() const override {
+    // This is only used for serializing the type system, which is already not
+    // guaranteed to be possible as we don't require URIs for all user-defined
+    // types.
+    return {};
+  }
+
+ private:
+  // Convert the definition to TypeSystem's representation.
+  // The approach is:
+  // 1. Traverse the root definition node's fields to gather the set of
+  // definitions that need to be converted (as a structured definition node has
+  // pointers to its fields' types). This is done using BFS to avoid unbounded
+  // user-controlled recursion.
+  // 2. Allocate a placeholder object for each structured definition in the set,
+  // so that even in cases of circular references we still have a stable address
+  // for the type of each field available during population. (Enum definitions
+  // are populated immediately as they don't have outgoing edges). This
+  // is done during the traversal in the first step.
+  // 3. Populate the placeholder objects with the actual data.
+  type_system::DefinitionRef convertUserDefinedType(
+      const DefinitionNode* rootSgDef) {
+    // This is the queue for the first traversal, performing steps 1 and 2.
+    std::queue<const DefinitionNode*> initialAllocationQueue;
+    initialAllocationQueue.push(rootSgDef);
+    // This is the queue for the second traversal, performing step 3.
+    // Nodes are added to it as they are processed by the first traversal.
+    std::queue<const DefinitionNode*> populationQueue;
+    while (!initialAllocationQueue.empty()) {
+      const DefinitionNode* sgDef = initialAllocationQueue.front();
+      initialAllocationQueue.pop();
+      if (cache_.count(sgDef)) {
+        continue;
+      }
+
+      auto processStructuredType = [&](const StructuredNode& s) {
+        for (const auto& field : s.fields()) {
+          const DefinitionNode* fieldType =
+              field.type().trueType().visit([](const auto& n) {
+                if constexpr (std::is_base_of_v<
+                                  detail::WithDefinition,
+                                  decltype(n)>) {
+                  return &n.definition();
+                }
+                return nullptr;
+              });
+          if (fieldType && !cache_.count(fieldType)) {
+            initialAllocationQueue.push(fieldType);
+          }
+        }
+
+        // Enqueue the current node to be populated later.
+        populationQueue.push(sgDef);
+      };
+
+      // We may encounter circular references, so we insert a placeholder object
+      // into the map that we will later overwrite with the correct data.
+      sgDef->visit(
+          [&](const StructNode& s) {
+            cache_.emplace(sgDef, type_system::StructNode{{}, {}, {}, {}});
+            processStructuredType(s);
+          },
+          [&](const UnionNode& s) {
+            cache_.emplace(sgDef, type_system::UnionNode{{}, {}, {}, {}});
+            processStructuredType(s);
+          },
+          [](const ExceptionNode&) {
+            folly::throw_exception<std::runtime_error>(
+                "Exceptions aren't supported by TypeSystem");
+          },
+          [&](const EnumNode& e) {
+            // Enums can be populated immediately.
+            std::vector<type_system::EnumNode::Value> values;
+            values.reserve(e.values().size());
+            for (const auto& value : e.values()) {
+              // TODO: annotations
+              values.emplace_back(type_system::EnumNode::Value{
+                  std::string(value.name()),
+                  value.i32(),
+                  type_system::AnnotationsMap{}});
+            }
+            // TODO: annotations
+            cache_.emplace(
+                sgDef,
+                type_system::EnumNode{
+                    type_system::Uri(e.uri()), std::move(values), {}});
+          },
+          [](const TypedefNode&) {
+            folly::throw_exception<std::logic_error>(
+                "Typedefs should have been resolved by trueType call");
+          },
+          [](const auto& n) {
+            folly::throw_exception<std::logic_error>(fmt::format(
+                "Encountered unexpected node type `{}`",
+                folly::pretty_name<decltype(n)>()));
+          });
+    }
+
+    // Now that all types have been allocated, go back and populate structured
+    // types.
+    while (!populationQueue.empty()) {
+      const DefinitionNode* sgDef = populationQueue.front();
+      populationQueue.pop();
+      TSDefinition& tsDef = cache_.at(sgDef);
+      auto makeFields = [&](const StructuredNode& s) {
+        std::vector<type_system::FieldNode> fields;
+        fields.reserve(s.fields().size());
+        for (const auto& field : s.fields()) {
+          fields.emplace_back(
+              type_system::FieldIdentity{field.id(), std::string(field.name())},
+              // TODO: SyntaxGraph doesn't ever set this to terse but TypeSystem
+              // does.
+              static_cast<type_system::PresenceQualifier>(field.presence()),
+              convertType(field.type()),
+              // TODO: default value
+              std::nullopt,
+              // TODO: annotations
+              type_system::AnnotationsMap{}
+
+          );
+        }
+        return fields;
+      };
+      sgDef->visit(
+          [&](const StructNode& s) {
+            std::get<type_system::StructNode>(tsDef) = type_system::StructNode{
+                type_system::Uri(s.uri()),
+                makeFields(s),
+                false,
+                type_system::AnnotationsMap{}};
+          },
+          [&](const UnionNode& s) {
+            std::get<type_system::UnionNode>(tsDef) = type_system::UnionNode{
+                type_system::Uri(s.uri()),
+                makeFields(s),
+                false,
+                type_system::AnnotationsMap{}};
+          },
+          [](const auto& n) {
+            folly::throw_exception<std::logic_error>(fmt::format(
+                "Encountered unexpected node type `{}`",
+                folly::pretty_name<decltype(n)>()));
+          });
+    }
+
+    return folly::variant_match(cache_.at(rootSgDef), [](auto& def) {
+      return type_system::DefinitionRef{&def};
+    });
+  }
+
+  type_system::TypeRef convertType(const TypeRef& type) {
+    return type.trueType().visit(
+        [](const Primitive& primitive) {
+          switch (primitive) {
+            case Primitive::BOOL:
+              return type_system::TypeRef{type_system::TypeRef::Bool{}};
+            case Primitive::BYTE:
+              return type_system::TypeRef{type_system::TypeRef::Byte{}};
+            case Primitive::I16:
+              return type_system::TypeRef{type_system::TypeRef::I16{}};
+            case Primitive::I32:
+              return type_system::TypeRef{type_system::TypeRef::I32{}};
+            case Primitive::I64:
+              return type_system::TypeRef{type_system::TypeRef::I64{}};
+            case Primitive::FLOAT:
+              return type_system::TypeRef{type_system::TypeRef::Float{}};
+            case Primitive::DOUBLE:
+              return type_system::TypeRef{type_system::TypeRef::Double{}};
+            case Primitive::STRING:
+              return type_system::TypeRef{type_system::TypeRef::String{}};
+            case Primitive::BINARY:
+              return type_system::TypeRef{type_system::TypeRef::Binary{}};
+          }
+        },
+        [&](const StructNode& s) {
+          return type_system::TypeRef{
+              std::get<type_system::StructNode>(cache_.at(&s.definition()))};
+        },
+        [&](const UnionNode& u) {
+          return type_system::TypeRef{
+              std::get<type_system::UnionNode>(cache_.at(&u.definition()))};
+        },
+        [&](const ExceptionNode&) {
+          folly::throw_exception<std::runtime_error>(
+              "Exceptions aren't supported by TypeSystem");
+          return type_system::TypeRef(type_system::TypeRef::Bool{});
+        },
+        [&](const EnumNode& e) {
+          return type_system::TypeRef{
+              std::get<type_system::EnumNode>(cache_.at(&e.definition()))};
+        },
+        [&](const TypedefNode&) {
+          folly::throw_exception<std::logic_error>(
+              "Typedefs should have been resolved by trueType call");
+          return type_system::TypeRef(type_system::TypeRef::Bool{});
+        },
+        [&](const List& l) {
+          return type_system::TypeRef{
+              type_system::detail::ListTypeRef{convertType(l.elementType())}};
+        },
+        [&](const Set& s) {
+          return type_system::TypeRef{
+              type_system::detail::SetTypeRef{convertType(s.elementType())}};
+        },
+        [&](const Map& m) {
+          return type_system::TypeRef{type_system::detail::MapTypeRef{
+              convertType(m.keyType()), convertType(m.valueType())}};
+        });
+  }
+
+  const detail::SchemaBackedResolver& resolver_;
+  folly::F14NodeMap<const DefinitionNode*, TSDefinition> cache_;
+};
+} // namespace
+
+type_system::TypeSystem& SyntaxGraph::asTypeSystem() {
+  if (typeSystemFacade_) {
+    return *typeSystemFacade_;
+  }
+  if (auto* resolver = dynamic_cast<const detail::SchemaBackedResolver*>(
+          resolver_.get().unwrap())) {
+    typeSystemFacade_ = std::make_unique<TypeSystemFacade>(*resolver);
+    return *typeSystemFacade_;
+  }
+  folly::throw_exception<std::runtime_error>(
+      "SyntaxGraph instance does not support URI-based lookup");
 }
 
 } // namespace apache::thrift::syntax_graph

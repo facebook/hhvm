@@ -31,11 +31,24 @@ folly::not_null_unique_ptr<Resolver> createResolverfromSchema(type::Schema&&);
 folly::not_null_unique_ptr<Resolver> createResolverfromSchemaRef(
     const type::Schema&);
 
-class IncrementalResolver : public Resolver {
+class SchemaBackedResolver : public Resolver {
  public:
-  IncrementalResolver();
-  ~IncrementalResolver() override;
+  SchemaBackedResolver();
+  ~SchemaBackedResolver() override;
 
+  /**
+   * Gets node for given definition, or returns nullptr if not present in
+   * schema.
+   */
+  virtual const DefinitionNode* getDefinitionNodeByUri(
+      std::string_view uri) const;
+
+ protected:
+  folly::not_null_unique_ptr<SchemaIndex> index_;
+};
+
+class IncrementalResolver : public SchemaBackedResolver {
+ public:
   /**
    * Gets node for given definition, or throws `std::out_of_range` if not
    * present in schema.
@@ -43,9 +56,10 @@ class IncrementalResolver : public Resolver {
   template <typename T>
   const DefinitionNode& getDefinitionNode() const;
 
+  const DefinitionNode* getDefinitionNodeByUri(
+      std::string_view uri) const override;
   /**
-   * Gets node for given definition, or returns nullptr if not present in
-   * schema.
+   * As above, but reads in provided schema bundle if URI not found.
    */
   const DefinitionNode* getDefinitionNodeByUri(
       std::string_view uri,
@@ -69,7 +83,6 @@ class IncrementalResolver : public Resolver {
       folly::span<const std::string_view> bundle) const;
 
   mutable folly::Synchronized<type::Schema> schema_;
-  folly::not_null_unique_ptr<SchemaIndex> index_;
 };
 
 template <typename T>

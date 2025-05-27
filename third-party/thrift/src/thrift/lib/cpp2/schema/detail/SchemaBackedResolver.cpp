@@ -214,56 +214,54 @@ class SchemaIndex {
   }
 };
 
-class FullyResolvedSchemaRefBackedResolver : public Resolver {
+class FullyResolvedSchemaRefBackedResolver : public SchemaBackedResolver {
  public:
   explicit FullyResolvedSchemaRefBackedResolver(const type::Schema& schema)
-      : schema_(schema), index_(*this) {
-    index_.updateIndices(schema_);
+      : schema_(schema) {
+    index_->updateIndices(schema_);
   }
 
   const ProgramNode& programOf(const type::ProgramId& id) const override {
-    return index_.programOf(id);
+    return index_->programOf(id);
   }
   const protocol::Value& valueOf(const type::ValueId& id) const override {
-    return index_.valueOf(id);
+    return index_->valueOf(id);
   }
   const DefinitionNode* definitionOf(
       const type::DefinitionKey& key) const override {
-    return index_.definitionOf(key);
+    return index_->definitionOf(key);
   }
   ProgramNode::IncludesList programs() const override {
-    return index_.programs();
+    return index_->programs();
   }
 
  private:
   const type::Schema& schema_;
-  SchemaIndex index_;
 };
 
-class FullyResolvedSchemaBackedResolver : public Resolver {
+class FullyResolvedSchemaBackedResolver : public SchemaBackedResolver {
  public:
   explicit FullyResolvedSchemaBackedResolver(type::Schema&& schema)
-      : schema_(std::move(schema)), index_(*this) {
-    index_.updateIndices(schema_);
+      : schema_(std::move(schema)) {
+    index_->updateIndices(schema_);
   }
 
   const ProgramNode& programOf(const type::ProgramId& id) const override {
-    return index_.programOf(id);
+    return index_->programOf(id);
   }
   const protocol::Value& valueOf(const type::ValueId& id) const override {
-    return index_.valueOf(id);
+    return index_->valueOf(id);
   }
   const DefinitionNode* definitionOf(
       const type::DefinitionKey& key) const override {
-    return index_.definitionOf(key);
+    return index_->definitionOf(key);
   }
   ProgramNode::IncludesList programs() const override {
-    return index_.programs();
+    return index_->programs();
   }
 
  private:
   const type::Schema schema_;
-  SchemaIndex index_;
 };
 
 FieldNode::PresenceQualifier presenceOf(const type::FieldQualifier& qualifier) {
@@ -842,9 +840,9 @@ folly::not_null_unique_ptr<Resolver> createResolverfromSchemaRef(
   return std::make_unique<FullyResolvedSchemaRefBackedResolver>(schema);
 }
 
-IncrementalResolver::IncrementalResolver()
+SchemaBackedResolver::SchemaBackedResolver()
     : index_(std::make_unique<SchemaIndex>(*this)) {}
-IncrementalResolver::~IncrementalResolver() = default;
+SchemaBackedResolver::~SchemaBackedResolver() = default;
 
 const ProgramNode& IncrementalResolver::programOf(
     const type::ProgramId& id) const {
@@ -921,6 +919,17 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode(
   }
   folly::throw_exception<std::out_of_range>(
       fmt::format("Definition `{}` does not have bundled schema.", name));
+}
+
+const DefinitionNode* SchemaBackedResolver::getDefinitionNodeByUri(
+    std::string_view uri) const {
+  return index_->definitionForUri(uri);
+}
+
+const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
+    std::string_view uri) const {
+  auto schemaReadGuard = schema_.rlock();
+  return index_->definitionForUri(uri);
 }
 
 const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(

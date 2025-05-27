@@ -116,6 +116,9 @@ class TypeSystem {
    * Resolves the definition of a user-defined type, and implicitly, all
    * transitively referenced types.
    *
+   * NOTE: non-const, which means the caller must synchronize calls to this
+   * method.
+   *
    * Throws:
    *   - InvalidTypeError if the type is not defined in the type system.
    */

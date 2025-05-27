@@ -19,6 +19,7 @@
 
 #include <folly/Utility.h>
 
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
@@ -642,7 +643,7 @@ TEST_F(ServiceSchemaTest, getServiceSchemaNodes) {
 
   const auto* staticService = staticServiceNodes.back().unwrap();
 
-  // static service uses the global registry while dynamic service has its own
+  // static service uses the global registry while dynamic service has its  own
   // SyntaxGraph instance.
   EXPECT_NE(dynamicService, staticService);
 
@@ -693,4 +694,34 @@ TEST(SyntaxGraphTest, getNode) {
       std::out_of_range);
 }
 
+TEST_F(ServiceSchemaTest, asTypeSystem) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
+  auto def = mainProgram->definitionsByName().at("TestRecursiveStruct");
+  auto uri = "meta.com/thrift_test/TestRecursiveStruct";
+  ASSERT_EQ(def->asStruct().uri(), uri);
+
+  auto& typeSystem = syntaxGraph.asTypeSystem();
+
+  const type_system::StructNode& structNode =
+      typeSystem.getUserDefinedType(uri).asStruct();
+  EXPECT_EQ(structNode.uri(), uri);
+  EXPECT_EQ(structNode.fields().size(), 1);
+  EXPECT_EQ(structNode.fields()[0].identity().name(), "myself");
+  EXPECT_EQ(structNode.fields()[0].identity().id(), FieldId{1});
+  EXPECT_EQ(structNode.fields()[0].type().asStruct().uri(), uri);
+  EXPECT_EQ(&structNode.fields()[0].type().asStruct(), &structNode);
+
+  uri = "meta.com/thrift_test/TestEnum";
+  const type_system::EnumNode& enumNode =
+      typeSystem.getUserDefinedType(uri).asEnum();
+  EXPECT_EQ(enumNode.uri(), uri);
+  EXPECT_EQ(enumNode.values().size(), 3);
+  EXPECT_EQ(enumNode.values()[0].name, "UNSET");
+  EXPECT_EQ(enumNode.values()[0].i32, 0);
+  EXPECT_EQ(enumNode.values()[1].name, "VALUE_1");
+  EXPECT_EQ(enumNode.values()[1].i32, 1);
+  EXPECT_EQ(enumNode.values()[2].name, "VALUE_2");
+  EXPECT_EQ(enumNode.values()[2].i32, 2);
+}
 } // namespace apache::thrift::syntax_graph

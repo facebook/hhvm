@@ -19,6 +19,7 @@
 
 #include <folly/tracing/StaticTracepoint.h>
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/async/InterceptorFlags.h>
 #include <thrift/lib/cpp2/detail/EventHandlerRuntime.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
@@ -369,7 +370,9 @@ void ContextStack::onStreamSubscribe() {
 
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onStreamSubscribe(contextAt(i));
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onStreamSubscribe(contextAt(i));
+      }
     }
   }
 }
@@ -382,7 +385,9 @@ void ContextStack::onStreamCredit(uint32_t credits) {
       methodNamePrefixed_);
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onStreamCredit(contextAt(i), credits);
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onStreamCredit(contextAt(i), credits);
+      }
     }
   }
 }
@@ -395,7 +400,9 @@ void ContextStack::onStreamNext() {
       methodNamePrefixed_);
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onStreamNext(contextAt(i));
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onStreamNext(contextAt(i));
+      }
     }
   }
 }
@@ -409,7 +416,9 @@ void ContextStack::onStreamPauseReceive() {
 
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onStreamPauseReceive(contextAt(i));
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onStreamPauseReceive(contextAt(i));
+      }
     }
   }
 }
@@ -423,7 +432,9 @@ void ContextStack::onStreamResumeReceive() {
 
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onStreamResumeReceive(contextAt(i));
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onStreamResumeReceive(contextAt(i));
+      }
     }
   }
 }
@@ -438,7 +449,9 @@ void ContextStack::handleStreamErrorWrapped(
 
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->handleStreamErrorWrapped(contextAt(i), ew);
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->handleStreamErrorWrapped(contextAt(i), ew);
+      }
     }
   }
 }
@@ -452,7 +465,9 @@ void ContextStack::onStreamFinally(details::STREAM_ENDING_TYPES endReason) {
 
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onStreamFinally(contextAt(i), endReason);
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onStreamFinally(contextAt(i), endReason);
+      }
     }
   }
 }
@@ -465,7 +480,9 @@ void ContextStack::onSinkSubscribe() {
       methodNamePrefixed_);
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onSinkSubscribe(contextAt(i));
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onSinkSubscribe(contextAt(i));
+      }
     }
   }
 }
@@ -478,7 +495,9 @@ void ContextStack::onSinkNext() {
       methodNamePrefixed_);
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onSinkNext(contextAt(i));
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onSinkNext(contextAt(i));
+      }
     }
   }
 }
@@ -491,7 +510,9 @@ void ContextStack::onSinkCancel() {
       methodNamePrefixed_);
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onSinkCancel(contextAt(i));
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onSinkCancel(contextAt(i));
+      }
     }
   }
 }
@@ -504,7 +525,9 @@ void ContextStack::onSinkCredit(uint32_t credits) {
       methodNamePrefixed_);
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onSinkCredit(contextAt(i), credits);
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onSinkCredit(contextAt(i), credits);
+      }
     }
   }
 }
@@ -518,7 +541,9 @@ void ContextStack::onSinkFinally(details::SINK_ENDING_TYPES endReason) {
 
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->onSinkFinally(contextAt(i), endReason);
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onSinkFinally(contextAt(i), endReason);
+      }
     }
   }
 }
@@ -532,7 +557,9 @@ void ContextStack::handleSinkError(const folly::exception_wrapper& ew) {
 
   if (handlers_) {
     for (size_t i = 0; i < handlers_->size(); i++) {
-      (*handlers_)[i]->handleSinkError(contextAt(i), ew);
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->handleSinkError(contextAt(i), ew);
+      }
     }
   }
 }

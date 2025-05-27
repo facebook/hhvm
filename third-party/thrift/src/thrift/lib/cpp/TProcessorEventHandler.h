@@ -22,23 +22,11 @@
 #include <folly/Demangle.h>
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp/SerializedMessage.h>
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp/server/TConnectionContext.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 
 namespace apache::thrift {
-namespace details {
-enum class STREAM_ENDING_TYPES {
-  COMPLETE = 0,
-  ERROR = 1,
-  CANCEL = 2,
-};
-
-enum class SINK_ENDING_TYPES {
-  COMPLETE = 0,
-  COMPLETE_WITH_ERROR = 1,
-  ERROR = 2,
-};
-} // namespace details
 
 using server::TConnectionContext;
 
@@ -197,28 +185,18 @@ class TProcessorEventHandler {
     return userException(ctx, fn_name, type, what);
   }
 
-  // Experimental: callbacks for stream events, please do not use without asking
-  // help from Thrift team.
-  virtual void onStreamSubscribe(void*) {}
-  virtual void onStreamNext(void*) {}
-  virtual void onStreamCredit(void*, uint32_t) {}
-  virtual void onStreamPauseReceive(void*) {}
-  virtual void onStreamResumeReceive(void*) {}
-  virtual void handleStreamErrorWrapped(
-      void*, const folly::exception_wrapper&) {}
-  virtual void onStreamFinally(void*, details::STREAM_ENDING_TYPES) {}
-
-  // Experimental: callbacks for sink events, please do not use without asking
-  // help from Thrift team.
-  virtual void onSinkSubscribe(void*) {}
-  virtual void onSinkNext(void*) {}
-  virtual void onSinkCancel(void*) {}
-  virtual void onSinkCredit(void*, uint32_t) {}
-  virtual void handleSinkError(void*, const folly::exception_wrapper&) {}
-  virtual void onSinkFinally(void*, details::SINK_ENDING_TYPES) {}
+  StreamEventHandler* getStreamEventHandler() {
+    return streamEventHandler_.get();
+  }
 
  protected:
-  TProcessorEventHandler() {}
+  TProcessorEventHandler() : streamEventHandler_(nullptr) {}
+  explicit TProcessorEventHandler(
+      std::unique_ptr<StreamEventHandler> streamEventHandler)
+      : streamEventHandler_(std::move(streamEventHandler)) {}
+
+ private:
+  std::unique_ptr<StreamEventHandler> streamEventHandler_;
 };
 
 /**

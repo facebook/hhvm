@@ -11,6 +11,7 @@
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 #include <folly/synchronization/Baton.h>
+#include <atomic>
 #include <memory>
 
 #include "squangle/base/Base.h"
@@ -87,6 +88,14 @@ class PoolOptions {
         exp_policy_(ExpirationPolicy::Age),
         pool_per_instance_{false} {}
 
+  PoolOptions(const PoolOptions& other)
+      : per_key_limit_(other.per_key_limit_.load()),
+        pool_limit_(other.pool_limit_),
+        idle_timeout_(other.idle_timeout_),
+        age_timeout_(other.age_timeout_),
+        exp_policy_(other.exp_policy_),
+        pool_per_instance_(other.pool_per_instance_) {}
+
   PoolOptions& setPerKeyLimit(int conn_limit) {
     per_key_limit_ = conn_limit;
     return *this;
@@ -148,9 +157,20 @@ class PoolOptions {
   bool operator!=(const PoolOptions& other) const {
     return !(operator==(other));
   }
+  PoolOptions& operator=(const PoolOptions& other) {
+    if (this != &other) {
+      per_key_limit_.store(other.per_key_limit_.load());
+      pool_limit_ = other.pool_limit_;
+      idle_timeout_ = other.idle_timeout_;
+      age_timeout_ = other.age_timeout_;
+      exp_policy_ = other.exp_policy_;
+      pool_per_instance_ = other.pool_per_instance_;
+    }
+    return *this;
+  }
 
  private:
-  uint64_t per_key_limit_;
+  std::atomic<uint64_t> per_key_limit_;
   uint64_t pool_limit_;
   Duration idle_timeout_;
   Duration age_timeout_;
@@ -284,6 +304,10 @@ class ConnectionPoolBase {
 
   FOLLY_NODISCARD bool poolPerMysqlInstance() const noexcept {
     return pool_options_.poolPerMysqlInstance();
+  }
+
+  void setPerKeyLimit(int limit) {
+    pool_options_.setPerKeyLimit(limit);
   }
 
   // Note that unlike the AsyncMysqlClient this similar counter is for open

@@ -332,7 +332,13 @@ let where_constrs env = List.concat_map ~f:(where_constr env)
 let requirements env = List.concat_map ~f:(fun (h, _kind) -> hint env h)
 
 let fun_ tenv f =
-  let env = { typedef_tparams = []; tenv } in
+  let env =
+    let Aast_defs.{ f_tparams; _ } = f in
+    let typedef_tparams =
+      List.map f_tparams ~f:Aast_defs.tparam_of_hint_tparam
+    in
+    { typedef_tparams; tenv }
+  in
   let errs =
     FunUtils.check_params ~from_abstract_method:false tenv.decl_env f.f_params
   in

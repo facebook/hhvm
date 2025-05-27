@@ -398,6 +398,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
         )
         ->build(),
     );
+    await PSP()->genRunFromUnitTest(); // flush logs
     expect($mock)->wasCalledWithArgumentsPassingNTimes(
       ($_event, $_sample_rate, $specific_meta) ==> {
         return $specific_meta['thrift_caller_service_id'] === 'foo/bar';
@@ -425,6 +426,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
       )
     )->genBefore('fake_service', 'fake_method');
 
+    await PSP()->genRunFromUnitTest(); // flush logs
     expect($mock)->wasCalledWithArgumentsPassingNTimes(
       ($_event, $_sample_rate, $specific_meta) ==> {
         return $specific_meta['thrift_caller_service_id'] === 'sr_config_1';
@@ -456,6 +458,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
       )
     )->genBefore('fake_service', 'fake_method');
 
+    await PSP()->genRunFromUnitTest(); // flush logs
     expect($mock)->wasCalledWithArgumentsPassingNTimes(
       ($log, $_sample_rate) ==> {
         return Shapes::idx($log, 'client_id') === $client_id;

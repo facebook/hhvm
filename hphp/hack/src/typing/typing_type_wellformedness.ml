@@ -130,7 +130,9 @@ let check_happly unchecked_tparams env h =
   env
 
 let check_splat_hint env p h =
-  let (_env, hint_pos, locl_ty) =
+  (* It's important that we pass tenv down to subtyping
+   * because tpenv might have been updated during localization *)
+  let (tenv, hint_pos, locl_ty) =
     loclty_of_hint env.typedef_tparams env.tenv h
   in
   (* The top tuple (mixed...) *)
@@ -150,7 +152,7 @@ let check_splat_hint env p h =
   in
   let (_env, err) =
     Typing_generic_constraint.check_tparams_constraint
-      env.tenv
+      tenv
       ~use_pos:hint_pos
       Ast_defs.Constraint_as
       ~cstr_ty

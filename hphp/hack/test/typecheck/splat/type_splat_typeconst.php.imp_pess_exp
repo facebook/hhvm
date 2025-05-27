@@ -1,0 +1,54 @@
+ERROR: File "type_splat_typeconst.php", line 18, characters 38-50:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 18, characters 25-58:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 16, characters 23-29:
+  But got `mixed`
+ERROR: File "type_splat_typeconst.php", line 18, characters 38-50:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 18, characters 25-58:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 18, characters 38-50:
+  But got `this::TInputs`
+ERROR: File "type_splat_typeconst.php", line 18, characters 38-50:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 18, characters 25-58:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 18, characters 44-50:
+  But got `Bad::TInputs`
+  by accessing the type constant `TInputs`
+  File "type_splat_typeconst.php", line 18, characters 38-50:
+  on the expression dependent type this
+ERROR: File "type_splat_typeconst.php", line 20, characters 25-44:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 5, characters 13-13:
+  `T` is a constrained type parameter
+  File "type_splat_typeconst.php", line 5, characters 18-27:
+  This type constraint is violated
+  File "type_splat_typeconst.php", line 5, characters 18-27:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 16, characters 23-29:
+  But got `mixed`
+ERROR: File "type_splat_typeconst.php", line 20, characters 25-44:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 5, characters 13-13:
+  `T` is a constrained type parameter
+  File "type_splat_typeconst.php", line 5, characters 18-27:
+  This type constraint is violated
+  File "type_splat_typeconst.php", line 5, characters 18-27:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 20, characters 31-43:
+  But got `this::TInputs as Bad::TInputs`
+ERROR: File "type_splat_typeconst.php", line 20, characters 25-44:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 5, characters 13-13:
+  `T` is a constrained type parameter
+  File "type_splat_typeconst.php", line 5, characters 18-27:
+  This type constraint is violated
+  File "type_splat_typeconst.php", line 5, characters 18-27:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 20, characters 37-43:
+  But got `Bad::TInputs super this::TInputs`
+  by accessing the type constant `TInputs`
+  File "type_splat_typeconst.php", line 20, characters 31-43:
+  on the expression dependent type this

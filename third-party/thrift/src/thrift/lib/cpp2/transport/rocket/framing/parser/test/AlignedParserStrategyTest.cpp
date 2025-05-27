@@ -496,7 +496,8 @@ TEST(AlignedParserStrategyTest, TestAlignmentWithRPC) {
   auto handler = std::make_shared<TestServiceHandler>();
   auto server =
       std::make_shared<ScopedServerInterfaceThread>(handler, [](auto&) {});
-  auto client = server->newClient<apache::thrift::Client<TestService>>();
+  auto client = server->newClient<apache::thrift::Client<TestService>>(
+      nullptr, RocketClientChannel::newChannel, protocol::T_BINARY_PROTOCOL);
 
   for (int i = 0; i < 20; ++i) {
     {

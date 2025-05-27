@@ -23,7 +23,6 @@
 #include <pcre.h>
 
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/container-functions.h"

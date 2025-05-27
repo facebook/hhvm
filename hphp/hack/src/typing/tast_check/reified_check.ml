@@ -10,7 +10,6 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-open Typing_reified_check (* validator *)
 module Env = Tast_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
@@ -118,7 +117,7 @@ let verify_targ_valid env reification tparam targ =
           err
       in
 
-      validator#validate_hint
+      Typing_reified_check.validator#validate_hint
         (Tast_env.tast_env_as_typing_env env)
         (snd targ)
         ~reification

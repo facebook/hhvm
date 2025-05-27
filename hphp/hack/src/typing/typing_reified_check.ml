@@ -79,7 +79,16 @@ let validator =
       super#on_taccess acc r (root, ids)
 
     method! on_tthis acc r =
-      this#invalid acc r "the late static bound `this` type"
+      let is_known_to_be_final =
+        match acc.class_from_taccess_lhs with
+        | Some class_ -> Folded_class.final class_
+        | None -> false
+      in
+      if is_known_to_be_final then
+        (* In a final class, `this` is known statically and so is safe here *)
+        acc
+      else
+        this#invalid acc r "the late static bound `this` type"
 
     method! on_trefinement acc r _ty _ = this#invalid acc r "type refinement"
   end

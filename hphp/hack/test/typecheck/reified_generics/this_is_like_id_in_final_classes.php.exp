@@ -1,0 +1,6 @@
+ERROR: File "this_is_like_id_in_final_classes.php", line 19, characters 15-19:
+Invalid reified hint (Typing[4305])
+  File "this_is_like_id_in_final_classes.php", line 10, characters 24-27:
+  This is the late static bound `this` type, it cannot be used as a reified type argument
+  File "this_is_like_id_in_final_classes.php", line 13, characters 28-28:
+  `T` is reified

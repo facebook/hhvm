@@ -28,6 +28,7 @@ type validation_state = {
   inside_reified_class_generic_position: bool;
   reification: reification;
   expanded_typedefs: SSet.t;
+  class_from_taccess_lhs: Folded_class.t option;
 }
 
 type error_emitter = Pos.t -> (Pos_or_decl.t * string) list Lazy.t -> unit
@@ -94,8 +95,15 @@ class virtual type_validator =
                      already reported an error. *)
                   None
                 | Ok ety_env ->
-                  Some (this#on_typeconst { acc with ety_env } class_ typeconst)
-              )
+                  (* stash and restore `class_from_taccess_lhs` *)
+                  let { class_from_taccess_lhs; _ } = acc in
+                  let acc =
+                    this#on_typeconst
+                      { acc with ety_env; class_from_taccess_lhs = Some class_ }
+                      class_
+                      typeconst
+                  in
+                  Some { acc with class_from_taccess_lhs } )
           | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =
@@ -178,6 +186,7 @@ class virtual type_validator =
             validity = Valid;
             inside_reified_class_generic_position = false;
             reification;
+            class_from_taccess_lhs = None;
           }
           root_ty
       in

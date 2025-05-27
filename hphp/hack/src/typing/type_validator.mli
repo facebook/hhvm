@@ -22,6 +22,10 @@ type validation_state = {
   inside_reified_class_generic_position: bool;
   reification: reification;
   expanded_typedefs: SSet.t;
+      (**
+  `Some Klass` if we're traversing a type and have gone through `Klass::TheTy`.
+   *)
+  class_from_taccess_lhs: Folded_class.t option;
 }
 
 type error_emitter = Pos.t -> (Pos_or_decl.t * string) list Lazy.t -> unit

@@ -711,6 +711,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(structNode.fields()[0].identity().id(), FieldId{1});
   EXPECT_EQ(structNode.fields()[0].type().asStruct().uri(), uri);
   EXPECT_EQ(&structNode.fields()[0].type().asStruct(), &structNode);
+  EXPECT_EQ(&syntaxGraph.asTypeSystemStructNode(def->asStruct()), &structNode);
 
   uri = "meta.com/thrift_test/TestEnum";
   const type_system::EnumNode& enumNode =

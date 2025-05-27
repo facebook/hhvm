@@ -567,7 +567,11 @@ struct FastFieldHandle {
 
 class DefinitionNode {
  public:
-  const Uri& uri() const noexcept { return uri_; }
+  /**
+   * Returns the URI associated with this definition.
+   * Throws `InvalidTypeError` if the type does not have a URI.
+   */
+  const Uri& uri() const;
 
  protected:
   Uri uri_;
@@ -790,10 +794,10 @@ class DefinitionRef final {
   }
 
   /**
-   * Returns the URI associated with this definition. Since all user-defined
-   * types must have URIs, this function is infallible.
+   * Returns the URI associated with this definition.
+   * Throws `InvalidTypeError` if the type does not have a URI.
    */
-  const Uri& uri() const noexcept;
+  const Uri& uri() const;
 
   /**
    * An `std::visit`-like API for pattern-matching on the active variant

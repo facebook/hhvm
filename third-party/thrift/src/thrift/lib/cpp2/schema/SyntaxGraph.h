@@ -45,11 +45,8 @@
 #include <vector>
 
 #include <thrift/common/tree_printer.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
-
-namespace apache::thrift::type_system {
-class TypeSystem;
-}
 
 namespace apache::thrift::syntax_graph {
 
@@ -1574,6 +1571,17 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
    * lookup (which does not happen with any official Resolver implementations).
    */
   type_system::TypeSystem& asTypeSystem();
+
+  /**
+   * Allows converting a SyntaxGraph node into its corresponding TypeSystem
+   * node. Equivalent to `asTypeSystem().getUserDefinedType(node.uri())`, but
+   * more efficient and supports nodes without URIs.
+   */
+  type_system::DefinitionRef asTypeSystemDefinitionRef(
+      const DefinitionNode& node);
+  const type_system::StructNode& asTypeSystemStructNode(const StructNode& node);
+  const type_system::UnionNode& asTypeSystemUnionNode(const UnionNode& node);
+  const type_system::EnumNode& asTypeSystemEnumNode(const EnumNode& node);
 
   explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 

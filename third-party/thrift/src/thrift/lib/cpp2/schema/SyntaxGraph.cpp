@@ -712,7 +712,6 @@ class TypeSystemFacade final : public type_system::TypeSystem {
     return {};
   }
 
- private:
   // Convert the definition to TypeSystem's representation.
   // The approach is:
   // 1. Traverse the root definition node's fields to gather the set of
@@ -855,6 +854,7 @@ class TypeSystemFacade final : public type_system::TypeSystem {
     });
   }
 
+ private:
   type_system::TypeRef convertType(const TypeRef& type) {
     return type.trueType().visit(
         [](const Primitive& primitive) {
@@ -931,6 +931,24 @@ type_system::TypeSystem& SyntaxGraph::asTypeSystem() {
   }
   folly::throw_exception<std::runtime_error>(
       "SyntaxGraph instance does not support URI-based lookup");
+}
+
+type_system::DefinitionRef SyntaxGraph::asTypeSystemDefinitionRef(
+    const DefinitionNode& node) {
+  auto& facade = static_cast<TypeSystemFacade&>(asTypeSystem());
+  return facade.convertUserDefinedType(&node);
+}
+const type_system::StructNode& SyntaxGraph::asTypeSystemStructNode(
+    const StructNode& node) {
+  return asTypeSystemDefinitionRef(node.definition()).asStruct();
+}
+const type_system::UnionNode& SyntaxGraph::asTypeSystemUnionNode(
+    const UnionNode& node) {
+  return asTypeSystemDefinitionRef(node.definition()).asUnion();
+}
+const type_system::EnumNode& SyntaxGraph::asTypeSystemEnumNode(
+    const EnumNode& node) {
+  return asTypeSystemDefinitionRef(node.definition()).asEnum();
 }
 
 } // namespace apache::thrift::syntax_graph

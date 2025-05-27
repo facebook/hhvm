@@ -319,7 +319,14 @@ std::string_view kindToString(TypeRef::Kind k) noexcept {
   folly::assume_unreachable();
 }
 
-const Uri& DefinitionRef::uri() const noexcept {
+const Uri& DefinitionNode::uri() const {
+  if (uri_.empty()) {
+    folly::throw_exception<InvalidTypeError>("Type does not have URI set.");
+  }
+  return uri_;
+}
+
+const Uri& DefinitionRef::uri() const {
   return visit(std::mem_fn(&DefinitionNode::uri));
 }
 

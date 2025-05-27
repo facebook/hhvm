@@ -25,7 +25,11 @@ using std::unique_ptr;
 
 namespace {
 
-static const std::string kChunked = "chunked";
+#ifndef CLANG_LAZY_INIT_TEST
+#define CLANG_LAZY_INIT_TEST
+#endif
+
+CLANG_LAZY_INIT_TEST static const std::string kChunked = "chunked";
 const char CRLF[] = "\r\n";
 
 /**

@@ -23,7 +23,11 @@
 
 namespace proxygen {
 
-extern const std::string empty_string;
+#ifndef CLANG_LAZY_INIT_TEST
+#define CLANG_LAZY_INIT_TEST
+#endif
+
+CLANG_LAZY_INIT_TEST extern const std::string empty_string;
 
 /**
  * Return true if the character is linear whitespace, as defined by the LWS
@@ -89,11 +93,15 @@ class HTTPHeaders {
   using headers_initializer_list =
       std::initializer_list<std::pair<HTTPHeaderName, folly::StringPiece>>;
 
+#ifndef CLANG_LAZY_INIT_TEST
+#define CLANG_LAZY_INIT_TEST
+#endif
+
   /*
    * separator used to concatenate multiple values of the same header
    * check out sections 4.2 and 14.45 from rfc2616
    */
-  static const std::string COMBINE_SEPARATOR;
+  CLANG_LAZY_INIT_TEST static const std::string COMBINE_SEPARATOR;
 
   FB_EXPORT HTTPHeaders();
   FB_EXPORT ~HTTPHeaders();

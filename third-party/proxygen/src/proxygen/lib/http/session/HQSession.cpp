@@ -36,7 +36,12 @@
 
 namespace {
 static const uint16_t kMaxReadsPerLoop = 16;
-static const std::string kQUICProtocolName("QUIC");
+
+#ifndef CLANG_LAZY_INIT_TEST
+#define CLANG_LAZY_INIT_TEST
+#endif
+
+CLANG_LAZY_INIT_TEST static const std::string kQUICProtocolName("QUIC");
 constexpr uint64_t kMaxQuarterStreamId = (1ull << 60) - 1;
 
 using namespace proxygen::HTTP3;
@@ -145,15 +150,15 @@ using namespace proxygen::hq;
 
 namespace proxygen {
 
-const std::string kH3FBCurrentDraft("h3-fb-05");
-const std::string kH3AliasV1("h3-alias-01");
-const std::string kH3AliasV2("h3-alias-02");
-const std::string kH3("h3");
-const std::string kHQ("hq-interop");
+CLANG_LAZY_INIT_TEST const std::string kH3FBCurrentDraft("h3-fb-05");
+CLANG_LAZY_INIT_TEST const std::string kH3AliasV1("h3-alias-01");
+CLANG_LAZY_INIT_TEST const std::string kH3AliasV2("h3-alias-02");
+CLANG_LAZY_INIT_TEST const std::string kH3("h3");
+CLANG_LAZY_INIT_TEST const std::string kHQ("hq-interop");
 
 // TODO: remove these constants, the library no longer negotiates them
-const std::string kH3CurrentDraft("h3-29");
-const std::string kHQCurrentDraft("hq-29");
+CLANG_LAZY_INIT_TEST const std::string kH3CurrentDraft("h3-29");
+CLANG_LAZY_INIT_TEST const std::string kHQCurrentDraft("hq-29");
 
 const http2::PriorityUpdate hqDefaultPriority{kSessionStreamId, false, 15};
 

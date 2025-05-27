@@ -36,14 +36,28 @@ std::shared_ptr<StructuredLogger> getLogger() {
 DynamicEvent WatchmanStructuredLogger::populateDefaultFields(
     std::optional<const char*> type) {
   DynamicEvent event = StructuredLogger::populateDefaultFields(type);
-  if (sessionInfo_.ciInstanceId.has_value()) {
-    event.addInt("sandcastle_instance_id", *sessionInfo_.ciInstanceId);
-  }
   event.addString("version", sessionInfo_.appVersion);
 #ifdef WATCHMAN_BUILD_INFO
   event.addString("buildinfo", WATCHMAN_BUILD_INFO);
 #endif
   event.addString("logged_by", "watchman");
+
+  const auto& fbInfo = sessionInfo_.fbInfo;
+  for (const auto& info : fbInfo) {
+    const auto& key = info.first;
+    const auto& value = info.second;
+    std::visit(
+        [&](const auto& v) {
+          using T = std::decay_t<decltype(v)>;
+          if constexpr (std::is_same_v<T, std::string>) {
+            event.addString(key, v);
+          } else if constexpr (std::is_same_v<T, uint64_t>) {
+            event.addInt(key, v);
+          }
+        },
+        value);
+  }
+
   return event;
 }
 

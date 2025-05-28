@@ -351,6 +351,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t CodeCache.TCNumHugeColdMB = 4, UNKNOWN, lookuppath(Eval.TCNumHugeColdMB)
 - uint32_t CodeCache.AutoTCShift = 1, UNKNOWN
 
+# Configerator
+
+- uint32_t Configerator.ExposureBloomFilterSize = 10000000, UNKNOWN
+- double Configerator.ExposureBloomFilterFalsePositiveRate = 0.0000001, UNKNOWN
+
 # Debug
 
 - bool Debug.NativeStackTrace = false, UNKNOWN

@@ -439,10 +439,10 @@ class t_whisker_generator::whisker_source_parser
     : public whisker::source_resolver {
  public:
   explicit whisker_source_parser(
-      const templates_map& templates_by_path, std::string template_prefix)
+      templates_map templates_by_path, std::string template_prefix)
       : template_prefix_(std::move(template_prefix)),
-        src_manager_(std::make_unique<template_source_manager_backend>(
-            templates_by_path)) {}
+        src_manager_(std::make_unique<in_memory_source_manager_backend>(
+            std::move(templates_by_path))) {}
 
   resolve_import_result resolve_import(
       std::string_view combined_path,
@@ -512,28 +512,24 @@ class t_whisker_generator::whisker_source_parser
       cached_asts_;
 };
 
-/* static */ const t_whisker_generator::templates_map&
-t_whisker_generator::templates_by_path() {
-  static const auto cached_result = [] {
-    templates_map result;
-    for (std::size_t i = 0; i < templates_size; ++i) {
-      auto name = fs_path(
-          templates_name_datas[i],
-          templates_name_datas[i] + templates_name_sizes[i]);
-      name = name.parent_path() / name.stem();
+/* static */ t_whisker_generator::templates_map
+t_whisker_generator::create_templates_by_path() {
+  templates_map result;
+  for (std::size_t i = 0; i < templates_size; ++i) {
+    auto name = fs_path(
+        templates_name_datas[i],
+        templates_name_datas[i] + templates_name_sizes[i]);
+    name = name.parent_path() / name.stem();
 
-      auto tpl = std::string(
-          templates_content_datas[i],
-          templates_content_datas[i] + templates_content_sizes[i]);
-      // Remove a single '\n' or '\r\n' or '\r' at end, if present.
-      chomp_last_char(&tpl, '\n');
-      chomp_last_char(&tpl, '\r');
-      result.emplace(name.generic_string(), std::move(tpl));
-    }
-    return result;
-  }();
-
-  return cached_result;
+    auto tpl = std::string(
+        templates_content_datas[i],
+        templates_content_datas[i] + templates_content_sizes[i]);
+    // Remove a single '\n' or '\r\n' or '\r' at end, if present.
+    chomp_last_char(&tpl, '\n');
+    chomp_last_char(&tpl, '\r');
+    result.emplace(name.generic_string(), std::move(tpl));
+  }
+  return result;
 }
 
 t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
@@ -541,7 +537,7 @@ t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
     whisker::render_options options;
 
     auto source_resolver = std::make_shared<whisker_source_parser>(
-        templates_by_path(), template_prefix());
+        create_templates_by_path(), template_prefix());
     options.src_resolver = source_resolver;
 
     strictness_options strict = strictness();

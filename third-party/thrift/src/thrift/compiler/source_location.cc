@@ -301,4 +301,18 @@ std::optional<std::string> source_manager::found_include_file(
   return {};
 }
 
+std::optional<std::vector<char>> in_memory_source_manager_backend::read_file(
+    std::string_view path) {
+  auto found = files_by_path_.find(path);
+  if (found == files_by_path_.end()) {
+    return std::nullopt;
+  }
+  const auto& [_, source_code] = *found;
+  std::vector<char> result;
+  result.reserve(source_code.size() + 1);
+  result.insert(result.end(), source_code.begin(), source_code.end());
+  result.push_back('\0');
+  return result;
+}
+
 } // namespace apache::thrift::compiler

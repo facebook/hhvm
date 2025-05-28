@@ -66,12 +66,6 @@ class t_mstch_generator : public t_whisker_generator {
    */
   virtual bool should_resolve_typedefs() const { return false; }
 
-  /**
-   * Fetches a particular template from the template map, throwing an error
-   * if the template doesn't exist
-   */
-  const std::string& get_template(const std::string& template_name);
-
   using t_whisker_generator::render;
   /**
    * Render the mstch template with name `template_name` in the given context.

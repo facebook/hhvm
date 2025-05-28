@@ -210,4 +210,21 @@ class source_manager {
       std::string_view filename) const;
 };
 
+/**
+ * This implementation of source_manager_backend is backed by a std::map of file
+ * names to their contents.
+ */
+class in_memory_source_manager_backend final : public source_manager_backend {
+ public:
+  using map = std::map<std::string, std::string, std::less<>>;
+
+  std::optional<std::vector<char>> read_file(std::string_view path) final;
+
+  explicit in_memory_source_manager_backend(map files_by_path)
+      : files_by_path_(std::move(files_by_path)) {}
+
+ private:
+  map files_by_path_;
+};
+
 } // namespace apache::thrift::compiler

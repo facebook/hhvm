@@ -383,16 +383,6 @@ mstch::map t_mstch_generator::extend_annotation(const annotation&) {
   return {};
 }
 
-const std::string& t_mstch_generator::get_template(
-    const std::string& template_name) {
-  const templates_map& templates = templates_by_path();
-  if (auto t = templates.find(template_name); t != templates.end()) {
-    return t->second;
-  }
-  throw std::runtime_error(
-      fmt::format("Could not find template '{}'", template_name));
-}
-
 bool t_mstch_generator::has_option(const std::string& option) const {
   return has_compiler_option(option);
 }

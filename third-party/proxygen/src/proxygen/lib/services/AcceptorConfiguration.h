@@ -47,11 +47,6 @@ struct AcceptorConfiguration : public wangle::ServerSocketConfig {
   std::string plaintextProtocol;
 
   /**
-   * Comma separated string of protocols that can be upgraded to from HTTP/1.1
-   */
-  std::list<std::string> allowedPlaintextUpgradeProtocols;
-
-  /**
    * True if HTTP/1.0 messages should always be serialized as HTTP/1.1
    *
    * Maximizes connection re-use

@@ -16,8 +16,6 @@ proxygen::HTTPCodecFactory::CodecConfig getCodecConfigFromAcceptorConfig(
     const proxygen::AcceptorConfiguration& accConfig) {
   proxygen::HTTPCodecFactory::CodecConfig config;
   config.h1.forceHTTP1xCodecTo1_1 = accConfig.forceHTTP1_0_to_1_1;
-  config.h1.allowedH1UpgradeProtocols =
-      accConfig.allowedPlaintextUpgradeProtocols;
   config.h2.headerIndexingStrategy = accConfig.headerIndexingStrategy;
   return config;
 }

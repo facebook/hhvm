@@ -269,8 +269,6 @@ ProxygenServer::ProxygenServer(
   m_httpsConfig->initialReceiveWindow = kStreamFlowControl;
   m_httpsConfig->receiveSessionWindowSize = kConnFlowControl;
   if (Cfg::Server::EnableH2C) {
-    m_httpConfig->allowedPlaintextUpgradeProtocols = {
-      proxygen::http2::kProtocolCleartextString };
     m_httpConfig->initialReceiveWindow = kStreamFlowControl;
     m_httpConfig->receiveSessionWindowSize = kConnFlowControl;
   }

@@ -39,27 +39,6 @@ TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecH2) {
   EXPECT_EQ(http1Codec->getProtocol(), CodecProtocol::HTTP_1_1);
 }
 
-TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecUpgradeProtocols) {
-  std::list<std::string> plainTextUpgrades = {http2::kProtocolCleartextString};
-  auto conf = std::make_shared<AcceptorConfiguration>();
-  conf->allowedPlaintextUpgradeProtocols = plainTextUpgrades;
-  HTTPDefaultSessionCodecFactory factory(std::move(conf));
-
-  auto codec =
-      factory.getCodec("http/1.1", TransportDirection::DOWNSTREAM, false);
-  HTTP1xCodec* downstreamCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
-  EXPECT_NE(downstreamCodec, nullptr);
-  EXPECT_FALSE(downstreamCodec->getAllowedUpgradeProtocols().empty());
-  EXPECT_EQ(downstreamCodec->getAllowedUpgradeProtocols(),
-            http2::kProtocolCleartextString);
-
-  // If TLS, we should not attempt to upgrade.
-  codec = factory.getCodec("http/1.1", TransportDirection::DOWNSTREAM, true);
-  downstreamCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
-  EXPECT_NE(downstreamCodec, nullptr);
-  EXPECT_TRUE(downstreamCodec->getAllowedUpgradeProtocols().empty());
-}
-
 TEST(HTTPDefaultSessionCodecFactoryTest, GetCodec) {
   auto conf = std::make_shared<AcceptorConfiguration>();
   HTTPDefaultSessionCodecFactory factory(std::move(conf));

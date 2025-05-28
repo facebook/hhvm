@@ -16,7 +16,9 @@
 
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 
+#ifndef _WIN32
 #include <thrift/common/tree_printer.h>
+#endif
 #include <thrift/lib/cpp/util/EnumUtils.h>
 
 #include <folly/Memory.h>
@@ -414,6 +416,7 @@ void ensureUTF8OrThrow(std::string_view string) {
 
 } // namespace detail
 
+#ifndef _WIN32
 namespace {
 
 void printTo(tree_printer::scope& scope, const SerializableRecord& record) {
@@ -482,5 +485,6 @@ std::ostream& operator<<(std::ostream& out, const SerializableRecord& record) {
   printTo(scope, record);
   return out << scope;
 }
+#endif
 
 } // namespace apache::thrift::type_system

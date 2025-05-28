@@ -37,6 +37,12 @@ namespace detail {
 template <typename T>
 using is_set_t = std::conditional_t<std::is_const_v<T>, const uint8_t, uint8_t>;
 
+template <typename U>
+using detect_value_type = typename U::value_type;
+template <typename U>
+constexpr static bool has_value_type_v =
+    folly::is_detected_v<detect_value_type, U>;
+
 [[noreturn]] void throw_on_bad_optional_field_access();
 [[noreturn]] void throw_on_bad_union_field_access();
 [[noreturn]] void throw_on_nullptr_dereferencing();
@@ -212,6 +218,15 @@ class field_ref {
     value_ = value_type(ilist, static_cast<Args&&>(args)...);
     bitref_ = true;
     return value_;
+  }
+
+  /// Constructs the value in-place.
+  template <class U = value_type, class... Args>
+  FOLLY_ERASE
+      std::enable_if_t<apache::thrift::detail::has_value_type_v<U>, value_type&>
+      emplace(
+          std::initializer_list<typename U::value_type> ilist, Args&&... args) {
+    return emplace<typename U::value_type>(ilist, static_cast<Args&&>(args)...);
   }
 
  private:
@@ -513,6 +528,14 @@ class optional_field_ref {
     value_ = value_type(ilist, static_cast<Args&&>(args)...);
     bitref_ = true;
     return value_;
+  }
+
+  template <class U = value_type, class... Args>
+  FOLLY_ERASE
+      std::enable_if_t<apache::thrift::detail::has_value_type_v<U>, value_type&>
+      emplace(
+          std::initializer_list<typename U::value_type> ilist, Args&&... args) {
+    return emplace<typename U::value_type>(ilist, static_cast<Args&&>(args)...);
   }
 
  private:

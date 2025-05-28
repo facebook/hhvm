@@ -95,3 +95,12 @@ struct NotEligibleForConstexpr {
 }
 
 typedef map<i32, i32> i32_map
+
+struct AllContainersStruct {
+  1: list<i32> list_field;
+  2: set<i32> set_field;
+  3: map<i32, i32> map_field;
+  4: optional list<i32> list_field_opt;
+  5: optional set<i32> set_field_opt;
+  6: optional map<i32, i32> map_field_opt;
+}

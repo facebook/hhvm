@@ -862,4 +862,15 @@ TEST_F(StructTest, TerseFields) {
   EXPECT_FALSE(serializedField<ident::cpp_ref_union_field>(terse));
   EXPECT_FALSE(serializedField<ident::cpp_ref_exception_field>(terse));
 }
+
+TEST_F(StructTest, TestInitListEmplaceContainers) {
+  AllContainersStruct obj;
+  obj.list_field().emplace({1, 2});
+  obj.set_field().emplace({1, 2});
+  obj.map_field().emplace({{1, 1}, {2, 2}});
+  obj.list_field_opt().emplace({1, 2});
+  obj.set_field_opt().emplace({1, 2});
+  obj.map_field_opt().emplace({{1, 1}, {2, 2}});
+}
+
 } // namespace

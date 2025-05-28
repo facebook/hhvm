@@ -11,5 +11,6 @@ function baz() :mixed{ echo "baz\n"; return "baz"; }
 
 <<__EntryPoint>>
 function main() :mixed{
-  Foo::{bar()}(baz());
+  $bar = bar();
+  HH\dynamic_class_meth(Foo::class, $bar)(baz());
 }

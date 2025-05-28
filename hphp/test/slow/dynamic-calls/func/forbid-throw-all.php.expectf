@@ -1,6 +1,22 @@
 =============== positive tests =====================
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'async_func' called dynamically but is not __DynamicallyCallable
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 142
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 144
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 57
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 58
+
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 59
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 67
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 68
+
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-throw-all.php on line 69
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'func' called dynamically but is not __DynamicallyCallable

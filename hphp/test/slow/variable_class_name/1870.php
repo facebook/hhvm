@@ -26,5 +26,5 @@ var_dump($cls::bar());
  // SimpleFunctionCall
 
 $func = 'bar';
-var_dump($cls::$func());
+var_dump(HH\dynamic_class_meth($cls, $func)());
 }

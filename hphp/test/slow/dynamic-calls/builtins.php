@@ -3,9 +3,9 @@
 class A extends DateTime {
   public function test() :mixed{
     $x = 'createFromFormat';
-    self::$x('j-M-Y', '05-Nov-2017');
-    static::$x('j-M-Y', '05-Nov-2017');
-    parent::$x('j-M-Y', '05-Nov-2017');
+    HH\dynamic_class_meth(self::class, $x)('j-M-Y', '05-Nov-2017');
+    HH\dynamic_class_meth(static::class, $x)('j-M-Y', '05-Nov-2017');
+    HH\dynamic_class_meth(parent::class, $x)('j-M-Y', '05-Nov-2017');
     $x = 'getTimezone'; $this->$x();
   }
 }
@@ -18,7 +18,7 @@ function test() :mixed{
   $x = vec[new Vector, 'fromItems']; $x(vec[]);
   $x = vec[new Vector, 'toVArray']; $x();
   $x = 'HH\Vector'; $x::fromItems(vec[]);
-  $x = 'fromItems'; Vector::$x(vec[]);
+  $x = 'fromItems'; HH\dynamic_class_meth(Vector::class, $x)(vec[]);
 
   $x = 'toVArray'; $obj = new Vector; $obj->$x();
   $x = 'HH\Vector'; new $x();

@@ -6,8 +6,12 @@ in Foo constructor
 in Foo constructor
 in Foo constructor
 string(3) "foo"
+
+Warning: Method Foo::foo not marked dynamic in %s/packages/enforcement/basic-3.php on line 20
 string(3) "foo"
 string(3) "foo"
+
+Warning: Method Foo::foo not marked dynamic in %s/packages/enforcement/basic-3.php on line 22
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"

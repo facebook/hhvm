@@ -26,8 +26,8 @@ function main() :mixed{
   $x::bar(); // warning
   $x::rbar<int>(10); // warning
   $s = 'bar';
-  Foo::$s(); // warning
+  HH\dynamic_class_meth(Foo::class, $s)(); // warning
   $s = 'baz';
-  Foo::$s(); // no warning
+  HH\dynamic_class_meth(Foo::class, $s)(); // no warning
 
 }

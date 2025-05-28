@@ -34,7 +34,7 @@ function positive_tests() :mixed{
 
 
 
-  $x = 'func3'; A::$x(inout $v);
+  $x = 'func3'; HH\dynamic_class_meth(A::class, $x)(inout $v);
 
   $obj = new A; $x = 'func2'; $obj->$x(inout $v);
 
@@ -55,7 +55,7 @@ function negative_tests() :mixed{
 
   $x = 'B'; $x::func6(inout $v);
 
-  $x = 'func6'; B::$x(inout $v);
+  $x = 'func6'; HH\dynamic_class_meth(B::class, $x)(inout $v);
 
   $obj = new B; $x = 'func5'; $obj->$x(inout $v);
 

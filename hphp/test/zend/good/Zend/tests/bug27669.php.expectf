@@ -1,0 +1,4 @@
+
+Warning: Method A::hello not marked dynamic in %s/good/Zend/tests/bug27669.php on line 12
+Hello World
+===DONE===

@@ -28,11 +28,11 @@ function entrypoint_prop_order(): void {
 
   var_dump(C::$x);
   $x = 'foo1';
-  var_dump(C::$x());
+  var_dump(HH\dynamic_class_meth(C::class, $x)());
 
   var_dump(C::$y[0]);
   $y = vec['foo2'];
-  var_dump(C::$y[0]());
+  var_dump(HH\dynamic_class_meth(C::class, $y[0])());
 
   var_dump(C::$z[0]->prop);
   var_dump(C::$z[0]->prop());

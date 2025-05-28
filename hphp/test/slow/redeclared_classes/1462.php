@@ -15,7 +15,7 @@ function main_1462() :mixed{
   $foo = "foo";
   $y = new a;
   var_dump(a::foo());
-  var_dump(a::$foo());
+  var_dump(HH\dynamic_class_meth(a::class, $foo)());
   var_dump(call_user_func(vec['a','foo']));
   var_dump(a::$astat);
   var_dump(a::$a1stat);

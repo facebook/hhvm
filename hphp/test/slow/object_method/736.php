@@ -171,13 +171,13 @@ echo "dynamic call \$g->'G::f' ".ObjectMethod736::$trace.", 21 == $res\n";
 
 // Test on static class, dynamic method name, static call
 $f = 'sf1';
-echo "31 == ",G::$f(31),"\n";
+echo "31 == ",HH\dynamic_class_meth(G::class, $f)(31),"\n";
  // G::f exists
 $f = 'f3';
-if ($fix249639) echo "<method not found>(32) == ",G::$f(32),"\n";
+if ($fix249639) echo "<method not found>(32) == ",HH\dynamic_class_meth(G::class, $f)(32),"\n";
  // H::f3 exists, but not G::f3
 $f = 'missing';
-if ($fix249639) echo "<method not found>(33) == ",G::$f(33),"\n";
+if ($fix249639) echo "<method not found>(33) == ",HH\dynamic_class_meth(G::class, $f)(33),"\n";
  // missing does not exist
 
 // Test dynamic class, dynamic method name, static call

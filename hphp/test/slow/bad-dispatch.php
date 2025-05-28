@@ -14,7 +14,7 @@ function main() :mixed{
   (new Foo)->a();
   (new $foo)->$a();
   Foo::b();
-  $foo::$b();
+  HH\dynamic_class_meth($foo, $b)();
 
   try {
     Foo::a();
@@ -23,8 +23,8 @@ function main() :mixed{
   }
 
   try {
-    $foo::$a();
-  } catch (BadMethodCallException $e) {
+    HH\dynamic_class_meth($foo, $a)();
+  } catch (InvalidArgumentException $e) {
     var_dump($e->getMessage());
   }
 

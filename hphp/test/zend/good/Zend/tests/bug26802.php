@@ -24,7 +24,7 @@ $function();
  * properties and then do the function call.
  */
 $method = 'foo_func';
-foo::$method();
+HH\dynamic_class_meth(foo::class, $method)();
 
 echo "===DONE===\n";
 }

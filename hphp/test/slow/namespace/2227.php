@@ -7,7 +7,7 @@ class Foo {
     \var_dump($a);
   }
   function callUnknownClassMethod($method) :mixed{
-    return SomeUnknownClass::$method();
+    return HH\dynamic_class_meth(SomeUnknownClass::class, $method)();
   }
   function unsetStaticProperty() :mixed{
     unset(Foo::$baz);

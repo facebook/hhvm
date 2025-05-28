@@ -7,8 +7,8 @@ $classname        =  'A';
 $wrongClassname   =  'B';
 $methodname       =  'foo';
 
-echo $classname::$methodname()."\n";
+echo HH\dynamic_class_meth($classname, $methodname)()."\n";
 
-echo $wrongClassname::$methodname()."\n";
+echo HH\dynamic_class_meth($wrongClassname,$methodname)()."\n";
 echo "===DONE===\n";
 }

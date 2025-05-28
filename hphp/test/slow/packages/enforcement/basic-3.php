@@ -17,9 +17,9 @@ function main_3(): void {
 
   // methods
   Foo::foo();
-  Foo::$f();
+  HH\dynamic_class_meth(Foo::class, $f)();
   $c::foo();
-  $c::$f();
+  HH\dynamic_class_meth($c, $f)();
   __hhvm_intrinsics\launder_value(vec[$c, "foo"])();
   __hhvm_intrinsics\launder_value("Foo::foo")();
 }

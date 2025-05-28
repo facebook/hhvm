@@ -14,8 +14,8 @@ class C extends B {
     $arr = vec['foo'];
     self::foo();
     parent::foo();
-    self::$arr[0]();
-    parent::$arr[0]();
+    HH\dynamic_class_meth(self::class, $arr[0])();
+    HH\dynamic_class_meth(parent::class, $arr[0])();
     echo self::MYCONST . "\n";
     echo parent::MYCONST . "\n";
   }

@@ -44,7 +44,7 @@ Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
-=Foo::$fooStatic();
+=HH\dynamic_meth_caller(Foo::class, $fooStatic)();
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: fooStatic' in :1
 Stack trace:
 #0 (1): include()

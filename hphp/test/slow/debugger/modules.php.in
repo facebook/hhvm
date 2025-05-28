@@ -8,7 +8,7 @@ $x = getFoo();
 =$x->fooProp;
 =$x::$fooStaticProp;
 =Foo::$fooStaticProp;
-=Foo::$fooStatic();
+=HH\dynamic_meth_caller(Foo::class, $fooStatic)();
 =$cls="Foo";
 =$cls::fooStatic();
 set bac on

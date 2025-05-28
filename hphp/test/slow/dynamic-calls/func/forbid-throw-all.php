@@ -54,9 +54,9 @@ class A extends B {
 
 
     $x = 'static_func';
-    try { self::$x(); } catch (Exception $e) { wrap($e); }
-    try { static::$x(); } catch (Exception $e) { wrap($e); }
-    try { parent::$x(); } catch (Exception $e) { wrap($e); }
+    try { HH\dynamic_class_meth(self::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { HH\dynamic_class_meth(static::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { HH\dynamic_class_meth(parent::class, $x)(); } catch (Exception $e) { wrap($e); }
 
 
 
@@ -64,9 +64,9 @@ class A extends B {
 
 
     $x = 'static_async_func';
-    try { await self::$x(); } catch (Exception $e) { wrap($e); }
-    try { await static::$x(); } catch (Exception $e) { wrap($e); }
-    try { await parent::$x(); } catch (Exception $e) { wrap($e); }
+    try { await HH\dynamic_class_meth(self::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { await HH\dynamic_class_meth(static::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { await HH\dynamic_class_meth(parent::class, $x)(); } catch (Exception $e) { wrap($e); }
   }
 
   public static async function negative_test1() :Awaitable<mixed>{
@@ -96,9 +96,9 @@ class A extends B {
 
 
     $x = 'static_func2';
-    try { self::$x(); } catch (Exception $e) { wrap($e); }
-    try { static::$x(); } catch (Exception $e) { wrap($e); }
-    try { parent::$x(); } catch (Exception $e) { wrap($e); }
+    try { HH\dynamic_class_meth(self::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { HH\dynamic_class_meth(static::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { HH\dynamic_class_meth(parent::class, $x)(); } catch (Exception $e) { wrap($e); }
 
 
 
@@ -106,9 +106,9 @@ class A extends B {
 
 
     $x = 'static_async_func2';
-    try { await self::$x(); } catch (Exception $e) { wrap($e); }
-    try { await static::$x(); } catch (Exception $e) { wrap($e); }
-    try { await parent::$x(); } catch (Exception $e) { wrap($e); }
+    try { await HH\dynamic_class_meth(self::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { await HH\dynamic_class_meth(static::class, $x)(); } catch (Exception $e) { wrap($e); }
+    try { await HH\dynamic_class_meth(parent::class, $x)(); } catch (Exception $e) { wrap($e); }
   }
 }
 
@@ -139,9 +139,9 @@ async function positive_tests() :Awaitable<mixed>{
   try { $x = 'A'; await $x::static_async_func(); } catch (Exception $e) { wrap($e); }
 
 
-  try { $x = 'static_func'; A::$x(); } catch (Exception $e) { wrap($e); }
+  try { $x = 'static_func'; HH\dynamic_class_meth(A::class, $x)(); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'static_async_func'; await A::$x(); } catch (Exception $e) { wrap($e); }
+  try { $x = 'static_async_func'; await HH\dynamic_class_meth(A::class, $x)(); } catch (Exception $e) { wrap($e); }
 
 
   A::positive_test1();
@@ -255,7 +255,7 @@ async function negative_tests() :Awaitable<mixed>{
   try { $x = 'HH\Vector::fromItems'; $x(vec[]); } catch (Exception $e) { wrap($e); }
   try { $x = vec['HH\Vector', 'fromItems']; $x(vec[]); } catch (Exception $e) { wrap($e); }
   try { $x = vec[new Vector, 'fromItems']; $x(vec[]); } catch (Exception $e) { wrap($e); }
-  try { $x = 'fromItems'; Vector::$x(vec[]); } catch (Exception $e) { wrap($e); }
+  try { $x = 'fromItems'; HH\dynamic_class_meth(Vector::class, $x)(vec[]); } catch (Exception $e) { wrap($e); }
   try { $x = vec[new Vector, 'firstValue']; $x(); } catch (Exception $e) { wrap($e); }
   try { $x = 'HH\Vector'; $x::fromItems(vec[]); } catch (Exception $e) { wrap($e); }
   try { $obj = new Vector; $x = 'firstValue'; $obj->$x(); } catch (Exception $e) { wrap($e); }
@@ -305,9 +305,9 @@ async function negative_tests() :Awaitable<mixed>{
   try { $x = 'A'; await $x::static_async_func2(); } catch (Exception $e) { wrap($e); }
 
 
-  try { $x = 'static_func2'; A::$x(); } catch (Exception $e) { wrap($e); }
+  try { $x = 'static_func2'; HH\dynamic_class_meth(A::class, $x)(); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'static_async_func2'; await A::$x(); } catch (Exception $e) { wrap($e); }
+  try { $x = 'static_async_func2'; await HH\dynamic_class_meth(A::class, $x)(); } catch (Exception $e) { wrap($e); }
 
 
   try { $x = 'F'; new $x(); } catch (Exception $e) { wrap($e); }

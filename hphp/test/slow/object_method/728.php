@@ -24,13 +24,13 @@ function main_728() :mixed{
   $f = 'a1f';
   $b = 'a1b';
   $a1->$f(1);
-  A1::$b(1);
+  HH\dynamic_class_meth(A1::class, $b)(1);
   $b1->$f(1);
-  B1::$b(1);
+  HH\dynamic_class_meth(B1::class, $b)(1);
   $f = 'b1f';
   $b = 'b1b';
   $b1->$f(1);
-  B1::$b(1);
+  HH\dynamic_class_meth(B1::class, $b)(1);
   $f = 'b2f';
   $b = 'b2b';
   call_user_func(vec[$b1, 'b1f'], 1);

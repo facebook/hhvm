@@ -1,4 +1,4 @@
 <?hh 
 <<__EntryPoint>> function main(): void {
-$a::$b();
+HH\dynamic_class_meth($a, $b)();
 }

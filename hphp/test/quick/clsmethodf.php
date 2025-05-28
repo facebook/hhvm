@@ -23,7 +23,7 @@ class a extends aa {
 
   public function nons() :mixed{
     $str = 'blah';
-    self::$str();
+    HH\dynamic_meth_caller(self::class, $str)($this);
     self::stat();
     parent::blah();
 

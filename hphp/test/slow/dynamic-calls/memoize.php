@@ -37,8 +37,8 @@ class A {
 
 
 
-    $x = 'func3'; A::$x($v);
-    $x = 'func3$memoize_impl'; A::$x($v);
+    $x = 'func3'; HH\dynamic_class_meth(A::class, $x)($v);
+    $x = 'func3$memoize_impl'; HH\dynamic_class_meth(A::class, $x)($v);
 
     $obj = new A; $x = 'func2'; $obj->$x($v);
     $obj = new A; $x = 'func2$memoize_impl'; $obj->$x($v);
@@ -65,7 +65,7 @@ class B {
     $x = vec[new B, 'func6$memoize_impl']; $x($v);
 
 
-    $x = 'func6$memoize_impl'; B::$x($v);
+    $x = 'func6$memoize_impl'; HH\dynamic_class_meth(B::class, $x)($v);
 
     $obj = new B; $x = 'func5$memoize_impl'; $obj->$x($v);
 
@@ -85,7 +85,7 @@ class B {
 
     $x = 'B'; $x::func6($v);
 
-    $x = 'func6'; B::$x($v);
+    $x = 'func6'; HH\dynamic_class_meth(B::class, $x)($v);
 
     $obj = new B; $x = 'func5'; $obj->$x($v);
 

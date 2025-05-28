@@ -11,14 +11,22 @@ Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'B::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'B::static_async_func' called dynamically but is not __DynamicallyCallable
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 142
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 144
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 57
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 58
+
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 59
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 67
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 68
+
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 69
 Exception: 'A' constructed dynamically
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
@@ -56,7 +64,6 @@ Exception: 'count' called dynamically without using a function pointer
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
-Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::firstValue' called dynamically without using a function pointer
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::firstValue' called dynamically without using a function pointer
@@ -84,8 +91,6 @@ Exception: 'A::static_async_func2' called dynamically without using a function p
 Exception: 'A::func2' called dynamically without using a function pointer
 Exception: 'A::static_func2' called dynamically without using a function pointer
 Exception: 'A::async_func2' called dynamically without using a function pointer
-Exception: 'A::static_async_func2' called dynamically without using a function pointer
-Exception: 'A::static_func2' called dynamically without using a function pointer
 Exception: 'A::static_async_func2' called dynamically without using a function pointer
 Exception: 'A::static_func2' called dynamically without using a function pointer
 Exception: 'A::static_async_func2' called dynamically without using a function pointer

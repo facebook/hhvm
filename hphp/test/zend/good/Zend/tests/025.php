@@ -12,8 +12,8 @@ $b = 'a';
 $class = 'foo';
 
 foo::a();
-foo::$a();
+HH\dynamic_class_meth(foo::class, $a)();
 
 $class::a();
-$class::$a();
+HH\dynamic_class_meth($class, $a)();
 }

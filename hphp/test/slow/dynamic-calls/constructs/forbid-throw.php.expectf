@@ -1,0 +1,19 @@
+=============== positive tests =====================
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 142
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 144
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 57
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 58
+
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 59
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 67
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 68
+
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-throw.php on line 69
+Exception: 'A' constructed dynamically
+=============== negative tests =====================

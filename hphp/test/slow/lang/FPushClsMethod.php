@@ -15,13 +15,13 @@ class I extends F {
   function test() :mixed{
     C::__construct();
     $X = "C";
-    $m = "__construct"; C::$m(); $X::$m();
+    $m = "__construct"; HH\dynamic_meth_caller(C::class, $m)($this); HH\dynamic_meth_caller($X, $m)($this);
     F::__construct();
     I::__construct();
     $X = "F";
-    $m = "__construct"; F::$m(); $X::$m();
+    $m = "__construct"; HH\dynamic_meth_caller(F::class, $m)($this); HH\dynamic_meth_caller($X, $m)($this);
     $X = "I";
-    $m = "__construct"; I::$m(); $X::$m();
+    $m = "__construct"; HH\dynamic_meth_caller(I::class, $m)($this); HH\dynamic_meth_caller($X, $m)($this);
   }
 }
 

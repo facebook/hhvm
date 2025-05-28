@@ -17,5 +17,5 @@ function main_1207() :mixed{
   $ar = vec[0,1];
   $st = 'abc';
   $o->$i($ar[0], $st[0]);
-  A::$s($ar[1], $st[1]);
+  HH\dynamic_class_meth(A::class, $s)($ar[1], $st[1]);
 }

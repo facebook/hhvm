@@ -1,4 +1,6 @@
 string(3) "red"
+
+Warning: Method M::psf not marked dynamic in %s/spec/tests/expressions/postfix_operators/scope_resolution_operator.php on line 179
 string(3) "red"
 int(-333)
 float(3.14)

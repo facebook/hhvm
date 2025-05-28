@@ -42,7 +42,7 @@ function main_1506() :mixed{
   $y = 'g';
   echo "dsmc
 ";
-  c::$y(p(1), p(2), p(3), 4);
+  HH\dynamic_class_meth(c::class, $y)(p(1), p(2), p(3), 4);
   echo "occ
 ";
   $q = new c(p(1), p(2), p(3), 4);

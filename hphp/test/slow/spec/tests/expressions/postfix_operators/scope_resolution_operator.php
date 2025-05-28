@@ -176,7 +176,7 @@ function main_entry(): void {
 
   var_dump(M::psf());     // okay to access static method via class
   $memName = 'psf';
-  var_dump(M::$memName());// string form allowed
+  var_dump(HH\dynamic_class_meth(M::class, $memName)());// string form allowed
   //var_dump(M::'psf'()); // but not string literal
 
   var_dump(M::$psProp);   // okay to access static property via class, but leading $ needed!!

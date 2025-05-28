@@ -1,0 +1,24 @@
+Test begin
+In I::__construct()
+In C::__construct()
+
+Warning: dynamic_meth_caller(): C::__construct is not a dynamically callable instance method in %s/lang/FPushClsMethod.php on line 18
+In I::__construct()
+
+Warning: dynamic_meth_caller(): C::__construct is not a dynamically callable instance method in %s/lang/FPushClsMethod.php on line 18
+In I::__construct()
+In C::__construct()
+In I::__construct()
+
+Warning: dynamic_meth_caller(): F::__construct is not a dynamically callable instance method in %s/lang/FPushClsMethod.php on line 22
+In I::__construct()
+
+Warning: dynamic_meth_caller(): F::__construct is not a dynamically callable instance method in %s/lang/FPushClsMethod.php on line 22
+In I::__construct()
+
+Warning: dynamic_meth_caller(): I::__construct is not a dynamically callable instance method in %s/lang/FPushClsMethod.php on line 24
+In I::__construct()
+
+Warning: dynamic_meth_caller(): I::__construct is not a dynamically callable instance method in %s/lang/FPushClsMethod.php on line 24
+In I::__construct()
+Test end

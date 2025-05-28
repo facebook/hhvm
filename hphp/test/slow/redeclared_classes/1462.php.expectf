@@ -1,5 +1,7 @@
 first def made
 int(1)
+
+Warning: Method a::foo not marked dynamic in %s/redeclared_classes/1462.php on line 18
 int(1)
 int(1)
 int(1)

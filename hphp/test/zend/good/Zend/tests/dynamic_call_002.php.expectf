@@ -1,2 +1,2 @@
 
-Fatal error: Function name must be a string in %s/dynamic_call_002.php on line 5
+Catchable fatal error: Argument 2 passed to HH\dynamic_class_meth() must be an instance of string, stdClass given in %s/good/Zend/tests/dynamic_call_002.php on line 5

@@ -54,17 +54,17 @@ function main() :mixed{
   $funktion = __hhvm_intrinsics\launder_value('funktion');
 
   echo "Class/method string call (laundered)\n";
-  Klass::$funktion();
+  HH\dynamic_class_meth(Klass::class, $funktion)();
   $klass::funktion();
-  $klass::$funktion();
+  HH\dynamic_class_meth($klass, $funktion)();
 
   $klass2 = 'Klass';
   $funktion2 = 'funktion';
 
   echo "Class/method string call\n";
-  Klass::$funktion2();
+  HH\dynamic_class_meth(Klass::class, $funktion2)();
   $klass2::funktion();
-  $klass2::$funktion2();
+  HH\dynamic_class_meth($klass2, $funktion2)();
 
   $arr = vec[Klass::class, 'funktion'];
 

@@ -1,0 +1,5 @@
+bar
+
+Warning: Method Foo::bar not marked dynamic in %s/eval_order/dyn_clsmeth.php on line 15
+baz
+done

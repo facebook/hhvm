@@ -30,7 +30,7 @@ function main() :mixed{
   $a_pub_stat_dyn();
 
   echo "============== Log ======================\n";
-  $a::$pub_stat();
-  A::$pub_stat();
+  HH\dynamic_class_meth($a, $pub_stat)();
+  HH\dynamic_class_meth(A::class, $pub_stat)();
   $a_pub_stat();
 }

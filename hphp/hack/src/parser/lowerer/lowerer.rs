@@ -2310,17 +2310,7 @@ fn p_scope_resolution_expr<'a>(
                         ast::PropOrMethod::IsProp,
                     ))
                 }
-                _ if env.is_typechecker() => {
-                    missing_syntax("static property or method name", &c.name, env)
-                }
-                _ => Ok(Expr_::mk_class_get(
-                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                    ast::ClassGetExpr::CGexpr(Expr((), p, expr_)),
-                    match location {
-                        ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                        _ => ast::PropOrMethod::IsProp,
-                    },
-                )),
+                _ => missing_syntax("static property or method name", &c.name, env),
             }
         }
     }

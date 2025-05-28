@@ -11,10 +11,10 @@ function main_call_soft_1() {
   $_ = new A();
 
   var_dump(A::b());
-  var_dump(A::$b());
+  var_dump(HH\dynamic_class_meth(A::class, $b)());
 
   var_dump($a::b());
-  var_dump($a::$b());
+  var_dump(HH\dynamic_class_meth($a, $b)());
 
   var_dump(f());
   var_dump($f());

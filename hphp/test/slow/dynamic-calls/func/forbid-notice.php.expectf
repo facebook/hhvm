@@ -1,22 +1,46 @@
 =============== positive tests =====================
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 121
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/func/forbid-notice.php on line 121
 
-Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s on line 122
+Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/func/forbid-notice.php on line 122
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 156
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 143
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 167
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 145
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 177
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 57
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 187
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 58
 
-Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s on line 195
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 59
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 67
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 68
+
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice.php on line 69
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/func/forbid-notice.php on line 156
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/func/forbid-notice.php on line 167
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/func/forbid-notice.php on line 177
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/func/forbid-notice.php on line 187
+
+Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/func/forbid-notice.php on line 195
 =============== negative tests =====================
 =============== positive tests (exceptions) ========
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'async_func' called dynamically but is not __DynamicallyCallable
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method B::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method B::static_async_func not marked dynamic
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'func' called dynamically but is not __DynamicallyCallable

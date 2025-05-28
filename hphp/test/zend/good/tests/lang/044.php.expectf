@@ -1,3 +1,7 @@
 foo
 
-Fatal error: Class undefined: B in %s/044.php on line 12
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Unable to find class B' in %s/lang/044.php:12
+Stack trace:
+#0 %s/lang/044.php(12): HH\dynamic_class_meth()
+#1 (): main()
+#2 {main}

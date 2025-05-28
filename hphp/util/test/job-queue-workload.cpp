@@ -19,7 +19,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include <folly/Random.h>

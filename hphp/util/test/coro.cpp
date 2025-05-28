@@ -16,7 +16,6 @@
 
 #include "hphp/util/coro.h"
 
-#include <folly/Format.h>
 #include <folly/executors/GlobalExecutor.h>
 
 #include <gtest/gtest.h>

@@ -177,13 +177,19 @@ void ParallelConcurrencyControllerBase::executeRequest(
     // expired (not queue-timeouted)
     if (!serverRequest.request()->isOneway() &&
         !serverRequest.request()->getShouldStartProcessing()) {
-      auto eb = detail::ServerRequestHelper::eventBase(serverRequest);
-      HandlerCallbackBase::releaseRequest(
-          detail::ServerRequestHelper::request(std::move(serverRequest)), eb
-          /*FIXME:roddym tile*/);
+      using namespace apache::thrift::detail;
+      if (onExpireFunction_) {
+        onExpireFunction_(serverRequest);
+      }
+      auto eb = ServerRequestHelper::eventBase(serverRequest);
+      auto req = ServerRequestHelper::request(std::move(serverRequest));
+      HandlerCallbackBase::releaseRequest(std::move(req), eb);
       return;
     }
 
+    if (onExecuteFunction_) {
+      onExecuteFunction_(serverRequest);
+    }
     serverRequest.requestData().setRequestExecutionBegin();
     AsyncProcessorHelper::executeRequest(std::move(*req));
     serverRequest.requestData().setRequestExecutionEnd();
@@ -203,6 +209,9 @@ void ParallelConcurrencyControllerBase::executeRequest(
 void ParallelConcurrencyControllerBase::processExpiredRequest(
     ServerRequest&& request) {
   using namespace apache::thrift::detail;
+  if (onExpireFunction_) {
+    onExpireFunction_(request);
+  }
   auto eb = ServerRequestHelper::eventBase(request);
   auto req = ServerRequestHelper::request(std::move(request));
   HandlerCallbackBase::releaseRequest(std::move(req), eb);

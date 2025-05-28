@@ -79,6 +79,17 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase,
 
   void processExpiredRequest(ServerRequest&& request) override;
 
+  using ServerRequestLoggingFunction =
+      std::function<void(const ServerRequest&)>;
+
+  void setOnExpireFunction(ServerRequestLoggingFunction fn) {
+    onExpireFunction_ = std::move(fn);
+  }
+
+  void setOnExecuteFunction(ServerRequestLoggingFunction fn) {
+    onExecuteFunction_ = std::move(fn);
+  }
+
  protected:
   const RequestExecutionMode requestExecutionMode_;
 
@@ -113,6 +124,9 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase,
   bool isRequestActive(const ServerRequest& req);
 
   void onExecuteFinish(bool dequeueSuccess);
+
+  ServerRequestLoggingFunction onExpireFunction_;
+  ServerRequestLoggingFunction onExecuteFunction_;
 };
 
 class ParallelConcurrencyController : public ParallelConcurrencyControllerBase {

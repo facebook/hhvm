@@ -124,7 +124,7 @@ class Wrap {
   FOLLY_NODISCARD T& resetAnd() { return (reset(), data_); }
 };
 
-template <typename Derived, typename T, typename Tag = infer_tag<T>>
+template <typename Derived, typename T, typename Tag = struct_t<T>>
 class EqWrap : public Wrap<T, Tag>, public BaseDerived<Derived> {
   using Base = Wrap<T, Tag>;
 

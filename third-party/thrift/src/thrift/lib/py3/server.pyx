@@ -52,6 +52,7 @@ from thrift.python.server_impl.request_context import ( # noqa
     get_context,
 )
 from thrift.python.server_impl.request_context cimport handleAddressCallback
+from thrift.python.server_impl.interceptor.server_module cimport PythonServerModule
 
 AsyncProcessorFactory = AsyncProcessorFactory_
 
@@ -291,6 +292,13 @@ cdef class ThriftServer:
 
     def set_use_client_timeout(self, cbool use_client_timeout):
         self.server.get().setUseClientTimeout(use_client_timeout)
+
+    def add_server_module(self, PythonServerModule module): 
+        # this is a dumb hack around cython not understanding that 
+        # unique_ptr[Base] = unique_ptr[Derived] is valid and safe
+        self.server.get().addModule(
+            unique_ptr[[cServerModule]](module._cpp_module.release())
+        )
 
     @property
     def handler(self):

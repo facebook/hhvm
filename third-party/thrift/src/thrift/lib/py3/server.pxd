@@ -33,6 +33,7 @@ from thrift.python.server_impl.async_processor cimport (
     cAsyncProcessorFactory,
     AsyncProcessorFactory as Py3AsyncProcessorFactory,
 )
+from thrift.python.server_impl.interceptor.server_module cimport cServerModule
 
 
 cdef extern from "thrift/lib/cpp2/server/StatusServerInterface.h" \
@@ -94,6 +95,7 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         void requireResourcePools() nogil noexcept
         void setTaskExpireTime(milliseconds timeout)
         void setUseClientTimeout(cbool useClientTimeout)
+        void addModule(unique_ptr[cServerModule] module)
 
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":

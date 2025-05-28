@@ -34,3 +34,4 @@ from thrift.python.server_impl.python_async_processor import (
     PythonUserException,
     RpcKind,
 )
+from thrift.python.server_impl.interceptor.server_module import PythonServerModule

@@ -79,6 +79,63 @@ std::string toTypeidName(const MapTypeId& mapType) {
       actualKind));
 }
 
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Bool) noexcept {
+  this->data_.boolType_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Byte) noexcept {
+  this->data_.byteType_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(I16) noexcept {
+  this->data_.i16Type_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(I32) noexcept {
+  this->data_.i32Type_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(I64) noexcept {
+  this->data_.i64Type_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Float) noexcept {
+  this->data_.floatType_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Double) noexcept {
+  this->data_.doubleType_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(String) noexcept {
+  this->data_.stringType_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Binary) noexcept {
+  this->data_.binaryType_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Any) noexcept {
+  this->data_.anyType_ref() = {};
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Uri uri) noexcept {
+  this->data_.userDefinedType_ref() = std::move(uri);
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(List&& list) noexcept {
+  this->data_.listType_ref() = std::move(list);
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Set&& set) noexcept {
+  this->data_.setType_ref() = std::move(set);
+}
+template <>
+TypeIdWrapper<TypeIdUnion>::TypeIdWrapper(Map&& map) noexcept {
+  this->data_.mapType_ref() = std::move(map);
+}
+
 } // namespace apache::thrift::type_system::detail
 
 fmt::format_context::iterator

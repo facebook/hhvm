@@ -371,40 +371,20 @@ class TypeIdWrapper final : public type::detail::EqWrap<TypeIdWrapper<T>, T> {
   using Set = SetTypeId;
   using Map = MapTypeId;
 
-  /* implicit */ TypeIdWrapper(Bool) noexcept {
-    this->data_.boolType_ref() = {};
-  }
-  /* implicit */ TypeIdWrapper(Byte) noexcept {
-    this->data_.byteType_ref() = {};
-  }
-  /* implicit */ TypeIdWrapper(I16) noexcept { this->data_.i16Type_ref() = {}; }
-  /* implicit */ TypeIdWrapper(I32) noexcept { this->data_.i32Type_ref() = {}; }
-  /* implicit */ TypeIdWrapper(I64) noexcept { this->data_.i64Type_ref() = {}; }
-  /* implicit */ TypeIdWrapper(Float) noexcept {
-    this->data_.floatType_ref() = {};
-  }
-  /* implicit */ TypeIdWrapper(Double) noexcept {
-    this->data_.doubleType_ref() = {};
-  }
-  /* implicit */ TypeIdWrapper(String) noexcept {
-    this->data_.stringType_ref() = {};
-  }
-  /* implicit */ TypeIdWrapper(Binary) noexcept {
-    this->data_.binaryType_ref() = {};
-  }
-  /* implicit */ TypeIdWrapper(Any) noexcept { this->data_.anyType_ref() = {}; }
-  /* implicit */ TypeIdWrapper(Uri uri) noexcept {
-    this->data_.userDefinedType_ref() = std::move(uri);
-  }
-  /* implicit */ TypeIdWrapper(List&& list) noexcept {
-    this->data_.listType_ref() = std::move(list);
-  }
-  /* implicit */ TypeIdWrapper(Set&& set) noexcept {
-    this->data_.setType_ref() = std::move(set);
-  }
-  /* implicit */ TypeIdWrapper(Map&& map) noexcept {
-    this->data_.mapType_ref() = std::move(map);
-  }
+  /* implicit */ TypeIdWrapper(Bool) noexcept;
+  /* implicit */ TypeIdWrapper(Byte) noexcept;
+  /* implicit */ TypeIdWrapper(I16) noexcept;
+  /* implicit */ TypeIdWrapper(I32) noexcept;
+  /* implicit */ TypeIdWrapper(I64) noexcept;
+  /* implicit */ TypeIdWrapper(Float) noexcept;
+  /* implicit */ TypeIdWrapper(Double) noexcept;
+  /* implicit */ TypeIdWrapper(String) noexcept;
+  /* implicit */ TypeIdWrapper(Binary) noexcept;
+  /* implicit */ TypeIdWrapper(Any) noexcept;
+  /* implicit */ TypeIdWrapper(Uri uri) noexcept;
+  /* implicit */ TypeIdWrapper(List&& list) noexcept;
+  /* implicit */ TypeIdWrapper(Set&& set) noexcept;
+  /* implicit */ TypeIdWrapper(Map&& map) noexcept;
 
   /**
    * Returns true if the underlying data is the empty union.
